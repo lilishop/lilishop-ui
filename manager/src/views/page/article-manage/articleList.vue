@@ -1,20 +1,19 @@
 <template>
-  <div class="wrapper">
-    <el-row :gutter="10">
-      <el-col :span="4" style="height: 100%">
-        <el-card class="article-category mr_10">
-          <el-tree
-            :data="treeData"
-            :props="{ label: 'title', children: 'children' }"
-            node-key="value"
-            highlight-current
-            default-expand-all
-            @node-click="handleCateChange"
-          />
-        </el-card>
-      </el-col>
-      <el-col :span="20">
-        <el-card class="article-detail">
+  <div class="article-page">
+    <div class="article-page__aside">
+      <el-card class="article-category">
+        <el-tree
+          :data="treeData"
+          :props="{ label: 'title', children: 'children' }"
+          node-key="value"
+          highlight-current
+          default-expand-all
+          @node-click="handleCateChange"
+        />
+      </el-card>
+    </div>
+    <div class="article-page__main">
+      <el-card class="article-detail">
           <el-form
             ref="searchForm"
             :model="searchForm"
@@ -41,7 +40,8 @@
             <el-button v-if="!selected" type="primary" @click="add">添加</el-button>
           </div>
 
-          <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
+          <div class="article-table-wrap">
+            <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
             <el-table-column prop="articleCategoryName" label="分类名称" width="150" />
             <el-table-column prop="title" label="文章标题" min-width="200" show-overflow-tooltip />
             <el-table-column label="是否显示" width="100">
@@ -74,7 +74,8 @@
                 </template>
               </template>
             </el-table-column>
-          </el-table>
+            </el-table>
+          </div>
 
           <div class="mt_10" style="display: flex; justify-content: flex-end">
             <el-pagination
@@ -89,8 +90,7 @@
             />
           </div>
         </el-card>
-      </el-col>
-    </el-row>
+    </div>
 
     <el-dialog
       v-if="!selected"
@@ -100,7 +100,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="form" :model="form" label-width="100px">
+      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="文章标题" prop="title">
           <el-input v-model="form.title" clearable style="width: 40%" />
         </el-form-item>
@@ -155,6 +155,25 @@ import {
   updateArticleStatus,
 } from "@/api/pages";
 import tinymec from "@/components/editor/index.vue";
+import { regular } from "@/utils";
+
+const validateArticleContent = (rule, value, callback) => {
+  const html = String(value || "").trim();
+  if (!html) {
+    callback(new Error("请填写文章内容"));
+    return;
+  }
+  const text = html
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .trim();
+  const hasImage = /<img[\s>]/i.test(html);
+  if (!text && !hasImage) {
+    callback(new Error("请填写文章内容"));
+    return;
+  }
+  callback();
+};
 
 export default {
   components: {
@@ -190,6 +209,12 @@ export default {
         content: "",
         id: "",
       },
+      formValidate: {
+        title: [{ required: true, message: "请输入文章标题", trigger: "blur" }],
+        categoryId: [{ required: true, message: "请选择文章分类", trigger: "change" }],
+        sort: [regular.REQUIRED, regular.INTEGER],
+        content: [{ required: true, validator: validateArticleContent, trigger: "change" }],
+      },
       list: [],
       treeValue: "",
       treeData: [],
@@ -213,6 +238,15 @@ export default {
     },
   },
   methods: {
+    getDefaultForm() {
+      return {
+        openStatus: false,
+        title: "",
+        categoryId: "",
+        sort: 1,
+        content: "",
+      };
+    },
     init() {
       this.getDataList();
       this.getAllList(0);
@@ -224,8 +258,8 @@ export default {
     handleCateChange(data) {
       if (!data) return;
       const { value, title } = data;
-      this.list.push({ value, title });
-      this.searchForm.categoryId = value;
+      this.searchForm.categoryId =
+        value === "0" || value === 0 ? "" : value;
       this.searchTreeValue = title;
     },
     changeSwitch(v) {
@@ -308,10 +342,24 @@ export default {
       }
       return arr;
     },
+    buildArticleSearchParams() {
+      const params = { ...this.searchForm };
+      const categoryId = params.categoryId;
+      if (
+        categoryId === "" ||
+        categoryId === null ||
+        categoryId === undefined ||
+        categoryId === 0 ||
+        categoryId === "0"
+      ) {
+        delete params.categoryId;
+      }
+      return params;
+    },
     getDataList(val) {
       if (val) this.form = {};
       this.loading = true;
-      getArticle(this.searchForm)
+      getArticle(this.buildArticleSearchParams())
         .then((res) => {
           if (res.success) {
             this.total = res.result.total;
@@ -323,6 +371,9 @@ export default {
         });
     },
     handleSubmit() {
+      if (this.$refs.editor?.getContent) {
+        this.form.content = this.$refs.editor.getContent();
+      }
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.submitLoading = true;
@@ -353,20 +404,17 @@ export default {
       this.modalType = 0;
       this.modalTitle = "添加文章";
       this.treeValue = "";
-      this.form = {
-        sort: 1,
-        content: "",
-      };
-      this.$refs.form?.resetFields();
-      delete this.form.id;
+      this.form = this.getDefaultForm();
       this.modalVisible = true;
+      this.$nextTick(() => {
+        this.$refs.form?.clearValidate?.();
+      });
     },
     edit(data) {
       this.modalType = 1;
       this.modalTitle = "编辑文章";
       this.treeValue = "";
-      this.form = { content: "" };
-      this.$refs.form?.resetFields();
+      this.form = this.getDefaultForm();
       seeArticle(data.id).then((res) => {
         if (res.result) {
           this.modalVisible = true;
@@ -402,3 +450,35 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.article-page {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+}
+
+.article-page__aside {
+  flex: 0 0 220px;
+  width: 220px;
+  min-width: 180px;
+  max-width: 260px;
+}
+
+.article-page__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.article-category,
+.article-detail {
+  width: 100%;
+}
+
+.article-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+</style>

@@ -13,11 +13,11 @@
                 style="width: 260px"
               />
             </el-form-item>
-            <el-form-item label="活动时间" class="activity-time-form-item">
+            <el-form-item label="活动时间" prop="rangeTime" class="activity-time-form-item">
               <el-date-picker
                 type="datetimerange"
                 :disabled-date="options.disabledDate"
-                v-model="rangeTime"
+                v-model="form.rangeTime"
                 format="YYYY-MM-DD HH:mm:ss"
                 start-placeholder="开始时间"
                 end-placeholder="结束时间"
@@ -184,13 +184,13 @@ export default {
       },
       showCouponSelect: false,
       tempCouponList: [],
-      rangeTime: "",
       checkUserList: false,
       selectedMember: [],
       form: {
         promotionName: "",
         activityScope: "ALL",
         couponActivityType: "REGISTERED",
+        rangeTime: null,
         startTime: "",
         endTime: "",
         memberDTOS: [],
@@ -201,7 +201,19 @@ export default {
       selectCouponList: [],
       formRule: {
         promotionName: [{ required: true, message: "活动名称不能为空" }],
-        rangeTime: [{ required: true, message: "请选择活动有效期" }],
+        rangeTime: [
+          {
+            required: true,
+            validator: (rule, value, callback) => {
+              if (!value || !Array.isArray(value) || value.length !== 2 || !value[0] || !value[1]) {
+                callback(new Error("请选择活动有效期"));
+              } else {
+                callback();
+              }
+            },
+            trigger: "change",
+          },
+        ],
         description: [{ required: true, message: "请输入范围描述" }],
       },
     };
@@ -291,49 +303,31 @@ export default {
       this.showCouponSelect = true;
     },
     handleSubmit() {
-      if (this.form.couponFrequencyEnum !== "") {
-        if (this.form.activityScope == "ALL") {
-          this.form.startTime = this.$filters.unixToDate(this.rangeTime[0] / 1000);
-          this.form.endTime = this.$filters.unixToDate(this.rangeTime[1] / 1000);
+      if (this.form.couponFrequencyEnum !== "" && this.form.activityScope != "ALL") {
+        this.$Message.info("自动发券只能全用户发送");
+        this.form.couponActivityType = "SPECIFY";
+        this.form.activityScope = "ALL";
+        return;
+      }
 
-          this.$refs.form.validate((valid) => {
-            if (valid) {
-              const params = JSON.parse(JSON.stringify(this.form));
-              this.submitLoading = true;
-              delete params.id;
-              saveActivityCoupon(params).then((res) => {
-                this.submitLoading = false;
-                if (res.success) {
-                  this.$Message.success("优惠券活动创建成功");
-                  this.closeCurrentPage();
-                }
-              });
-            }
-          });
-        } else {
-          this.$Message.info("自动发券只能全用户发送");
-          this.form.couponActivityType = "SPECIFY";
-          this.form.activityScope = "ALL";
-        }
-      } else {
-        this.form.startTime = this.$filters.unixToDate(this.rangeTime[0] / 1000);
-        this.form.endTime = this.$filters.unixToDate(this.rangeTime[1] / 1000);
+      this.$refs.form.validate((valid) => {
+        if (!valid) return;
 
-        this.$refs.form.validate((valid) => {
-          if (valid) {
-            const params = JSON.parse(JSON.stringify(this.form));
-            this.submitLoading = true;
-            delete params.id;
-            saveActivityCoupon(params).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("优惠券活动创建成功");
-                this.closeCurrentPage();
-              }
-            });
+        this.form.startTime = this.$filters.unixToDate(this.form.rangeTime[0] / 1000);
+        this.form.endTime = this.$filters.unixToDate(this.form.rangeTime[1] / 1000);
+
+        const params = JSON.parse(JSON.stringify(this.form));
+        delete params.rangeTime;
+        delete params.id;
+        this.submitLoading = true;
+        saveActivityCoupon(params).then((res) => {
+          this.submitLoading = false;
+          if (res.success) {
+            this.$Message.success("优惠券活动创建成功");
+            this.closeCurrentPage();
           }
         });
-      }
+      });
     },
     closeCurrentPage() {
       this.$store.commit("removeTag", "add-platform-coupon");

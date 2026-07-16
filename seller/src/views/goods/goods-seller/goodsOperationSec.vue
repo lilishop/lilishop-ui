@@ -1211,8 +1211,6 @@ export default {
         this.baseInfoForm.weight = response.result.skuList[0].weight;
       }
 
-      this.Get_SkuInfoByCategory(this.categoryId);
-
       this.renderGoodsDetailSku(response.result.skuList);
 
       /** 查询品牌列表 */
@@ -2000,20 +1998,6 @@ export default {
       return generateCombinations(0, []);
     },
 
-    /** 根据分类id获取系统设置规格信息*/
-    Get_SkuInfoByCategory(categoryId) {
-      if (categoryId) {
-        API_GOODS.getGoodsSpecInfoSeller(categoryId).then((res) => {
-          if (res.length) {
-            res.forEach((e) => {
-              this.skuData.push(e.specName);
-              const vals = e.specValue ? e.specValue.split(",") : [];
-              this.skuVals.push(Array.from(new Set(vals)));
-            });
-          }
-        });
-      }
-    },
     // 判断相同数组的值
     scalarArrayEquals(array1, array2) {
       return (
@@ -2307,8 +2291,6 @@ export default {
         this.GET_GoodsParams();
         /** 查询品牌列表 */
         this.getGoodsBrandList();
-        /** 查询分类绑定的规格信息 */
-        this.Get_SkuInfoByCategory(this.categoryId);
         // 获取商品单位
         this.GET_GoodsUnit();
         // 获取当前店铺分类

@@ -44,7 +44,7 @@
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="edit(row)">编辑</a>
-              <span class="op-split">|</span>|<span class="op-split">|</span>
+              <span class="op-split">|</span>
               <a class="link-text" @click="remove(row)">删除</a>
             </template>
           </template>

@@ -120,9 +120,37 @@ export const getAllUserData = (params) => {
   return getRequest("/passport/user/getAll", params);
 };
 
+function buildUserRegisterFormBody(params) {
+  const parts = [];
+  const appendField = (key, value) => {
+    if (value === undefined || value === null || value === "") return;
+    parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+  };
+  appendField("username", params.username);
+  appendField("password", params.password);
+  appendField("nickName", params.nickName);
+  appendField("mobile", params.mobile);
+  appendField("email", params.email);
+  appendField("avatar", params.avatar);
+  appendField("description", params.description);
+  if (params.departmentId !== undefined && params.departmentId !== null && params.departmentId !== "" && params.departmentId !== 0) {
+    appendField("departmentId", params.departmentId);
+  }
+  if (params.isSuper !== undefined && params.isSuper !== null) {
+    appendField("isSuper", params.isSuper);
+  }
+  if (Array.isArray(params.roles)) {
+    params.roles.forEach((roleId) => appendField("roles", roleId));
+  }
+  return parts.join("&");
+}
+
 // 添加用户
 export const addUser = (params) => {
-  return postRequest("/passport/user", params);
+  const body = buildUserRegisterFormBody(params);
+  return postRequest("/passport/user/register", body, {
+    "Content-Type": "application/x-www-form-urlencoded",
+  });
 };
 // 编辑管理员自身
 export const editUser = (params) => {

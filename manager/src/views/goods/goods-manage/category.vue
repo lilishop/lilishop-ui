@@ -116,28 +116,6 @@
           <el-button type="primary" :loading="submitLoading" @click="saveCategoryBrand">提交</el-button>
         </template>
       </el-dialog>
-
-      <el-dialog
-        v-model="modalSpecVisible"
-        :title="modalSpecTitle"
-        width="500px"
-        :close-on-click-modal="false"
-      >
-        <el-form ref="specForm" :model="specForm" label-width="100px">
-          <el-select v-model="specForm.categorySpecs" multiple style="width: 100%">
-            <el-option
-              v-for="item in specifications"
-              :key="item.id"
-              :label="item.specName"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form>
-        <template #footer>
-          <el-button @click="modalSpecVisible = false">取消</el-button>
-          <el-button type="primary" :loading="submitLoading" @click="saveCategorySpec">提交</el-button>
-        </template>
-      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -148,12 +126,9 @@ import {
   disableCategory,
   getBrandListData,
   getCategoryBrandListData,
-  getCategorySpecListData,
   getCategoryTree,
-  getSpecificationList,
   insertCategory,
   saveCategoryBrand,
-  saveCategorySpec,
   updateCategory,
 } from "@/api/goods";
 import uploadPicInput from "@/components/lili/upload-pic-input";
@@ -171,18 +146,14 @@ export default {
       categoryList: [],
       loading: false,
       brands: [],
-      specifications: [],
       categoryId: "",
-      categorySpecs: [],
       modalType: 0,
       modalVisible: false,
       modalBrandVisible: false,
-      modalSpecVisible: false,
       modalTitle: "",
       showParent: false,
       parentTitle: "",
       modalBrandTitle: "",
-      modalSpecTitle: "",
       formAdd: {
         parentId: "",
         name: "",
@@ -196,9 +167,6 @@ export default {
         categoryBrands: [],
       },
       brandWay: [],
-      specForm: {
-        categorySpecs: [],
-      },
       formValidate: {
         commissionRate: [regular.REQUIRED, regular.INTEGER],
         name: [regular.REQUIRED, regular.VARCHAR20],
@@ -245,18 +213,10 @@ export default {
     init() {
       this.getAllList();
       this.getBrandList();
-      this.getSpecList();
     },
     getBrandList() {
       getBrandListData().then((res) => {
         this.brandWay = res;
-      });
-    },
-    getSpecList() {
-      getSpecificationList().then((res) => {
-        if (res.length != 0) {
-          this.specifications = res.result;
-        }
       });
     },
     brandOperation(v) {
@@ -265,23 +225,6 @@ export default {
         this.modalBrandTitle = "品牌关联";
         this.brandForm.categoryBrands = res.result.map((item) => item.id);
         this.modalBrandVisible = true;
-      });
-    },
-    specOperation(v) {
-      getCategorySpecListData(v.id).then((res) => {
-        this.categoryId = v.id;
-        this.modalSpecTitle = "规格关联";
-        this.specForm.categorySpecs = res.map((item) => item.id);
-        this.modalSpecVisible = true;
-      });
-    },
-    saveCategorySpec() {
-      saveCategorySpec(this.categoryId, this.specForm).then((res) => {
-        this.submitLoading = false;
-        if (res.success) {
-          ElMessage.success("操作成功");
-          this.modalSpecVisible = false;
-        }
       });
     },
     saveCategoryBrand() {

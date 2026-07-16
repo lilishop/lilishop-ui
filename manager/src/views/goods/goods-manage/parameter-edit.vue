@@ -25,35 +25,37 @@
           <el-input-number :min="0" v-model="form.sort" style="width: 520px" />
         </el-form-item>
         <el-form-item label="参数值" prop="options">
-          <el-table :data="form.options" border size="small" style="width: 520px">
-            <el-table-column label="参数值" min-width="420">
-              <template #default="{ row, $index }">
-                <el-input
-                  v-if="row"
-                  v-model="form.options[$index].value"
-                  clearable
-                  @blur="touchOptionsValidate"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="90" align="center">
-              <template #default="{ row, $index }">
-                <a v-if="row" class="link-text" @click="removeOptionRow($index)">
-                  删除
-                </a>
-              </template>
-            </el-table-column>
-          </el-table>
-          <div style="margin-top: 10px">
-            <el-button type="primary" @click="addOptionRow">新增</el-button>
+          <div class="options-editor">
+            <el-table :data="form.options" border size="small" style="width: 520px">
+              <el-table-column label="参数值" min-width="420">
+                <template #default="{ row, $index }">
+                  <el-input
+                    v-if="row"
+                    v-model="form.options[$index].value"
+                    clearable
+                    @blur="touchOptionsValidate"
+                  />
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="90" align="center">
+                <template #default="{ row, $index }">
+                  <a v-if="row" class="link-text" @click="removeOptionRow($index)">
+                    删除
+                  </a>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="options-editor__actions">
+              <el-button type="primary" @click="addOptionRow">新增</el-button>
+            </div>
           </div>
         </el-form-item>
-        <el-form-item label="关联分类">
+        <el-form-item label="关联分类" prop="categoryIds">
           <el-button @click="openCategoryModal">选择分类</el-button>
           <span v-if="selectedCategoryNamesText" style="margin-left: 10px; color: #999; font-size: 12px">
             {{ selectedCategoryNamesText }}</span>
           <span v-else style="margin-left: 10px; color: #999; font-size: 12px">
-            已选择{{ selectedCategoryIds.length }}个分类
+            已选择{{ (form.categoryIds || []).length }}个分类
           </span>
         </el-form-item>
         <el-form-item>
@@ -189,6 +191,28 @@ const buildCategoryIdNameMap = (list, map) => {
   });
 };
 
+const buildFormState = (source, parameterId) => {
+  const opts = normalizeOptions(source?.options);
+  const options = opts.length > 0 ? opts.map((x) => ({ value: x })) : [{ value: "" }];
+  const categoryList = Array.isArray(source?.categoryParameterList)
+    ? source.categoryParameterList
+    : [];
+  const categoryIds = toStringArray(
+    categoryList.map((x) => x && x.categoryId).filter(Boolean)
+  );
+  const formState = {
+    paramName: source?.paramName || "",
+    options,
+    required: normalize01(source?.required, 0),
+    isIndex: normalize01(source?.isIndex, 0),
+    sort: Number(source?.sort ?? 0) || 0,
+    categoryIds,
+  };
+  const id = source?.id || parameterId;
+  if (id) formState.id = id;
+  return formState;
+};
+
 export default {
   name: "parameterEdit",
   data() {
@@ -209,6 +233,7 @@ export default {
         required: 0,
         isIndex: 0,
         sort: 0,
+        categoryIds: [],
       },
       formValidate: {
         paramName: [regular.REQUIRED, regular.VARCHAR5],
@@ -216,6 +241,15 @@ export default {
         required: [{ required: true, validator: validateRadioRequired("请选择是否必填"), trigger: "change" }],
         isIndex: [{ required: true, validator: validateRadioRequired("请选择是否索引"), trigger: "change" }],
         sort: [regular.REQUIRED, regular.INTEGER],
+        categoryIds: [
+          {
+            type: "array",
+            required: true,
+            min: 1,
+            message: "请选择关联分类",
+            trigger: "change",
+          },
+        ],
       },
     };
   },
@@ -262,15 +296,23 @@ export default {
     back() {
       this.$router.push({ name: "goods-parameter" });
     },
+    syncCategoryIds(ids) {
+      const categoryIds = toStringArray(ids);
+      this.selectedCategoryIds = categoryIds;
+      if (!this.form) this.form = {};
+      this.form.categoryIds = categoryIds;
+    },
     touchOptionsValidate() {
-      if (this.$refs.form && this.$refs.form.validateField) {
-        this.$refs.form.validateField("options");
-      }
+      this.$nextTick(() => {
+        const form = this.$refs.form;
+        if (form && typeof form.validateField === "function") {
+          form.validateField("options", () => {});
+        }
+      });
     },
     addOptionRow() {
       if (!Array.isArray(this.form.options)) this.form.options = [];
       this.form.options.push({ value: "" });
-      this.touchOptionsValidate();
     },
     removeOptionRow(index) {
       if (!Array.isArray(this.form.options)) this.form.options = [];
@@ -290,17 +332,8 @@ export default {
       const res = await getGoodsParamsDetail(parameterId).catch(() => null);
       if (!(res && res.success && res.result)) return;
       const dto = res.result;
-      const opts = normalizeOptions(dto.options);
-      this.form = {
-        id: dto.id || parameterId,
-        paramName: dto.paramName || "",
-        options: opts.map((x) => ({ value: x })),
-        required: normalize01(dto.required, 0),
-        isIndex: normalize01(dto.isIndex, 0),
-        sort: Number(dto.sort ?? 0) || 0,
-      };
-      const list = Array.isArray(dto.categoryParameterList) ? dto.categoryParameterList : [];
-      this.selectedCategoryIds = toStringArray(list.map((x) => x && x.categoryId).filter(Boolean));
+      this.form = buildFormState(dto, parameterId);
+      this.selectedCategoryIds = [...this.form.categoryIds];
     },
     async openCategoryModal() {
       this.categoryModalVisible = true;
@@ -320,7 +353,13 @@ export default {
       }
     },
     onCategoryTreeCheckChange(_data, checkedInfo) {
-      this.selectedCategoryIds = toStringArray(checkedInfo?.checkedKeys || []);
+      this.syncCategoryIds(checkedInfo?.checkedKeys || []);
+      this.$nextTick(() => {
+        const form = this.$refs.form;
+        if (form && typeof form.validateField === "function") {
+          form.validateField("categoryIds", () => {});
+        }
+      });
     },
     initForm() {
       if (this.id) {
@@ -329,15 +368,8 @@ export default {
         if (cached) {
           try {
             const row = JSON.parse(cached);
-            const opts = normalizeOptions(row.options);
-            this.form = {
-              id: row.id,
-              paramName: row.paramName || "",
-              options: opts.map((x) => ({ value: x })),
-              required: normalize01(row.required, 0),
-              isIndex: normalize01(row.isIndex, 0),
-              sort: Number(row.sort ?? 0) || 0,
-            };
+            this.form = buildFormState(row, row.id);
+            this.selectedCategoryIds = [...this.form.categoryIds];
           } catch (e) {
             this.modalType = 0;
           }
@@ -348,7 +380,7 @@ export default {
         if (!Array.isArray(this.form.options) || this.form.options.length === 0) {
           this.form.options = [{ value: "" }];
         }
-        this.selectedCategoryIds = [];
+        this.syncCategoryIds([]);
       }
     },
     handleSubmit() {
@@ -356,7 +388,7 @@ export default {
         if (!valid) return;
         this.submitLoading = true;
         const options = normalizeOptions(this.form.options);
-        const categoryIds = toStringArray(this.selectedCategoryIds);
+        const categoryIds = toStringArray(this.form.categoryIds);
         const payload = {
           ...this.form,
           options: options.join(","),
@@ -404,4 +436,14 @@ export default {
 };
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+.options-editor {
+  display: flex;
+  flex-direction: column;
+  width: 520px;
+}
+
+.options-editor__actions {
+  margin-top: 10px;
+}
+</style>

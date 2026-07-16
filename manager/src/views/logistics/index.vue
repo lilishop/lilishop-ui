@@ -137,6 +137,13 @@ export default {
             trigger: "blur",
           },
         ],
+        code: [
+          {
+            required: true,
+            message: "请输入物流公司编码",
+            trigger: "blur",
+          },
+        ],
       },
       submitLoading: false,
       data: [],
@@ -192,10 +199,12 @@ export default {
 
         if (this.modalTitle === "添加") {
           const payload = {
-            ...this.form,
+            name: this.form.name,
+            code: this.form.code,
+            disabled: this.form.disabled,
             standBy: normalizeStandBy(this.form.standBy),
+            formItems: this.form.formItems,
           };
-          delete payload.id;
           addLogistics(payload).then((res) => {
             this.submitLoading = false;
             if (res.success) {
