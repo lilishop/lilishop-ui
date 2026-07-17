@@ -93,6 +93,7 @@ export default {
         { type: "WECHAT_PAYMENT", name: "微信支付设置" },
       ],
       tabWay: [], // tab数据
+      settingRequestSeq: 0,
     };
   },
 
@@ -115,29 +116,60 @@ export default {
       this.selected = name;
       this.getSettingData(name);
     },
+    resolveTabWay() {
+      const tabMap = {
+        setting: this.setting,
+        authLogin: this.authLogin,
+        pay: this.pay,
+      };
+      this.tabWay = tabMap[this.$route.name] || [];
+    },
+    normalizeSettingResult(res) {
+      if (!res || res.result == null) {
+        return {};
+      }
+      const raw = res.result;
+      if (typeof raw === "string") {
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          return {};
+        }
+      }
+      if (typeof raw === "object") {
+        return raw;
+      }
+      return {};
+    },
     /**
      * 进入页面请求第一个配置
      */
     getSettingData(name) {
       this.settingData = "";
-      Object.keys(this).forEach((item) => {
-        if (this.$route.name == item) {
-          this.tabWay = this[item];
-        }
-      });
-      // 点击页面给每项第一个数据赋值
+      this.resolveTabWay();
+
       if (!name) {
+        if (!this.tabWay.length) {
+          return;
+        }
         name = this.tabWay[0].type;
         this.selected = name;
       }
 
-      getSetting(name).then((res) => {
-        if (res.result) {
-          this.settingData = JSON.stringify(res.result);
-        } else {
+      const requestId = ++this.settingRequestSeq;
+      getSetting(name)
+        .then((res) => {
+          if (requestId !== this.settingRequestSeq) {
+            return;
+          }
+          this.settingData = JSON.stringify(this.normalizeSettingResult(res));
+        })
+        .catch(() => {
+          if (requestId !== this.settingRequestSeq) {
+            return;
+          }
           this.settingData = "{}";
-        }
-      });
+        });
     },
   },
 };

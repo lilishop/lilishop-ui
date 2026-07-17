@@ -193,7 +193,7 @@
                 </div>
               </div>
               <div class="error-goods" v-if="goods.errorMessage">
-                <div style="margin-top: 20px">{{ goods.errorMessage }}</div>
+                <div>{{ goods.errorMessage }}</div>
                 <el-button type="primary" @click="delGoods(goods.goodsSku.id)"
                   >删除</el-button
                 >
@@ -785,20 +785,18 @@ export default {
           outline-color: $theme_color;
         }
       }
-    }
-    .error-goods {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      margin-left: -20px;
-      background-color: rgba($color: #999, $alpha: 0.5);
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-left: 150px;
-      color: #000;
-      padding-right: 30px;
+      .error-goods {
+        position: absolute;
+        inset: 0;
+        background-color: rgba($color: #999, $alpha: 0.5);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px 0 150px;
+        box-sizing: border-box;
+        color: #000;
+      }
     }
   }
   &-footer {
