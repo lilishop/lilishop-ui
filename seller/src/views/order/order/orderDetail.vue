@@ -1,210 +1,294 @@
 <template>
   <div class="search">
-    <Card style="height: 60px">
-      <div>
-        <Button v-if="allowOperation.editPrice" @click="modifyPrice" type="primary">调整价格</Button>
-        <Button v-if="allowOperation.editConsignee" @click="editAddress" type="primary">修改收货地址</Button>
-        <Button v-if="allowOperation.showLogistics || orderPackage.length > 0" @click="checkLogistics" type="primary">查看物流</Button>
-        <Button @click="orderLogModal = true" type="primary">订单日志</Button>
-        <Button @click="printOrder" type="primary" ghost style="float:right;">打印发货单</Button>
-        <Button v-if="allowOperation.take" @click="orderTake" type="primary">订单核销</Button>
-        <!-- <Button v-if="allowOperation.ship" @click="orderDeliver" type="primary">发货</Button> -->
-
-        <Button v-if="allowOperation.ship" @click="groupShip" type="primary">分包裹发货</Button>
-
-        <Button @click="sfPrint" type="primary" ghost
-          v-if="allowOperation.showLogistics && logisticsType == 'SHUNFENG'">下载面单</Button>
-        <Button @click="toPrint" type="primary" ghost
-          v-if="allowOperation.ship && logisticsType != 'SHUNFENG'">打印电子面单</Button>
-        <Button @click="modifyRemark" type="primary">添加备注</Button>
-      </div>
-    </Card>
-
-    <Card class="mt_10">
-      <Row>
-        <Col span="12">
-        <div class="div-item">
-          <div class="div-item-left">订单号：</div>
-          <div class="div-item-right">{{ orderInfo.order.sn }}</div>
+    <div>
+      <el-card style="height: 60px">
+        <div>
+          <el-button v-if="allowOperation.editPrice" type="primary" @click="modifyPrice">调整价格</el-button>
+          <el-button v-if="allowOperation.editConsignee" type="primary" @click="editAddress">修改收货地址</el-button>
+          <el-button
+            v-if="allowOperation.showLogistics || orderPackages.length > 0"
+            type="primary"
+            @click="checkLogistics"
+          >查看物流</el-button>
+          <el-button type="primary" @click="orderLog">订单日志</el-button>
+          <el-button v-if="canOrderTake" type="primary" @click="orderTake">订单核销</el-button>
+          <el-button v-if="canPartDelivery" type="primary" @click="openPartDelivery">分包裹发货</el-button>
+          <el-button type="primary" @click="modifyRemark">添加备注</el-button>
+          <el-button
+            v-if="allowOperation.showLogistics && logisticsType === 'SHUNFENG'"
+            type="primary"
+            plain
+            @click="sfPrint"
+          >下载面单</el-button>
+          <el-button
+            v-if="allowOperation.ship && logisticsType !== 'SHUNFENG'"
+            type="primary"
+            plain
+            @click="toPrint"
+          >打印电子面单</el-button>
+          <el-button
+            v-if="$route.query.orderType != 'VIRTUAL'"
+            type="primary"
+            plain
+            style="float: right"
+            @click="printOrder"
+          >打印发货单</el-button>
         </div>
-        <div class="div-item">
-          <div class="div-item-left">订单来源：</div>
-          <div class="div-item-right">
-            {{ orderInfo.order.clientType | clientTypeWay }}
-          </div>
-        </div>
-        <div class="div-item">
-            <div class="div-item-left">订单备注：</div>
-            <div class="div-item-right">{{ orderInfo.order.sellerRemark }}</div>
-          </div>
-        <div class="div-item">
-          <div class="div-item-left">订单状态：</div>
-          <div class="div-item-right">
-            {{ orderInfo.orderStatusValue }}
-          </div>
-        </div>
-
-        <div class="div-item">
-          <div class="div-item-left">下单时间：</div>
-          <div class="div-item-right">
-            {{ orderInfo.order.createTime }}
-          </div>
-        </div>
-        <div class="div-item" v-if="orderInfo.order.needReceipt == false">
-          <div class="div-item-left">发票信息：</div>
-          <div class="div-item-right">暂无发票信息</div>
-        </div>
-        <template v-if="orderInfo.order.needReceipt == true && orderInfo.receipt">
+      </el-card>
+      <el-card class="mt_10 clearfix">
+        <div style="width: 30%; float: left; margin-left: 20px">
           <div class="div-item">
+            <div class="div-item-left">订单号：</div>
+            <div class="div-item-right">{{ orderInfo.order.sn }}</div>
+          </div>
+          <div class="div-item">
+            <div class="div-item-left">订单来源：</div>
+            <div class="div-item-right">
+              {{ $filters.clientTypeWay(orderInfo.order.clientType) }}
+            </div>
+          </div>
+          <div class="div-item">
+            <div class="div-item-left">订单备注：</div>
+            <div class="div-item-right">{{ orderInfo.order.sellerRemark || "暂无" }}</div>
+          </div>
+
+          <div class="div-item">
+            <div class="div-item-left">订单状态：</div>
+            <div class="div-item-right">
+              {{ orderInfo.orderStatusValue }}
+            </div>
+          </div>
+
+          <div class="div-item">
+            <div class="div-item-left">下单时间：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.createTime }}
+            </div>
+          </div>
+          <div class="div-item" v-if="orderInfo.order.verificationCode">
+            <div class="div-item-left">核验码：</div>
+            <div class="div-item-right">{{ orderInfo.order.verificationCode }}</div>
+          </div>
+        </div>
+        <div style="width: 30%; float: left; margin-left: 20px">
+          <div class="div-item" v-if="orderInfo.order.needReceipt == false">
+            <div class="div-item-left">发票信息：</div>
+            <div class="div-item-right">暂无发票信息</div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票抬头：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptTitle
-                ? orderInfo.receipt.receiptTitle
-                : "暂无"
+                orderInfo.receipt && orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
               }}
             </div>
           </div>
 
-          <div class="div-item" v-if="orderInfo.receipt.taxpayerId">
+          <div class="div-item"
+            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt && orderInfo.receipt.taxpayerId">
             <div class="div-item-left">发票税号：</div>
             <div class="div-item-right">
-              {{
-                orderInfo.receipt.taxpayerId
-                ? orderInfo.receipt.taxpayerId
-                : "暂无"
-              }}
+              {{ orderInfo.receipt && orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
             </div>
           </div>
 
-          <div class="div-item">
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票内容：</div>
             <div class="div-item-right">
               {{
-                orderInfo.receipt.receiptContent
+                orderInfo.receipt && orderInfo.receipt.receiptContent
                 ? orderInfo.receipt.receiptContent
                 : "暂无"
               }}
             </div>
           </div>
 
-          <div class="div-item">
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">发票金额：</div>
             <div class="div-item-right">
-              <span v-if="orderInfo.receipt.receiptPrice">￥</span>{{
-                orderInfo.receipt.receiptPrice
-                ? orderInfo.receipt.receiptPrice
-                : "暂无" | unitPrice
+
+              <priceColorScheme  v-if="orderInfo.receipt && orderInfo.receipt.receiptPrice" :value="orderInfo.receipt.receiptPrice" :color="$mainColor"></priceColorScheme>
+              <span v-else>暂无</span>
+
+            </div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">是否开票：</div>
+            <div class="div-item-right">
+              {{ orderInfo.receipt ? (orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开") : "空" }}
+            </div>
+          </div>
+        </div>
+        <div style="width: 36%; float: left">
+          <div class="div-item" v-if="orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
+            <div class="div-item-left">收货信息：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.consigneeName }}
+              {{ orderInfo.order.consigneeMobile }}
+              {{ orderInfo.order.consigneeAddressPath }}
+              {{ orderInfo.order.consigneeDetail }}
+            </div>
+          </div>
+          <div class="div-item" v-if="orderInfo.order.deliveryMethod == 'SELF_PICK_UP'">
+            <div class="div-item-left">自提信息：</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.storeAddressPath }}
+              {{ orderInfo.order.storeAddressMobile }}
+            </div>
+          </div>
+          <div class="div-item">
+            <div class="div-item-left">支付方式：</div>
+            <div class="div-item-right">
+              {{ orderInfo.paymentMethodValue }}
+            </div>
+          </div>
+
+          <div class="div-item">
+            <div class="div-item-left">买家留言：</div>
+            <div class="div-item-right">{{ orderInfo.order.remark }}</div>
+          </div>
+
+          <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == false">
+            <div class="div-item-left">发票信息：</div>
+            <div class="div-item-right">暂无发票信息</div>
+          </div> -->
+
+          <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票抬头：</div>
+            <div class="div-item-right">
+              {{
+                orderInfo.receipt && orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
               }}
             </div>
           </div>
 
-          <div class="div-item">
+          <div class="div-item"
+            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt && orderInfo.receipt.taxpayerId">
+            <div class="div-item-left">发票税号：</div>
+            <div class="div-item-right">
+              {{ orderInfo.receipt && orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
+            </div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票内容：</div>
+            <div class="div-item-right">
+              {{
+                orderInfo.receipt && orderInfo.receipt.receiptContent
+                ? orderInfo.receipt.receiptContent
+                : "暂无"
+              }}
+            </div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
+            <div class="div-item-left">发票金额：</div>
+            <div class="div-item-right">
+              {{
+                $filters.unitPrice(
+                  orderInfo.receipt && orderInfo.receipt.receiptPrice
+                    ? orderInfo.receipt.receiptPrice
+                    : "暂无",
+                  "￥"
+                )
+              }}
+            </div>
+          </div>
+
+          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
             <div class="div-item-left">是否开票：</div>
             <div class="div-item-right">
-              {{ orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开" }}
+              {{ orderInfo.receipt ? (orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开") : "空" }}
+            </div>
+          </div> -->
+
+          <div class="div-item" v-if="$route.query.orderType != 'VIRTUAL'">
+            <div class="div-item-left">配送方式：</div>
+            <div class="div-item-right">
+              {{ orderInfo.deliveryMethodValue }}
             </div>
           </div>
-        </template>
-        </Col>
-        <Col span="12">
-        <div class="div-item" v-if="orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
-          <div class="div-item-left">收货信息：</div>
-          <div class="div-item-right">
-            {{ orderInfo.order.consigneeName }}
-            {{ orderInfo.order.consigneeMobile }}
-            {{ orderInfo.order.consigneeAddressPath }}
-            {{ orderInfo.order.consigneeDetail }}
-          </div>
         </div>
-        <div class="div-item" v-if="orderInfo.order.deliveryMethod == 'SELF_PICK_UP'">
-          <div class="div-item-left">自提信息：</div>
-          <div class="div-item-right">
-            {{ orderInfo.order.storeAddressPath }}
-            {{ orderInfo.order.storeAddressMobile }}
-          </div>
-        </div>
-        <div class="div-item">
-          <div class="div-item-left">支付方式：</div>
-          <div class="div-item-right">
-            {{ orderInfo.paymentMethodValue }}
-          </div>
-        </div>
-
-        <div class="div-item">
-          <div class="div-item-left">买家留言：</div>
-          <div class="div-item-right">{{ orderInfo.order.remark }}</div>
-        </div>
-
-        <div class="div-item" v-if="orderInfo.order.orderType != 'VIRTUAL'">
-          <div class="div-item-left">配送方式：</div>
-          <div class="div-item-right">
-            {{
-              orderInfo.deliveryMethodValue
-              ? orderInfo.deliveryMethodValue
-              : "暂无配送方式"
-            }}
-          </div>
-        </div>
-        </Col>
-      </Row>
-    </Card>
-
-    <Card class="mt_10">
-      <Table :loading="loading" border :columns="columns" :data="data" ref="table">
-        <!-- 商品栏目格式化 -->
-        <template slot="goodsSlot" slot-scope="{ row }">
-          <div style="margin-top: 5px; height: 80px; display: flex">
-            <div style="">
-              <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
-            </div>
-
-            <div style="margin-left: 13px">
-              <div class="div-zoom">
-                <a @click="linkTo(row.goodsId, row.skuId)">{{
-                  row.goodsName
-                }}</a>
-              </div>
-              <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
-                <span v-show="key != 'images'" style="font-size: 12px; color: #999999">
-                  {{ key }} : {{ item }}
-                </span>
-              </span>
-              <Poptip trigger="hover" style="display: block" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.goodsId, row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
-                    :size="150"></vue-qr>
+      </el-card>
+      <el-card class="mt_10">
+        <el-table v-loading="loading" border :data="data" ref="table" style="width: 100%">
+          <el-table-column label="商品" min-width="200">
+            <template #default="{ row }">
+              <div v-if="row" style="margin-top: 5px; height: 80px; display: flex">
+                <div>
+                  <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
                 </div>
-                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="" />
-              </Poptip>
-            </div>
-          </div>
-        </template>
-      </Table>
-      <div class="goods-total">
-        <ul>
-          <li>
-            <span class="label">商品总额：</span>
-            <span class="txt">{{
-              orderInfo.order.priceDetailDTO.goodsPrice | unitPrice("￥")
-            }}</span>
-          </li>
-          <li v-if="orderInfo.order.priceDetailDTO.discountPrice && orderInfo.order.priceDetailDTO.discountPrice > 0">
-            <span class="label">优惠金额：</span>
-            <span class="txt"> {{ orderInfo.order.priceDetailDTO.discountPrice | unitPrice('￥') }} </span>
-          </li>
+                <div style="margin-left: 13px">
+                  <div class="div-zoom">
+                    <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+                  </div>
+                  <span v-for="(item, key) in parseOrderItemSpecs(row.specs)" :key="key">
+                    <span v-show="key != 'images'" style="font-size: 12px; color: #999999">
+                      {{ key }} : {{ item }}</span>
+                  </span>
+                  <el-popover trigger="hover" title="扫码在手机中查看" width="180">
+                    <template #reference>
+                      <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="" style="display: block" />
+                    </template>
+                    <vue-qr :text="wapLinkTo(row.goodsId, row.skuId)" :margin="0" colorDark="#000" colorLight="#fff" :size="150" />
+                  </el-popover>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="优惠" min-width="100">
+            <template #default="{ row }">
+              <span v-if="row">{{ getPromotionText(row) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="单价" min-width="100">
+            <template #default="{ row }">
+              <span v-if="row">{{ $filters.unitPrice(row.unitPrice || 0, "￥") }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="num" label="数量" min-width="80" />
+          <el-table-column prop="returnGoodsNumber" label="退款数量" min-width="80" />
+          <el-table-column label="小计" min-width="100">
+            <template #default="{ row }">
+              <span v-if="row">{{ $filters.unitPrice(row.flowPrice, "￥") }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="goods-total">
+          <ul>
+            <li>
+              <span class="label">商品总额：</span>
+              <span class="txt">{{
+                $filters.unitPrice(orderInfo.order.priceDetailDTO.goodsPrice, "￥")
+              }}</span>
+            </li>
+            <li v-if="
+              orderInfo.order.priceDetailDTO.discountPrice &&
+              orderInfo.order.priceDetailDTO.discountPrice > 0
+            ">
+              <span class="label">优惠金额：</span>
+              <span class="txt">
+                {{ $filters.unitPrice(orderInfo.order.priceDetailDTO.discountPrice, "￥") }}</span>
+            </li>
 
-          <li v-if="orderInfo.order.priceDetailDTO.couponPrice && orderInfo.order.priceDetailDTO.couponPrice > 0">
-            <span class="label">优惠券金额：</span>
-            <span class="txt"> {{ orderInfo.order.priceDetailDTO.couponPrice | unitPrice('￥') }} </span>
-          </li>
-          <li
-            v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
-            <div class="label">
-              <Poptip trigger="hover" placement="left" width="200">
-                <Icon v-if="typeList.length > 0" type="ios-alert-outline" size="17" @click="getOrderPrice"
-                  color="#cc0000" />
-                <template #content>
+            <li v-if="
+              orderInfo.order.priceDetailDTO.couponPrice &&
+              orderInfo.order.priceDetailDTO.couponPrice > 0
+            ">
+              <span class="label">优惠券金额：</span>
+              <span class="txt">
+                <priceColorScheme :value="orderInfo.order.priceDetailDTO.couponPrice" :color="$mainColor"></priceColorScheme>
+              </span>
+            </li>
+            <li
+              v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
+              <div class="label">
+                <el-popover v-if="typeList.length > 0" trigger="hover" placement="left" width="220">
+                  <template #reference>
+                    <span class="hover-pointer" style="color: #cc0000" @click="getOrderPrice">ⓘ</span>
+                  </template>
                   <div class="api" style="text-align:left;">
                     <table>
                       <thead>
@@ -215,159 +299,262 @@
                       <tbody>
                         <tr v-for="(item, index) in typeList" :key="index">
                           <td>{{ item.promotionName }}：</td>
-                          <td>¥{{ item.discountPrice | unitPrice }}</td>
+                          <td>¥{{ $filters.unitPrice(item.discountPrice) }}</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
-                </template>
-              </Poptip>
-              <span>优惠详情：</span>
-            </div>
-          </li>
-          <li>
-            <span class="label">运费：</span>
-            <span class="txt">{{
-              orderInfo.order.freightPrice | unitPrice("￥")
-            }}</span>
-          </li>
-          <li v-if="orderInfo.order.priceDetailDTO.updatePrice">
-            <span class="label">修改金额：</span>
-            <span class="txt theme_color">¥{{ orderInfo.order.priceDetailDTO.updatePrice | unitPrice }}</span>
-          </li>
-          <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index" >
-            <hr style="border:1px dashed black;">
-              <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-              <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
-              <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-              <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ item.discountPrice | unitPrice }}</span>
-              <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a></span>
-              <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ item.discountPrice | unitPrice }}</span>
-            </li> -->
-          <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
-            <span class="label">使用积分：</span>
-            <span class="txt">{{
-              orderInfo.order.priceDetailDTO.payPoint
-            }}</span>
-          </li>
-          <li>
-            <span class="label">应付金额：</span>
-            <span class="txt flowPrice">¥{{ orderInfo.order.flowPrice | unitPrice }}</span>
-            <!-- <template v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
-                <Space style="height:20px;float: right;text-align: center;margin-left:30px;margin-right:53px;">
-                      <Button type="primary" ghost size="small" @click="getOrderPrice()">优惠详情</Button>
-                </Space>
-            </template> -->
-          </li>
-        </ul>
-      </div>
-    </Card>
-    <Modal v-model="modal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
-        <span>修改金额</span>
-      </p>
-      <div>
-        <Form ref="modifyPriceForm" :model="modifyPriceForm" label-position="left" :label-width="100"
-          :rules="modifyPriceValidate">
-          <FormItem label="订单金额" prop="orderPrice">
-            <InputNumber style="width: 100%" v-model="modifyPriceForm.orderPrice" size="large" :min="0.01" :max="99999">
-              <span slot="append">元</span>
-            </InputNumber>
-          </FormItem>
-        </Form>
-      </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="modal = false">关闭</Button>
-        <Button type="primary" @click="modifyPriceSubmit">调整</Button>
-      </div>
-    </Modal>
-    <Modal v-model="sellerRemarkModal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
-        <span>编辑备注</span>
-      </p>
-      <div>
-        <Form ref="modifyRemarkForm" :model="modifyRemarkForm" label-position="left" :label-width="100">
-          <FormItem label="订单备注" prop="sellerRemark">
-            <Input v-model="modifyRemarkForm.sellerRemark" size="large" maxlength="20"></Input>
-          </FormItem>
-        </Form>
-      </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="sellerRemarkModal = false">关闭</Button>
-        <Button type="primary" @click="modifyRemarkSubmit">确认</Button>
-      </div>
-    </Modal>
-    <!--收件地址弹出框-->
-    <Modal v-model="addressModal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
-        <span>修改收件信息</span>
-      </p>
-      <div>
-        <Form ref="addressForm" :model="addressForm" label-position="left" :label-width="100" :rules="addressRule">
-          <FormItem label="收件人" prop="consigneeName">
-            <Input v-model="addressForm.consigneeName" size="large" maxlength="20"></Input>
-          </FormItem>
-          <FormItem label="联系方式" prop="consigneeMobile">
-            <Input v-model="addressForm.consigneeMobile" size="large" maxlength="11"></Input>
-          </FormItem>
-          <FormItem label="地址信息" prop="consigneeAddressPath">
-            <span>{{ addressForm.consigneeAddressPath }}</span>
-            <Button  size="small" type="default" @click="$refs.map.open()"
-              style="margin-left: 8px">修改
-            </Button>
+                </el-popover>
+                <span>优惠详情：</span>
+              </div>
+            </li>
+            <!-- <li v-if="showPrices">
+                <span class="label" style="color: #cc0000;font-size: 14px;" v-if="typeList.length > 0" >优惠详情：</span>
+              </li> -->
+            <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index">
+                <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
+                <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
+                <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
+                <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
+                <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
+                <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
+              </li> -->
+            <li>
+              <span class="label">运费：</span>
+              <span class="txt">{{
+                $filters.unitPrice(orderInfo.order.freightPrice, "￥")
+              }}</span>
+            </li>
+            <li v-if="orderInfo.order.priceDetailDTO.updatePrice">
+              <span class="label">修改金额：</span>
+              <span class="txt theme_color">¥{{ $filters.unitPrice(orderInfo.order.priceDetailDTO.updatePrice) }}</span>
+            </li>
+            <li v-if="orderInfo.order.priceDetailDTO.payPoint != 0">
+              <span class="label">使用积分：</span>
+              <span class="txt flowPrice">{{
+                orderInfo.order.priceDetailDTO.payPoint
+              }}</span>
+            </li>
+            <li>
+              <span class="label">应付金额：</span>
+              <span class="txt flowPrice">¥{{ $filters.unitPrice(orderInfo.order.flowPrice) }}</span>
+            </li>
+          </ul>
+        </div>
+      </el-card>
+    </div>
 
-          </FormItem>
-          <FormItem label="详细地址" prop="consigneeDetail">
-            <Input v-model="addressForm.consigneeDetail" size="large"></Input>
-          </FormItem>
-        </Form>
-      </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="addressModal = false">关闭</Button>
-        <Button type="primary" @click="editAddressSubmit">修改</Button>
-      </div>
-    </Modal>
-    <!-- 订单核销 -->
-    <Modal v-model="orderTakeModal" width="530">
-      <p slot="header">
-        <Icon type="edit"></Icon>
-        <span>订单核销</span>
-      </p>
-      <div>
-        <Form ref="orderTakeForm" :model="orderTakeForm" label-position="left" :label-width="100"
-          :rules="orderTakeValidate">
-          <FormItem label="核销码" prop="qrCode">
-            <Input v-model="orderTakeForm.qrCode" size="large" maxlength="10"></Input>
-          </FormItem>
-        </Form>
-      </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="orderTakeModal = false">关闭</Button>
-        <Button type="primary" @click="orderTakeSubmit">核销</Button>
-      </div>
-    </Modal>
-    <!-- 订单日志 -->
-    <Modal v-model="orderLogModal" width="60">
-      <p slot="header">
-        <span>订单日志</span>
-      </p>
+    <el-dialog v-model="modal" title="修改金额" width="530px">
+      <el-form ref="modifyPriceForm" :model="modifyPriceForm" label-width="100px" :rules="modifyPriceValidate" @submit.prevent>
+        <el-form-item label="订单金额" prop="orderPrice">
+          <el-input-number v-model="modifyPriceForm.orderPrice" :min="0.01" :max="99999" style="width: 100%" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="modal = false">关闭</el-button>
+        <el-button type="primary" @click="modifyPriceSubmit">调整</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="sellerRemarkModal" title="编辑备注" width="530px">
+      <el-form ref="modifyRemarkForm" :model="modifyRemarkForm" label-width="100px">
+        <el-form-item label="订单备注" prop="sellerRemark">
+          <el-input v-model="modifyRemarkForm.sellerRemark" maxlength="20" show-word-limit />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="sellerRemarkModal = false">关闭</el-button>
+        <el-button type="primary" @click="modifyRemarkSubmit">确认</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="addressModal" title="修改收件信息" width="530px">
+      <el-form ref="addressForm" :model="addressForm" label-width="100px" :rules="addressRule">
+        <el-form-item label="收件人" prop="consigneeName">
+          <el-input v-model="addressForm.consigneeName" maxlength="20" />
+        </el-form-item>
+        <el-form-item label="联系方式" prop="consigneeMobile">
+          <el-input v-model="addressForm.consigneeMobile" maxlength="11" />
+        </el-form-item>
+        <el-form-item label="地址信息" prop="consigneeAddressPath">
+          <span>{{ addressForm.consigneeAddressPath || addr }}</span>
+          <el-button size="small" style="margin-left: 8px" @click="$refs.map.open()">修改</el-button>
+        </el-form-item>
+        <el-form-item label="详细地址" prop="consigneeDetail">
+          <el-input v-model="addressForm.consigneeDetail" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="addressModal = false">关闭</el-button>
+        <el-button type="primary" @click="editAddressSubmit">修改</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="orderLogModal" title="订单日志" width="60%">
       <div class="order-log-div">
-        <Table :loading="loading" border :columns="orderLogColumns" :data="orderLogData" ref="table"></Table>
+        <el-table v-loading="loading" border :data="orderInfo.orderLogs || []" style="width: 100%">
+          <el-table-column prop="operatorName" label="操作者" min-width="120" />
+          <el-table-column prop="operatorType" label="操作类型" min-width="100" />
+          <el-table-column prop="createTime" label="时间" width="180" />
+          <el-table-column prop="message" label="日志" min-width="200" show-overflow-tooltip />
+        </el-table>
+      </div>
+      <template #footer>
+        <el-button @click="handelCancel">取消</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="partDeliveryModal" title="分包裹发货" width="1200px">
+      <el-form ref="partDeliveryForm" :model="partDeliveryForm" label-width="100px" :rules="partDeliveryRules">
+        <el-form-item label="物流公司" prop="logisticsId">
+          <el-select v-model="partDeliveryForm.logisticsId" placeholder="请选择物流公司" filterable style="width: 260px">
+            <el-option
+              v-for="item in checkedLogistics"
+              :key="getLogisticsId(item)"
+              :label="getLogisticsName(item)"
+              :value="getLogisticsId(item)"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="物流单号" prop="logisticsNo">
+          <el-input v-model="partDeliveryForm.logisticsNo" placeholder="请输入物流单号" style="width: 260px" />
+        </el-form-item>
+        <el-form-item label-width="0" prop="partDeliveryDTOList" class="part-delivery-goods-item">
+          <div v-if="deliverableOrderItems.length" class="part-delivery-table-wrap">
+            <el-table
+              ref="partDeliveryTable"
+              border
+              :data="deliverableOrderItems"
+              style="width: 100%"
+              @selection-change="handlePartDeliverySelectionChange"
+            >
+            <el-table-column type="selection" width="55" :selectable="isPartDeliveryRowSelectable" />
+            <el-table-column label="商品" min-width="420">
+              <template #default="{ row }">
+                <div class="part-delivery-goods">
+                  <img :src="row.image" class="part-delivery-goods-img" alt="" />
+                  <div class="part-delivery-goods-info">
+                    <div class="part-delivery-goods-name">{{ row.goodsName }}</div>
+                    <div
+                      v-for="(specValue, specKey) in parseOrderItemSpecs(row.specs)"
+                      :key="specKey"
+                      class="part-delivery-goods-spec"
+                    >
+                      <span v-if="specKey !== 'images'">{{ specKey }}：{{ specValue }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="单价" min-width="110" align="center">
+              <template #default="{ row }">
+                {{ $filters.unitPrice(row.unitPrice || 0, "￥") }}
+              </template>
+            </el-table-column>
+            <el-table-column label="数量" min-width="140" align="center">
+              <template #default="{ row }">
+                <el-input-number
+                  v-model="partDeliveryForm.deliveryNumMap[getOrderItemId(row)]"
+                  :min="1"
+                  :max="getRemainingDeliveryNum(row)"
+                  :precision="0"
+                  controls-position="right"
+                  size="default"
+                  class="part-delivery-num-input"
+                  @change="(val) => handlePartDeliveryNumChange(row, val)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column label="已发包裹" min-width="110" align="center">
+              <template #default="{ row }">
+                {{ getShippedPackageNum(row) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="小计" min-width="110" align="center">
+              <template #default="{ row }">
+                {{ $filters.unitPrice(getPartDeliverySubtotal(row), "￥") }}
+              </template>
+            </el-table-column>
+          </el-table>
+          </div>
+          <div v-else class="delivery-empty">暂无可发货商品</div>
+        </el-form-item>
+      </el-form>
+      <div v-if="orderPackages.length" class="package-list">
+        <div class="package-title">已有包裹</div>
+        <el-table :data="orderPackages" border size="small">
+          <el-table-column prop="logisticsName" label="物流公司" min-width="120" />
+          <el-table-column prop="logisticsNo" label="物流单号" min-width="160" />
+        </el-table>
+      </div>
+      <template #footer>
+        <el-button @click="partDeliveryModal = false">关闭</el-button>
+        <el-button type="primary" :loading="partDeliverySubmitting" @click="submitPartDelivery">确认发货</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="printModal" width="530px" @close="printCancel">
+      <template #header>
+        <div style="line-height:26px;height:26px;">
+          <span style="float: left;">打印发货单</span>
+          <el-button size="small" style="margin-right:35px;float: right;padding-bottom: 2px;" @click="printHiddenInfo">
+            {{ printHiddenFlag ? "显示" : "隐藏" }}敏感信息
+          </el-button>
+        </div>
+      </template>
+      <div style="max-height:500px;overflow-y:auto;overflow-x:hidden;">
+        <div id="printInfo">
+          <el-row v-if="orderInfo.order.remark !== ''">
+            <el-col :span="24">
+            <p class="lineH30 f14">备注：{{ orderInfo.order.remark }}</p>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12">
+            <p class="lineH30 f14">收件人：{{ orderInfo.order.consigneeName }}</p>
+            </el-col>
+            <el-col v-if="orderInfo.order.consigneeMobile" :span="12">
+            <p v-if="printHiddenFlag" class="lineH30 f14">手机号：{{
+              orderInfo.order.consigneeMobile.replace(/^(.{3})(?:\d+)(.{4})$/, "$1****$2") }}</p>
+            <p v-else class="lineH30 f14">手机号：{{ orderInfo.order.consigneeMobile }}</p>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+            <p class="lineH30 f14">收货地址：{{ orderInfo.order.consigneeAddressPath }}{{ orderInfo.order.consigneeDetail }}
+            </p>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+            <p class="printgoodtitle">商品信息</p>
+            <div class="printgoodinfo">
+              <div v-for="(item, index) in orderInfo.orderItems" :key="index" class="printgooditem">
+                <div class="printgoodname">
+                  <p>{{ item.goodsName }}</p>
+                  <div class="printgoodguid">
+                    <span v-for="(itemchild, keychild) in parseOrderItemSpecs(item.specs)" :key="keychild">
+                      <span class="printgoodguiditem" v-if="keychild != 'images'">
+                        {{ keychild }} : {{ itemchild }}</span>
+                    </span>
+                  </div>
+                </div>
+                <span class="printgoodnumber">数量：{{ item.num }}</span>
+              </div>
+            </div>
+            </el-col>
+          </el-row>
+        </div>
       </div>
 
-      <div slot="footer" style="text-align: right">
-        <Button @click="orderLogModal = false">取消</Button>
-      </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="printModal = false">关闭</el-button>
+        <el-button type="primary" @click="handlePrintInvoice">打印发货单</el-button>
+      </template>
+    </el-dialog>
 
-    <!-- 查询物流 -->
-    <Modal v-model="logisticsModal" width="40">
-      <p slot="header">
-        <span>查询物流</span>
-      </p>
+
+    <el-dialog v-model="logisticsModal" title="查询物流" width="40%">
       <div class="layui-layer-wrap">
         <dl>
           <dt>订单号：</dt>
@@ -376,7 +563,11 @@
           </dd>
         </dl>
       </div>
-      <div v-if="packageTraceList.length > 0" v-for="(packageItem, packageIndex) in packageTraceList" :key="packageIndex">
+      <template v-if="packageTraceList.length > 0">
+        <div
+          v-for="(packageItem, packageIndex) in packageTraceList"
+          :key="packageIndex"
+        >
         <div class="layui-layer-wrap">
           <dl>
             <dt>物流公司：</dt>
@@ -384,7 +575,7 @@
           </dl>
           <dl>
             <dt>快递单号：</dt>
-            <dd><div nctype="ordersSn" class="text-box">{{ packageItem.logisticsNo }}</div></dd>
+            <dd><div class="text-box">{{ packageItem.logisticsNo }}</div></dd>
           </dl>
           <div class="div-express-log">
             <ul class="express-log express-log-name">
@@ -396,17 +587,18 @@
             </ul>
           </div>
           <div class="div-express-log">
-            <ul class="express-log" v-if="packageItem.traces && packageItem.traces.traces">
+            <ul v-if="packageItem.traces && packageItem.traces.traces" class="express-log">
               <li v-for="(item, index) in packageItem.traces.traces" :key="index">
                 <span class="time">{{ item.AcceptTime || item.acceptTime }}</span>
                 <span class="detail">{{ item.AcceptStation || item.remark }}</span>
               </li>
             </ul>
-            <ul class="express-log" v-else><li>暂无物流信息</li></ul>
+            <ul v-else class="express-log"><li>暂无物流信息</li></ul>
           </div>
         </div>
-      </div>
-      <div v-if = "packageTraceList.length == 0 && logisticsInfo">
+        </div>
+      </template>
+      <div v-if="packageTraceList.length == 0 && logisticsInfo">
         <div class="layui-layer-wrap">
           <dl>
             <dt>物流公司：</dt>
@@ -414,175 +606,83 @@
           </dl>
           <dl>
             <dt>快递单号：</dt>
-            <dd><div nctype="ordersSn" class="text-box">{{ logisticsInfo.logisticCode }}</div></dd>
+            <dd><div class="text-box">{{ logisticsInfo.logisticCode }}</div></dd>
           </dl>
           <div class="div-express-log">
-            <ul class="express-log" v-if="logisticsInfo && logisticsInfo.traces">
+            <ul v-if="logisticsInfo && logisticsInfo.traces" class="express-log">
               <li v-for="(item, index) in logisticsInfo.traces" :key="index">
                 <span class="time">{{ item.AcceptTime }}</span>
                 <span class="detail">{{ item.AcceptStation }}</span>
               </li>
             </ul>
-            <ul class="express-log" v-else><li>暂无物流信息</li></ul>
+            <ul v-else class="express-log"><li>暂无物流信息</li></ul>
           </div>
         </div>
       </div>
-      <div slot="footer" style="text-align: right">
-        <Button @click="logisticsModal = false">取消</Button>
-      </div>
-    </Modal>
+      <template #footer>
+        <el-button @click="logisticsModal = false">取消</el-button>
+      </template>
+    </el-dialog>
 
+    <el-dialog v-model="orderDeliverModal" title="订单发货" width="500px">
+      <el-form
+        v-if="facesheetFlag"
+        ref="faceSheetForm"
+        :model="faceSheetForm"
+        :rules="faceSheetFormValidate"
+        label-width="90px"
+      >
+        <el-form-item label="物流公司" prop="logisticsId">
+          <el-select v-model="faceSheetForm.logisticsId" placeholder="请选择" style="width: 250px">
+            <el-option
+              v-for="(item, i) in checkedLogistics"
+              :key="i"
+              :label="item.name"
+              :value="item.logisticsId"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <el-form
+        v-else
+        ref="orderDeliveryForm"
+        :model="orderDeliveryForm"
+        :rules="orderDeliverFormValidate"
+        label-width="90px"
+      >
+        <el-form-item label="物流公司" prop="logisticsId">
+          <el-select v-model="orderDeliveryForm.logisticsId" placeholder="请选择" style="width: 250px">
+            <el-option
+              v-for="(item, i) in checkedLogistics"
+              :key="i"
+              :label="item.name"
+              :value="item.logisticsId"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="物流单号" prop="logisticsNo">
+          <el-input v-model="orderDeliveryForm.logisticsNo" style="width: 250px" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="orderDeliverModal = false">关闭</el-button>
+        <el-button type="primary" @click="orderDeliverySubmit">发货</el-button>
+      </template>
+    </el-dialog>
 
-    <!-- 订单发货 -->
-    <Modal v-model="orderDeliverModal" width="500px">
-      <p slot="header">
-        <span>订单发货</span>
-      </p>
-      <div>
-        <Form :model="faceSheetForm" ref="faceSheetForm" v-if="facesheetFlag" :rules="faceSheetFormValidate">
-          <FormItem label="物流公司" prop="logisticsId" style="position: relative" :label-width="90">
-            <Select v-model="faceSheetForm.logisticsId" placeholder="请选择" style="width: 250px">
-              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.logisticsId">{{ item.name }}
-              </Option>
-            </Select>
-          </FormItem>
-        </Form>
-        <Form v-else ref="orderDeliveryForm" :model="orderDeliveryForm" :label-width="90"
-          :rules="orderDeliverFormValidate" style="position: relative">
-          <FormItem label="物流公司" prop="logisticsId">
-            <Select v-model="orderDeliveryForm.logisticsId" placeholder="请选择" style="width: 250px">
-              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.logisticsId">{{ item.name }}
-              </Option>
-            </Select>
-          </FormItem>
-          <!-- v-if="showOrder" -->
-          <FormItem label="物流单号" prop="logisticsNo">
-            <Input v-model="orderDeliveryForm.logisticsNo" style="width: 250px" />
-          </FormItem>
-        </Form>
-      </div>
+    <el-dialog v-model="orderTakeModal" title="订单核销" width="530px">
+      <el-form ref="orderTakeForm" :model="orderTakeForm" label-width="100px" :rules="orderTakeValidate">
+        <el-form-item label="核销码" prop="qrCode">
+          <el-input v-model="orderTakeForm.qrCode" placeholder="请输入核销码" maxlength="10" clearable />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="orderTakeModal = false">取消</el-button>
+        <el-button type="primary" @click="orderTakeSubmit">核销</el-button>
+      </template>
+    </el-dialog>
 
-      <div slot="footer" style="text-align: right">
-        <Button @click="orderDeliverModal = false">关闭</Button>
-        <Button type="primary" @click="orderDeliverySubmit">发货</Button>
-      </div>
-    </Modal>
-    <!-- 打印发货单 -->
-    <Modal v-model="printModal" width="530" @on-cancel="printCancel">
-      <p slot="header" style="line-height:26px;height:26px;">
-        <span style="float: left;">打印发货单</span>
-        <Button size="small" style="margin-right:35px;float: right;padding-bottom: 2px;"
-          @click="printHiddenInfo"><template v-if="printHiddenFlag">显示</template><template
-            v-else>隐藏</template>敏感信息</Button>
-      </p>
-      <div style="max-height:500px;overflow-y:auto;overflow-x:hidden;">
-        <div id="printInfo">
-          <Row v-if="orderInfo.order.remark !== ''">
-            <Col span="24">
-            <p class="lineH30 f14">备注：{{ orderInfo.order.remark }}</p>
-            </Col>
-          </Row>
-          <Row>
-            <Col span="12">
-            <p class="lineH30 f14">收件人：{{ orderInfo.order.consigneeName }}</p>
-            </Col>
-            <Col span="12" v-if="orderInfo.order.consigneeMobile">
-            <p class="lineH30 f14" v-if="printHiddenFlag">手机号：{{
-              orderInfo.order.consigneeMobile.replace(/^(.{3})(?:\d+)(.{4})$/, "$1****$2") }}</p>
-            <p class="lineH30 f14" v-else>手机号：{{ orderInfo.order.consigneeMobile }}</p>
-            </Col>
-          </Row>
-          <Row>
-            <Col span="24">
-            <p class="lineH30 f14">收货地址：{{ orderInfo.order.consigneeAddressPath }}{{ orderInfo.order.consigneeDetail }}
-            </p>
-            </Col>
-          </Row>
-          <Row>
-            <Col span="24">
-            <p class="printgoodtitle">商品信息</p>
-            <div class="printgoodinfo">
-              <div v-for="(item, index) in orderInfo.orderItems" :key="index" class="printgooditem">
-                <div class="printgoodname">
-                  <p>{{ item.goodsName }}</p>
-                  <div class="printgoodguid">
-                    <span v-for="(itemchild, keychild) in JSON.parse(item.specs)" :key="keychild">
-                      <span class="printgoodguiditem" v-if="keychild != 'images'">
-                        {{ keychild }} : {{ itemchild }}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-                <span class="printgoodnumber">数量：{{ item.num }}</span>
-              </div>
-            </div>
-            </Col>
-          </Row>
-        </div>
-      </div>
-
-      <div slot="footer" style="text-align: right">
-        <Button @click="printModal = false">关闭</Button>
-        <Button type="primary" v-print="printInfoObj">打印发货单</Button>
-      </div>
-    </Modal>
-    <!--订单分包裹发货-->
-    <Modal v-model="groupShipModal" :loading="shipLoading" title="分包裹发快递" width="1000">
-      <div>
-        <Form ref="groupOrderDeliveryForm" :model="groupOrderDeliveryForm" :label-width="90" :rules="groupOrderDeliverFormValidate" style="position: relative">
-          <FormItem label="物流公司" prop="logisticsId">
-            <Select v-model="groupOrderDeliveryForm.logisticsId" placeholder="请选择" style="width: 250px">
-              <Option v-for="(item, i) in checkedLogistics" :key="i" :value="item.logisticsId">{{ item.name }}
-              </Option>
-            </Select>
-          </FormItem>
-          <FormItem label="物流单号" prop="logisticsNo">
-            <Input v-model="groupOrderDeliveryForm.logisticsNo" style="width: 250px" />
-          </FormItem>
-        </Form>
-      </div>
-      <Table @on-select="selectGroupShipGoodsMethods" @on-selection-change="selectGroupShipGoodsMethods"
-             @on-select-all="selectGroupShipGoodsMethods" :data="data" :columns="groupShipColumns" border>
-        <template slot="goodsSlot" slot-scope="{ row }">
-          <div style="margin-top: 5px; height: 80px; display: flex">
-            <div style="">
-              <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
-            </div>
-
-            <div style="margin-left: 13px">
-              <div class="div-zoom">
-                <a @click="linkTo(row.goodsId, row.skuId)">{{
-                  row.goodsName
-                  }}</a>
-              </div>
-              <span v-for="(item, key) in JSON.parse(row.specs)" :key="key">
-                <span v-show="key != 'images'" style="font-size: 12px; color: #999999">
-                  {{ key }} : {{ item }}
-                </span>
-              </span>
-              <Poptip trigger="hover" style="display: block" title="扫码在手机中查看" transfer>
-                <div slot="content">
-                  <vue-qr :text="wapLinkTo(row.goodsId, row.skuId)" :margin="0" colorDark="#000" colorLight="#fff"
-                          :size="150"></vue-qr>
-                </div>
-                <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="" />
-              </Poptip>
-            </div>
-          </div>
-        </template>
-        <template slot="numSlot" slot-scope="{ row, index }">
-          <InputNumber v-model="row.canNum" :disabled="!selectGroupShipGoods.find(item=>item.id === row.id)"
-                       :max="row.___num - row.deliverNumber - row.returnNum" :min="0"
-                       @on-change="changeNum($event,index)"></InputNumber>
-        </template>
-      </Table>
-      <div slot="footer">
-        <Button type="default" @click="groupShipModal = false">取消</Button>
-        <Button type="primary" @click="confirmShipGroupGoods">确定</Button>
-      </div>
-    </Modal>
-
-    <multipleMap ref="map" @callback="getAddress"></multipleMap>
+    <multipleMap ref="map" @callback="selectedRegion" />
   </div>
 </template>
 
@@ -592,79 +692,70 @@ import * as API_Logistics from "@/api/logistics";
 import * as RegExp from "@/libs/RegExp.js";
 
 import multipleMap from "@/views/my-components/map/multiple-map";
-
-
+import vueQr from "vue-qr";
+import { printElement } from "@/utils/print";
 export default {
   name: "orderDetail",
   components: {
     multipleMap,
+    "vue-qr": vueQr,
   },
   data () {
     return {
-      loading:false,
       typeList: [],
       showPrices: false,
-      printHiddenFlag: false,//隐藏信息
-      printInfoObj: {
-        id: "printInfo",//要打印的id名 无#号
-        popTitle: '&nbsp;',//页眉标题 默认浏览器标题 空字符串时显示undefined 使用html语言
-        extraHead: '',//头部文字 默认空
-      },
-      submitLoading: false, // 添加或编辑提交状态
-      logisticsType: 'KUAIDINIAO', //物流类型
-
-      someJSONdata: '',
+      printHiddenFlag: false,
+      loading: false,
+      logisticsType: "KUAIDINIAO",
+      someJSONdata: "",
       faceSheetForm: {
-        logisticsId: '',
+        logisticsId: "",
       },
       faceSheetFormValidate: {
-        logisticsId: [
-          { required: true, message: "请选择物流公司" },
-        ],
+        logisticsId: [{ required: true, message: "请选择物流公司" }],
       },
-      facesheetFlag: false, //电子面单标识
-      orderLogModal: false, //弹出调整价格框
-      logisticsModal: false, //弹出查询物流框
-      orderDeliverModal: false, //订单发货弹出框
-      orderTakeModal: false, //订单核销弹出框
-      checkedLogistics: [], //选中的物流公司集合
-      allowOperation: {}, //订单可才做选项
+      facesheetFlag: false,
+      logisticsModal: false,
+      orderDeliverModal: false,
       logisticsInfo: {
         shipper: "",
-      }, //物流信息
+      },
+      packageTraceList: [],
+      sellerRemarkModal: false,
+      addr: "",
+      regionId: "",
+
+      orderLogModal: false,
+      checkedLogistics: [], //选中的物流公司集合
+      allowOperation: {}, //订单可才做选项
       sn: "", //订单编号
       orderInfo: {
-        // 订单信息
         order: {
           priceDetailDTO: {},
         },
       },
-      modal: false, //弹出调整价格框
-      printModal: false,//弹出打印发货单
-      sellerRemarkModal: false,//弹出编辑订单备注
+      modal: false,
       //调整价格表单
       modifyPriceForm: {
         orderPrice: 0,
       },
-      //修改订单备注表单
       modifyRemarkForm: {
-        sellerRemark: 0,
-      },
-      //订单核销表单
-      orderTakeForm: {
-        qrCode: "",
-      },
-      //验证要调整的订单金额
-      orderTakeValidate: {
-        qrCode: [
-          { required: true, message: "订单核销码不能为空", trigger: "blur" },
-        ],
+        sellerRemark: "",
       },
       //订单发货
       orderDeliveryForm: {
         logisticsNo: "", //发货单号
         logisticsId: "", //物流公司
       },
+      partDeliveryModal: false,
+      partDeliverySubmitting: false,
+      partDeliveryForm: {
+        logisticsNo: "",
+        logisticsId: "",
+        selectedOrderItemIds: [],
+        deliveryNumMap: {},
+      },
+      orderPackages: [],
       //验证要调整的订单金额
       modifyPriceValidate: {
         orderPrice: [
@@ -676,7 +767,16 @@ export default {
           },
         ],
       },
-      addressModal: false, //弹出修改收件信息框
+
+      addressModal: false,
+      printModal: false,
+      orderTakeModal: false,
+      orderTakeForm: {
+        qrCode: "",
+      },
+      orderTakeValidate: {
+        qrCode: [{ required: true, message: "订单核销码不能为空", trigger: "blur" }],
+      },
       //收件地址表单
       addressForm: {
         consigneeName: "",
@@ -686,9 +786,12 @@ export default {
         consigneeAddressIdPath: "",
       },
       orderDeliverFormValidate: {
-        logisticsNo: [
-          { required: true, message: "发货单号不能为空", trigger: "change" },
-        ]
+        logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
+        logisticsId: [{ required: true, message: "请选择物流公司", trigger: "blur" }],
+      },
+      partDeliveryRules: {
+        logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
+        logisticsId: [{ required: true, message: "请选择物流公司", trigger: "change" }],
       },
       addressRule: {
         consigneeName: [
@@ -707,262 +810,428 @@ export default {
         ],
       },
 
-      columns: [
-        {
-          title: "商品",
-          key: "goodsName",
-          minWidth: 400,
-          slot: "goodsSlot",
-        },
-        {
-          title: "优惠",
-          key: "num",
-          minWidth: 100,
-          render: (h, params) => {
-            let resultText = "";
-            if (params.row.promotionType) {
-              let type = params.row.promotionType.split(",");
-              if (type.indexOf("PINTUAN") != -1) {
-                resultText += "拼团 ";
-              }
-              if (type.indexOf("SECKILL") != -1) {
-                resultText += "秒杀 ";
-              }
-              if (type.indexOf("COUPON") != -1) {
-                resultText += "优惠券 ";
-              }
-              if (type.indexOf("FULL_DISCOUNT") != -1) {
-                resultText += "满减 ";
-              }
-              if (type.indexOf("POINTS_GOODS") != -1) {
-                resultText += "积分商品 ";
-              }
-            }
-            if (resultText === "") {
-              resultText = "暂无未参与任何促销";
-            }
-            return h("div", resultText);
-          },
-        },
-        {
-          title: "单价",
-          key: "unitPrice",
-          minWidth: 100,
-          render: (h, params) => {
-            if (!params.row.unitPrice) {
-              return h("div", this.$options.filters.unitPrice(0, "￥"));
-            }
-            return h(
-              "div",
-              this.$options.filters.unitPrice(
-                params.row.unitPrice,
-                "￥"
-              )
-            );
-          },
-        },
-
-        {
-          title: "数量",
-          key: "num",
-          minWidth: 80,
-        },
-        {
-          title: "小计",
-          key: "subTotal",
-          minWidth: 100,
-          render: (h, params) => {
-            return h(
-              "div",
-              this.$options.filters.unitPrice(params.row.flowPrice, "￥")
-            );
-          },
-        },
-      ],
-      data: [], // 商品表单数据
-      orderLogColumns: [
-        // 表头
-        {
-          title: "时间",
-          key: "createTime",
-          minWidth: 120,
-        },
-        {
-          title: "操作者",
-          key: "operatorName",
-          minWidth: 120,
-        },
-        {
-          title: "操作类型",
-          key: "operatorType",
-          minWidth: 120,
-        },
-        {
-          title: "日志",
-          key: "message",
-          minWidth: 200,
-        },
-      ],
-      // 订单日志数据
-      orderLogData: [],
-
-      // 分包裹发货
-      groupShipModal: false,
-      shipLoading: true,
-      groupOrderDeliveryForm: {
-        logisticsNo: "", //发货单号
-        logisticsId: "", //物流公司
-      },
-      groupOrderDeliverFormValidate: {
-        logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" },],
-        logisticsId: [{ required: true, message: "请选择物流公司", trigger: "blur" },],
-      },
-      // 选择要发货的商品
-      selectGroupShipGoods: [],
-      groupShipColumns: [
-        {type: "selection", width: 60, align: "center",},
-        {title: "商品", key: "goodsName", width: 300, slot: "goodsSlot",},
-        {
-          title: "单价",
-          key: "unitPrice",
-          slot: "priceSlot",
-          width: 100,
-          render: (h, params) => {
-            if (!params.row.unitPrice) {
-              return h("div", this.$options.filters.unitPrice(0, "￥"));
-            }
-            return h("div", this.$options.filters.unitPrice(params.row.unitPrice, "￥"));
-          },
-        },
-        {title: "数量", key: "num", slot: "numSlot", width: 120,},
-        {
-          title: "已发包裹",
-          key: "deliverNumber",
-          render: (h, params) => {
-            return h("div", params.row.deliverNumber ? params.row.deliverNumber : 0);
-          },
-        },
-        {
-          title: "小计",
-          key: "subTotal",
-          width: 120,
-          render: (h, params) => {
-            return h("div", this.$options.filters.unitPrice(params.row.subTotal, "￥"));
-          },
-        },
-      ],
-      orderPackage: [],
-      packageTraceList: []
+      data: [], // 表单数据
     };
   },
+  computed: {
+    canPartDelivery() {
+      if (!this.allowOperation.ship) return false;
+      const status = this.orderInfo.order && this.orderInfo.order.orderStatus;
+      return (
+        this.$route.query.orderType !== "VIRTUAL" &&
+        ["UNDELIVERED", "PARTS_DELIVERED"].includes(status) &&
+        this.deliverableOrderItems.length > 0
+      );
+    },
+    deliverableOrderItems() {
+      return (this.data || []).filter((item) => {
+        if (!this.getOrderItemId(item)) return false;
+        return this.getRemainingDeliveryNum(item) > 0;
+      });
+    },
+    canOrderTake() {
+      if (this.allowOperation.take) return true;
+      const order = this.orderInfo?.order;
+      if (!order) return false;
+      const isVirtual =
+        this.$route.query.orderType === "VIRTUAL" ||
+        order.orderType === "VIRTUAL";
+      return isVirtual && order.orderStatus === "TAKE";
+    },
+  },
+  watch: {
+    $route (to, from) {
+      this.$router.go(0);
+    },
+  },
   methods: {
-    // 选中
-    selectGroupShipGoodsMethods (selected) {
-      this.selectGroupShipGoods = selected;
+    getPromotionText(row) {
+      let resultText = "";
+      if (row && row.promotionType) {
+        const type = row.promotionType.split(",");
+        if (type.indexOf("PINTUAN") != -1) resultText += "拼团 ";
+        if (type.indexOf("SECKILL") != -1) resultText += "秒杀 ";
+        if (type.indexOf("COUPON") != -1) resultText += "优惠券 ";
+        if (type.indexOf("FULL_DISCOUNT") != -1) resultText += "满减 ";
+        if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
+      }
+      return resultText === "" ? "暂无未参与任何促销" : resultText;
     },
-    // 分包裹发货
-    groupShip () {
-      this.groupShipModal = true;
-      this.getLogisticsList();
+    gotoHomes () {
+      return false
     },
-    // 分页获取物流公司
-    getLogisticsList () {
+    getOrderItemId(item) {
+      return item && (item.id || item.orderItemId || item.sn);
+    },
+    getLogisticsId(item) {
+      return item && (item.logisticsId || item.id);
+    },
+    getLogisticsName(item) {
+      return item && (item.logisticsName || item.name || item.logisticsCompany || item.logisticsId || item.id);
+    },
+    parseOrderItemSpecs(specs) {
+      if (!specs) return {};
+      try {
+        return JSON.parse(specs);
+      } catch (e) {
+        return {};
+      }
+    },
+    getShippedPackageNum(item) {
+      if (item != null && item.deliverNumber != null && item.deliverNumber !== "") {
+        const direct = Number(item.deliverNumber);
+        if (Number.isFinite(direct)) return direct;
+      }
+      const orderItemId = this.getOrderItemId(item);
+      if (!orderItemId || !this.orderPackages.length) return 0;
+      let total = 0;
+      this.orderPackages.forEach((pkg) => {
+        (pkg.orderPackageItemList || []).forEach((pkgItem) => {
+          if (this.isPackageItemMatch(item, pkgItem)) {
+            total += Number(pkgItem.deliverNumber ?? pkgItem.num ?? 0);
+          }
+        });
+      });
+      return total;
+    },
+    isPackageItemMatch(orderItem, pkgItem) {
+      const orderKeys = [
+        this.getOrderItemId(orderItem),
+        orderItem?.sn,
+        orderItem?.id,
+        orderItem?.orderItemId,
+      ]
+        .filter(Boolean)
+        .map(String);
+      const pkgKeys = [
+        pkgItem.orderItemSn,
+        pkgItem.orderItemId,
+        pkgItem.orderItemsId,
+        pkgItem.id,
+        pkgItem.sn,
+      ]
+        .filter(Boolean)
+        .map(String);
+      return pkgKeys.some((key) => orderKeys.includes(key));
+    },
+    getRemainingDeliveryNum(item) {
+      const total = Number(item && item.num) || 0;
+      return Math.max(total - this.getShippedPackageNum(item), 0);
+    },
+    getPartDeliverySubtotal(row) {
+      const id = this.getOrderItemId(row);
+      const qty = Number(this.partDeliveryForm.deliveryNumMap[id]) || 0;
+      const unitPrice = Number(row.unitPrice) || 0;
+      return unitPrice * qty;
+    },
+    initPartDeliveryNumMap() {
+      const map = {};
+      this.deliverableOrderItems.forEach((item) => {
+        const id = this.getOrderItemId(item);
+        if (id) {
+          map[id] = this.getRemainingDeliveryNum(item);
+        }
+      });
+      this.partDeliveryForm.deliveryNumMap = map;
+    },
+    refreshPartDeliveryAfterSubmit() {
+      this.partDeliveryModal = false;
+      this.loading = true;
+      return Promise.all([
+        API_Order.getOrderDetail(this.sn).then((res) => {
+          if (res.success) {
+            this.orderInfo = res.result;
+            this.allowOperation = res.result.allowOperationVO;
+            this.data = res.result.orderItems;
+            this.typeList = res.result.order.priceDetailDTO.discountPriceDetail
+              ? JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail))
+              : [];
+            this.getContentPrice();
+            this.getOrderPrice();
+          }
+        }),
+        this.getOrderPackages(),
+      ]).finally(() => {
+        this.loading = false;
+        this.partDeliveryForm.logisticsNo = "";
+        this.partDeliveryForm.logisticsId = "";
+        this.partDeliveryForm.selectedOrderItemIds = [];
+        this.initPartDeliveryNumMap();
+        this.$nextTick(() => {
+          this.$refs.partDeliveryTable?.clearSelection();
+          this.$refs.partDeliveryForm?.clearValidate();
+        });
+      });
+    },
+    handlePartDeliveryNumChange(row, value) {
+      const id = this.getOrderItemId(row);
+      if (!id) return;
+      const num = Number(value);
+      if (!Number.isFinite(num) || num < 1) return;
+      if (!this.partDeliveryForm.selectedOrderItemIds.includes(id)) {
+        this.partDeliveryForm.selectedOrderItemIds = [
+          ...this.partDeliveryForm.selectedOrderItemIds,
+          id,
+        ];
+        this.$nextTick(() => {
+          this.$refs.partDeliveryTable?.toggleRowSelection(row, true);
+        });
+      }
+    },
+    isPartDeliveryRowSelectable(row) {
+      return this.getRemainingDeliveryNum(row) > 0;
+    },
+    handlePartDeliverySelectionChange(selection) {
+      const selectedIds = [];
+      selection.forEach((item) => {
+        const id = this.getOrderItemId(item);
+        if (!id) return;
+        selectedIds.push(id);
+        if (this.partDeliveryForm.deliveryNumMap[id] == null) {
+          this.partDeliveryForm.deliveryNumMap[id] = this.getRemainingDeliveryNum(item);
+        }
+      });
+      this.partDeliveryForm.selectedOrderItemIds = selectedIds;
+    },
+    isPartDeliveryItemSelected(item) {
+      const id = this.getOrderItemId(item);
+      return !!id && this.partDeliveryForm.selectedOrderItemIds.includes(id);
+    },
+    buildPartDeliveryDTOList() {
+      return this.partDeliveryForm.selectedOrderItemIds
+        .map((orderItemId) => ({
+          orderItemId,
+          deliveryNum: Number(this.partDeliveryForm.deliveryNumMap[orderItemId]),
+        }))
+        .filter((item) => item.orderItemId && item.deliveryNum > 0);
+    },
+    resetPartDeliveryForm() {
+      this.partDeliveryForm = {
+        logisticsNo: "",
+        logisticsId: "",
+        selectedOrderItemIds: [],
+        deliveryNumMap: {},
+      };
+      this.$nextTick(() => {
+        if (this.$refs.partDeliveryForm) {
+          this.$refs.partDeliveryForm.clearValidate();
+        }
+        if (this.$refs.partDeliveryTable) {
+          this.$refs.partDeliveryTable.clearSelection();
+        }
+      });
+    },
+    openPartDelivery() {
+      this.resetPartDeliveryForm();
+      this.partDeliveryModal = true;
+      this.getCheckedLogistics();
+      this.getOrderPackages();
+    },
+    getCheckedLogistics() {
       API_Order.getLogisticsChecked().then((res) => {
         if (res.success) {
-          this.checkedLogistics = res.result;
+          this.checkedLogistics = Array.isArray(res.result) ? res.result : [];
         }
       });
     },
-    changeNum(number, index) {
-      const current = this.data[index]
-      if (this.selectGroupShipGoods.length) {
-        this.selectGroupShipGoods.forEach(item => {
-          if (item.skuId === current.skuId) {
-            item.canNum = number
-          }
+    getOrderPackages() {
+      return API_Order.getPackage(this.sn).then((res) => {
+        if (res.success) {
+          this.orderPackages = Array.isArray(res.result) ? res.result : [];
+        }
+        this.initPartDeliveryNumMap();
+      });
+    },
+    submitPartDelivery() {
+      this.$refs.partDeliveryForm.validate((valid) => {
+        if (!valid) return;
+        const partDeliveryDTOList = this.buildPartDeliveryDTOList();
+        if (!partDeliveryDTOList.length) {
+          this.$Message.error("请选择本次发货商品并填写发货数量");
+          return;
+        }
+        this.partDeliverySubmitting = true;
+        API_Order.partDelivery(this.sn, {
+          orderSn: this.sn,
+          logisticsNo: this.partDeliveryForm.logisticsNo,
+          logisticsId: this.partDeliveryForm.logisticsId,
+          partDeliveryDTOList,
         })
-      }
-    },
-    // 分包裹发货
-    confirmShipGroupGoods () {
-      this.$refs.groupOrderDeliveryForm.validate(async (valid) => {
-        if (valid) {
-          if (this.selectGroupShipGoods.length) {
-            let submit = {
-              ...this.groupOrderDeliveryForm,
-              orderSn: this.sn,
-              partDeliveryDTOList: this.selectGroupShipGoods.map((item) => {
-                return {
-                  orderItemId: item.id,
-                  deliveryNum: item.canNum ? item.canNum : item.num,
-                };
-              }),
-            };
-            const res = await API_Order.partDelivery(this.sn, submit);
+          .then((res) => {
             if (res.success) {
-              this.$Message.success("发货成功!");
-              this.shipLoading = false;
-              this.getDataDetail();
-              this.getOrderPackage();
-              this.groupShipModal = false;
-              this.groupOrderDeliveryForm = []
-            } else {
-              this.shipLoading = false;
-              this.groupShipModal = true;
+              this.$Message.success("发货成功");
+              this.refreshPartDeliveryAfterSubmit();
             }
-          } else {
-            this.shipLoading = false;
-            this.groupShipModal = true;
-            this.$Message.error("请选择要发货的商品");
-          }
-        } else {
-          this.shipLoading = false;
-        }
+          })
+          .finally(() => {
+            this.partDeliverySubmitting = false;
+          });
       });
     },
 
-    // 回调地址信息
-    getAddress(val){
-      if(val.type === 'select'){
-          const paths = val.data.map(item => item.name).join(',')
-          const ids = val.data.map(item => item.id).join(',')
-          this.$set(this.addressForm, 'consigneeAddressPath', paths)
-          this.$set(this.addressForm, 'consigneeAddressIdPath', ids)
-      }
-      else{
-          this.$set(this.addressForm, 'consigneeAddressPath', val.data.addr)
-          this.$set(this.addressForm, 'consigneeAddressIdPath', val.data.addrId)
-      }
+    // 获取订单详情
+    getDataDetail () {
+      this.loading = true;
+      API_Order.getOrderDetail(this.sn).then((res) => {
+        this.loading = false;
+        if (res.success) {
+          this.orderInfo = res.result;
+          this.allowOperation = res.result.allowOperationVO;
+          this.data = res.result.orderItems || [];
+          const discountDetail = res.result.order.priceDetailDTO?.discountPriceDetail;
+          this.typeList = discountDetail
+            ? JSON.parse(JSON.stringify(discountDetail))
+            : [];
+          this.getContentPrice();
+          this.getOrderPrice();
+        }
+      });
     },
-
-    //弹出订单核销框
-    orderTake () {
-      this.orderTakeForm.qrCode = this.orderInfo.order.verificationCode;
-      this.orderTakeModal = true;
+    modifyPrice () {
+      this.modifyPriceForm.orderPrice = this.orderInfo.order.flowPrice;
+      this.modal = true;
     },
-    //打印发货单
-    printOrder () {
-      this.printModal = true;
-    },
-    printHiddenInfo () {
-      this.printHiddenFlag = !this.printHiddenFlag;
-    },
-    printCancel () {
-      // this.printHiddenFlag = false;
-    },
-    //订单核销提交
-    orderTakeSubmit () {
-      this.$refs.orderTakeForm.validate((valid) => {
+    modifyPriceSubmit () {
+      this.$refs.modifyPriceForm.validate((valid) => {
         if (valid) {
-          API_Order.orderTake(this.sn, this.orderTakeForm.qrCode).then(
-            (res) => {
+          API_Order.modifyOrderPrice(this.sn, this.modifyPriceForm).then((res) => {
+            if (res.success) {
+              this.$Message.success("修改订单金额成功");
+              this.modal = false;
+              this.getDataDetail();
+            }
+          });
+        }
+      });
+    },
+    modifyRemark () {
+      this.modifyRemarkForm.sellerRemark = this.orderInfo.order.sellerRemark || "";
+      this.sellerRemarkModal = true;
+    },
+    modifyRemarkSubmit () {
+      this.$refs.modifyRemarkForm.validate((valid) => {
+        if (valid) {
+          API_Order.modifyOrderRemark(this.sn, this.modifyRemarkForm).then((res) => {
+            if (res.success) {
+              this.$Message.success("编辑订单备注成功");
+              this.sellerRemarkModal = false;
+              this.getDataDetail();
+            }
+          });
+        }
+      });
+    },
+    checkLogistics () {
+      this.logisticsModal = true;
+      if (this.orderPackages.length > 0) {
+        this.logisticsList();
+      } else {
+        this.logistics();
+      }
+    },
+    logisticsList () {
+      API_Order.getPackage(this.sn).then((res) => {
+        if (res.success && res.result != null) {
+          this.packageTraceList = res.result;
+        }
+      });
+    },
+    logistics () {
+      API_Order.getTraces(this.sn).then((res) => {
+        if (res.success && res.result != null) {
+          this.logisticsInfo = res.result;
+        }
+      });
+    },
+    toPrint () {
+      this.facesheetFlag = true;
+      API_Logistics.getCheckedOn().then((res) => {
+        if (res.success) {
+          this.checkedLogistics = res.result;
+          this.orderDeliverModal = true;
+        }
+      });
+    },
+    sfPrint () {
+      API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then((res) => {
+        if (res.success) {
+          const headers = {
+            "X-Auth-token": res.result.token,
+          };
+          API_Logistics.getShunFengFaceSheet(res.result.url, headers).then((sheetRes) => {
+            const blob = new Blob([sheetRes], {
+              type: "application/pdf;charset=utf-8",
+            });
+            if ("download" in document.createElement("a")) {
+              const link = document.createElement("a");
+              link.download = `${this.orderInfo.order.sn}.pdf`;
+              link.style.display = "none";
+              link.href = URL.createObjectURL(blob);
+              document.body.appendChild(link);
+              link.click();
+              URL.revokeObjectURL(link.href);
+              document.body.removeChild(link);
+            } else {
+              navigator.msSaveBlob(blob, `${this.orderInfo.order.sn}.pdf`);
+            }
+          });
+        }
+      });
+    },
+    toPrints (printWindow) {
+      this.orderDeliverModal = false;
+      if (!this.someJSONdata) {
+        printWindow && printWindow.close();
+        return;
+      }
+      const win = printWindow || window.open("", "_blank");
+      if (!win) {
+        this.$Message.error("无法打开打印窗口，请允许浏览器弹窗");
+        return;
+      }
+      win.document.write(this.someJSONdata);
+      win.document.close();
+      win.focus();
+      this.$Message.success("电子面单发货成功");
+      this.getDataDetail();
+    },
+    orderDeliverySubmit () {
+      if (this.facesheetFlag) {
+        this.$refs.faceSheetForm.validate((valid) => {
+          if (valid) {
+            const printWindow = window.open("", "_blank");
+            API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then((res) => {
+              if (res.success && res.result.printTemplate) {
+                this.someJSONdata = res.result.printTemplate;
+                this.toPrints(printWindow);
+              } else {
+                printWindow && printWindow.close();
+                this.$Message.error("电子面单发货失败！");
+              }
+            }).catch(() => {
+              printWindow && printWindow.close();
+              this.$Message.error("电子面单发货失败！");
+            });
+          }
+        });
+      } else {
+        this.$refs.orderDeliveryForm.validate((valid) => {
+          if (valid) {
+            API_Order.orderDelivery(this.sn, this.orderDeliveryForm).then((res) => {
               if (res.success) {
-                this.$Message.success("订单核销成功");
-                this.orderTakeModal = false;
+                this.$Message.success("订单发货成功");
+                this.orderDeliverModal = false;
                 this.getDataDetail();
               }
-            }
-          );
+            });
+          }
+        });
+      }
+    },
+    getLogisticsSetting () {
+      API_Logistics.getLogisticsSetting().then((res) => {
+        if (res.success) {
+          this.logisticsType = res.result;
         }
       });
     },
@@ -982,301 +1251,120 @@ export default {
           }
         }
       }
-
       if (this.typeList.length >= 3) {
-
-        this.getContentPrice()
+        this.getContentPrice();
       }
     },
-    //获取订单详细信息
-    getDataDetail () {
-      this.loading = true;
-      API_Order.getOrderDetail(this.sn).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.orderInfo = res.result;
-          this.allowOperation = res.result.allowOperationVO;
-          if (res.result.orderItems.length) {
-            this.data = res.result.orderItems.map((item) => {
-              return {
-                ...item,
-                ___num: item.num,
-                _disabled: item.deliverNumber >= item.num,
-                canNum: item.num - item.deliverNumber
-              };
-            });
-          }
-          this.orderLogData = res.result.orderLogs;
-          this.typeList = JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail));
-          this.getContentPrice()
-          this.getOrderPrice()
-        }
-      });
-    },
-    toPrint () {
-      this.facesheetFlag = true;
-      API_Logistics.getCheckedOn().then(res => {
-        if (res.success) {
-          this.checkedLogistics = res.result;
-          this.orderDeliverModal = true;
-        }
-      });
-    },
-    // 修改订单金额
-    modifyPrice () {
-      //默认要修改的金额为订单总金额
-      this.modifyPriceForm.orderPrice = this.orderInfo.order.flowPrice;
-      this.modal = true;
-    },
-    //修改订单金额提交
-    modifyPriceSubmit () {
-      this.$refs.modifyPriceForm.validate((valid) => {
-        if (valid) {
-          API_Order.modifyOrderPrice(this.sn, this.modifyPriceForm).then(
-            (res) => {
-              if (res.success) {
-                this.$Message.success("修改订单金额成功");
-                this.modal = false;
-                this.getDataDetail();
-              }
-            }
-          );
-        }
-      });
-    },
-    modifyRemark () {
-      this.modifyRemarkForm.sellerRemark = this.orderInfo.order.sellerRemark;
-      this.sellerRemarkModal = true;
-    },
-    //修改订单备注提交
-    modifyRemarkSubmit () {
-      this.$refs.modifyRemarkForm.validate((valid) => {
-        if (valid) {
-          API_Order.modifyOrderRemark(this.sn, this.modifyRemarkForm).then(
-            (res) => {
-              if (res.success) {
-                this.$Message.success("编辑订单备注成功");
-                this.sellerRemarkModal = false;
-                this.getDataDetail();
-              }
-            }
-          );
-        }
-      });
-    },
-    getOrderPackage() {
-      API_Order.getPackage(this.sn).then(res => {
-        if (res.success) {
-          this.orderPackage = res.result;
-          console.log('this.orderPackage',this.orderPackage);
-        }
-      })
-    },
-    //查询物流
-    checkLogistics () {
-      this.logisticsModal = true;
-      if (this.orderPackage.length > 0) {
-        this.logisticsList();
+    selectedRegion (val) {
+      if (val.type === "select") {
+        const paths = val.data.map((item) => item.name).join(",");
+        const ids = val.data.map((item) => item.id).join(",");
+        this.addr = paths;
+        this.regionId = ids;
+        this.addressForm.consigneeAddressPath = paths;
+        this.addressForm.consigneeAddressIdPath = ids;
       } else {
-        this.logistics();
+        this.addr = val.data.addr;
+        this.regionId = val.data.addrId;
+        this.addressForm.consigneeAddressPath = val.data.addr;
+        this.addressForm.consigneeAddressIdPath = val.data.addrId;
       }
     },
-    logisticsList () {
-      this.logisticsModal = true;
-      API_Order.getPackage(this.sn).then((res) => {
-        if (res.success && res.result != null) {
-          this.packageTraceList = res.result;
-        }
+    //订单日志
+    orderLog () {
+      this.orderLogModal = true;
+    },
+    //订单日志取消
+    handelCancel () {
+      this.orderLogModal = false;
+    },
+    orderTake() {
+      this.orderTakeForm.qrCode = this.orderInfo.order.verificationCode || "";
+      this.orderTakeModal = true;
+      this.$nextTick(() => {
+        this.$refs.orderTakeForm?.clearValidate();
       });
     },
-    logistics () {
-      this.logisticsModal = true;
-      API_Order.getTraces(this.sn).then((res) => {
-        if (res.success && res.result != null) {
-          this.logisticsInfo = res.result;
-        }
-      });
-    },
-    //订单发货
-    orderDeliver () {
-      this.facesheetFlag = false
-      if (this.logisticsType == 'SHUNFENG') {
-        this.$Modal.confirm({
-          title: "确认发货",
-          content: "您确认使用顺丰发货 " + this.sn + " 订单?",
-          loading: true,
-          onOk: () => {
-            API_Order.orderShunFengDelivery(this.sn).then((res) => {
-              if (res.success) {
-                this.$Modal.remove();
-                this.$Message.success("订单发货成功");
-                this.getDataDetail()
-              }
-            })
-          }
-        })
-      } else {
-        API_Order.getLogisticsChecked().then((res) => {
+    orderTakeSubmit() {
+      this.$refs.orderTakeForm.validate((valid) => {
+        if (!valid) return;
+        API_Order.orderTake(this.sn, this.orderTakeForm.qrCode).then((res) => {
           if (res.success) {
-            this.checkedLogistics = res.result;
-            this.orderDeliverModal = true;
+            this.$Message.success("订单核销成功");
+            this.orderTakeModal = false;
+            this.getDataDetail();
           }
         });
-      }
+      });
     },
-    //顺丰打印面单
-    sfPrint () {
-      API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
-        if (res.success) {
-          let headers = {
-            'X-Auth-token': res.result.token
-          }
-          API_Logistics.getShunFengFaceSheet(res.result.url, headers).then(res => {
-            const blob = new Blob([res], {
-              type: "application/pdf;charset=utf-8",
-            });
-
-            //对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
-            //IE10以上支持blob但是依然不支持download
-            if ("download" in document.createElement("a")) {
-              //支持a标签download的浏览器
-              const link = document.createElement("a"); //创建a标签
-              link.download = this.orderInfo.order.sn + ".pdf"; //a标签添加属性
-              link.style.display = "none";
-              link.href = URL.createObjectURL(blob);
-              document.body.appendChild(link);
-              link.click(); //执行下载
-              URL.revokeObjectURL(link.href); //释放url
-              document.body.removeChild(link); //释放标签
-            } else {
-              navigator.msSaveBlob(blob, fileName);
-            }
-          })
-        }
-      })
+    //打印发货单
+    printOrder () {
+      this.printModal = true;
     },
-    toPrints (printWindow) {
-      this.orderDeliverModal = false;
-      if (!this.someJSONdata) {
-        printWindow && printWindow.close();
-        return;
-      }
-      const win = printWindow || window.open('', '_blank');
-      if (!win) {
-        this.$Message.error('无法打开打印窗口，请允许浏览器弹窗');
-        return;
-      }
-      win.document.write(this.someJSONdata);
-      win.document.close();
-      win.focus();
-      this.$Message.success('电子面单发货成功');
-      this.getDataDetail();
+    printHiddenInfo () {
+      this.printHiddenFlag = !this.printHiddenFlag;
     },
-    //订单发货提交
-    orderDeliverySubmit () {
-      if (this.facesheetFlag) {
-        this.$refs['faceSheetForm'].validate((valid) => {
-          if (valid) {
-            const printWindow = window.open('', '_blank');
-            API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then(res => {
-              if (res.success && res.result.printTemplate) {
-                this.someJSONdata = res.result.printTemplate;
-                this.toPrints(printWindow);
-              } else {
-                printWindow && printWindow.close();
-                this.$Message.error('电子面单发货失败！');
-              }
-            }).catch(() => {
-              printWindow && printWindow.close();
-              this.$Message.error('电子面单发货失败！');
-            });
-          }
-        })
-      } else {
-        console.log("this.orderDeliveryForm",this.orderDeliveryForm)
-        this.$refs['orderDeliveryForm'].validate((valid) => {
-          if (valid) {
-            API_Order.orderDelivery(this.sn, this.orderDeliveryForm).then(
-              (res) => {
-                if (res.success) {
-                  this.$Message.success("订单发货成功");
-                  this.orderDeliverModal = false;
-                  this.getDataDetail();
-                }
-              }
-            );
-          }
-        });
-      }
+    printCancel () {
+      // this.printHiddenFlag = false;
+    },
+    handlePrintInvoice() {
+      printElement("printInfo", "发货单");
     },
     //弹出修改收货地址框
     editAddress () {
       this.addressModal = true;
+      this.addr = this.orderInfo.order.consigneeAddressPath;
+      this.regionId = this.orderInfo.order.consigneeAddressIdPath;
       this.addressForm.consigneeName = this.orderInfo.order.consigneeName;
       this.addressForm.consigneeMobile = this.orderInfo.order.consigneeMobile;
       this.addressForm.consigneeDetail = this.orderInfo.order.consigneeDetail;
-      this.addressForm.consigneeAddressPath =
-        this.orderInfo.order.consigneeAddressPath;
-      this.addressForm.consigneeAddressIdPath =
-        this.orderInfo.order.consigneeAddressIdPath;
+      this.addressForm.consigneeAddressPath = this.orderInfo.order.consigneeAddressPath;
+      this.addressForm.consigneeAddressIdPath = this.orderInfo.order.consigneeAddressIdPath;
     },
     //修改收货地址
     editAddressSubmit () {
+      if (this.regionId == "") {
+        this.$Message.error("请选择地址");
+        return;
+      }
+      this.addressForm.consigneeAddressPath = this.addr;
+      this.addressForm.consigneeAddressIdPath = this.regionId;
       this.$refs.addressForm.validate((valid) => {
         if (valid) {
-          API_Order.editOrderConsignee(this.sn, this.addressForm).then(
-            (res) => {
-              if (res.success) {
-                this.$Message.success("收货地址修改成功");
-                this.addressModal = false;
-                this.getDataDetail();
-              }
+          API_Order.editOrderConsignee(this.sn, this.addressForm).then((res) => {
+            if (res.success) {
+              this.$Message.success("收货地址修改成功");
+              this.addressModal = false;
+              this.getDataDetail();
             }
-          );
+          });
         }
       });
     },
-
-    getLogisticsSetting () {
-      API_Logistics.getLogisticsSetting().then(res => {
-        if (res.success) {
-          this.logisticsType = res.result;
-        }
-      })
-    },
-
   },
   mounted () {
     this.sn = this.$route.query.sn;
     this.getDataDetail();
     this.getLogisticsSetting();
-    this.getOrderPackage();
+    this.getOrderPackages();
   },
-  // 如果是从详情页返回列表页，修改列表页keepAlive为true，确保不刷新页面
   beforeRouteLeave (to, from, next) {
-    if (to.name === 'orderList' || to.name === 'virtualOrderList') {
-      to.meta.keepAlive = true
+    if (to.name === "orderList" || to.name === "virtualOrderList") {
+      to.meta.keepAlive = true;
     }
-    next()
-  }
+    next();
+  },
 };
 </script>
-<style lang="scss" scoped>
-// 建议引入通用样式 可删除下面样式代码
-// @import "@/styles/table-common.scss";
+<style lang="scss">
 .lineH30 {
   line-height: 30px;
 }
 
 .order-log-div {
   line-height: 30px;
-  height: 500px;
+  max-height: 500px;
   overflow-y: scroll;
-}
-
-dl dt {
-  width: 100px;
-  text-align: right;
 }
 
 .div-express-log {
@@ -1288,7 +1376,6 @@ dl dt {
 }
 
 .express-log {
-  /*margin: 5px -10px 5px 5px;*/
   padding: 10px;
   list-style-type: none;
 
@@ -1309,12 +1396,11 @@ dl dt {
   }
 }
 
-.express-log-name {
-  li {
+.express-log-name li {
+  display: flex;
+
+  span {
     display: flex;
-    span  {
-      display: flex;
-    }
   }
 }
 
@@ -1348,9 +1434,107 @@ dl dt {
   }
 }
 
+.delivery-empty {
+  color: #999;
+}
+
+.part-delivery-goods-item :deep(.el-form-item__content) {
+  line-height: normal;
+}
+
+.part-delivery-table-wrap {
+  width: 100%;
+  min-height: 360px;
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+
+  :deep(.el-table__cell) {
+    padding: 18px 0;
+  }
+
+  :deep(.el-table__header .el-table__cell) {
+    padding: 14px 0;
+    font-size: 14px;
+  }
+
+  :deep(.el-table__body .el-table__cell) {
+    font-size: 14px;
+  }
+}
+
+.part-delivery-goods {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+  min-height: 88px;
+}
+
+.part-delivery-goods-img {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.part-delivery-goods-info {
+  margin-left: 16px;
+  min-width: 0;
+}
+
+.part-delivery-goods-name {
+  line-height: 1.5;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.part-delivery-goods-spec {
+  font-size: 13px;
+  color: #999;
+  line-height: 1.6;
+}
+
+.part-delivery-num-input {
+  width: 130px;
+}
+
+.package-list {
+  margin-top: 12px;
+}
+
+.package-title {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.flex-card {
+  display: flex;
+  height: 600px;
+}
+
+.card-item {
+  margin: 5px 0;
+}
+
+.flex-card-left {
+  flex: 4;
+  //background: #f8f8f8;
+}
+
+.flex-card-right {
+  flex: 6;
+}
 
 .search {
+  .operation {
+    margin-bottom: 2vh;
+  }
 
+  .select-clear {
+    margin-left: 10px;
+  }
 
   .div-item {
     line-height: 35px;
@@ -1366,6 +1550,15 @@ dl dt {
     }
   }
 
+  .div-status-right {
+    margin-top: 20px;
+    margin-left: 30px;
+    font-size: 20px;
+  }
+
+  .page {
+    margin-top: 2vh;
+  }
 
   button {
     margin-left: 5px;
@@ -1381,7 +1574,10 @@ dl dt {
       display: block;
       float: right;
       list-style-type: none;
-      line-height: 25px;
+
+      li {
+        text-align: -webkit-match-parent;
+      }
     }
 
     .label {
@@ -1393,21 +1589,17 @@ dl dt {
 
     .txt {
       float: left;
-      width: 130px;
       font-size: 14px;
+      width: 130px;
       text-align: right;
       font-family: verdana;
     }
 
     .flowPrice {
-      color: $theme_color;
+      color: #cc0000;
       font-size: 22px;
     }
   }
-}
-
-.theme_color {
-  color: $theme_color;
 }
 
 .f14 {
