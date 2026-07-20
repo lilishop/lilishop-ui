@@ -114,3 +114,39 @@ export const getDistributionRankDistributor = (params) => {
 export const getDistributionRankGoods = (params) => {
   return getRequest("/statistics/distribution/rank/goods", params);
 };
+
+/** 店铺业绩报表 */
+export const getStorePerformanceReport = (params) => {
+  return getRequest("/statistics/report/store-performance", params);
+};
+
+export const exportStorePerformanceReport = (params) => {
+  return getRequest("/statistics/report/store-performance/export", params, "blob");
+};
+
+/** 商品同比环比报表 */
+export const getGoodsComparisonReport = (params) => {
+  return getRequest("/statistics/report/goods-comparison", params);
+};
+
+export const exportGoodsComparisonReport = (params) => {
+  return getRequest("/statistics/report/goods-comparison/export", params, "blob");
+};
+
+/** 销售订单明细报表 */
+export const getSalesOrderDetailReport = (params) => {
+  return getRequest("/statistics/report/sales-order-detail", params);
+};
+
+export const exportSalesOrderDetailReport = (params) => {
+  return getRequest("/statistics/report/sales-order-detail/export", params, "blob");
+};
+
+/** 商品销售汇总报表 */
+export const getGoodsSalesSummaryReport = (params) => {
+  return getRequest("/statistics/report/goods-sales-summary", params);
+};
+
+export const exportGoodsSalesSummaryReport = (params) => {
+  return getRequest("/statistics/report/goods-sales-summary/export", params, "blob");
+};

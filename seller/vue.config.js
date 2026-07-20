@@ -7,6 +7,7 @@ const resolve = (dir) => path.join(__dirname, dir);
 const enableProduction = process.env.NODE_ENV === "production";
 
 module.exports = {
+  publicPath: process.env.VUE_APP_PUBLIC_PATH || "/",
   outputDir: "dist",
   assetsDir: "static",
   css: {

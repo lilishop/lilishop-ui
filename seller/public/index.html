@@ -71,8 +71,8 @@
     <% for(var js of htmlWebpackPlugin.options.cdn.js) { %>
     <script src="<%=js%>"></script>
     <% } %>
-    <script src="/config.js"></script>
-    <script src="/tinymce/tinymce.min.js"></script>
+    <script src="<%= BASE_URL %>config.js"></script>
+    <script src="<%= BASE_URL %>tinymce/tinymce.min.js"></script>
     <noscript>
       <strong
         >We're sorry  doesn't work properly without JavaScript

@@ -426,6 +426,34 @@ export const otherRouter = {
       title: "钱包流水",
       name: "finance-wallet-log",
       component: () => import("@/views/finance/walletLog.vue")
+    },
+    {
+      path: "statistics/store-performance",
+      title: "店铺业绩报表",
+      name: "storePerformanceReport",
+      meta: { title: "店铺业绩报表" },
+      component: () => import("@/views/statistics/store-performance.vue")
+    },
+    {
+      path: "statistics/goods-comparison",
+      title: "商品同比环比报表",
+      name: "goodsComparisonReport",
+      meta: { title: "商品同比环比报表" },
+      component: () => import("@/views/statistics/goods-comparison.vue")
+    },
+    {
+      path: "statistics/sales-order-detail",
+      title: "销售订单明细报表",
+      name: "salesOrderDetailReport",
+      meta: { title: "销售订单明细报表" },
+      component: () => import("@/views/statistics/sales-order-detail.vue")
+    },
+    {
+      path: "statistics/goods-sales-summary",
+      title: "商品销售汇总报表",
+      name: "goodsSalesSummaryReport",
+      meta: { title: "商品销售汇总报表" },
+      component: () => import("@/views/statistics/goods-sales-summary.vue")
     }
   ]
 };
