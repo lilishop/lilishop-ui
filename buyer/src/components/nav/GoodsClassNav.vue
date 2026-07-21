@@ -121,7 +121,7 @@
             >
               <el-checkbox
                 class="item"
-                :label="item"
+                :value="item"
                 v-for="(item, index) in tag.values"
                 :key="index"
                 >{{ item }}</el-checkbox

@@ -11,6 +11,7 @@
 
     <el-alert class="l_title" show-icon type="warning">我的申诉信息</el-alert>
     <table cellspacing="0" cellpadding='0' border="1">
+      <tbody>
       <tr>
         <td>投诉商品</td>
         <td class="hover-color" @click="linkTo(`/goodsDetail?goodsId=${detail.goodsId}&skuId=${detail.skuId}`)"><img :src="detail.goodsImage" width="60" alt=""> &nbsp;{{ detail.goodsName }}</td>
@@ -39,10 +40,12 @@
           </div>
         </td>
       </tr>
+      </tbody>
     </table>
 
     <el-alert class="l_title" show-icon type="warning">商家申诉信息</el-alert>
     <table cellspacing="0" cellpadding='0' border="1">
+      <tbody>
       <tr>
         <td>申诉时间</td>
         <td>{{ detail.appealTime || '暂无' }}</td>
@@ -68,14 +71,17 @@
           </div>
         </td>
       </tr>
+      </tbody>
     </table>
 
     <el-alert class="l_title" show-icon type="warning">平台仲裁</el-alert>
     <table cellspacing="0" cellpadding='0' border="1">
+      <tbody>
       <tr>
         <td>仲裁意见</td>
         <td>{{ detail.arbitrationResult || '暂无' }}</td>
       </tr>
+      </tbody>
     </table>
 
     <el-alert class="l_title" show-icon type="warning">对话详情</el-alert>
@@ -98,6 +104,7 @@
     </div>
     <div v-else>暂无对话</div>
     <table cellspacing="0" cellpadding='0' border="1" v-if="detail.complainStatus!='COMPLETE'">
+      <tbody>
       <tr>
         <td>回复：</td>
         <td><label>
@@ -113,6 +120,7 @@
           </el-button>
         </td>
       </tr>
+      </tbody>
     </table>
 
     <el-dialog title="View Image" v-model="visible">

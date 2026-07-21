@@ -81,6 +81,16 @@
             <span v-if="row">{{ storeDisableText(row.storeDisable) }}</span>
           </template>
         </el-table-column>
+        <el-table-column prop="goodsNum" label="上架商品数" width="110" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.goodsNum ?? 0 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="orderNum" label="订单总数" width="100" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.orderNum ?? 0 }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="170" align="left" />
         <el-table-column label="操作" width="220" align="center" fixed="right">
           <template #default="{ row }">

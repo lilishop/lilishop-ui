@@ -42,6 +42,7 @@
     <div class="order-card">
       <h3 class="mb_10">服务单信息</h3>
       <table border="1" cellpadding='0' cellspacing="0">
+        <tbody>
         <tr>
           <td>退款方式</td><td>{{afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}</td>
         </tr>
@@ -71,6 +72,7 @@
         <tr>
           <td>问题描述</td><td>{{afterSale.problemDesc}}</td>
         </tr>
+        </tbody>
       </table>
     </div>
     <div class="order-card" v-if="afterSale.afterSaleImage">

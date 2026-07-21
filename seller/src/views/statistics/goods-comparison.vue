@@ -5,8 +5,8 @@
         <div class="filter-row">
           <el-form-item label="时间类型">
             <el-radio-group v-model="dateType" @change="onDateTypeChange">
-              <el-radio label="DAY">日</el-radio>
-              <el-radio label="PERIOD">指定周期</el-radio>
+              <el-radio value="DAY">日</el-radio>
+              <el-radio value="PERIOD">指定周期</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item v-if="dateType === 'DAY'" label="日期">
