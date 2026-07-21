@@ -156,10 +156,15 @@
     <el-dialog v-model="checkUserList" width="1200px" title="选择会员" destroy-on-close>
       <userList
         v-if="checkUserList"
-        @callback="callbackSelectUser"
-        :selectedList="selectedMember"
         ref="memberLayout"
+        :selectedMember="true"
+        :checkboxSelect="true"
+        :selectedList="memberSelectSnapshot"
       />
+      <template #footer>
+        <el-button @click="cancelMemberSelect">取消</el-button>
+        <el-button type="primary" @click="confirmMemberSelect">确定</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -185,6 +190,7 @@ export default {
       showCouponSelect: false,
       tempCouponList: [],
       checkUserList: false,
+      memberSelectSnapshot: [],
       selectedMember: [],
       form: {
         promotionName: "",
@@ -237,20 +243,14 @@ export default {
       };
       return map[type] || "danger";
     },
-    callbackSelectUser(val) {
-      let findUser = this.selectedMember.find((item) => {
-        return item.id === val.id;
-      });
-      if (!findUser) {
-        this.selectedMember.push(val);
-      } else {
-        this.selectedMember.map((item, index) => {
-          if (item.id === findUser.id) {
-            this.selectedMember.splice(index, 1);
-          }
-        });
-      }
+    cancelMemberSelect() {
+      this.checkUserList = false;
+    },
+    confirmMemberSelect() {
+      const list = this.$refs.memberLayout?.getSelection?.() || [];
+      this.selectedMember = list;
       this.reSelectMember();
+      this.checkUserList = false;
     },
     delUser(index) {
       this.selectedMember.splice(index, 1);
@@ -293,10 +293,8 @@ export default {
       });
     },
     addVip() {
+      this.memberSelectSnapshot = JSON.parse(JSON.stringify(this.selectedMember));
       this.checkUserList = true;
-      this.$nextTick(() => {
-        this.$refs.memberLayout.selectedMember = true;
-      });
     },
     showSelector() {
       this.tempCouponList = [...this.selectCouponList];
