@@ -68,7 +68,13 @@
         row-key="id"
         @selection-change="onSelectionChange"
       >
-        <el-table-column v-if="!selectedMember" type="selection" width="60" align="center" />
+        <el-table-column
+          v-if="!selectedMember || checkboxSelect"
+          type="selection"
+          width="60"
+          align="center"
+          :reserve-selection="checkboxSelect"
+        />
         <el-table-column prop="id" label="会员ID" min-width="120" show-overflow-tooltip />
         <el-table-column label="头像" min-width="80" align="center">
           <template #default="{ row }">
@@ -109,10 +115,16 @@
             <priceColorScheme v-if="row" :value="row.memberWallet" :color="$mainColor" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column
+          v-if="!selectedMember || !checkboxSelect"
+          label="操作"
+          width="200"
+          align="center"
+          fixed="right"
+        >
           <template #default="{ row }">
             <div v-if="row" style="display: flex; justify-content: center; align-items: center">
-              <template v-if="selectedMember">
+              <template v-if="selectedMember && !checkboxSelect">
                 <a class="link-text" @click="callback(row)">
                   {{ row.___selected ? "已选择" : "选择" }}
                 </a>
@@ -320,6 +332,10 @@ export default {
       type: null,
       default: () => [],
     },
+    checkboxSelect: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -432,7 +448,27 @@ export default {
       if (name === "updatePoint") this.openMemberPoint(row);
     },
     onSelectionChange(selection) {
+      if (this.selectedMember && this.checkboxSelect) {
+        this.selectMember = selection || [];
+        return;
+      }
       this.selectedRows = selection || [];
+    },
+    getSelection() {
+      return this.selectMember || [];
+    },
+    syncTableSelection() {
+      if (!this.selectedMember || !this.checkboxSelect) {
+        return;
+      }
+      this.$nextTick(() => {
+        this.clearSelection();
+        this.data.forEach((row) => {
+          if (this.selectMember.some((member) => member.id === row.id)) {
+            this.$refs.table?.toggleRowSelection(row, true);
+          }
+        });
+      });
     },
     openSetMemberGroup() {
       this.memberGroupFlag = true;
@@ -569,6 +605,7 @@ export default {
           this.loading = false;
           this.init(res.result.records);
           this.total = res.result.total;
+          this.syncTableSelection();
         }
       });
     },

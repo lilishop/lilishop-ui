@@ -92,6 +92,7 @@ import { mobile, email } from '@/plugins/RegExp.js';
 
 export default {
   name: 'invoiceModal',
+  emits: ['change'],
   data () {
     return {
       invoice: 1, // 1 电子普通发票 2 增值税专用发票

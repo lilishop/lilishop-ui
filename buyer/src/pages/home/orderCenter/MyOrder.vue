@@ -55,7 +55,7 @@
                 <div>
                   <div class="hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
                   <div class="mt_10">
-                    <span class="global_color">{{ $filters.unitPrice(goods.goodsPrice, "￥") }} </span>x {{ goods.num }}
+                    <span class="global_color">{{ $filters.unitPrice(goods.goodsPrice, "￥") }} </span> x {{ goods.num }}
                     <span style="margin-left: 10px;color: #ff9900;">{{refundPriceList(goods.isRefund)}}</span>
                   </div>
                   <el-button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.sn, goodsIndex)" size="small" type="success" class="fontsize_12" style="position:relative;top:-22px;left:190px;margin-right:10px">评价</el-button>
