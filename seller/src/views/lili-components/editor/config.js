@@ -1,6 +1,6 @@
 import plugins from "./plugins";
 import toobar from "./toolbar";
-const localCDN = window.location.origin + "/tinymce"; //本地引入
+const localCDN = window.location.origin + process.env.BASE_URL + "tinymce"; //本地引入，兼容子路径部署（publicPath）
 export const initEditor = {
   base_url: localCDN,
   height: "400px",

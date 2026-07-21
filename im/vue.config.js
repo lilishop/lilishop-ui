@@ -12,7 +12,7 @@ function resolve(dir) {
 // vue.config.js
 const vueConfig = {
   // 公共路径(必须有的)
-  publicPath: '/',
+  publicPath: process.env.VUE_APP_PUBLIC_PATH || '/',
   // 输出文件目录
   outputDir: 'dist',
   // 静态资源存放的文件夹(相对于ouputDir)

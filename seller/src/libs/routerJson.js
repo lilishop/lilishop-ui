@@ -368,6 +368,15 @@ export const result = [{
           component: "statistics/traffic",
           children: null
         },
+        {
+          name: "dataReport",
+          level: 2,
+          type: 0,
+          title: "数据报表",
+          path: "dataReport",
+          component: "statistics/data-report",
+          children: null
+        },
       ]
     }]
   },
