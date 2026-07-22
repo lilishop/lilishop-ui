@@ -4,7 +4,7 @@
       <el-tabs v-model="activeName" @tab-click="handleClick" :stretch=true>
         <el-tab-pane label="最近浏览" name="goods">
           <dl v-if='list.length' class='base-list'>
-            <dd :key="index"  @click="linkToGoods(item.goodsId, item.id)" v-for="(item,index) in list" v-infinite-scroll="loadMore">
+            <dd :key="index"  @click="linkToGoods(item.goodsId, item.id)" v-for="(item,index) in list">
               <div class="base">
                 <div>
                   <img style="width: 60px; height: 60px;margin-left:20px;box-sizing: border-box;" :src="item.thumbnail"
@@ -21,7 +21,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="review"> <el-button  v-if="item.btnHide == 1 && toUser.storeFlag" size="mini"
+                <div class="review"> <el-button  v-if="item.btnHide == 1 && toUser.storeFlag" size="small"
                           @click.stop="submitSendGoodsMessage(item)" plain>发送</el-button></div>
               </div>
             </dd>
@@ -33,7 +33,7 @@
         </el-tab-pane>
         <el-tab-pane label="订单列表" name="orders">
           <dl class='base-order-list' v-if='orderList.length'>
-            <dd  v-for="(item, index) in orderList" v-infinite-scroll="loadMore" :key="index">
+            <dd  v-for="(item, index) in orderList" :key="index">
               <div class="order-list">
                 <div class="order-top order-padding">
                   <span class="order-sn" @click="linkToOrders(item.sn)">订单号:{{ item.sn }}</span>
@@ -48,12 +48,12 @@
                  
                   <div class="order-btn ">
                     <el-button class="store-button" v-if="item.btnHide == 1 && toUser.storeFlag"
-                      size="mini" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
+                      size="small" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
                   </div>
                 </div>
                 <div class="order-footer order-padding">
                   <span></span>
-                  <el-tag  size='mini' :type="col[item.orderStatus]">{{
+                  <el-tag  size="small" :type="col[item.orderStatus]">{{
                     item.orderStatus == 'STAY_PICKED_UP' ? '待自提'
                       : item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus
                         ==
@@ -107,12 +107,6 @@ export default {
       id: (state) => state.user.id,
       toUser: (state) => state.user.toUser,
     }),
-  },
-  components: {
-    "el-tag": Tag,
-    "el-button": button,
-    "el-tabs": Tabs,
-    "el-tab-pane": TabPane,
   },
   methods: {
     //跳转订单列表
@@ -179,11 +173,11 @@ export default {
   props: {
     list: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     orderList: {
       type: Array,
-      default: []
+      default: () => [],
     },
   },
   mounted () {

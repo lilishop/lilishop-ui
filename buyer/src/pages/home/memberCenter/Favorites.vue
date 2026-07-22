@@ -177,7 +177,7 @@ export default {
       let url
       if (this.params.type === 'STORE') {
         url = this.$router.resolve({
-          path: '/Merchant',
+          path: '/merchant',
           query: { 'id': storeId }
         })
       } else {

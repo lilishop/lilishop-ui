@@ -23,7 +23,7 @@
     <div class="module right-module" >
       <el-tooltip content="历史消息" placement="top">
         <p v-show="params.is_robot == 0">
-          <i class="el-icon-time" @click="triggerEvent('history')" />
+          <legacy-el-icon name="el-icon-time" @click="triggerEvent('history')" />
         </p>
       </el-tooltip>
       <el-tooltip content="群公告" placement="top">
@@ -33,7 +33,7 @@
       </el-tooltip>
       <el-tooltip content="群设置" placement="top">
         <p v-show="params.talk_type == 2">
-          <i class="el-icon-setting" @click="triggerEvent('setting')" />
+          <legacy-el-icon name="el-icon-setting" @click="triggerEvent('setting')" />
         </p>
       </el-tooltip>
     </div>

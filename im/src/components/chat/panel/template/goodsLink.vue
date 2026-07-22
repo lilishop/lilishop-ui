@@ -11,7 +11,7 @@
           <span style="color: red;">{{ $filters.unitPrice(goodsDetail.price, '￥') }}</span>
         </div>
         <div v-if="hide">
-          <el-button class="store-button" type="danger" v-if="btnHide == 1 && toUser.storeFlag" size="mini"
+          <el-button class="store-button" type="danger" v-if="btnHide == 1 && toUser.storeFlag" size="small"
             @click="submitSendMessage()" plain>发送</el-button>
         </div>
       </div>

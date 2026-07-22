@@ -5,6 +5,8 @@ import store from "@/store";
 import { setupElementPlus } from "@/plugins/element";
 import { setupLegacyMessage } from "@/utils/message";
 import { registerDirectives } from "@/core/directives";
+import LegacyElIcon from "@/components/global/LegacyElIcon.vue";
+import { resolveLegacyIcon } from "@/core/legacy-icon-map";
 
 export default {
   install(app) {
@@ -30,6 +32,8 @@ export default {
       setupElementPlus(cardApp);
       setupLegacyMessage(cardApp);
       registerDirectives(cardApp);
+      cardApp.component("legacy-el-icon", LegacyElIcon);
+      cardApp.config.globalProperties.$legacyIcon = resolveLegacyIcon;
       cardApp.use(router);
       cardApp.use(store);
       cardApp.mount(container);

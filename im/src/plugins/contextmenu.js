@@ -1,4 +1,5 @@
 import { createApp, h, onMounted, onUnmounted } from "vue";
+import LegacyElIcon from "@/components/global/LegacyElIcon.vue";
 
 let activeMenu = null;
 
@@ -99,7 +100,7 @@ function renderMenuItem(item, close) {
       },
     },
     [
-      item.icon ? h("i", { class: item.icon }) : null,
+      item.icon ? h(LegacyElIcon, { name: item.icon }) : null,
       h("span", item.label),
     ]
   );

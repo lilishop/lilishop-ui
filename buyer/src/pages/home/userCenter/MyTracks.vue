@@ -71,7 +71,7 @@ export default {
     // 跳转店铺首页
     shopPage(id) {
       let routeUrl = this.$router.resolve({
-        path: "/Merchant",
+        path: "/merchant",
         query: { id: id },
       });
       window.open(routeUrl.href, "_blank");

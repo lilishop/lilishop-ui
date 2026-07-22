@@ -9,7 +9,7 @@
       </div>
       <div class="tools flex-center">
         <span class="flex-center pointer">
-          <i class="el-icon-plus" /> 加好友
+          <legacy-el-icon name="el-icon-plus" /> 加好友
         </span>
       </div>
     </div>

@@ -4,7 +4,7 @@
       <el-header class="no-padding header" height="50px">
         <p>发送图片</p>
         <p class="tools">
-          <i class="el-icon-close" @click="closeBox" />
+          <legacy-el-icon name="el-icon-close" @click="closeBox" />
         </p>
       </el-header>
 
@@ -21,7 +21,7 @@
         <el-button
           class="btn"
           type="primary"
-          size="medium"
+          size="default"
           :loading="loading"
           @click="uploadImage"
           >立即发送

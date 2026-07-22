@@ -2,7 +2,7 @@
   <!-- 新消息提示组件 -->
   <div class="notify-box">
     <div class="lbox">
-      <el-avatar size="medium" :src="avatar" />
+      <el-avatar size="default" :src="avatar" />
     </div>
     <div class="rbox">
       <div class="xheader">

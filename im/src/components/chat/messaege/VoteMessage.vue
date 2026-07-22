@@ -5,16 +5,13 @@
         <div class="vheader">
           <p>
             {{ answer_mode == 1 ? "[多选投票]" : "[单选投票]" }}
-            <i
+            <legacy-el-icon
               v-show="is_vote"
               class="pointer"
-              :class="{
-                'el-icon-loading': refresh,
-                'el-icon-refresh': !refresh,
-              }"
+              :name="refresh ? 'el-icon-loading' : 'el-icon-refresh'"
               title="刷新投票结果"
               @click="loadRefresh"
-            ></i>
+            />
           </p>
           <p>{{ title }}</p>
         </div>

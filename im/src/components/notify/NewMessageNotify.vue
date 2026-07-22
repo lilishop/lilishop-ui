@@ -2,14 +2,14 @@
   <!-- 新消息提示组件 -->
   <div class="notify-box pointer">
     <div class="lbox">
-      <el-avatar size="medium" shape="square" :src="avatar" />
+      <el-avatar size="default" shape="square" :src="avatar" />
     </div>
     <div class="rbox">
       <div class="xheader">
         <p class="title">
           {{ talk_type == 1 ? '私信消息通知' : '群聊消息通知' }}
         </p>
-        <p class="time"><i class="el-icon-time" /> {{ formatTime(datetime) }}</p>
+        <p class="time"><legacy-el-icon name="el-icon-time" /> {{ formatTime(datetime) }}</p>
       </div>
       <div class="xbody">
         <p>@{{ nickname }}</p>
