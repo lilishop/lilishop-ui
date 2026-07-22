@@ -48,7 +48,7 @@ app.config.globalProperties.linkToGoods = function (goodsId, skuId) {
   );
 };
 app.config.globalProperties.linkToStore = function (storeId) {
-  window.open(`${config.PC_URL}/Merchant?id=${storeId}`, "_blank");
+  window.open(`${config.PC_URL}merchant?id=${storeId}`, "_blank");
 };
 app.config.globalProperties.linkToOrders = function (sn) {
   if (localStorage.getItem("storeFlag") == "false") {

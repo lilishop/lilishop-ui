@@ -87,7 +87,7 @@
       @confirm="confirmCodeBlock" />
 
     <!-- 文件上传管理器 -->
-    <MeEditorFileManage ref="filesManager" v-model:show="filesManager.isShow" />
+    <MeEditorFileManage ref="fileManageRef" v-model:show="filesManager.isShow" />
 
     <MeEditorVote v-if="vote.isShow" @close="
       () => {
@@ -133,7 +133,7 @@ export default {
   },
   watch: {
     talkUser (n_index_name) {
-      this.$refs.filesManager.clear();
+      this.$refs.fileManageRef?.clear();
       this.editorText = this.getDraftText(n_index_name);
     },
   },
@@ -251,7 +251,7 @@ export default {
 
       this.filesManager.isShow = true;
       this.$refs.restFile2.value = null;
-      this.$refs.filesManager.upload(file);
+      this.$refs.fileManageRef?.upload(file);
     },
 
     // 打开图片查看器

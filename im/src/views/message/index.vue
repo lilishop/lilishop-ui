@@ -48,9 +48,9 @@
             </el-header>
 
             <!-- 对话列表栏 -->
-            <el-scrollbar tag="section" ref="menusScrollbar" class="full-height" :native="false">
+            <el-scrollbar tag="section" ref="menusScrollbar" class="full-height" :native="false" @scroll="onMenusScroll">
               <el-main class="main">
-                <p v-show="loadStatus === 0" class="empty-data">
+                <p v-show="loadStatus === 0 && userTalkItem.length === 0" class="empty-data">
                   <legacy-el-icon name="el-icon-loading" /> 数据加载中...
                 </p>
 
@@ -168,6 +168,7 @@ import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
 import { beautifyTime } from "@/utils/functions";
 import { formatTalkItem, findTalkIndex, getCacheIndexName } from "@/utils/talk";
 import { setToken } from "@/utils/auth";
+import { syncImTokenFromRoute } from "@/utils/im-mode";
 
 const title = document.title;
 
@@ -286,6 +287,7 @@ export default {
   },
 
   beforeRouteUpdate (to, from, next) {
+    syncImTokenFromRoute(to, setToken);
     let index_name = getCacheIndexName();
     if (index_name) this.clickTab(index_name);
     // 更新商品参数
@@ -293,7 +295,7 @@ export default {
     next();
   },
   beforeCreate () {
-    setToken(this.$route.query.token);
+    syncImTokenFromRoute(this.$route, setToken);
   },
   async created () {
     await this.initialize();
@@ -308,9 +310,6 @@ export default {
 
   },
 
-  mounted () {
-    this.scrollEvent();
-  },
   beforeUnmount () {
     document.title = title;
     clearInterval(this.interval);
@@ -368,40 +367,34 @@ export default {
       }
     },
 
-    // 监听自定义滚动条事件
-    scrollEvent () {
-      let scrollbarEl = this.$refs.menusScrollbar.wrap;
-      scrollbarEl.onscroll = () => {
-        this.subHeaderShadow = scrollbarEl.scrollTop > 0;
-      };
+    // 左侧会话列表滚动时，控制置顶栏阴影
+    onMenusScroll ({ scrollTop }) {
+      this.subHeaderShadow = scrollTop > 0;
     },
     // 获取用户对话列表
     loadChatList () {
       this.loadStatus = this.talkNum == 0 ? 0 : 1;
 
-      ServeGetTalkList()
+      return ServeGetTalkList()
         .then(({ code, result }) => {
-          if (code !== 200) return false;
+          if (code !== 200 || !Array.isArray(result)) return false;
           this.$store.commit("SET_UNREAD_NUM", 0);
           this.$store.commit("SET_TALK_ITEMS", {
             items: result.map((item) => formatTalkItem(item)),
           });
 
-          // 判断
           if (this.$route.query.id) {
-            let takeData, takeIndex;
-            console.log("用户result", result)
-            this.talkItems.forEach((take, index) => {
-              if (take.userId == this.$route.query.id) {
-                takeData = take;
-                takeIndex = index;
-              }
-            });
-            this.$nextTick(() =>
-              this.clickTab(this.$route.query.id, takeData, takeIndex)
+            const targetId = this.$route.query.id;
+            const takeIndex = this.talkItems.findIndex(
+              (take) => take.userId == targetId
             );
+            const takeData = takeIndex >= 0 ? this.talkItems[takeIndex] : null;
+            if (takeData) {
+              this.clickTab(targetId, takeData, takeIndex);
+            }
           }
         })
+        .catch(() => {})
         .finally(() => {
           this.loadStatus = 1;
         });
@@ -414,18 +407,21 @@ export default {
       let item =
         this.talks.find((item) => {
           return item.userId == id;
-        }) || {};
+        }) || val || {};
       // 点击当前栏目存储当前用户的信息
-      this.$store.state.user.toUser = val;
+      this.$store.state.user.toUser = val || item;
 
       let nickname = item.name;
+      const talkId = item.id || val?.id;
+
+      if (!talkId) return;
 
       this.params = {
         talk_type: 1,
-        receiver_id: item.userId,
+        receiver_id: item.userId || id,
         nickname,
         is_robot: item.is_robot,
-        talkId: item.id, //聊天对话的id
+        talkId,
         clickFlag: true
       };
 

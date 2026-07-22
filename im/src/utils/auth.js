@@ -10,6 +10,9 @@ const USER_SETTING = 'LILI-SETTING'
  * @param {String} token
  */
 export function setToken (token) {
+  if (token == null || token === '' || token === 'undefined' || token === 'null') {
+    return
+  }
   return localStorage.setItem(
     USER_TOKEN,
     token

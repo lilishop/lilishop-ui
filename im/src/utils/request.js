@@ -28,6 +28,9 @@ const errorHandler = (error) => {
       removeAll();
       location.reload();
     } else if (error.response.status == 403) {
+      if (error.config?.skipAuthDialog) {
+        return Promise.reject(error);
+      }
       if(!isRefreshing){
       
       /**
@@ -80,8 +83,8 @@ request.interceptors.request.use((config) => {
 
   if (token) {
     config.headers["accessToken"] = `${token}`;
-    return config;
   }
+  return config;
 }, errorHandler);
 
 // 响应拦截器
