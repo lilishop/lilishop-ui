@@ -449,6 +449,11 @@ export default {
     },
   },
   mounted() {
+    const goodsStatus = this.$route.query.goodsStatus;
+    if (goodsStatus) {
+      this.currentStatus = goodsStatus;
+      this.searchForm.goodsStatus = goodsStatus;
+    }
     this.init();
   },
 };

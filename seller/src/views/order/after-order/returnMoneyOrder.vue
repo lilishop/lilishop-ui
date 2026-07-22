@@ -315,6 +315,11 @@ export default {
     },
   },
   mounted() {
+    const status = this.$route.query.serviceStatus;
+    if (status) {
+      this.currentStatus = status;
+      this.searchForm.serviceStatus = status;
+    }
     this.init();
   },
 };

@@ -24,7 +24,7 @@ export const getSellerFlow = (id, params) => {
 
 // 商家核对结算单
 export const reconciliation = (id, params) => {
-  return putRequest(`/order/bill/check/${id}/`, params)
+  return putRequest(`/order/bill/check/${id}`, params)
 }
 //根据id获取店铺信息
 export const downloadBill = (id) => {

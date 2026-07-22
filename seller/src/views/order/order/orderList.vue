@@ -393,6 +393,11 @@ export default {
     },
   },
   mounted() {
+    const orderStatus = this.$route.query.orderStatus;
+    if (orderStatus) {
+      this.currentStatus = orderStatus;
+      this.searchForm.orderStatus = orderStatus;
+    }
     this.init();
   },
 };

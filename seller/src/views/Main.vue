@@ -3,7 +3,7 @@
 </style>
 
 <template>
-  <div class="main">
+  <div class="main" :class="{ 'menu-collapsed': !showSubMenu }">
     <div class="sidebar-menu-con menu-bar">
       <div class="logo-con">
         <img :src="storeSideLogo" key="max-logo" />
@@ -120,6 +120,9 @@ export default {
     },
     pageTagsList() {
       return this.$store.state.app.storeOpenedList;
+    },
+    showSubMenu() {
+      return this.$store.state.app.menuList.length > 0;
     },
     lang() {
       return this.$store.state.app.lang;

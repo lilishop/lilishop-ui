@@ -6,6 +6,10 @@ import config from "@/config/index";
 
 let util = {};
 
+/** 店铺主页一级菜单 */
+export const HOME_NAV_NAME = "home";
+export const HOME_NAV_ITEM = { name: HOME_NAV_NAME, title: "主页" };
+
 /** 静态路由名，禁止被动态路由清理误删 */
 const STATIC_ROUTE_NAMES = new Set([
   "home_index",
@@ -437,7 +441,7 @@ util.initAllMenuData = function (constRoutes, data) {
 util.initMenuData = function (vm, data) {
   const menuRoutes = [];
   let menuData = data;
-  let navList = [];
+  let navList = [HOME_NAV_ITEM];
   menuData.forEach((e) => {
     navList.push({ name: e.name, title: e.title });
   });
@@ -454,10 +458,16 @@ util.initMenuData = function (vm, data) {
       }
     }
   } else {
-    currNav = navList[0].name;
-    vm.$store.commit("setCurrNavTitle", navList[0].title);
+    currNav = HOME_NAV_NAME;
+    vm.$store.commit("setCurrNavTitle", HOME_NAV_ITEM.title);
   }
   vm.$store.commit("setCurrNav", currNav);
+
+  if (currNav === HOME_NAV_NAME) {
+    vm.$store.commit("updateMenulist", []);
+    return;
+  }
+
   for (let item of menuData) {
     if (item.name == currNav) {
       menuData = item.children;
@@ -517,6 +527,33 @@ util.initRouterNode = function (routers, data) {
 
     routers.push(menu);
   }
+};
+
+util.getFirstRouterName = function (routeName) {
+  if (!routeName) {
+    return null;
+  }
+  const raw = window.localStorage.getItem("menuData");
+  if (!raw) {
+    return null;
+  }
+  try {
+    const menuData = JSON.parse(raw);
+    for (const top of menuData) {
+      const level1 = top.children || [];
+      for (const mid of level1) {
+        const leaves = mid.children || [];
+        for (const leaf of leaves) {
+          if (leaf.name === routeName) {
+            return leaf.firstRouterName || top.name;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[util] getFirstRouterName failed", e);
+  }
+  return null;
 };
 
 export default util;

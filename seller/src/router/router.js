@@ -199,6 +199,12 @@ export const otherRouter = {
       component: () => import("@/views/statistics/goods-sales-summary.vue")
     },
     {
+      path: "procurement/purchase-order/list",
+      title: "采购单",
+      name: "procurementPurchaseOrderList",
+      component: () => import("@/views/procurement/purchase-order/list.vue")
+    },
+    {
       path: "procurement/purchase-order/operation",
       title: "采购单",
       name: "procurement-purchase-order-operation",
@@ -233,6 +239,37 @@ export const otherRouter = {
       title: "设置预警",
       name: "alertQuantityWarnSetting",
       component: () => import("@/views/goods/goods-seller/alertQuantityWarn.vue")
+    },
+    {
+      path: "order/returnMoneyOrder",
+      title: "退款管理",
+      name: "returnMoneyOrder",
+      component: () => import("@/views/order/after-order/returnMoneyOrder.vue")
+    },
+    {
+      path: "order/returnGoodsOrder",
+      title: "退货管理",
+      name: "returnGoodsOrder",
+      component: () => import("@/views/order/after-order/returnGoodsOrder.vue")
+    },
+    {
+      path: "order/memberComment",
+      title: "评价管理",
+      name: "memberComment",
+      component: () => import("@/views/member/memberComment.vue")
+    },
+    {
+      path: "bill/accountStatementBill",
+      title: "财务对账",
+      name: "accountStatementBill",
+      component: () => import("@/views/shop/bill/accountStatementBill.vue")
+    },
+    {
+      path: "bill/storeBill",
+      title: "店铺结算",
+      name: "storeBill",
+      meta: { firstRouterName: "bill" },
+      component: () => import("@/views/shop/bill/storeBill.vue")
     }
   ]
 };

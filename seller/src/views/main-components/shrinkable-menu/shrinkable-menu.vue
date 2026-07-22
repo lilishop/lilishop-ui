@@ -1,5 +1,5 @@
 <template>
-  <div class="shrinkable-menu">
+  <div class="shrinkable-menu" :class="{ 'no-sub-menu': !menuList.length }">
     <el-menu
       ref="sideMenu"
       class="nav-menu-dark"
@@ -11,6 +11,7 @@
       </el-menu-item>
     </el-menu>
     <el-menu
+      v-if="menuList.length"
       ref="childrenMenu"
       :key="currNav"
       class="sub-menu"
@@ -33,7 +34,7 @@
 </template>
 
 <script>
-import util from "@/libs/util.js";
+import util, { HOME_NAV_NAME, HOME_NAV_ITEM } from "@/libs/util.js";
 
 export default {
   name: "shrinkableMenu",
@@ -50,15 +51,30 @@ export default {
   },
   watch: {
     $route(val) {
-      if (
-        val.meta.firstRouterName &&
-        val.meta.firstRouterName !== this.currNav
-      ) {
-        this.selectNav(val.meta.firstRouterName);
-      }
+      this.syncRouteMenu(val);
     },
   },
   methods: {
+    syncRouteMenu(route) {
+      if (!route?.name) {
+        return;
+      }
+      if (route.name === "home_index") {
+        this.activateHomeNav();
+        return;
+      }
+      const firstRouterName =
+        route.meta?.firstRouterName || util.getFirstRouterName(route.name);
+      if (firstRouterName && firstRouterName !== this.currNav) {
+        this.selectNav(firstRouterName);
+      }
+    },
+    activateHomeNav() {
+      this.$store.commit("setCurrNav", HOME_NAV_NAME);
+      this.$store.commit("setCurrNavTitle", HOME_NAV_ITEM.title);
+      this.setStore("currNav", HOME_NAV_NAME);
+      this.$store.commit("updateMenulist", []);
+    },
     changeMenu(name) {
       if (!name) return;
       this.$router.push({ name });
@@ -67,8 +83,19 @@ export default {
       this.$store.commit("childrenMenu", this.$refs.childrenMenu);
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
+      if (name === HOME_NAV_NAME) {
+        this.$store.commit("updateMenulist", []);
+        this.$store.commit("setCurrNavTitle", HOME_NAV_ITEM.title);
+        if (this.$route.name !== "home_index") {
+          this.$router.push({ name: "home_index" });
+        }
+        return;
+      }
       util.initRouter(this);
     },
+  },
+  mounted() {
+    this.syncRouteMenu(this.$route);
   },
 };
 </script>
@@ -78,6 +105,11 @@ export default {
   height: calc(100% - 60px);
   width: 180px;
   display: flex;
+  transition: width 0.3s;
+
+  &.no-sub-menu {
+    width: 80px;
+  }
 }
 
 .nav-menu-dark {

@@ -57,60 +57,61 @@ h4 {
   justify-content: flex-start;
 }
 .notice-title {
-  margin: 10px 0;
-  font-weight: bold;
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.5;
+
+  a {
+    display: block;
+    color: #333;
+    font-weight: normal;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $theme_color;
+    }
+  }
 }
-.detail-list {
+.todo-group-list {
   display: flex;
-  flex-wrap: wrap;
-}
-.detail-title {
-  flex: 0 0 100%;
-  width: 100%;
-  order: -1;
-  align-self: flex-start;
-  margin-bottom: 8px;
-  padding-left: 4px;
-  opacity: 1;
-  color: #000;
-  font-size: 20px;
-  font-weight: normal;
-  text-decoration: initial;
-  transition: 0.35s;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.detail-item {
-  cursor: pointer;
-  transition: 0.35s;
-  position: relative;
-  font-weight: bold;
-  width: 286px;
+.todo-group {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: center;
-  :deep(span) {
-    color: $theme_color;
-    font-size: 18px;
-  }
-  padding: 16px 12px 20px;
+  align-items: stretch;
   background: #eee;
   border-radius: 0.4em;
-  margin: 10px;
-  > div:not(.detail-title) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 0 8px;
-  }
+  overflow: hidden;
 }
-.detail-item:hover {
-  box-shadow: 3px 5px 12px rgba(0, 0, 0, 0.2);
-  transform: translateY(-4px);
-  > .detail-title {
-    opacity: 1;
+
+.todo-item {
+  cursor: pointer;
+  flex: 1;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+
+  .todo-item-label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+
+  span {
+    color: $theme_color;
+    font-size: 18px;
+    font-weight: bold;
   }
 }
 
@@ -120,19 +121,6 @@ h4 {
   border-radius: 50%;
   border: 3px solid #ededed;
   box-sizing: border-box;
-}
-.count-item,
-.todo-item {
-  height: 84px;
-  display: flex;
-  cursor: pointer;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  border-radius: 0.4em;
-  flex: 1;
-  font-weight: bold;
-  margin-right: 20px;
 }
 
 .card {
@@ -147,25 +135,68 @@ h4 {
 .box-right {
   flex: 2;
   margin-left: 20px;
+
+  h4 {
+    font-size: 16px;
+    margin: 16px 0 12px;
+  }
 }
 
-.count-item:nth-of-type(1) {
-  background-image: linear-gradient(109.6deg, rgba($color: #ff9a76, $alpha: 0.6) 11.2%, #ff9a76 100.2%);
-
-  box-shadow: 1px 3px 12px rgba($color: #ff9a76, $alpha: 0.3);
+.overview-list {
+  flex-wrap: wrap;
+  gap: 16px;
 }
-.count-item:nth-of-type(2) {
-  background-image: linear-gradient(109.6deg, rgba($color: #4e89ae, $alpha: 0.6) 11.2%, #4e89ae 100.2%);
 
-  box-shadow: 1px 3px 12px rgba($color: #4e89ae, $alpha: 0.3);
+.overview-item {
+  flex: 1;
+  min-width: 180px;
+  padding: 16px 20px;
+  background: #f8f9fb;
+  border-radius: 0.4em;
+  cursor: pointer;
+  transition: 0.3s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
 }
-.count-item:nth-of-type(3) {
-  background-image: linear-gradient(109.6deg, rgba($color: #679b9b, $alpha: 0.6) 11.2%, #679b9b 100.2%);
 
-  box-shadow: 1px 3px 12px rgba($color: #679b9b, $alpha: 0.3);
+.overview-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
 }
-.count-item:nth-of-type(4) {
-  background-image: linear-gradient(109.6deg, rgba($color: #637373, $alpha: 0.6) 11.2%, #637373 100.2%);
 
-  box-shadow: 1px 3px 12px rgba($color: #637373, $alpha: 0.3);
+.overview-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: $theme_color;
+  margin-bottom: 6px;
+}
+
+.overview-sub {
+  font-size: 12px;
+  color: #999;
+}
+
+.compare-up {
+  color: #67c23a;
+  margin-left: 4px;
+}
+
+.compare-down {
+  color: #f56c6c;
+  margin-left: 4px;
+}
+
+.compare-flat {
+  color: #999;
+  margin-left: 4px;
+}
+
+.rank-tip {
+  font-size: 12px;
+  color: #999;
+  margin: -10px 0 16px;
 }

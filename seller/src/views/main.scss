@@ -29,6 +29,7 @@
     top: 0;
     left: 0;
     z-index: 21;
+    width: 180px;
     transition: width 0.3s; // background: rgb(73, 80, 96)
     background: #fff;
     box-shadow: rgba(0, 21, 41, 0.35) 2px 0px 6px;
@@ -236,11 +237,26 @@
     overflow: auto;
     background-color: #f0f0f0;
     z-index: 1;
-    transition: left 0.3s;
+    transition: left 0.3s, width 0.3s;
 
     .single-page {
       position: relative;
       margin: 10px;
+    }
+  }
+
+  &.menu-collapsed {
+    .sidebar-menu-con {
+      width: 80px;
+    }
+
+    .main-header-con {
+      padding-left: 80px;
+    }
+
+    .single-page-con {
+      left: 80px;
+      width: calc(100% - 80px);
     }
   }
 

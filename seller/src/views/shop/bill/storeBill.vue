@@ -1,5 +1,5 @@
 <template>
-  <div class="store-bill">
+  <div class="search">
     <el-card>
       <el-form
         ref="searchForm"
@@ -29,13 +29,6 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="状态" prop="billStatus">
-          <el-select v-model="searchForm.billStatus" placeholder="请选择" clearable style="width: 240px">
-            <el-option label="已出账" value="OUT" />
-            <el-option label="已对账" value="CHECK" />
-            <el-option label="已完成" value="COMPLETE" />
-          </el-select>
-        </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
           <el-button class="search-btn" @click="handleReset">重置</el-button>
@@ -45,6 +38,17 @@
     </el-card>
 
     <el-card>
+      <div class="bill-tab">
+        <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
+          <el-tab-pane
+            v-for="(item, index) in billStatusTabs"
+            :key="index"
+            :label="item.title"
+            :name="item.value"
+          />
+        </el-tabs>
+      </div>
+
       <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
         <el-table-column prop="sn" label="账单号" min-width="250" show-overflow-tooltip />
         <el-table-column prop="createTime" label="生成时间" min-width="120" />
@@ -106,9 +110,34 @@ export default {
       },
       data: [],
       total: 0,
+      currentStatus: "ALL",
     };
   },
+  computed: {
+    billStatusTabs() {
+      return [
+        { title: "全部", value: "ALL" },
+        { title: "已出账", value: "OUT" },
+        { title: "已对账", value: "CHECK" },
+        { title: "已完成", value: "COMPLETE" },
+      ];
+    },
+  },
   methods: {
+    onStatusTabClick(tab) {
+      this.billStatusClick(tab.paneName);
+    },
+    billStatusClick(name) {
+      if (name === "ALL" || name === "" || name === undefined || name === null) {
+        delete this.searchForm.billStatus;
+        this.currentStatus = "ALL";
+      } else {
+        this.searchForm.billStatus = name;
+        this.currentStatus = name;
+      }
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
     init() {
       this.getDataList();
     },
@@ -125,6 +154,7 @@ export default {
       this.getDataList();
     },
     handleReset() {
+      const { billStatus } = this.searchForm;
       this.searchForm = {
         pageNumber: 1,
         pageSize: 10,
@@ -133,6 +163,9 @@ export default {
         startDate: "",
         endDate: "",
       };
+      if (this.currentStatus !== "ALL") {
+        this.searchForm.billStatus = billStatus;
+      }
       this.getDataList();
     },
     getDataList() {
@@ -159,6 +192,11 @@ export default {
     },
   },
   mounted() {
+    const billStatus = this.$route.query.billStatus;
+    if (billStatus) {
+      this.currentStatus = billStatus;
+      this.searchForm.billStatus = billStatus;
+    }
     this.init();
   },
   beforeRouteLeave(to, from, next) {
@@ -170,6 +208,14 @@ export default {
 
 <style lang="scss" scoped>
 @import "@/styles/table-common.scss";
+.search > .el-card + .el-card {
+  margin-top: 16px;
+}
+.bill-tab {
+  :deep(.el-tabs__item) {
+    font-size: 14px;
+  }
+}
 .link-text {
   color: #409eff;
   cursor: pointer;
