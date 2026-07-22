@@ -454,6 +454,30 @@ export const otherRouter = {
       name: "goodsSalesSummaryReport",
       meta: { title: "商品销售汇总报表" },
       component: () => import("@/views/statistics/goods-sales-summary.vue")
+    },
+    {
+      path: "procurement/purchase-order/detail",
+      title: "采购单详情",
+      name: "manager-procurement-order-detail",
+      component: () => import("@/views/procurement/purchase-order/detail.vue")
+    },
+    {
+      path: "procurement/inbound/detail",
+      title: "入库单详情",
+      name: "manager-procurement-inbound-detail",
+      component: () => import("@/views/procurement/inbound/detail.vue")
+    },
+    {
+      path: "procurement/inventory-count/detail",
+      title: "盘点单详情",
+      name: "manager-inventory-count-detail",
+      component: () => import("@/views/procurement/inventory-count/detail.vue")
+    },
+    {
+      path: "procurement/damage-report/detail",
+      title: "报损单详情",
+      name: "manager-damage-report-detail",
+      component: () => import("@/views/procurement/damage-report/detail.vue")
     }
   ]
 };

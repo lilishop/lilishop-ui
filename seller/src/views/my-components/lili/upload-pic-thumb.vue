@@ -226,7 +226,14 @@ export default {
     setData(v, init) {
       if (typeof v == "string") {
         if (this.multiple) {
-          this.$Message.warning("多张上传仅支持数组数据类型");
+          if (!v) {
+            this.uploadList = [];
+            return;
+          }
+          this.setData(
+            v.split(",").map((s) => s.trim()).filter(Boolean),
+            init
+          );
           return;
         }
         if (!v) {

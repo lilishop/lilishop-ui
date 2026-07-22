@@ -197,6 +197,42 @@ export const otherRouter = {
       name: "goodsSalesSummaryReport",
       meta: { title: "商品销售汇总报表" },
       component: () => import("@/views/statistics/goods-sales-summary.vue")
+    },
+    {
+      path: "procurement/purchase-order/operation",
+      title: "采购单",
+      name: "procurement-purchase-order-operation",
+      component: () => import("@/views/procurement/purchase-order/operation.vue")
+    },
+    {
+      path: "procurement/inbound/operation",
+      title: "采购入库",
+      name: "procurement-inbound-operation",
+      component: () => import("@/views/procurement/inbound/operation.vue")
+    },
+    {
+      path: "procurement/inventory-count/detail",
+      title: "盘点明细",
+      name: "procurement-inventory-count-detail",
+      component: () => import("@/views/procurement/inventory-count/detail.vue")
+    },
+    {
+      path: "procurement/damage-report/operation",
+      title: "报损单",
+      name: "procurement-damage-report-operation",
+      component: () => import("@/views/procurement/damage-report/operation.vue")
+    },
+    {
+      path: "alertQuantityWarnList",
+      title: "预警商品",
+      name: "alertQuantityWarnList",
+      component: () => import("@/views/goods/goods-seller/alertQuantityWarn.vue")
+    },
+    {
+      path: "alertQuantityWarnSetting",
+      title: "设置预警",
+      name: "alertQuantityWarnSetting",
+      component: () => import("@/views/goods/goods-seller/alertQuantityWarn.vue")
     }
   ]
 };
