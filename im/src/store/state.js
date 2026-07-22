@@ -1,4 +1,4 @@
-const defaultAvatar = require('@/assets/image/detault-avatar.jpg')
+import { defaultAvatar } from "@/assets/images";
 
 // 根级别的 state
 const state = {

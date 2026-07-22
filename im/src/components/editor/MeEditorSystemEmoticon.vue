@@ -4,7 +4,7 @@
       <el-header class="no-padding header" height="50px">
         <p>系统表情</p>
         <p class="tools">
-          <i class="el-icon-close" @click="closeBox" />
+          <legacy-el-icon name="el-icon-close" @click="closeBox" />
         </p>
       </el-header>
 
@@ -31,7 +31,7 @@
       </el-main>
 
       <el-footer class="footer" height="50px">
-        <el-button type="primary" size="medium" class="btn" @click="closeBox">
+        <el-button type="primary" size="default" class="btn" @click="closeBox">
           关闭窗口
         </el-button>
       </el-footer>

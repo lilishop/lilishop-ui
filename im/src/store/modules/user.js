@@ -1,4 +1,5 @@
 import { setUserInfo, getUserInfo, getToken } from "@/utils/auth";
+import { defaultAvatar, defaultUserBanner } from "@/assets/images";
 
 // import { ServeLogout } from "@/api/user";
 
@@ -8,9 +9,9 @@ let state = {
   // 用户昵称
   name: "",
   // 个性头像
-  face: require("@/assets/image/detault-avatar.jpg"),
+  face: defaultAvatar,
   // 名片背景
-  visitCardBag: require("@/assets/image/default-user-banner.png"),
+  visitCardBag: defaultUserBanner,
   // 当前登录状态
   loginStatus: false,
   toUser:""

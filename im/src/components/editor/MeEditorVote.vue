@@ -4,7 +4,7 @@
       <el-header class="header no-select" height="60px">
         <p>发起投票</p>
         <p class="tools">
-          <i class="el-icon-close" @click="$emit('close')" />
+          <legacy-el-icon name="el-icon-close" @click="$emit('close')" />
         </p>
       </el-header>
       <el-main class="main no-padding vote-from">
@@ -18,7 +18,7 @@
         <div class="vote-title">投票主题</div>
         <div>
           <el-input
-            size="medium"
+            size="default"
             clear="vote-input"
             v-model.trim="title"
             placeholder="请输入投票主题，最多50字"
@@ -31,7 +31,7 @@
           <div class="vote-options" v-for="(option, index) in options">
             <div class="lbox">
               <el-input
-                size="medium"
+                size="default"
                 clear="vote-input"
                 v-model.trim="option.value"
                 placeholder="请输入选项内容"
@@ -46,12 +46,12 @@
               </el-input>
             </div>
             <div class="rbox">
-              <i class="el-icon-close" @click="removeOption(index)"></i>
+              <legacy-el-icon name="el-icon-close" @click="removeOption(index)" />
             </div>
           </div>
 
           <h6 class="pointer add-option" @click="addOption">
-            <i class="el-icon-plus"></i> 添加选项
+            <legacy-el-icon name="el-icon-plus" /> 添加选项
           </h6>
         </div>
       </el-main>

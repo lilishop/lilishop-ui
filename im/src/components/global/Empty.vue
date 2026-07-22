@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import { noOncallImage } from "@/assets/images";
+
 export default {
   name: 'Empty',
   props: {
@@ -17,7 +19,7 @@ export default {
     },
     src: {
       type: String,
-      default: require('@/assets/image/no-oncall.6b776fcf.png'),
+      default: noOncallImage,
     },
   },
   data() {

@@ -4,7 +4,7 @@
       <el-header class="no-padding header" height="60px">
         <p>会话记录 ({{ records.length }})</p>
         <p class="tools">
-          <i class="el-icon-close" @click="close" />
+          <legacy-el-icon name="el-icon-close" @click="close" />
         </p>
       </el-header>
       <el-main class="no-padding main" v-loading="loading">

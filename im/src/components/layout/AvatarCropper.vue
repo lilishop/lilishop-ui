@@ -4,7 +4,7 @@
       <el-header class="header" height="50px">
         <p>选择头像</p>
         <p class="tools">
-          <i class="el-icon-close" @click="$emit('close', 0)" />
+          <legacy-el-icon name="el-icon-close" @click="$emit('close', 0)" />
         </p>
       </el-header>
       <el-main class="main">
@@ -45,28 +45,28 @@
               <el-button
                 size="small"
                 plain
-                icon="el-icon-upload"
+                :icon="$legacyIcon('el-icon-upload')"
                 @click="clickUpload"
                 >上传图片
               </el-button>
               <el-button
                 size="small"
                 plain
-                icon="el-icon-refresh"
+                :icon="$legacyIcon('el-icon-refresh')"
                 @click="refreshCrop"
                 >刷新
               </el-button>
               <el-button
                 size="small"
                 plain
-                icon="el-icon-refresh-left"
+                :icon="$legacyIcon('el-icon-refresh-left')"
                 @click="rotateLeft"
                 >左转
               </el-button>
               <el-button
                 size="small"
                 plain
-                icon="el-icon-refresh-right"
+                :icon="$legacyIcon('el-icon-refresh-right')"
                 @click="rotateRight"
                 >右转
               </el-button>

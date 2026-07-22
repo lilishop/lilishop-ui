@@ -20,7 +20,7 @@
             </el-header>
             <el-header height="60px" class="header">
               <div class="from-search">
-                <el-input v-model="input" prefix-icon="el-icon-search" placeholder="搜索好友" size="small" />
+                <el-input v-model="input" :prefix-icon="$legacyIcon('el-icon-search')" placeholder="搜索好友" size="small" />
               </div>
             </el-header>
             <!-- <el-header height="118px" class="logo-header">
@@ -51,7 +51,7 @@
             <el-scrollbar tag="section" ref="menusScrollbar" class="full-height" :native="false">
               <el-main class="main">
                 <p v-show="loadStatus === 0" class="empty-data">
-                  <i class="el-icon-loading" /> 数据加载中...
+                  <legacy-el-icon name="el-icon-loading" /> 数据加载中...
                 </p>
 
                 <p v-show="loadStatus === 1 && talkNum === 0" class="empty-data">
@@ -61,7 +61,7 @@
                 <p v-show="loadStatus === 1 && talkNum > 0" class="main-menu">
                   <span class="title">对话记录({{ talkNum }})</span>
 
-                  <!-- <el-tag size="mini" type="danger" v-if="myUnreadNum"
+                  <!-- <el-tag size="small" type="danger" v-if="myUnreadNum"
                     >未读：{{ myUnreadNum }}</el-tag
                   > -->
                 </p>
@@ -78,7 +78,7 @@
                       <face :text="item.face" v-if="item.face"></face>
                       <face-null :text="item.name" v-else></face-null>
                       <div v-show="item.is_top == 0" class="top-mask" @click.stop="topChatItem(item)">
-                        <i class="el-icon-top" />
+                        <legacy-el-icon name="el-icon-top" />
                       </div>
                     </div>
                     <div class="card-box">

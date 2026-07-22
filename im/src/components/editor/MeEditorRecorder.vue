@@ -3,7 +3,7 @@
     <el-container class="lum-dialog-box">
       <el-header class="no-padding header no-select" height="50px">
         <p>语音消息</p>
-        <p class="tools"><i class="el-icon-close" @click="closeBox" /></p>
+        <p class="tools"><legacy-el-icon name="el-icon-close" @click="closeBox" /></p>
       </el-header>
 
       <el-main class="no-padding mian">
@@ -52,45 +52,45 @@
         <el-button
           v-show="recorderStatus == 0"
           type="primary"
-          size="mini"
+          size="small"
           round
-          icon="el-icon-microphone"
+          :icon="$legacyIcon('el-icon-microphone')"
           @click="startRecorder"
           >开始录音
         </el-button>
         <el-button
           v-show="recorderStatus == 1"
           type="primary"
-          size="mini"
+          size="small"
           round
-          icon="el-icon-video-pause"
+          :icon="$legacyIcon('el-icon-video-pause')"
           @click="pauseRecorder"
           >暂停录音
         </el-button>
         <el-button
           v-show="recorderStatus == 2"
           type="primary"
-          size="mini"
+          size="small"
           round
-          icon="el-icon-microphone"
+          :icon="$legacyIcon('el-icon-microphone')"
           @click="resumeRecorder"
           >继续录音
         </el-button>
         <el-button
           v-show="recorderStatus == 2"
           type="primary"
-          size="mini"
+          size="small"
           round
-          icon="el-icon-microphone"
+          :icon="$legacyIcon('el-icon-microphone')"
           @click="stopRecorder"
           >结束录音
         </el-button>
         <el-button
           v-show="recorderStatus == 3 || recorderStatus == 6"
           type="primary"
-          size="mini"
+          size="small"
           round
-          icon="el-icon-video-play"
+          :icon="$legacyIcon('el-icon-video-play')"
           @click="playRecorder"
           >播放录音
         </el-button>
@@ -100,9 +100,9 @@
             recorderStatus == 3 || recorderStatus == 5 || recorderStatus == 6
           "
           type="primary"
-          size="mini"
+          size="small"
           round
-          icon="el-icon-video-play"
+          :icon="$legacyIcon('el-icon-video-play')"
           @click="startRecorder"
           >重新录音
         </el-button>
@@ -110,18 +110,18 @@
         <el-button
           v-show="recorderStatus == 4"
           type="primary"
-          size="mini"
+          size="small"
           round
-          icon="el-icon-video-pause"
+          :icon="$legacyIcon('el-icon-video-pause')"
           @click="pausePlayRecorder"
           >暂停播放
         </el-button>
         <el-button
           v-show="recorderStatus == 5"
           type="primary"
-          size="mini"
+          size="small"
           round
-          icon="el-icon-video-play"
+          :icon="$legacyIcon('el-icon-video-play')"
           @click="resumePlayRecorder"
           >继续播放
         </el-button>
@@ -131,7 +131,7 @@
             recorderStatus == 3 || recorderStatus == 5 || recorderStatus == 6
           "
           type="primary"
-          size="mini"
+          size="small"
           round
           @click="submit"
           >立即发送
