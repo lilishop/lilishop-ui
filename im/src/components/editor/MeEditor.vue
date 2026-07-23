@@ -18,24 +18,24 @@
             <p class="tip-title">代码片段</p>
           </li>
           <li @click="recorder = true">
-            <i class="el-icon-headset" />
+            <legacy-el-icon name="el-icon-headset" />
             <p class="tip-title">语音消息</p>
           </li> -->
           <!-- #TODO 发图片功能暂时隐藏 此处会涉及到token过期 -->
           <!-- <li @click="$refs.restFile.click()">
-            <i class="el-icon-picture-outline-round" />
+            <legacy-el-icon name="el-icon-picture-outline-round" />
             <p class="tip-title">图片</p>
           </li> -->
           <!-- <li @click="$refs.restFile2.click()">
-            <i class="el-icon-folder" />
+            <legacy-el-icon name="el-icon-folder" />
             <p class="tip-title">附件</p>
           </li>
           <li @click="filesManager.isShow = true">
-            <i class="el-icon-folder-opened" />
+            <legacy-el-icon name="el-icon-folder-opened" />
             <p class="tip-title">上传管理</p>
           </li>
           <li v-show="isGroupTalk" @click="vote.isShow = true">
-            <i class="el-icon-s-data" />
+            <legacy-el-icon name="el-icon-s-data" />
             <p class="tip-title">发起投票</p>
           </li> -->
 
@@ -87,7 +87,7 @@
       @confirm="confirmCodeBlock" />
 
     <!-- 文件上传管理器 -->
-    <MeEditorFileManage ref="filesManager" v-model:show="filesManager.isShow" />
+    <MeEditorFileManage ref="fileManageRef" v-model:show="filesManager.isShow" />
 
     <MeEditorVote v-if="vote.isShow" @close="
       () => {
@@ -133,7 +133,7 @@ export default {
   },
   watch: {
     talkUser (n_index_name) {
-      this.$refs.filesManager.clear();
+      this.$refs.fileManageRef?.clear();
       this.editorText = this.getDraftText(n_index_name);
     },
   },
@@ -251,7 +251,7 @@ export default {
 
       this.filesManager.isShow = true;
       this.$refs.restFile2.value = null;
-      this.$refs.filesManager.upload(file);
+      this.$refs.fileManageRef?.upload(file);
     },
 
     // 打开图片查看器

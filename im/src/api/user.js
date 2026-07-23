@@ -17,31 +17,35 @@ export const ServeGetUserDetail = (memberId) => {
 };
 
 // 获取店铺相关设置信息
-export const ServeGetStoreDetail = (storeId) => {
-  return get(`${config.BASE_BUYER}/buyer/store/store/store/${storeId}`);
+export const ServeGetStoreDetail = (storeId, options = {}) => {
+  return get(`${config.BASE_BUYER}/buyer/store/store/store/${storeId}`, {}, options);
 };
 
 // 获取用户历史足迹
-export const ServeGetFootPrint = (params) => {
-  return get(`${config.BASE_BUYER}/buyer/member/footprint`, params);
+export const ServeGetFootPrint = (params, options = {}) => {
+  return get(`${config.BASE_BUYER}/buyer/member/footprint`, params, options);
 };
 
 // 商家获取用户历史足迹
-export const ServeStoreGetFootPrint = (params) => {
-  return get(`${config.BASE_SELLER}/store/member/footprint`, params);
+export const ServeStoreGetFootPrint = (params, options = {}) => {
+  return get(`${config.BASE_SELLER}/store/member/footprint`, params, options);
 };
 
 // 获取用户订单列表信息
-export const ServeGetOrderPrint = (params) => {
-  return get(`${config.BASE_BUYER}/buyer/order/order`, params);
+export const ServeGetOrderPrint = (params, options = {}) => {
+  return get(`${config.BASE_BUYER}/buyer/order/order`, params, options);
 };
 
 // 商家获取用户订单列表信息
-export const ServeStoreGetOrderPrint = (params) => {
-  return get(`${config.BASE_SELLER}/store/order/order`, params);
+export const ServeStoreGetOrderPrint = (params, options = {}) => {
+  return get(`${config.BASE_SELLER}/store/order/order`, params, options);
 };
 
 // 获取商品信息
-export const ServeGetGoodsDetail = (data) => {
-  return get(`${config.BASE_BUYER}/buyer/goods/goods/sku/${data.goodsId}/${data.skuId}`);
+export const ServeGetGoodsDetail = (data, options = {}) => {
+  return get(
+    `${config.BASE_BUYER}/buyer/goods/goods/sku/${data.goodsId}/${data.skuId}`,
+    {},
+    options
+  );
 };

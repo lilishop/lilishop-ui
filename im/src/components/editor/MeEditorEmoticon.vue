@@ -43,7 +43,7 @@
             class="emoji-item custom-emoji"
             @click="$refs.fileCustomEmoji.click()"
           >
-            <i class="el-icon-picture" />
+            <legacy-el-icon name="el-icon-picture" />
             <span>自定义</span>
           </div>
           <div
@@ -64,7 +64,7 @@
             class="toolbar-item prev-page"
             @click="turnPage(1)"
           >
-            <i class="el-icon-caret-left" />
+            <legacy-el-icon name="el-icon-caret-left" />
           </div>
           <div
             v-for="(item, index) in showItems"
@@ -80,7 +80,7 @@
             class="toolbar-item next-page"
             @click="turnPage(2)"
           >
-            <i class="el-icon-caret-right" />
+            <legacy-el-icon name="el-icon-caret-right" />
           </div>
         </div>
       </el-footer> -->

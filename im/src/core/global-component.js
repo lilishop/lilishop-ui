@@ -16,6 +16,8 @@ import {
   LoginMessage,
 } from "@/components/chat/messaege";
 import UserCard from "@/components/user/user-card/index";
+import LegacyElIcon from "@/components/global/LegacyElIcon.vue";
+import { resolveLegacyIcon } from "@/core/legacy-icon-map";
 
 const messageComponents = [
   AudioMessage,
@@ -39,5 +41,7 @@ export function registerGlobalComponents(app) {
   messageComponents.forEach((component) => {
     app.component(component.name, component);
   });
+  app.component("legacy-el-icon", LegacyElIcon);
+  app.config.globalProperties.$legacyIcon = resolveLegacyIcon;
   app.use(UserCard);
 }

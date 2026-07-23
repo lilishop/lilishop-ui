@@ -5,7 +5,7 @@
         <el-header class="header" height="50px">
           <p>添加好友</p>
           <p class="tools">
-            <i class="el-icon-close" @click="close" />
+            <legacy-el-icon name="el-icon-close" @click="close" />
           </p>
         </el-header>
         <el-main class="main">
@@ -13,7 +13,7 @@
             v-model="mobile"
             id="serach-mobile"
             class="input"
-            prefix-icon="el-icon-search"
+            :prefix-icon="$legacyIcon('el-icon-search')"
             placeholder="请输入对方手机号(精确查找)"
             clearable
             @keyup.enter="onSubmit"

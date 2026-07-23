@@ -46,6 +46,8 @@ export function formatTalkItem (params) {
   };
 
   Object.assign(options, params);
+  options.talk_type = options.talk_type || 1;
+  options.receiver_id = options.receiver_id || options.userId;
   options.index_name = `${options.talk_type}_${options.receiver_id}`;
 
   return options;

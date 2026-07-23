@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { Message } from "@/utils/message";
+import { Modal } from "@/utils/message";
 import { getIMDetail } from "@/api/common";
 import Storage from "@/plugins/storage";
 import { getMemberMsg } from "@/api/login";
@@ -15,28 +15,52 @@ export default {
     };
   },
   methods: {
+    promptLogin() {
+      Modal.confirm({
+        title: "温馨提示",
+        content: "请登录后执行此操作",
+        okText: "立即登录",
+        cancelText: "取消",
+        onOk: () => {
+          this.$router.push({
+            path: "/login",
+            query: {
+              rePath: this.$route.path,
+              query: JSON.stringify(this.$route.query || {}),
+            },
+          });
+        },
+      });
+    },
     // 跳转im客服
     async IMService(id, goodsId, skuId) {
+      if (!Storage.getItem("accessToken")) {
+        this.promptLogin();
+        return;
+      }
 
-      // 获取访问Token
-      let accessToken = Storage.getItem("accessToken");
-      await this.getIMDetailMethods();
-      const userInfo = await getMemberMsg();
-      if (userInfo.success) {
-        //携带商品Id,在IM可以发送商品信息
-        if(goodsId && skuId){
-          window.open(
-            this.IMLink + "?token=" + accessToken + "&id=" + (id || this.storeMsg.storeId) + "&goodsId=" + goodsId + "&skuId=" + skuId
-          );
-        }else{
-          window.open(
-            this.IMLink + "?token=" + accessToken + "&id=" + (id || this.storeMsg.storeId)
-          );
+      try {
+        await this.getIMDetailMethods();
+        const userInfo = await getMemberMsg();
+        if (!userInfo.success) {
+          this.promptLogin();
+          return;
         }
 
-      } else {
-        Message.error("请登录后再联系客服");
-        return;
+        const accessToken = Storage.getItem("accessToken");
+        const storeId = id || this.storeMsg?.storeId;
+        const baseUrl = `${this.IMLink}?token=${accessToken}&id=${storeId}`;
+
+        if (goodsId && skuId) {
+          window.open(`${baseUrl}&goodsId=${goodsId}&skuId=${skuId}`);
+        } else {
+          window.open(baseUrl);
+        }
+      } catch {
+        // token 过期等场景由 request 拦截器处理；未登录时避免未捕获异常
+        if (!Storage.getItem("accessToken")) {
+          this.promptLogin();
+        }
       }
     },
     // 获取im信息

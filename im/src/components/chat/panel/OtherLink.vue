@@ -17,17 +17,29 @@
 </template>
 
 <script>
-import { ServeGetStoreDetail, ServeGetUserDetail, ServeGetFootPrint, ServeGetOrderPrint, ServeGetGoodsDetail, ServeStoreGetFootPrint,ServeStoreGetOrderPrint } from '@/api/user'
+import {
+  ServeGetStoreDetail,
+  ServeGetFootPrint,
+  ServeGetOrderPrint,
+  ServeGetGoodsDetail,
+  ServeStoreGetFootPrint,
+  ServeStoreGetOrderPrint,
+} from "@/api/user";
 import StoreDetail from "@/components/chat/panel/template/storeDetail.vue";
 import FootPrint from "@/components/chat/panel/template/footPrint.vue";
 import GoodsLink from "@/components/chat/panel/template/goodsLink.vue";
 import SocketInstance from "@/im-server/socket-instance";
 import { mapState, mapGetters } from "vuex";
+import { getToken } from "@/utils/auth";
+import { isBuyerImMode } from "@/utils/im-mode";
+
+const SIDE_REQUEST_OPTIONS = { skipAuthDialog: true };
+
 export default {
   components: {
     StoreDetail,
     FootPrint,
-    GoodsLink
+    GoodsLink,
   },
   props: {
     toUser: {
@@ -36,7 +48,7 @@ export default {
     },
     id: {
       type: String,
-      default: '',
+      default: "",
     },
     goodsParams: {
       type: Object,
@@ -48,167 +60,173 @@ export default {
     ...mapState({
       index_name: (state) => state.dialogue.index_name,
     }),
+    isBuyerImMode() {
+      return isBuyerImMode(this.$route);
+    },
   },
-  watch:{
-    toUser(){
-      localStorage.setItem('storeFlag', this.toUser.storeFlag)
-      this.footPrintList = []
-      this.orderPrintList = []
-      this.footPrintParams.pageNumber = 1
+  watch: {
+    toUser() {
+      this.syncStoreFlagCache();
+      this.resetSidePanelData();
       if (this.toUser.storeFlag) {
-        this.getStoreDetail()
-      } 
-      // else {
-      //   this.getMemberDetail()
-      // }
-      this.getFootPrint()
-      if (this.goodsParams && this.toUser.storeFlag == true) {
-        this.getGoodsDetail()
+        this.getStoreDetail();
       }
-    }
+      this.getFootPrint();
+      if (this.goodsParams && this.toUser.storeFlag) {
+        this.getGoodsDetail();
+      }
+    },
   },
-  data () {
+  data() {
     return {
-      activeName: 'history',
-      storeInfo: {}, //店铺信息
-      memberInfo: {}, //会员信息
+      activeName: "history",
+      storeInfo: {},
+      memberInfo: {},
       footPrintParams: {
         pageSize: 20,
         pageNumber: 1,
-        memberId: '',
-        storeId: '',
+        memberId: "",
+        storeId: "",
       },
       goodsDetail: {},
-      footPrintList: [], // 商品
-      orderPrintList: []// 订单
-    }
+      footPrintList: [],
+      orderPrintList: [],
+    };
   },
-  mounted () {
-    localStorage.setItem('storeFlag', this.toUser.storeFlag)
+  mounted() {
+    this.syncStoreFlagCache();
     if (this.toUser.storeFlag) {
-      this.getStoreDetail()
-    } 
-    // else {
-    //   this.getMemberDetail()
-    // }
-    this.getFootPrint()
-    if (this.goodsParams && this.toUser.storeFlag == true) {
-      this.getGoodsDetail()
+      this.getStoreDetail();
+    }
+    this.getFootPrint();
+    if (this.goodsParams && this.toUser.storeFlag) {
+      this.getGoodsDetail();
     }
   },
   methods: {
-    getStoreDetail () {
-      ServeGetStoreDetail(this.toUser.userId).then(res => {
-        if (res.success) {
-          this.storeInfo = res.result
-        }
-      })
+    syncStoreFlagCache() {
+      localStorage.setItem(
+        "storeFlag",
+        this.isBuyerImMode ? "true" : "false"
+      );
     },
-    loadMoreFootPrint (e) {
-      //触底再次调接口
-      this.footPrintParams.pageNumber++
-      this.getFootPrint()
+    resetSidePanelData() {
+      this.footPrintList = [];
+      this.orderPrintList = [];
+      this.footPrintParams.pageNumber = 1;
     },
-    handleClick () { },
-    // getMemberDetail () {
-    //   ServeGetUserDetail(this.toUser.userId).then(res => {
-    //     if (res.success) {
-    //       this.memberInfo = res.result
-    //     }
-    //   })
-    // },
-    getGoodsDetail () {
-      // 检查必要参数是否存在
+    getStoreDetail() {
+      ServeGetStoreDetail(this.toUser.userId, SIDE_REQUEST_OPTIONS)
+        .then((res) => {
+          if (res.success) {
+            this.storeInfo = res.result;
+          }
+        })
+        .catch(() => {});
+    },
+    loadMoreFootPrint() {
+      this.footPrintParams.pageNumber++;
+      this.getFootPrint();
+    },
+    handleClick() {},
+    getGoodsDetail() {
       if (!this.toUser.storeFlag) {
-        return
+        return;
       }
-      
       if (!this.goodsParams || !this.goodsParams.goodsId) {
-        console.warn('getGoodsDetail: goodsParams 或 goodsId 参数缺失')
-        return
+        return;
       }
-
-      ServeGetGoodsDetail(this.goodsParams).then(res => {
-        if (res.success) {
-          this.goodsDetail = res.result.data
-        }
-      }).catch(error => {
-        console.error('获取商品详情失败:', error)
-      })
+      ServeGetGoodsDetail(this.goodsParams, SIDE_REQUEST_OPTIONS)
+        .then((res) => {
+          if (res.success) {
+            this.goodsDetail = res.result.data;
+          }
+        })
+        .catch(() => {});
+    },
+    normalizeFootPrintRecords(records = []) {
+      const goodsId = this.goodsParams?.goodsId;
+      return records
+        .filter((item) => item != null)
+        .filter((item) => !goodsId || item.goodsId !== goodsId)
+        .map((item) => ({
+          ...item,
+          btnHide: localStorage.getItem(item.goodsId) ? 0 : 1,
+        }));
+    },
+    normalizeOrderRecords(records = []) {
+      return records.map((item) => ({
+        ...item,
+        btnHide: 1,
+      }));
     },
     getFootPrint() {
-      if (this.toUser.storeFlag) {
-        this.footPrintParams.memberId = this.id
-        this.footPrintParams.storeId = this.toUser.userId
-        ServeGetFootPrint(this.footPrintParams).then(res => {
-          res.result.records=res.result.records.filter((item)=>{
-            return item!=null
-          })
-          res.result.records.forEach((item, index) => {
-            if (localStorage.getItem(item.goodsId)) {
-              item.btnHide = 0
-            } else {
-              item.btnHide = 1
-            }
-            if (item.goodsId === this.goodsParams.goodsId) {
-              res.result.records.splice(index, 1)
-            }
-          });         
-          this.footPrintList.push(...res.result.records)
-        })
-        // 订单列表
-        ServeGetOrderPrint(this.footPrintParams).then((res) => {
-          if (res.code == 200) {
-            res.result.records.forEach((item) => {
-              this.orderPrintList.push({
-                ...item,
-                btnHide: 1
-              })
-            })
-          }
-        })
+      if (!getToken()) {
+        return;
+      }
+      if (!this.toUser?.userId || !this.id) {
+        return;
+      }
+
+      if (this.isBuyerImMode) {
+        this.footPrintParams.memberId = this.id;
+        this.footPrintParams.storeId = this.toUser.userId;
+        this.fetchBuyerSideData();
       } else {
-        this.footPrintParams.memberId = this.toUser.userId
-        this.footPrintParams.storeId = this.id
-        ServeStoreGetFootPrint(this.footPrintParams).then(res => {
-          res.result.records=res.result.records.filter((item)=>{
-            return item!=null
-          })
-          res.result.records.forEach((item, index) => {
-            if (localStorage.getItem(item.goodsId)) {
-              item.btnHide = 0
-            } else {
-              item.btnHide = 1
-            }
-            if (item.goodsId === this.goodsParams.goodsId) {
-              res.result.records.splice(index, 1)
-            }
-          });
-          this.footPrintList.push(...res.result.records)
-        })
-        ServeStoreGetOrderPrint(this.footPrintParams).then((res) => {
-          if (res.code == 200) {
-            res.result.records.forEach((item) => {
-              this.orderPrintList.push({
-                ...item,
-                btnHide: 1
-              })
-            })
-          }
-        })
+        this.footPrintParams.memberId = this.toUser.userId;
+        this.footPrintParams.storeId = this.id;
+        this.fetchStoreSideData();
       }
     },
+    fetchBuyerSideData() {
+      ServeGetFootPrint(this.footPrintParams, SIDE_REQUEST_OPTIONS)
+        .then((res) => {
+          if (res?.result?.records) {
+            this.footPrintList.push(
+              ...this.normalizeFootPrintRecords(res.result.records)
+            );
+          }
+        })
+        .catch(() => {});
 
-    // 发送消息回调事件
-    submitSendMessage (record, context, messageType) {
+      ServeGetOrderPrint(this.footPrintParams, SIDE_REQUEST_OPTIONS)
+        .then((res) => {
+          if (res?.code === 200 && res?.result?.records) {
+            this.orderPrintList.push(
+              ...this.normalizeOrderRecords(res.result.records)
+            );
+          }
+        })
+        .catch(() => {});
+    },
+    fetchStoreSideData() {
+      ServeStoreGetFootPrint(this.footPrintParams, SIDE_REQUEST_OPTIONS)
+        .then((res) => {
+          if (res?.result?.records) {
+            this.footPrintList.push(
+              ...this.normalizeFootPrintRecords(res.result.records)
+            );
+          }
+        })
+        .catch(() => {});
+
+      ServeStoreGetOrderPrint(this.footPrintParams, SIDE_REQUEST_OPTIONS)
+        .then((res) => {
+          if (res?.code === 200 && res?.result?.records) {
+            this.orderPrintList.push(
+              ...this.normalizeOrderRecords(res.result.records)
+            );
+          }
+        })
+        .catch(() => {});
+    },
+
+    submitSendMessage(record, context, messageType) {
       SocketInstance.emit("event_talk", record);
       this.$store.commit("UPDATE_TALK_ITEM", {
         index_name: this.index_name,
         draft_text: "",
       });
-      /**
-       * 插入数据
-       */
       const insterChat = {
         createTime: this.formateDateAndTimeToString(new Date()),
         fromUser: this.id,
@@ -219,11 +237,8 @@ export default {
         float: "right",
       };
 
-      // 插入对话记录
       this.$store.commit("PUSH_DIALOGUE", insterChat);
-      // 获取聊天面板元素节点
       let el = document.getElementById("lumenChatPanel");
-      // 判断的滚动条是否在底部
       let isBottom =
         Math.ceil(el.scrollTop) + el.clientHeight >= el.scrollHeight;
 
@@ -233,14 +248,13 @@ export default {
         });
       } else {
         this.$store.commit("SET_TLAK_UNREAD_MESSAGE", {
-          content: content,
+          content: context,
           nickname: record.name,
         });
       }
-
     },
 
-    formateDateAndTimeToString (date) {
+    formateDateAndTimeToString(date) {
       var hours = date.getHours();
       var mins = date.getMinutes();
       var secs = date.getSeconds();
@@ -254,7 +268,7 @@ export default {
       );
     },
 
-    formatDateToString (date) {
+    formatDateToString(date) {
       var year = date.getFullYear();
       var month = date.getMonth() + 1;
       var day = date.getDate();
@@ -262,15 +276,11 @@ export default {
       if (day < 10) day = "0" + day;
       return year + "-" + month + "-" + day;
     },
-  }
-}
-
+  },
+};
 </script>
 
 <style scoped lang="less">
-// :deep(.el-tabs__nav.is-top ) {
-// }
-
 :deep(.el-tabs__nav ) {
   height: 60px;
   line-height: 60px;

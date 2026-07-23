@@ -5,11 +5,11 @@
         <el-header class="header no-padding" height="50px">
           <div class="tools">
             <span>选择编程语言:&nbsp;&nbsp;</span>
-            <el-select v-model="language" size="mini" filterable placeholder="语言类型" :disabled="!editMode">
+            <el-select v-model="language" size="small" filterable placeholder="语言类型" :disabled="!editMode">
               <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </div>
-          <i class="el-icon-close close-btn" @click="close" />
+          <legacy-el-icon name="el-icon-close" class="close-btn" @click="close" />
           <i class="iconfont icon-full-screen" :class="{
               'icon-tuichuquanping': isFullScreen,
               'icon-quanping ': !isFullScreen,

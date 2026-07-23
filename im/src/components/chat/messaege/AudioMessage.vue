@@ -2,9 +2,9 @@
   <div class="audio-message">
     <div class="videodisc">
       <div class="disc" :class="{ play: isPlay }" @click="toPlay">
-        <i v-if="loading" class="el-icon-loading" />
-        <i v-else-if="isPlay" class="el-icon-video-pause" />
-        <i v-else class="el-icon-video-play" />
+        <legacy-el-icon v-if="loading" name="el-icon-loading" />
+        <legacy-el-icon v-else-if="isPlay" name="el-icon-video-pause" />
+        <legacy-el-icon v-else name="el-icon-video-play" />
         <audio
           ref="audio"
           type="audio/mp3"
@@ -17,7 +17,7 @@
     </div>
     <div class="detail">
       <div class="text">
-        <i class="el-icon-service" />
+        <legacy-el-icon name="el-icon-service" />
         <span>{{ getCurrDuration }} / {{ getTotalDuration }}</span>
       </div>
       <div class="process">

@@ -2,7 +2,7 @@
   <div class="lum-dialog-mask animated fadeIn">
     <el-container class="container" v-outside="close">
       <el-header class="no-padding header" height="180px">
-        <i class="close el-icon-error pointer" @click="close" />
+        <legacy-el-icon name="el-icon-error" class="close pointer" @click="close" />
         <div class="img-banner">
           <img :src="detail.bag" class="img-banner" />
         </div>
@@ -55,9 +55,9 @@
                 @keyup.enter="editRemarkSubmit"
               />
             </span>
-            <i
+            <legacy-el-icon
               v-show="!editRemark.isShow"
-              class="el-icon-edit-outline"
+              name="el-icon-edit-outline"
               @click="clickEditRemark"
             />
           </div>
@@ -76,7 +76,7 @@
           v-if="detail.friend_status == 1 && detail.friend_apply == 0"
           type="primary"
           size="small"
-          icon="el-icon-circle-plus-outline"
+          :icon="$legacyIcon('el-icon-circle-plus-outline')"
           @click="apply.isShow = true"
           >添加好友
         </el-button>
@@ -90,7 +90,7 @@
           v-else-if="detail.friend_status == 2"
           type="primary"
           size="small"
-          icon="el-icon-s-promotion"
+          :icon="$legacyIcon('el-icon-s-promotion')"
           @click="sendMessage(detail)"
           >发消息
         </el-button>
@@ -125,6 +125,7 @@
 // import { ServeSearchUser } from "@/api/user";
 import { ServeCreateContact, ServeEditContactRemark } from "@/api/contacts";
 import { toTalk } from "@/utils/talk";
+import { defaultUserBanner } from "@/assets/images";
 
 export default {
   name: "UserCardDetail",
@@ -144,7 +145,7 @@ export default {
         friend_status: 0,
         friend_apply: 0,
         nickname_remark: "",
-        bag: require("@/assets/image/default-user-banner.png"),
+        bag: defaultUserBanner,
         gender: 0,
       },
 
@@ -425,7 +426,7 @@ export default {
       padding-right: 5px;
     }
 
-    .el-icon-edit-outline {
+    .legacy-el-icon {
       margin-left: 3px !important;
     }
   }

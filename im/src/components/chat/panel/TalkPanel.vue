@@ -9,10 +9,10 @@
           <!-- 数据加载状态栏 -->
           <div class="loading-toolbar">
             <span v-if="loadRecord.status == 0" class="color-blue">
-              <i class="el-icon-loading" /> 正在加载数据中...
+              <legacy-el-icon name="el-icon-loading" /> 正在加载数据中...
             </span>
             <span v-if="loadRecord.status == 1" class="pointer color-blue" @click="loadChatRecords">
-              <i class="el-icon-bottom" /> 查看更多消息...
+              <legacy-el-icon name="el-icon-bottom" /> 查看更多消息...
             </span>
             <span v-if="loadRecord.status == 2"> 没有更多消息了... </span>
           </div>
@@ -39,8 +39,7 @@
               'checkbox-border': multiSelect.isOpen === true,
             }">
               <aside v-show="multiSelect.isOpen" class="checkbox-column">
-                <i class="el-icon-success" :class="{ selected: verifyMultiSelect(item.id) }"
-                  @click="triggerMultiSelect(item.id)" />
+                <legacy-el-icon name="el-icon-success" :class="{ selected: verifyMultiSelect(item.id) }" @click="triggerMultiSelect(item.id)" />
               </aside>
               <aside class="avatar-column">
                 <div class="avatar-box" v-if="item.float == 'right'">
@@ -59,7 +58,7 @@
                     {{ unixToDate(item.createTime, "MM月dd日 hh:mm") }}
                   </span>
                   <div class="flex flex-a-c">
-                    <i @click="againSendMessage(item)" v-if="item.webSocketStatus" class="el-icon-refresh-left again main-color"></i>
+                    <legacy-el-icon name="el-icon-refresh-left" class="again main-color" @click="againSendMessage(item)" v-if="item.webSocketStatus" />
                     <!-- 文本消息 -->
                     <div v-if="item.messageType == 'MESSAGE'" style="background-color: #d0e9ff;color: black;"
                       class="text-message" :class="{
@@ -122,7 +121,7 @@
                       </span> 
                       <div class="order-status">
                         <el-tag 
-                          size="mini"
+                          size="small"
                           :type="item.text.orderStatus == 'CANCELLED' || item.text.orderStatus == 'UNPAID' || item.text.orderStatus == ' TAKE' ? 'info' : 'danger'">{{
                             item.text.orderStatus == 'CANCELLED' ? '已取消' : item.text.orderStatus == 'UNPAID' ? '未付款' :
                               item.text.orderStatus ==
@@ -156,7 +155,7 @@
         <!-- 新消息气泡 -->
         <div v-show="tipsBoard && unreadMessage.num" class="talk-bubble pointer no-select"
           @click="talkPanelScrollBottom">
-          <i class="el-icon-chat-dot-round" />
+          <legacy-el-icon name="el-icon-chat-dot-round" />
           <span>新消息({{ unreadMessage.num }}条)</span>
           <span>
             &nbsp;#{{ unreadMessage.nickname }}#
@@ -285,6 +284,9 @@ export default {
 
       // 置底按钮是否显示
       tipsBoard: false,
+
+      // 防止并发请求导致 loading 状态错乱
+      recordsRequestId: 0,
     };
   },
 
@@ -302,21 +304,14 @@ export default {
     }),
   },
   watch: {
-    // 监听面板传递参数
-    params () {
-      this.loadRecord.minRecord = 0;
-      this.tipsBoard = false;
-      this.multiSelect = {
-        isOpen: false,
-        items: [],
-        mode: 0,
-      };
-      this.loadChatRecords();
-
+    // 监听面板传递参数（含首次挂载）
+    params: {
+      handler () {
+        this.resetRecordState();
+        this.loadChatRecords();
+      },
+      immediate: true,
     },
-  },
-  mounted () {
-    this.loadChatRecords();
   },
   methods: {
     parseTime,
@@ -497,27 +492,49 @@ export default {
 
 
 
+    resetRecordState () {
+      this.loadRecord.minRecord = 0;
+      this.loadRecord.pageNumber = 0;
+      this.tipsBoard = false;
+      this.multiSelect = {
+        isOpen: false,
+        items: [],
+        mode: 0,
+      };
+    },
+
     // 加载用户聊天详情信息
     loadChatRecords () {
-      if (this.loadRecord.pageNumber === 0 || this.params.clickFlag) {
-        this.loadRecord.pageNumber = 1
-        this.params.clickFlag = false
-      } else {
-        this.loadRecord.pageNumber = this.loadRecord.pageNumber + 1
+      if (!this.params.talkId) {
+        this.loadRecord.status = 2;
+        return;
       }
+
+      const isFirstPage = this.loadRecord.pageNumber === 0;
+      if (isFirstPage) {
+        this.loadRecord.pageNumber = 1;
+      } else {
+        this.loadRecord.pageNumber = this.loadRecord.pageNumber + 1;
+      }
+
       const user_id = this.id;
       const data = {
         pageNumber: this.loadRecord.pageNumber,
-        pageSize: this.loadChatRecords.pageSize,
+        pageSize: this.loadRecord.pageSize,
         talkId: this.params.talkId,
       };
       this.loadRecord.status = 0;
 
-      let el = document.getElementById('lumenChatPanel')
-      let scrollHeight = el.scrollHeight
+      const requestId = ++this.recordsRequestId;
+      let el = document.getElementById('lumenChatPanel');
+      let scrollHeight = el ? el.scrollHeight : 0;
+
       ServeTalkRecords(data).then((res) => {
-        // 防止点击切换过快消息返回延迟，导致信息错误
-        // console.log("读取历史数据", res);
+        if (requestId !== this.recordsRequestId) return;
+        if (res.code !== 200 || !Array.isArray(res.result)) {
+          this.loadRecord.status = 2;
+          return;
+        }
         const records = res.result.map((item) => {
           let key = new Date().getTime();
           item.float = "center";
@@ -525,28 +542,26 @@ export default {
             item.float = item.fromUser == user_id ? "right" : "left";
           }
           if (item.messageType == 'GOODS') {
-            item.text = JSON.parse(item.text)
+            item.text = JSON.parse(item.text);
           }
-          // if (item.messageType == 'MESSAGE"') {
-          //   item.text = this.textReplaceEmoji(item.text)
-          // }
           if (item.messageType == 'ORDER') {
-            item.text = JSON.parse(item.text)
+            item.text = JSON.parse(item.text);
           }
           return { ...item, [key]: key };
         });
         this.$store.commit("UNSHIFT_DIALOGUE", records);
-        records.length
-          ? (this.loadRecord.status = 1)
-          : (this.loadRecord.status = 2);
+        this.loadRecord.status = records.length ? 1 : 2;
         this.$nextTick(() => {
-          // if (data.record_id == 0 || !data.record_id) {
-          if (data.record_id == 0 || data.pageNumber == 1) {
-            el.scrollTop = el.scrollHeight
+          if (!el) return;
+          if (isFirstPage) {
+            el.scrollTop = el.scrollHeight;
           } else {
-            el.scrollTop = el.scrollHeight - scrollHeight
+            el.scrollTop = el.scrollHeight - scrollHeight;
           }
-        })
+        });
+      }).catch(() => {
+        if (requestId !== this.recordsRequestId) return;
+        this.loadRecord.status = 2;
       });
     },
 

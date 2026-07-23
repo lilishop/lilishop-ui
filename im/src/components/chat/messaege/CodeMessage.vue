@@ -7,10 +7,14 @@
       'full-screen': fullscreen,
     }"
   >
+    <legacy-el-icon
+      v-if="fullscreen"
+      name="el-icon-close"
+      @click="fullscreen = !fullscreen"
+    />
     <i
-      :class="
-        fullscreen ? 'el-icon-close' : 'iconfont icon-tubiao_chakangongyi'
-      "
+      v-else
+      class="iconfont icon-tubiao_chakangongyi"
       @click="fullscreen = !fullscreen"
     />
     <pre class="lum-scrollbar" v-html="formatCode(code, lang)" />

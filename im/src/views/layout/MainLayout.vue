@@ -18,7 +18,7 @@
             <el-tooltip content="我的消息" placement="right" :visible-arrow="false">
               <router-link to="/message">
                 <div class="menu-items" :class="{ active: idx == 0 }">
-                  <i class="el-icon-chat-line-round" />
+                  <legacy-el-icon name="el-icon-chat-line-round" />
                   <span v-show="unreadNum" class="notify"></span>
                 </div>
               </router-link>
