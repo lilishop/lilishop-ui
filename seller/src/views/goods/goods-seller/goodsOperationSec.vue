@@ -508,6 +508,7 @@
         :isComponent="true"
         :initialize="picModelFlag"
         :max-select="selectedFormBtnName === 'goodsGalleryFiles' ? 1 : 0"
+        :hide-select-footer="true"
         @callback="callbackSelected"
         @selected="(list) => { selectedImage = list }"
       />
@@ -530,8 +531,7 @@ import tinymec from "@/views/lili-components/editor/index.vue";
 import { uploadFile } from "@/libs/axios";
 import { regular } from "@/utils";
 import DPlayer from 'dplayer';
-// import ossManage from "@/views/sys/oss-manage/ossManage";
-import ossManage from "@/views/shop/ossManages";
+import ossManage from "@/views/sys/oss-manage/ossManage";
 
 
 export default {

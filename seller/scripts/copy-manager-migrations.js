@@ -93,11 +93,32 @@ function adaptForSeller(content, sellerRel, sellerOriginal) {
   c = c.replace(/userInfoManager/g, "userInfoSeller");
   c = c.replace(/JSON\.parse\(Cookies\.get\("userInfoManager"\)\)/g, 'JSON.parse(Cookies.get("userInfoSeller"))');
 
-  // ossManage seller variant - hide role tabs, use STORE only
-  if (sellerRel.includes("shop/ossManage.vue")) {
-    c = c.replace(/<el-tab-pane label="管理员" name="MANAGER" \/>[\s\S]*?<el-tab-pane label="客服" name="CUSTOMER" \/>/,
-      '<el-tab-pane label="商家" name="STORE" />');
-    c = c.replace(/activeRoleTab: "MANAGER"/, 'activeRoleTab: "STORE"');
+  // 从平台同步 ossManage 时，转换为商家版：去掉多角色 Tab、改用 sellerUrl 与 STORE 身份
+  if (sellerRel.includes("oss-manage/ossManage") || sellerRel.includes("shop/ossManage")) {
+    c = c.replace(
+      /<el-card v-if="!isComponent" class="tabs-card">[\s\S]*?<\/el-card>\s*/,
+      ""
+    );
+    c = c.replace(/managerApiUrl/g, "sellerUrl");
+    c = c.replace(/\/manager\/common\/upload\/file/g, "/store/common/upload/file");
+    c = c.replace(/activeRoleTab: "MANAGER"/g, 'activeRoleTab: "STORE"');
+    c = c.replace(/userEnums: "MANAGER"/g, 'userEnums: "STORE"');
+    c = c.replace(
+      /return this\.activeRoleTab === "MANAGER";/g,
+      'return this.activeRoleTab === "STORE";'
+    );
+    c = c.replace(
+      /this\.activeRoleTab = "MANAGER";\s*\n\s*this\.searchForm\.userEnums = "MANAGER";/g,
+      'this.activeRoleTab = "STORE";\n          this.searchForm.userEnums = "STORE";'
+    );
+    c = c.replace(
+      /ElMessage\.warning\("仅管理员模块支持上传图片"\)/g,
+      'ElMessage.warning("当前模块不支持上传")'
+    );
+    c = c.replace(
+      /import \{managerApiUrl\} from "@\/libs\/axios";/,
+      'import {sellerUrl} from "@/libs/axios";'
+    );
   }
 
   return c;

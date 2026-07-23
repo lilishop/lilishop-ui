@@ -2,9 +2,9 @@
 @import "./ossManage.scss";
 
 .group-row {
-  padding-top: 10px;
+  padding-top: 16px;
+  margin-top: 8px;
   border-top: 1px solid #ededed;
-  margin-top: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,68 +54,99 @@
   margin-bottom: 16px;
 }
 
+.oss-group-tree {
+  padding: 4px 8px 0;
+
+  :deep(.el-tree-node__expand-icon) {
+    display: none;
+  }
+
+  :deep(.el-tree-node) {
+    margin-bottom: 6px;
+  }
+
+  :deep(.el-tree-node__content) {
+    padding: 0 10px !important;
+    height: 42px;
+    border-radius: 6px;
+    font-size: 15px;
+    line-height: 42px;
+  }
+
+  :deep(.el-tree-node__content:hover) {
+    background: #f5f7fa;
+  }
+
+  :deep(.el-tree-node.is-current > .el-tree-node__content) {
+    background: #ecf5ff;
+    color: #409eff;
+    font-weight: 500;
+  }
+}
+
 .oss-tree-node {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding-right: 8px;
+  padding-right: 4px;
+  font-size: 15px;
 }
 
 .oss-tree-more {
   cursor: pointer;
   color: #909399;
   padding: 0 4px;
+  font-size: 16px;
+}
+
+.file-preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #606266;
+
+  .file-preview-name {
+    margin: 16px 0 8px;
+    font-size: 16px;
+    font-weight: 500;
+    word-break: break-all;
+    text-align: center;
+  }
+
+  .file-preview-tip {
+    margin: 0 0 20px;
+    color: #909399;
+  }
 }
 
 </style>
 <template>
-  <div class="search">
-    <el-card class="tabs-card">
-      <el-tabs v-model="activeRoleTab" @tab-change="handleRoleTabChange">
-        <el-tab-pane label="商家" name="STORE" />
+  <div class="search" :class="{ 'oss-manage-picker': isComponent }">
+    <el-card class="tabs-card category-tabs-card">
+      <el-tabs v-model="activeCategoryTab" @tab-change="handleCategoryTabChange">
+        <el-tab-pane label="图片" name="IMAGE" />
+        <el-tab-pane label="视频" name="VIDEO" />
+        <el-tab-pane label="文件" name="FILE" />
       </el-tabs>
     </el-card>
     <el-row>
       <el-card>
         <div>
-          <div class="operation">
-            <el-row @keyup.enter="handleSearch">
-              <el-form
-                ref="searchForm"
-                label-width="85px"
-                :model="searchForm"
-                class="search-form"
-                inline
-              >
-                <el-form-item label="上传时间">
-                  <el-date-picker
-                    v-model="selectDate"
-                    clearable
-                    value-format="YYYY-MM-DD"
-                    start-placeholder="开始日期"
-                    end-placeholder="结束日期"
-                    style="width: 240px"
-                    type="daterange"
-                    @change="selectDateRange"
-                  />
-                </el-form-item>
-                <el-form-item>
-                  <el-button class="search-btn" type="primary" @click="handleSearch">搜索</el-button>
-                </el-form-item>
-              </el-form>
-            </el-row>
-          </div>
           <el-row class="oss-manage-box">
             <el-col v-if="canShowGroups" :span="isComponent ? 5 : 4">
               <div class="file-list">
                 <div class="article-category mr_10">
                   <el-tree
+                    :key="treeRenderKey"
                     :data="treeData"
                     node-key="value"
                     :props="{ label: 'title', children: 'children' }"
+                    :indent="0"
                     highlight-current
-                    class="demo-tree-render"
+                    class="demo-tree-render oss-group-tree"
                     @node-click="handleTreeNodeClick"
                   >
                     <template #default="{ data }">
@@ -161,7 +192,7 @@
                         multiple
                         style="display: inline-block"
                       >
-                        <el-button>上传图片</el-button>
+                        <el-button>{{ uploadButtonText }}</el-button>
                       </el-upload>
                       <el-button v-if="!isComponent && showType == 'list'" @click="removeAll">批量删除</el-button>
                     </div>
@@ -186,7 +217,16 @@
                             class="card-checkbox"
                             @click.stop
                           />
-                          <img :src="item.url" alt="" />
+                          <img v-if="isImageFile(item)" :src="item.url" alt="" />
+                          <video
+                            v-else-if="isVideoFile(item)"
+                            class="card-media"
+                            :src="item.url"
+                            muted
+                          />
+                          <div v-else class="card-file">
+                            <el-icon :size="28"><Document /></el-icon>
+                          </div>
                           <div v-if="item.isShowPreview" class="preview">
                             <div @click.prevent="download(item)">
                               <el-tooltip content="下载" placement="top">
@@ -198,7 +238,9 @@
                                 <el-icon :size="18"><Delete /></el-icon>
                               </el-tooltip>
                             </div>
-                            <div @click.prevent="showPic(item)">
+                            <div
+                              @click.prevent="previewFile(item)"
+                            >
                               <el-tooltip content="预览" placement="top">
                                 <el-icon :size="22"><View /></el-icon>
                               </el-tooltip>
@@ -222,13 +264,14 @@
                     @current-change="pageChange"
                   />
                 </div>
-                <div v-if="isComponent && selectImage" class="oss-select-footer">
+                <div v-if="isComponent && selectImage && !hideSelectFooter" class="oss-select-footer">
                   <el-button @click="handleSelectCancel">取消</el-button>
                   <el-button type="primary" @click="handleSelectConfirm">确定</el-button>
                 </div>
               </div>
             </el-col>
           </el-row>
+
         </div>
       </el-card>
     </el-row>
@@ -256,9 +299,27 @@
     <el-dialog v-model="picVisible" :title="picTitle" width="600px">
       <img
         :src="file.url"
-        alt="无效的图片链接"
+        alt="图片加载失败"
         style="width: 100%; margin: 0 auto; display: block"
       />
+      <template #footer>
+        <span>文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{ file.createTime }}</span>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="fileVisible" :title="fileTitle" width="800px" destroy-on-close>
+      <iframe
+        v-if="isPdfFile(file)"
+        :src="file.url"
+        style="width: 100%; height: 70vh; border: none"
+        title="文件预览"
+      />
+      <div v-else class="file-preview-fallback">
+        <el-icon :size="64"><Document /></el-icon>
+        <p class="file-preview-name">{{ file.name }}</p>
+        <p class="file-preview-tip">该文件类型暂不支持在线预览</p>
+        <el-button type="primary" @click="download(file)">下载文件</el-button>
+      </div>
       <template #footer>
         <span>文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{ file.createTime }}</span>
       </template>
@@ -270,8 +331,9 @@
       width="800px"
       destroy-on-close
       @close="closeVideo"
+      @opened="initDPlayer"
     >
-      <div id="dplayer"></div>
+      <div ref="dplayerRef"></div>
       <template #footer>
         <span>文件类型：{{ file.fileType }} 文件大小：{{ file.msize }} 创建时间：{{ file.createTime }}</span>
       </template>
@@ -290,15 +352,6 @@
         :model="groupFormValidate"
         :rules="groupRuleValidate"
       >
-        <el-form-item label="所在分组" prop="id">
-          <el-cascader
-            v-model="defaultValue"
-            :options="treeData"
-            :props="{ value: 'value', label: 'label', children: 'children', checkStrictly: true }"
-            style="width: 100%"
-            @change="treeDataChange"
-          />
-        </el-form-item>
         <el-form-item label="分组名称" prop="directoryName">
           <el-input v-model="groupFormValidate.directoryName" />
         </el-form-item>
@@ -312,7 +365,14 @@
 </template>
 
 <script>
-import { Delete, Download, View } from "@element-plus/icons-vue";
+/**
+ * 商家素材管理（OSS 资源库）。
+ * - 固定 STORE 角色，仅管理本店素材，API 走 /store/common/*
+ * - 支持图片/视频/文件分类、分组 CRUD、上传、预览、下载、删除
+ * - isComponent=true 时作为弹窗选择器嵌入商品编辑、店铺装修等页面
+ */
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Delete, Download, View, Document } from "@element-plus/icons-vue";
 import {
   addFileDirectory,
   deleteFile,
@@ -324,13 +384,15 @@ import {
 } from "@/api/index";
 import DPlayer from "dplayer";
 import {sellerUrl} from "@/libs/axios";
-
 import config from "@/config/index";
+
+const playIcon =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23409eff' d='M8 5v14l11-7z'/%3E%3C/svg%3E";
 
 let dp;
 export default {
   name: "oss-manage",
-  components: { Delete, Download, View },
+  components: { Delete, Download, View, Document },
   props: {
     isComponent: {
       default: false,
@@ -348,6 +410,10 @@ export default {
       type: Number,
       default: 0,
     },
+    hideSelectFooter: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -355,11 +421,11 @@ export default {
       config, // api地址
       fileDirectoryId: "",
       groupFormValidate: {
-        id: [],
+        id: "",
         level: 0,
+        parentId: "0",
         directoryName: "",
       },
-      defaultValue: [], // 默认分组id
       groupRuleValidate: {
         directoryName: [
           {
@@ -368,44 +434,37 @@ export default {
             trigger: "blur",
           },
         ],
-        id: [
-          {
-            required: true,
-            message: "请选择分组",
-            trigger: "blur",
-            type: "array",
-          },
-        ],
       },
       enableGroup: false, // 是否展示分组
       selectImage: false, //是否是选择
       accessToken: {}, // 上传token鉴权
       loading: false, // 表单加载状态
-      fileType: "all", // 文件类型
+      fileType: "pic", // 兼容外部调用：pic / video
       showType: "list", // 展示类型
       modalVisible: false, // 添加或编辑显示
       uploadVisible: false, // 上传展示
-      videoVisible: false, // 文件modal
-      picVisible: false, // 图片modal
-      picTitle: "", // 图片title
-      videoTitle: "", // 视频title
+      videoVisible: false, // 视频预览
+      picVisible: false, // 图片预览
+      fileVisible: false, // 文件预览
+      picTitle: "", // 图片 title
+      videoTitle: "", // 视频 title
+      fileTitle: "", // 文件 title
+      pendingVideoUrl: "", // 待播放视频地址
       modalTitle: "", // 添加或编辑标题
-      activeRoleTab: "STORE",
+      activeRoleTab: "STORE", // 商家固定为 STORE，与素材 ownerId（storeId）一致
+      activeCategoryTab: "IMAGE",
       searchForm: {
         // 搜索框对应data对象
         name: "",
         fileKey: "",
         fileType: "",
-        fileCategory: "",
+        fileCategory: "IMAGE",
         userEnums: "STORE",
         pageNumber: 1, // 当前页数
         pageSize: 20, // 页面大小
         sort: "createTime", // 默认排序字段
         order: "desc", // 默认排序方式
-        startDate: "", // 起始时间
-        endDate: "", // 终止时间
       },
-      selectDate: null, // 选择日期绑定modal
       oldKey: "", // 请求参数
       form: {
         // 表单
@@ -422,6 +481,342 @@ export default {
       selectList: [], // 多选数据
       selectCount: 0, // 多选计数
       totalSize: "", // 文件大小统计
+      columns: [
+        // 表头
+        {
+          type: "selection",
+          width: 60,
+          align: "center",
+        },
+        {
+          title: "缩略图(点击预览)",
+          key: "url",
+          width: 300,
+          align: "center",
+          render: (h, params) => {
+            if (this.isImageFile(params.row)) {
+              return h("img", {
+                attrs: {
+                  src: params.row.url || "",
+                  alt: "加载图片失败",
+                },
+                style: {
+                  cursor: "pointer",
+                  width: "80px",
+                  height: "60px",
+                  margin: "10px 0",
+                  "object-fit": "contain",
+                },
+                on: {
+                  click: () => {
+                    this.showPic(params.row);
+                  },
+                },
+              });
+            } else if (this.isVideoFile(params.row)) {
+              // 如果视频文件大小超过5MB不予加载video
+              if (params.row.fileSize < 1024 * 1024 * 5) {
+                return h(
+                  "video",
+                  {
+                    style: {
+                      cursor: "pointer",
+                      width: "80px",
+                      height: "60px",
+                      margin: "10px 0",
+                      "object-fit": "contain",
+                    },
+                    on: {
+                      click: () => {
+                        this.showVideo(params.row);
+                      },
+                    },
+                  },
+                  [
+                    h("source", {
+                      attrs: {
+                        src: params.row.url,
+                      },
+                    }),
+                  ]
+                );
+              } else {
+                return h("img", {
+                  attrs: {
+                    src: playIcon,
+                  },
+                  style: {
+                    cursor: "pointer",
+                    width: "80px",
+                    height: "60px",
+                    margin: "10px 0",
+                    "object-fit": "contain",
+                  },
+                  on: {
+                    click: () => {
+                      this.showVideo(params.row);
+                    },
+                  },
+                });
+              }
+            } else {
+              return h("span", "非多媒体类型");
+            }
+          },
+        },
+        {
+          title: "文件类型",
+          key: "fileType",
+          width: 115,
+          className: this.selectImage == true ? "none" : "",
+        },
+        {
+          title: "文件大小",
+          key: "fileSize",
+          width: 115,
+          sortable: true,
+          className: this.selectImage == true ? "none" : "",
+          render: (h, params) => {
+            let m =
+              ((params.row.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
+            return h("span", m);
+          },
+        },
+        {
+          title: "上传者",
+          key: "createBy",
+          width: 200,
+          render: (h, params) => {
+            let m = "";
+            if (params.row.userEnums == "MANAGER") {
+              m = "[管理员]";
+            } else if (params.row.userEnums == "STORE") {
+              m = "[商家]";
+            } else if (params.row.userEnums == "CUSTOMER") {
+              m = "[客服]";
+            } else {
+              m = "[用户]";
+            }
+            m += params.row.createBy;
+            return h("span", m);
+          },
+        },
+        {
+          title: "操作",
+          key: "action",
+          align: "center",
+          fixed: "right",
+          // width: 300,
+          render: (h, params) => {
+            return h("div", [
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    marginRight: "5px",
+                    display: this.selectImage === true ? "inline-block" : "none",
+                  },
+                  on: {
+                    click: () => {
+                      this.selectedParams(params.row);
+                    },
+                  },
+                },
+                "选择"
+              ),
+              h(
+                "span",
+                {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2",
+                    display: this.selectImage === true ? "inline-block" : "none",
+                  },
+                },
+                "|"
+              ),
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    marginRight: "5px",
+                    display: this.selectImage == true ? "none" : "inline-block",
+                  },
+                  on: {
+                    click: () => {
+                      this.download(params.row);
+                    },
+                  },
+                },
+                "下载"
+              ),
+              h(
+                "span",
+                {
+                  style: {
+                    margin: "0 8px",
+                    color: "#dcdee2",
+                    display: this.selectImage == true ? "none" : "inline-block",
+                  },
+                },
+                "|"
+              ),
+              h(
+                "a",
+                {
+                  style: {
+                    color: "#2d8cf0",
+                    cursor: "pointer",
+                    textDecoration: "none",
+                    display: this.selectImage == true ? "none" : "inline-block",
+                  },
+                  on: {
+                    click: () => {
+                      this.remove(params.row);
+                    },
+                  },
+                },
+                "删除"
+              ),
+            ]);
+          },
+        },
+      ],
+      viewColumns: [
+        {
+          title: "缩略图(点击预览)",
+          key: "url",
+          // width: 150,
+          align: "center",
+          render: (h, params) => {
+            if (this.isImageFile(params.row)) {
+              return h("img", {
+                attrs: {
+                  src: params.row.url || "",
+                  alt: "加载图片失败",
+                },
+                style: {
+                  cursor: "pointer",
+                  width: "80px",
+                  height: "60px",
+                  margin: "10px 0",
+                  "object-fit": "contain",
+                },
+                on: {
+                  click: () => {
+                    this.showPic(params.row);
+                  },
+                },
+              });
+            } else if (this.isVideoFile(params.row)) {
+              // 如果视频文件大小超过5MB不予加载video
+              if (params.row.fileSize < 1024 * 1024 * 5) {
+                return h(
+                  "video",
+                  {
+                    style: {
+                      cursor: "pointer",
+                      width: "80px",
+                      height: "60px",
+                      margin: "10px 0",
+                      "object-fit": "contain",
+                    },
+                    on: {
+                      click: () => {
+                        this.showVideo(params.row);
+                      },
+                    },
+                  },
+                  [
+                    h("source", {
+                      attrs: {
+                        src: params.row.url,
+                      },
+                    }),
+                  ]
+                );
+              } else {
+                return h("img", {
+                  attrs: {
+                    src: playIcon,
+                  },
+                  style: {
+                    cursor: "pointer",
+                    width: "80px",
+                    height: "60px",
+                    margin: "10px 0",
+                    "object-fit": "contain",
+                  },
+                  on: {
+                    click: () => {
+                      this.showVideo(params.row);
+                    },
+                  },
+                });
+              }
+            } else {
+              return h("span", "非多媒体类型");
+            }
+          },
+        },
+        {
+          title: "上传者",
+          key: "createBy",
+          width: 120,
+          sortable: true,
+          render: (h, params) => {
+            let m = "";
+            if (params.row.userEnums == "MANAGER") {
+              m = "[管理员]";
+            } else if (params.row.userEnums == "STORE") {
+              m = "[商家]";
+            } else if (params.row.userEnums == "CUSTOMER") {
+              m = "[客服]";
+            } else {
+              m = "[用户]";
+            }
+            m += params.row.createBy;
+            return h("span", m);
+          },
+        },
+        {
+          title: "操作",
+          key: "action",
+          align: "center",
+          fixed: "right",
+          width: 300,
+          render: (h, params) => {
+            return h("div", [
+              h(
+                "Button",
+                {
+                  props: {
+                    type: "default",
+                    size: "small",
+                  },
+                  style: {
+                    marginRight: "5px",
+                    display:
+                      this.selectImage === true ? "inline-block" : "none",
+                  },
+                  on: {
+                    click: () => {
+                      this.selectedParams(params.row);
+                    },
+                  },
+                },
+                "选择"
+              )
+            ]);
+          },
+        },
+      ],
       data: [], // 表单数据
       total: 0, // 表单数据总数
       pageSizeOpts: [5, 10, 20], // 页码展示项
@@ -429,16 +824,61 @@ export default {
       //树结构
       treeData: [],
       treeDataDefault: [],
+      treeRenderKey: 0,
       selectedGroupData: "",
       insertOrUpdate: "insert",
       groupLoading: false,
       // 图片列表
       selectedOss: [],
+      myData: [
+        {
+          title: 'parent 1',
+          expand: true,
+          render: (h, {root, node, data}) => {
+            return h('span', {style: {display: 'inline-block', width: '100%'}}, [
+              h('span', [h("Icon", {type: 'ios-folder-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+              h('span', {style: {display: 'inline-block', float: 'right', marginRight: '32px'}},
+                [h("Button", {
+                  ...this.buttonProps,
+                  icon: 'ios-add',
+                  type: 'primary',
+                  style: {width: '64px'},
+                  onClick: () => {
+                    this.append(data)
+                  }
+                })
+                ])
+            ]);
+          },
+          children: [
+            {
+              title: 'child 1-1',
+              expand: true,
+              children: [{title: 'leaf 1-1-1', expand: true}, {title: 'leaf 1-1-2', expand: true}]
+            },
+            {
+              title: 'child 1-2',
+              expand: true,
+              children: [{title: 'leaf 1-2-1', expand: true}, {title: 'leaf 1-2-1', expand: true}]
+            }
+          ]
+        }
+      ],
+      buttonProps: {type: 'default', size: 'small',},
     };
   },
   watch: {
     selectImage(val) {
-      if (val && !this.data.length) this.init();
+      if (val) {
+        if (this.isComponent) {
+          // 弹窗选图模式：加载本店素材，而非平台管理员资源
+          this.activeRoleTab = "STORE";
+          this.searchForm.userEnums = "STORE";
+          this.init();
+        } else if (!this.data.length) {
+          this.init();
+        }
+      }
     },
     choose(val) {
       if (val) this.selectImage = val
@@ -448,38 +888,54 @@ export default {
         this.$emit("callback", { url: val[val.length - 1].split(",")[1] });
       }
     },
-    // 初始化监听 是否清空所选图片
+    // 弹窗打开时重置状态并加载分组与素材列表
     initialize(val) {
       if (val && this.isComponent) {
         this.selectedOss = [];
-      }
-    },
-    defaultValue(val) {
-      if (val) {
-        this.groupFormValidate.parentId = val;
+        this.activeRoleTab = "STORE";
+        this.activeCategoryTab = "IMAGE";
+        this.searchForm.userEnums = "STORE";
+        this.searchForm.fileCategory = "IMAGE";
+        delete this.searchForm.fileDirectoryId;
+        this.selectedGroupData = "";
+        this.selectImage = true;
       }
     },
   },
   computed: {
+    // 商家端展示分组树与分组维护能力
     canShowGroups() {
-      return this.activeRoleTab === "MANAGER";
+      return this.activeRoleTab === "STORE";
     },
+    // 商家端允许上传图片/视频/文件
     canUploadImages() {
-      return this.activeRoleTab === "MANAGER" || this.activeRoleTab === "STORE";
+      return this.activeRoleTab === "STORE";
+    },
+    uploadButtonText() {
+      const textMap = {
+        IMAGE: "上传图片",
+        VIDEO: "上传视频",
+        FILE: "上传文件",
+      };
+      return textMap[this.activeCategoryTab] || "上传图片";
     },
     uploadData() {
-      return {
-        directoryPath: this.searchForm.fileDirectoryId,
+      const data = {
         userEnums: this.activeRoleTab,
         directoryType: this.activeRoleTab,
       };
+      const directoryId = this.searchForm.fileDirectoryId;
+      if (directoryId && directoryId !== "0") {
+        data.directoryPath = directoryId;
+      }
+      return data;
     },
   },
 
   methods: {
     beforeUpload(file) {
       if (!this.canUploadImages) {
-        this.$Message.warning("仅管理员模块支持上传图片");
+        ElMessage.warning("当前模块不支持上传");
         return false;
       }
       const maxSize = 20480 * 1024;
@@ -515,40 +971,58 @@ export default {
       this.searchForm.userEnums = name;
       delete this.searchForm.fileDirectoryId;
       this.selectedGroupData = "";
-      this.defaultValue = [];
-      this.groupFormValidate.id = [];
+      this.groupFormValidate.id = "";
       this.groupFormValidate.level = 0;
       this.selectedOss = [];
       this.updateTreeDataByRole();
       this.getDataList();
     },
+    handleCategoryTabChange(name) {
+      this.activeCategoryTab = name;
+      this.searchForm.fileCategory = name;
+      this.searchForm.fileType = "";
+      this.searchForm.pageNumber = 1;
+      delete this.searchForm.fileDirectoryId;
+      this.selectedGroupData = "";
+      this.selectedOss = [];
+      if (this.showType === "list") {
+        this.searchForm.pageSize = 20;
+      } else {
+        this.searchForm.pageSize = 12;
+      }
+      this.updateTreeDataByRole();
+      this.getDataList();
+    },
     updateTreeDataByRole() {
+      const rootTitleMap = {
+        IMAGE: "全部图片",
+        VIDEO: "全部视频",
+        FILE: "全部文件",
+      };
       const currentTree = this.filterTreeByRole(this.treeDataDefault, this.activeRoleTab);
       this.treeData = [
         {
-          title: "全部图片",
+          title: rootTitleMap[this.activeCategoryTab] || "全部图片",
           label: "全部分类",
           value: "0",
           type: this.activeRoleTab,
           level: 0,
-          children: currentTree,
+          children: [],
           id: "0",
           categoryId: 0,
         },
+        ...currentTree,
       ];
+      this.treeRenderKey += 1;
     },
     filterTreeByRole(tree = [], role) {
       if (!tree || !tree.length) return [];
-      return tree.reduce((arr, item) => {
-        const children = this.filterTreeByRole(item.children || [], role);
-        if (item.type === role || children.length) {
-          arr.push({
-            ...item,
-            children,
-          });
-        }
-        return arr;
-      }, []);
+      return tree
+        .filter((item) => item.type === role)
+        .map((item) => ({
+          ...item,
+          children: [],
+        }));
     },
     // 复选框值改变时触发
     selectOssChange(e) {
@@ -591,92 +1065,118 @@ export default {
       this.searchForm.pageNumber = value;
       this.getDataList();
     },
+    // 自定义tree节点显示内容和交互
+    renderContent(h, {root, node, data}) {
+      if (data.value === '0') {
+        return h('span', {style: {display: 'inline-block', width: '100%'}},
+          [
+            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}}, [])
+          ]
+        );
+      } else {
+        return h('span', {style: {display: 'inline-block', width: '100%'}},
+          [
+            h('span', [h("Icon", {type: 'ios-paper-outline', style: {marginRight: '8px'}}), h('span', data.title)]),
+            h('span', {style: {display: 'inline-block', float: 'right', marginRight: '10px'}},
+              [
+                h("Dropdown", {style: {marginLeft: "4px"}},
+                  [
+                    h("Icon", {
+                      props: {type: 'ios-more', size: "20",},
+                      style: {display: 'inline-block'},
+                      on: {
+                        click: () => {
+                        }
+                      }
+                    }),
+                    h("DropdownMenu", {
+                      slot: "list"
+                    }, [
+                      h("DropdownItem", {
+                        nativeOn: {
+                          click: () => {
+                            this.handleContextMenuEdit(root, node, data)
+                          }
+                        }
+                      }, "编辑"),
+                      h("DropdownItem", {
+                        nativeOn: {
+                          click: () => {
+                            this.handleContextMenuDelete()
+                          }
+                        }
+                      }, "删除"),
+                    ])
+                  ]),
+              ])
+          ]
+        );
+      }
+
+    },
+
+
     handleContextMenu(val) {
-this.selectedGroupData = val;
+      console.log('handleContextMenu', val);
+      this.selectedGroupData = val;
     },
     // 编辑分组
     handleContextMenuEdit(root, node, data) {
       this.insertOrUpdate = "update";
       this.enableGroup = true;
-      this.groupFormValidate.directoryName = data.label;
-      this.groupFormValidate.id = [data.value];
-      this.groupFormValidate.level = data.level;
-      this.groupFormValidate.parentId = data.parentId;
-      this.defaultValue = [data.parentId];
+      this.groupFormValidate.id = data.value;
+      this.groupFormValidate.directoryName = data.title || data.label;
+      this.groupFormValidate.level = 0;
+      this.groupFormValidate.parentId = "0";
     },
     // 删除分组
     async handleContextMenuDelete(val) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "是否删除该分组",
-        onOk: async () => {
+      ElMessageBox.confirm("是否删除该分组", "提示", { type: "warning" }).then(async () => {
           const res = await delFileDirectory(this.selectedGroupData.value);
           if (res.success) {
-            this.$Message.success("删除成功!");
+            ElMessage.success("删除成功!");
             this.getDataList();
             this.getAllList();
           }
-        },
-      });
+      }).catch(() => {});
     },
-    treeDataChange(value) {
-      if (value && value.length) {
-        this.groupFormValidate.id = value;
-        if (value[value.length - 1] == "0") {
-          this.groupFormValidate.level = 0;
-        } else {
-          const node = this.findTreeNodeByValue(this.treeData, value[value.length - 1]);
-          this.groupFormValidate.level = node ? Number(node.level) + 1 : 0;
-        }
-      }
-    },
-    findTreeNodeByValue(nodes, value) {
-      if (!nodes || !nodes.length) return null;
-      for (const node of nodes) {
-        if (String(node.value) === String(value)) return node;
-        const found = this.findTreeNodeByValue(node.children, value);
-        if (found) return found;
-      }
-      return null;
-    },
-    // 保存/修改分组
     async submitAddGroup() {
       this.$refs["formValidate"].validate(async (valid) => {
         if (valid) {
-          let res
-          const params = {...this.groupFormValidate};
-          params.directoryType = (this.selectedGroupData && this.selectedGroupData.type) || this.activeRoleTab;
+          let res;
+          const params = {
+            directoryName: this.groupFormValidate.directoryName,
+            level: 0,
+            parentId: "0",
+            directoryType: this.activeRoleTab,
+          };
           if (this.insertOrUpdate === "insert") {
-            params.parentId = params.id[params.id.length - 1];
-            delete params.id;
             res = await addFileDirectory(params);
           } else {
-            params.id = params.id[params.id.length - 1];
-            params.parentId = params.parentId[params.parentId.length - 1];
+            params.id = this.groupFormValidate.id;
             res = await updateFileDirectory(params);
           }
 
           if (res.success) {
-            this.$Message.success("操作成功!");
+            ElMessage.success("操作成功!");
             this.enableGroup = false;
             this.getAllList();
           }
-          this.$Modal.remove();
-        } else {
-          this.$Message.error("请填写完整信息!");
+          } else {
+          ElMessage.error("请填写完整信息!");
         }
       });
     },
-    // 添加/修改分组
     handleClickAddGroup() {
       this.insertOrUpdate = "insert";
-      if (this.selectedGroupData) {
-        this.groupFormValidate.id = [this.selectedGroupData.value];
-      } else {
-        this.groupFormValidate.id = ["0"];
-      }
+      this.groupFormValidate = {
+        id: "",
+        level: 0,
+        parentId: "0",
+        directoryName: "",
+      };
       this.enableGroup = true;
-      this.groupFormValidate.directoryName = "";
     },
     copyFileUrl(row) {
       const textArea = document.createElement("textarea");
@@ -686,7 +1186,7 @@ this.selectedGroupData = val;
       textArea.select();
       try {
         document.execCommand("copy");
-        this.$Message.success("复制成功");
+        ElMessage.success("复制成功");
       } catch (err) {
         console.error("Unable to copy to clipboard", err);
       }
@@ -704,26 +1204,31 @@ this.selectedGroupData = val;
         }
       });
     },
-    // 文件目录分类格式化方法
+    // 文件目录分类格式化：仅展示一级分组
     getTree(tree = []) {
-      let arr = [];
-      if (!!tree && tree.length !== 0) {
-        tree.forEach((item) => {
-          let obj = {};
-          obj.title = item.directoryName;
-          obj.value = item.id; // 拥有者id
-          obj.type = item.directoryType; // 用户类型
-          obj.label = item.directoryName;
-          obj.level = item.level;
-          obj.expand = false;
-          obj.selected = false;
-          obj.contextmenu = false;
-          obj.parentId = item.parentId;
-          obj.children = this.getTree(item.children); // 递归调用
-          arr.push(obj);
+      const flat = [];
+      const walk = (nodes) => {
+        if (!nodes || !nodes.length) return;
+        nodes.forEach((item) => {
+          flat.push({
+            title: item.directoryName,
+            value: item.id,
+            type: item.directoryType,
+            label: item.directoryName,
+            level: 0,
+            expand: false,
+            selected: false,
+            contextmenu: false,
+            parentId: "0",
+            children: [],
+          });
+          if (item.children && item.children.length) {
+            walk(item.children);
+          }
         });
-      }
-      return arr;
+      };
+      walk(tree);
+      return flat;
     },
 
     // 选择分类回调
@@ -735,9 +1240,6 @@ this.selectedGroupData = val;
         this.searchForm.fileDirectoryId = value;
         if (value === "0" || value === 0) {
           delete this.searchForm.fileDirectoryId;
-          this.groupFormValidate.level = 0;
-        } else {
-          this.groupFormValidate.level = Number(level) + 1;
         }
         this.searchForm.userEnums = type || this.activeRoleTab;
         this.getDataList();
@@ -752,7 +1254,7 @@ this.selectedGroupData = val;
     },
     handleSelectConfirm() {
       if (!this.selectedOss.length) {
-        this.$Message.warning("请选择图片");
+        ElMessage.warning("请选择图片");
         return;
       }
       const last = this.selectedOss[this.selectedOss.length - 1];
@@ -768,34 +1270,51 @@ this.selectedGroupData = val;
         accessToken: this.getStore("accessToken"),
       };
       this.searchForm.userEnums = this.activeRoleTab;
+      this.searchForm.fileCategory = this.activeCategoryTab;
       this.getDataList();
       this.getAllList();
     },
     // 查看大图
     showPic(v) {
-      this.file = v;
-      this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
-
-      this.picTitle = v.name + "(" + v.fileKey + ")";
+      this.prepareFileMeta(v);
+      this.picTitle = v.name || "图片预览";
       this.picVisible = true;
+    },
+    // 查看文件（PDF 等）
+    showFile(v) {
+      this.prepareFileMeta(v);
+      this.fileTitle = v.name || "文件预览";
+      this.fileVisible = true;
     },
     // 查看视频
     showVideo(v) {
+      this.prepareFileMeta(v);
+      this.videoTitle = v.name || "视频预览";
+      this.pendingVideoUrl = v.url;
+      this.videoVisible = true;
+    },
+    initDPlayer() {
+      const container = this.$refs.dplayerRef;
+      if (!container || !this.pendingVideoUrl) return;
+      if (dp) {
+        dp.destroy();
+        dp = null;
+      }
       dp = new DPlayer({
-        container: document.getElementById("dplayer"),
+        container,
         screenshot: true,
         video: {
-          url: v.url,
+          url: this.pendingVideoUrl,
         },
       });
-      this.file = v;
-      this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
-      this.videoTitle = v.name + "(" + v.fileKey + ")";
-      this.videoVisible = true;
     },
     // 关闭视频
     closeVideo() {
-      dp.destroy();
+      if (dp) {
+        dp.destroy();
+        dp = null;
+      }
+      this.pendingVideoUrl = "";
     },
     // 分页 改变页码
     changePage(v) {
@@ -818,16 +1337,7 @@ this.selectedGroupData = val;
       }
       this.getDataList();
     },
-    // 起止时间从新赋值
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
-      }
-    },
+    // 起止时间筛选已移除
     // 改变查看方式
     changeShowType() {
       this.searchForm.pageNumber = 1;
@@ -846,35 +1356,35 @@ this.selectedGroupData = val;
         this.pageSizeOpts = [12, 24, 48];
       }
       this.loading = true;
-      getFileListData(this.searchForm).then((res) => {
-        this.loading = false;
-
-        this.data = res.result.records;
-        this.total = res.result.total;
-      });
+      getFileListData(this.searchForm)
+        .then((res) => {
+          if (res && res.success && res.result) {
+            this.data = res.result.records || [];
+            this.total = res.result.total || 0;
+          } else {
+            this.data = [];
+            this.total = 0;
+          }
+        })
+        .catch(() => {
+          this.data = [];
+          this.total = 0;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 搜索
-    handleSearch() {
-      this.searchForm.title = this.searchForm.name;
-      this.searchForm.pageNumber = 1;
-      if (this.showType == "list") {
-        this.searchForm.pageSize = 20;
-      } else {
-        this.searchForm.pageSize = 12;
-      }
-      this.getDataList();
-    },
-    // 文件类型筛选
+    // 兼容外部按场景切换分类（如装修选图/选视频）
     changeFileType() {
-      const name = this.fileType;
-      this.searchForm.fileType = "";
-      this.searchForm.fileCategory = "";
-      if (name === "pic") {
-        this.searchForm.fileCategory = "IMAGE";
-      } else if (name === "video") {
-        this.searchForm.fileCategory = "VIDEO";
-      }
-      this.handleSearch();
+      const categoryMap = {
+        pic: "IMAGE",
+        video: "VIDEO",
+        file: "FILE",
+        all: "IMAGE",
+      };
+      const category = categoryMap[this.fileType] || "IMAGE";
+      this.activeCategoryTab = category;
+      this.handleCategoryTabChange(category);
     },
     isImageFile(row) {
       return row?.fileCategory === "IMAGE" || (row?.fileType && row.fileType.includes("image"));
@@ -882,26 +1392,45 @@ this.selectedGroupData = val;
     isVideoFile(row) {
       return row?.fileCategory === "VIDEO" || (row?.fileType && row.fileType.includes("video"));
     },
+    isPdfFile(row) {
+      return (
+        row?.fileType === "application/pdf" ||
+        (row?.name && row.name.toLowerCase().endsWith(".pdf"))
+      );
+    },
+    previewFile(item) {
+      if (this.isVideoFile(item)) {
+        this.showVideo(item);
+      } else if (this.isImageFile(item)) {
+        this.showPic(item);
+      } else {
+        this.showFile(item);
+      }
+    },
+    prepareFileMeta(v) {
+      this.file = v;
+      this.file.msize = ((v.fileSize * 1.0) / (1024 * 1024)).toFixed(2) + " MB";
+    },
     // 上传文件超过大小限制
     handleMaxSize() {
-      this.$Message.warning("所选文件大小过大，不得超过 20MB");
+      ElMessage.warning("所选文件大小过大，不得超过 20MB");
     },
     // 上传成功回调
     handleSuccess(res, file) {
       if (!this.canUploadImages) {
-        this.$Message.warning("仅管理员模块支持上传图片");
+        ElMessage.warning("当前模块不支持上传");
         return;
       }
       if (res.success) {
-        this.$Message.success("上传文件 " + file.name + " 成功");
+        ElMessage.success("上传文件 " + file.name + " 成功");
         this.getDataList();
       } else {
-        this.$Message.error(res.message);
+        ElMessage.error(res.message);
       }
     },
     // 上传失败回调
     handleError(error, file, fileList) {
-      this.$Message.error(error.toString());
+      ElMessage.error(error.toString());
     },
     // 清空上传文件
     clearFiles() {
@@ -920,50 +1449,38 @@ this.selectedGroupData = val;
     // 批量删除文件
     removeAll() {
       if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
+        ElMessage.warning("您还未选择要删除的数据");
         return;
       }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 个文件?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除所选的 " + this.selectCount + " 个文件?", "确认删除", { type: "warning" }).then(() => {
           let ids = "";
           this.selectList.forEach(function (e) {
             ids += e.id + ",";
           });
           ids = ids.substring(0, ids.length - 1);
           deleteFile(ids).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
               this.selectedOss = [];
               // this.clearSelectAll();
               this.init();
-              this.$Message.success("批量删除文件成功");
+              ElMessage.success("批量删除文件成功");
             }
           })
             .catch((err) => {
               console.log("失败", err);
             });
-        },
-      });
+      }).catch(() => {});
     },
     // 单个删除文件
     remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除文件 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
+      ElMessageBox.confirm("您确认要删除文件 " + v.name + " ?", "确认删除", { type: "warning" }).then(() => {
           deleteFile(v.id).then((res) => {
-            this.$Modal.remove();
             if (res.success) {
-              this.$Message.success("删除文件 " + v.name + " 成功");
+              ElMessage.success("删除文件 " + v.name + " 成功");
               this.getDataList();
             }
           })
-        },
-      });
+      }).catch(() => {});
     },
     // 提交修改文件名
     handleSubmit() {
@@ -979,7 +1496,7 @@ this.selectedGroupData = val;
           renameFile(params).then((res) => {
             this.submitLoading = false;
             if (res.success) {
-              this.$Message.success("操作成功");
+              ElMessage.success("操作成功");
               this.getDataList();
               this.modalVisible = false;
             }

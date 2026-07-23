@@ -67,6 +67,7 @@
         ref="ossManage"
         :is-component="true"
         :initialize="showOssManager"
+        :hide-select-footer="true"
         @selected="handleOssSelected"
       />
       <template #footer>
@@ -87,7 +88,7 @@
 import { Delete, Plus, ZoomIn } from "@element-plus/icons-vue";
 import vuedraggable from "vuedraggable";
 import { uploadFile } from "@/libs/axios";
-import OssManage from "@/views/shop/ossManage";
+import OssManage from "@/views/sys/oss-manage/ossManage";
 
 export default {
   name: "upload-image",

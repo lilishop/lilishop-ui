@@ -69,6 +69,7 @@
         ref="ossManage"
         :is-component="true"
         :initialize="picModelFlag"
+        :hide-select-footer="true"
         @callback="callbackSelected"
         @selected="(list) => { selectedImage = list }"
       />
@@ -84,7 +85,7 @@
 import { Camera, Delete, View } from "@element-plus/icons-vue";
 import { uploadFile } from "@/libs/axios";
 import vuedraggable from "vuedraggable";
-import ossManage from "@/views/shop/ossManages";
+import ossManage from "@/views/sys/oss-manage/ossManage";
 
 export default {
   name: "uploadPicThumb",

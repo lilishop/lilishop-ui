@@ -1,3 +1,54 @@
+// 弹窗选择器模式：固定内容区高度，避免空分组时布局塌陷
+.oss-manage-picker {
+  .category-tabs-card {
+    margin-bottom: 0;
+
+    :deep(.el-card__body) {
+      padding-bottom: 0;
+    }
+  }
+
+  > .el-row > .el-card {
+    border: none;
+    box-shadow: none;
+
+    :deep(.el-card__body) {
+      padding: 0 0 8px;
+    }
+  }
+
+  .oss-manage-box {
+    min-height: 520px;
+    align-items: stretch;
+
+    > .el-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-list,
+    .pic-list {
+      flex: 1;
+      min-height: 520px;
+    }
+
+    .pic-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .img-box {
+      flex: 1;
+      min-height: 400px;
+    }
+
+    .page-box {
+      flex-shrink: 0;
+      margin-top: auto;
+    }
+  }
+}
+
 .search {
   .oss-operation {
     margin-bottom: 2vh;
@@ -16,131 +67,12 @@
   display: none;
 }
 
-.oss-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  position: relative;
-}
-
-.oss-card {
-  margin: 10px 20px 10px 0;
-  width: 290px;
-
-  :hover {
-    .content .other .name {
-      color: #1890ff;
-      transition: color .3s;
-    }
-  }
-
-  cursor: pointer;
-
-  .el-card__body {
-    padding: 0;
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-
-    :hover {
-      .play {
-        transition: opacity .3s;
-        opacity: 1 !important;
-      }
-    }
-
-    .img {
-      height: 135px;
-      object-fit: cover;
-    }
-
-    .video {
-      height: 135px;
-      position: relative;
-
-      .cover {
-        height: 100%;
-        width: 100%;
-        object-fit: fill;
-      }
-
-      .play {
-        position: absolute;
-        top: 43px;
-        left: 117px;
-        height: 50px;
-        width: 50px;
-        opacity: 0.8;
-      }
-    }
-
-    .other {
-      padding: 16px;
-      height: 135px;
-
-      .name {
-        font-size: 16px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        color: rgba(0, 0, 0, .85);
-        font-weight: 500;
-        margin-bottom: 4px;
-      }
-
-      .key {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        height: 45px;
-        word-break: break-all;
-        color: rgba(0, 0, 0, .45);
-      }
-
-      .info {
-        font-size: 12px;
-        color: rgba(0, 0, 0, .45);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        height: 36px;
-        word-break: break-all;
-      }
-    }
-
-    .actions {
-      display: flex;
-      align-items: center;
-      height: 50px;
-      background: #f7f9fa;
-      border-top: 1px solid #e8e8e8;
-
-      i:hover {
-        color: #1890ff;
-      }
-
-      .btn {
-        display: flex;
-        justify-content: center;
-        width: 33.33%;
-        border-right: 1px solid #e8e8e8;
-      }
-
-      .btn-no {
-        display: flex;
-        justify-content: center;
-        width: 33.33%;
-      }
-    }
-  }
-}
-
-
 .oss-manage-box {
   .file-list {
     height: 100%;
     box-sizing: border-box;
     border-right: 1px solid #e5e6eb;
-    padding: 16px 0 24px;
+    padding: 20px 12px 28px;
   }
   .pic-list {
     height: 100%;
@@ -172,10 +104,20 @@
         overflow: hidden;
         box-sizing: border-box;
         position: relative;
-        img {
+        img,
+        .card-media {
           width: 100%;
           height: 100%;
           object-fit: cover;
+        }
+        .card-file {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f5f7fa;
+          color: #909399;
         }
         .card-checkbox {
           position: absolute;
@@ -193,17 +135,21 @@
           width: 100%;
           height: 26px;
           background-color: #ffffff;
-          text-align: center;
-          line-height: 30px;
           color: #666666;
           position: absolute;
           left: 0;
           bottom: 0;
           display: flex;
           flex-wrap: nowrap;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
           > div {
-            width: 100%;
             flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
           }
         }
       }
@@ -240,7 +186,7 @@
     flex-direction: row-reverse;
   }
 
-  .demo-tree-render .el-tree-node__content {
+  .demo-tree-render .el-tree-node__label {
     width: 94%;
   }
 }

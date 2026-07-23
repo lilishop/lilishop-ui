@@ -499,6 +499,21 @@ export const result = [{
             children: null
 
           },
+          {
+            name: "ossManage",
+            level: 2,
+            type: 0,
+            title: "素材管理",
+            path: "ossManage",
+            component: "sys/oss-manage/ossManage",
+            /**
+             * 运行时菜单来自 li_store_menu，此处仅为静态参考。
+             * 平台后台「店铺菜单」配置：
+             *   frontRoute = sys/oss-manage/ossManage
+             *   permission = /store/common/file*,/store/common/fileDirectory*,/store/common/upload*
+             */
+            children: null
+          },
           // {
           //   name: "shopAddress",
           //   level: 2,

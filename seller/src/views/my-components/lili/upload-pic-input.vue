@@ -57,6 +57,7 @@
         :is-component="true"
         :initialize="picModalFlag"
         :max-select="1"
+        :hide-select-footer="true"
         @callback="callbackSelected"
         @selected="handleOssSelected"
       />
@@ -71,7 +72,7 @@
 <script>
 import { View } from "@element-plus/icons-vue";
 import { uploadFile } from "@/libs/axios";
-import ossManage from "@/views/shop/ossManages";
+import ossManage from "@/views/sys/oss-manage/ossManage";
 
 export default {
   name: "uploadPicInput",
