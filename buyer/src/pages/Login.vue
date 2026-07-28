@@ -197,6 +197,7 @@ export default {
         mobile: "",
       },
       verifyStatus: false, // 是否图片验证通过
+      codeSent: false, // 是否已成功发送短信验证码
       ruleInline: {
         // 验证规则
         username: [{required: true, message: "请输入用户名"}],
@@ -237,7 +238,15 @@ export default {
           if (this.type) {
             this.$refs.verify?.init();
           } else {
-            let data = JSON.parse(JSON.stringify(this.formSms));
+            if (!this.verifyStatus) {
+              Message.warning("请先完成安全验证");
+              return;
+            }
+            if (!this.codeSent) {
+              Message.warning("请先获取短信验证码");
+              return;
+            }
+            const data = JSON.parse(JSON.stringify(this.formSms));
             apiLogin.smsLogin(data).then((res) => {
               this.hideVerify();
               if (res.success) {
@@ -262,7 +271,7 @@ export default {
               } else {
                 Message.error(res.message);
               }
-            });
+            }).catch(() => {});
           }
         }
       });
@@ -285,6 +294,7 @@ export default {
         sendSms(params).then((res) => {
           if (res.success) {
             Message.success("验证码发送成功");
+            this.codeSent = true;
             let that = this;
             this.interval = setInterval(() => {
               that.time--;
@@ -292,6 +302,7 @@ export default {
                 that.time = 60;
                 that.codeMsg = "重新发送";
                 that.verifyStatus = false;
+                that.codeSent = false;
                 clearInterval(that.interval);
               } else {
                 that.codeMsg = that.time;
@@ -300,7 +311,7 @@ export default {
           } else {
             Message.warning(res.message);
           }
-        });
+        }).catch(() => {});
       }
     },
     verifyChange(con) {
@@ -453,7 +464,15 @@ export default {
         this.$refs.formSms.resetFields();
       }
       this.verifyStatus = false;
+      this.codeSent = false;
       this.hideVerify();
+      clearInterval(this.interval);
+      this.codeMsg = "发送验证码";
+      this.time = 60;
+    },
+    "formSms.mobile"() {
+      this.codeSent = false;
+      this.verifyStatus = false;
       clearInterval(this.interval);
       this.codeMsg = "发送验证码";
       this.time = 60;
