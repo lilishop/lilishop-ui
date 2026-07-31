@@ -84,6 +84,7 @@ export default {
   data() {
     return {
       selectGoodsType: false, // 展示选择商品分类modal
+      /** 商品类型选项；E_COUPON 为卡密商品（与 VIRTUAL_GOODS 核销型区分，见 FR-S-01） */
       goodsTypeWay: [
         {
           title: "实物商品",
@@ -97,6 +98,13 @@ export default {
           img: goodsType2Img,
           desc: "虚拟核验，无需物流",
           type: "VIRTUAL_GOODS",
+          check: false,
+        },
+        {
+          title: "电子卡券",
+          img: goodsType2Img,
+          desc: "卡密自动发卡，无需物流",
+          type: "E_COUPON", // goodsType；库存由卡池同步，非手动填写
           check: false,
         },
       ],
@@ -229,5 +237,13 @@ export default {
   justify-content: flex-end;
   gap: 12px;
   width: 100%;
+}
+
+.content-goods-publish {
+  .goods-category li.activeClass {
+    background-color: #409eff;
+    border-color: #409eff;
+    color: #fff;
+  }
 }
 </style>

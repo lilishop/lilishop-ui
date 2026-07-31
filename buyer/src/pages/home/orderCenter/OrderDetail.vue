@@ -30,7 +30,7 @@
         >取消订单</el-button>
       <el-button v-if="order.allowOperationVO.showLogistics || orderPackage.length > 0 || logistics" type="info" @click="logisticsList()" size="small">查看物流</el-button>
     </el-card>
-    <p class="verificationCode" v-if="order.order.verificationCode">
+    <p class="verificationCode" v-if="order.order.verificationCode && !isECouponOrder">
       核验码：<span>{{ order.order.verificationCode }}</span>
     </p>
     <div class="order-card">
@@ -51,7 +51,7 @@
         ></el-step>
       </el-steps>
     </div>
-    <div class="order-card" v-if="order.order.deliveryMethod === 'LOGISTICS' && order.order.orderType !== 'VIRTUAL'">
+    <div class="order-card" v-if="order.order.deliveryMethod === 'LOGISTICS' && !isNonPhysicalOrder">
       <h3>收货人信息</h3>
       <p>收货人：{{ order.order.consigneeName }}</p>
       <p>手机号码：{{ $filters.secrecyMobile( order.order.consigneeMobile ) }}</p>
@@ -70,7 +70,7 @@
       <p>支付方式：{{ order.paymentMethodValue }}</p>
       <p>付款状态：{{ order.payStatusValue }}</p>
     </div>
-    <div class="order-card" v-if="!order.order.verificationCode && order.order.orderType !== 'VIRTUAL'">
+    <div class="order-card" v-if="!order.order.verificationCode && !isNonPhysicalOrder">
       <h3>配送信息</h3>
       <p>配送方式：{{ order.deliveryMethodValue }}</p>
       <p v-if="order.order.deliveryMethod === 'LOGISTICS'">配送状态：{{ order.deliverStatusValue }}</p>
@@ -132,6 +132,37 @@
       </template>
       <div v-else style="color: #999; margin-left: 5px">未开发票</div>
     </div>
+    <!-- 电子卡券：卡密信息（PC 内嵌） -->
+    <div class="order-card ecoupon-card-keys" v-if="isECouponOrder">
+      <h3>卡密信息</h3>
+      <el-alert
+        v-if="!ecouponCardKeyDelivered"
+        type="info"
+        show-icon
+        :closable="false"
+        title="卡密尚未发放，请稍后刷新或联系商家"
+      />
+      <template v-else-if="ecouponCardKeyRows.length">
+        <div class="ecoupon-card-keys-mobile">
+          <el-button type="primary" @click="cardKeyDialogVisible = true">查看卡密</el-button>
+        </div>
+        <div class="ecoupon-card-keys-pc">
+          <el-table border :data="ecouponCardKeyRows" style="width: 100%">
+            <el-table-column type="index" label="序号" width="60" align="center" />
+            <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
+            <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
+            <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
+            <el-table-column label="操作" width="120" align="center">
+              <template #default="{ row }">
+                <el-button v-if="row" link type="primary" @click="copyCardKey(row)">复制</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-button class="mt_10" size="small" @click="copyAllCardKeys">复制全部卡密</el-button>
+        </div>
+      </template>
+    </div>
+
     <!-- 订单商品 -->
     <div class="goods">
       <div class="shop-name">
@@ -144,8 +175,8 @@
             <th width="15%">货号</th>
             <th width="10%">单价</th>
             <th width="5%">数量</th>
-            <th width="10%">退款状态</th>
-            <th width="10%">实际退款金额</th>
+            <th width="10%" v-if="!isECouponOrder">退款状态</th>
+            <th width="10%" v-if="!isECouponOrder">实际退款金额</th>
             <th width="10%">小计</th>
             <th width="10%">操作</th>
           </tr>
@@ -170,8 +201,8 @@
             <td>{{ goods.id }}</td>
             <td>{{ $filters.unitPrice(goods.goodsPrice, "￥") }}</td>
             <td>{{ goods.num }}</td>
-            <td>{{refundPriceList(goods.isRefund)}}</td>
-            <td>{{ $filters.unitPrice(goods.refundPrice, "￥") }}</td>
+            <td v-if="!isECouponOrder">{{refundPriceList(goods.isRefund)}}</td>
+            <td v-if="!isECouponOrder">{{ $filters.unitPrice(goods.refundPrice, "￥") }}</td>
             <td>{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</td>
             <td class="order-item-actions">
               <el-button
@@ -192,8 +223,9 @@
               >
               <el-button
                 v-if="
-                  goods.afterSaleStatus.includes('NOT_APPLIED') ||
-                  goods.afterSaleStatus.includes('PART_AFTER_SALE')
+                  !isECouponOrder &&
+                  (goods.afterSaleStatus.includes('NOT_APPLIED') ||
+                    goods.afterSaleStatus.includes('PART_AFTER_SALE'))
                 "
                 @click="applyAfterSale(goods.sn)"
                 type="default"
@@ -213,7 +245,7 @@
         <div>
           <span>商品总价：</span><span>{{ $filters.unitPrice(order.order.goodsPrice, "￥") }}</span><br />
         </div>
-        <div v-if="order.order.orderType !== 'VIRTUAL'">
+        <div v-if="!isECouponOrder">
           <span>运费：</span><span>+{{ $filters.unitPrice(order.order.freightPrice, "￥") }}</span><br />
         </div>
         <div v-if="order.order.priceDetailDTO.couponPrice">
@@ -319,6 +351,19 @@
         <el-button @click="logisticsModal = false">取消</el-button>
       </div></template>
     </el-dialog>
+
+    <!-- 移动端查看卡密 -->
+    <el-dialog v-model="cardKeyDialogVisible" title="卡密信息" width="92%" class="card-key-mobile-dialog">
+      <div v-for="(row, idx) in ecouponCardKeyRows" :key="idx" class="card-key-mobile-item">
+        <p><strong>卡号：</strong>{{ row.cardNo }}</p>
+        <p><strong>卡密：</strong>{{ row.cardSecret }}</p>
+        <el-button size="small" link type="primary" @click="copyCardKey(row)">复制</el-button>
+      </div>
+      <template #footer>
+        <el-button @click="copyAllCardKeys">复制全部</el-button>
+        <el-button type="primary" @click="cardKeyDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
     </UserCenterLayout>
 
   </div>
@@ -333,6 +378,12 @@ import {
   getPackage
 } from "@/api/order.js";
 import { afterSaleReason, receiptDetail } from "@/api/member";
+import { isECouponOrder as checkECouponOrder } from "@/constants/goodsType";
+
+/**
+ * 订单详情：E_COUPON 展示 orderItems[].cardKeys，屏蔽售后/物流（FR-B-03 / FR-B-04）。
+ * 移动端已完成订单用 Dialog 查看卡密（原型 P-09 / D-01）。
+ */
 export default {
   name: "order-detail",
   data() {
@@ -340,6 +391,7 @@ export default {
       order: {}, // 订单详情数据
       progressList: [], // 订单流程
       logistics: "", // 物流数据
+      cardKeyDialogVisible: false,
       cancelParams: {
         // 取消售后参数
         orderSn: "",
@@ -352,7 +404,57 @@ export default {
       logisticsModal: false,
     };
   },
+  computed: {
+    /** 电子卡券订单：无物流/核验码，卡密数据来自 API-B-01 orderItems[].cardKeys */
+    isECouponOrder() {
+      return checkECouponOrder(this.order?.order?.orderType);
+    },
+    isVirtualOrder() {
+      return this.order?.order?.orderType === "VIRTUAL";
+    },
+    isNonPhysicalOrder() {
+      return this.isVirtualOrder || this.isECouponOrder;
+    },
+    ecouponCardKeyDelivered() {
+      return (this.order.orderItems || []).some((item) => item.cardKeyDelivered);
+    },
+    ecouponCardKeyRows() {
+      const rows = [];
+      (this.order.orderItems || []).forEach((item) => {
+        (item.cardKeys || []).forEach((ck) => {
+          rows.push({ ...ck });
+        });
+      });
+      return rows;
+    },
+  },
   methods: {
+    copyCardKey(row) {
+      const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
+      this.copyText(text);
+    },
+    copyAllCardKeys() {
+      const text = this.ecouponCardKeyRows
+        .map((row, i) => `${i + 1}. 卡号：${row.cardNo || ""}  卡密：${row.cardSecret || ""}`)
+        .join("\n");
+      this.copyText(text || "");
+    },
+    copyText(text) {
+      if (!text) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          Message.success("已复制到剪贴板");
+        });
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        Message.success("已复制到剪贴板");
+      }
+    },
     isVatSpecialReceipt (receipt) {
       if (!receipt) return false;
       const rt = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
@@ -658,6 +760,32 @@ table {
   text-align: center;
   span {
     color: $theme_color;
+  }
+}
+
+.ecoupon-card-keys-mobile {
+  display: none;
+}
+
+.ecoupon-card-keys-pc {
+  display: block;
+}
+
+.card-key-mobile-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  p {
+    margin: 4px 0;
+    word-break: break-all;
+  }
+}
+
+@media (max-width: 768px) {
+  .ecoupon-card-keys-mobile {
+    display: block;
+  }
+  .ecoupon-card-keys-pc {
+    display: none;
   }
 }
 /** 订单进度条 */

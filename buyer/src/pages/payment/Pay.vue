@@ -18,7 +18,8 @@
     <el-divider />
     <div class="content width_1200_auto">
       <!-- 收货地址 -->
-      <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && goodsType !== 'VIRTUAL_GOODS'">
+      <!-- 收货地址（E_COUPON / VIRTUAL 免地址，见 isVirtualLikeCheckout） -->
+      <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && !isVirtualLikeCheckout">
         <div class="card-head">
           <span>收货人信息</span>
           <span @click="goAddressManage">管理收货人地址</span>
@@ -94,7 +95,7 @@
       </div>
       <div>
       </div>
-      <div class="goods-content" v-if="goodsType !== 'VIRTUAL_GOODS'">
+      <div class="goods-content" v-if="!isVirtualLikeCheckout">
         <div class="card-head mt_20 mb_20">
           <span>配送方式</span>
         </div>
@@ -166,8 +167,8 @@
           <span @click="editInvoice">编辑</span>
         </div>
       </div>
-      <!-- 优惠券 -->
-      <div class="invoice">
+      <!-- 优惠券（E_COUPON 不参与促销 M-01） -->
+      <div class="invoice" v-if="!isECouponCheckout">
         <div class="card-head mt_20 mb_20">
           <span class="relative">优惠券</span>
         </div>
@@ -203,7 +204,7 @@
         </ul>
       </div>
       <!-- 礼品卡 -->
-      <div class="invoice pay-gcc-module">
+      <div class="invoice pay-gcc-module" v-if="!isECouponCheckout">
         <div class="pay-gcc-head">
           <div class="pay-gcc-title">
             使用礼品卡
@@ -328,6 +329,7 @@ import {
 } from "@/api/cart";
 import { getStoreAddress } from "@/api/shopentry.js"
 import { canUseCouponList } from "@/api/member.js";
+import { isECoupon } from "@/constants/goodsType";
 
 export default {
   name: "Pay",
@@ -376,6 +378,14 @@ export default {
               : 0
       );
       return Number.isFinite(n) ? n : 0;
+    },
+    /** 电子卡券结算：免地址、隐藏优惠券/礼品卡/发票（M-01 / O-11） */
+    isECouponCheckout() {
+      return isECoupon(this.goodsType);
+    },
+    /** 虚拟型结算（核销虚拟 + 电子卡券）：均不需要收货地址 */
+    isVirtualLikeCheckout() {
+      return this.goodsType === "VIRTUAL_GOODS" || this.isECouponCheckout;
     },
   },
   data() {
@@ -854,10 +864,15 @@ export default {
                 query: { orderType: "TRADE", sn: res.result.sn },
               });
             }
+          } else if (res.message) {
+            Message.warning(res.message);
           }
         })
-        .catch(() => {
+        .catch((err) => {
           Spin.hide();
+          if (err?.message && !err?.data?.message) {
+            Message.error(err.message);
+          }
         });
     },
     // 优惠券可用范围

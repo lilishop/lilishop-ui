@@ -8,7 +8,7 @@
           <el-button v-if="allowOperation.cancel" plain type="warning" @click="orderCancel">订单取消</el-button>
           <el-button v-if="orderInfo.order.orderStatus === 'UNPAID'" type="primary" @click="confirmPrice">收款</el-button>
           <el-button plain @click="orderLog">订单日志</el-button>
-          <el-button v-if="$route.query.orderType != 'VIRTUAL'" plain type="primary" style="float:right;" @click="printOrder">打印发货单</el-button>
+          <el-button v-if="!isNonPhysicalOrder" plain type="primary" style="float:right;" @click="printOrder">打印发货单</el-button>
         </div>
       </el-card>
       <el-card class="mt_10 clearfix">
@@ -90,7 +90,7 @@
           </div>
         </div>
         <div style="width: 36%; float: left">
-          <div class="div-item">
+          <div class="div-item" v-if="!isECouponOrder && orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
             <div class="div-item-left">收货信息：</div>
             <div class="div-item-right">
               {{ orderInfo.order.consigneeName }}
@@ -165,7 +165,7 @@
             </div>
           </div> -->
 
-          <div class="div-item" v-if="$route.query.orderType != 'VIRTUAL'">
+          <div class="div-item" v-if="!isNonPhysicalOrder">
             <div class="div-item-left">配送方式：</div>
             <div class="div-item-right">
               {{ orderInfo.deliveryMethodValue }}
@@ -217,6 +217,42 @@
             </template>
           </el-table-column>
         </el-table>
+
+        <!-- E_COUPON：平台订单详情只读展示卡密，无卡池代管（S-04） -->
+        <div v-if="isECouponOrder" class="ecoupon-card-keys mt_10">
+          <h4>卡密信息</h4>
+          <el-alert
+            v-if="!ecouponCardKeyDelivered"
+            type="info"
+            show-icon
+            :closable="false"
+            title="卡密尚未发放"
+            class="mb_10"
+          />
+          <el-table
+            v-else-if="ecouponCardKeyRows.length"
+            border
+            :data="ecouponCardKeyRows"
+            style="width: 100%"
+          >
+            <el-table-column type="index" label="序号" width="60" align="center" />
+            <el-table-column prop="goodsName" label="商品" min-width="140" show-overflow-tooltip />
+            <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
+            <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
+            <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
+            <el-table-column label="状态" width="90" align="center">
+              <template #default="{ row }">
+                <span v-if="row">{{ formatCardKeyStatus(row.status || 'ALLOCATED') }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="100" align="center">
+              <template #default="{ row }">
+                <el-button v-if="row" link type="primary" @click="copyCardKey(row)">复制</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
         <div class="goods-total">
           <ul>
             <li>
@@ -280,7 +316,7 @@
                 <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
                 <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ unitPrice(item.discountPrice) }}</span>
               </li> -->
-            <li>
+            <li v-if="!isECouponOrder">
               <span class="label">运费：</span>
               <span class="txt">{{
                 unitPrice(orderInfo.order.freightPrice, "￥")
@@ -440,12 +476,42 @@ import vueQr from "vue-qr";
 import { printElement } from "@/utils/print";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, clientTypeWay } from "@/utils/filters";
+import { formatCardKeyStatus } from "@/constants/cardKey";
 export default {
   name: "orderList",
   components: {
 
     multipleMap,
     "vue-qr": vueQr,
+  },
+  computed: {
+    /** 电子卡券订单：无物流区，卡密来自 orderItems[].cardKeys */
+    isECouponOrder() {
+      const t = this.orderInfo?.order?.orderType;
+      return t === "E_COUPON" || this.$route.query.orderType === "E_COUPON";
+    },
+    isVirtualOrder() {
+      const t = this.orderInfo?.order?.orderType;
+      return t === "VIRTUAL" || this.$route.query.orderType === "VIRTUAL";
+    },
+    isNonPhysicalOrder() {
+      return this.isVirtualOrder || this.isECouponOrder;
+    },
+    ecouponCardKeyDelivered() {
+      return (this.data || []).some((item) => item.cardKeyDelivered);
+    },
+    ecouponCardKeyRows() {
+      const rows = [];
+      (this.data || []).forEach((item) => {
+        (item.cardKeys || []).forEach((ck) => {
+          rows.push({
+            ...ck,
+            goodsName: item.goodsName,
+          });
+        });
+      });
+      return rows;
+    },
   },
   data () {
     return {
@@ -546,6 +612,23 @@ export default {
   methods: {
     unitPrice,
     clientTypeWay,
+    formatCardKeyStatus,
+    copyCardKey(row) {
+      const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          ElMessage.success("已复制到剪贴板");
+        });
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        ElMessage.success("已复制到剪贴板");
+      }
+    },
     getPromotionText(row) {
       let resultText = "";
       if (row && row.promotionType) {

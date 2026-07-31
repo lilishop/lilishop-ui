@@ -102,14 +102,21 @@ export default {
           title: '支付确认',
           content: '确认使用余额支付吗？',
           onOk: () => {
-            pay(params).then(res => {
-              if (res.success) {
-                Message.success(res.message)
-                this.$router.push('/payDone');
-              } else {
-                Message.warning(res.message)
-              }
-            })
+            return pay(params)
+              .then((res) => {
+                if (res.success) {
+                  Message.success(res.message || '支付成功');
+                  this.$router.push('/payDone');
+                } else {
+                  Message.warning(res.message || '支付失败');
+                }
+              })
+              .catch((err) => {
+                // 支付失败兜底：业务错误（如 CARD_KEY_STORE_SELL_FORBIDDEN）通常已由 axios 拦截器提示
+                if (err?.message && !err?.data?.message) {
+                  Message.error(err.message);
+                }
+              });
           }
         });
       } else {

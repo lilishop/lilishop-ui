@@ -44,7 +44,7 @@
             </el-form-item>
             <el-form-item class="form-item-view-el" label="销售模式" prop="salesModel">
               <el-radio-group
-                v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'"
+                v-if="!isVirtualLikeGoods"
                 v-model="baseInfoForm.salesModel"
                 @change="handleSalesModeChange"
               >
@@ -52,7 +52,7 @@
                 <el-radio-button value="WHOLESALE">批发型</el-radio-button>
               </el-radio-group>
               <el-radio-group v-else v-model="baseInfoForm.salesModel">
-                <el-radio-button value="RETAIL">虚拟型</el-radio-button>
+                <el-radio-button value="RETAIL">{{ isECouponGoods ? "电子卡券" : "虚拟型" }}</el-radio-button>
               </el-radio-group>
             </el-form-item>
             <el-form-item v-if="baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="销售规则"
@@ -336,13 +336,21 @@
                               @change="updateSkuTable(row, 'sn', $index)"
                             />
                             <el-input
-                              v-else-if="col.slot === 'weight' && baseInfoForm.goodsType !== 'VIRTUAL_GOODS'"
+                              v-else-if="col.slot === 'weight' && needsLogistics && baseInfoForm.salesModel !== 'WHOLESALE'"
                               v-model="row.weight"
                               clearable
                               placeholder="请输入重量"
                               @change="updateSkuTable(row, 'weight', $index)"
                             >
                               <template #append>kg</template>
+                            </el-input>
+                            <el-input
+                              v-else-if="col.slot === 'quantity' && isECouponGoods"
+                              :model-value="resolvePoolStockDisplay(row)"
+                              disabled
+                              placeholder="卡池可用数"
+                            >
+                              <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
                             </el-input>
                             <el-input
                               v-else-if="col.slot === 'quantity'"
@@ -444,7 +452,7 @@
               </div>
             </el-form-item>
           </div>
-          <div v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'">
+          <div v-if="needsLogistics">
             <h4>商品物流信息</h4>
             <div class="form-item-view">
               <el-form-item class="form-item-view-el" label="物流模板" prop="templateId">
@@ -513,7 +521,7 @@
         @selected="(list) => { selectedImage = list }"
       />
       <template #footer>
-        <el-button @click="picModelFlag = false">取消</el-button>
+        <el-button @click="picModelFlag = false; selectedImage = []">取消</el-button>
         <el-button type="primary" @click="confirmUrls">确定</el-button>
       </template>
     </el-dialog>
@@ -550,6 +558,22 @@ export default {
     firstData: {
       default: {},
       type: Object,
+    },
+  },
+  computed: {
+    /** 卡密商品：库存只读展示 poolStock，提交时 quantity 传 0（FR-S-01 / P-02） */
+    isECouponGoods() {
+      return this.baseInfoForm.goodsType === "E_COUPON";
+    },
+    isVirtualGoods() {
+      return this.baseInfoForm.goodsType === "VIRTUAL_GOODS";
+    },
+    isVirtualLikeGoods() {
+      return this.isVirtualGoods || this.isECouponGoods;
+    },
+    /** 仅实物需要运费模板；E_COUPON 强制 templateId=0（§6.1） */
+    needsLogistics() {
+      return this.baseInfoForm.goodsType === "PHYSICAL_GOODS";
     },
   },
   data() {
@@ -759,11 +783,32 @@ export default {
     }
   },
   methods: {
+    /** E_COUPON 库存列只读展示，无卡密时显示 0 */
+    resolvePoolStockDisplay(row) {
+      if (row.poolStock != null && row.poolStock !== "") {
+        return row.poolStock;
+      }
+      if (row.quantity != null && row.quantity !== "") {
+        return row.quantity;
+      }
+      return 0;
+    },
+    /** E_COUPON 提交固定传 0，真实库存由卡池同步 */
+    resolveSubmitQuantity(sku) {
+      if (this.isECouponGoods) {
+        return 0;
+      }
+      return sku.quantity;
+    },
+    defaultSkuQuantity() {
+      return this.isECouponGoods ? 0 : "";
+    },
     draggableItemKey(item) {
       return item;
     },
     // 选择图片modal
     handleCLickImg(val, index) {
+      this.selectedImage = [];
       this.picModelFlag = true;
       this.selectedFormBtnName = val;
       this.$nextTick(() => {
@@ -793,22 +838,60 @@ export default {
         desc: "视频大小不能超过10MB",
       });
     },
+    parseOssSelectionUrl(item) {
+      if (!item) return "";
+      if (typeof item === "string") {
+        const index = item.indexOf(",");
+        return index >= 0 ? item.slice(index + 1) : item;
+      }
+      return item.url || "";
+    },
     // 图片选择后回调
     callbackSelected(val) {
       this.picModelFlag = false;
-      if (val && this.selectedFormBtnName == 'selectedSkuImages') {
-        this.selectedSku.images.push(val);
+      if (!val?.url) {
+        return;
+      }
+      if (this.selectedFormBtnName === "selectedSkuImages") {
+        if (!this.selectedSku.images) {
+          this.selectedSku.images = [];
+        }
+        this.selectedSku.images.push(val.url);
       } else {
         this.baseInfoForm[this.selectedFormBtnName].push(val.url);
       }
-
     },
     confirmUrls() {
-      if (this.selectedImage && this.selectedFormBtnName == 'selectedSkuImages') {
-        this.selectedSku.images = [...this.selectedSku.images, ...this.selectedImage];
-      } else {
-        this.baseInfoForm[this.selectedFormBtnName] = [...this.baseInfoForm[this.selectedFormBtnName], ...this.selectedImage];
+      const urls = (this.selectedImage || [])
+        .map((item) => this.parseOssSelectionUrl(item))
+        .filter(Boolean);
+      if (!urls.length) {
+        this.$Message.warning("请选择图片");
+        return;
       }
+      if (this.selectedFormBtnName === "selectedSkuImages") {
+        if (!this.selectedSku.images) {
+          this.selectedSku.images = [];
+        }
+        urls.forEach((url) => {
+          if (this.selectedSku.images.length < 5) {
+            this.selectedSku.images.push(url);
+          }
+        });
+      } else if (this.selectedFormBtnName === "goodsGalleryFiles") {
+        urls.forEach((url) => {
+          if (this.baseInfoForm.goodsGalleryFiles.length < 5) {
+            this.baseInfoForm.goodsGalleryFiles.push(url);
+          }
+        });
+      } else if (this.selectedFormBtnName) {
+        const target = this.baseInfoForm[this.selectedFormBtnName];
+        if (Array.isArray(target)) {
+          urls.forEach((url) => target.push(url));
+        }
+      }
+      this.selectedImage = [];
+      this.picModelFlag = false;
     },
     // 局部刷新
     refresh(v) {
@@ -1255,6 +1338,7 @@ export default {
           price: e.price,
           // cost: e.cost,
           quantity: e.quantity,
+          poolStock: e.poolStock,
           // alertQuantity: e.alertQuantity,
           weight: e.weight,
         };
@@ -1724,14 +1808,20 @@ export default {
               ...combination,
               id: existingCombination.id || "",
               sn: existingCombination.sn || "",
-              quantity: existingCombination.quantity || "",
+              quantity: this.isECouponGoods
+                ? this.resolvePoolStockDisplay(existingCombination)
+                : (existingCombination.quantity || ""),
+              poolStock: existingCombination.poolStock,
               cost: existingCombination.cost || "",
               price: existingCombination.price || "",
               weight: existingCombination.weight || ""
             };
           } else {
             // 新组合使用默认值
-            return combination;
+            return {
+              ...combination,
+              quantity: this.defaultSkuQuantity(),
+            };
           }
         });
         this.baseInfoForm.regeneratorSkuFlag = true;
@@ -1779,14 +1869,20 @@ export default {
             ...combination,
             id: existingCombination.id || "",
             sn: existingCombination.sn || "",
-            quantity: existingCombination.quantity || "",
+            quantity: this.isECouponGoods
+              ? this.resolvePoolStockDisplay(existingCombination)
+              : (existingCombination.quantity || ""),
+            poolStock: existingCombination.poolStock,
             cost: existingCombination.cost || "",
             price: existingCombination.price || "",
             weight: existingCombination.weight || ""
           };
         } else {
           // 新组合使用默认值
-          return combination;
+          return {
+            ...combination,
+            quantity: this.defaultSkuQuantity(),
+          };
         }
       });
 
@@ -1833,7 +1929,7 @@ export default {
 
       // 有重量的情况
       if (
-        this.baseInfoForm.goodsType !== "VIRTUAL_GOODS" &&
+        this.needsLogistics &&
         this.baseInfoForm.salesModel !== "WHOLESALE"
       ) {
         pushData.push({
@@ -1843,7 +1939,7 @@ export default {
       }
       pushData.push(
         {
-          title: "库存",
+          title: this.isECouponGoods ? "卡池可用数" : "库存",
           slot: "quantity",
         },
         // {
@@ -1878,7 +1974,10 @@ export default {
               ...combination,
               id: existingCombination.id || "",
               sn: existingCombination.sn || "",
-              quantity: existingCombination.quantity || "",
+              quantity: this.isECouponGoods
+                ? this.resolvePoolStockDisplay(existingCombination)
+                : (existingCombination.quantity || ""),
+              poolStock: existingCombination.poolStock,
               cost: existingCombination.cost || "",
               price: existingCombination.price || (this.baseInfoForm.salesModel === 'WHOLESALE' && this.wholesaleData.length > 0 ? this.wholesaleData[0].price : ""),
               weight: existingCombination.weight || ""
@@ -1889,7 +1988,7 @@ export default {
               ...combination,
               id: "",
               sn: "",
-              quantity: "",
+              quantity: this.defaultSkuQuantity(),
               cost: "",
               price: this.baseInfoForm.salesModel === 'WHOLESALE' && this.wholesaleData.length > 0 ? this.wholesaleData[0].price : "",
               weight: ""
@@ -2153,6 +2252,10 @@ export default {
             return;
           }
           if (submit.templateId === "") submit.templateId = 0;
+          if (this.isECouponGoods) {
+            submit.templateId = 0;
+            submit.salesModel = "RETAIL";
+          }
           let flag = false;
           let paramValue = "";
 
@@ -2175,7 +2278,7 @@ export default {
             let skuCopy = {
               cost: 1,
               price: sku.price,
-              quantity: sku.quantity,
+              quantity: this.resolveSubmitQuantity(sku),
               // alertQuantity: sku.alertQuantity,
               sn: sku.sn,
               images: [],
