@@ -11,18 +11,21 @@
 export const CARD_KEY_STATUS = {
   UNUSED: "UNUSED",
   ALLOCATED: "ALLOCATED",
+  RESERVED: "RESERVED",
   VOIDED: "VOIDED",
 };
 
 export const CARD_KEY_STATUS_TEXT = {
   UNUSED: "未使用",
   ALLOCATED: "已分配",
+  RESERVED: "已预占",
   VOIDED: "已作废",
 };
 
 export const CARD_KEY_STATUS_TAG = {
   UNUSED: "success",
   ALLOCATED: "info",
+  RESERVED: "warning",
   VOIDED: "danger",
 };
 
@@ -30,6 +33,7 @@ export const CARD_KEY_STATUS_TAG = {
 export const CARD_KEY_STATUS_TABS = [
   { key: "", label: "全部" },
   { key: CARD_KEY_STATUS.UNUSED, label: "未使用" },
+  { key: CARD_KEY_STATUS.RESERVED, label: "已预占" },
   { key: CARD_KEY_STATUS.ALLOCATED, label: "已分配" },
   { key: CARD_KEY_STATUS.VOIDED, label: "已作废" },
 ];

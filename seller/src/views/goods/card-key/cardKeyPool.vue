@@ -116,6 +116,7 @@
             >
               作废
             </el-button>
+            <span v-else-if="row && row.status === 'RESERVED'" class="text-muted">预占中</span>
             <span v-else>—</span>
           </template>
         </el-table-column>
@@ -257,10 +258,14 @@ export default {
       const withCount = (label, count) =>
         count != null && this.stats ? `${label}(${count})` : label;
       const total =
-        (s.unusedCount || 0) + (s.allocatedCount || 0) + (s.voidedCount || 0);
+        (s.unusedCount || 0) +
+        (s.reservedCount || 0) +
+        (s.allocatedCount || 0) +
+        (s.voidedCount || 0);
       return [
         { title: withCount("全部", total), value: "ALL" },
         { title: withCount("未使用", s.unusedCount || 0), value: "UNUSED" },
+        { title: withCount("已预占", s.reservedCount || 0), value: "RESERVED" },
         { title: withCount("已分配", s.allocatedCount || 0), value: "ALLOCATED" },
         { title: withCount("已作废", s.voidedCount || 0), value: "VOIDED" },
       ];
@@ -481,5 +486,10 @@ export default {
   font-size: 13px;
   color: #909399;
   line-height: 1.5;
+}
+
+.text-muted {
+  color: #909399;
+  font-size: 12px;
 }
 </style>

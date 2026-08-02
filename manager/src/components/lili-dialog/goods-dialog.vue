@@ -45,7 +45,15 @@
               <div class="wap-sku">
                 {{ item.goodsUnit }}
                 <el-tag
-                  style="margin-left: 10px"
+                  v-if="item.goodsType"
+                  style="margin-left: 6px"
+                  size="small"
+                  :type="goodsTypeTagType(item.goodsType)"
+                >
+                  {{ goodsTypeLabel(item.goodsType) }}
+                </el-tag>
+                <el-tag
+                  style="margin-left: 6px"
                   :type="item.salesModel === 'RETAIL' ? 'info' : 'primary'"
                 >
                   {{ item.salesModel === "RETAIL" ? "零售型" : "批发型" }}
@@ -53,6 +61,9 @@
               </div>
               <div class="wap-content-desc-bottom">
                 <div>￥{{ $filters.unitPrice(item.price) }}</div>
+                <div v-if="item.goodsType === 'E_COUPON'" class="pool-stock-hint">
+                  库存 {{ item.quantity != null ? item.quantity : "—" }}（卡池）
+                </div>
               </div>
             </div>
           </div>
@@ -75,6 +86,7 @@
 </template>
 <script>
 import * as API_Goods from "@/api/goods";
+import { goodsTypeLabel, goodsTypeTagType } from "@/constants/goodsType";
 export default {
   props: {
     selectedWay: {
@@ -129,6 +141,8 @@ export default {
     this.init();
   },
   methods: {
+    goodsTypeLabel,
+    goodsTypeTagType,
     onSearchGoods() {
       this.goodsData = [];
       this.goodsParams.pageNumber = 1;
@@ -270,7 +284,9 @@ export default {
 }
 </style>
 <style lang="scss">
-.goods-dialog-cascader-popper {
-  z-index: 10001 !important;
+.pool-stock-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
 }
 </style>

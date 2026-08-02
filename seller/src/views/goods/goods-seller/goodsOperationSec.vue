@@ -346,9 +346,9 @@
                             </el-input>
                             <el-input
                               v-else-if="col.slot === 'quantity' && isECouponGoods"
-                              :model-value="resolvePoolStockDisplay(row)"
+                              :model-value="row.quantity ?? 0"
                               disabled
-                              placeholder="卡池可用数"
+                              placeholder="库存"
                             >
                               <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
                             </el-input>
@@ -561,7 +561,7 @@ export default {
     },
   },
   computed: {
-    /** 卡密商品：库存只读展示 poolStock，提交时 quantity 传 0（FR-S-01 / P-02） */
+    /** 卡密商品：库存只读展示 quantity，提交时 quantity 传 0（FR-S-01 / P-02） */
     isECouponGoods() {
       return this.baseInfoForm.goodsType === "E_COUPON";
     },
@@ -783,17 +783,7 @@ export default {
     }
   },
   methods: {
-    /** E_COUPON 库存列只读展示，无卡密时显示 0 */
-    resolvePoolStockDisplay(row) {
-      if (row.poolStock != null && row.poolStock !== "") {
-        return row.poolStock;
-      }
-      if (row.quantity != null && row.quantity !== "") {
-        return row.quantity;
-      }
-      return 0;
-    },
-    /** E_COUPON 提交固定传 0，真实库存由卡池同步 */
+    /** E_COUPON 提交固定传 0，真实库存由卡池 syncSkuStock 同步至 quantity */
     resolveSubmitQuantity(sku) {
       if (this.isECouponGoods) {
         return 0;
@@ -1338,7 +1328,6 @@ export default {
           price: e.price,
           // cost: e.cost,
           quantity: e.quantity,
-          poolStock: e.poolStock,
           // alertQuantity: e.alertQuantity,
           weight: e.weight,
         };
@@ -1809,9 +1798,8 @@ export default {
               id: existingCombination.id || "",
               sn: existingCombination.sn || "",
               quantity: this.isECouponGoods
-                ? this.resolvePoolStockDisplay(existingCombination)
+                ? (existingCombination.quantity ?? 0)
                 : (existingCombination.quantity || ""),
-              poolStock: existingCombination.poolStock,
               cost: existingCombination.cost || "",
               price: existingCombination.price || "",
               weight: existingCombination.weight || ""
@@ -1870,9 +1858,8 @@ export default {
             id: existingCombination.id || "",
             sn: existingCombination.sn || "",
             quantity: this.isECouponGoods
-              ? this.resolvePoolStockDisplay(existingCombination)
+              ? (existingCombination.quantity ?? 0)
               : (existingCombination.quantity || ""),
-            poolStock: existingCombination.poolStock,
             cost: existingCombination.cost || "",
             price: existingCombination.price || "",
             weight: existingCombination.weight || ""
@@ -1939,7 +1926,7 @@ export default {
       }
       pushData.push(
         {
-          title: this.isECouponGoods ? "卡池可用数" : "库存",
+          title: "库存",
           slot: "quantity",
         },
         // {
@@ -1975,9 +1962,8 @@ export default {
               id: existingCombination.id || "",
               sn: existingCombination.sn || "",
               quantity: this.isECouponGoods
-                ? this.resolvePoolStockDisplay(existingCombination)
+                ? (existingCombination.quantity ?? 0)
                 : (existingCombination.quantity || ""),
-              poolStock: existingCombination.poolStock,
               cost: existingCombination.cost || "",
               price: existingCombination.price || (this.baseInfoForm.salesModel === 'WHOLESALE' && this.wholesaleData.length > 0 ? this.wholesaleData[0].price : ""),
               weight: existingCombination.weight || ""

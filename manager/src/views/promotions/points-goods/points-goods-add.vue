@@ -23,6 +23,11 @@
               >
                 <el-table-column type="selection" width="60" align="center" />
                 <el-table-column prop="goodsName" label="商品名称" min-width="120" show-overflow-tooltip />
+                <el-table-column label="类型" width="100">
+                  <template #default="{ row }">
+                    <span v-if="row">{{ goodsTypeLabel(row.goodsType) }}</span>
+                  </template>
+                </el-table-column>
                 <el-table-column label="SKU编码" min-width="120">
                   <template #default="{ row }">
                     <span v-if="row">{{ row.skuId }}</span>
@@ -117,6 +122,7 @@
 <script>
 import { addPointsGoods, getPointsGoodsCategoryList } from "@/api/promotion";
 import skuSelect from "@/components/lili-dialog";
+import { isECoupon, goodsTypeLabel } from "@/constants/goodsType";
 
 export default {
   name: "addPoinsGoods",
@@ -160,6 +166,7 @@ export default {
     await this.getCategory();
   },
   methods: {
+    goodsTypeLabel,
     async getCategory() {
       let res = await getPointsGoodsCategoryList();
       this.categoryList = res.result.records;
@@ -171,6 +178,13 @@ export default {
         if (!params || params.length === 0) {
           this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
           return;
+        }
+        for (const row of params) {
+          const stock = Number(row.quantity) || 0;
+          if (isECoupon(row.goodsType) && Number(row.activeStock) > stock) {
+            this.$Message.error(`【${row.goodsName}】活动库存不能超过卡池库存（${stock}）`);
+            return;
+          }
         }
         this.form.startTime = this.form.rangeTime[0];
         this.form.endTime = this.form.rangeTime[1];
@@ -251,6 +265,7 @@ export default {
           quantity: e.quantity || "",
           storeName: e.storeName || "",
           price: e.price || "",
+          goodsType: e.goodsType,
         };
         list.push(obj);
       });

@@ -33,7 +33,12 @@
             <el-table-column prop="originalPrice" label="原价" width="90" align="center" />
             <el-table-column label="活动价" width="150" align="center">
               <template #default="{ row }">
-                <el-input-number v-model="row.price" :min="0.01" :precision="2" size="small" />
+                <el-input-number
+                  v-model="row.price"
+                  :min="promotionPriceMin(row.goodsType)"
+                  :precision="2"
+                  size="small"
+                />
               </template>
             </el-table-column>
           </el-table>
@@ -50,6 +55,7 @@
 
 <script>
 import { getFlashDiscountDetail, saveFlashDiscount, editFlashDiscount } from "@/api/promotion.js";
+import { promotionPriceMin } from "@/constants/goodsType";
 
 export default {
   data() {
@@ -75,6 +81,7 @@ export default {
     }
   },
   methods: {
+    promotionPriceMin,
     openGoods() {
       this.$refs.liliDialog.open("goods");
     },
@@ -88,6 +95,7 @@ export default {
             originalPrice: g.price,
             price: g.price,
             quantity: g.quantity,
+            goodsType: g.goodsType,
           });
         }
       });

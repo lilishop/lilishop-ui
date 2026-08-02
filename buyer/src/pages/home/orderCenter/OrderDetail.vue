@@ -132,35 +132,59 @@
       </template>
       <div v-else style="color: #999; margin-left: 5px">未开发票</div>
     </div>
-    <!-- 电子卡券：卡密信息（PC 内嵌） -->
-    <div class="order-card ecoupon-card-keys" v-if="isECouponOrder">
+    <!-- 卡密信息（E_COUPON 主单或满赠子单，以 cardKeyFulfillStatus 为准） -->
+    <div class="order-card ecoupon-card-keys" v-if="hasCardKeySection">
       <h3>卡密信息</h3>
-      <el-alert
-        v-if="!ecouponCardKeyDelivered"
-        type="info"
-        show-icon
-        :closable="false"
-        title="卡密尚未发放，请稍后刷新或联系商家"
-      />
-      <template v-else-if="ecouponCardKeyRows.length">
-        <div class="ecoupon-card-keys-mobile">
-          <el-button type="primary" @click="cardKeyDialogVisible = true">查看卡密</el-button>
+      <div
+        v-for="line in cardKeyFulfillLines"
+        :key="line.key"
+        class="ecoupon-fulfill-block"
+      >
+        <div v-if="cardKeyFulfillLines.length > 1" class="ecoupon-fulfill-title">
+          {{ line.goodsName || (line.isGift ? "满赠电子卡券" : "电子卡券") }}
         </div>
-        <div class="ecoupon-card-keys-pc">
-          <el-table border :data="ecouponCardKeyRows" style="width: 100%">
-            <el-table-column type="index" label="序号" width="60" align="center" />
-            <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
-            <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
-            <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
-            <el-table-column label="操作" width="120" align="center">
-              <template #default="{ row }">
-                <el-button v-if="row" link type="primary" @click="copyCardKey(row)">复制</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-          <el-button class="mt_10" size="small" @click="copyAllCardKeys">复制全部卡密</el-button>
-        </div>
-      </template>
+        <el-alert
+          v-if="line.status !== 'DELIVERED'"
+          :type="cardKeyFulfillAlertType(line.status)"
+          show-icon
+          :closable="false"
+          :title="resolveCardKeyFulfillMessage(line)"
+          class="mb_10"
+        />
+        <template v-else-if="line.cardKeys.length">
+          <div class="ecoupon-card-keys-mobile">
+            <el-button type="primary" @click="cardKeyDialogVisible = true">查看卡密</el-button>
+          </div>
+          <div class="ecoupon-card-keys-pc">
+            <el-table border :data="lineCardKeyRows(line)" style="width: 100%">
+              <el-table-column type="index" label="序号" width="60" align="center" />
+              <el-table-column
+                v-if="cardKeyFulfillLines.length > 1"
+                prop="goodsName"
+                label="商品"
+                min-width="120"
+                show-overflow-tooltip
+              />
+              <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
+              <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
+              <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
+              <el-table-column label="操作" width="120" align="center">
+                <template #default="{ row }">
+                  <el-button v-if="row" link type="primary" @click="copyCardKey(row)">复制</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </template>
+      </div>
+      <el-button
+        v-if="ecouponCardKeyRows.length"
+        class="mt_10 ecoupon-card-keys-pc"
+        size="small"
+        @click="copyAllCardKeys"
+      >
+        复制全部卡密
+      </el-button>
     </div>
 
     <!-- 订单商品 -->
@@ -378,7 +402,14 @@ import {
   getPackage
 } from "@/api/order.js";
 import { afterSaleReason, receiptDetail } from "@/api/member";
-import { isECouponOrder as checkECouponOrder } from "@/constants/goodsType";
+import {
+  isECouponOrder as checkECouponOrder,
+  collectCardKeyFulfillLines,
+  orderHasCardKeySection,
+  flattenOrderCardKeys,
+  cardKeyFulfillAlertType,
+  resolveCardKeyFulfillMessage,
+} from "@/constants/goodsType";
 
 /**
  * 订单详情：E_COUPON 展示 orderItems[].cardKeys，屏蔽售后/物流（FR-B-03 / FR-B-04）。
@@ -415,20 +446,37 @@ export default {
     isNonPhysicalOrder() {
       return this.isVirtualOrder || this.isECouponOrder;
     },
-    ecouponCardKeyDelivered() {
-      return (this.order.orderItems || []).some((item) => item.cardKeyDelivered);
+    /** 是否展示卡密区块（含满赠 E_COUPON 子单 giftECouponOrders） */
+    hasCardKeySection() {
+      return orderHasCardKeySection({
+        orderItems: this.order.orderItems,
+        giftSummaries: this.order.giftECouponOrders,
+        isECouponOrder: this.isECouponOrder,
+      });
+    },
+    cardKeyFulfillLines() {
+      return collectCardKeyFulfillLines(
+        this.order.orderItems,
+        this.order.giftECouponOrders
+      );
     },
     ecouponCardKeyRows() {
-      const rows = [];
-      (this.order.orderItems || []).forEach((item) => {
-        (item.cardKeys || []).forEach((ck) => {
-          rows.push({ ...ck });
-        });
-      });
-      return rows;
+      return flattenOrderCardKeys(
+        this.order.orderItems,
+        false,
+        this.order.giftECouponOrders
+      );
     },
   },
   methods: {
+    cardKeyFulfillAlertType,
+    resolveCardKeyFulfillMessage,
+    lineCardKeyRows(line) {
+      return (line.cardKeys || []).map((ck) => ({
+        ...ck,
+        goodsName: line.goodsName,
+      }));
+    },
     copyCardKey(row) {
       const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
       this.copyText(text);
@@ -765,6 +813,18 @@ table {
 
 .ecoupon-card-keys-mobile {
   display: none;
+}
+
+.ecoupon-fulfill-block + .ecoupon-fulfill-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #eee;
+}
+
+.ecoupon-fulfill-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
 }
 
 .ecoupon-card-keys-pc {

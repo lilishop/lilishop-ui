@@ -10,6 +10,7 @@
 export const CARD_KEY_STATUS_TEXT = {
   UNUSED: "未使用",
   ALLOCATED: "已分配",
+  RESERVED: "已预占",
   VOIDED: "已作废",
 };
 

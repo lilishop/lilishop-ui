@@ -257,39 +257,55 @@
           </el-table-column>
         </el-table>
 
-        <!-- E_COUPON：卡密来自订单详情 orderItems[].cardKeys（S-09，无独立 API-S-06） -->
-        <div v-if="isECouponOrder" class="ecoupon-card-keys mt_10">
+        <!-- 卡密信息（E_COUPON 主单或满赠子单，以 cardKeyFulfillStatus 为准） -->
+        <div v-if="hasCardKeySection" class="ecoupon-card-keys mt_10">
           <h4>卡密信息</h4>
-          <el-alert
-            v-if="!ecouponCardKeyDelivered"
-            type="info"
-            show-icon
-            :closable="false"
-            title="卡密尚未发放"
-            class="mb_10"
-          />
-          <el-table
-            v-else-if="ecouponCardKeyRows.length"
-            border
-            :data="ecouponCardKeyRows"
-            style="width: 100%"
+          <div
+            v-for="line in cardKeyFulfillLines"
+            :key="line.key"
+            class="ecoupon-fulfill-block"
           >
-            <el-table-column type="index" label="序号" width="60" align="center" />
-            <el-table-column prop="goodsName" label="商品" min-width="140" show-overflow-tooltip />
-            <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
-            <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
-            <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
-            <el-table-column label="状态" width="90" align="center">
-              <template #default="{ row }">
-                <span v-if="row">{{ formatCardKeyStatus(row.status || 'ALLOCATED') }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="100" align="center">
-              <template #default="{ row }">
-                <el-button v-if="row" link type="primary" @click="copyCardKey(row)">复制</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
+            <div v-if="cardKeyFulfillLines.length > 1" class="ecoupon-fulfill-title mb_10">
+              {{ line.goodsName || (line.isGift ? "满赠电子卡券" : "电子卡券") }}
+            </div>
+            <el-alert
+              v-if="line.status !== 'DELIVERED'"
+              :type="cardKeyFulfillAlertType(line.status)"
+              show-icon
+              :closable="false"
+              :title="resolveCardKeyFulfillMessage(line)"
+              class="mb_10"
+            />
+            <el-table
+              v-else-if="line.cardKeys.length"
+              border
+              :data="lineCardKeyRows(line)"
+              style="width: 100%"
+              class="mb_10"
+            >
+              <el-table-column type="index" label="序号" width="60" align="center" />
+              <el-table-column
+                v-if="cardKeyFulfillLines.length > 1"
+                prop="goodsName"
+                label="商品"
+                min-width="140"
+                show-overflow-tooltip
+              />
+              <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
+              <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
+              <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
+              <el-table-column label="状态" width="90" align="center">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatCardKeyStatus(row.status || 'ALLOCATED') }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="100" align="center">
+                <template #default="{ row }">
+                  <el-button v-if="row" link type="primary" @click="copyCardKey(row)">复制</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </div>
 
         <div class="goods-total">
@@ -731,6 +747,13 @@ import multipleMap from "@/views/my-components/map/multiple-map";
 import vueQr from "vue-qr";
 import { printElement } from "@/utils/print";
 import { formatCardKeyStatus } from "@/constants/cardKey";
+import {
+  collectCardKeyFulfillLines,
+  orderHasCardKeySection,
+  flattenOrderCardKeys,
+  cardKeyFulfillAlertType,
+  resolveCardKeyFulfillMessage,
+} from "@/constants/goodsType";
 export default {
   name: "orderDetail",
   components: {
@@ -863,20 +886,18 @@ export default {
     isNonPhysicalOrder() {
       return this.isVirtualOrder || this.isECouponOrder;
     },
-    ecouponCardKeyDelivered() {
-      return (this.data || []).some((item) => item.cardKeyDelivered);
+    hasCardKeySection() {
+      return orderHasCardKeySection({
+        orderItems: this.data,
+        giftSummaries: this.orderInfo.giftECouponOrders,
+        isECouponOrder: this.isECouponOrder,
+      });
+    },
+    cardKeyFulfillLines() {
+      return collectCardKeyFulfillLines(this.data, this.orderInfo.giftECouponOrders);
     },
     ecouponCardKeyRows() {
-      const rows = [];
-      (this.data || []).forEach((item) => {
-        (item.cardKeys || []).forEach((ck) => {
-          rows.push({
-            ...ck,
-            goodsName: item.goodsName,
-          });
-        });
-      });
-      return rows;
+      return flattenOrderCardKeys(this.data, true, this.orderInfo.giftECouponOrders);
     },
     canPartDelivery() {
       if (!this.allowOperation.ship) return false;
@@ -910,6 +931,14 @@ export default {
   },
   methods: {
     formatCardKeyStatus,
+    cardKeyFulfillAlertType,
+    resolveCardKeyFulfillMessage,
+    lineCardKeyRows(line) {
+      return (line.cardKeys || []).map((ck) => ({
+        ...ck,
+        goodsName: line.goodsName,
+      }));
+    },
     copyCardKey(row) {
       const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
       if (navigator.clipboard && navigator.clipboard.writeText) {

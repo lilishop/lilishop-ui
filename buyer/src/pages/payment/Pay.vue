@@ -151,8 +151,8 @@
           </div>
         </div>
       </div>
-      <!-- 发票信息 -->
-      <div class="invoice">
+      <!-- 发票信息（E_COUPON 虚拟型结算不开发票） -->
+      <div class="invoice" v-if="!isECouponCheckout">
         <div class="card-head mt_20 mb_20">
           <span class="relative">发票信息<span class="inv-tips">
               <el-icon><Warning /></el-icon>开企业抬头发票须填写纳税人识别号，以免影响报销
@@ -167,8 +167,8 @@
           <span @click="editInvoice">编辑</span>
         </div>
       </div>
-      <!-- 优惠券（E_COUPON 不参与促销 M-01） -->
-      <div class="invoice" v-if="!isECouponCheckout">
+      <!-- 优惠券 -->
+      <div class="invoice">
         <div class="card-head mt_20 mb_20">
           <span class="relative">优惠券</span>
         </div>
@@ -204,7 +204,7 @@
         </ul>
       </div>
       <!-- 礼品卡 -->
-      <div class="invoice pay-gcc-module" v-if="!isECouponCheckout">
+      <div class="invoice pay-gcc-module">
         <div class="pay-gcc-head">
           <div class="pay-gcc-title">
             使用礼品卡
@@ -284,13 +284,13 @@
       <!-- 底部支付栏 -->
       <div class="order-footer">
         <div class="pay ml_20" @click="pay">提交订单</div>
-        <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'LOGISTICS'">
+        <div class="pay-address" v-if="!isVirtualLikeCheckout && addressList.length && selectedDeliverMethod === 'LOGISTICS'">
           配送至：{{ $filters.unitAddress(selectedAddress.consigneeAddressPath) }}
           {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
               selectedAddress.name
           }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
         </div>
-        <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
+        <div class="pay-address" v-if="!isVirtualLikeCheckout && addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
           自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }}
         </div>
       </div>
@@ -329,7 +329,7 @@ import {
 } from "@/api/cart";
 import { getStoreAddress } from "@/api/shopentry.js"
 import { canUseCouponList } from "@/api/member.js";
-import { isECoupon } from "@/constants/goodsType";
+import { isECoupon, shouldSkipPaymentPage } from "@/constants/goodsType";
 
 export default {
   name: "Pay",
@@ -379,7 +379,7 @@ export default {
       );
       return Number.isFinite(n) ? n : 0;
     },
-    /** 电子卡券结算：免地址、隐藏优惠券/礼品卡/发票（M-01 / O-11） */
+    /** 电子卡券结算：免地址、隐藏发票；优惠券/礼品卡/促销明细可用（M-02） */
     isECouponCheckout() {
       return isECoupon(this.goodsType);
     },
@@ -855,15 +855,15 @@ export default {
         .then((res) => {
           Spin.hide();
           if (res.success) {
-            if (params.way === "POINTS") {
-              // 积分支付不需要跳转支付页面
+            const way = params.way;
+            if (shouldSkipPaymentPage(res.result, way)) {
               this.$router.push("/payDone");
-            } else {
-              this.$router.push({
-                path: "/payment",
-                query: { orderType: "TRADE", sn: res.result.sn },
-              });
+              return;
             }
+            this.$router.push({
+              path: "/payment",
+              query: { orderType: "TRADE", sn: res.result.sn },
+            });
           } else if (res.message) {
             Message.warning(res.message);
           }

@@ -37,7 +37,7 @@
 </template>
 <script>
 
-import {tradeDetail, pay} from '@/api/pay.js';
+import { tradeDetail, pay } from '@/api/pay.js';
 import { Message, Modal } from "@/utils/message";
 
 export default {
@@ -78,6 +78,10 @@ export default {
           this.isStart = true
           this.support = this.payDetail.support
           this.walletValue = this.payDetail.walletValue
+          const price = Number(this.payDetail.price);
+          if (!Number.isNaN(price) && price <= 0) {
+            this.$router.replace('/payDone');
+          }
         }
       }).catch((err) => {
         this.$router.push({name: 'MyOrder'});

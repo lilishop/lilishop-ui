@@ -113,6 +113,7 @@
               </el-select>
             </el-form-item>
             <el-form-item v-if="form.giftFlag" label="赠品" prop="giftId">
+              <p class="describe">电子卡券赠品支付后自动发卡；卡池不足时仅取消赠品子单，不影响主订单。</p>
               <el-select
                 v-model="form.giftId"
                 filterable
@@ -127,7 +128,7 @@
                   v-for="item in giftList"
                   :value="item.id"
                   :key="item.id"
-                  :label="item.goodsName"
+                  :label="giftOptionLabel(item)"
                 />
               </el-select>
             </el-form-item>
@@ -241,6 +242,7 @@ import {
 import { getGoodsSkuListDataSeller } from "@/api/goods";
 import { regular } from "@/utils";
 import vueQr from "vue-qr";
+import { goodsTypeLabel } from "@/constants/goodsType";
 
 export default {
   name: "add-full-discount",
@@ -313,6 +315,16 @@ export default {
     this.getGiftList();
   },
   methods: {
+    giftOptionLabel(item) {
+      if (!item) return "";
+      const typeLabel =
+        item.goodsType === "E_COUPON" ? ` [${goodsTypeLabel(item.goodsType)}]` : "";
+      const stock =
+        item.goodsType === "E_COUPON" && item.quantity != null
+          ? ` · 库存${item.quantity}`
+          : "";
+      return `${item.goodsName || ""}${typeLabel}${stock}`;
+    },
     closeCurrentPage() {
       this.$router.back();
     },
@@ -442,6 +454,7 @@ export default {
           thumbnail: e.thumbnail,
           skuId: e.id,
           goodsId: e.goodsId,
+          goodsType: e.goodsType,
         });
       });
       this.form.promotionGoodsList = list;
