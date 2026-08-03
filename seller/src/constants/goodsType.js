@@ -36,11 +36,6 @@ export function promotionPriceMin(goodsType) {
   return isECoupon(goodsType) ? 0 : 0.01;
 }
 
-/** 活动价下限：E_COUPON 允许 0 元 */
-export function promotionPriceMin(goodsType) {
-  return isECoupon(goodsType) ? 0 : 0.01;
-}
-
 export const CARD_KEY_FULFILL_STATUS = {
   PENDING: "PENDING",
   DELIVERED: "DELIVERED",
