@@ -33,20 +33,16 @@
 
     <el-card>
       <el-table v-loading="loading" :data="data" ref="table" class="mt_10" style="width: 100%">
-        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+        <el-table-column label="商品名称" min-width="220" class-name="goods-name-column">
           <template #default="{ row }">
-            <div v-if="row" style="margin-top: 5px; height: 80px; display: flex; align-items: flex-start">
+            <div v-if="row" class="goods-name-cell">
               <img
                 v-if="row.original"
                 :src="row.original"
-                style="height: 60px; width: 60px; object-fit: cover; margin-top: 3px"
+                class="goods-name-img"
                 alt=""
               />
-              <div style="margin-left: 13px">
-                <div class="div-zoom">
-                  <a class="link-text">{{ row.goodsName }}</a>
-                </div>
-              </div>
+              <a class="link-text goods-name-text">{{ row.goodsName }}</a>
             </div>
           </template>
         </el-table-column>
@@ -201,9 +197,25 @@ export default {
   margin: 0 8px;
   color: #dcdee2;
 }
-.div-zoom {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.goods-name-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 4px 0;
+}
+.goods-name-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.goods-name-text {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+}
+:deep(.goods-name-column .cell) {
+  white-space: normal;
+  line-height: 1.5;
 }
 </style>

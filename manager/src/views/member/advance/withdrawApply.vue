@@ -9,10 +9,10 @@
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="会员名称" prop="memberName">
+        <el-form-item label="客户名称" prop="memberName">
           <el-input
             v-model="searchForm.memberName"
-            placeholder="请输入会员名称"
+            placeholder="请输入客户名称"
             clearable
             style="width: 240px"
           />
@@ -57,7 +57,7 @@
         @selection-change="changeSelect"
       >
         <el-table-column prop="sn" label="申请编号" min-width="160" show-overflow-tooltip />
-        <el-table-column prop="memberName" label="用户名称" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="memberName" label="客户名称" min-width="120" show-overflow-tooltip />
         <el-table-column label="申请金额" width="120">
           <template #default="{ row }">
             <priceColorScheme v-if="row" :value="row.applyMoney" :color="$mainColor" />

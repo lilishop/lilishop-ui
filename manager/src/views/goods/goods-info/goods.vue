@@ -17,10 +17,10 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="商品编号" prop="id">
+        <el-form-item label="商品ID" prop="id">
           <el-input
             v-model="searchForm.id"
-            placeholder="请输入商品编号"
+            placeholder="请输入商品ID"
             clearable
             style="width: 240px"
           />

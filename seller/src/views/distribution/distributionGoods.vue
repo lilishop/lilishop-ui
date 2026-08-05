@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="search">
     <el-card>
       <el-form
         ref="searchForm"
@@ -17,13 +17,59 @@
             style="width: 240px"
           />
         </el-form-item>
+        <el-form-item label="商品品牌" prop="brandId">
+          <el-select
+            v-model="searchForm.brandId"
+            placeholder="请选择商品品牌"
+            clearable
+            filterable
+            style="width: 240px"
+          >
+            <el-option
+              v-for="item in brandList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="店铺分类" prop="storeCategoryPath">
+          <el-cascader
+            v-model="searchForm.storeCategoryPath"
+            :options="shopCategoryList"
+            :props="shopCategoryProps"
+            clearable
+            filterable
+            placeholder="请选择店铺分类"
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="商品类型" prop="goodsType">
+          <el-select
+            v-model="searchForm.goodsType"
+            placeholder="请选择商品类型"
+            clearable
+            style="width: 240px"
+          >
+            <el-option label="实物商品" value="PHYSICAL_GOODS" />
+            <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
+            <el-option label="电子卡券" value="E_COUPON" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
+    <el-card class="list-card">
+      <el-tabs v-model="currentAuthStatus" class="auth-tabs" @tab-change="onAuthStatusChange">
+        <el-tab-pane label="全部" name="ALL" />
+        <el-tab-pane label="待审核" name="TOBEAUDITED" />
+        <el-tab-pane label="已审核" name="PASS" />
+        <el-tab-pane label="审核未通过" name="REFUSE" />
+      </el-tabs>
+
       <div class="operation">
         <el-button type="primary" @click="add">添加</el-button>
       </div>
@@ -36,43 +82,33 @@
         class="mt_10"
         style="width: 100%"
       >
-        <el-table-column label="商品名称" min-width="250">
+        <el-table-column prop="skuId" label="ID" min-width="180" show-overflow-tooltip />
+        <el-table-column label="商品图片" width="90" align="center">
           <template #default="{ row }">
-            <div v-if="row" class="goods-msg">
-              <img :src="row.thumbnail" width="60" height="60" alt="" />
-              <div>
-                <div class="div-zoom">
-                  <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
-                </div>
-                <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
-                  <template #reference>
-                    <img
-                      src="../../assets/qrcode.svg"
-                      class="hover-pointer"
-                      width="20"
-                      height="20"
-                      alt="qrcode"
-                    />
-                  </template>
-                  <vue-qr
-                    :text="wapLinkTo(row.goodsId, row.skuId)"
-                    :margin="0"
-                    color-dark="#000"
-                    color-light="#fff"
-                    :size="150"
-                  />
-                </el-popover>
-              </div>
-            </div>
+            <img v-if="row?.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+            <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="商品价格" min-width="110">
+        <el-table-column label="商品名称" min-width="180" class-name="goods-name-column">
+          <template #default="{ row }">
+            <span v-if="row" class="goods-name-text">{{ row.goodsName }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="规格" min-width="140" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row?.specs || "-" }}
+          </template>
+        </el-table-column>
+        <el-table-column label="商品类型" min-width="110">
+          <template #default="{ row }">
+            <span v-if="row">{{ goodsTypeText(row.goodsType) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品金额" min-width="110">
           <template #default="{ row }">
             <span v-if="row" :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, "￥") }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="quantity" label="库存" min-width="80" />
-        <el-table-column prop="createTime" label="添加时间" min-width="160" />
         <el-table-column label="佣金金额" min-width="110">
           <template #default="{ row }">
             <span v-if="row" :style="{ color: $mainColor }">
@@ -80,9 +116,20 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="100" align="center" fixed="right">
+        <el-table-column prop="quantity" label="库存" min-width="80" align="center" />
+        <el-table-column label="审核状态" min-width="110" align="center">
           <template #default="{ row }">
-            <a v-if="row" class="link-text" @click="remove(row)">删除</a>
+            <span v-if="row">{{ authStatusText(row.authStatus) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="添加时间" min-width="160" />
+        <el-table-column label="操作" min-width="120" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a class="link-text" @click="edit(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="remove(row)">删除</a>
+            </template>
           </template>
         </el-table-column>
       </el-table>
@@ -91,7 +138,7 @@
         <el-pagination
           v-model:current-page="searchForm.pageNumber"
           v-model:page-size="searchForm.pageSize"
-          :page-sizes="[10, 20, 50]"
+          :page-sizes="[20, 50, 100]"
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
@@ -106,18 +153,86 @@
     <el-dialog
       v-model="modalVisible"
       :title="modalTitle"
-      width="500px"
+      width="900px"
       :close-on-click-modal="false"
       append-to-body
+      class="add-distribution-goods-dialog"
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
-        <el-form-item label="分销佣金" prop="commission">
-          <el-input v-model="form.commission" clearable placeholder="请输入分销佣金" />
-        </el-form-item>
-      </el-form>
+      <el-table :data="selectedGoodsList" border max-height="420">
+        <el-table-column label="商品图片" width="90" align="center">
+          <template #default="{ row }">
+            <img v-if="row?.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品名称" min-width="160" class-name="goods-name-column">
+          <template #default="{ row }">
+            <span class="goods-name-text">{{ row.goodsName }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="规格" min-width="120" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.specs || "-" }}
+          </template>
+        </el-table-column>
+        <el-table-column label="商品价格" width="110" align="right">
+          <template #default="{ row }">
+            <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, "￥") }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="分销佣金" width="160" align="center">
+          <template #default="{ row, $index }">
+            <el-input
+              v-model="row.commission"
+              clearable
+              placeholder="请输入佣金"
+              :class="{ 'commission-input-error': row.commissionError }"
+              @blur="validateRowCommission(row, $index)"
+              @input="row.commissionError = false"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="80" align="center">
+          <template #default="{ $index }">
+            <a
+              v-if="selectedGoodsList.length > 1"
+              class="link-text"
+              @click="removeSelectedGoods($index)"
+            >移除</a>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+      </el-table>
       <template #footer>
         <el-button @click="modalVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="editVisible"
+      title="编辑分销商品"
+      width="480px"
+      :close-on-click-modal="false"
+      append-to-body
+    >
+      <el-form ref="editFormRef" :model="editForm" label-width="100px">
+        <el-form-item label="商品名称">
+          <span>{{ editForm.goodsName }}</span>
+        </el-form-item>
+        <el-form-item label="分销佣金" prop="commission">
+          <el-input
+            v-model="editForm.commission"
+            clearable
+            placeholder="请输入分销佣金"
+            :class="{ 'commission-input-error': editForm.commissionError }"
+            @input="editForm.commissionError = false"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editVisible = false">取消</el-button>
+        <el-button type="primary" :loading="editLoading" @click="handleEditSubmit">保存</el-button>
       </template>
     </el-dialog>
   </div>
@@ -127,75 +242,166 @@
 import {
   getDistributionGoods,
   distributionGoodsCancel,
-  distributionGoodsCheck,
+  distributionGoodsBatchCheck,
+  updateDistributionGoodsCommission,
 } from "@/api/distribution";
+import { getBrandListData, getShopGoodsLabelListSeller } from "@/api/goods";
 import liliDialog from "@/views/lili-dialog";
-import vueQr from "vue-qr";
 
 export default {
   name: "distributionGoods",
-  components: { liliDialog, vueQr },
+  components: { liliDialog },
   data() {
     return {
       modalVisible: false,
       modalTitle: "添加分销商品",
+      editVisible: false,
+      editLoading: false,
       submitLoading: false,
       loading: true,
+      currentAuthStatus: "ALL",
       searchForm: {
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         sort: "createTime",
         order: "desc",
+        goodsName: "",
+        brandId: "",
+        storeCategoryPath: "",
+        goodsType: "",
+        authStatus: "",
       },
-      form: {
-        commission: 1,
+      brandList: [],
+      shopCategoryList: [],
+      shopCategoryProps: {
+        value: "value",
+        label: "label",
+        children: "children",
+        checkStrictly: true,
+        emitPath: false,
       },
-      skuId: 0,
-      formValidate: {
-        commission: [
-          { required: true, message: "请输入大于1小于9999的合法佣金金额", trigger: "blur" },
-          {
-            pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
-            message: "请输入大于1小于9999的合法佣金金额",
-            trigger: "blur",
-          },
-        ],
+      selectedGoodsList: [],
+      editForm: {
+        id: "",
+        goodsName: "",
+        commission: "",
+        commissionError: false,
       },
+      commissionPattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
       data: [],
       total: 0,
     };
   },
   methods: {
     init() {
+      this.loadFilterOptions();
+      this.getDataList();
+    },
+    loadFilterOptions() {
+      getBrandListData().then((res) => {
+        this.brandList = Array.isArray(res) ? res : res?.result || [];
+      });
+      getShopGoodsLabelListSeller().then((res) => {
+        if (res?.success) {
+          this.shopCategoryList = this.formatShopCategory(res.result || []);
+        }
+      });
+    },
+    formatShopCategory(list) {
+      return (list || []).map((item) => ({
+        value: item.id,
+        label: item.labelName,
+        children:
+          item.children && item.children.length
+            ? this.formatShopCategory(item.children)
+            : undefined,
+      }));
+    },
+    goodsTypeText(value) {
+      if (value === "PHYSICAL_GOODS") return "实物商品";
+      if (value === "VIRTUAL_GOODS") return "虚拟商品";
+      if (value === "E_COUPON") return "电子卡券";
+      return "-";
+    },
+    authStatusText(value) {
+      if (value === "TOBEAUDITED") return "待审核";
+      if (value === "REFUSE") return "审核未通过";
+      return "已审核";
+    },
+    onAuthStatusChange(name) {
+      this.searchForm.authStatus = name === "ALL" ? "" : name;
+      this.searchForm.pageNumber = 1;
       this.getDataList();
     },
     add() {
       this.$refs.liliDialog.goodsData = [];
-      this.$refs.liliDialog.open("goods", "single");
+      this.$refs.liliDialog.open("goods");
     },
     selectedGoodsData(selected) {
       if (!selected?.length) return;
+      this.selectedGoodsList = selected.map((item) => ({
+        skuId: item.id,
+        goodsId: item.goodsId,
+        thumbnail: item.thumbnail,
+        goodsName: item.goodsName,
+        specs: item.simpleSpecs || "-",
+        price: item.price,
+        commission: "1",
+        commissionError: false,
+      }));
       this.modalVisible = true;
-      this.form.commission = 1;
-      this.modalTitle = "添加分销商品";
-      this.skuId = selected[0].id;
+      this.modalTitle = `添加分销商品（已选${this.selectedGoodsList.length}项）`;
+    },
+    validateRowCommission(row) {
+      const valid = this.commissionPattern.test(String(row.commission || "").trim());
+      row.commissionError = !valid;
+      return valid;
+    },
+    validateAllCommission() {
+      let valid = true;
+      this.selectedGoodsList.forEach((row) => {
+        if (!this.validateRowCommission(row)) {
+          valid = false;
+        }
+      });
+      return valid;
+    },
+    removeSelectedGoods(index) {
+      this.selectedGoodsList.splice(index, 1);
+      if (!this.selectedGoodsList.length) {
+        this.modalVisible = false;
+        return;
+      }
+      this.modalTitle = `添加分销商品（已选${this.selectedGoodsList.length}项）`;
     },
     handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        distributionGoodsCheck(this.skuId, this.form)
-          .then((res) => {
-            if (res?.success || res?.message === "success") {
-              this.$Message.success("添加成功");
+      if (!this.selectedGoodsList.length) return;
+      if (!this.validateAllCommission()) {
+        this.$Message.error("请为所有商品填写大于1且小于9999的合法佣金金额");
+        return;
+      }
+      this.submitLoading = true;
+      const items = this.selectedGoodsList.map((item) => ({
+        skuId: item.skuId,
+        commission: Number(item.commission),
+      }));
+      distributionGoodsBatchCheck(items)
+        .then((res) => {
+          if (res?.success || res?.message === "success") {
+            const addedCount = Array.isArray(res?.result) ? res.result.length : 0;
+            if (addedCount > 0) {
+              this.$Message.success(`成功添加${addedCount}个分销商品`);
+            } else {
+              this.$Message.info("所选商品均已是分销商品，已跳过");
             }
-            this.modalVisible = false;
-            this.getDataList();
-          })
-          .finally(() => {
-            this.submitLoading = false;
-          });
-      });
+          }
+          this.modalVisible = false;
+          this.selectedGoodsList = [];
+          this.getDataList();
+        })
+        .finally(() => {
+          this.submitLoading = false;
+        });
     },
     changePage(v) {
       this.searchForm.pageNumber = v;
@@ -243,6 +449,37 @@ export default {
         },
       });
     },
+    edit(row) {
+      this.editForm = {
+        id: row.id,
+        goodsName: row.goodsName,
+        commission: row.commission != null ? String(row.commission) : "1",
+        commissionError: false,
+      };
+      this.editVisible = true;
+    },
+    handleEditSubmit() {
+      const valid = this.commissionPattern.test(String(this.editForm.commission || "").trim());
+      this.editForm.commissionError = !valid;
+      if (!valid) {
+        this.$Message.error("请输入大于1且小于9999的合法佣金金额");
+        return;
+      }
+      this.editLoading = true;
+      updateDistributionGoodsCommission(this.editForm.id, {
+        commission: Number(this.editForm.commission),
+      })
+        .then((res) => {
+          if (res?.success || res?.message === "success") {
+            this.$Message.success("修改成功");
+            this.editVisible = false;
+            this.getDataList();
+          }
+        })
+        .finally(() => {
+          this.editLoading = false;
+        });
+    },
   },
   mounted() {
     this.init();
@@ -255,15 +492,11 @@ export default {
   margin: 10px 0;
 }
 
-.goods-msg {
-  display: flex;
-  align-items: flex-start;
-  gap: 13px;
-  padding: 5px 0;
-
-  img {
-    object-fit: contain;
-  }
+.goods-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
 .link-text {
@@ -272,19 +505,46 @@ export default {
   text-decoration: none;
 }
 
-.div-zoom {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-bottom: 4px;
+.op-split {
+  margin: 0 6px;
+  color: #dcdfe6;
 }
 
-.hover-pointer {
-  cursor: pointer;
-  vertical-align: middle;
+.goods-name-text {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+:deep(.goods-name-column .cell) {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
 }
 
 .mt_10 {
   margin-top: 10px;
+}
+
+.list-card {
+  margin-top: 16px;
+}
+
+.auth-tabs {
+  margin-bottom: 4px;
+}
+
+.commission-input-error {
+  :deep(.el-input__wrapper) {
+    box-shadow: 0 0 0 1px #f56c6c inset;
+  }
+}
+
+.add-distribution-goods-dialog {
+  :deep(.goods-name-column .cell) {
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.5;
+  }
 }
 </style>

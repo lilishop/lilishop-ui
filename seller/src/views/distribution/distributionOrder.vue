@@ -17,10 +17,10 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="分销商" prop="distributionName">
+        <el-form-item label="分销员" prop="distributionName">
           <el-input
             v-model="searchForm.distributionName"
-            placeholder="请输入分销商名称"
+            placeholder="请输入分销员名称"
             clearable
             style="width: 240px"
           />
@@ -89,7 +89,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="distributionName" label="分销商" min-width="100" show-overflow-tooltip />
+        <el-table-column prop="distributionName" label="分销员" min-width="100" show-overflow-tooltip />
         <el-table-column label="状态" min-width="90">
           <template #default="{ row }">
             <el-tag v-if="row" :type="filterStatusTagType(row.distributionOrderStatus)">
@@ -100,7 +100,7 @@
         <el-table-column label="佣金金额" min-width="100">
           <template #default="{ row }">
             <span v-if="row" :style="{ color: $mainColor }">
-              {{ $filters.unitPrice(row.rebate, "￥") }}</span>
+              {{ $filters.unitPrice(row.directCommission ?? row.rebate, "￥") }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" min-width="160" fixed="right" />

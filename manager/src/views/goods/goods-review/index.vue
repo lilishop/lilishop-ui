@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="search">
     <el-card>
       <el-form
         ref="searchForm"
@@ -9,10 +9,10 @@
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="会员名称" prop="memberName">
+        <el-form-item label="客户名称" prop="memberName">
           <el-input
             v-model="searchForm.memberName"
-            placeholder="请输入会员名称"
+            placeholder="请输入客户名称"
             clearable
             style="width: 240px"
           />
@@ -34,7 +34,7 @@
     <el-card>
       <el-table ref="table" v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
         <el-table-column prop="goodsName" label="商品名称" min-width="120" show-overflow-tooltip />
-        <el-table-column prop="memberName" label="会员名称" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="memberName" label="客户名称" min-width="120" show-overflow-tooltip />
         <el-table-column prop="content" label="评论内容" min-width="220" show-overflow-tooltip />
         <el-table-column label="是否置顶" width="100" align="center">
           <template #default="{ row }">
@@ -297,7 +297,7 @@ export default {
       this.infoData = {};
     },
     remove(v) {
-      ElMessageBox.confirm("您确认要删除会员" + v.memberName + "的评论?", "确认删除", { type: "warning" }).then(() => {
+      ElMessageBox.confirm("您确认要删除客户" + v.memberName + "的评论?", "确认删除", { type: "warning" }).then(() => {
         return API_Member.delMemberReview(v.id).then(() => {
           ElMessage.success("修改成功");
           this.init();

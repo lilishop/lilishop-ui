@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="search">
     <el-card>
       <el-form
         ref="searchForm"
@@ -17,10 +17,10 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="分销商" prop="distributionName">
+        <el-form-item label="分销员" prop="distributionName">
           <el-input
             v-model="searchForm.distributionName"
-            placeholder="请输入分销商名称"
+            placeholder="请输入分销员名称"
             clearable
             style="width: 240px"
           />
@@ -60,7 +60,13 @@
       </el-form>
     </el-card>
 
-    <el-card>
+    <el-card class="list-card">
+      <el-tabs v-model="currentStatus" class="status-tabs" @tab-change="onStatusTabChange">
+        <el-tab-pane label="全部" name="ALL" />
+        <el-tab-pane label="未完成" name="NO_COMPLETED" />
+        <el-tab-pane label="完成" name="COMPLETE" />
+        <el-tab-pane label="退款" name="REFUND" />
+      </el-tabs>
       <el-table
         ref="table"
         v-loading="loading"
@@ -76,38 +82,42 @@
           fixed="left"
           show-overflow-tooltip
         />
+        <el-table-column label="客户信息" min-width="180">
+          <template #default="{ row }">
+            <div v-if="row" class="member-cell">
+              <div class="member-name">{{ row.memberName || "-" }}</div>
+              <div class="member-id">客户ID：{{ row.memberId || "-" }}</div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column label="商品信息" min-width="200">
           <template #default="{ row }">
             <div v-if="row" class="goods-msg">
-              <img :src="row.image" width="60" height="60" alt="" />
-              <div>
-                <div class="div-zoom">
-                  <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
-                </div>
-                <div style="color: #999; font-size: 10px">数量：x{{ row.num }}</div>
-                <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
-                  <template #reference>
-                    <img
-                      src="../../assets/qrcode.svg"
-                      class="hover-pointer"
-                      width="20"
-                      height="20"
-                      alt="qrcode"
-                    />
-                  </template>
-                  <vue-qr
-                    :text="wapLinkTo(row.goodsId, row.skuId)"
-                    :margin="0"
-                    color-dark="#000"
-                    color-light="#fff"
-                    :size="150"
-                  />
-                </el-popover>
+              <img v-if="row.image" :src="row.image" class="goods-thumb" alt="" />
+              <span v-else class="goods-thumb-empty">无图</span>
+              <div class="goods-info">
+                <div class="goods-name">{{ row.goodsName }}</div>
+                <div class="goods-num">数量：x{{ row.num }}</div>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="distributionName" label="分销商" min-width="100" show-overflow-tooltip />
+        <el-table-column label="一级分销员" min-width="180">
+          <template #default="{ row }">
+            <div v-if="row" class="member-cell">
+              <div class="member-name">{{ row.distributionName || "-" }}</div>
+              <div class="member-id">分销员ID：{{ row.distributionId || "-" }}</div>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="二级分销员" min-width="180">
+          <template #default="{ row }">
+            <div v-if="row" class="member-cell">
+              <div class="member-name">{{ row.inviteDistributionName || "-" }}</div>
+              <div class="member-id">分销员ID：{{ row.inviteDistributionId || "-" }}</div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="storeName" label="店铺名称" min-width="100" show-overflow-tooltip />
         <el-table-column label="状态" min-width="90">
           <template #default="{ row }">
@@ -116,10 +126,18 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="佣金金额" min-width="100">
+        <el-table-column label="一级佣金" min-width="100">
           <template #default="{ row }">
             <span v-if="row" :style="{ color: $mainColor }">
-              {{ $filters.unitPrice(row.rebate, "￥") }}</span>
+              {{ formatCommission(row.directCommission) }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="二级佣金" min-width="100">
+          <template #default="{ row }">
+            <span v-if="row" :style="{ color: $mainColor }">
+              {{ formatCommission(row.inviteCommission) }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" min-width="160" fixed="right" />
@@ -145,23 +163,23 @@
 import { getDistributionOrder } from "@/api/distribution";
 import { orderStatusList } from "./dataJson";
 import { getShopListData } from "@/api/shops";
-import vueQr from "vue-qr";
 
 export default {
   name: "distributionOrder",
-  components: { vueQr },
   data() {
     return {
       timeRange: [],
       orderStatusList,
       shopList: [],
       distributionId: this.$route.query.id,
+      currentStatus: "ALL",
       loading: true,
       searchForm: {
         pageNumber: 1,
         pageSize: 20,
         sort: "create_time",
         order: "desc",
+        distributionOrderStatus: "",
       },
       data: [],
       total: 0,
@@ -178,6 +196,12 @@ export default {
       this.getDataList();
       this.getShopList();
     },
+    onStatusTabChange(name) {
+      this.currentStatus = name;
+      this.searchForm.distributionOrderStatus = name === "ALL" ? "" : name;
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
     changePage() {
       this.getDataList();
     },
@@ -191,7 +215,11 @@ export default {
       this.getDataList();
     },
     getDataList() {
-      this.searchForm.distributionId = this.distributionId;
+      if (this.distributionId) {
+        this.searchForm.distributionId = this.distributionId;
+      } else {
+        delete this.searchForm.distributionId;
+      }
       this.loading = true;
       if (this.timeRange && this.timeRange[0] && this.timeRange[1]) {
         const startTime = new Date(this.timeRange[0]).getTime();
@@ -249,6 +277,12 @@ export default {
       }
       return "warning";
     },
+    formatCommission(amount) {
+      if (amount === null || amount === undefined || amount === "") {
+        return "-";
+      }
+      return this.$filters.unitPrice(amount, "￥");
+    },
   },
   mounted() {
     this.init();
@@ -256,26 +290,72 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
+.member-cell {
+  line-height: 1.4;
+}
+.member-name {
+  color: #303133;
+}
+.member-id {
+  margin-top: 2px;
+  color: #909399;
+  font-size: 12px;
+  word-break: break-all;
+}
 .goods-msg {
   display: flex;
   align-items: center;
-  > div {
-    margin-left: 10px;
-  }
+  gap: 10px;
+  padding: 2px 0;
 }
-
-.link-text {
-  color: #409eff;
-  cursor: pointer;
-  text-decoration: none;
+.goods-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
-
-.hover-pointer {
-  cursor: pointer;
+.goods-thumb-empty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  background: #f5f7fa;
+  color: #909399;
+  font-size: 12px;
+}
+.goods-info {
+  min-width: 0;
+}
+.goods-name {
+  line-height: 1.4;
+  word-break: break-word;
+}
+.goods-num {
+  color: #999;
+  font-size: 12px;
+  margin-top: 2px;
 }
 
 .mt_10 {
   margin-top: 10px;
+}
+
+.list-card {
+  margin-top: 16px;
+}
+
+.status-tabs {
+  margin-bottom: 4px;
+
+  :deep(.el-tabs__content) {
+    display: none;
+  }
+
+  :deep(.el-tabs__header) {
+    margin-bottom: 0;
+  }
 }
 </style>

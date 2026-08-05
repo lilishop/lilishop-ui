@@ -1,6 +1,33 @@
 <template>
+  <el-drawer
+    v-model="goodsVisible"
+    title="选择商品"
+    direction="rtl"
+    size="85%"
+    :z-index="10000"
+    :close-on-click-modal="false"
+    append-to-body
+    destroy-on-close
+    class="lili-goods-drawer"
+  >
+    <goodsDialog
+      v-if="goodsVisible"
+      ref="goodsDialog"
+      :selectedWay="goodsData"
+      @selected="
+        (val) => {
+          goodsData = val;
+        }
+      "
+    />
+    <template #footer>
+      <el-button @click="clickClose">取消</el-button>
+      <el-button type="primary" @click="clickOK">确定</el-button>
+    </template>
+  </el-drawer>
+
   <el-dialog
-    v-model="flag"
+    v-model="linkVisible"
     width="1160px"
     top="120px"
     :z-index="10000"
@@ -9,27 +36,15 @@
     destroy-on-close
     @close="clickClose"
   >
-    <template v-if="flag">
-      <goodsDialog
-        @selected="
-          (val) => {
-            goodsData = val;
-          }
-        "
-        v-if="goodsFlag"
-        ref="goodsDialog"
-        :selectedWay="goodsData"
-      />
-      <linkDialog
-        @selectedLink="
-          (val) => {
-            linkData = val;
-          }
-        "
-        v-else
-        class="linkDialog"
-      />
-    </template>
+    <linkDialog
+      v-if="linkVisible"
+      class="linkDialog"
+      @selectedLink="
+        (val) => {
+          linkData = val;
+        }
+      "
+    />
     <template #footer>
       <el-button @click="clickClose">取消</el-button>
       <el-button type="primary" @click="clickOK">确定</el-button>
@@ -46,23 +61,44 @@ export default {
   },
   data() {
     return {
+      goodsVisible: false,
+      linkVisible: false,
       goodsFlag: false,
       goodsData: [],
       linkData: "",
-      flag: false,
     };
+  },
+  computed: {
+    flag: {
+      get() {
+        return this.goodsVisible || this.linkVisible;
+      },
+      set(val) {
+        if (val) {
+          if (this.goodsFlag) {
+            this.goodsVisible = true;
+          } else {
+            this.linkVisible = true;
+          }
+        } else {
+          this.goodsVisible = false;
+          this.linkVisible = false;
+        }
+      },
+    },
   },
   methods: {
     clearGoodsSelected() {
       this.goodsData = [];
     },
     clickClose() {
-      this.flag = false;
+      this.goodsVisible = false;
+      this.linkVisible = false;
       this.goodsFlag = false;
       this.$emit("closeFlag", false);
     },
     singleGoods() {
-      var timer = setInterval(() => {
+      const timer = setInterval(() => {
         if (this.$refs.goodsDialog) {
           this.$refs.goodsDialog.type = "single";
           clearInterval(timer);
@@ -70,34 +106,50 @@ export default {
       }, 100);
     },
     clickOK() {
-      if (this.goodsFlag) {
+      if (this.goodsVisible) {
         this.$emit("selectedGoodsData", this.goodsData);
-      } else {
+      } else if (this.linkVisible) {
         this.$emit("selectedLink", this.linkData);
       }
       this.clickClose();
     },
     open(type, mutiple) {
-      this.flag = true;
       if (type == "goods") {
         this.goodsFlag = true;
+        this.goodsVisible = true;
         if (mutiple) {
           this.singleGoods();
         }
       } else {
         this.goodsFlag = false;
+        this.linkVisible = true;
       }
     },
     close() {
-      this.flag = false;
+      this.clickClose();
     },
   },
 };
 </script>
 <style scoped lang="scss">
+.lili-goods-drawer {
+  :deep(.el-drawer__body) {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 20px;
+    overflow: hidden;
+  }
+
+  :deep(.el-drawer__footer) {
+    border-top: 1px solid #ebeef5;
+    padding: 12px 20px;
+    text-align: right;
+  }
+}
+
 :deep(.el-dialog__body) {
   width: 100%;
-  height: 500px;
+  height: 640px;
   overflow: hidden;
 }
 </style>

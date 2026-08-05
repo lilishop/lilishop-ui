@@ -111,18 +111,22 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+        <el-table-column label="商品名称" min-width="220" class-name="goods-name-column">
           <template #default="{ row }">
-            <a class="link-text" @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
+            <a
+              v-if="row"
+              class="link-text goods-name-text"
+              @click="linkTo(row.id, row.skuId)"
+            >{{ row.goodsName }}</a>
           </template>
         </el-table-column>
-        <el-table-column label="价格" width="200">
+        <el-table-column label="价格" width="120">
           <template #default="{ row }">
             <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, '￥') }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="buyCount" label="销量" width="150" />
-        <el-table-column prop="quantity" label="库存" width="150" />
+        <el-table-column prop="buyCount" label="销量" width="90" />
+        <el-table-column prop="quantity" label="库存" width="90" />
         <el-table-column label="销售模式" width="150">
           <template #default="{ row }">
             <span v-if="row">{{ salesModelText(row.salesModel) }}</span>
@@ -464,5 +468,20 @@ export default {
   :deep(.el-tabs__item) {
     font-size: 14px;
   }
+}
+.goods-name-text {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+  display: inline-block;
+}
+:deep(.goods-name-column .cell) {
+  white-space: normal;
+  line-height: 1.5;
+}
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
 }
 </style>

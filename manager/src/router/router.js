@@ -456,6 +456,20 @@ export const otherRouter = {
       component: () => import("@/views/statistics/goods-sales-summary.vue")
     },
     {
+      path: "distributionImportRecord",
+      title: "分销员导入记录",
+      name: "distributionImportRecord",
+      meta: { title: "分销员导入记录" },
+      component: () => import("@/views/distribution/distributionImportRecord.vue")
+    },
+    {
+      path: "distributionGradeHistory",
+      title: "等级变更记录",
+      name: "distributionGradeHistory",
+      meta: { title: "等级变更记录" },
+      component: () => import("@/views/distribution/distributionGradeHistory.vue")
+    },
+    {
       path: "procurement/purchase-order/detail",
       title: "采购单详情",
       name: "manager-procurement-order-detail",
