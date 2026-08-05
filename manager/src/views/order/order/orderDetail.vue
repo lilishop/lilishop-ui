@@ -236,7 +236,6 @@
             style="width: 100%"
           >
             <el-table-column type="index" label="序号" width="60" align="center" />
-            <el-table-column prop="goodsName" label="商品" min-width="140" show-overflow-tooltip />
             <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
             <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
             <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
@@ -504,10 +503,7 @@ export default {
       const rows = [];
       (this.data || []).forEach((item) => {
         (item.cardKeys || []).forEach((ck) => {
-          rows.push({
-            ...ck,
-            goodsName: item.goodsName,
-          });
+          rows.push({ ...ck });
         });
       });
       return rows;

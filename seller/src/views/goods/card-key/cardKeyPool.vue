@@ -5,11 +5,29 @@
 <template>
   <div class="search card-key-pool">
     <el-card>
-      <div v-if="goodsName" class="pool-header">
+      <div v-if="goodsName || skuOptions.length" class="pool-header">
         <el-button @click="goBack">返回</el-button>
-        <span class="pool-meta">
+        <span v-if="goodsName" class="pool-meta">
           <strong>商品：</strong>{{ goodsName }}
         </span>
+        <div v-if="skuOptions.length" class="pool-sku-select">
+          <span class="pool-sku-label">规格 SKU</span>
+          <el-select
+            v-model="skuId"
+            :loading="skuLoading"
+            placeholder="请选择规格"
+            filterable
+            style="width: 320px"
+            @change="onSkuChange"
+          >
+            <el-option
+              v-for="item in skuOptions"
+              :key="item.id"
+              :label="formatSkuOptionLabel(item)"
+              :value="item.id"
+            />
+          </el-select>
+        </div>
       </div>
 
       <el-alert
@@ -167,9 +185,17 @@
         max-height="320"
         border
       >
-        <el-table-column prop="row" label="行号" width="80" />
-        <el-table-column prop="cardNo" label="卡号" min-width="120" />
-        <el-table-column prop="reason" label="失败原因" min-width="200" />
+        <el-table-column label="行号" width="80" align="center">
+          <template #default="{ row: failItem }">
+            <span v-if="failItem">{{ failItem.row }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="卡号" min-width="120">
+          <template #default="{ row: failItem }">
+            <span v-if="failItem">{{ failItem.cardNo || "—" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="reason" label="失败原因" min-width="200" show-overflow-tooltip />
       </el-table>
       <template #footer>
         <el-button type="primary" @click="importResultVisible = false">确定</el-button>
@@ -204,6 +230,7 @@ import {
   exportCardKey,
   downloadImportTemplate,
 } from "@/api/cardKey";
+import { getQueryGoodsIdGoodsList } from "@/api/goods";
 import {
   formatCardKeyStatus,
   CARD_KEY_STATUS_TAG,
@@ -223,6 +250,8 @@ export default {
       skuId: "",
       goodsId: "",
       goodsName: "",
+      skuOptions: [],
+      skuLoading: false,
       statusTab: "ALL",
       stats: null,
       poolLocked: false,
@@ -271,6 +300,20 @@ export default {
       ];
     },
   },
+  watch: {
+    "$route.query": {
+      handler() {
+        const prevSkuId = this.skuId;
+        this.initFromRoute();
+        if (this.skuId && this.skuId !== prevSkuId) {
+          this.resetPoolViewState();
+          this.loadStats();
+          this.getList();
+        }
+      },
+      deep: true,
+    },
+  },
   methods: {
     formatStatus: formatCardKeyStatus,
     statusTag(status) {
@@ -284,6 +327,65 @@ export default {
       this.skuId = q.skuId || "";
       this.goodsId = q.goodsId || "";
       this.goodsName = q.goodsName || "";
+    },
+    formatSkuOptionLabel(sku) {
+      if (!sku) return "";
+      const spec = sku.simpleSpecs || sku.sn || sku.id;
+      const qty =
+        sku.poolStock != null && sku.poolStock !== ""
+          ? sku.poolStock
+          : sku.quantity != null
+            ? sku.quantity
+            : "—";
+      return `${spec}（库存 ${qty}）`;
+    },
+    resetPoolViewState() {
+      this.statusTab = "ALL";
+      this.searchForm.pageNumber = 1;
+      this.searchForm.cardNo = "";
+      this.importRange = [];
+      this.poolLocked = false;
+      this.stats = null;
+      this.data = [];
+      this.total = 0;
+    },
+    /** 卡池变更后刷新 SKU 选择器中的可售库存（后端 syncSkuStock → quantity） */
+    refreshSkuOptionStock() {
+      if (!this.goodsId) return Promise.resolve();
+      return this.loadSkuOptions();
+    },
+    async loadSkuOptions() {
+      if (!this.goodsId) {
+        this.skuOptions = [];
+        return;
+      }
+      this.skuLoading = true;
+      try {
+        const res = await getQueryGoodsIdGoodsList(this.goodsId);
+        if (res.success) {
+          this.skuOptions = (res.result || []).filter((s) => !s.deleteFlag);
+        }
+      } catch {
+        this.skuOptions = [];
+      } finally {
+        this.skuLoading = false;
+      }
+    },
+    onSkuChange(newSkuId) {
+      if (!newSkuId) return;
+      this.skuId = newSkuId;
+      this.resetPoolViewState();
+      this.$router.replace({
+        path: this.$route.path,
+        query: {
+          ...this.$route.query,
+          skuId: newSkuId,
+          goodsId: this.goodsId,
+          goodsName: this.goodsName,
+        },
+      });
+      this.loadStats();
+      this.getList();
     },
     onStatusTabClick(tab) {
       this.statusTab = tab.paneName;
@@ -370,6 +472,7 @@ export default {
           this.importResultVisible = true;
           this.loadStats();
           this.getList();
+          this.refreshSkuOptionStock();
         } else {
           this.checkPoolLocked(res);
         }
@@ -407,6 +510,7 @@ export default {
               this.addVisible = false;
               this.loadStats();
               this.getList();
+              this.refreshSkuOptionStock();
             } else {
               this.checkPoolLocked(res);
             }
@@ -426,6 +530,7 @@ export default {
               this.$Message.success("作废成功");
               this.loadStats();
               this.getList();
+              this.refreshSkuOptionStock();
             }
           });
         },
@@ -445,8 +550,15 @@ export default {
           this.exportLoading = false;
         });
     },
-    init() {
+    async init() {
       this.initFromRoute();
+      if (this.goodsId) {
+        await this.loadSkuOptions();
+      }
+      if (!this.skuId && this.skuOptions.length) {
+        this.onSkuChange(this.skuOptions[0].id);
+        return;
+      }
       if (this.skuId) {
         this.loadStats();
         this.getList();
@@ -473,6 +585,18 @@ export default {
 .pool-meta {
   color: #606266;
   font-size: 14px;
+}
+
+.pool-sku-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pool-sku-label {
+  color: #606266;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .goods-tab {

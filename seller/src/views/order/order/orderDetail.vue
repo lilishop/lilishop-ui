@@ -257,7 +257,7 @@
           </el-table-column>
         </el-table>
 
-        <!-- 卡密信息（E_COUPON 主单或满赠子单，以 cardKeyFulfillStatus 为准） -->
+        <!-- 卡密信息（当前订单 orderItems；满赠赠品卡密在赠品子单详情查看） -->
         <div v-if="hasCardKeySection" class="ecoupon-card-keys mt_10">
           <h4>卡密信息</h4>
           <div
@@ -265,9 +265,6 @@
             :key="line.key"
             class="ecoupon-fulfill-block"
           >
-            <div v-if="cardKeyFulfillLines.length > 1" class="ecoupon-fulfill-title mb_10">
-              {{ line.goodsName || (line.isGift ? "满赠电子卡券" : "电子卡券") }}
-            </div>
             <el-alert
               v-if="line.status !== 'DELIVERED'"
               :type="cardKeyFulfillAlertType(line.status)"
@@ -284,13 +281,6 @@
               class="mb_10"
             >
               <el-table-column type="index" label="序号" width="60" align="center" />
-              <el-table-column
-                v-if="cardKeyFulfillLines.length > 1"
-                prop="goodsName"
-                label="商品"
-                min-width="140"
-                show-overflow-tooltip
-              />
               <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
               <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
               <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
@@ -889,15 +879,14 @@ export default {
     hasCardKeySection() {
       return orderHasCardKeySection({
         orderItems: this.data,
-        giftSummaries: this.orderInfo.giftECouponOrders,
         isECouponOrder: this.isECouponOrder,
       });
     },
     cardKeyFulfillLines() {
-      return collectCardKeyFulfillLines(this.data, this.orderInfo.giftECouponOrders);
+      return collectCardKeyFulfillLines(this.data);
     },
     ecouponCardKeyRows() {
-      return flattenOrderCardKeys(this.data, true, this.orderInfo.giftECouponOrders);
+      return flattenOrderCardKeys(this.data, true);
     },
     canPartDelivery() {
       if (!this.allowOperation.ship) return false;
@@ -934,10 +923,7 @@ export default {
     cardKeyFulfillAlertType,
     resolveCardKeyFulfillMessage,
     lineCardKeyRows(line) {
-      return (line.cardKeys || []).map((ck) => ({
-        ...ck,
-        goodsName: line.goodsName,
-      }));
+      return line.cardKeys || [];
     },
     copyCardKey(row) {
       const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;

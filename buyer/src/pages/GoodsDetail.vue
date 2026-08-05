@@ -140,8 +140,8 @@ export default {
             if (!this.goodsMsg.data.intro) {
               this.goodsMsg.data.intro = ''
             }
-            // 判断是否收藏
-            if (this.Cookies.getItem("userInfo")) {
+            // 判断是否收藏（须同时有 token，避免未登录/ token 失效时误跳登录页）
+            if (this.Cookies.getItem("accessToken") && this.Cookies.getItem("userInfo")) {
               isStoreCollection("STORE", this.goodsMsg.data.storeId).then((res) => {
                 if (res.success && res.result) {
                   this.storeCollected = true;

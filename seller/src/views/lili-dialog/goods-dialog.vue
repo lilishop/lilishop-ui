@@ -61,8 +61,8 @@
               </div>
               <div class="wap-content-desc-bottom">
                 <div>￥{{ $filters.unitPrice(item.price) }}</div>
-                <div v-if="item.goodsType === 'E_COUPON'" class="pool-stock-hint">
-                  库存 {{ item.quantity != null ? item.quantity : "—" }}（卡池）
+                <div v-if="showStockHint(item)" class="stock-hint">
+                  库存 {{ item.quantity != null ? item.quantity : "—" }}<template v-if="item.goodsType === 'E_COUPON'">（卡池）</template>
                 </div>
               </div>
             </div>
@@ -142,6 +142,9 @@ export default {
   methods: {
     goodsTypeLabel,
     goodsTypeTagType,
+    showStockHint(item) {
+      return ["PHYSICAL_GOODS", "VIRTUAL_GOODS", "E_COUPON"].includes(item.goodsType);
+    },
     onSearchGoods() {
       this.goodsData = [];
       this.goodsParams.pageNumber = 1;
@@ -261,16 +264,41 @@ export default {
   position: relative;
   flex-wrap: wrap;
   height: 340px;
+  align-content: flex-start;
+  overflow-y: auto;
 }
 .wap-content-item {
-  width: 210px;
+  position: relative;
+  width: calc((100% - 56px) / 4);
+  box-sizing: border-box;
   margin: 10px 7px;
-  padding: 6px 0;
-}
-.active {
-  background: url("../../assets/selected.png") no-repeat;
-  background-position: right;
-  background-size: 10%;
+  padding: 6px 8px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  min-width: 0;
+
+  :deep(.wap-content-desc) {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &.active {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+      background: url("../../assets/selected.png") no-repeat center / contain;
+      z-index: 2;
+      pointer-events: none;
+    }
+  }
 }
 .loading-mask {
   position: absolute;
@@ -280,10 +308,15 @@ export default {
   margin-top: 12px;
   justify-content: flex-end;
 }
-.pool-stock-hint {
-  font-size: 12px;
-  color: #999;
-  margin-top: 4px;
+.wap-content-desc-bottom {
+  align-items: center;
+
+  .stock-hint {
+    font-size: 12px;
+    color: #999;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 </style>
 <style lang="scss">

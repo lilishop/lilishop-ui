@@ -13,6 +13,7 @@ import storage from "@/plugins/storage";
 import { fetchAndApplyTheme } from "@/utils/theme";
 import { getThemeSetting } from "@/api/common.js";
 import config from "@/config";
+import { openLink } from "@/utils/buyerLogin";
 
 const { aMapSecurityJsCode, inputMaxLength } = config;
 
@@ -36,12 +37,7 @@ app.config.globalProperties.Cookies = storage;
 app.config.globalProperties.$inputMaxLength = inputMaxLength;
 
 app.config.globalProperties.linkTo = function (url) {
-  if (!url) return;
-  if (url.substr(0, 1) === "/") {
-    window.open(location.origin + url, "_blank");
-  } else {
-    window.open(url, "_blank");
-  }
+  openLink(url, router);
 };
 
 app.config.globalProperties.connectCs = function (

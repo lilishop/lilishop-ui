@@ -132,7 +132,7 @@
       </template>
       <div v-else style="color: #999; margin-left: 5px">未开发票</div>
     </div>
-    <!-- 卡密信息（E_COUPON 主单或满赠子单，以 cardKeyFulfillStatus 为准） -->
+    <!-- 卡密信息（当前订单 orderItems；满赠赠品卡密在赠品子单详情查看） -->
     <div class="order-card ecoupon-card-keys" v-if="hasCardKeySection">
       <h3>卡密信息</h3>
       <div
@@ -140,9 +140,6 @@
         :key="line.key"
         class="ecoupon-fulfill-block"
       >
-        <div v-if="cardKeyFulfillLines.length > 1" class="ecoupon-fulfill-title">
-          {{ line.goodsName || (line.isGift ? "满赠电子卡券" : "电子卡券") }}
-        </div>
         <el-alert
           v-if="line.status !== 'DELIVERED'"
           :type="cardKeyFulfillAlertType(line.status)"
@@ -158,13 +155,6 @@
           <div class="ecoupon-card-keys-pc">
             <el-table border :data="lineCardKeyRows(line)" style="width: 100%">
               <el-table-column type="index" label="序号" width="60" align="center" />
-              <el-table-column
-                v-if="cardKeyFulfillLines.length > 1"
-                prop="goodsName"
-                label="商品"
-                min-width="120"
-                show-overflow-tooltip
-              />
               <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
               <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
               <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
@@ -446,36 +436,25 @@ export default {
     isNonPhysicalOrder() {
       return this.isVirtualOrder || this.isECouponOrder;
     },
-    /** 是否展示卡密区块（含满赠 E_COUPON 子单 giftECouponOrders） */
+    /** 是否展示卡密区块（仅当前订单 orderItems） */
     hasCardKeySection() {
       return orderHasCardKeySection({
         orderItems: this.order.orderItems,
-        giftSummaries: this.order.giftECouponOrders,
         isECouponOrder: this.isECouponOrder,
       });
     },
     cardKeyFulfillLines() {
-      return collectCardKeyFulfillLines(
-        this.order.orderItems,
-        this.order.giftECouponOrders
-      );
+      return collectCardKeyFulfillLines(this.order.orderItems);
     },
     ecouponCardKeyRows() {
-      return flattenOrderCardKeys(
-        this.order.orderItems,
-        false,
-        this.order.giftECouponOrders
-      );
+      return flattenOrderCardKeys(this.order.orderItems, false);
     },
   },
   methods: {
     cardKeyFulfillAlertType,
     resolveCardKeyFulfillMessage,
     lineCardKeyRows(line) {
-      return (line.cardKeys || []).map((ck) => ({
-        ...ck,
-        goodsName: line.goodsName,
-      }));
+      return line.cardKeys || [];
     },
     copyCardKey(row) {
       const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
@@ -819,12 +798,6 @@ table {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px dashed #eee;
-}
-
-.ecoupon-fulfill-title {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
 }
 
 .ecoupon-card-keys-pc {

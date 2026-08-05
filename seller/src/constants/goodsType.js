@@ -92,22 +92,19 @@ function normalizeCardKeyFulfillLine(source) {
   };
 }
 
-export function collectCardKeyFulfillLines(orderItems = [], giftSummaries = []) {
+/** 汇总当前订单 orderItems 中的卡密履约行（不含满赠子单；赠品卡密在赠品子单详情单独查看） */
+export function collectCardKeyFulfillLines(orderItems = []) {
   const lines = [];
   (orderItems || []).forEach((item) => {
     if (!isCardKeyFulfillApplicable(item)) return;
     lines.push(normalizeCardKeyFulfillLine(item));
   });
-  (giftSummaries || []).forEach((gift) => {
-    lines.push(normalizeCardKeyFulfillLine({ ...gift, isGift: true }));
-  });
   return lines;
 }
 
-export function orderHasCardKeySection({ orderItems, giftSummaries, isECouponOrder } = {}) {
+export function orderHasCardKeySection({ orderItems, isECouponOrder } = {}) {
   if (isECouponOrder) return true;
-  if (Array.isArray(giftSummaries) && giftSummaries.length > 0) return true;
-  if (collectCardKeyFulfillLines(orderItems, []).length > 0) return true;
+  if (collectCardKeyFulfillLines(orderItems).length > 0) return true;
   return (orderItems || []).some(
     (item) =>
       item.goodsType === E_COUPON_GOODS_TYPE ||
@@ -126,13 +123,13 @@ export function flattenCardKeyFulfillLines(lines, withGoodsName = false) {
   return rows;
 }
 
-/** 订单是否含已交付卡密（含满赠子单） */
-export function orderHasCardKeyContent(orderItems, giftSummaries) {
-  return flattenCardKeyFulfillLines(collectCardKeyFulfillLines(orderItems, giftSummaries)).length > 0;
+/** 当前订单是否含已交付卡密（仅 orderItems） */
+export function orderHasCardKeyContent(orderItems) {
+  return flattenCardKeyFulfillLines(collectCardKeyFulfillLines(orderItems)).length > 0;
 }
 
-export function flattenOrderCardKeys(orderItems, withGoodsName = false, giftSummaries) {
-  const lines = collectCardKeyFulfillLines(orderItems, giftSummaries);
+export function flattenOrderCardKeys(orderItems, withGoodsName = false) {
+  const lines = collectCardKeyFulfillLines(orderItems);
   if (lines.some((line) => line.status)) {
     return flattenCardKeyFulfillLines(lines, withGoodsName);
   }

@@ -125,6 +125,7 @@ import { Message } from "@/utils/message";
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
 import GoodsClassNav from "@/components/nav/GoodsClassNav";
 import * as apiGoods from "@/api/goods";
+import { isBuyerLoggedIn, redirectToLogin } from "@/utils/buyerLogin";
 export default {
   name: "GoodsList",
   beforeRouteEnter(to, from, next) {
@@ -201,12 +202,15 @@ export default {
       this.getGoodsList();
     },
     goGoodsDetail(skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
+      const location = {
         path: "/goodsDetail",
         query: { skuId, goodsId },
-      });
-      window.open(routeUrl.href, "_blank");
+      };
+      if (!isBuyerLoggedIn()) {
+        redirectToLogin(this.$router, location);
+        return;
+      }
+      window.open(this.$router.resolve(location).href, "_blank");
     },
     goShopPage(id) {
       if (!id) {

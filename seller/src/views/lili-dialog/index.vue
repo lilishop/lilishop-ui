@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="flag"
-    width="1160px"
+    width="1200px"
     top="120px"
     :z-index="10000"
     :close-on-click-modal="false"

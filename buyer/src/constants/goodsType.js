@@ -28,6 +28,14 @@ export function isECouponOrder(orderType) {
   return orderType === E_COUPON_ORDER_TYPE;
 }
 
+/** 详情页提示：卡密交付后不支持买家售后（FR-B-04） */
+export const E_COUPON_AFTER_SALE_HINT =
+  "卡密交付后不支持买家售后，请确认商品信息后再购买。";
+
+export function eCouponAfterSaleHint() {
+  return E_COUPON_AFTER_SALE_HINT;
+}
+
 /** 可售库存：E_COUPON 读 SKU quantity（由卡池 syncSkuStock 同步） */
 export function getECouponStock(sku) {
   if (!sku) return 0;
@@ -132,23 +140,19 @@ function normalizeCardKeyFulfillLine(source) {
   };
 }
 
-/** 汇总 E_COUPON 主单行 + 满赠子单摘要的履约行 */
-export function collectCardKeyFulfillLines(orderItems = [], giftSummaries = []) {
+/** 汇总当前订单 orderItems 中的卡密履约行（不含满赠子单；赠品卡密在赠品子单详情单独查看） */
+export function collectCardKeyFulfillLines(orderItems = []) {
   const lines = [];
   (orderItems || []).forEach((item) => {
     if (!isCardKeyFulfillApplicable(item)) return;
     lines.push(normalizeCardKeyFulfillLine(item));
   });
-  (giftSummaries || []).forEach((gift) => {
-    lines.push(normalizeCardKeyFulfillLine({ ...gift, isGift: true }));
-  });
   return lines;
 }
 
-export function orderHasCardKeySection({ orderItems, giftSummaries, isECouponOrder } = {}) {
+export function orderHasCardKeySection({ orderItems, isECouponOrder } = {}) {
   if (isECouponOrder) return true;
-  if (Array.isArray(giftSummaries) && giftSummaries.length > 0) return true;
-  if (collectCardKeyFulfillLines(orderItems, []).length > 0) return true;
+  if (collectCardKeyFulfillLines(orderItems).length > 0) return true;
   return (orderItems || []).some(
     (item) =>
       item.goodsType === E_COUPON_GOODS_TYPE ||
@@ -167,15 +171,14 @@ export function flattenCardKeyFulfillLines(lines, withGoodsName = false) {
   return rows;
 }
 
-/** 订单是否含已交付或可展示的卡密行（含满赠 E_COUPON 子单行） */
-export function orderHasCardKeyContent(orderItems, giftSummaries) {
-  const lines = collectCardKeyFulfillLines(orderItems, giftSummaries);
-  return flattenCardKeyFulfillLines(lines).length > 0;
+/** 当前订单是否含已交付卡密（仅 orderItems，不含满赠子单） */
+export function orderHasCardKeyContent(orderItems) {
+  return flattenCardKeyFulfillLines(collectCardKeyFulfillLines(orderItems)).length > 0;
 }
 
-/** 扁平化订单项卡密（仅 cardKeyDelivered 且含 cardKeys；兼容旧逻辑） */
-export function flattenOrderCardKeys(orderItems, withGoodsName = false, giftSummaries) {
-  const lines = collectCardKeyFulfillLines(orderItems, giftSummaries);
+/** 扁平化当前订单 orderItems 卡密 */
+export function flattenOrderCardKeys(orderItems, withGoodsName = false) {
+  const lines = collectCardKeyFulfillLines(orderItems);
   if (lines.some((line) => line.status)) {
     return flattenCardKeyFulfillLines(lines, withGoodsName);
   }

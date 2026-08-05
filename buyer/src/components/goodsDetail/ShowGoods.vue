@@ -259,7 +259,6 @@
             </div>
           </div>
         </div>
-        <br />
         <div class="add-buy-car-box">
           <div class="item-select">
             <div class="item-select-title">
@@ -339,6 +338,14 @@
                   @click="buyNow"
                   >立即购买</el-button
                 >
+                <el-alert
+                  v-if="isECouponGoods"
+                  class="e-coupon-after-sale-notice"
+                  type="warning"
+                  :closable="false"
+                  show-icon
+                  :title="eCouponAfterSaleHint()"
+                />
                 <el-tooltip content="观看视频" v-if="skuDetail.goodsVideo">
                   <img class="view-video" @click="showGoodsVideo = true" :src="playIcon" alt="">
                 </el-tooltip>
@@ -374,6 +381,7 @@ import {
   getECouponMaxBuyNum,
   createEmptyPromotionMap,
   resolveECouponCartType,
+  eCouponAfterSaleHint,
   E_COUPON_CART_BUY_NOW,
   E_COUPON_CART_PINTUAN,
   E_COUPON_CART_POINTS,
@@ -476,6 +484,7 @@ export default {
     },
   },
   methods: {
+    eCouponAfterSaleHint,
     // 初始化video
     initVideo(){
       if(!this.goodsVideo ){
@@ -724,8 +733,8 @@ export default {
     },
   },
   mounted() {
-    // 用户登录才会判断是否收藏
-    if (this.Cookies.getItem("userInfo")) {
+    // 用户登录才会判断是否收藏（须同时有 token，避免残留 userInfo 触发 401 跳转登录）
+    if (this.Cookies.getItem("accessToken") && this.Cookies.getItem("userInfo")) {
       isCollection("GOODS", this.skuDetail.id).then((res) => {
         if (res.success && res.result) {
           this.isCollected = true;
@@ -1050,6 +1059,22 @@ export default {
 
   margin-top: 15px;
   border-top: 1px dotted $border_color;
+}
+
+.e-coupon-after-sale-notice {
+  width: fit-content;
+  max-width: 420px;
+  flex: 0 0 auto;
+  padding: 4px 10px;
+
+  :deep(.el-alert__content) {
+    padding: 0;
+  }
+
+  :deep(.el-alert__title) {
+    font-size: 12px;
+    line-height: 1.5;
+  }
 }
 
 .add-buy-car-row {

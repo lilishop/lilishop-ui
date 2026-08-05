@@ -70,7 +70,6 @@ service.interceptors.request.use(
 
     const accessToken = Storage.getItem("accessToken");
     if (accessToken && (config.needToken || config.optionalToken)) {
-      config.headers["accessToken"] = accessToken;
       try {
         const jwtData = JSON.parse(
           decodeURIComponent(
@@ -80,12 +79,23 @@ service.interceptors.request.use(
             )
           )
         );
-        if (jwtData.exp < Math.round(new Date() / 1000)) {
-          refresh({ response: { config } });
+        const expired = jwtData.exp < Math.round(new Date() / 1000);
+        if (expired) {
+          if (config.needToken) {
+            return refresh({ response: { config } });
+          }
+          // 公开接口：丢弃过期 token，匿名继续请求，避免浏览商品时被引导登录
+          Storage.removeItem("accessToken");
+          Storage.removeItem("refreshToken");
+        } else {
+          config.headers["accessToken"] = accessToken;
         }
       } catch {
         Storage.removeItem("accessToken");
         Storage.removeItem("refreshToken");
+        if (config.needToken) {
+          return refresh({ response: { config } });
+        }
       }
     }
 
