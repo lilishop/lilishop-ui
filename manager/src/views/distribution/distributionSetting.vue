@@ -160,7 +160,7 @@
                   <img :src="posterForm.backgroundImage" alt="平台海报背景" class="poster-bg-thumb" />
                 </div>
                 <upload-pic-input v-model="posterForm.backgroundImage" :show-input="false" />
-                <div class="form-desc">建议上传竖版图片，用于平台海报背景。</div>
+                <div class="form-desc">建议尺寸：与邀请卡预览画布一致 630×1000 像素（端上海报若用其它比例，将以封面填充居中裁剪）。预览区样式与「邀请卡」页一致，便于对照效果。</div>
               </div>
             </el-form-item>
             <el-form-item label="推荐语">
@@ -208,7 +208,7 @@
                   <img :src="inviteCardForm.backgroundImage" alt="邀请卡背景" class="poster-bg-thumb" />
                 </div>
                 <upload-pic-input v-model="inviteCardForm.backgroundImage" :show-input="false" />
-                <div class="form-desc">建议上传竖版图片，用于邀请卡背景。</div>
+                <div class="form-desc">建议尺寸：630×1000 像素（端上若用其它比例，将以封面填充居中裁剪）。</div>
               </div>
             </el-form-item>
             <el-form-item label="推荐语">

@@ -333,8 +333,8 @@ util.initAllMenuData = function(constRoutes, data) {
 util.initMenuData = function(vm, data) {
   const menuRoutes = [];
   let menuData = data;
-  // 顶部菜单
-  let navList = [];
+  // 顶部菜单 —— 首页固定置顶
+  let navList = [{ name: 'home_index', title: '首页' }];
   menuData.forEach(e => {
     let nav = {
       name: e.name,
@@ -357,11 +357,16 @@ util.initMenuData = function(vm, data) {
       }
     }
   } else {
-    // 默认第一个
-    currNav = navList[0].name;
-    vm.$store.commit("setCurrNavTitle", navList[0].title);
+    // 默认首页
+    currNav = 'home_index';
+    vm.$store.commit("setCurrNavTitle", '首页');
   }
   vm.$store.commit("setCurrNav", currNav);
+  // 首页不需要二级菜单
+  if (currNav === 'home_index') {
+    vm.$store.commit("updateMenulist", []);
+    return;
+  }
   for (let item of menuData) {
     if (item.name == currNav) {
       // 过滤

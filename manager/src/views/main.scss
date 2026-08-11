@@ -89,6 +89,7 @@
     z-index: -1;
     margin-left: 200px;
     width: calc(100% - 200px);
+    transition: margin-left 0.3s, width 0.3s;
     background: #f0f0f0;
     display: flex;
     align-items: center;
@@ -249,7 +250,7 @@
     overflow: auto;
     background-color: #f0f0f0;
     z-index: 1;
-    transition: left 0.3s;
+    transition: left 0.3s, width 0.3s;
 
     .single-page {
       position: relative;
@@ -288,6 +289,19 @@
 
 .menu-bar::-webkit-scrollbar-track {
   background: #fff;
+}
+
+/* 首页：无二级菜单时，内容区跟随侧边栏收缩 */
+.main.home-only {
+  .single-page-con {
+    left: 80px;
+    width: calc(100% - 80px);
+  }
+
+  .tags-con {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+  }
 }
 
 .nav-item {
