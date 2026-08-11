@@ -53,6 +53,8 @@
           >
             <el-option label="实物商品" value="PHYSICAL_GOODS" />
             <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
+            <!-- E_COUPON：卡密商品，可跳转卡池管理 -->
+            <el-option label="电子卡券" value="E_COUPON" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -148,7 +150,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="storeName" label="店铺名称" width="200" show-overflow-tooltip />
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="260" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row.marketEnable === 'DOWN'">
               <a class="link-text" @click="upper(row)">上架</a>
@@ -159,6 +161,11 @@
               <a class="link-text" @click="edit(row)">下架</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="editGoods(row)">编辑</a>
+            </template>
+            <!-- E_COUPON 专属：卡池管理入口（原型 P-03） -->
+            <template v-if="row.goodsType === 'E_COUPON'">
+              <span class="op-split">|</span>
+              <a class="link-text" @click="goCardKeyPool(row)">卡池管理</a>
             </template>
           </template>
         </el-table-column>
@@ -196,6 +203,7 @@
 import {
   getGoodsListData,
   getGoodsNumerData,
+  getQueryGoodsIdGoodsList,
   upGoods,
   lowGoods,
 } from "@/api/goods";
@@ -252,7 +260,34 @@ export default {
     goodsTypeText(v) {
       if (v === "PHYSICAL_GOODS") return "实物商品";
       if (v === "VIRTUAL_GOODS") return "虚拟商品";
-      return "电子卡券";
+      if (v === "E_COUPON") return "电子卡券"; // 卡密商品
+      return v || "—";
+    },
+    /** 跳转卡池管理；单 SKU 商品默认取第一个 SKU（card-key-pool 需 skuId） */
+    async goCardKeyPool(row) {
+      let skuId = row.skuId;
+      if (!skuId) {
+        try {
+          const res = await getQueryGoodsIdGoodsList(row.id);
+          if (res.success && res.result?.length) {
+            skuId = res.result[0].id;
+          } else {
+            this.$message.warning("该商品暂无 SKU，请先完善商品规格");
+            return;
+          }
+        } catch {
+          this.$message.error("获取商品规格失败");
+          return;
+        }
+      }
+      this.$router.push({
+        path: "/card-key-pool",
+        query: {
+          skuId,
+          goodsId: row.id,
+          goodsName: row.goodsName,
+        },
+      });
     },
     marketEnableText(v) {
       if (v === "DOWN") return "下架";

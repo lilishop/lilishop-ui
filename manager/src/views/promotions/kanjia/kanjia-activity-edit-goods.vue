@@ -90,6 +90,7 @@
 <script>
 import { getKanJiaActivityGoodsById, editKanJiaActivityGoods } from "@/api/promotion";
 import { regular } from "@/utils";
+import { isECoupon } from "@/constants/goodsType";
 
 export default {
   name: "editKanjiaActivityGoods",
@@ -200,6 +201,8 @@ export default {
         params.endTime = this.$filters.unixToDate(endDate.getTime() / 1000);
         delete params.rangeTime;
 
+        const eCoupon = isECoupon(params.goodsType || params.goodsSku?.goodsType);
+
         if (params.stock <= 0 || params.stock > params.goodsSku.quantity) {
           this.$Message.error("活动库存不能为0且不能超过商品库存");
           return;
@@ -208,8 +211,15 @@ export default {
           this.$Message.error("结算价格金额格式不正确");
           return;
         }
-        if (params.settlementPrice < 0 || params.settlementPrice > params.price) {
-          this.$Message.error("结算价格金额不能为0且不能超过商品价格");
+        if (
+          (eCoupon ? params.settlementPrice < 0 : params.settlementPrice <= 0) ||
+          params.settlementPrice > params.price
+        ) {
+          this.$Message.error(
+            eCoupon
+              ? "结算价格不能小于0且不能超过商品价格"
+              : "结算价格金额不能为0且不能超过商品价格"
+          );
           return;
         }
         if (!regular.money.test(params.highestPrice)) {
@@ -224,8 +234,12 @@ export default {
           this.$Message.error("最低可砍金额格式错误");
           return;
         }
-        if (params.lowestPrice <= 0 || params.lowestPrice > params.price) {
-          this.$Message.error("最低可砍金额不能为0");
+        if (
+          params.lowestPrice < 0 ||
+          (!eCoupon && params.lowestPrice <= 0) ||
+          params.lowestPrice > params.price
+        ) {
+          this.$Message.error(eCoupon ? "最低可砍金额不能小于0" : "最低可砍金额不能为0");
           return;
         }
         if (params.lowestPrice > params.highestPrice) {

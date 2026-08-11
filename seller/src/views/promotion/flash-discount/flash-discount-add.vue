@@ -6,7 +6,14 @@
           <el-input v-model="form.promotionName" style="width: 320px" />
         </el-form-item>
         <el-form-item label="活动时间" required>
-          <el-date-picker v-model="form.rangeTime" type="datetimerange" style="width: 360px" />
+          <el-date-picker
+            v-model="form.rangeTime"
+            class="flash-discount-range-picker"
+            type="datetimerange"
+            format="YYYY-MM-DD HH:mm:ss"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+          />
         </el-form-item>
         <el-form-item label="限购数量">
           <el-input-number v-model="form.limitNum" :min="0" /> <span class="tip">0 表示不限</span>
@@ -16,12 +23,22 @@
         </el-form-item>
         <el-form-item label="活动商品">
           <el-button type="primary" @click="openGoods">选择商品</el-button>
-          <el-table v-if="form.promotionGoodsList.length" :data="form.promotionGoodsList" border class="mt_10">
-            <el-table-column prop="goodsName" label="商品" />
-            <el-table-column prop="originalPrice" label="原价" width="100" />
-            <el-table-column label="活动价" width="140">
+          <el-table
+            v-if="form.promotionGoodsList.length"
+            :data="form.promotionGoodsList"
+            border
+            class="mt_10 flash-discount-goods-table"
+          >
+            <el-table-column prop="goodsName" label="商品" width="180" show-overflow-tooltip />
+            <el-table-column prop="originalPrice" label="原价" width="90" align="center" />
+            <el-table-column label="活动价" width="150" align="center">
               <template #default="{ row }">
-                <el-input-number v-model="row.price" :min="0.01" :precision="2" />
+                <el-input-number
+                  v-model="row.price"
+                  :min="promotionPriceMin(row.goodsType)"
+                  :precision="2"
+                  size="small"
+                />
               </template>
             </el-table-column>
           </el-table>
@@ -38,6 +55,7 @@
 
 <script>
 import { getFlashDiscountDetail, saveFlashDiscount, editFlashDiscount } from "@/api/promotion.js";
+import { promotionPriceMin } from "@/constants/goodsType";
 
 export default {
   data() {
@@ -63,6 +81,7 @@ export default {
     }
   },
   methods: {
+    promotionPriceMin,
     openGoods() {
       this.$refs.liliDialog.open("goods");
     },
@@ -76,6 +95,7 @@ export default {
             originalPrice: g.price,
             price: g.price,
             quantity: g.quantity,
+            goodsType: g.goodsType,
           });
         }
       });
@@ -83,9 +103,18 @@ export default {
     submit() {
       const payload = { ...this.form };
       if (payload.rangeTime && payload.rangeTime.length === 2) {
-        payload.startTime = payload.rangeTime[0];
-        payload.endTime = payload.rangeTime[1];
+        const start =
+          payload.rangeTime[0] instanceof Date
+            ? payload.rangeTime[0]
+            : new Date(payload.rangeTime[0]);
+        const end =
+          payload.rangeTime[1] instanceof Date
+            ? payload.rangeTime[1]
+            : new Date(payload.rangeTime[1]);
+        payload.startTime = this.$filters.unixToDate(start.getTime() / 1000);
+        payload.endTime = this.$filters.unixToDate(end.getTime() / 1000);
       }
+      delete payload.rangeTime;
       const req = payload.id ? editFlashDiscount(payload) : saveFlashDiscount(payload);
       req.then((res) => {
         if (res.success) {
@@ -101,4 +130,16 @@ export default {
 <style scoped>
 .tip { margin-left: 8px; color: #999; }
 .mt_10 { margin-top: 10px; }
+
+:deep(.flash-discount-range-picker.el-date-editor--datetimerange) {
+  width: 380px;
+  max-width: 380px;
+  flex-grow: 0;
+  --el-date-editor-width: 380px;
+}
+
+.flash-discount-goods-table {
+  width: fit-content;
+  max-width: 100%;
+}
 </style>

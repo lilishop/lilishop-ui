@@ -72,8 +72,8 @@
               <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
               <el-button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</el-button>
               <el-button @click="received(order.sn)" size="small" type="primary" v-if="order.allowOperationVO.rog">确认收货</el-button>
-              <!-- 售后 -->
-              <el-button v-if="order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
+              <!-- 售后（E_COUPON 卡密已交付不支持售后 FR-B-04） -->
+              <el-button v-if="order.orderType !== 'E_COUPON' && order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
                       @click="applyAfterSale(order.orderItems)" size="small">申请售后</el-button>
             </div>
           </div>
@@ -141,8 +141,8 @@
             <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
             <el-button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</el-button>
             <el-button @click="received(order.sn)" size="small" type="primary" v-if="order.allowOperationVO.rog">确认收货</el-button>
-            <!-- 售后 -->
-            <el-button v-if="order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
+            <!-- 售后（E_COUPON 不支持买家售后 FR-B-04） -->
+            <el-button v-if="order.orderType !== 'E_COUPON' && order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
                     @click="applyAfterSale(order.orderItems)" size="small">申请售后</el-button>
           </div>
         </div>

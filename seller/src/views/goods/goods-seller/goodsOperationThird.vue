@@ -2,9 +2,6 @@
   <div class="content-goods-publish">
     <div class="success" style="text-align: left">
       <h1>恭喜您，商品发布成功!</h1>
-      <div class="goToGoodsList" @click="gotoGoodsList">
-        <a>去店铺查看商品列表>></a>
-      </div>
       <div class="operation">
         <h3>您还可以：</h3>
         <div>
@@ -34,5 +31,17 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-  @import "./addGoods.scss";
+@import "./addGoods.scss";
+
+.success {
+  a {
+    color: #409eff;
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover {
+      color: #66b1ff;
+    }
+  }
+}
 </style>

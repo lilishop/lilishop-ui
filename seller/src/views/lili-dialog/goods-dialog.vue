@@ -253,6 +253,7 @@ export default {
       goodsData: [],
       loading: false,
       tableHeight: 400,
+      syncingSelection: false,
     };
   },
   watch: {
@@ -339,14 +340,15 @@ export default {
     initGoods(res) {
       const records = res?.result?.records || [];
       this.total = res?.result?.total || 0;
+      const selectedIds = new Set(
+        (this.selectedList || [])
+          .map((e) => e.id || e.skuId)
+          .filter((id) => id != null)
+          .map(String)
+      );
       records.forEach((item) => {
-        item.selected = false;
         item.___type = "goods";
-        this.selectedList.forEach((e) => {
-          if (e.id && e.id === item.id) {
-            item.selected = true;
-          }
-        });
+        item.selected = selectedIds.has(String(item.id));
       });
       this.goodsData = records;
       this.syncTableSelection();
@@ -356,11 +358,17 @@ export default {
         const table = this.$refs.goodsTable;
         if (!table) return;
         if (this.type === "multiple") {
+          // clearSelection/toggleRowSelection 都会触发 selection-change，
+          // 同步期间忽略，避免把已选状态清掉
+          this.syncingSelection = true;
           table.clearSelection();
           this.goodsData.forEach((row) => {
             if (row.selected) {
               table.toggleRowSelection(row, true);
             }
+          });
+          this.$nextTick(() => {
+            this.syncingSelection = false;
           });
           return;
         }
@@ -382,13 +390,16 @@ export default {
       this.$refs.goodsTable?.setCurrentRow(row);
     },
     handleSelectionChange(selection) {
-      if (this.type !== "multiple") return;
-      const selectedIds = new Set(selection.map((item) => item.id));
+      if (this.type !== "multiple" || this.syncingSelection) return;
+      const selectedIds = new Set(selection.map((item) => String(item.id)));
       this.goodsData.forEach((item) => {
-        item.selected = selectedIds.has(item.id);
+        item.selected = selectedIds.has(String(item.id));
       });
-      const currentPageIds = new Set(this.goodsData.map((item) => item.id));
-      const otherPages = this.selectedList.filter((item) => !currentPageIds.has(item.id));
+      const currentPageIds = new Set(this.goodsData.map((item) => String(item.id)));
+      const otherPages = this.selectedList.filter((item) => {
+        const id = item.id || item.skuId;
+        return id != null && !currentPageIds.has(String(id));
+      });
       this.emitSelected([...otherPages, ...selection]);
     },
     formatShopCategory(list) {

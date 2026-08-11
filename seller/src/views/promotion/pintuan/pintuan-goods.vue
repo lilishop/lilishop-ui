@@ -44,7 +44,7 @@
               <el-input-number
                 v-if="row"
                 v-model="row.price"
-                :min="0.01"
+                :min="promotionPriceMin(row.goodsType)"
                 :precision="2"
                 controls-position="right"
                 size="small"
@@ -133,6 +133,7 @@
 import { getPintuanGoodsList, getPintuanDetail, editPintuan } from "@/api/promotion.js";
 import liliDialog from "@/views/lili-dialog";
 import vueQr from "vue-qr";
+import { promotionPriceMin } from "@/constants/goodsType";
 
 export default {
   components: { liliDialog, vueQr },
@@ -158,6 +159,7 @@ export default {
     },
   },
   methods: {
+    promotionPriceMin,
     promotionStatusText(status) {
       const map = {
         NEW: "未开始",

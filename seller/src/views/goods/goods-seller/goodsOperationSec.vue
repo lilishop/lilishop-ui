@@ -8,12 +8,37 @@
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
-            <el-form-item label="商品分类">
-              <span class="goods-category-name">{{
-                baseInfoForm.categoryName[0]
-                }}</span>
-              <span> &gt; {{ baseInfoForm.categoryName[1] }}</span>
-              <span> &gt; {{ baseInfoForm.categoryName[2] }}</span>
+            <el-form-item label="商品类型" prop="goodsType">
+              <el-select
+                v-model="baseInfoForm.goodsType"
+                placeholder="请选择商品类型"
+                style="width: 260px"
+                popper-class="goods-type-select-popper"
+                @change="handleGoodsTypeChange"
+              >
+                <el-option
+                  v-for="item in goodsTypeOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                >
+                  <div class="goods-type-option">
+                    <span class="goods-type-option-label">{{ item.label }}</span>
+                    <span class="goods-type-option-desc">{{ item.desc }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <div v-if="currentGoodsTypeDesc" class="form-tip">{{ currentGoodsTypeDesc }}</div>
+            </el-form-item>
+            <el-form-item label="商品分类" prop="categoryPath">
+              <el-cascader
+                v-model="selectedCategory"
+                :options="categoryList"
+                placeholder="请选择商品分类"
+                clearable
+                style="width: 260px"
+                @change="handleCategoryChange"
+              />
             </el-form-item>
             <el-form-item label="商品名称" prop="goodsName">
               <el-input v-model="baseInfoForm.goodsName" clearable placeholder="商品名称" style="width: 260px" type="text" />
@@ -44,7 +69,7 @@
             </el-form-item>
             <el-form-item class="form-item-view-el" label="销售模式" prop="salesModel">
               <el-radio-group
-                v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'"
+                v-if="!isVirtualLikeGoods"
                 v-model="baseInfoForm.salesModel"
                 @change="handleSalesModeChange"
               >
@@ -52,7 +77,7 @@
                 <el-radio-button value="WHOLESALE">批发型</el-radio-button>
               </el-radio-group>
               <el-radio-group v-else v-model="baseInfoForm.salesModel">
-                <el-radio-button value="RETAIL">虚拟型</el-radio-button>
+                <el-radio-button value="RETAIL">{{ isECouponGoods ? "电子卡券" : "虚拟型" }}</el-radio-button>
               </el-radio-group>
             </el-form-item>
             <el-form-item v-if="baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="销售规则"
@@ -336,13 +361,21 @@
                               @change="updateSkuTable(row, 'sn', $index)"
                             />
                             <el-input
-                              v-else-if="col.slot === 'weight' && baseInfoForm.goodsType !== 'VIRTUAL_GOODS'"
+                              v-else-if="col.slot === 'weight' && needsLogistics && baseInfoForm.salesModel !== 'WHOLESALE'"
                               v-model="row.weight"
                               clearable
                               placeholder="请输入重量"
                               @change="updateSkuTable(row, 'weight', $index)"
                             >
                               <template #append>kg</template>
+                            </el-input>
+                            <el-input
+                              v-else-if="col.slot === 'quantity' && isECouponGoods"
+                              :model-value="row.quantity ?? 0"
+                              disabled
+                              placeholder="库存"
+                            >
+                              <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
                             </el-input>
                             <el-input
                               v-else-if="col.slot === 'quantity'"
@@ -444,7 +477,7 @@
               </div>
             </el-form-item>
           </div>
-          <div v-if="baseInfoForm.goodsType != 'VIRTUAL_GOODS'">
+          <div v-if="needsLogistics">
             <h4>商品物流信息</h4>
             <div class="form-item-view">
               <el-form-item class="form-item-view-el" label="物流模板" prop="templateId">
@@ -486,7 +519,6 @@
     <!-- 底部按钮 -->
     <div class="footer">
       <div class="footer-btns">
-        <el-button type="primary" @click="pre">上一步</el-button>
         <el-button :loading="submitLoading" type="primary" @click="save">
           {{ $route.query.id ? "保存" : "保存商品" }}
         </el-button>
@@ -513,7 +545,7 @@
         @selected="(list) => { selectedImage = list }"
       />
       <template #footer>
-        <el-button @click="picModelFlag = false">取消</el-button>
+        <el-button @click="picModelFlag = false; selectedImage = []">取消</el-button>
         <el-button type="primary" @click="confirmUrls">确定</el-button>
       </template>
     </el-dialog>
@@ -552,6 +584,28 @@ export default {
       type: Object,
     },
   },
+  computed: {
+    /** 卡密商品：库存只读展示 quantity，提交时 quantity 传 0（FR-S-01 / P-02） */
+    isECouponGoods() {
+      return this.baseInfoForm.goodsType === "E_COUPON";
+    },
+    isVirtualGoods() {
+      return this.baseInfoForm.goodsType === "VIRTUAL_GOODS";
+    },
+    isVirtualLikeGoods() {
+      return this.isVirtualGoods || this.isECouponGoods;
+    },
+    /** 仅实物需要运费模板；E_COUPON 强制 templateId=0（§6.1） */
+    needsLogistics() {
+      return this.baseInfoForm.goodsType === "PHYSICAL_GOODS";
+    },
+    currentGoodsTypeDesc() {
+      const matched = this.goodsTypeOptions.find(
+        (item) => item.value === this.baseInfoForm.goodsType
+      );
+      return matched ? matched.desc : "";
+    },
+  },
   data() {
     // 表单验证项，商品价格
     const checkPrice = (rule, value, callback) => {
@@ -584,6 +638,16 @@ export default {
       accessToken: "", //令牌token
       goodsParams: [],
       categoryId: "", // 商品分类第三级id
+      /** 商品类型选项 */
+      goodsTypeOptions: [
+        { label: "实物商品", value: "PHYSICAL_GOODS", desc: "零售批发，物流配送" },
+        { label: "虚拟商品", value: "VIRTUAL_GOODS", desc: "虚拟核验，无需物流" },
+        { label: "电子卡券", value: "E_COUPON", desc: "卡密自动发卡，无需物流" },
+      ],
+      /** 商城分类级联数据 */
+      categoryList: [],
+      /** 商城分类选中值 [一级id, 二级id, 三级id] */
+      selectedCategory: [],
       //提交状态
       submitLoading: false,
       //上传图片路径
@@ -705,6 +769,8 @@ export default {
       /** 存储未通过校验的单元格位置  */
       validateError: [],
       baseInfoFormRule: {
+        goodsType: [{ required: true, message: "请选择商品类型", trigger: "change" }],
+        categoryPath: [{ required: true, message: "请选择商品分类", trigger: "change" }],
         goodsName: [regular.REQUIRED, regular.WHITE_SPACE, regular.VARCHAR60],
         price: [regular.REQUIRED, { validator: checkPrice }],
         sellingPoint: [regular.REQUIRED, regular.VARCHAR60],
@@ -759,11 +825,22 @@ export default {
     }
   },
   methods: {
+    /** E_COUPON 提交固定传 0，真实库存由卡池 syncSkuStock 同步至 quantity */
+    resolveSubmitQuantity(sku) {
+      if (this.isECouponGoods) {
+        return 0;
+      }
+      return sku.quantity;
+    },
+    defaultSkuQuantity() {
+      return this.isECouponGoods ? 0 : "";
+    },
     draggableItemKey(item) {
       return item;
     },
     // 选择图片modal
     handleCLickImg(val, index) {
+      this.selectedImage = [];
       this.picModelFlag = true;
       this.selectedFormBtnName = val;
       this.$nextTick(() => {
@@ -793,22 +870,60 @@ export default {
         desc: "视频大小不能超过10MB",
       });
     },
+    parseOssSelectionUrl(item) {
+      if (!item) return "";
+      if (typeof item === "string") {
+        const index = item.indexOf(",");
+        return index >= 0 ? item.slice(index + 1) : item;
+      }
+      return item.url || "";
+    },
     // 图片选择后回调
     callbackSelected(val) {
       this.picModelFlag = false;
-      if (val && this.selectedFormBtnName == 'selectedSkuImages') {
-        this.selectedSku.images.push(val);
+      if (!val?.url) {
+        return;
+      }
+      if (this.selectedFormBtnName === "selectedSkuImages") {
+        if (!this.selectedSku.images) {
+          this.selectedSku.images = [];
+        }
+        this.selectedSku.images.push(val.url);
       } else {
         this.baseInfoForm[this.selectedFormBtnName].push(val.url);
       }
-
     },
     confirmUrls() {
-      if (this.selectedImage && this.selectedFormBtnName == 'selectedSkuImages') {
-        this.selectedSku.images = [...this.selectedSku.images, ...this.selectedImage];
-      } else {
-        this.baseInfoForm[this.selectedFormBtnName] = [...this.baseInfoForm[this.selectedFormBtnName], ...this.selectedImage];
+      const urls = (this.selectedImage || [])
+        .map((item) => this.parseOssSelectionUrl(item))
+        .filter(Boolean);
+      if (!urls.length) {
+        this.$Message.warning("请选择图片");
+        return;
       }
+      if (this.selectedFormBtnName === "selectedSkuImages") {
+        if (!this.selectedSku.images) {
+          this.selectedSku.images = [];
+        }
+        urls.forEach((url) => {
+          if (this.selectedSku.images.length < 5) {
+            this.selectedSku.images.push(url);
+          }
+        });
+      } else if (this.selectedFormBtnName === "goodsGalleryFiles") {
+        urls.forEach((url) => {
+          if (this.baseInfoForm.goodsGalleryFiles.length < 5) {
+            this.baseInfoForm.goodsGalleryFiles.push(url);
+          }
+        });
+      } else if (this.selectedFormBtnName) {
+        const target = this.baseInfoForm[this.selectedFormBtnName];
+        if (Array.isArray(target)) {
+          urls.forEach((url) => target.push(url));
+        }
+      }
+      this.selectedImage = [];
+      this.picModelFlag = false;
     },
     // 局部刷新
     refresh(v) {
@@ -913,9 +1028,79 @@ export default {
         });
       }
     },
-    pre() {
-      // 上一步
-      this.$parent.activestep--;
+    /** 加载商城商品分类树 */
+    loadCategoryList() {
+      return API_GOODS.getGoodsCategoryAll().then((res) => {
+        if (res.success && res.result) {
+          this.categoryList = this.formatCategoryTree(res.result);
+          this.syncSelectedCategoryFromPath();
+        }
+      });
+    },
+    formatCategoryTree(list) {
+      return (list || []).map((item) => ({
+        value: String(item.id),
+        label: item.name,
+        children: (item.children || []).map((child) => ({
+          value: String(child.id),
+          label: child.name,
+          children: (child.children || []).map((grandson) => ({
+            value: String(grandson.id),
+            label: grandson.name,
+          })),
+        })),
+      }));
+    },
+    syncSelectedCategoryFromPath() {
+      const path = this.baseInfoForm.categoryPath;
+      if (!path) {
+        return;
+      }
+      const ids = path.split(",").filter(Boolean).map(String);
+      if (ids.length >= 3) {
+        this.selectedCategory = ids;
+        this.categoryId = ids[2];
+      }
+    },
+    getCategoryNames(ids) {
+      const names = [];
+      let options = this.categoryList;
+      ids.forEach((id) => {
+        const found = (options || []).find((item) => item.value === id);
+        if (found) {
+          names.push(found.label);
+          options = found.children || [];
+        }
+      });
+      return names;
+    },
+    handleGoodsTypeChange() {
+      if (this.isVirtualLikeGoods) {
+        this.baseInfoForm.salesModel = "RETAIL";
+      }
+      if (this.isECouponGoods) {
+        this.baseInfoForm.templateId = 0;
+      }
+      this.renderTableData(this.skuTableData);
+    },
+    handleCategoryChange(val) {
+      if (!val || val.length < 3) {
+        this.selectedCategory = val || [];
+        this.categoryId = "";
+        this.baseInfoForm.categoryPath = "";
+        this.baseInfoForm.categoryName = [];
+        this.baseInfoForm.brandId = 0;
+        this.brandList = [];
+        this.goodsParams = [];
+        this.params_panel = [];
+        return;
+      }
+      this.categoryId = val[2];
+      this.baseInfoForm.categoryPath = val.join(",");
+      this.baseInfoForm.categoryName = this.getCategoryNames(val);
+      this.baseInfoForm.brandId = 0;
+      this.getGoodsBrandList();
+      this.GET_GoodsParams();
     },
     // 预览图片
     handleView(url) {
@@ -1192,6 +1377,7 @@ export default {
       this.baseInfoForm = { ...this.baseInfoForm, ...response.result };
       this.baseInfoForm.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
       this.categoryId = response.result.categoryPath.split(",")[2];
+      this.syncSelectedCategoryFromPath();
 
       // 如果是复制商品，需要清除ID，确保提交时作为新商品
       if (this.$route.query.copyId) {
@@ -1228,19 +1414,6 @@ export default {
       this.GET_ShopGoodsLabel();
       this.GET_GoodsUnit();
 
-      if (this.firstData.category) {
-        const cateId = [];
-        this.baseInfoForm.categoryName = [];
-        this.firstData.category.forEach((cate) => {
-          this.baseInfoForm.categoryName.push(cate.name);
-          cateId.push(cate.id);
-        });
-        this.categoryId = cateId[2];
-
-        this.baseInfoForm.categoryPath = cateId.toString();
-      }
-      this.firstData.goodsType &&
-        (this.baseInfoForm.goodsType = this.firstData.goodsType);
       /** 查询商品参数 */
       this.GET_GoodsParams();
     },
@@ -1724,14 +1897,19 @@ export default {
               ...combination,
               id: existingCombination.id || "",
               sn: existingCombination.sn || "",
-              quantity: existingCombination.quantity || "",
+              quantity: this.isECouponGoods
+                ? (existingCombination.quantity ?? 0)
+                : (existingCombination.quantity || ""),
               cost: existingCombination.cost || "",
               price: existingCombination.price || "",
               weight: existingCombination.weight || ""
             };
           } else {
             // 新组合使用默认值
-            return combination;
+            return {
+              ...combination,
+              quantity: this.defaultSkuQuantity(),
+            };
           }
         });
         this.baseInfoForm.regeneratorSkuFlag = true;
@@ -1779,14 +1957,19 @@ export default {
             ...combination,
             id: existingCombination.id || "",
             sn: existingCombination.sn || "",
-            quantity: existingCombination.quantity || "",
+            quantity: this.isECouponGoods
+              ? (existingCombination.quantity ?? 0)
+              : (existingCombination.quantity || ""),
             cost: existingCombination.cost || "",
             price: existingCombination.price || "",
             weight: existingCombination.weight || ""
           };
         } else {
           // 新组合使用默认值
-          return combination;
+          return {
+            ...combination,
+            quantity: this.defaultSkuQuantity(),
+          };
         }
       });
 
@@ -1833,7 +2016,7 @@ export default {
 
       // 有重量的情况
       if (
-        this.baseInfoForm.goodsType !== "VIRTUAL_GOODS" &&
+        this.needsLogistics &&
         this.baseInfoForm.salesModel !== "WHOLESALE"
       ) {
         pushData.push({
@@ -1878,7 +2061,9 @@ export default {
               ...combination,
               id: existingCombination.id || "",
               sn: existingCombination.sn || "",
-              quantity: existingCombination.quantity || "",
+              quantity: this.isECouponGoods
+                ? (existingCombination.quantity ?? 0)
+                : (existingCombination.quantity || ""),
               cost: existingCombination.cost || "",
               price: existingCombination.price || (this.baseInfoForm.salesModel === 'WHOLESALE' && this.wholesaleData.length > 0 ? this.wholesaleData[0].price : ""),
               weight: existingCombination.weight || ""
@@ -1889,7 +2074,7 @@ export default {
               ...combination,
               id: "",
               sn: "",
-              quantity: "",
+              quantity: this.defaultSkuQuantity(),
               cost: "",
               price: this.baseInfoForm.salesModel === 'WHOLESALE' && this.wholesaleData.length > 0 ? this.wholesaleData[0].price : "",
               weight: ""
@@ -2119,6 +2304,10 @@ export default {
         this.$Message.error(`以下参数为必填项：${missingParams.join('、')}`);
         return;
       }
+      if (!this.selectedCategory || this.selectedCategory.length < 3) {
+        this.$Message.error("必须选择到三级分类");
+        return;
+      }
       this.submitLoading = true;
       this.$refs["baseInfoForm"].validate((valid) => {
         if (valid) {
@@ -2153,6 +2342,10 @@ export default {
             return;
           }
           if (submit.templateId === "") submit.templateId = 0;
+          if (this.isECouponGoods) {
+            submit.templateId = 0;
+            submit.salesModel = "RETAIL";
+          }
           let flag = false;
           let paramValue = "";
 
@@ -2175,7 +2368,7 @@ export default {
             let skuCopy = {
               cost: 1,
               price: sku.price,
-              quantity: sku.quantity,
+              quantity: this.resolveSubmitQuantity(sku),
               // alertQuantity: sku.alertQuantity,
               sn: sku.sn,
               images: [],
@@ -2273,37 +2466,20 @@ export default {
       accessToken: this.getStore("accessToken"),
     };
     this.GET_ShipTemplate()
+    this.loadCategoryList();
     if (this.$route.query.id || this.$route.query.draftId) {
       // 编辑商品、模板
       this.GET_GoodData(this.$route.query.id, this.$route.query.draftId);
     } else if (this.$route.query.copyId) {
       // 复制商品
       this.GET_GoodData(this.$route.query.copyId);
+    } else if (this.firstData.tempId) {
+      // 选择模板
+      this.GET_GoodData("", this.firstData.tempId);
     } else {
-      // 新增商品、模板
-      if (this.firstData.tempId) {
-        // 选择模板
-        this.GET_GoodData("", this.firstData.tempId);
-      } else {
-        const cateId = [];
-        this.firstData.category.forEach((cate) => {
-          this.baseInfoForm.categoryName.push(cate.name);
-          cateId.push(cate.id);
-        });
-        this.categoryId = cateId[2];
-        this.baseInfoForm.categoryPath = cateId.toString();
-        this.baseInfoForm.goodsType = this.firstData.goodsType;
-
-
-        /** 获取该商城分类下 商品参数信息 */
-        this.GET_GoodsParams();
-        /** 查询品牌列表 */
-        this.getGoodsBrandList();
-        // 获取商品单位
-        this.GET_GoodsUnit();
-        // 获取当前店铺分类
-        this.GET_ShopGoodsLabel();
-      }
+      // 新增商品
+      this.GET_GoodsUnit();
+      this.GET_ShopGoodsLabel();
     }
   },
 };
@@ -2415,5 +2591,59 @@ export default {
 
 .refresh-icon {
   margin-left: 10px;
+}
+
+.form-tip {
+  color: #666;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 4px;
+  max-width: 260px;
+}
+
+.goods-type-option {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+  padding: 2px 0;
+}
+
+.goods-type-option-label {
+  color: #303133;
+}
+
+.goods-type-option-desc {
+  color: #909399;
+  font-size: 12px;
+}
+</style>
+<style lang="scss">
+.goods-type-select-popper {
+  .el-select-dropdown__item {
+    height: auto;
+    min-height: 58px;
+    padding: 10px 12px;
+    line-height: 1.5;
+    white-space: normal;
+  }
+
+  .goods-type-option {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .goods-type-option-label {
+    color: #303133;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .goods-type-option-desc {
+    color: #909399;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: normal;
+  }
 }
 </style>

@@ -46,7 +46,8 @@ export function applyThird (params) {
 export function getDetailById (id) {
   return request({
     url: `/buyer/store/store/get/detail/${id}`,
-    needToken: true,
+    needToken: false,
+    optionalToken: true,
     method: Method.GET
   })
 }

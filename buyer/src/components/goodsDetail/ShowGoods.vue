@@ -44,7 +44,14 @@
           <div class="item-detail-title-row">
             <span class="item-detail-name">{{ skuDetail.goodsName }}</span>
             <el-tag
-              v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
+              v-if="isECouponGoods"
+              class="goods-type-tag"
+              size="small"
+            >
+              电子卡券
+            </el-tag>
+            <el-tag
+              v-else-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
               class="goods-type-tag"
               size="small"
             >
@@ -85,7 +92,7 @@
             <!-- 商品原价 -->
             <div class="item-price-row" v-else>
               <!-- 批发价格 -->
-              <div v-if="wholesaleNum && wholesaleNum.length">
+              <div v-if="!isECouponGoods && wholesaleNum && wholesaleNum.length">
                 <div class="flex">
                   <div class="item-price-title">
                     价 &nbsp;&nbsp;&nbsp;&nbsp;格
@@ -158,6 +165,36 @@
                   </div>
               </div>
             </div>
+            <!-- 限时折扣 -->
+            <div class="item-price-row" v-if="promotionMap['DISCOUNT']">
+              <p>
+                <span class="item-price-title">促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
+                <span class="item-promotion">限时折扣</span>
+                <span class="item-desc-pintuan" v-if="promotionMap['DISCOUNT'].discount">
+                  享 {{ promotionMap["DISCOUNT"].discount }} 折
+                </span>
+              </p>
+            </div>
+            <!-- 第N件优惠 -->
+            <div class="item-price-row" v-if="promotionMap['NTH']">
+              <p>
+                <span class="item-price-title">促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
+                <span class="item-promotion">第N件</span>
+                <span class="item-desc-pintuan">
+                  第 {{ promotionMap["NTH"].nthNum || promotionMap["NTH"].num }} 件优惠
+                </span>
+              </p>
+            </div>
+            <!-- 拼团 -->
+            <div class="item-price-row" v-if="promotionMap['PINTUAN']">
+              <p>
+                <span class="item-price-title">拼&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;团</span>
+                <span class="item-promotion">拼团价</span>
+                <span class="item-desc-pintuan" v-if="promotionMap['PINTUAN'].price">
+                  {{ $filters.unitPrice(promotionMap["PINTUAN"].price, "￥") }}
+                </span>
+              </p>
+            </div>
             <!-- 满减展示 -->
             <div class="item-price-row" v-if="promotionMap['FULL_DISCOUNT']">
               <p>
@@ -222,7 +259,6 @@
             </div>
           </div>
         </div>
-        <br />
         <div class="add-buy-car-box">
           <div class="item-select">
             <div class="item-select-title">
@@ -238,14 +274,16 @@
                   :precision="0"
                   @blur="changeCount"
                 ></el-input-number>
-                <span class="inventory">&nbsp;&nbsp;库存{{ skuDetail.quantity }}</span>
+                <span class="inventory">&nbsp;&nbsp;库存{{ displayStock }}</span>
               </div>
             </div>
           </div>
           <div
             class="item-select"
             v-if="
-              skuDetail.goodsType !== 'VIRTUAL_GOODS' && skuDetail.weight !== 0
+              !isECouponGoods &&
+              skuDetail.goodsType !== 'VIRTUAL_GOODS' &&
+              skuDetail.weight !== 0
             "
           >
             <div class="item-select-title">
@@ -279,19 +317,35 @@
               <div class="add-buy-car">
                 <el-button
                   class="goods-action-btn"
-                  v-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
+                  v-if="!isECouponGoods && skuDetail.goodsType !== 'VIRTUAL_GOODS'"
                   :loading="loading"
-                  :disabled="skuDetail.quantity === 0"
+                  :disabled="isOutOfStock"
                   @click="addShoppingCartBtn"
                   >加入购物车</el-button
                 >
                 <el-button
                   class="goods-action-btn"
+                  v-if="promotionMap['PINTUAN']"
+                  :loading="loadingPintuan"
+                  :disabled="isOutOfStock"
+                  @click="pintuanBuy"
+                  >拼团购买</el-button
+                >
+                <el-button
+                  class="goods-action-btn"
                   :loading="loading1"
-                  :disabled="skuDetail.quantity === 0"
+                  :disabled="isOutOfStock"
                   @click="buyNow"
                   >立即购买</el-button
                 >
+                <el-alert
+                  v-if="isECouponGoods"
+                  class="e-coupon-after-sale-notice"
+                  type="warning"
+                  :closable="false"
+                  show-icon
+                  :title="eCouponAfterSaleHint()"
+                />
                 <el-tooltip content="观看视频" v-if="skuDetail.goodsVideo">
                   <img class="view-video" @click="showGoodsVideo = true" :src="playIcon" alt="">
                 </el-tooltip>
@@ -320,6 +374,18 @@ import {
 } from "@/api/member.js";
 import { addCartGoods } from "@/api/cart.js";
 import playIcon from "@/assets/iconfont/play.svg";
+/** 卡密商品（E_COUPON）判定与库存工具，见 @/constants/goodsType */
+import {
+  isECoupon,
+  getECouponStock,
+  getECouponMaxBuyNum,
+  createEmptyPromotionMap,
+  resolveECouponCartType,
+  eCouponAfterSaleHint,
+  E_COUPON_CART_BUY_NOW,
+  E_COUPON_CART_PINTUAN,
+  E_COUPON_CART_POINTS,
+} from "@/constants/goodsType";
 
 export default {
   name: "ShowGoods",
@@ -362,15 +428,11 @@ export default {
         specList: [],
       }, // sku详情
       goodsSpecList: this.detail.specs, // 商品spec
-      promotionMap: {
-        // 活动状态
-        SECKILL: null,
-        FULL_DISCOUNT: null,
-        COUPON: [],
-      }, // 促销活动
+      promotionMap: createEmptyPromotionMap(),
       formatList: [], // 选择商品品类的数组
       loading: false, // 立即购买loading
       loading1: false, // 加入购物车loading
+      loadingPintuan: false,
       isCollected: false, // 是否收藏
     };
   },
@@ -397,15 +459,32 @@ export default {
           })
         : [];
     },
+    /** 卡密商品：禁加购，仅立即购买；库存读 quantity（M-02 起支持促销） */
+    isECouponGoods() {
+      return isECoupon(this.skuDetail.goodsType);
+    },
+    displayStock() {
+      if (this.isECouponGoods) {
+        return getECouponStock(this.skuDetail);
+      }
+      return Number(this.skuDetail.quantity) || 0;
+    },
     quantityMax() {
+      if (this.isECouponGoods) {
+        return getECouponMaxBuyNum(this.skuDetail);
+      }
       const qty = Number(this.skuDetail.quantity) || 0;
       return qty > 0 ? qty : 1;
     },
     isOutOfStock() {
+      if (this.isECouponGoods) {
+        return getECouponStock(this.skuDetail) <= 0;
+      }
       return (Number(this.skuDetail.quantity) || 0) <= 0;
     },
   },
   methods: {
+    eCouponAfterSaleHint,
     // 初始化video
     initVideo(){
       if(!this.goodsVideo ){
@@ -425,17 +504,20 @@ export default {
 
 
     syncCountWithQuantity() {
-      const qty = Number(this.skuDetail.quantity) || 0;
+      const qty = this.isECouponGoods
+        ? getECouponStock(this.skuDetail)
+        : Number(this.skuDetail.quantity) || 0;
       if (qty <= 0) {
         this.count = 1;
         return;
       }
-      if (this.wholesaleList && this.wholesaleList.length > 0) {
+      if (!this.isECouponGoods && this.wholesaleList && this.wholesaleList.length > 0) {
         this.count = Math.min(Math.max(this.wholesaleList[0].num, 1), qty);
         return;
       }
-      if (this.count > qty) {
-        this.count = qty;
+      const max = this.isECouponGoods ? getECouponMaxBuyNum(this.skuDetail) : qty;
+      if (this.count > max) {
+        this.count = max;
       } else if (this.count < 1) {
         this.count = 1;
       }
@@ -471,6 +553,11 @@ export default {
     },
 
     addShoppingCartBtn() {
+      // FR-B-01：E_COUPON 禁止加购物车（后端亦返回 CARD_KEY_E_COUPON_CART_FORBIDDEN）
+      if (this.isECouponGoods) {
+        Message.warning("电子卡券请使用立即购买");
+        return;
+      }
       // 添加购物车
       const params = {
         num: this.count,
@@ -500,20 +587,32 @@ export default {
         });
     },
     buyNow() {
-      // 立即购买
+      this.startCheckout(E_COUPON_CART_BUY_NOW, "loading1");
+    },
+    pintuanBuy() {
+      this.startCheckout(E_COUPON_CART_PINTUAN, "loadingPintuan");
+    },
+    pointPay() {
+      this.startCheckout(E_COUPON_CART_POINTS, "loading");
+    },
+    startCheckout(action, loadingKey) {
       const params = {
         num: this.count,
         skuId: this.skuDetail.id,
         cartType: "BUY_NOW",
       };
-      // 虚拟商品购买
       if (this.skuDetail.goodsType === "VIRTUAL_GOODS") {
         params.cartType = "VIRTUAL";
+      } else if (this.isECouponGoods) {
+        params.cartType = resolveECouponCartType({
+          routeWay: this.$route.query.way,
+          action,
+        });
       }
-      this.loading1 = true;
+      this[loadingKey] = true;
       addCartGoods(params)
         .then((res) => {
-          this.loading1 = false;
+          this[loadingKey] = false;
           if (res.success) {
             this.$router.push({
               path: "/pay",
@@ -524,7 +623,7 @@ export default {
           }
         })
         .catch(() => {
-          this.loading1 = false;
+          this[loadingKey] = false;
         });
     },
     async collect() {
@@ -602,16 +701,20 @@ export default {
       });
     },
     promotion() {
-      this.promotionMap = {SECKILL: null, FULL_DISCOUNT: null, COUPON: []};
-      // 格式化促销活动，返回当前促销的对象
-      if (!this.detail.promotionMap) return false;
-      let keysArr = Object.keys(this.detail.promotionMap);
+      this.promotionMap = createEmptyPromotionMap();
+      if (!this.detail || !this.detail.promotionMap) return false;
+      const keysArr = Object.keys(this.detail.promotionMap);
       if (keysArr.length === 0) return false;
 
       for (let i = 0; i < keysArr.length; i++) {
-        let key = keysArr[i].split("-")[0];
+        const key = keysArr[i].split("-")[0];
         if (key === "COUPON") {
-          this.promotionMap[key].push(this.detail.promotionMap[keysArr[i]]);
+          if (!Array.isArray(this.promotionMap.COUPON)) {
+            this.promotionMap.COUPON = [];
+          }
+          this.promotionMap.COUPON.push(this.detail.promotionMap[keysArr[i]]);
+        } else if (Object.prototype.hasOwnProperty.call(this.promotionMap, key)) {
+          this.promotionMap[key] = this.detail.promotionMap[keysArr[i]];
         } else {
           this.promotionMap[key] = this.detail.promotionMap[keysArr[i]];
         }
@@ -630,8 +733,8 @@ export default {
     },
   },
   mounted() {
-    // 用户登录才会判断是否收藏
-    if (this.Cookies.getItem("userInfo")) {
+    // 用户登录才会判断是否收藏（须同时有 token，避免残留 userInfo 触发 401 跳转登录）
+    if (this.Cookies.getItem("accessToken") && this.Cookies.getItem("userInfo")) {
       isCollection("GOODS", this.skuDetail.id).then((res) => {
         if (res.success && res.result) {
           this.isCollected = true;
@@ -956,6 +1059,22 @@ export default {
 
   margin-top: 15px;
   border-top: 1px dotted $border_color;
+}
+
+.e-coupon-after-sale-notice {
+  width: fit-content;
+  max-width: 420px;
+  flex: 0 0 auto;
+  padding: 4px 10px;
+
+  :deep(.el-alert__content) {
+    padding: 0;
+  }
+
+  :deep(.el-alert__title) {
+    font-size: 12px;
+    line-height: 1.5;
+  }
 }
 
 .add-buy-car-row {

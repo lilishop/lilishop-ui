@@ -68,7 +68,7 @@
                   <el-input-number
                     v-if="row"
                     v-model="row.price"
-                    :min="0.01"
+                    :min="promotionPriceMin(row.goodsType)"
                     :precision="2"
                     :disabled="row.promotionApplyStatus === 'PASS'"
                     controls-position="right"
@@ -185,6 +185,7 @@ import {
   delSeckillGoods,
 } from "@/api/promotion.js";
 import liliDialog from "@/views/lili-dialog";
+import { promotionPriceMin } from "@/constants/goodsType";
 
 export default {
   components: {
@@ -215,6 +216,7 @@ export default {
     },
   },
   methods: {
+    promotionPriceMin,
     seckillStatusText(status) {
       const map = {
         NEW: "未开始",
@@ -349,6 +351,7 @@ export default {
           storeName: item.storeName,
           skuId: item.id,
           timeLine,
+          goodsType: item.goodsType,
         };
       });
       this.goodsList[this.tabIndex].list = list;

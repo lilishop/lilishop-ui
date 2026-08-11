@@ -24,12 +24,13 @@ export function tradeDetail (params) {
  * @param payClient  调起方式 可用值：APP,NATIVE,JSAPI,H5
  * @param sn   订单编号
  */
-export function pay (params) {
+export function pay (params, config = {}) {
   return request({
     url: `/buyer/payment/cashier/pay/${params.paymentMethod}/${params.paymentClient}`,
     needToken: true,
     method: Method.GET,
-    params
+    params,
+    skipMessage: !!config.skipMessage,
   });
 }
 

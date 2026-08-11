@@ -11,19 +11,31 @@
       </div>
     </div>
     <div class="content">
-      <div class="pay-way">{{params.paymentMethod === 'ALIPAY' ? '支付宝支付' : '微信支付'}}</div>
+      <div class="pay-way">{{ payWayName }}支付</div>
       <div class="qrcode">
-        <div style="width:200px;height:200px;border:1px solid #eee;">
-          <vue-qr :text="qrcode" :margin="0" colorDark="#000" colorLight="#fff" :size="200"></vue-qr>
+        <div class="qrcode-box">
+          <div v-if="payLoading" class="qrcode-status">正在生成支付二维码...</div>
+          <div v-else-if="payError" class="qrcode-status qrcode-status--error">
+            <p>{{ payError }}</p>
+            <p class="qrcode-status-tip">您可点击「重新支付」重试，或返回选择其他支付方式</p>
+          </div>
+          <vue-qr
+            v-else
+            :text="qrcode"
+            :margin="0"
+            colorDark="#000"
+            colorLight="#fff"
+            :size="200"
+          />
         </div>
-        <div class="intro">
-          <el-icon><Iphone /></el-icon> 请使用{{params.paymentMethod === 'ALIPAY' ? '支付宝' : '微信'}}扫码付款
+        <div v-if="!payError" class="intro">
+          <el-icon><Iphone /></el-icon> 请使用{{ payWayName }}扫码付款
         </div>
       </div>
       <div class="btn-div">
         <p class="mb_10">支付成功后自动跳转，如未跳转请点击按钮手动跳转。。。</p>
         <div>
-          <el-button @click="handlePay">重新支付</el-button>
+          <el-button :loading="payLoading" @click="handlePay">重新支付</el-button>
           <el-button type="success" @click="$router.push('/payDone')">支付成功</el-button>
         </div>
       </div>
@@ -41,47 +53,79 @@ export default {
   components: { vueQr, Iphone },
   data () {
     return {
-      qrcode: '', // 二维码
-      params: this.$route.query, // 参数
-      interval: null, // 定时器
-      num: 0 // 商品数
+      qrcode: '',
+      params: this.$route.query,
+      interval: null,
+      num: 0,
+      payLoading: false,
+      payError: '',
     };
   },
-  methods: {
-    // 获取支付二维码
-    handlePay () {
-      const params = this.$route.query;
-      pay(params).then(res => {
-        if (res.success) {
-          this.qrcode = res.result;
-          this.num = 0;
-          this.interval = setInterval(this.callback, 5000);
-        } else {
-          Message.error(res.message)
-        }
-      });
+  computed: {
+    payWayName () {
+      return this.params.paymentMethod === 'ALIPAY' ? '支付宝' : '微信';
     },
-    callback () { // 支付回调接口
-      this.num++;
-      if (this.num >= 7) {
+  },
+  methods: {
+    formatPayError (rawMessage) {
+      const message = (rawMessage || '').trim();
+      if (!message || message === '支付业务异常，请稍后重试') {
+        return `${this.payWayName}支付暂不可用，请稍后重试或选择其他支付方式`;
+      }
+      return message;
+    },
+    clearPayPoll () {
+      if (this.interval) {
         clearInterval(this.interval);
         this.interval = null;
       }
-      let params = JSON.parse(JSON.stringify(this.$route.query));
+    },
+    handlePay () {
+      this.clearPayPoll();
+      const params = this.$route.query;
+      this.payLoading = true;
+      this.payError = '';
+      this.qrcode = '';
+      pay(params, { skipMessage: true })
+        .then((res) => {
+          this.payLoading = false;
+          if (res.success && res.result) {
+            this.qrcode = res.result;
+            this.num = 0;
+            this.interval = setInterval(this.callback, 5000);
+            return;
+          }
+          this.payError = this.formatPayError(res.message);
+          Message.error(this.payError);
+        })
+        .catch((err) => {
+          this.payLoading = false;
+          this.payError = this.formatPayError(err?.message || err?.data?.message);
+          Message.error(this.payError);
+        });
+    },
+    callback () {
+      this.num++;
+      if (this.num >= 7) {
+        this.clearPayPoll();
+      }
+      const params = JSON.parse(JSON.stringify(this.$route.query));
       delete params.paymentMethod;
       delete params.paymentClient;
-      payCallback(params).then(res => {
+      payCallback(params).then((res) => {
         if (res.result) {
-          clearInterval(this.interval);
-          this.interval = null;
-          this.$router.push({path: '/payDone', query: {orderType: this.$route.query.orderType}});
+          this.clearPayPoll();
+          this.$router.push({ path: '/payDone', query: { orderType: this.$route.query.orderType } });
         }
       });
-    }
+    },
   },
   mounted () {
     this.handlePay();
-  }
+  },
+  beforeUnmount () {
+    this.clearPayPoll();
+  },
 };
 </script>
 <style scoped lang="scss">
@@ -125,6 +169,33 @@ export default {
     margin: 30px 0 0 70px;
   }
 
+  .qrcode-box {
+    width: 200px;
+    height: 200px;
+    border: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qrcode-status {
+    padding: 16px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .qrcode-status--error {
+    color: #f56c6c;
+  }
+
+  .qrcode-status-tip {
+    margin-top: 8px;
+    color: #909399;
+    font-size: 12px;
+  }
+
   .intro {
     background-color: #ff7674;
     height: 40px;
@@ -143,6 +214,9 @@ export default {
     position: absolute;
     right: 20px;
     top: 20px;
+    cursor: pointer;
+    color: #409eff;
+    text-decoration: none;
   }
 }
 .price {
@@ -152,5 +226,8 @@ export default {
 }
 .head-right {
   font-weight: bold;
+}
+.mb_10 {
+  margin-bottom: 10px;
 }
 </style>

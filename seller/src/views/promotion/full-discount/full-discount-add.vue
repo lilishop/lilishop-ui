@@ -113,23 +113,26 @@
               </el-select>
             </el-form-item>
             <el-form-item v-if="form.giftFlag" label="赠品" prop="giftId">
-              <el-select
-                v-model="form.giftId"
-                filterable
-                remote
-                :remote-method="getGiftList"
-                placeholder="输入赠品名称搜索"
-                :disabled="fieldDisabled"
-                :loading="giftLoading"
-                style="width: 260px"
-              >
-                <el-option
-                  v-for="item in giftList"
-                  :value="item.id"
-                  :key="item.id"
-                  :label="item.goodsName"
-                />
-              </el-select>
+              <div class="gift-field">
+                <el-select
+                  v-model="form.giftId"
+                  filterable
+                  remote
+                  :remote-method="getGiftList"
+                  placeholder="输入赠品名称搜索"
+                  :disabled="fieldDisabled"
+                  :loading="giftLoading"
+                  style="width: 260px"
+                >
+                  <el-option
+                    v-for="item in giftList"
+                    :value="item.id"
+                    :key="item.id"
+                    :label="giftOptionLabel(item)"
+                  />
+                </el-select>
+                <p class="describe describe-block">电子卡券赠品支付后自动发卡；卡池不足时仅取消赠品子单，不影响主订单。</p>
+              </div>
             </el-form-item>
             <el-form-item v-if="form.pointFlag" label="赠积分" prop="point">
               <el-input
@@ -241,6 +244,7 @@ import {
 import { getGoodsSkuListDataSeller } from "@/api/goods";
 import { regular } from "@/utils";
 import vueQr from "vue-qr";
+import { goodsTypeLabel } from "@/constants/goodsType";
 
 export default {
   name: "add-full-discount",
@@ -313,6 +317,16 @@ export default {
     this.getGiftList();
   },
   methods: {
+    giftOptionLabel(item) {
+      if (!item) return "";
+      const typeLabel =
+        item.goodsType === "E_COUPON" ? ` [${goodsTypeLabel(item.goodsType)}]` : "";
+      const stock =
+        item.goodsType === "E_COUPON" && item.quantity != null
+          ? ` · 库存${item.quantity}`
+          : "";
+      return `${item.goodsName || ""}${typeLabel}${stock}`;
+    },
     closeCurrentPage() {
       this.$router.back();
     },
@@ -442,6 +456,7 @@ export default {
           thumbnail: e.thumbnail,
           skuId: e.id,
           goodsId: e.goodsId,
+          goodsType: e.goodsType,
         });
       });
       this.form.promotionGoodsList = list;
@@ -499,6 +514,17 @@ h4 {
   font-size: 12px;
   margin-left: 10px;
   color: #999;
+}
+.describe-block {
+  margin-left: 0;
+  margin-top: 4px;
+  line-height: 1.5;
+  max-width: 260px;
+}
+.gift-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 .link-text {
   color: #409eff;

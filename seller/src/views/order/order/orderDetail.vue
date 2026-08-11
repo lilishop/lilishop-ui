@@ -27,7 +27,7 @@
             @click="toPrint"
           >打印电子面单</el-button>
           <el-button
-            v-if="$route.query.orderType != 'VIRTUAL'"
+            v-if="!isNonPhysicalOrder"
             type="primary"
             plain
             style="float: right"
@@ -122,7 +122,7 @@
           </div>
         </div>
         <div style="width: 36%; float: left">
-          <div class="div-item" v-if="orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
+          <div class="div-item" v-if="!isECouponOrder && orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
             <div class="div-item-left">收货信息：</div>
             <div class="div-item-right">
               {{ orderInfo.order.consigneeName }}
@@ -204,7 +204,7 @@
             </div>
           </div> -->
 
-          <div class="div-item" v-if="$route.query.orderType != 'VIRTUAL'">
+          <div class="div-item" v-if="!isNonPhysicalOrder">
             <div class="div-item-left">配送方式：</div>
             <div class="div-item-right">
               {{ orderInfo.deliveryMethodValue }}
@@ -256,6 +256,48 @@
             </template>
           </el-table-column>
         </el-table>
+
+        <!-- 卡密信息（当前订单 orderItems；满赠赠品卡密在赠品子单详情查看） -->
+        <div v-if="hasCardKeySection" class="ecoupon-card-keys mt_10">
+          <h4>卡密信息</h4>
+          <div
+            v-for="line in cardKeyFulfillLines"
+            :key="line.key"
+            class="ecoupon-fulfill-block"
+          >
+            <el-alert
+              v-if="line.status !== 'DELIVERED'"
+              :type="cardKeyFulfillAlertType(line.status)"
+              show-icon
+              :closable="false"
+              :title="resolveCardKeyFulfillMessage(line)"
+              class="mb_10"
+            />
+            <el-table
+              v-else-if="line.cardKeys.length"
+              border
+              :data="lineCardKeyRows(line)"
+              style="width: 100%"
+              class="mb_10"
+            >
+              <el-table-column type="index" label="序号" width="60" align="center" />
+              <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
+              <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
+              <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
+              <el-table-column label="状态" width="90" align="center">
+                <template #default="{ row }">
+                  <span v-if="row">{{ formatCardKeyStatus(row.status || 'ALLOCATED') }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="100" align="center">
+                <template #default="{ row }">
+                  <el-button v-if="row" link type="primary" @click="copyCardKey(row)">复制</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </div>
+
         <div class="goods-total">
           <ul>
             <li>
@@ -319,7 +361,7 @@
                 <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
                 <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
               </li> -->
-            <li>
+            <li v-if="!isECouponOrder">
               <span class="label">运费：</span>
               <span class="txt">{{
                 $filters.unitPrice(orderInfo.order.freightPrice, "￥")
@@ -694,6 +736,14 @@ import * as RegExp from "@/libs/RegExp.js";
 import multipleMap from "@/views/my-components/map/multiple-map";
 import vueQr from "vue-qr";
 import { printElement } from "@/utils/print";
+import { formatCardKeyStatus } from "@/constants/cardKey";
+import {
+  collectCardKeyFulfillLines,
+  orderHasCardKeySection,
+  flattenOrderCardKeys,
+  cardKeyFulfillAlertType,
+  resolveCardKeyFulfillMessage,
+} from "@/constants/goodsType";
 export default {
   name: "orderDetail",
   components: {
@@ -814,11 +864,35 @@ export default {
     };
   },
   computed: {
+    /** 电子卡券订单：隐藏物流/发货/售后，展示 orderItems[].cardKeys（FR-S-04 / FR-S-05） */
+    isECouponOrder() {
+      const t = this.orderInfo?.order?.orderType;
+      return t === "E_COUPON" || this.$route.query.orderType === "E_COUPON";
+    },
+    isVirtualOrder() {
+      const t = this.orderInfo?.order?.orderType;
+      return t === "VIRTUAL" || this.$route.query.orderType === "VIRTUAL";
+    },
+    isNonPhysicalOrder() {
+      return this.isVirtualOrder || this.isECouponOrder;
+    },
+    hasCardKeySection() {
+      return orderHasCardKeySection({
+        orderItems: this.data,
+        isECouponOrder: this.isECouponOrder,
+      });
+    },
+    cardKeyFulfillLines() {
+      return collectCardKeyFulfillLines(this.data);
+    },
+    ecouponCardKeyRows() {
+      return flattenOrderCardKeys(this.data, true);
+    },
     canPartDelivery() {
       if (!this.allowOperation.ship) return false;
       const status = this.orderInfo.order && this.orderInfo.order.orderStatus;
       return (
-        this.$route.query.orderType !== "VIRTUAL" &&
+        !this.isNonPhysicalOrder &&
         ["UNDELIVERED", "PARTS_DELIVERED"].includes(status) &&
         this.deliverableOrderItems.length > 0
       );
@@ -845,6 +919,28 @@ export default {
     },
   },
   methods: {
+    formatCardKeyStatus,
+    cardKeyFulfillAlertType,
+    resolveCardKeyFulfillMessage,
+    lineCardKeyRows(line) {
+      return line.cardKeys || [];
+    },
+    copyCardKey(row) {
+      const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          this.$Message.success("已复制到剪贴板");
+        });
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        this.$Message.success("已复制到剪贴板");
+      }
+    },
     getPromotionText(row) {
       let resultText = "";
       if (row && row.promotionType) {

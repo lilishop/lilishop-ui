@@ -105,6 +105,7 @@
 import { saveKanJiaActivityGoods } from "@/api/promotion";
 import { regular } from "@/utils";
 import skuSelect from "@/components/lili-dialog";
+import { isECoupon } from "@/constants/goodsType";
 
 export default {
   name: "add-kanjia-activity-goods",
@@ -175,6 +176,7 @@ export default {
 
         let checkResult = true;
         this.form.promotionGoodsList.forEach((res) => {
+          const eCoupon = isECoupon(res.goodsType);
           if (res.stock <= 0 || res.stock > res.quantity) {
             checkResult = false;
             this.$Message.error("活动库存不能为0且不能超过商品库存");
@@ -186,9 +188,16 @@ export default {
             this.$Message.error("结算价格金额格式不正确");
             return;
           }
-          if (res.settlementPrice < 0 || res.settlementPrice > res.price) {
+          if (
+            (eCoupon ? res.settlementPrice < 0 : res.settlementPrice <= 0) ||
+            res.settlementPrice > res.price
+          ) {
             checkResult = false;
-            this.$Message.error("结算价格金额不能为0且不能超过商品价格");
+            this.$Message.error(
+              eCoupon
+                ? "结算价格不能小于0且不能超过商品价格"
+                : "结算价格金额不能为0且不能超过商品价格"
+            );
             return;
           }
           if (!regular.money.test(res.highestPrice)) {
@@ -206,9 +215,9 @@ export default {
             this.$Message.error("最低可砍金额格式错误");
             return;
           }
-          if (res.lowestPrice <= 0 || res.lowestPrice > res.price) {
+          if (res.lowestPrice < 0 || (!eCoupon && res.lowestPrice <= 0) || res.lowestPrice > res.price) {
             checkResult = false;
-            this.$Message.error("最低可砍金额不能为0");
+            this.$Message.error(eCoupon ? "最低可砍金额不能小于0" : "最低可砍金额不能为0");
             return;
           }
           if (parseInt(res.lowestPrice) > parseInt(res.highestPrice)) {
@@ -277,6 +286,7 @@ export default {
           storeId: e.storeId,
           storeName: e.storeName,
           skuId: e.id,
+          goodsType: e.goodsType,
         });
       });
       this.form.promotionGoodsList = list;

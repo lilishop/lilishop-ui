@@ -80,9 +80,16 @@
                 >
                   自营
                 </el-tag>
+                <!-- E_COUPON 卡密商品类型标识 -->
+                <el-tag
+                  class="goods-show-tag goods-show-tag-physical goods-show-tag-ecoupon"
+                  v-if="item.goodsType === 'E_COUPON'"
+                >
+                  电子卡券
+                </el-tag>
                 <el-tag
                   class="goods-show-tag goods-show-tag-physical"
-                  v-if="item.goodsType === 'VIRTUAL_GOODS'"
+                  v-else-if="item.goodsType === 'VIRTUAL_GOODS'"
                 >
                   虚拟
                 </el-tag>
@@ -118,6 +125,7 @@ import { Message } from "@/utils/message";
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
 import GoodsClassNav from "@/components/nav/GoodsClassNav";
 import * as apiGoods from "@/api/goods";
+import { isBuyerLoggedIn, redirectToLogin } from "@/utils/buyerLogin";
 export default {
   name: "GoodsList",
   beforeRouteEnter(to, from, next) {
@@ -194,12 +202,15 @@ export default {
       this.getGoodsList();
     },
     goGoodsDetail(skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
+      const location = {
         path: "/goodsDetail",
         query: { skuId, goodsId },
-      });
-      window.open(routeUrl.href, "_blank");
+      };
+      if (!isBuyerLoggedIn()) {
+        redirectToLogin(this.$router, location);
+        return;
+      }
+      window.open(this.$router.resolve(location).href, "_blank");
     },
     goShopPage(id) {
       if (!id) {
@@ -281,13 +292,24 @@ export default {
 }
 
 .goods-show-tag {
-  height: 18px;
-  width: 32px;
-  line-height: 14px;
-  white-space: nowrap;
-  text-align: center;
+  display: inline-flex;
   align-items: center;
-  padding: 0 3px;
+  justify-content: center;
+  height: 18px;
+  min-width: 32px;
+  width: auto;
+  line-height: 1;
+  white-space: nowrap;
+  padding: 0 4px;
+  box-sizing: border-box;
+
+  :deep(.el-tag__content) {
+    line-height: 1;
+  }
+}
+
+.goods-show-tag-ecoupon {
+  padding: 0 5px;
 }
 
 .goods-show-tag-self {

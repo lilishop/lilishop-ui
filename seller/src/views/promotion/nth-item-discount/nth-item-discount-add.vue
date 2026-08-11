@@ -6,7 +6,14 @@
           <el-input v-model="form.promotionName" style="width: 320px" />
         </el-form-item>
         <el-form-item label="活动时间" required>
-          <el-date-picker v-model="form.rangeTime" type="datetimerange" style="width: 360px" />
+          <el-date-picker
+            v-model="form.rangeTime"
+            class="nth-item-range-picker"
+            type="datetimerange"
+            format="YYYY-MM-DD HH:mm:ss"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+          />
         </el-form-item>
         <el-form-item label="第N件" required>
           <el-input-number v-model="form.nthNum" :min="2" />
@@ -92,9 +99,18 @@ export default {
     submit() {
       const payload = { ...this.form };
       if (payload.rangeTime && payload.rangeTime.length === 2) {
-        payload.startTime = payload.rangeTime[0];
-        payload.endTime = payload.rangeTime[1];
+        const start =
+          payload.rangeTime[0] instanceof Date
+            ? payload.rangeTime[0]
+            : new Date(payload.rangeTime[0]);
+        const end =
+          payload.rangeTime[1] instanceof Date
+            ? payload.rangeTime[1]
+            : new Date(payload.rangeTime[1]);
+        payload.startTime = this.$filters.unixToDate(start.getTime() / 1000);
+        payload.endTime = this.$filters.unixToDate(end.getTime() / 1000);
       }
+      delete payload.rangeTime;
       const req = payload.id ? editNthItemDiscount(payload) : saveNthItemDiscount(payload);
       req.then((res) => {
         if (res.success) {
@@ -110,4 +126,11 @@ export default {
 <style scoped>
 .tip { margin-left: 8px; color: #999; }
 .mt_10 { margin-top: 10px; }
+
+:deep(.nth-item-range-picker.el-date-editor--datetimerange) {
+  width: 380px;
+  max-width: 380px;
+  flex-grow: 0;
+  --el-date-editor-width: 380px;
+}
 </style>

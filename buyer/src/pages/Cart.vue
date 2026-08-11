@@ -248,6 +248,7 @@ import Promotion from "@/components/goodsDetail/Promotion";
 import Search from "@/components/Search";
 import * as APICart from "@/api/cart";
 import * as APIMember from "@/api/member";
+import { isECoupon } from "@/constants/goodsType";
 export default {
   name: "Cart",
   beforeRouteEnter(to, from, next) {
@@ -407,11 +408,20 @@ export default {
     },
     // 跳转支付页面
     pay() {
-      if (this.checkedNum) {
-        this.$router.push({ path: "/pay", query: { way: "CART" } });
-      } else {
+      if (!this.checkedNum) {
         Message.warning("请至少选择一件商品");
+        return;
       }
+      const hasECoupon = this.cartList.some((shop) =>
+        (shop.skuList || []).some(
+          (goods) => goods.checked && isECoupon(goods.goodsSku && goods.goodsSku.goodsType)
+        )
+      );
+      if (hasECoupon) {
+        Message.warning("电子卡券请使用立即购买，不可通过购物车结算");
+        return;
+      }
+      this.$router.push({ path: "/pay", query: { way: "CART" } });
     },
     // 展示优惠券
     showCoupon(storeId, index) {

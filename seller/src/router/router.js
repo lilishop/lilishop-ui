@@ -64,6 +64,13 @@ export const otherRouter = {
       name: "goods-draft-operation-edit",
       component: () => import("@/views/goods/goods-seller/goodsOperation.vue")
     },
+    /** 卡密商品（E_COUPON）卡池管理；query: skuId（必填）, goodsId, goodsName */
+    {
+      path: "card-key-pool",
+      title: "卡池管理",
+      name: "card-key-pool",
+      component: () => import("@/views/goods/card-key/cardKeyPool.vue")
+    },
     {
       path: "add-coupon",
       title: "店铺优惠券",

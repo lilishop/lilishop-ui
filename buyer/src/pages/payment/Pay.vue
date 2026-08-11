@@ -18,7 +18,8 @@
     <el-divider />
     <div class="content width_1200_auto">
       <!-- 收货地址 -->
-      <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && goodsType !== 'VIRTUAL_GOODS'">
+      <!-- 收货地址（E_COUPON / VIRTUAL 免地址，见 isVirtualLikeCheckout） -->
+      <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && !isVirtualLikeCheckout">
         <div class="card-head">
           <span>收货人信息</span>
           <span @click="goAddressManage">管理收货人地址</span>
@@ -94,7 +95,7 @@
       </div>
       <div>
       </div>
-      <div class="goods-content" v-if="goodsType !== 'VIRTUAL_GOODS'">
+      <div class="goods-content" v-if="!isVirtualLikeCheckout">
         <div class="card-head mt_20 mb_20">
           <span>配送方式</span>
         </div>
@@ -150,8 +151,8 @@
           </div>
         </div>
       </div>
-      <!-- 发票信息 -->
-      <div class="invoice">
+      <!-- 发票信息（E_COUPON 虚拟型结算不开发票） -->
+      <div class="invoice" v-if="!isECouponCheckout">
         <div class="card-head mt_20 mb_20">
           <span class="relative">发票信息<span class="inv-tips">
               <el-icon><Warning /></el-icon>开企业抬头发票须填写纳税人识别号，以免影响报销
@@ -283,13 +284,13 @@
       <!-- 底部支付栏 -->
       <div class="order-footer">
         <div class="pay ml_20" @click="pay">提交订单</div>
-        <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'LOGISTICS'">
+        <div class="pay-address" v-if="!isVirtualLikeCheckout && addressList.length && selectedDeliverMethod === 'LOGISTICS'">
           配送至：{{ $filters.unitAddress(selectedAddress.consigneeAddressPath) }}
           {{ selectedAddress.detail }}&nbsp;&nbsp;收货人：{{
               selectedAddress.name
           }}&nbsp;&nbsp;{{ selectedAddress.mobile }}
         </div>
-        <div class="pay-address" v-if="addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
+        <div class="pay-address" v-if="!isVirtualLikeCheckout && addressList.length && selectedDeliverMethod === 'SELF_PICK_UP'">
           自提地点：{{selectedStoreAddress.address}} &nbsp;&nbsp;联系方式：{{ selectedStoreAddress.mobile }}
         </div>
       </div>
@@ -328,6 +329,7 @@ import {
 } from "@/api/cart";
 import { getStoreAddress } from "@/api/shopentry.js"
 import { canUseCouponList } from "@/api/member.js";
+import { isECoupon, shouldSkipPaymentPage } from "@/constants/goodsType";
 
 export default {
   name: "Pay",
@@ -376,6 +378,14 @@ export default {
               : 0
       );
       return Number.isFinite(n) ? n : 0;
+    },
+    /** 电子卡券结算：免地址、隐藏发票；优惠券/礼品卡/促销明细可用（M-02） */
+    isECouponCheckout() {
+      return isECoupon(this.goodsType);
+    },
+    /** 虚拟型结算（核销虚拟 + 电子卡券）：均不需要收货地址 */
+    isVirtualLikeCheckout() {
+      return this.goodsType === "VIRTUAL_GOODS" || this.isECouponCheckout;
     },
   },
   data() {
@@ -845,19 +855,24 @@ export default {
         .then((res) => {
           Spin.hide();
           if (res.success) {
-            if (params.way === "POINTS") {
-              // 积分支付不需要跳转支付页面
+            const way = params.way;
+            if (shouldSkipPaymentPage(res.result, way)) {
               this.$router.push("/payDone");
-            } else {
-              this.$router.push({
-                path: "/payment",
-                query: { orderType: "TRADE", sn: res.result.sn },
-              });
+              return;
             }
+            this.$router.push({
+              path: "/payment",
+              query: { orderType: "TRADE", sn: res.result.sn },
+            });
+          } else if (res.message) {
+            Message.warning(res.message);
           }
         })
-        .catch(() => {
+        .catch((err) => {
           Spin.hide();
+          if (err?.message && !err?.data?.message) {
+            Message.error(err.message);
+          }
         });
     },
     // 优惠券可用范围

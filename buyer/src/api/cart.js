@@ -65,7 +65,7 @@ export function addCartGoods (params) {
 /**
  * 创建交易
  * @param client 客户端：H5/移动端 PC/PC端,WECHAT_MP/小程序端,APP/移动应用端
- * @param way 购物车购买：CART/立即购买：BUY_NOW / 积分购买：POINT
+ * @param way 购物车：CART / 立即购买：BUY_NOW / 积分：POINTS / 拼团：PINTUAN / 砍价：KANJIA
  * @param remark 备注  非必填
  */
 export function createTrade (data) {
@@ -81,7 +81,7 @@ export function createTrade (data) {
 /**
  * 选择优惠券
  * @param memberCouponId 优惠券id
- * @param way 购物车购买：CART/立即购买：BUY_NOW/ 积分购买：POINT
+ * @param way 购物车：CART / 立即购买：BUY_NOW / 积分：POINTS
  * @param used 使用true 弃用 false
  */
 export function selectCoupon (params) {
@@ -95,7 +95,7 @@ export function selectCoupon (params) {
 
 /**
  * 选择礼品卡
- * @param way 购物车购买：CART/立即购买：BUY_NOW/拼团购买：PINTUAN / 积分购买：POINT
+ * @param way 购物车：CART / 立即购买：BUY_NOW / 拼团：PINTUAN / 积分：POINTS / 砍价：KANJIA
  * @param credentialId 礼品卡凭证 id；used=false 且不传则清空全部
  * @param used 使用 true / 弃用 false
  */

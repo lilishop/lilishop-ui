@@ -33,12 +33,13 @@ export function goodsDetail (goodsId) {
   });
 }
 
-// id获取商品Sku详情
+// id获取商品Sku详情（支持未登录浏览，登录后可选携带 token）
 export function goodsSkuDetail (params) {
   return request({
     url: `/buyer/goods/goods/sku/${params.goodsId}/${params.skuId}`,
     method: Method.GET,
-    needToken: true,
+    needToken: false,
+    optionalToken: true,
     params
   });
 }

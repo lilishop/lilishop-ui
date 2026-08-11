@@ -196,7 +196,7 @@ export default {
       receiptModalMode: "detail",
       uploadFileUrl: uploadFile,
       accessToken: {},
-      receiptUploadData: { directoryPath: "receipt" },
+      receiptUploadData: { directoryPath: "default" }, // OSS 上传目录（与后端存储配置一致）
       currentReceipt: {},
       selectedReceiptRow: null,
       searchForm: {

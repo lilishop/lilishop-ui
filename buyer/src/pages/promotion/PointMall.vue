@@ -18,7 +18,7 @@
         @click="goGoodsDetail(item.id)"
       >
         <div class="goods-show-img">
-          <img :src="item.goodsSku.thumbnail" />
+          <img :src="itemThumbnail(item)" />
         </div>
         <div class="goods-show-price">
           <span>
@@ -26,7 +26,7 @@
           </span>
         </div>
         <div class="goods-show-detail">
-          <span>{{ item.goodsSku.goodsName }}</span>
+          <span>{{ itemGoodsName(item) }}</span>
         </div>
         <div class="goods-show-num">
           已有<span>{{ item.commentNum || 0 }}</span>人评价
@@ -70,6 +70,13 @@ export default {
     this.getCate()
   },
   methods: {
+    /** 列表 API 返回 PointsGoods（thumbnail/goodsName 在顶层）；详情 API 才有 goodsSku */
+    itemThumbnail (item) {
+      return item?.goodsSku?.thumbnail || item?.thumbnail || ''
+    },
+    itemGoodsName (item) {
+      return item?.goodsSku?.goodsName || item?.goodsName || ''
+    },
     getList () { // 获取列表
       pointGoods(this.params).then(res => {
         if (res.success) {
