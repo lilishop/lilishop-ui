@@ -331,12 +331,13 @@ export default {
       this.$router.back();
     },
     openSkuList() {
-      this.$refs.liliDialog.open("goods");
-      const data = JSON.parse(JSON.stringify(this.form.promotionGoodsList));
+      const data = JSON.parse(JSON.stringify(this.form.promotionGoodsList || []));
       data.forEach((e) => {
-        e.id = e.skuId;
+        e.id = e.skuId || e.id;
       });
+      // 先写入已选商品，再打开选择器，保证回显时 selectedWay 已就绪
       this.$refs.liliDialog.goodsData = data;
+      this.$refs.liliDialog.open("goods");
     },
     getDetail() {
       getFullDiscountById(this.id).then((res) => {
