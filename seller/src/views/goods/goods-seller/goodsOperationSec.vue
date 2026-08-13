@@ -1341,21 +1341,23 @@ export default {
     GET_ShopGoodsLabel() {
       API_GOODS.getShopGoodsLabelListSeller().then((res) => {
         if (res.success) {
-          let shopCategories = !this.baseInfoForm.storeCategoryPath
+          const shopCategories = !this.baseInfoForm.storeCategoryPath
             ? []
-            : this.baseInfoForm.storeCategoryPath.split(",");
+            : this.baseInfoForm.storeCategoryPath.split(",").filter(Boolean);
 
           this.shopCategory = res.result.map((i) => {
             i.title = i.labelName;
             i.expand = false;
-            i.checked = shopCategories.some((o) => o === i.id);
             i.children = i.children.map((j) => {
               j.title = j.labelName;
               j.expand = false;
-              j.checked = shopCategories.some((o) => o === j.id);
               return j;
             });
             return i;
+          });
+
+          this.$nextTick(() => {
+            this.$refs.tree?.setCheckedKeys(shopCategories);
           });
         }
       });
