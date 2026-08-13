@@ -87,7 +87,7 @@
             </div>
           </div>
         </div>
-        <div class="more-addr" @click="storeMoreAddr = !storeMoreAddr" v-if="addressList.length > 3">
+        <div class="more-addr" @click="storeMoreAddr = !storeMoreAddr" v-if="storeAddressList.length > 3">
           {{ storeMoreAddr ? "收起地址" : "更多地址" }}
           <el-icon :v-show="!storeMoreAddr"><ArrowDown /></el-icon>
           <el-icon :v-show="storeMoreAddr"><ArrowUp /></el-icon>

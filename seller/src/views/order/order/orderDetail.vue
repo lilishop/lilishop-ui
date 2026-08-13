@@ -12,7 +12,7 @@
           >查看物流</el-button>
           <el-button type="primary" @click="orderLog">订单日志</el-button>
           <el-button v-if="canOrderTake" type="primary" @click="orderTake">订单核销</el-button>
-          <el-button v-if="canPartDelivery" type="primary" @click="openPartDelivery">分包裹发货</el-button>
+          <el-button v-if="canShip" type="primary" @click="openFulfill()">发货</el-button>
           <el-button type="primary" @click="modifyRemark">添加备注</el-button>
           <el-button
             v-if="allowOperation.showLogistics && logisticsType === 'SHUNFENG'"
@@ -21,7 +21,7 @@
             @click="sfPrint"
           >下载面单</el-button>
           <el-button
-            v-if="allowOperation.ship && logisticsType !== 'SHUNFENG'"
+            v-if="canShip && logisticsType !== 'SHUNFENG'"
             type="primary"
             plain
             @click="toPrint"
@@ -384,6 +384,34 @@
           </ul>
         </div>
       </el-card>
+
+      <el-card v-if="orderPackages.length" class="mt_10">
+        <el-divider content-position="left">发货记录</el-divider>
+        <el-table :data="orderPackages" border style="width: 100%">
+          <el-table-column label="发货方式" width="120">
+            <template #default="{ row }">{{ getFulfillmentModeLabel(row.fulfillmentMode) }}</template>
+          </el-table-column>
+          <el-table-column label="物流信息" min-width="220">
+            <template #default="{ row }">
+              <template v-if="isNoDeliveryPackage(row)">
+                <span>无需配送</span>
+                <span v-if="row.deliveryRemark" class="delivery-remark-text">（{{ row.deliveryRemark }}）</span>
+              </template>
+              <template v-else>
+                {{ row.logisticsName || "-" }} / {{ row.logisticsNo || "-" }}
+              </template>
+            </template>
+          </el-table-column>
+          <el-table-column prop="logisticsTime" label="发货时间" width="170" />
+          <el-table-column label="商品明细" min-width="260">
+            <template #default="{ row }">
+              <div v-for="(item, idx) in row.orderPackageItemList || []" :key="idx" class="package-item-line">
+                {{ item.goodsName }} × {{ item.deliverNumber }}
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
     </div>
 
     <el-dialog v-model="modal" title="修改金额" width="530px">
@@ -446,92 +474,163 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="partDeliveryModal" title="分包裹发货" width="1200px">
-      <el-form ref="partDeliveryForm" :model="partDeliveryForm" label-width="100px" :rules="partDeliveryRules">
-        <el-form-item label="物流公司" prop="logisticsId">
-          <el-select v-model="partDeliveryForm.logisticsId" placeholder="请选择物流公司" filterable style="width: 260px">
-            <el-option
-              v-for="item in checkedLogistics"
-              :key="getLogisticsId(item)"
-              :label="getLogisticsName(item)"
-              :value="getLogisticsId(item)"
-            />
-          </el-select>
+    <el-dialog v-model="fulfillModal" title="订单发货" width="1200px">
+      <div v-if="showFulfillModeSelector" class="fulfill-mode-selector">
+        <el-radio-group v-model="fulfillForm.fulfillmentMode">
+          <el-radio v-if="allowOperation.fulfillWhole" label="WHOLE">整单发货</el-radio>
+          <el-radio v-if="allowOperation.fulfillSplit" label="SPLIT">拆单发货</el-radio>
+          <el-radio v-if="allowOperation.fulfillNoDelivery" label="NO_DELIVERY">无需配送</el-radio>
+        </el-radio-group>
+      </div>
+      <div v-else-if="fulfillForm.fulfillmentMode === 'SPLIT'" class="fulfill-mode-tip">继续拆单发货</div>
+
+      <el-form ref="fulfillFormRef" :model="fulfillForm" label-width="100px" :rules="fulfillRules">
+        <template v-if="fulfillForm.fulfillmentMode !== 'NO_DELIVERY'">
+          <el-form-item label="物流公司" prop="logisticsId">
+            <el-select v-model="fulfillForm.logisticsId" placeholder="请选择物流公司" filterable style="width: 260px">
+              <el-option
+                v-for="item in checkedLogistics"
+                :key="getLogisticsId(item)"
+                :label="getLogisticsName(item)"
+                :value="getLogisticsId(item)"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="物流单号" prop="logisticsNo">
+            <el-input v-model="fulfillForm.logisticsNo" placeholder="请输入物流单号" style="width: 260px" />
+          </el-form-item>
+        </template>
+
+        <el-form-item
+          v-if="fulfillForm.fulfillmentMode === 'NO_DELIVERY'"
+          label="配送说明"
+          prop="deliveryRemark"
+        >
+          <el-input
+            v-model="fulfillForm.deliveryRemark"
+            type="textarea"
+            :rows="3"
+            maxlength="500"
+            show-word-limit
+            placeholder="选填，如：商家自行配送，预计今日送达"
+            style="width: 480px"
+          />
         </el-form-item>
-        <el-form-item label="物流单号" prop="logisticsNo">
-          <el-input v-model="partDeliveryForm.logisticsNo" placeholder="请输入物流单号" style="width: 260px" />
-        </el-form-item>
-        <el-form-item label-width="0" prop="partDeliveryDTOList" class="part-delivery-goods-item">
+
+        <el-form-item label-width="0" class="part-delivery-goods-item">
           <div v-if="deliverableOrderItems.length" class="part-delivery-table-wrap">
             <el-table
-              ref="partDeliveryTable"
+              v-if="fulfillForm.fulfillmentMode === 'SPLIT'"
+              ref="fulfillTable"
               border
               :data="deliverableOrderItems"
               style="width: 100%"
-              @selection-change="handlePartDeliverySelectionChange"
+              @selection-change="handleFulfillSelectionChange"
             >
-            <el-table-column type="selection" width="55" :selectable="isPartDeliveryRowSelectable" />
-            <el-table-column label="商品" min-width="420">
-              <template #default="{ row }">
-                <div class="part-delivery-goods">
-                  <img :src="row.image" class="part-delivery-goods-img" alt="" />
-                  <div class="part-delivery-goods-info">
-                    <div class="part-delivery-goods-name">{{ row.goodsName }}</div>
-                    <div
-                      v-for="(specValue, specKey) in parseOrderItemSpecs(row.specs)"
-                      :key="specKey"
-                      class="part-delivery-goods-spec"
-                    >
-                      <span v-if="specKey !== 'images'">{{ specKey }}：{{ specValue }}</span>
+              <el-table-column type="selection" width="55" :selectable="isPartDeliveryRowSelectable" />
+              <el-table-column label="商品" min-width="420">
+                <template #default="{ row }">
+                  <div class="part-delivery-goods">
+                    <img :src="row.image" class="part-delivery-goods-img" alt="" />
+                    <div class="part-delivery-goods-info">
+                      <div class="part-delivery-goods-name">{{ row.goodsName }}</div>
+                      <div
+                        v-for="(specValue, specKey) in parseOrderItemSpecs(row.specs)"
+                        :key="specKey"
+                        class="part-delivery-goods-spec"
+                      >
+                        <span v-if="specKey !== 'images'">{{ specKey }}：{{ specValue }}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column label="单价" min-width="110" align="center">
-              <template #default="{ row }">
-                {{ $filters.unitPrice(row.unitPrice || 0, "￥") }}
-              </template>
-            </el-table-column>
-            <el-table-column label="数量" min-width="140" align="center">
-              <template #default="{ row }">
-                <el-input-number
-                  v-model="partDeliveryForm.deliveryNumMap[getOrderItemId(row)]"
-                  :min="1"
-                  :max="getRemainingDeliveryNum(row)"
-                  :precision="0"
-                  controls-position="right"
-                  size="default"
-                  class="part-delivery-num-input"
-                  @change="(val) => handlePartDeliveryNumChange(row, val)"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column label="已发包裹" min-width="110" align="center">
-              <template #default="{ row }">
-                {{ getShippedPackageNum(row) }}
-              </template>
-            </el-table-column>
-            <el-table-column label="小计" min-width="110" align="center">
-              <template #default="{ row }">
-                {{ $filters.unitPrice(getPartDeliverySubtotal(row), "￥") }}
-              </template>
-            </el-table-column>
-          </el-table>
+                </template>
+              </el-table-column>
+              <el-table-column label="单价" min-width="110" align="center">
+                <template #default="{ row }">
+                  {{ $filters.unitPrice(row.unitPrice || 0, "￥") }}
+                </template>
+              </el-table-column>
+              <el-table-column label="待发/购买" min-width="120" align="center">
+                <template #default="{ row }">
+                  {{ getRemainingDeliveryNum(row) }} / {{ row.num }}
+                </template>
+              </el-table-column>
+              <el-table-column label="本次发货" min-width="140" align="center">
+                <template #default="{ row }">
+                  <el-input-number
+                    v-model="fulfillForm.deliveryNumMap[getOrderItemId(row)]"
+                    :min="1"
+                    :max="getRemainingDeliveryNum(row)"
+                    :precision="0"
+                    controls-position="right"
+                    size="default"
+                    class="part-delivery-num-input"
+                    @change="(val) => handleFulfillNumChange(row, val)"
+                  />
+                </template>
+              </el-table-column>
+              <el-table-column label="已发" min-width="80" align="center">
+                <template #default="{ row }">
+                  {{ getShippedPackageNum(row) }}
+                </template>
+              </el-table-column>
+            </el-table>
+
+            <el-table v-else border :data="deliverableOrderItems" style="width: 100%">
+              <el-table-column label="商品" min-width="420">
+                <template #default="{ row }">
+                  <div class="part-delivery-goods">
+                    <img :src="row.image" class="part-delivery-goods-img" alt="" />
+                    <div class="part-delivery-goods-info">
+                      <div class="part-delivery-goods-name">{{ row.goodsName }}</div>
+                      <div
+                        v-for="(specValue, specKey) in parseOrderItemSpecs(row.specs)"
+                        :key="specKey"
+                        class="part-delivery-goods-spec"
+                      >
+                        <span v-if="specKey !== 'images'">{{ specKey }}：{{ specValue }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="单价" min-width="110" align="center">
+                <template #default="{ row }">
+                  {{ $filters.unitPrice(row.unitPrice || 0, "￥") }}
+                </template>
+              </el-table-column>
+              <el-table-column label="待发数量" min-width="120" align="center">
+                <template #default="{ row }">
+                  {{ getRemainingDeliveryNum(row) }}
+                </template>
+              </el-table-column>
+              <el-table-column label="购买数量" min-width="100" align="center" prop="num" />
+            </el-table>
           </div>
           <div v-else class="delivery-empty">暂无可发货商品</div>
         </el-form-item>
       </el-form>
+
       <div v-if="orderPackages.length" class="package-list">
         <div class="package-title">已有包裹</div>
         <el-table :data="orderPackages" border size="small">
-          <el-table-column prop="logisticsName" label="物流公司" min-width="120" />
-          <el-table-column prop="logisticsNo" label="物流单号" min-width="160" />
+          <el-table-column label="方式" width="100">
+            <template #default="{ row }">{{ getFulfillmentModeLabel(row.fulfillmentMode) }}</template>
+          </el-table-column>
+          <el-table-column label="物流/说明" min-width="200">
+            <template #default="{ row }">
+              <template v-if="isNoDeliveryPackage(row)">
+                无需配送<span v-if="row.deliveryRemark">（{{ row.deliveryRemark }}）</span>
+              </template>
+              <template v-else>{{ row.logisticsName }} / {{ row.logisticsNo }}</template>
+            </template>
+          </el-table-column>
+          <el-table-column prop="logisticsTime" label="发货时间" width="170" />
         </el-table>
       </div>
       <template #footer>
-        <el-button @click="partDeliveryModal = false">关闭</el-button>
-        <el-button type="primary" :loading="partDeliverySubmitting" @click="submitPartDelivery">确认发货</el-button>
+        <el-button @click="fulfillModal = false">关闭</el-button>
+        <el-button type="primary" :loading="fulfillSubmitting" @click="submitFulfill">确认发货</el-button>
       </template>
     </el-dialog>
 
@@ -611,6 +710,21 @@
           :key="packageIndex"
         >
         <div class="layui-layer-wrap">
+          <template v-if="isNoDeliveryPackage(packageItem)">
+            <dl>
+              <dt>配送方式：</dt>
+              <dd><div class="text-box">无需配送</div></dd>
+            </dl>
+            <dl v-if="packageItem.logisticsTime">
+              <dt>发货时间：</dt>
+              <dd><div class="text-box">{{ packageItem.logisticsTime }}</div></dd>
+            </dl>
+            <dl v-if="packageItem.deliveryRemark">
+              <dt>配送说明：</dt>
+              <dd><div class="text-box">{{ packageItem.deliveryRemark }}</div></dd>
+            </dl>
+          </template>
+          <template v-else>
           <dl>
             <dt>物流公司：</dt>
             <dd><div class="text-box">{{ packageItem.logisticsName }}</div></dd>
@@ -619,6 +733,7 @@
             <dt>快递单号：</dt>
             <dd><div class="text-box">{{ packageItem.logisticsNo }}</div></dd>
           </dl>
+          </template>
           <div class="div-express-log">
             <ul class="express-log express-log-name">
               <li v-for="(item, index) in packageItem.orderPackageItemList" :key="index">
@@ -628,7 +743,7 @@
               </li>
             </ul>
           </div>
-          <div class="div-express-log">
+          <div v-if="!isNoDeliveryPackage(packageItem)" class="div-express-log">
             <ul v-if="packageItem.traces && packageItem.traces.traces" class="express-log">
               <li v-for="(item, index) in packageItem.traces.traces" :key="index">
                 <span class="time">{{ item.AcceptTime || item.acceptTime }}</span>
@@ -666,9 +781,8 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="orderDeliverModal" title="订单发货" width="500px">
+    <el-dialog v-model="faceSheetModal" title="打印电子面单" width="500px">
       <el-form
-        v-if="facesheetFlag"
         ref="faceSheetForm"
         :model="faceSheetForm"
         :rules="faceSheetFormValidate"
@@ -685,30 +799,9 @@
           </el-select>
         </el-form-item>
       </el-form>
-      <el-form
-        v-else
-        ref="orderDeliveryForm"
-        :model="orderDeliveryForm"
-        :rules="orderDeliverFormValidate"
-        label-width="90px"
-      >
-        <el-form-item label="物流公司" prop="logisticsId">
-          <el-select v-model="orderDeliveryForm.logisticsId" placeholder="请选择" style="width: 250px">
-            <el-option
-              v-for="(item, i) in checkedLogistics"
-              :key="i"
-              :label="item.name"
-              :value="item.logisticsId"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="物流单号" prop="logisticsNo">
-          <el-input v-model="orderDeliveryForm.logisticsNo" style="width: 250px" />
-        </el-form-item>
-      </el-form>
       <template #footer>
-        <el-button @click="orderDeliverModal = false">关闭</el-button>
-        <el-button type="primary" @click="orderDeliverySubmit">发货</el-button>
+        <el-button @click="faceSheetModal = false">关闭</el-button>
+        <el-button type="primary" @click="submitFaceSheet">打印</el-button>
       </template>
     </el-dialog>
 
@@ -744,6 +837,13 @@ import {
   cardKeyFulfillAlertType,
   resolveCardKeyFulfillMessage,
 } from "@/constants/goodsType";
+import {
+  validateFulfillForm,
+  isNoDeliveryPackage,
+  getFulfillmentModeLabel,
+  resolveDefaultFulfillmentMode,
+  canShowShipButton,
+} from "@/utils/orderFulfill";
 export default {
   name: "orderDetail",
   components: {
@@ -764,9 +864,8 @@ export default {
       faceSheetFormValidate: {
         logisticsId: [{ required: true, message: "请选择物流公司" }],
       },
-      facesheetFlag: false,
       logisticsModal: false,
-      orderDeliverModal: false,
+      faceSheetModal: false,
       logisticsInfo: {
         shipper: "",
       },
@@ -792,16 +891,14 @@ export default {
       modifyRemarkForm: {
         sellerRemark: "",
       },
-      //订单发货
-      orderDeliveryForm: {
-        logisticsNo: "", //发货单号
-        logisticsId: "", //物流公司
-      },
-      partDeliveryModal: false,
-      partDeliverySubmitting: false,
-      partDeliveryForm: {
+      fulfillModal: false,
+      fulfillSubmitting: false,
+      autoOpenFulfill: true,
+      fulfillForm: {
+        fulfillmentMode: "WHOLE",
         logisticsNo: "",
         logisticsId: "",
+        deliveryRemark: "",
         selectedOrderItemIds: [],
         deliveryNumMap: {},
       },
@@ -835,11 +932,7 @@ export default {
         consigneeAddressPath: "",
         consigneeAddressIdPath: "",
       },
-      orderDeliverFormValidate: {
-        logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
-        logisticsId: [{ required: true, message: "请选择物流公司", trigger: "blur" }],
-      },
-      partDeliveryRules: {
+      fulfillRules: {
         logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
         logisticsId: [{ required: true, message: "请选择物流公司", trigger: "change" }],
       },
@@ -888,14 +981,14 @@ export default {
     ecouponCardKeyRows() {
       return flattenOrderCardKeys(this.data, true);
     },
-    canPartDelivery() {
-      if (!this.allowOperation.ship) return false;
-      const status = this.orderInfo.order && this.orderInfo.order.orderStatus;
-      return (
-        !this.isNonPhysicalOrder &&
-        ["UNDELIVERED", "PARTS_DELIVERED"].includes(status) &&
-        this.deliverableOrderItems.length > 0
-      );
+    canShip() {
+      return canShowShipButton(this.allowOperation, this.orderInfo?.order);
+    },
+    showFulfillModeSelector() {
+      const status = this.orderInfo?.order?.orderStatus;
+      if (status === "PARTS_DELIVERED") return false;
+      const op = this.allowOperation || {};
+      return [op.fulfillWhole, op.fulfillSplit, op.fulfillNoDelivery].filter(Boolean).length > 1;
     },
     deliverableOrderItems() {
       return (this.data || []).filter((item) => {
@@ -1011,16 +1104,16 @@ export default {
       return pkgKeys.some((key) => orderKeys.includes(key));
     },
     getRemainingDeliveryNum(item) {
+      if (item != null && item.remainDeliverNumber != null && item.remainDeliverNumber !== "") {
+        const remain = Number(item.remainDeliverNumber);
+        if (Number.isFinite(remain)) return Math.max(remain, 0);
+      }
       const total = Number(item && item.num) || 0;
       return Math.max(total - this.getShippedPackageNum(item), 0);
     },
-    getPartDeliverySubtotal(row) {
-      const id = this.getOrderItemId(row);
-      const qty = Number(this.partDeliveryForm.deliveryNumMap[id]) || 0;
-      const unitPrice = Number(row.unitPrice) || 0;
-      return unitPrice * qty;
-    },
-    initPartDeliveryNumMap() {
+    isNoDeliveryPackage,
+    getFulfillmentModeLabel,
+    initFulfillNumMap() {
       const map = {};
       this.deliverableOrderItems.forEach((item) => {
         const id = this.getOrderItemId(item);
@@ -1028,10 +1121,10 @@ export default {
           map[id] = this.getRemainingDeliveryNum(item);
         }
       });
-      this.partDeliveryForm.deliveryNumMap = map;
+      this.fulfillForm.deliveryNumMap = map;
     },
-    refreshPartDeliveryAfterSubmit() {
-      this.partDeliveryModal = false;
+    refreshFulfillAfterSubmit() {
+      this.fulfillModal = false;
       this.loading = true;
       return Promise.all([
         API_Order.getOrderDetail(this.sn).then((res) => {
@@ -1049,79 +1142,131 @@ export default {
         this.getOrderPackages(),
       ]).finally(() => {
         this.loading = false;
-        this.partDeliveryForm.logisticsNo = "";
-        this.partDeliveryForm.logisticsId = "";
-        this.partDeliveryForm.selectedOrderItemIds = [];
-        this.initPartDeliveryNumMap();
+        this.resetFulfillForm(false);
+        this.initFulfillNumMap();
         this.$nextTick(() => {
-          this.$refs.partDeliveryTable?.clearSelection();
-          this.$refs.partDeliveryForm?.clearValidate();
+          this.$refs.fulfillTable?.clearSelection();
+          this.$refs.fulfillFormRef?.clearValidate();
         });
       });
     },
-    handlePartDeliveryNumChange(row, value) {
+    handleFulfillNumChange(row, value) {
       const id = this.getOrderItemId(row);
       if (!id) return;
       const num = Number(value);
       if (!Number.isFinite(num) || num < 1) return;
-      if (!this.partDeliveryForm.selectedOrderItemIds.includes(id)) {
-        this.partDeliveryForm.selectedOrderItemIds = [
-          ...this.partDeliveryForm.selectedOrderItemIds,
-          id,
-        ];
+      if (!this.fulfillForm.selectedOrderItemIds.includes(id)) {
+        this.fulfillForm.selectedOrderItemIds = [...this.fulfillForm.selectedOrderItemIds, id];
         this.$nextTick(() => {
-          this.$refs.partDeliveryTable?.toggleRowSelection(row, true);
+          this.$refs.fulfillTable?.toggleRowSelection(row, true);
         });
       }
     },
     isPartDeliveryRowSelectable(row) {
       return this.getRemainingDeliveryNum(row) > 0;
     },
-    handlePartDeliverySelectionChange(selection) {
+    handleFulfillSelectionChange(selection) {
       const selectedIds = [];
       selection.forEach((item) => {
         const id = this.getOrderItemId(item);
         if (!id) return;
         selectedIds.push(id);
-        if (this.partDeliveryForm.deliveryNumMap[id] == null) {
-          this.partDeliveryForm.deliveryNumMap[id] = this.getRemainingDeliveryNum(item);
+        if (this.fulfillForm.deliveryNumMap[id] == null) {
+          this.fulfillForm.deliveryNumMap[id] = this.getRemainingDeliveryNum(item);
         }
       });
-      this.partDeliveryForm.selectedOrderItemIds = selectedIds;
+      this.fulfillForm.selectedOrderItemIds = selectedIds;
     },
-    isPartDeliveryItemSelected(item) {
-      const id = this.getOrderItemId(item);
-      return !!id && this.partDeliveryForm.selectedOrderItemIds.includes(id);
-    },
-    buildPartDeliveryDTOList() {
-      return this.partDeliveryForm.selectedOrderItemIds
+    buildFulfillItems() {
+      return this.fulfillForm.selectedOrderItemIds
         .map((orderItemId) => ({
           orderItemId,
-          deliveryNum: Number(this.partDeliveryForm.deliveryNumMap[orderItemId]),
+          deliveryNum: Number(this.fulfillForm.deliveryNumMap[orderItemId]),
         }))
         .filter((item) => item.orderItemId && item.deliveryNum > 0);
     },
-    resetPartDeliveryForm() {
-      this.partDeliveryForm = {
+    resetFulfillForm(clearMode = true) {
+      const mode = clearMode
+        ? resolveDefaultFulfillmentMode(
+            this.allowOperation,
+            this.orderInfo?.order?.orderStatus
+          ) || "WHOLE"
+        : this.fulfillForm.fulfillmentMode;
+      this.fulfillForm = {
+        fulfillmentMode: mode,
         logisticsNo: "",
         logisticsId: "",
+        deliveryRemark: "",
         selectedOrderItemIds: [],
         deliveryNumMap: {},
       };
       this.$nextTick(() => {
-        if (this.$refs.partDeliveryForm) {
-          this.$refs.partDeliveryForm.clearValidate();
-        }
-        if (this.$refs.partDeliveryTable) {
-          this.$refs.partDeliveryTable.clearSelection();
-        }
+        this.$refs.fulfillFormRef?.clearValidate();
+        this.$refs.fulfillTable?.clearSelection();
       });
     },
-    openPartDelivery() {
-      this.resetPartDeliveryForm();
-      this.partDeliveryModal = true;
+    openFulfill(presetMode) {
+      this.resetFulfillForm(true);
+      if (presetMode === "SPLIT" || this.$route.query.fulfillMode === "SPLIT") {
+        this.fulfillForm.fulfillmentMode = "SPLIT";
+      } else {
+        const mode = resolveDefaultFulfillmentMode(
+          this.allowOperation,
+          this.orderInfo?.order?.orderStatus
+        );
+        if (mode) this.fulfillForm.fulfillmentMode = mode;
+      }
+      this.fulfillModal = true;
       this.getCheckedLogistics();
       this.getOrderPackages();
+    },
+    buildFulfillPayload() {
+      const mode = this.fulfillForm.fulfillmentMode;
+      const payload = { fulfillmentMode: mode };
+      if (mode === "WHOLE" || mode === "SPLIT") {
+        payload.logisticsId = this.fulfillForm.logisticsId;
+        payload.logisticsNo = this.fulfillForm.logisticsNo;
+      }
+      if (mode === "NO_DELIVERY") {
+        const remark = (this.fulfillForm.deliveryRemark || "").trim();
+        if (remark) payload.deliveryRemark = remark;
+      }
+      if (mode === "SPLIT") {
+        payload.items = this.buildFulfillItems();
+      }
+      return payload;
+    },
+    submitFulfill() {
+      const mode = this.fulfillForm.fulfillmentMode;
+      const payload = this.buildFulfillPayload();
+      const validateMsg = validateFulfillForm(mode, payload);
+      if (validateMsg) {
+        this.$Message.error(validateMsg);
+        return;
+      }
+      if (mode !== "NO_DELIVERY") {
+        this.$refs.fulfillFormRef.validate((valid) => {
+          if (!valid) return;
+          this.doSubmitFulfill(payload);
+        });
+      } else {
+        this.doSubmitFulfill(payload);
+      }
+    },
+    doSubmitFulfill(payload) {
+      this.fulfillSubmitting = true;
+      API_Order.orderFulfill(this.sn, payload)
+        .then((res) => {
+          if (res.success) {
+            this.$Message.success("发货成功");
+            this.refreshFulfillAfterSubmit();
+          } else if (res.code === 1003) {
+            this.$Message.warning(res.message || "访问过于频繁，请稍后再试");
+          }
+        })
+        .finally(() => {
+          this.fulfillSubmitting = false;
+        });
     },
     getCheckedLogistics() {
       API_Order.getLogisticsChecked().then((res) => {
@@ -1135,33 +1280,7 @@ export default {
         if (res.success) {
           this.orderPackages = Array.isArray(res.result) ? res.result : [];
         }
-        this.initPartDeliveryNumMap();
-      });
-    },
-    submitPartDelivery() {
-      this.$refs.partDeliveryForm.validate((valid) => {
-        if (!valid) return;
-        const partDeliveryDTOList = this.buildPartDeliveryDTOList();
-        if (!partDeliveryDTOList.length) {
-          this.$Message.error("请选择本次发货商品并填写发货数量");
-          return;
-        }
-        this.partDeliverySubmitting = true;
-        API_Order.partDelivery(this.sn, {
-          orderSn: this.sn,
-          logisticsNo: this.partDeliveryForm.logisticsNo,
-          logisticsId: this.partDeliveryForm.logisticsId,
-          partDeliveryDTOList,
-        })
-          .then((res) => {
-            if (res.success) {
-              this.$Message.success("发货成功");
-              this.refreshPartDeliveryAfterSubmit();
-            }
-          })
-          .finally(() => {
-            this.partDeliverySubmitting = false;
-          });
+        this.initFulfillNumMap();
       });
     },
 
@@ -1180,6 +1299,14 @@ export default {
             : [];
           this.getContentPrice();
           this.getOrderPrice();
+          if (
+            this.autoOpenFulfill &&
+            this.canShip &&
+            (this.$route.query.openFulfill || this.$route.query.fulfillMode)
+          ) {
+            this.autoOpenFulfill = false;
+            this.$nextTick(() => this.openFulfill(this.$route.query.fulfillMode));
+          }
         }
       });
     },
@@ -1240,11 +1367,10 @@ export default {
       });
     },
     toPrint () {
-      this.facesheetFlag = true;
       API_Logistics.getCheckedOn().then((res) => {
         if (res.success) {
           this.checkedLogistics = res.result;
-          this.orderDeliverModal = true;
+          this.faceSheetModal = true;
         }
       });
     },
@@ -1275,7 +1401,7 @@ export default {
       });
     },
     toPrints (printWindow) {
-      this.orderDeliverModal = false;
+      this.faceSheetModal = false;
       if (!this.someJSONdata) {
         printWindow && printWindow.close();
         return;
@@ -1290,39 +1416,26 @@ export default {
       win.focus();
       this.$Message.success("电子面单发货成功");
       this.getDataDetail();
+      this.getOrderPackages();
     },
-    orderDeliverySubmit () {
-      if (this.facesheetFlag) {
-        this.$refs.faceSheetForm.validate((valid) => {
-          if (valid) {
-            const printWindow = window.open("", "_blank");
-            API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then((res) => {
-              if (res.success && res.result.printTemplate) {
-                this.someJSONdata = res.result.printTemplate;
-                this.toPrints(printWindow);
-              } else {
-                printWindow && printWindow.close();
-                this.$Message.error("电子面单发货失败！");
-              }
-            }).catch(() => {
+    submitFaceSheet () {
+      this.$refs.faceSheetForm.validate((valid) => {
+        if (valid) {
+          const printWindow = window.open("", "_blank");
+          API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then((res) => {
+            if (res.success && res.result.printTemplate) {
+              this.someJSONdata = res.result.printTemplate;
+              this.toPrints(printWindow);
+            } else {
               printWindow && printWindow.close();
               this.$Message.error("电子面单发货失败！");
-            });
-          }
-        });
-      } else {
-        this.$refs.orderDeliveryForm.validate((valid) => {
-          if (valid) {
-            API_Order.orderDelivery(this.sn, this.orderDeliveryForm).then((res) => {
-              if (res.success) {
-                this.$Message.success("订单发货成功");
-                this.orderDeliverModal = false;
-                this.getDataDetail();
-              }
-            });
-          }
-        });
-      }
+            }
+          }).catch(() => {
+            printWindow && printWindow.close();
+            this.$Message.error("电子面单发货失败！");
+          });
+        }
+      });
     },
     getLogisticsSetting () {
       API_Logistics.getLogisticsSetting().then((res) => {
@@ -1603,6 +1716,24 @@ export default {
 .package-title {
   margin-bottom: 8px;
   font-weight: bold;
+}
+
+.fulfill-mode-selector {
+  margin-bottom: 16px;
+}
+
+.fulfill-mode-tip {
+  margin-bottom: 12px;
+  color: #606266;
+}
+
+.package-item-line {
+  line-height: 1.8;
+}
+
+.delivery-remark-text {
+  color: #909399;
+  margin-left: 4px;
 }
 
 .flex-card {

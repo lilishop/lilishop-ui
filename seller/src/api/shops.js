@@ -71,7 +71,7 @@ export const logisticsUnChecked = (id, params) => {
 }
 // 获取商家自提点
 export const getShopAddress = (id, params) => {
-  return getRequest(`/member/storeAddress/`, params)
+  return getRequest(`/member/storeAddress`, params)
 }
 
 // 修改商家自提点
@@ -81,7 +81,7 @@ export const editShopAddress = (id, params) => {
 
 // 添加商品自提点
 export const addShopAddress = (params) => {
-  return postRequest(`/member/storeAddress/`, params)
+  return postRequest(`/member/storeAddress`, params)
 }
 
 // 添加商品自提点
