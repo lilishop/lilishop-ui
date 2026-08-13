@@ -108,9 +108,14 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="下单时间" width="170" />
-        <el-table-column label="操作" width="100" align="center" fixed="right">
+        <el-table-column label="操作" width="160" align="center" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="detail(row)">查看</a>
+            <a
+              v-if="canShip(row)"
+              class="link-text continue-ship-link"
+              @click="detail(row, true)"
+            >{{ row.orderStatus === "PARTS_DELIVERED" ? "继续发货" : "发货" }}</a>
           </template>
         </el-table-column>
       </el-table>
@@ -133,6 +138,7 @@
 
 <script>
 import * as API_Order from "@/api/order";
+import { canShowShipButton, isNonShippableOrder } from "@/utils/orderFulfill";
 export default {
   name: "orderList",
   data() {
@@ -335,11 +341,23 @@ export default {
           this.loading = false;
         });
     },
-    detail(v) {
+    detail(v, openFulfill = false) {
       this.$filters.customRouterPush({
         name: "order-detail",
-        query: { sn: v.sn },
+        query: {
+          sn: v.sn,
+          ...(openFulfill ? { openFulfill: "1" } : {}),
+          ...(openFulfill && v.orderStatus === "PARTS_DELIVERED" ? { fulfillMode: "SPLIT" } : {}),
+        },
       });
+    },
+    canShip(row) {
+      if (!row) return false;
+      if (row.allowOperationVO) {
+        return canShowShipButton(row.allowOperationVO, row);
+      }
+      if (isNonShippableOrder(row)) return false;
+      return row.orderStatus === "UNDELIVERED" || row.orderStatus === "PARTS_DELIVERED";
     },
     async exportOrder() {
       if (!this.searchForm.startDate || !this.searchForm.endDate) {
@@ -416,5 +434,8 @@ export default {
   color: #409eff;
   cursor: pointer;
   text-decoration: none;
+}
+.continue-ship-link {
+  margin-left: 8px;
 }
 </style>

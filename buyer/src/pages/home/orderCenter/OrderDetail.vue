@@ -72,23 +72,29 @@
     </div>
     <div class="order-card" v-if="!order.order.verificationCode && !isNonPhysicalOrder">
       <h3>配送信息</h3>
-      <p>配送方式：{{ order.deliveryMethodValue }}</p>
-      <p v-if="order.order.deliveryMethod === 'LOGISTICS'">配送状态：{{ order.deliverStatusValue }}</p>
-      <p v-if="logistics">
-        物流信息：{{ logistics.shipper || "暂无物流信息" }}
-      </p>
-      <p v-if="logistics">
-        物流单号：{{ logistics.logisticCode || "暂无物流单号" }}
-      </p>
-      <div class="div-express-log" v-if="logistics">
-        <div class="express-log">
-          <p>订单日志：</p>
-          <div v-for="(item, index) in logistics.traces" :key="index">
-            <span class="time">{{ item.AcceptTime }}</span>
-            <span class="detail">{{ item.AcceptStation }}</span>
+      <p>配送方式：{{ displayDeliveryMethodValue }}</p>
+      <p v-if="order.order.deliveryMethod === 'LOGISTICS' && !isNoDeliveryOrder">配送状态：{{ order.deliverStatusValue }}</p>
+      <template v-if="isNoDeliveryOrder">
+        <p v-if="noDeliveryShipTime">发货时间：{{ noDeliveryShipTime }}</p>
+        <p v-if="noDeliveryRemark">配送说明：{{ noDeliveryRemark }}</p>
+      </template>
+      <template v-else>
+        <p v-if="logistics">
+          物流信息：{{ logistics.shipper || "暂无物流信息" }}
+        </p>
+        <p v-if="logistics">
+          物流单号：{{ logistics.logisticCode || "暂无物流单号" }}
+        </p>
+        <div class="div-express-log" v-if="logistics">
+          <div class="express-log">
+            <p>订单日志：</p>
+            <div v-for="(item, index) in logistics.traces" :key="index">
+              <span class="time">{{ item.AcceptTime }}</span>
+              <span class="detail">{{ item.AcceptStation }}</span>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
     <div class="order-card" v-if="order.order.payStatus === 'PAID'">
       <h3>发票信息</h3>
@@ -313,12 +319,28 @@
       <template v-if="orderPackage.length > 0">
       <div v-for="(packageItem, packageIndex) in orderPackage" :key="packageIndex">
         <div class="layui-layer-wrap">
+          <dl><dt>发货方式：</dt>
+            <dd><div class="text-box">{{ getFulfillmentModeLabel(packageItem.fulfillmentMode) }}</div></dd>
+          </dl>
+          <template v-if="isNoDeliveryPackage(packageItem)">
+            <dl><dt>配送方式：</dt>
+              <dd><div class="text-box">无需配送</div></dd>
+            </dl>
+            <dl v-if="packageItem.logisticsTime"><dt>发货时间：</dt>
+              <dd><div class="text-box">{{ packageItem.logisticsTime }}</div></dd>
+            </dl>
+            <dl v-if="packageItem.deliveryRemark"><dt>配送说明：</dt>
+              <dd><div class="text-box">{{ packageItem.deliveryRemark }}</div></dd>
+            </dl>
+          </template>
+          <template v-else>
           <dl><dt>物流公司：</dt>
             <dd><div class="text-box">{{ packageItem.logisticsName }}</div></dd>
           </dl>
           <dl><dt>快递单号：</dt>
             <dd><div nctype="ordersSn" class="text-box">{{ packageItem.logisticsNo }}</div></dd>
           </dl>
+          </template>
           <div class="div-express-log">
             <ul class="express-log express-log-name">
               <li v-for="(item, index) in packageItem.orderPackageItemList" :key="index">
@@ -327,7 +349,7 @@
                 <span class="time" style="width: 20%;"><span>发货数量：</span><span>{{ item.deliverNumber }}</span></span>
               </li>
             </ul>
-            <div class="div-express-log" style="overflow: hidden;">
+            <div v-if="!isNoDeliveryPackage(packageItem)" class="div-express-log" style="overflow: hidden;">
               <ul class="express-log" v-if="packageItem.traces && packageItem.traces.traces">
                 <li v-for="(item, index) in packageItem.traces.traces" :key="index">
                   <span class="time">{{ item.AcceptTime || item.acceptTime }}</span>
@@ -400,6 +422,11 @@ import {
   cardKeyFulfillAlertType,
   resolveCardKeyFulfillMessage,
 } from "@/constants/goodsType";
+import {
+  isNoDeliveryPackage,
+  isNoDeliveryOrder as checkNoDeliveryOrder,
+  getFulfillmentModeLabel,
+} from "@/utils/orderFulfill";
 
 /**
  * 订单详情：E_COUPON 展示 orderItems[].cardKeys，屏蔽售后/物流（FR-B-03 / FR-B-04）。
@@ -449,8 +476,29 @@ export default {
     ecouponCardKeyRows() {
       return flattenOrderCardKeys(this.order.orderItems, false);
     },
+    /** 商家以无需配送方式发货（包裹 fulfillmentMode=NO_DELIVERY） */
+    isNoDeliveryOrder() {
+      return checkNoDeliveryOrder(this.orderPackage);
+    },
+    displayDeliveryMethodValue() {
+      if (this.isNoDeliveryOrder) return "无需配送";
+      return this.order?.deliveryMethodValue || "-";
+    },
+    noDeliveryPackages() {
+      return (this.orderPackage || []).filter(isNoDeliveryPackage);
+    },
+    noDeliveryRemark() {
+      const pkg = this.noDeliveryPackages.find((p) => p.deliveryRemark);
+      return pkg?.deliveryRemark || "";
+    },
+    noDeliveryShipTime() {
+      const pkg = this.noDeliveryPackages[0];
+      return pkg?.logisticsTime || "";
+    },
   },
   methods: {
+    isNoDeliveryPackage,
+    getFulfillmentModeLabel,
     cardKeyFulfillAlertType,
     resolveCardKeyFulfillMessage,
     lineCardKeyRows(line) {
@@ -576,7 +624,6 @@ export default {
           this.progressList = res.result.orderLogs;
           if (this.order.order.deliveryMethod === 'LOGISTICS') {
             this.getOrderPackage(this.order.order.sn);
-            this.traces();
           }
         }
       });
@@ -584,9 +631,16 @@ export default {
     getOrderPackage(sn) {
       getPackage(sn).then(res => {
         if (res.success) {
-          this.orderPackage = res.result
+          this.orderPackage = Array.isArray(res.result) ? res.result : [];
+          if (!this.orderPackage.length) {
+            this.traces();
+          }
+        } else {
+          this.traces();
         }
-      })
+      }).catch(() => {
+        this.traces();
+      });
     },
     traces() {
       // 物流信息

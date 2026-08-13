@@ -104,9 +104,11 @@ export const getOrderLog = (sn, params) => {
   return getRequest(`/orderLog/${sn}`, params);
 };
 
-// 订单发货
-export const orderDelivery = (sn, params) => {
-  return postRequest(`/order/order/${sn}/delivery`, params);
+// 订单发货（整单 / 拆单 / 无需配送）
+export const orderFulfill = (orderSn, params) => {
+  return postRequest(`/order/order/${orderSn}/fulfill`, params, {
+    "Content-type": "application/json",
+  });
 };
 
 // 订单发货
@@ -210,13 +212,6 @@ export const invoicing = (id, params) => {
 //查询包裹列表
 export const getPackage = (orderSn) => {
   return getRequest(`/order/order/getPackage/${orderSn}`);
-}
-
-//分包裹发货
-export const partDelivery = (orderSn,params) => {
-  return postRequest(`/order/order/${orderSn}/partDelivery`,params,{
-    "Content-type": "application/json"
-  })
 }
 
 //查询物流
