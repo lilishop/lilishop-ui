@@ -302,7 +302,7 @@ export default {
             }
             const params = {
               username: this.form.username,
-              password: this.form.password,
+              password: this.md5(this.form.password),
               nickName: this.form.nickName,
               mobile: this.form.mobile,
               email: this.form.email,
