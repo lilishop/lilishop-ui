@@ -80,33 +80,47 @@
                 <el-radio-button value="RETAIL">{{ isECouponGoods ? "电子卡券" : "虚拟型" }}</el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item v-if="baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="销售规则"
-              prop="wholesaleRule">
+            <el-form-item
+              v-if="baseInfoForm.salesModel == 'WHOLESALE'"
+              class="form-item-view-el wholesale-rule-form-item"
+              label="销售规则"
+              prop="wholesaleRule"
+            >
               <div class="form-item-view-wholesale">
                 <div>
-                  <el-table :data="wholesaleData" border style="width: 100%">
-                    <el-table-column label="购买数量" align="center">
+                  <el-table
+                    :key="'wholesale-edit-' + (baseInfoForm.goodsUnit || '')"
+                    :data="wholesaleData"
+                    border
+                    style="width: 100%"
+                  >
+                    <el-table-column label="购买数量" align="center" width="220">
                       <template #default="{ $index }">
-                        <el-input v-model="wholesaleData[$index].num" type="number" @blur="checkWholesaleNum($index)">
+                        <el-input
+                          class="wholesale-num-input"
+                          v-model="wholesaleData[$index].num"
+                          type="number"
+                          @blur="checkWholesaleNum($index)"
+                        >
                           <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
                         </el-input>
                       </template>
                     </el-table-column>
-                    <el-table-column label="商品单价" align="center" width="280">
+                    <el-table-column label="商品单价" align="center" width="320">
                       <template #default="{ $index }">
-                        <div style="display: flex; justify-content: space-between; align-items: center">
+                        <div class="wholesale-price-cell">
                           <el-input
+                            class="wholesale-price-input"
                             v-model="wholesaleData[$index].price"
                             type="number"
-                            style="width: 190px"
                             @blur="checkWholesalePrice($index)"
                           >
                             <template #append>元</template>
                           </el-input>
                           <el-button
                             v-if="$index > 0"
+                            class="wholesale-price-del"
                             size="small"
-                            style="margin-left: 5px"
                             type="danger"
                             @click="handleDeleteWholesaleData($index)"
                           >
@@ -123,10 +137,15 @@
                   </el-button>
                 </div>
                 <div class="form-item-view-wholesale-preview">
-                  <el-table :data="wholesaleData" border style="width: 100%">
-                    <el-table-column label="销售规则" width="300">
+                  <el-table
+                    :key="'wholesale-preview-' + (baseInfoForm.goodsUnit || '')"
+                    :data="wholesaleData"
+                    border
+                    class="wholesale-preview-table"
+                  >
+                    <el-table-column label="销售规则" width="480">
                       <template #default="{ row }">
-                        当商品购买数量 ≥{{ row.num }} 时，售价为 ￥{{ row.price }}/{{ baseInfoForm.goodsUnit }}
+                        {{ wholesaleRulePreview(row) }}
                       </template>
                     </el-table-column>
                   </el-table>
@@ -667,7 +686,7 @@ export default {
       wholesalePreviewColumns: [
         {
           title: "销售规则",
-          width: 300,
+          width: 480,
           render: (h, params) => {
             let guide =
               "当商品购买数量 ≥" +
@@ -1185,6 +1204,11 @@ export default {
       }
       this.renderTableData(this.skuTableData);
       this.syncWholesalePriceToSku();
+    },
+    wholesaleRulePreview(row) {
+      const unit = this.baseInfoForm.goodsUnit || "";
+      const unitText = unit ? `/${unit}` : "";
+      return `当商品购买数量 ≥${row.num} 时，售价为 ￥${row.price}${unitText}`;
     },
     handleDeleteWholesaleData(index) {
       this.wholesaleData.splice(index, 1);
@@ -2593,6 +2617,51 @@ export default {
 
 .refresh-icon {
   margin-left: 10px;
+}
+
+.wholesale-rule-form-item {
+  width: 100% !important;
+  min-width: 900px;
+}
+
+.wholesale-preview-table {
+  width: 480px;
+}
+
+.wholesale-preview-table :deep(.el-table__cell .cell) {
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.wholesale-rule-form-item :deep(.el-form-item__content) {
+  width: 100%;
+}
+
+.wholesale-num-input {
+  width: 190px;
+}
+
+.wholesale-num-input :deep(.el-input__wrapper) {
+  min-width: 140px;
+}
+
+.wholesale-price-cell {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wholesale-price-input {
+  width: 190px;
+}
+
+.wholesale-price-del {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: 100px;
+  transform: translateY(-50%);
 }
 
 .form-tip {
