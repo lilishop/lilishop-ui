@@ -47,6 +47,20 @@
   background-color: transparent;
 }
 
+/* 全局表格表头 */
+.el-table {
+  .el-table__header th.el-table__cell {
+    background: var(--el-color-primary-light-9, #ecf5ff);
+    color: #303133;
+    font-weight: normal;
+  }
+
+  .el-table__header th.el-table__cell .cell {
+    color: #303133;
+    font-weight: normal;
+  }
+}
+
 /* 列表操作列统一样式 */
 .link-text {
   color: #409eff;

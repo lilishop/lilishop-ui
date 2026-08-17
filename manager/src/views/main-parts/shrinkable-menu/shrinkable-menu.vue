@@ -1,5 +1,5 @@
 <template>
-  <div class="shrinkable-menu">
+  <div class="shrinkable-menu" :class="{ 'no-sub-menu': !menuList.length }">
     <el-menu
       class="nav-menu-dark"
       :default-active="currNav"
@@ -10,6 +10,7 @@
       </el-menu-item>
     </el-menu>
     <el-menu
+      v-if="menuList.length"
       :key="`${currNav}-${activeMenuName}`"
       class="sub-menu"
       :default-active="activeMenuName"
@@ -104,6 +105,11 @@ export default {
     selectNav(name) {
       this.$store.commit("setCurrNav", name);
       this.setStore("currNav", name);
+      if (name === 'home_index') {
+        this.$store.commit("updateMenulist", []);
+        this.$router.push({ name: 'home_index' });
+        return;
+      }
       util.initRouter(this);
     },
   },
@@ -115,6 +121,11 @@ export default {
   height: 100%;
   width: 200px;
   display: flex;
+  transition: width 0.3s;
+
+  &.no-sub-menu {
+    width: 80px;
+  }
 }
 
 .nav-menu-dark {

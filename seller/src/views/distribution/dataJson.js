@@ -1,4 +1,4 @@
-// 分销商状态列表
+// 分销员状态列表
 export const distributionStatusList= [ 
     {
         value:'APPLY',

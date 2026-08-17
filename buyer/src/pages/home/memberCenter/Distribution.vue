@@ -4,24 +4,11 @@
     <!-- 分销申请 -->
 
     <div v-if="status === 0">
-      <el-alert type="warning">分销商申请</el-alert>
+      <el-alert type="warning">分销员申请</el-alert>
       <el-form ref="form" :model="applyForm" :rules="rules">
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="applyForm.name"></el-input>
+        <el-form-item>
+          <el-alert type="info" show-icon :closable="false" title="分销员申请已改为招募流程，请通过招募入口加入。" />
         </el-form-item>
-        <el-form-item label="身份证号" prop="idNumber">
-          <el-input v-model="applyForm.idNumber"></el-input>
-        </el-form-item>
-        <el-form-item label="银行开户行" prop="settlementBankBranchName">
-          <el-input v-model="applyForm.settlementBankBranchName"></el-input>
-        </el-form-item>
-        <el-form-item label="银行开户名" prop="settlementBankAccountName">
-          <el-input v-model="applyForm.settlementBankAccountName"></el-input>
-        </el-form-item>
-        <el-form-item label="银行账号" prop="settlementBankAccountNum">
-          <el-input v-model="applyForm.settlementBankAccountNum"></el-input>
-        </el-form-item>
-
         <el-form-item>
           <el-button type="primary" :loading="applyLoading" @click="apply"
           >提交申请</el-button
@@ -266,14 +253,12 @@ import { Message } from "@/utils/message";
 import { Edit } from '@element-plus/icons-vue';
 import {
   distribution,
-  applyDistribution,
+  submitRecruitApplication,
   distCash,
   distCashHistory,
   getDistGoodsList,
   selectDistGoods,
 } from "@/api/member.js";
-import { IDCard } from "@/plugins/RegExp.js";
-import { checkBankno } from "@/plugins/Foundation";
 import vueQr from "vue-qr";
 import config from "@/config";
 export default {
@@ -285,37 +270,7 @@ export default {
       status: 0, // 申请状态，0为未申请 1 申请中 2 申请完成 3 功能暂未开启
       applyForm: {}, // 申请表单
       rules: {
-        // 验证规则
-        name: [{ required: true, message: "请输入真实姓名" }],
-        idNumber: [
-          { required: true, message: "请输入身份证号" },
-          { pattern: IDCard, message: "请输入正确的身份证号" },
-        ],
-        settlementBankBranchName: [
-          {
-            required: true,
-            message: "请输入银行开户行",
-            // 可以单个或者同时写两个触发验证方式
-            trigger: "blur",
-          },
-        ],
-        settlementBankAccountName: [
-          {
-            required: true,
-            message: "请输入银行开户名",
-            // 可以单个或者同时写两个触发验证方式
-            trigger: "blur",
-          },
-        ],
-        //银行账号
-        settlementBankAccountNum: [
-          {
-            required: true,
-            message: "银行账号不正确",
-            // 可以单个或者同时写两个触发验证方式
-            trigger: "blur",
-          },
-        ],
+        // 验证规则（V2 招募流程，旧实名认证字段已移除）
       },
       tabName: "goodsChecked", // 当前所在tab
       result: {}, // 审核结果
@@ -356,11 +311,11 @@ export default {
   },
   methods: {
     apply() {
-      // 申请成为分销商
+      // 申请成为分销员
       this.$refs.form.validate((valid) => {
         if (valid) {
           this.applyLoading = true;
-          applyDistribution(this.applyForm).then((res) => {
+          submitRecruitApplication({ agreementAccepted: true }).then((res) => {
             this.applyLoading = false;
             if (res.success) {
               Message.success("申请已提交，请等待管理员审核");
@@ -496,7 +451,7 @@ export default {
     },
     //申诉
     repaying(){
-      applyDistribution().then((res) => {
+      submitRecruitApplication({ agreementAccepted: true }).then((res) => {
         this.applyLoading = false;
         if (res.success) {
           Message.success("申诉已提交，请等待管理员审核");
@@ -505,7 +460,7 @@ export default {
       });
     },
     distribution() {
-      // 获取分销商信息
+      // 获取分销员信息
       distribution()
         .then((res) => {
           if (res?.result) {

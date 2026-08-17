@@ -356,33 +356,19 @@ export function distribution () {
 }
 
 /**
- * 申请成为分销商
- * @param idNumber 身份证号
- * @param name  名字
+ * 提交招募申请
  */
-export function applyDistribution (params) {
+export function submitRecruitApplication (data) {
   return request({
-    url: `/buyer/distribution/distribution`,
+    url: `/buyer/distribution/distribution/recruit/apply`,
     method: Method.POST,
     needToken: true,
-    params
+    data
   });
 }
 
 /**
- * 获取分销商订单列表
- */
-export function getDistOrderList (params) {
-  return request({
-    url: `/buyer/distribution/order`,
-    method: Method.GET,
-    needToken: true,
-    params
-  });
-}
-
-/**
- * 获取分销商商品列表
+ * 获取分销员商品列表
  */
 export function getDistGoodsList (params) {
   return request({
@@ -408,7 +394,7 @@ export function selectDistGoods (params) {
 }
 
 /**
- * 分销商提现历史
+ * 分销员提现历史
  */
 export function distCashHistory (params) {
   return request({
@@ -420,7 +406,7 @@ export function distCashHistory (params) {
 }
 
 /**
- * 分销商提现
+ * 分销员提现
  */
 export function distCash (params) {
   return request({

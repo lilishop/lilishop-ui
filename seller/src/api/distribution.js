@@ -1,6 +1,6 @@
 
 // 统一请求路径前缀在libs/axios.js中修改
-import {getRequest, postRequest, putRequest, deleteRequest, importRequest, getRequestWithNoToken} from '@/libs/axios';
+import {getRequest, postRequest, postRequestWithNoForm, putRequest, deleteRequest, importRequest, getRequestWithNoToken} from '@/libs/axios';
 
 
 //获取分销商品列表
@@ -18,22 +18,32 @@ export const distributionGoodsCheck = (id,param) => {
   return putRequest(`/distribution/goods/checked/${id}`,param)
 }
 
+// 批量选择分销商品
+export const distributionGoodsBatchCheck = (items) => {
+  return postRequestWithNoForm('/distribution/goods/checked/batch', { items })
+}
 
-//查询分销商
+// 修改分销商品佣金
+export const updateDistributionGoodsCommission = (id, params) => {
+  return putRequest(`/distribution/goods/${id}/commission`, params)
+}
+
+
+//查询分销员
 export const getDistributionListData = (params) => {
     return getRequest('/distribution/getByPage', params)
 }
-//审核分销商
+//审核分销员
 export const auditDistribution = (id, params) => {
     return putRequest(`/distribution/audit/${id}`, params)
 }
 
-// 清退分销商
+// 清退分销员
 export const retreatDistribution = (id, params) => {
     return putRequest(`/distribution/retreat/${id}`, params)
 }
 
-// 恢复分销商
+// 恢复分销员
 export const resumeDistribution = (id, params) => {
     return putRequest(`/distribution/resume/${id}`, params)
 }

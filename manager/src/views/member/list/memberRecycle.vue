@@ -9,10 +9,18 @@
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="会员名称" prop="username">
+        <el-form-item label="客户ID" prop="id">
+          <el-input
+            v-model="searchForm.id"
+            placeholder="请输入客户ID"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="客户名称" prop="username">
           <el-input
             v-model="searchForm.username"
-            placeholder="请输入会员名称"
+            placeholder="请输入客户名称"
             clearable
             style="width: 240px"
           />
@@ -40,7 +48,8 @@
         class="mt_10"
         style="width: 100%"
       >
-        <el-table-column prop="username" label="会员名称" min-width="150" align="left" show-overflow-tooltip />
+        <el-table-column prop="id" label="客户ID" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="username" label="客户名称" min-width="150" align="left" show-overflow-tooltip />
         <el-table-column prop="nickName" label="昵称" min-width="120" align="left" show-overflow-tooltip />
         <el-table-column label="联系方式" min-width="130">
           <template #default="{ row }">
@@ -98,7 +107,7 @@
           >修改</el-button>
           <input type="file" style="display: none" id="file" />
         </el-form-item>
-        <el-form-item label="会员名称" prop="name">
+        <el-form-item label="客户名称" prop="name">
           <el-input v-model="formValidate.username" style="width: 200px" disabled />
         </el-form-item>
         <el-form-item label="用户昵称" prop="name">
@@ -168,6 +177,7 @@ export default {
         pageNumber: 1,
         pageSize: 20,
         order: "desc",
+        id: "",
         username: "",
         mobile: "",
         disabled: "CLOSE",

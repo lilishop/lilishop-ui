@@ -63,7 +63,7 @@
           <div class="counts">{{ $store.state.notices.refund || 0 }}</div>
           <div>待审核售后</div>
         </div>
-        <div class="todo-item">
+        <div class="todo-item" @click="goDistributionCash">
           <div class="counts">
             {{ $store.state.notices.distributionCash || 0 }}
           </div>
@@ -241,6 +241,13 @@ export default {
     navigateTo(name) {
       this.$router.push({
         name,
+      });
+    },
+    // 跳转到分销提现，并打开待处理标签页
+    goDistributionCash() {
+      this.$router.push({
+        name: 'distributionCash',
+        query: { tabStatus: 'APPLY' }
       });
     },
     // top10热卖商品

@@ -2,7 +2,7 @@
 @import "./main.scss";
 </style>
 <template>
-  <div class="main">
+  <div class="main" :class="{ 'home-only': !menuList.length }">
     <div class="sidebar-menu-con menu-bar">
       <shrinkable-menu />
     </div>
@@ -112,6 +112,9 @@ export default {
     },
     loading() {
       return this.$store.state.app.loading;
+    },
+    menuList() {
+      return this.$store.state.app.menuList || [];
     },
     pageTagsList() {
       return this.$store.state.app.pageOpenedList;

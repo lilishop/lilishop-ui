@@ -14,7 +14,7 @@
             <el-badge :value="res.complain">待处理投诉审核</el-badge>
           </el-dropdown-item>
           <el-dropdown-item v-if="res.distributionCash" command="distributionCash">
-            <el-badge :value="res.distributionCash">待处理分销商提现申请</el-badge>
+            <el-badge :value="res.distributionCash">待处理分销员提现申请</el-badge>
           </el-dropdown-item>
           <el-dropdown-item v-if="res.goods" command="applyGoods">
             <el-badge :value="res.goods">待处理商品审核</el-badge>

@@ -9,11 +9,11 @@
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="会员ID" prop="id">
-          <el-input v-model="searchForm.id" placeholder="请输入会员ID" clearable style="width: 240px" />
+        <el-form-item label="客户ID" prop="id">
+          <el-input v-model="searchForm.id" placeholder="请输入客户ID" clearable style="width: 240px" />
         </el-form-item>
-        <el-form-item label="会员名称" prop="username">
-          <el-input v-model="searchForm.username" placeholder="请输入会员名称" clearable style="width: 240px" />
+        <el-form-item label="客户名称" prop="username">
+          <el-input v-model="searchForm.username" placeholder="请输入客户名称" clearable style="width: 240px" />
         </el-form-item>
         <el-form-item label="会员昵称" prop="nickName">
           <el-input v-model="searchForm.nickName" placeholder="请输入会员昵称" clearable style="width: 240px" />
@@ -75,7 +75,7 @@
           align="center"
           :reserve-selection="checkboxSelect"
         />
-        <el-table-column prop="id" label="会员ID" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="id" label="客户ID" min-width="120" show-overflow-tooltip />
         <el-table-column label="头像" min-width="80" align="center">
           <template #default="{ row }">
             <img
@@ -86,7 +86,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="username" label="会员名称" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="username" label="客户名称" min-width="150" show-overflow-tooltip />
         <el-table-column prop="nickName" label="会员昵称" min-width="120" show-overflow-tooltip />
         <el-table-column label="联系方式" min-width="130">
           <template #default="{ row }">
@@ -182,11 +182,11 @@
             autocomplete="off"
           />
         </el-form-item>
-        <el-form-item label="会员名称" prop="username" style="width: 90%">
+        <el-form-item label="客户名称" prop="username" style="width: 90%">
           <el-input
             v-model="addMemberForm.username"
             maxlength="15"
-            placeholder="请输入会员名称"
+            placeholder="请输入客户名称"
             autocomplete="off"
             name="member-username"
           />
@@ -421,7 +421,7 @@ export default {
           { required: true, message: "请输入手机号码" },
           { pattern: RegExp.mobile, message: "请输入正确的手机号" },
         ],
-        username: [{ required: true, message: "请输入会员名称" }],
+        username: [{ required: true, message: "请输入客户名称" }],
         password: [{ required: true, message: "请输入密码" }],
       },
       ruleValidate: {},
