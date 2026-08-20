@@ -28,7 +28,6 @@
                   </div>
                 </el-option>
               </el-select>
-              <div v-if="currentGoodsTypeDesc" class="form-tip">{{ currentGoodsTypeDesc }}</div>
             </el-form-item>
             <el-form-item label="商品分类" prop="categoryPath">
               <el-cascader
@@ -51,7 +50,13 @@
               <el-input v-model="baseInfoForm.sellingPoint" :rows="4" style="width: 260px" type="textarea" />
             </el-form-item>
             <el-form-item label="商品品牌" prop="brandId">
-              <el-select v-model="baseInfoForm.brandId" filterable style="width: 200px">
+              <el-select
+                v-model="baseInfoForm.brandId"
+                filterable
+                clearable
+                placeholder="请选择品牌"
+                style="width: 200px"
+              >
                 <el-option v-for="item in brandList" :key="item.id" :label="item.name" :value="item.id" />
               </el-select>
               <el-button class="refresh-icon" circle link @click="refresh('brand')">
@@ -466,7 +471,7 @@
           </div>
           <h4>商品详情描述</h4>
           <div class="form-item-view">
-            <div class="tree-bar">
+            <div class="tree-bar" :class="{ 'is-empty': !shopCategory.length }">
               <el-form-item class="form-item-view-el" label="店内分类" prop="shopCategory">
                 <el-tree
                   ref="tree"
@@ -477,7 +482,11 @@
                   style="text-align: left"
                   @node-click="(data) => selectTree([data])"
                   @check="(_, ctx) => changeSelect(ctx.checkedNodes)"
-                />
+                >
+                  <template #empty>
+                    <span class="shop-category-empty">暂无分类</span>
+                  </template>
+                </el-tree>
               </el-form-item>
             </div>
             <el-form-item class="form-item-view-el" label="PC商品描述" prop="intro" style="width: 100%">
@@ -499,7 +508,7 @@
           <div v-if="needsLogistics">
             <h4>商品物流信息</h4>
             <div class="form-item-view">
-              <el-form-item class="form-item-view-el" label="物流模板" prop="templateId">
+              <el-form-item class="form-item-view-el" label="运费模板" prop="templateId">
                 <el-select v-model="baseInfoForm.templateId" style="width: 200px">
                   <el-option v-for="item in logisticsTemplate" :key="item.id" :label="item.name" :value="item.id" />
                 </el-select>
@@ -618,12 +627,6 @@ export default {
     needsLogistics() {
       return this.baseInfoForm.goodsType === "PHYSICAL_GOODS";
     },
-    currentGoodsTypeDesc() {
-      const matched = this.goodsTypeOptions.find(
-        (item) => item.value === this.baseInfoForm.goodsType
-      );
-      return matched ? matched.desc : "";
-    },
   },
   data() {
     // 表单验证项，商品价格
@@ -732,7 +735,7 @@ export default {
         recommend: 1,
         /** 店铺分类 */
         storeCategoryPath: "",
-        brandId: 0,
+        brandId: "",
         /** 计量单位 **/
         goodsUnit: "",
         /** 商品类型 **/
@@ -1108,7 +1111,7 @@ export default {
         this.categoryId = "";
         this.baseInfoForm.categoryPath = "";
         this.baseInfoForm.categoryName = [];
-        this.baseInfoForm.brandId = 0;
+        this.baseInfoForm.brandId = "";
         this.brandList = [];
         this.goodsParams = [];
         this.params_panel = [];
@@ -1117,7 +1120,7 @@ export default {
       this.categoryId = val[2];
       this.baseInfoForm.categoryPath = val.join(",");
       this.baseInfoForm.categoryName = this.getCategoryNames(val);
-      this.baseInfoForm.brandId = 0;
+      this.baseInfoForm.brandId = "";
       this.getGoodsBrandList();
       this.GET_GoodsParams();
     },
@@ -1331,6 +1334,12 @@ export default {
       }
     },
 
+    /** 无品牌时后端用 0，选择器空值用空字符串，避免 el-select 直接显示 0 */
+    normalizeBrandId(id) {
+      if (id === 0 || id === "0" || id == null || id === "") return "";
+      return id;
+    },
+
     /** 查询商品品牌列表 */
     getGoodsBrandList(type) {
       API_GOODS.getCategoryBrandListDataSeller(this.categoryId).then(
@@ -1402,6 +1411,7 @@ export default {
       this.invalidGoodsGalleryFiles = [];
       this.baseInfoForm = { ...this.baseInfoForm, ...response.result };
       this.baseInfoForm.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
+      this.baseInfoForm.brandId = this.normalizeBrandId(this.baseInfoForm.brandId);
       this.categoryId = response.result.categoryPath.split(",")[2];
       this.syncSelectedCategoryFromPath();
 
@@ -2368,6 +2378,7 @@ export default {
             return;
           }
           if (submit.templateId === "") submit.templateId = 0;
+          if (submit.brandId === "" || submit.brandId == null) submit.brandId = 0;
           if (this.isECouponGoods) {
             submit.templateId = 0;
             submit.salesModel = "RETAIL";
@@ -2521,6 +2532,29 @@ export default {
   white-space: nowrap;
 }
 @import "./addGoods.scss";
+
+.tree-bar.is-empty {
+  min-height: auto !important;
+}
+
+.tree-bar :deep(.el-tree__empty-block) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 32px;
+  height: auto;
+  width: auto;
+}
+
+.tree-bar :deep(.el-tree__empty-text),
+.shop-category-empty {
+  position: static;
+  left: auto;
+  top: auto;
+  transform: none;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
+}
 </style>
 
 <style scoped>
@@ -2662,14 +2696,6 @@ export default {
   left: 50%;
   margin-left: 100px;
   transform: translateY(-50%);
-}
-
-.form-tip {
-  color: #666;
-  font-size: 12px;
-  line-height: 1.5;
-  margin-top: 4px;
-  max-width: 260px;
 }
 
 .goods-type-option {

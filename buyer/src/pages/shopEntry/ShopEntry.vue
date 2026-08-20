@@ -130,9 +130,9 @@ export default {
       Object.assign(this.thirdData, Object.fromEntries(third.map((key) => [key, data[key]])));
     },
     getArticle() {
-      // 入驻协议
+      // 入驻协议：库中无 STORE_REGISTER 文章时 result 为 null，不能直接读 content
       agreement().then((res) => {
-        this.agreementCon = res.result.content;
+        this.agreementCon = res.result?.content || "";
       });
     },
     getData(status) {
@@ -164,21 +164,19 @@ export default {
       });
     },
     refreshApplyData() {
-      applyStatus().then((res) => {
+      return applyStatus().then((res) => {
         if (res.success && res.result) {
           this.assignApplyData(res.result);
         }
-      });
+      }).catch(() => {});
     },
-    // 下一步
-    nextPage(step) {
+    // 下一步：先拉最新申请数据，再切步骤，避免第三步挂载后再改 content 触发校验
+    async nextPage(step) {
       if (typeof step !== "number") return;
-      this.currentIndex = step;
-      if (step > 0 && step < 3) {
-        this.refreshApplyData();
-      } else if (step === 3) {
-        this.refreshApplyData();
+      if (step > 0 && step <= 3) {
+        await this.refreshApplyData();
       }
+      this.currentIndex = step;
     },
   },
   created() {

@@ -15,7 +15,6 @@
         :props="treeProps"
         node-key="id"
         show-checkbox
-        default-expand-all
       />
     </div>
     <template #footer>

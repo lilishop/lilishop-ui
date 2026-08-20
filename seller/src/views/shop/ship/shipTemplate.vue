@@ -138,7 +138,7 @@
                             />
                           </td>
                           <td class="col-action">
-                            <a class="action-link" @click="editRegion(item,index)">修改</a>
+                            <a class="action-link" @click="editRegion(item,index)">选择地址</a>
                             <span class="action-split">|</span>
                             <a class="action-link" @click="removeTemplateChildren(index)">删除</a>
                           </td>

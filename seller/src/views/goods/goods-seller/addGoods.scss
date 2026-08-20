@@ -524,8 +524,9 @@ div.base-info-item {
 }
 
 .tree-bar {
+  width: 100%;
   height: auto !important;
-  max-height: auto !important;
+  max-height: none !important;
   min-height: 240px !important;
 }
 

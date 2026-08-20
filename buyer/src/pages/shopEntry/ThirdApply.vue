@@ -126,6 +126,12 @@ export default {
       form: { // 表单数据
         storeLogo: [],
         goodsManagementCategory: [],
+        storeName: "",
+        storeAddressDetail: "",
+        storeDesc: "",
+        storeAddressIdPath: "",
+        storeAddressPath: "",
+        storeCenter: "",
       },
       rules: { // 验证规则
         goodsManagementCategory: [
@@ -244,18 +250,42 @@ export default {
         (id) => this.normalizeCategoryId(id)
       );
     },
+    createEmptyForm () {
+      return {
+        storeLogo: [],
+        goodsManagementCategory: [],
+        storeName: "",
+        storeAddressDetail: "",
+        storeDesc: "",
+        storeAddressIdPath: "",
+        storeAddressPath: "",
+        storeCenter: "",
+      };
+    },
+    initFormFromContent (content) {
+      const src = content && Object.keys(content).length
+        ? JSON.parse(JSON.stringify(content))
+        : {};
+      this.form = {
+        ...this.createEmptyForm(),
+        ...src,
+      };
+      this.form.storeLogo = src.storeLogo
+        ? String(src.storeLogo).split(",").filter(Boolean)
+        : [];
+      this.form.goodsManagementCategory = src.goodsManagementCategory
+        ? String(src.goodsManagementCategory).split(",").filter(Boolean)
+        : [];
+      ["storeName", "storeAddressDetail", "storeDesc", "storeAddressIdPath", "storeAddressPath", "storeCenter"].forEach((key) => {
+        if (this.form[key] == null) this.form[key] = "";
+      });
+    },
+  },
+  created () {
+    this.initFormFromContent(this.content);
   },
   mounted () {
     this.accessToken.accessToken = storage.getItem('accessToken');
-    if (this.content && Object.keys(this.content).length) {
-      this.form = JSON.parse(JSON.stringify(this.content));
-      this.form.storeLogo = this.content.storeLogo
-        ? String(this.content.storeLogo).split(',').filter(Boolean)
-        : [];
-      this.form.goodsManagementCategory = this.content.goodsManagementCategory
-        ? String(this.content.goodsManagementCategory).split(',').filter(Boolean)
-        : [];
-    }
     this.getCategoryList();
   }
 };
