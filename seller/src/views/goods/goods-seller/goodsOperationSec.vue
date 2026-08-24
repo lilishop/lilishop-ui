@@ -1452,6 +1452,22 @@ export default {
 
       /** 查询商品参数 */
       this.GET_GoodsParams();
+
+      this.$nextTick(() => {
+        this.$refs.editor?.setContent?.(this.baseInfoForm.intro);
+        this.$refs.introEditor?.setContent?.(this.baseInfoForm.mobileIntro);
+      });
+    },
+    /** TinyMCE 的 v-model 可能滞后，提交前从编辑器实例取最新 HTML */
+    syncIntroFromEditors() {
+      const pcEditor = this.$refs.editor;
+      const mobileEditor = this.$refs.introEditor;
+      if (pcEditor?.getContent) {
+        this.baseInfoForm.intro = pcEditor.getContent() ?? "";
+      }
+      if (mobileEditor?.getContent) {
+        this.baseInfoForm.mobileIntro = mobileEditor.getContent() ?? "";
+      }
     },
     // 渲染sku数据
     renderGoodsDetailSku(skuList) {
@@ -1522,8 +1538,8 @@ export default {
     },
     // 将pc商品描述同步给移动端
     promiseIntroEditor() {
-      const pcContent = this.$refs.editor?.getContent?.() ?? this.baseInfoForm.intro ?? "";
-      this.baseInfoForm.intro = pcContent;
+      this.syncIntroFromEditors();
+      const pcContent = this.baseInfoForm.intro ?? "";
       this.baseInfoForm.mobileIntro = pcContent;
       this.$nextTick(() => {
         this.$refs.introEditor?.setContent?.(pcContent);
@@ -2360,6 +2376,7 @@ export default {
           if (!this.$route.query.copyId) {
             this.baseInfoForm.goodsId = this.goodsId;
           }
+          this.syncIntroFromEditors();
           let submit = JSON.parse(JSON.stringify(this.baseInfoForm));
           if (
             submit.goodsGalleryFiles &&
