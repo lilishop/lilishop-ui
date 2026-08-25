@@ -55,20 +55,7 @@ export default {
         okText: '使用',
         cancelText: '取消',
         onOk: () => {
-          let pageData = cache;
-          if (pageData) {
-            pageData = JSON.parse(pageData);
-            if (pageData.list[0].type === "topAdvert") {
-              this.$refs.modelForm.topAdvert = pageData.list[0];
-              this.$refs.modelForm.navList = pageData.list[1];
-              pageData.list.splice(0, 2);
-              this.modelForm = pageData;
-            } else {
-              this.modelForm = { list: [] };
-            }
-          } else {
-            this.modelForm = { list: [] };
-          }
+          this.applyPageData(cache);
         }
       });
     }
@@ -131,23 +118,41 @@ export default {
     resetTemplate() {
       this.getTemplateItem(this.$route.query.id);
     },
+    applyPageData(raw) {
+      const empty = { list: [] };
+      if (raw == null || raw === "") {
+        this.modelForm = empty;
+        return;
+      }
+      let pageData = raw;
+      if (typeof raw === "string") {
+        try {
+          pageData = JSON.parse(raw);
+        } catch {
+          this.modelForm = empty;
+          return;
+        }
+      }
+      const list = Array.isArray(pageData)
+        ? pageData
+        : Array.isArray(pageData?.list)
+          ? pageData.list
+          : [];
+      const form = Array.isArray(pageData) ? { list } : { ...pageData, list };
+      if (list[0]?.type === "topAdvert") {
+        this.$refs.modelForm.topAdvert = list[0];
+        if (list[1]) {
+          this.$refs.modelForm.navList = list[1];
+        }
+        this.modelForm = { ...form, list: list.slice(2) };
+        return;
+      }
+      this.modelForm = { ...form, list };
+    },
     getTemplateItem(id) {
       API_floor.getHomeData(id).then((res) => {
         if (res.success) {
-          let pageData = res.result.pageData;
-          if (pageData) {
-            pageData = JSON.parse(pageData);
-            if (pageData.list[0].type === "topAdvert") {
-              this.$refs.modelForm.topAdvert = pageData.list[0];
-              this.$refs.modelForm.navList = pageData.list[1];
-              pageData.list.splice(0, 2);
-              this.modelForm = pageData;
-            } else {
-              this.modelForm = { list: [] };
-            }
-          } else {
-            this.modelForm = { list: [] };
-          }
+          this.applyPageData(res.result?.pageData);
         }
       });
     },
