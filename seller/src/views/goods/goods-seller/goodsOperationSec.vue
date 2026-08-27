@@ -8,36 +8,12 @@
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
-            <el-form-item label="商品类型" prop="goodsType">
-              <el-select
-                v-model="baseInfoForm.goodsType"
-                placeholder="请选择商品类型"
-                style="width: 260px"
-                popper-class="goods-type-select-popper"
-                @change="handleGoodsTypeChange"
-              >
-                <el-option
-                  v-for="item in goodsTypeOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                >
-                  <div class="goods-type-option">
-                    <span class="goods-type-option-label">{{ item.label }}</span>
-                    <span class="goods-type-option-desc">{{ item.desc }}</span>
-                  </div>
-                </el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item label="商品分类" prop="categoryPath">
-              <el-cascader
-                v-model="selectedCategory"
-                :options="categoryList"
-                placeholder="请选择商品分类"
-                clearable
-                style="width: 260px"
-                @change="handleCategoryChange"
-              />
+            <el-form-item label="商品分类">
+              <span class="goods-category-name">{{
+                baseInfoForm.categoryName[0]
+                }}</span>
+              <span> &gt; {{ baseInfoForm.categoryName[1] }}</span>
+              <span> &gt; {{ baseInfoForm.categoryName[2] }}</span>
             </el-form-item>
             <el-form-item label="商品名称" prop="goodsName">
               <el-input v-model="baseInfoForm.goodsName" clearable placeholder="商品名称" style="width: 260px" type="text" />
@@ -547,6 +523,7 @@
     <!-- 底部按钮 -->
     <div class="footer">
       <div class="footer-btns">
+        <el-button type="primary" @click="pre">上一步</el-button>
         <el-button :loading="submitLoading" type="primary" @click="save">
           {{ $route.query.id ? "保存" : "保存商品" }}
         </el-button>
@@ -660,16 +637,6 @@ export default {
       accessToken: "", //令牌token
       goodsParams: [],
       categoryId: "", // 商品分类第三级id
-      /** 商品类型选项 */
-      goodsTypeOptions: [
-        { label: "实物商品", value: "PHYSICAL_GOODS", desc: "零售批发，物流配送" },
-        { label: "虚拟商品", value: "VIRTUAL_GOODS", desc: "虚拟核验，无需物流" },
-        { label: "电子卡券", value: "E_COUPON", desc: "卡密自动发卡，无需物流" },
-      ],
-      /** 商城分类级联数据 */
-      categoryList: [],
-      /** 商城分类选中值 [一级id, 二级id, 三级id] */
-      selectedCategory: [],
       //提交状态
       submitLoading: false,
       //上传图片路径
@@ -791,8 +758,6 @@ export default {
       /** 存储未通过校验的单元格位置  */
       validateError: [],
       baseInfoFormRule: {
-        goodsType: [{ required: true, message: "请选择商品类型", trigger: "change" }],
-        categoryPath: [{ required: true, message: "请选择商品分类", trigger: "change" }],
         goodsName: [regular.REQUIRED, regular.WHITE_SPACE, regular.VARCHAR60],
         price: [regular.REQUIRED, { validator: checkPrice }],
         sellingPoint: [regular.REQUIRED, regular.VARCHAR60],
@@ -1050,79 +1015,9 @@ export default {
         });
       }
     },
-    /** 加载商城商品分类树 */
-    loadCategoryList() {
-      return API_GOODS.getGoodsCategoryAll().then((res) => {
-        if (res.success && res.result) {
-          this.categoryList = this.formatCategoryTree(res.result);
-          this.syncSelectedCategoryFromPath();
-        }
-      });
-    },
-    formatCategoryTree(list) {
-      return (list || []).map((item) => ({
-        value: String(item.id),
-        label: item.name,
-        children: (item.children || []).map((child) => ({
-          value: String(child.id),
-          label: child.name,
-          children: (child.children || []).map((grandson) => ({
-            value: String(grandson.id),
-            label: grandson.name,
-          })),
-        })),
-      }));
-    },
-    syncSelectedCategoryFromPath() {
-      const path = this.baseInfoForm.categoryPath;
-      if (!path) {
-        return;
-      }
-      const ids = path.split(",").filter(Boolean).map(String);
-      if (ids.length >= 3) {
-        this.selectedCategory = ids;
-        this.categoryId = ids[2];
-      }
-    },
-    getCategoryNames(ids) {
-      const names = [];
-      let options = this.categoryList;
-      ids.forEach((id) => {
-        const found = (options || []).find((item) => item.value === id);
-        if (found) {
-          names.push(found.label);
-          options = found.children || [];
-        }
-      });
-      return names;
-    },
-    handleGoodsTypeChange() {
-      if (this.isVirtualLikeGoods) {
-        this.baseInfoForm.salesModel = "RETAIL";
-      }
-      if (this.isECouponGoods) {
-        this.baseInfoForm.templateId = 0;
-      }
-      this.renderTableData(this.skuTableData);
-    },
-    handleCategoryChange(val) {
-      if (!val || val.length < 3) {
-        this.selectedCategory = val || [];
-        this.categoryId = "";
-        this.baseInfoForm.categoryPath = "";
-        this.baseInfoForm.categoryName = [];
-        this.baseInfoForm.brandId = "";
-        this.brandList = [];
-        this.goodsParams = [];
-        this.params_panel = [];
-        return;
-      }
-      this.categoryId = val[2];
-      this.baseInfoForm.categoryPath = val.join(",");
-      this.baseInfoForm.categoryName = this.getCategoryNames(val);
-      this.baseInfoForm.brandId = "";
-      this.getGoodsBrandList();
-      this.GET_GoodsParams();
+    pre() {
+      // 上一步
+      this.$parent.activestep--;
     },
     // 预览图片
     handleView(url) {
@@ -1413,7 +1308,6 @@ export default {
       this.baseInfoForm.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
       this.baseInfoForm.brandId = this.normalizeBrandId(this.baseInfoForm.brandId);
       this.categoryId = response.result.categoryPath.split(",")[2];
-      this.syncSelectedCategoryFromPath();
 
       // 如果是复制商品，需要清除ID，确保提交时作为新商品
       if (this.$route.query.copyId) {
@@ -1449,6 +1343,20 @@ export default {
       /** 查询店铺商品分类 */
       this.GET_ShopGoodsLabel();
       this.GET_GoodsUnit();
+
+      if (this.firstData.category) {
+        const cateId = [];
+        this.baseInfoForm.categoryName = [];
+        this.firstData.category.forEach((cate) => {
+          this.baseInfoForm.categoryName.push(cate.name);
+          cateId.push(cate.id);
+        });
+        this.categoryId = cateId[2];
+
+        this.baseInfoForm.categoryPath = cateId.toString();
+      }
+      this.firstData.goodsType &&
+        (this.baseInfoForm.goodsType = this.firstData.goodsType);
 
       /** 查询商品参数 */
       this.GET_GoodsParams();
@@ -2356,10 +2264,6 @@ export default {
         this.$Message.error(`以下参数为必填项：${missingParams.join('、')}`);
         return;
       }
-      if (!this.selectedCategory || this.selectedCategory.length < 3) {
-        this.$Message.error("必须选择到三级分类");
-        return;
-      }
       this.submitLoading = true;
       this.$refs["baseInfoForm"].validate((valid) => {
         if (valid) {
@@ -2520,7 +2424,6 @@ export default {
       accessToken: this.getStore("accessToken"),
     };
     this.GET_ShipTemplate()
-    this.loadCategoryList();
     if (this.$route.query.id || this.$route.query.draftId) {
       // 编辑商品、模板
       this.GET_GoodData(this.$route.query.id, this.$route.query.draftId);
@@ -2532,6 +2435,17 @@ export default {
       this.GET_GoodData("", this.firstData.tempId);
     } else {
       // 新增商品
+      const cateId = [];
+      (this.firstData.category || []).forEach((cate) => {
+        this.baseInfoForm.categoryName.push(cate.name);
+        cateId.push(cate.id);
+      });
+      this.categoryId = cateId[2];
+      this.baseInfoForm.categoryPath = cateId.toString();
+      this.baseInfoForm.goodsType = this.firstData.goodsType;
+
+      this.GET_GoodsParams();
+      this.getGoodsBrandList();
       this.GET_GoodsUnit();
       this.GET_ShopGoodsLabel();
     }
@@ -2713,51 +2627,5 @@ export default {
   left: 50%;
   margin-left: 100px;
   transform: translateY(-50%);
-}
-
-.goods-type-option {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.4;
-  padding: 2px 0;
-}
-
-.goods-type-option-label {
-  color: #303133;
-}
-
-.goods-type-option-desc {
-  color: #909399;
-  font-size: 12px;
-}
-</style>
-<style lang="scss">
-.goods-type-select-popper {
-  .el-select-dropdown__item {
-    height: auto;
-    min-height: 58px;
-    padding: 10px 12px;
-    line-height: 1.5;
-    white-space: normal;
-  }
-
-  .goods-type-option {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .goods-type-option-label {
-    color: #303133;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-
-  .goods-type-option-desc {
-    color: #909399;
-    font-size: 12px;
-    line-height: 1.5;
-    white-space: normal;
-  }
 }
 </style>
