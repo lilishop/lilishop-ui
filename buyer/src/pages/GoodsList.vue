@@ -148,7 +148,7 @@ export default {
       total: 0, // 列表总数
       params: {
         // 请求参数
-        pageNumber: 0,
+        pageNumber: 1,
         pageSize: 20,
         categoryId: "",
       },
@@ -179,7 +179,7 @@ export default {
     handleSearch(key) {
       this.params.keyword = key;
       this.$route.query.keyword = key
-      this.params.pageNumber = 0;
+      this.params.pageNumber = 1;
       this.getGoodsList();
     },
     orderBy(data, index) {

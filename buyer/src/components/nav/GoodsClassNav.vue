@@ -291,8 +291,12 @@ export default {
           this.multSelected.push(item);
         }
       } else {
+        const type = this.tagsContent[index].key;
+        if (this.selectedItem.some((selected) => selected.type === type)) {
+          return;
+        }
         this.selectedItem.push({
-          type: this.tagsContent[index].key,
+          type,
           name: item
         });
 
@@ -300,12 +304,7 @@ export default {
 
         if (index === 0) {
           // 如果是品牌，获取品牌id
-
-          let brands = this.tagsContent[0].values;
-
-          brands.forEach((val) => {
-            if (val.name === item) this.brandIds.push(val.value);
-          });
+          this.appendBrandIdsByNames([item]);
         }
       }
     },
@@ -336,19 +335,19 @@ export default {
     },
     sure (index) {
       // 多选确认按钮
+      const type = this.tagsContent[index].key;
+      if (this.selectedItem.some((selected) => selected.type === type)) {
+        this.cancel();
+        return;
+      }
       this.selectedItem.push({
-        type: this.tagsContent[index].key,
+        type,
         name: this.multSelected.join('、')
       });
 
       if (index === 0) {
         // 如果是品牌，获取品牌id
-
-        let brands = this.tagsContent[0].values;
-
-        brands.forEach((val) => {
-          if (this.multSelected.includes(val.name)) this.brandIds.push(val.value);
-        });
+        this.appendBrandIdsByNames(this.multSelected);
       }
 
       this.tagsContent[index].show = false;
@@ -360,22 +359,30 @@ export default {
       this.tagsContent[0].more = false;
       this.multiple = false;
     },
+    appendBrandIdsByNames (names) {
+      const selectedNames = names || [];
+      const brands = this.tagsContent[0] && this.tagsContent[0].values ? this.tagsContent[0].values : [];
+      brands.forEach((val) => {
+        if (selectedNames.includes(val.name) && val.value && !this.brandIds.includes(val.value)) {
+          this.brandIds.push(val.value);
+        }
+      });
+    },
     getFilterList (params) {
       // 筛选、分类  列表
       APIGoods.filterList(params).then((res) => {
         if (res.success) {
           const data = res.result;
+          const hiddenKeys = new Set(this.selectedItem.map((item) => item.type));
           this.tagsContent = [{
             key: '品牌',
             more: false,
-            show: true,
-            values: []
-          }]
-          this.tagsContent[0].values = data.brands;
-          this.tagsContent = this.tagsContent.concat(data.paramOptions);
+            show: !hiddenKeys.has('品牌'),
+            values: data.brands || []
+          }].concat(data.paramOptions || []);
           this.tagsContent.forEach((item) => {
-            item['show'] = true
-            item['more'] = false
+            item.show = !hiddenKeys.has(item.key);
+            item.more = false;
           });
         }
       });
