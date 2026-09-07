@@ -159,7 +159,7 @@ export default {
       if (!Number.isFinite(num)) {
         return "-";
       }
-      return `${num.toFixed(2).replace(/\.?0+$/, "") || "0"}%`;
+      return `${(num * 100).toFixed(2).replace(/\.?0+$/, "") || "0"}%`;
     },
     applyUpgradeTimeRange() {
       if (this.upgradeTimeRange && this.upgradeTimeRange.length === 2) {

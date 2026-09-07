@@ -120,6 +120,22 @@ const GRADE_VALUE_OPTIONS = [1, 2, 3, 4, 5];
 const BASE_GRADE_VALUE = 1;
 const BASE_GRADE_NAME = "普通分销员";
 
+const toPercent = (decimal) => {
+  const num = Number(decimal);
+  if (!Number.isFinite(num)) {
+    return 0;
+  }
+  return Number((num * 100).toFixed(2));
+};
+
+const toFraction = (percent) => {
+  const num = Number(percent);
+  if (!Number.isFinite(num)) {
+    return 0;
+  }
+  return Number((num / 100).toFixed(4));
+};
+
 const buildDefaultRow = (sortOrder = null) => {
   const isBaseGrade = sortOrder === BASE_GRADE_VALUE;
   return {
@@ -158,6 +174,8 @@ export default {
         enableSalesCondition: row.enableSalesCondition !== false,
         enableCommissionCondition: row.enableCommissionCondition !== false,
         enableInviteCondition: row.enableInviteCondition !== false,
+        goodsCommissionRate: toPercent(row.goodsCommissionRate),
+        inviteCommissionRate: toPercent(row.inviteCommissionRate),
         _key: row._key || row.id || `grade_${index}_${Date.now()}`,
       };
       if (this.isBaseGrade(normalized)) {
@@ -326,8 +344,8 @@ export default {
         enableSalesCondition: isBaseGrade ? false : row.enableSalesCondition,
         enableCommissionCondition: isBaseGrade ? false : row.enableCommissionCondition,
         enableInviteCondition: isBaseGrade ? false : row.enableInviteCondition,
-        goodsCommissionRate: row.goodsCommissionRate,
-        inviteCommissionRate: row.inviteCommissionRate,
+        goodsCommissionRate: toFraction(row.goodsCommissionRate),
+        inviteCommissionRate: toFraction(row.inviteCommissionRate),
       };
     },
     async saveAll() {
