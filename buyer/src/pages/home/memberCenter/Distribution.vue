@@ -178,21 +178,9 @@
     <div v-if="status === 3">
       <el-alert type="danger" title="分销功能暂未开启" />
     </div>
-    <!-- 分销资格被清退 -->
+    <!-- 分销资格被清退：只能后台恢复，不提供申诉 -->
     <div v-if="status === 4">
-      <el-alert type="danger">
-        您的分销资格已被清退。请联系管理员或进行申诉
-
-        <el-button style="margin-left: 50px;" type="warning" @click="repaying">申诉</el-button>
-      </el-alert>
-    </div>
-    <!-- 分销申诉审核 -->
-    <div v-if="status === 5">
-      <el-alert
-        type="success"
-        title="您提交的申诉正在审核"
-        description="提交认证申请后，工作人员将在三个工作日进行核对完成审核"
-      />
+      <el-alert type="danger" title="您的分销资格已被清退。请联系管理员！" :closable="false" />
     </div>
     <el-dialog v-model="withdrawApplyModal" width="530">
       <template #header><p>
@@ -449,16 +437,6 @@ export default {
         if (res.success) this.logData = res.result;
       });
     },
-    //申诉
-    repaying(){
-      submitRecruitApplication({ agreementAccepted: true }).then((res) => {
-        this.applyLoading = false;
-        if (res.success) {
-          Message.success("申诉已提交，请等待管理员审核");
-          // this.status = 1;
-        }
-      });
-    },
     distribution() {
       // 获取分销员信息
       distribution()
@@ -473,8 +451,6 @@ export default {
               this.status = 0;
             } else if (type === "RETREAT") {
               this.status = 4;
-            } else if (type === "APPEAL") {
-              this.status = 5;
             } else {
               this.status = 1;
             }
