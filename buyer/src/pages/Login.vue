@@ -184,6 +184,8 @@ export default {
       scannerCodeLoginFLag: false,
       scannerCodeLoginStatus: 0,
       qrCodeTimer:null,
+      qrExpireMs: 20000,
+      qrCreateSeq: 0,
       config,
       type: true, // true 账号登录  false 验证码登录
       formData: {
@@ -219,12 +221,6 @@ export default {
       time: 60, // 倒计时
       year: new Date().getFullYear(),
     };
-  },
-  watch:{
-
-    scannerCodeLoginFLag(val){
-      !val ? this.clearInterval() : ''
-    }
   },
   methods: {
     hideVerify() {
@@ -374,43 +370,62 @@ export default {
     },
 
     async createPCLoginSession() {
+      const requestId = ++this.qrCreateSeq;
+      this.clearQRLoginInfo();
       getSCLoginCode({}).then(response=>{
-        this.clearQRLoginInfo();
-        if (response.code == 200) {
+        if (requestId !== this.qrCreateSeq) return;
+        if (response.code == 200 && response.result) {
           this.qrCodeStatus = 'success'
           let session = response.result;
           this.qrSessionToken = session.token;
+          this.qrExpireMs = Number(session.duration) > 0 ? Number(session.duration) : 20000;
           if (session.status === 0) {
             this.qrCode = session.token;
             this.refreshQrCode();
           }
           this.qrLogin();
-
+        } else {
+          this.markQrExpired();
         }
+      }).catch(() => {
+        if (requestId !== this.qrCreateSeq) return;
+        this.markQrExpired();
       });
     },
 
-    async refreshQrCode() {
-      if (!this.qrCodeTimer) {
-        this.qrCodeTimer = setInterval(() => {
+    refreshQrCode() {
+      this.clearQrTimer();
+      this.qrCodeTimer = setTimeout(() => {
+        this.qrCodeStatus = 'fail';
+        this.clearQrTimer();
+      }, this.qrExpireMs);
+    },
 
-          this.qrCodeStatus = 'fail' // 如果过期将二维码转为失效状态
-        }, 10 * 1000);
+    clearQrTimer() {
+      if (this.qrCodeTimer) {
+        clearTimeout(this.qrCodeTimer);
       }
+      this.qrCodeTimer = null;
+    },
+
+    markQrExpired() {
+      this.qrCodeStatus = 'fail';
+      this.scannerCodeLoginStatus = 0;
+      this.qrSessionToken = '';
+      this.clearQrTimer();
     },
 
     clearQRLoginInfo(){
       this.scannerCodeLoginStatus=0;
       this.qrSessionToken='';
-      if (this.qrCodeTimer) {
-        clearInterval(this.qrCodeTimer)
-      }
-      this.qrCodeTimer= null;
+      this.clearQrTimer();
     },
 
     async qrLogin() {
-      if(!this.qrSessionToken) return;
-      sCLogin(this.qrSessionToken,{beforeSessionStatus:this.scannerCodeLoginStatus}).then(response=>{
+      const token = this.qrSessionToken;
+      if(!token) return;
+      sCLogin(token,{beforeSessionStatus:this.scannerCodeLoginStatus}).then(response=>{
+        if (token !== this.qrSessionToken) return;
         if (response.success) {
           this.scannerCodeLoginStatus = response.result.status;
           switch (response.result.status) {
@@ -418,22 +433,27 @@ export default {
             case 1:
               this.qrLogin();break;
             case 2:
+              this.clearQRLoginInfo();
               this.loginSuccess(response.result.token.accessToken,response.result.token.refreshToken);
               break;
             case 3:
               this.createPCLoginSession();
               break;
             default:
-              this.clearQRLoginInfo();
+              this.markQrExpired();
               break
           }
         }  else{
-          this.clearQRLoginInfo();
+          this.markQrExpired();
         }
+      }).catch(() => {
+        if (token !== this.qrSessionToken) return;
+        this.markQrExpired();
       });
     },
   },
   beforeUnmount() {
+    this.qrCreateSeq++;
     this.clearQRLoginInfo();
   },
   mounted() {
@@ -454,6 +474,7 @@ export default {
         console.log("二维码登录");
       }else{
         console.log("取消二维码登录");
+        this.qrCreateSeq++;
         this.clearQRLoginInfo();
       }
     },

@@ -124,6 +124,7 @@ export function getSCLoginCode(params) {
     url: `/buyer/passport/member/pc_session`,
     method: Method.POST,
     needToken: false,
+    loading: false,
     params
   });
 }
@@ -132,6 +133,10 @@ export function sCLogin(token,params) {
     url: `/buyer/passport/member/session_login/`+token,
     method: Method.POST,
     needToken: false,
+    loading: false,
+    skipMessage: true,
+    // 长轮询后端最长挂起 20s，需大于该值，避免 axios 10s 默认超时把二维码请求掐断
+    timeout: 25000,
     params
   });
 }
