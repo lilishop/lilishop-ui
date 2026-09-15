@@ -294,6 +294,15 @@
                 <el-radio value="CUSTOM">自定义主推商品</el-radio>
               </el-radio-group>
             </el-form-item>
+            <el-form-item label="主推商品数量">
+              <div class="option-with-desc">
+                <el-radio-group v-model="featuredForm.displayCount">
+                  <el-radio :value="5">5个</el-radio>
+                  <el-radio :value="10">10个</el-radio>
+                </el-radio-group>
+                <div class="form-desc">{{ featuredDisplayCountDesc }}</div>
+              </div>
+            </el-form-item>
             <el-form-item v-if="featuredForm.sourceMode === 'AUTO'" label="匹配规则">
               <el-radio-group v-model="featuredForm.matchRule">
                 <el-radio value="HIGHEST_COMMISSION">展示佣金最高的推广商品</el-radio>
@@ -302,8 +311,11 @@
             </el-form-item>
             <el-form-item v-if="featuredForm.sourceMode === 'CUSTOM'" label="自定义商品">
               <div class="custom-goods-block">
+                <div v-if="featuredGoodsOverLimit" class="featured-over-limit-tip">
+                  当前已选超过主推数量，请删除多余商品后再保存（本页其他设置也会一并无法保存）。
+                </div>
                 <div class="form-desc">
-                  请从已审核通过的分销商品中选择，最多可配置 10 个，按列表顺序展示。
+                  请从已审核通过的分销商品中选择，最多可配置 {{ featuredGoodsLimit }} 个，按列表顺序展示。
                 </div>
                 <div class="goods-toolbar">
                   <a class="link-btn" @click.prevent="openFeaturedGoodsPicker">选择分销商品</a>
@@ -346,12 +358,6 @@
                 </el-table>
               </div>
             </el-form-item>
-            <el-form-item label="主推商品数量">
-              <el-radio-group v-model="featuredForm.displayCount">
-                <el-radio :value="5">5个</el-radio>
-                <el-radio :value="10">10个</el-radio>
-              </el-radio-group>
-            </el-form-item>
             </div>
 
             <el-form-item>
@@ -387,6 +393,7 @@
         ref="featuredPickerTable"
         v-loading="featuredPickerLoading"
         border
+        row-key="skuId"
         :data="featuredPickerList"
         max-height="420"
         @selection-change="onFeaturedPickerSelectionChange"
@@ -517,7 +524,9 @@ export default {
       featuredPickerLoading: false,
       featuredPickerList: [],
       featuredPickerTotal: 0,
+      featuredPickerDraft: [],
       featuredPickerSelection: [],
+      syncingFeaturedPickerSelection: false,
       featuredPickerSearch: {
         goodsName: "",
         authStatus: "PASS",
@@ -525,6 +534,20 @@ export default {
         pageSize: 20,
       },
     };
+  },
+  computed: {
+    featuredGoodsLimit() {
+      return this.featuredForm.displayCount === 10 ? 10 : 5;
+    },
+    featuredGoodsOverLimit() {
+      return this.featuredForm.sourceMode === "CUSTOM" && this.featuredCustomGoods.length > this.featuredGoodsLimit;
+    },
+    featuredDisplayCountDesc() {
+      if (this.featuredForm.sourceMode === "CUSTOM") {
+        return `最多选择 ${this.featuredGoodsLimit} 个，分销员端按顺序展示。`;
+      }
+      return `分销员端展示前 ${this.featuredGoodsLimit} 个。`;
+    },
   },
   mounted() {
     this.init();
@@ -683,10 +706,12 @@ export default {
       });
     },
     openFeaturedGoodsPicker() {
+      this.featuredPickerDraft = this.featuredCustomGoods.map((item) => ({ ...item }));
       this.featuredPickerVisible = true;
     },
     loadFeaturedPickerGoods() {
       this.featuredPickerLoading = true;
+      this.syncingFeaturedPickerSelection = true;
       getDistributionGoods({ ...this.featuredPickerSearch })
         .then((res) => {
           if (res.success) {
@@ -696,7 +721,28 @@ export default {
         })
         .finally(() => {
           this.featuredPickerLoading = false;
+          this.$nextTick(() => {
+            this.syncFeaturedPickerSelection();
+            this.$nextTick(() => {
+              this.syncingFeaturedPickerSelection = false;
+            });
+          });
         });
+    },
+    syncFeaturedPickerSelection() {
+      const table = this.$refs.featuredPickerTable;
+      if (!table) {
+        return;
+      }
+      const selectedSkuIds = new Set(
+        this.featuredPickerDraft.map((item) => item.skuId).filter(Boolean)
+      );
+      table.clearSelection();
+      this.featuredPickerList.forEach((row) => {
+        if (row.skuId && selectedSkuIds.has(row.skuId)) {
+          table.toggleRowSelection(row, true);
+        }
+      });
     },
     searchFeaturedPickerGoods() {
       this.featuredPickerSearch.pageNumber = 1;
@@ -707,40 +753,58 @@ export default {
       this.loadFeaturedPickerGoods();
     },
     onFeaturedPickerSelectionChange(selection) {
+      if (this.syncingFeaturedPickerSelection) {
+        return;
+      }
+      const selectedSkuIds = new Set((selection || []).map((item) => item.skuId).filter(Boolean));
+      const currentPageSkuIds = new Set(this.featuredPickerList.map((item) => item.skuId).filter(Boolean));
+      const remaining = this.featuredPickerDraft.filter((item) => {
+        if (!currentPageSkuIds.has(item.skuId)) {
+          return true;
+        }
+        return selectedSkuIds.has(item.skuId);
+      });
+      const remainingSkuIds = new Set(remaining.map((item) => item.skuId));
+      const added = [];
+      (selection || []).forEach((item) => {
+        if (!item.skuId || remainingSkuIds.has(item.skuId)) {
+          return;
+        }
+        remainingSkuIds.add(item.skuId);
+        added.push(this.toFeaturedGoodsItem(item));
+      });
+      this.featuredPickerDraft = [...remaining, ...added];
       this.featuredPickerSelection = selection || [];
     },
+    toFeaturedGoodsItem(item) {
+      return {
+        id: item.id,
+        goodsId: item.goodsId,
+        skuId: item.skuId,
+        goodsName: item.goodsName,
+        specs: item.specs,
+        thumbnail: item.thumbnail,
+        price: item.price,
+        commission: item.commission,
+        storeName: item.storeName,
+      };
+    },
+    featuredGoodsLimitMessage() {
+      const limit = this.featuredGoodsLimit;
+      return `主推商品数量为${limit}时，最多选择${limit}个自定义商品`;
+    },
     confirmFeaturedPicker() {
-      if (!this.featuredPickerSelection.length) {
+      const next = this.featuredPickerDraft.filter((item) => item.skuId);
+      if (!next.length) {
         this.$Message.warning("请至少选择一个分销商品");
         return;
       }
-      const existingSkuIds = new Set(this.featuredCustomGoods.map((item) => item.skuId));
-      const merged = [...this.featuredCustomGoods];
-      this.featuredPickerSelection.forEach((item) => {
-        if (!item.skuId || existingSkuIds.has(item.skuId)) {
-          return;
-        }
-        if (merged.length >= 10) {
-          return;
-        }
-        existingSkuIds.add(item.skuId);
-        merged.push({
-          id: item.id,
-          goodsId: item.goodsId,
-          skuId: item.skuId,
-          goodsName: item.goodsName,
-          specs: item.specs,
-          thumbnail: item.thumbnail,
-          price: item.price,
-          commission: item.commission,
-        });
-      });
-      if (merged.length > 10) {
-        this.$Message.warning("自定义主推商品最多配置 10 个");
-        this.featuredCustomGoods = merged.slice(0, 10);
-      } else {
-        this.featuredCustomGoods = merged;
+      const limit = this.featuredGoodsLimit;
+      if (next.length > limit) {
+        this.$Message.warning(this.featuredGoodsLimitMessage());
+        return;
       }
+      this.featuredCustomGoods = next;
       this.featuredPickerVisible = false;
       this.featuredPickerSelection = [];
     },
@@ -765,6 +829,10 @@ export default {
     submitFeatured() {
       if (this.featuredForm.sourceMode === "CUSTOM" && !this.featuredCustomGoods.length) {
         this.$Message.warning("请至少选择一个自定义主推商品");
+        return;
+      }
+      if (this.featuredGoodsOverLimit) {
+        this.$Message.warning(this.featuredGoodsLimitMessage());
         return;
       }
       this.saving.featured = true;
@@ -932,6 +1000,17 @@ export default {
 
   .custom-goods-block {
     width: 100%;
+  }
+
+  .featured-over-limit-tip {
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    color: #e6a23c;
+    background: #fdf6ec;
+    border: 1px solid #f5dab1;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.6;
   }
 
   .goods-toolbar {
