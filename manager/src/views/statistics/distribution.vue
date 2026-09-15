@@ -243,8 +243,6 @@ export default {
         year: item.year || "",
         month: item.month || "",
         storeId: item.storeId || "",
-        startTime: item.startTime || "",
-        endTime: item.endTime || "",
       };
     },
     onTabChange(name) {
@@ -253,12 +251,6 @@ export default {
       } else if (name === "goods") {
         this.loadGoods();
       }
-    },
-    buildQueryParams() {
-      return {
-        startTime: this.params.startTime || "",
-        endTime: this.params.endTime || "",
-      };
     },
     formatNumber(val) {
       if (val == null || val === "") return 0;
@@ -271,12 +263,11 @@ export default {
     },
     async loadOverviewData() {
       const query = { ...this.params };
-      const v2Query = this.buildQueryParams();
       const [overviewRes, distributorRes, goodsRes, overviewV2Res] = await Promise.all([
         API_Statistics.getDistributionOverview(query),
         API_Statistics.getDistributionRankDistributor(query),
         API_Statistics.getDistributionRankGoods(query),
-        getDistributionOverviewV2(v2Query),
+        getDistributionOverviewV2(),
       ]);
       if (overviewRes && overviewRes.success) {
         this.overview = overviewRes.result || {};
@@ -294,7 +285,6 @@ export default {
     loadBehavior() {
       this.behaviorLoading = true;
       getDistributionBehaviorV2({
-        ...this.buildQueryParams(),
         pageNumber: this.behaviorPage.pageNumber,
         pageSize: this.behaviorPage.pageSize,
       }).then((res) => {
@@ -312,7 +302,6 @@ export default {
     loadGoods() {
       this.goodsLoading = true;
       getDistributionGoodsV2({
-        ...this.buildQueryParams(),
         pageNumber: this.goodsPage.pageNumber,
         pageSize: this.goodsPage.pageSize,
       }).then((res) => {
