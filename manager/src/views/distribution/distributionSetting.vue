@@ -393,6 +393,7 @@
         ref="featuredPickerTable"
         v-loading="featuredPickerLoading"
         border
+        row-key="skuId"
         :data="featuredPickerList"
         max-height="420"
         @selection-change="onFeaturedPickerSelectionChange"
@@ -523,7 +524,9 @@ export default {
       featuredPickerLoading: false,
       featuredPickerList: [],
       featuredPickerTotal: 0,
+      featuredPickerDraft: [],
       featuredPickerSelection: [],
+      syncingFeaturedPickerSelection: false,
       featuredPickerSearch: {
         goodsName: "",
         authStatus: "PASS",
@@ -703,10 +706,12 @@ export default {
       });
     },
     openFeaturedGoodsPicker() {
+      this.featuredPickerDraft = this.featuredCustomGoods.map((item) => ({ ...item }));
       this.featuredPickerVisible = true;
     },
     loadFeaturedPickerGoods() {
       this.featuredPickerLoading = true;
+      this.syncingFeaturedPickerSelection = true;
       getDistributionGoods({ ...this.featuredPickerSearch })
         .then((res) => {
           if (res.success) {
@@ -716,7 +721,28 @@ export default {
         })
         .finally(() => {
           this.featuredPickerLoading = false;
+          this.$nextTick(() => {
+            this.syncFeaturedPickerSelection();
+            this.$nextTick(() => {
+              this.syncingFeaturedPickerSelection = false;
+            });
+          });
         });
+    },
+    syncFeaturedPickerSelection() {
+      const table = this.$refs.featuredPickerTable;
+      if (!table) {
+        return;
+      }
+      const selectedSkuIds = new Set(
+        this.featuredPickerDraft.map((item) => item.skuId).filter(Boolean)
+      );
+      table.clearSelection();
+      this.featuredPickerList.forEach((row) => {
+        if (row.skuId && selectedSkuIds.has(row.skuId)) {
+          table.toggleRowSelection(row, true);
+        }
+      });
     },
     searchFeaturedPickerGoods() {
       this.featuredPickerSearch.pageNumber = 1;
@@ -727,42 +753,58 @@ export default {
       this.loadFeaturedPickerGoods();
     },
     onFeaturedPickerSelectionChange(selection) {
+      if (this.syncingFeaturedPickerSelection) {
+        return;
+      }
+      const selectedSkuIds = new Set((selection || []).map((item) => item.skuId).filter(Boolean));
+      const currentPageSkuIds = new Set(this.featuredPickerList.map((item) => item.skuId).filter(Boolean));
+      const remaining = this.featuredPickerDraft.filter((item) => {
+        if (!currentPageSkuIds.has(item.skuId)) {
+          return true;
+        }
+        return selectedSkuIds.has(item.skuId);
+      });
+      const remainingSkuIds = new Set(remaining.map((item) => item.skuId));
+      const added = [];
+      (selection || []).forEach((item) => {
+        if (!item.skuId || remainingSkuIds.has(item.skuId)) {
+          return;
+        }
+        remainingSkuIds.add(item.skuId);
+        added.push(this.toFeaturedGoodsItem(item));
+      });
+      this.featuredPickerDraft = [...remaining, ...added];
       this.featuredPickerSelection = selection || [];
+    },
+    toFeaturedGoodsItem(item) {
+      return {
+        id: item.id,
+        goodsId: item.goodsId,
+        skuId: item.skuId,
+        goodsName: item.goodsName,
+        specs: item.specs,
+        thumbnail: item.thumbnail,
+        price: item.price,
+        commission: item.commission,
+        storeName: item.storeName,
+      };
     },
     featuredGoodsLimitMessage() {
       const limit = this.featuredGoodsLimit;
       return `主推商品数量为${limit}时，最多选择${limit}个自定义商品`;
     },
     confirmFeaturedPicker() {
-      if (!this.featuredPickerSelection.length) {
+      const next = this.featuredPickerDraft.filter((item) => item.skuId);
+      if (!next.length) {
         this.$Message.warning("请至少选择一个分销商品");
         return;
       }
-      const existingSkuIds = new Set(this.featuredCustomGoods.map((item) => item.skuId));
-      const merged = [...this.featuredCustomGoods];
-      this.featuredPickerSelection.forEach((item) => {
-        if (!item.skuId || existingSkuIds.has(item.skuId)) {
-          return;
-        }
-        existingSkuIds.add(item.skuId);
-        merged.push({
-          id: item.id,
-          goodsId: item.goodsId,
-          skuId: item.skuId,
-          goodsName: item.goodsName,
-          specs: item.specs,
-          thumbnail: item.thumbnail,
-          price: item.price,
-          commission: item.commission,
-        });
-      });
       const limit = this.featuredGoodsLimit;
-      if (merged.length > limit) {
-        const remain = Math.max(limit - this.featuredCustomGoods.length, 0);
-        this.$Message.warning(`${this.featuredGoodsLimitMessage()}，还可选择 ${remain} 个`);
+      if (next.length > limit) {
+        this.$Message.warning(this.featuredGoodsLimitMessage());
         return;
       }
-      this.featuredCustomGoods = merged;
+      this.featuredCustomGoods = next;
       this.featuredPickerVisible = false;
       this.featuredPickerSelection = [];
     },
