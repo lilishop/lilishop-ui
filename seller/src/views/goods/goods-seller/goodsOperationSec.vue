@@ -3,10 +3,31 @@
     <el-dialog v-model="visible" title="预览图片">
       <img v-if="visible" :src="previewPicture" style="width: 100%">
     </el-dialog>
-    <div class="content-goods-publish">
+    <div class="goods-publish-page">
+      <div ref="sectionNav" class="goods-section-nav">
+        <button
+          v-for="(tab, index) in sectionTabs"
+          :key="tab.name"
+          type="button"
+          class="goods-section-nav-item"
+          :class="{ active: activeTab === tab.name }"
+          @click="jumpToTab(tab.name)"
+        >
+          <span class="goods-section-nav-index">{{ index + 1 }}</span>
+          {{ tab.label }}
+        </button>
+      </div>
       <el-form ref="baseInfoForm" label-width="120px" :model="baseInfoForm" :rules="baseInfoFormRule">
         <div class="base-info-item">
-          <h4>基本信息</h4>
+          <div id="goods-section-basic" class="goods-section" data-section="basic">
+            <div class="goods-section-hd">
+              <span class="goods-section-index">{{ sectionNo("basic") }}</span>
+              <div class="goods-section-hd-text">
+                <h3>基础信息</h3>
+                <p>类目、标题、品牌与计量单位</p>
+              </div>
+            </div>
+            <div class="goods-section-bd">
           <div class="form-item-view">
             <el-form-item label="商品分类">
               <span class="goods-category-name">{{
@@ -16,22 +37,22 @@
               <span> &gt; {{ baseInfoForm.categoryName[2] }}</span>
             </el-form-item>
             <el-form-item label="商品名称" prop="goodsName">
-              <el-input v-model="baseInfoForm.goodsName" clearable placeholder="商品名称" style="width: 260px" type="text" />
+              <el-input v-model="baseInfoForm.goodsName" class="goods-field" clearable placeholder="商品名称" type="text" />
             </el-form-item>
 
             <el-form-item label="商品价格" prop="price">
-              <el-input v-model="baseInfoForm.price" clearable placeholder="商品价格" style="width: 260px" type="text" />
+              <el-input v-model="baseInfoForm.price" class="goods-field" clearable placeholder="商品价格" type="text" />
             </el-form-item>
             <el-form-item label="商品卖点" prop="sellingPoint">
-              <el-input v-model="baseInfoForm.sellingPoint" :rows="4" style="width: 260px" type="textarea" />
+              <el-input v-model="baseInfoForm.sellingPoint" class="goods-field" clearable placeholder="商品卖点" type="text" />
             </el-form-item>
             <el-form-item label="商品品牌" prop="brandId">
               <el-select
                 v-model="baseInfoForm.brandId"
+                class="goods-field"
                 filterable
                 clearable
                 placeholder="请选择品牌"
-                style="width: 200px"
               >
                 <el-option v-for="item in brandList" :key="item.id" :label="item.name" :value="item.id" />
               </el-select>
@@ -41,13 +62,193 @@
             </el-form-item>
              
               <el-form-item class="form-item-view-el" label="计量单位" prop="goodsUnit">
-              <el-select v-model="baseInfoForm.goodsUnit" style="width: 100px">
+              <el-select v-model="baseInfoForm.goodsUnit" class="goods-field">
                 <el-option v-for="(item, index) in goodsUnitList" :key="index" :label="item" :value="item" />
               </el-select>
               <el-button class="refresh-icon" circle link @click="refresh('goodsUnit')">
                 <el-icon><Refresh /></el-icon>
               </el-button>
             </el-form-item>
+          </div>
+          <div class="goods-submodule">
+            <div class="goods-submodule-hd">商品参数</div>
+          <div class="form-item-view">
+            <el-form-item v-for="(paramsItem, paramsIndex) in goodsParams" :key="paramsItem.id || paramsIndex"
+              :label="`${paramsItem.paramName}：`"
+              :prop="`goodsParams.${paramsIndex}.paramValue`"
+              :rules="paramsItem.required ? { required: true, message: `${paramsItem.paramName}不能为空`, trigger: 'change' } : {}">
+              <el-select v-model="baseInfoForm.goodsParams[paramsIndex].paramValue" class="goods-field" clearable placeholder="请选择"
+                @change="(val) => selectParams(paramsItem, val, paramsIndex)">
+                <el-option
+                  v-for="option in getParamOptions(paramsItem.options)"
+                  :key="option"
+                  :label="option"
+                  :value="option"
+                />
+              </el-select>
+            </el-form-item>
+          </div>
+          </div>
+            </div>
+          </div>
+          <div id="goods-section-specs" class="goods-section" data-section="specs">
+            <div class="goods-section-hd">
+              <span class="goods-section-index">{{ sectionNo("specs") }}</span>
+              <div class="goods-section-hd-text">
+                <h3>图文信息</h3>
+                <p>主图、视频与商品详情描述</p>
+              </div>
+            </div>
+            <div class="goods-section-bd">
+          <div class="form-item-view">
+            <el-form-item class="form-item-view-el required" label="主图" prop="goodsGalleryFiles">
+              <div style="display: flex; flex-wrap: wrap;">
+                <vuedraggable
+                  v-model="baseInfoForm.goodsGalleryFiles"
+                  :animation="200"
+                  :item-key="draggableItemKey"
+                  style="display: flex; flex-wrap: wrap"
+                >
+                  <template #item="{ element }">
+                    <div class="demo-upload-list">
+                      <img :src="element" @error="handleGoodsPictureError($event, element)" />
+                      <div class="demo-upload-list-cover">
+                        <div>
+                          <el-button link type="primary" @click="handleViewGoodsPicture(element)">预览</el-button>
+                          <el-button link type="danger" @click="handleRemoveGoodsPicture(element)">删除</el-button>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </vuedraggable>
+                <!--<Upload ref="upload"-->
+                <!--:action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"-->
+                <!--:format="['jpg', 'jpeg', 'png', 'webp']"-->
+                <!--:headers="{ ...accessToken }"-->
+                <!--:max-size="2048" :on-error="() => { $Spin.hide(); }" :on-exceeded-size="handleMaxSize"-->
+                <!--:on-format-error="handleFormatError" :on-progress="() => { $Spin.show(); }"-->
+                <!--:on-success="handleSuccessGoodsPicture" :show-upload-list="false" multiple-->
+                <!--style="margin-left: 10px"-->
+                <!--type="drag">-->
+                <!--<div style="width: 148px; height: 148px; line-height: 148px">-->
+                <!--<Icon size="20" type="md-add"></Icon>-->
+                <!--</div>-->
+                <!--</Upload>-->
+              </div>
+              <div style="width: 100%;display: flex;justify-content: start;margin-top: 10px;">
+                <el-button @click="handleCLickImg('goodsGalleryFiles')" type="primary">上传图片</el-button>
+              </div>
+              <el-dialog v-model="goodsPictureVisible" title="View Image">
+                <img v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%" />
+              </el-dialog>
+            </el-form-item>
+            <el-form-item>
+              <div class="gallery-hint">主图仅支持png，jpg，jpeg格式，宽高至少600*600px，大小2M内，可拖拽调整主图顺序</div>
+            </el-form-item>
+            <el-form-item
+              class="form-item-view-el goods-video-form-item"
+              :class="{ 'goods-video-form-item--multi': baseInfoForm.goodsVideo }"
+              label="主图视频"
+              prop="goodsVideo"
+            >
+              <div class="goods-video">
+                <div v-if="baseInfoForm.goodsVideo" class="goods-video-preview">
+                  <video :src="baseInfoForm.goodsVideo" class="video" controls style="max-width: 300px;" />
+                </div>
+                <div
+                  class="goods-video-actions"
+                  :class="{ 'goods-video-actions--with-preview': baseInfoForm.goodsVideo }"
+                >
+                  <el-upload
+                    :action="uploadFileUrl"
+                    :headers="{ ...accessToken }"
+                    accept=".avi,.wmv,.mpeg,.mp4,.mov"
+                    :show-file-list="false"
+                    :before-upload="beforeVideoUpload"
+                    :on-success="handleSuccessGoodsVideo"
+                    :on-error="() => { loadingVideo = false }"
+                  >
+                    <el-button :loading="loadingVideo" type="primary" link>
+                      {{ loadingVideo ? "正在上传..." : `${baseInfoForm.goodsVideo ? "已" : ""}上传视频` }}
+                    </el-button>
+                  </el-upload>
+                  <el-button v-if="baseInfoForm.goodsVideo" link type="danger" @click="handleRemoveGoodsVideo">
+                    删除
+                  </el-button>
+                </div>
+              </div>
+            </el-form-item>
+          </div>
+          <div v-if="showContent" class="goods-submodule">
+            <div class="goods-submodule-hd">规格描述内容</div>
+          <div class="form-item-view">
+            <div>
+              <el-form-item :label="contentImage" class="form-item-view-el">
+                <!-- {{item.url}} -->
+                <div v-for="(item, index) in listImages.images" :key="index" style="width:100%;display:flex;">
+                  <img :src="item.url" style="width:100px;flex:1;margin-top:10px;cursor:pointer;"
+                    @click="handleView(item.url)" />
+                </div>
+              </el-form-item>
+            </div>
+          </div>
+          </div>
+          <div class="goods-submodule">
+            <div class="goods-submodule-hd">商品详情</div>
+          <div class="form-item-view">
+            <el-form-item class="form-item-view-el" label="PC商品描述" prop="intro" style="width: 100%">
+              <div class="intro-editor-field">
+                <editor ref="editor" v-model="baseInfoForm.intro" height="800px" openXss></editor>
+                <div class="promise-intro-btn">
+                  <el-button type="primary" @click="promiseIntroEditor">将PC商品描述同步到移动端描述
+                  </el-button>
+                </div>
+              </div>
+            </el-form-item>
+
+            <el-form-item class="form-item-view-el" label="移动端描述" prop="skuList" style="width: 100%">
+              <div class="intro-editor-field">
+                <editor ref="introEditor" v-model="baseInfoForm.mobileIntro" height="800px" openXss></editor>
+              </div>
+            </el-form-item>
+          </div>
+          </div>
+            </div>
+          </div>
+          <div
+            v-if="isAppointmentGoods"
+            id="goods-section-appointment"
+            class="goods-section"
+            data-section="appointment"
+          >
+            <div class="goods-section-hd">
+              <span class="goods-section-index">{{ sectionNo("appointment") }}</span>
+              <div class="goods-section-hd-text">
+                <h3>预约规则</h3>
+                <p>服务模式、可约日期与预约政策</p>
+              </div>
+            </div>
+            <div class="goods-section-bd">
+              <appointment-publish-panel
+                ref="appointmentPanel"
+                v-model:settings="appointmentSettings"
+                v-model:division="appointmentDivision"
+                v-model:skuCapacities="skuSlotCapacities"
+                :sku-info="skuInfo"
+                division-target="#appointment-slot-mount"
+              />
+            </div>
+          </div>
+          <div id="goods-section-price" class="goods-section" data-section="price">
+            <div class="goods-section-hd">
+              <span class="goods-section-index">{{ sectionNo("price") }}</span>
+              <div class="goods-section-hd-text">
+                <h3>价格库存</h3>
+                <p>销售模式、时段、规格与库存</p>
+              </div>
+            </div>
+            <div class="goods-section-bd">
+          <div class="form-item-view">
             <el-form-item class="form-item-view-el" label="销售模式" prop="salesModel">
               <el-radio-group
                 v-if="!isVirtualLikeGoods"
@@ -58,7 +259,9 @@
                 <el-radio-button value="WHOLESALE">批发型</el-radio-button>
               </el-radio-group>
               <el-radio-group v-else v-model="baseInfoForm.salesModel">
-                <el-radio-button value="RETAIL">{{ isECouponGoods ? "电子卡券" : "虚拟型" }}</el-radio-button>
+                <el-radio-button value="RETAIL">{{
+                  isECouponGoods ? "电子卡券" : isAppointmentGoods ? "预约型" : "虚拟型"
+                }}</el-radio-button>
               </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -133,93 +336,11 @@
                 </div>
               </div>
             </el-form-item>
-            <el-form-item class="form-item-view-el" label="商品发布" prop="release">
-                <el-radio-group v-model="baseInfoForm.release">
-                  <el-radio-button :value="1">上架</el-radio-button>
-                  <el-radio-button :value="0">下架</el-radio-button>
-                </el-radio-group>
-              </el-form-item>
-          </div>
-
-          <h4>商品规格及图片</h4>
-          <div class="form-item-view">
-            <el-form-item class="form-item-view-el required" label="主图" prop="goodsGalleryFiles">
-              <div style="display: flex; flex-wrap: wrap;">
-                <vuedraggable
-                  v-model="baseInfoForm.goodsGalleryFiles"
-                  :animation="200"
-                  :item-key="draggableItemKey"
-                  style="display: flex; flex-wrap: wrap"
-                >
-                  <template #item="{ element }">
-                    <div class="demo-upload-list">
-                      <img :src="element" @error="handleGoodsPictureError($event, element)" />
-                      <div class="demo-upload-list-cover">
-                        <div>
-                          <el-button link type="primary" @click="handleViewGoodsPicture(element)">预览</el-button>
-                          <el-button link type="danger" @click="handleRemoveGoodsPicture(element)">删除</el-button>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </vuedraggable>
-                <!--<Upload ref="upload"-->
-                <!--:action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"-->
-                <!--:format="['jpg', 'jpeg', 'png', 'webp']"-->
-                <!--:headers="{ ...accessToken }"-->
-                <!--:max-size="2048" :on-error="() => { $Spin.hide(); }" :on-exceeded-size="handleMaxSize"-->
-                <!--:on-format-error="handleFormatError" :on-progress="() => { $Spin.show(); }"-->
-                <!--:on-success="handleSuccessGoodsPicture" :show-upload-list="false" multiple-->
-                <!--style="margin-left: 10px"-->
-                <!--type="drag">-->
-                <!--<div style="width: 148px; height: 148px; line-height: 148px">-->
-                <!--<Icon size="20" type="md-add"></Icon>-->
-                <!--</div>-->
-                <!--</Upload>-->
-              </div>
-              <div style="width: 100%;display: flex;justify-content: start;margin-top: 10px;">
-                <el-button @click="handleCLickImg('goodsGalleryFiles')" type="primary">上传图片</el-button>
-              </div>
-              <el-dialog v-model="goodsPictureVisible" title="View Image">
-                <img v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%" />
-              </el-dialog>
-            </el-form-item>
-            <el-form-item>
-              <div style="color: grey">主图仅支持png，jpg，jpeg格式，宽高至少600*600px，大小2M内，可拖拽调整主图顺序</div>
-            </el-form-item>
-            <el-form-item
-              class="form-item-view-el goods-video-form-item"
-              :class="{ 'goods-video-form-item--multi': baseInfoForm.goodsVideo }"
-              label="主图视频"
-              prop="goodsVideo"
-            >
-              <div class="goods-video">
-                <div v-if="baseInfoForm.goodsVideo" class="goods-video-preview">
-                  <video :src="baseInfoForm.goodsVideo" class="video" controls style="max-width: 300px;" />
-                </div>
-                <div
-                  class="goods-video-actions"
-                  :class="{ 'goods-video-actions--with-preview': baseInfoForm.goodsVideo }"
-                >
-                  <el-upload
-                    :action="uploadFileUrl"
-                    :headers="{ ...accessToken }"
-                    accept=".avi,.wmv,.mpeg,.mp4,.mov"
-                    :show-file-list="false"
-                    :before-upload="beforeVideoUpload"
-                    :on-success="handleSuccessGoodsVideo"
-                    :on-error="() => { loadingVideo = false }"
-                  >
-                    <el-button :loading="loadingVideo" type="primary" link>
-                      {{ loadingVideo ? "正在上传..." : `${baseInfoForm.goodsVideo ? "已" : ""}上传视频` }}
-                    </el-button>
-                  </el-upload>
-                  <el-button v-if="baseInfoForm.goodsVideo" link type="danger" @click="handleRemoveGoodsVideo">
-                    删除
-                  </el-button>
-                </div>
-              </div>
-            </el-form-item>
+            <div v-if="isAppointmentGoods" class="goods-submodule">
+              <div class="goods-submodule-hd">时段划分</div>
+              <!-- AppointmentPublishPanel Teleport 挂载点 -->
+              <div id="appointment-slot-mount"></div>
+            </div>
             <div class="layout" style="width: 100%">
               <el-collapse v-model="open_panel">
                 <el-collapse-item title="自定义规格项" name="1">
@@ -349,7 +470,7 @@
                           :key="colIndex"
                           :label="col.title"
                           :prop="col.key"
-                          min-width="120"
+                          :min-width="col.minWidth || 120"
                         >
                           <template #default="{ row, $index }">
                             <span v-if="col.key && !col.slot">{{ row[col.key] }}</span>
@@ -369,6 +490,14 @@
                             >
                               <template #append>kg</template>
                             </el-input>
+                            <el-button
+                              v-else-if="col.slot === 'appointmentCapacity' && isAppointmentGoods"
+                              link
+                              type="primary"
+                              @click="openAppointmentCapacity(row)"
+                            >
+                              设置可预约数量
+                            </el-button>
                             <el-input
                               v-else-if="col.slot === 'quantity' && isECouponGoods"
                               :model-value="row.quantity ?? 0"
@@ -433,20 +562,38 @@
               </el-collapse>
             </div>
           </div>
-          <h4 v-if="showContent">规格描述内容</h4>
-          <div v-if="showContent" class="form-item-view">
-            <div>
-              <el-form-item :label="contentImage" class="form-item-view-el">
-                <!-- {{item.url}} -->
-                <div v-for="(item, index) in listImages.images" :key="index" style="width:100%;display:flex;">
-                  <img :src="item.url" style="width:100px;flex:1;margin-top:10px;cursor:pointer;"
-                    @click="handleView(item.url)" />
-                </div>
-              </el-form-item>
             </div>
           </div>
-          <h4>商品详情描述</h4>
+          <div id="goods-section-other" class="goods-section" data-section="other">
+            <div class="goods-section-hd">
+              <span class="goods-section-index">{{ sectionNo("other") }}</span>
+              <div class="goods-section-hd-text">
+                <h3>其他信息</h3>
+                <p>上架状态、运费模板与店内分类</p>
+              </div>
+            </div>
+            <div class="goods-section-bd">
           <div class="form-item-view">
+            <el-form-item class="form-item-view-el" label="商品发布" prop="release">
+              <el-radio-group v-model="baseInfoForm.release">
+                <el-radio-button :value="1">上架</el-radio-button>
+                <el-radio-button :value="0">下架</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item v-if="needsLogistics" class="form-item-view-el" label="运费模板" prop="templateId">
+              <el-select v-model="baseInfoForm.templateId" class="goods-field">
+                <el-option v-for="item in logisticsTemplate" :key="item.id" :label="item.name" :value="item.id" />
+              </el-select>
+              <el-button class="refresh-icon" circle link @click="refresh('template')">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
+            </el-form-item>
+            <el-form-item v-if="needsLogistics && baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="商品重量"
+              prop="weight">
+              <el-input v-model="baseInfoForm.weight" class="goods-field" placeholder="请输入商品重量">
+                <template #append>kg</template>
+              </el-input>
+            </el-form-item>
             <div class="tree-bar" :class="{ 'is-empty': !shopCategory.length }">
               <el-form-item class="form-item-view-el" label="店内分类" prop="shopCategory">
                 <el-tree
@@ -465,57 +612,8 @@
                 </el-tree>
               </el-form-item>
             </div>
-            <el-form-item class="form-item-view-el" label="PC商品描述" prop="intro" style="width: 100%">
-              <div class="intro-editor-field">
-                <editor ref="editor" v-model="baseInfoForm.intro" height="800px" openXss></editor>
-                <div class="promise-intro-btn">
-                  <el-button type="primary" @click="promiseIntroEditor">将PC商品描述同步到移动端描述
-                  </el-button>
-                </div>
-              </div>
-            </el-form-item>
-
-            <el-form-item class="form-item-view-el" label="移动端描述" prop="skuList" style="width: 100%">
-              <div class="intro-editor-field">
-                <editor ref="introEditor" v-model="baseInfoForm.mobileIntro" height="800px" openXss></editor>
-              </div>
-            </el-form-item>
           </div>
-          <div v-if="needsLogistics">
-            <h4>商品物流信息</h4>
-            <div class="form-item-view">
-              <el-form-item class="form-item-view-el" label="运费模板" prop="templateId">
-                <el-select v-model="baseInfoForm.templateId" style="width: 200px">
-                  <el-option v-for="item in logisticsTemplate" :key="item.id" :label="item.name" :value="item.id" />
-                </el-select>
-                <el-button class="refresh-icon" circle link @click="refresh('template')">
-                  <el-icon><Refresh /></el-icon>
-                </el-button>
-              </el-form-item>
-              <el-form-item v-if="baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="商品重量"
-                prop="weight">
-                <el-input v-model="baseInfoForm.weight" placeholder="请输入商品重量">
-                  <template #append>kg</template>
-                </el-input>
-              </el-form-item>
             </div>
-          </div>
-          <h4>参数信息</h4>
-          <div class="form-item-view">
-            <el-form-item v-for="(paramsItem, paramsIndex) in goodsParams" :key="paramsItem.id || paramsIndex"
-              :label="`${paramsItem.paramName}：`"
-              :prop="`goodsParams.${paramsIndex}.paramValue`"
-              :rules="paramsItem.required ? { required: true, message: `${paramsItem.paramName}不能为空`, trigger: 'change' } : {}">
-              <el-select v-model="baseInfoForm.goodsParams[paramsIndex].paramValue" clearable placeholder="请选择" style="width: 200px"
-                @change="(val) => selectParams(paramsItem, val, paramsIndex)">
-                <el-option
-                  v-for="option in getParamOptions(paramsItem.options)"
-                  :key="option"
-                  :label="option"
-                  :value="option"
-                />
-              </el-select>
-            </el-form-item>
           </div>
         </div>
       </el-form>
@@ -569,6 +667,11 @@ import { uploadFile } from "@/libs/axios";
 import { regular } from "@/utils";
 import DPlayer from 'dplayer';
 import ossManage from "@/views/sys/oss-manage/ossManage";
+import AppointmentPublishPanel from "./components/AppointmentPublishPanel.vue";
+import {
+  defaultAppointmentSettings,
+  defaultSlotDivision,
+} from "@/constants/appointment";
 
 
 export default {
@@ -582,6 +685,7 @@ export default {
     editor: tinymec,
     vuedraggable,
     ossManage,
+    AppointmentPublishPanel,
   },
   props: {
     firstData: {
@@ -594,15 +698,36 @@ export default {
     isECouponGoods() {
       return this.baseInfoForm.goodsType === "E_COUPON";
     },
+    /** 预约商品：规则区 + 时段库存，SKU 数量列隐藏 */
+    isAppointmentGoods() {
+      return this.baseInfoForm.goodsType === "APPOINTMENT_GOODS";
+    },
     isVirtualGoods() {
       return this.baseInfoForm.goodsType === "VIRTUAL_GOODS";
     },
     isVirtualLikeGoods() {
-      return this.isVirtualGoods || this.isECouponGoods;
+      return this.isVirtualGoods || this.isECouponGoods || this.isAppointmentGoods;
+    },
+    hideSkuQuantity() {
+      return this.isECouponGoods || this.isAppointmentGoods;
     },
     /** 仅实物需要运费模板；E_COUPON 强制 templateId=0（§6.1） */
     needsLogistics() {
       return this.baseInfoForm.goodsType === "PHYSICAL_GOODS";
+    },
+    sectionTabs() {
+      const tabs = [
+        { name: "basic", label: "基础信息" },
+        { name: "specs", label: "图文信息" },
+      ];
+      if (this.isAppointmentGoods) {
+        tabs.push({ name: "appointment", label: "预约规则" });
+      }
+      tabs.push(
+        { name: "price", label: "价格库存" },
+        { name: "other", label: "其他信息" },
+      );
+      return tabs;
     },
   },
   data() {
@@ -637,6 +762,8 @@ export default {
       accessToken: "", //令牌token
       goodsParams: [],
       categoryId: "", // 商品分类第三级id
+      activeTab: "basic",
+      scrollingByClick: false,
       //提交状态
       submitLoading: false,
       //上传图片路径
@@ -801,6 +928,9 @@ export default {
       selectedFormBtnName: "", // 点击图片绑定form
       selectedImage: [],
       lastEditSkuValue: '',
+      appointmentSettings: defaultAppointmentSettings(),
+      appointmentDivision: defaultSlotDivision(),
+      skuSlotCapacities: {},
     };
   },
   watch: {
@@ -812,15 +942,18 @@ export default {
     }
   },
   methods: {
-    /** E_COUPON 提交固定传 0，真实库存由卡池 syncSkuStock 同步至 quantity */
+    /** E_COUPON / APPOINTMENT 提交固定传 0，预约品库存走 slot_capacity */
     resolveSubmitQuantity(sku) {
-      if (this.isECouponGoods) {
+      if (this.isECouponGoods || this.isAppointmentGoods) {
         return 0;
       }
       return sku.quantity;
     },
     defaultSkuQuantity() {
-      return this.isECouponGoods ? 0 : "";
+      return this.isECouponGoods || this.isAppointmentGoods ? 0 : "";
+    },
+    openAppointmentCapacity(row) {
+      this.$refs.appointmentPanel?.openSkuCapacityDialog(row);
     },
     draggableItemKey(item) {
       return item;
@@ -1018,6 +1151,110 @@ export default {
     pre() {
       // 上一步
       this.$parent.activestep--;
+    },
+    handleTabChange(name) {
+      if (name !== "specs") {
+        return;
+      }
+      this.$nextTick(() => {
+        this.$refs.editor?.getEditor?.()?.dispatch?.("ResizeEditor");
+        this.$refs.introEditor?.getEditor?.()?.dispatch?.("ResizeEditor");
+      });
+    },
+    getScrollParent() {
+      let node = this.$el && this.$el.parentElement;
+      while (node && node !== document.body) {
+        const overflowY = window.getComputedStyle(node).overflowY;
+        if (overflowY === "auto" || overflowY === "scroll") {
+          return node;
+        }
+        node = node.parentElement;
+      }
+      return null;
+    },
+    bindPublishScroll() {
+      this.unbindPublishScroll();
+      this.scrollParent = this.getScrollParent();
+      if (this.scrollParent) {
+        this._onPublishScroll = () => this.onPublishScroll();
+        this.scrollParent.addEventListener("scroll", this._onPublishScroll, { passive: true });
+      }
+    },
+    unbindPublishScroll() {
+      if (this.scrollParent && this._onPublishScroll) {
+        this.scrollParent.removeEventListener("scroll", this._onPublishScroll);
+      }
+      this.scrollParent = null;
+    },
+    onPublishScroll() {
+      if (this.scrollingByClick) return;
+      if (this._scrollTick) return;
+      this._scrollTick = true;
+      requestAnimationFrame(() => {
+        this._scrollTick = false;
+        this.syncActiveTabByScroll();
+      });
+    },
+    syncActiveTabByScroll() {
+      const scroller = this.scrollParent || this.getScrollParent();
+      if (!scroller) return;
+      const navHeight = (this.$refs.sectionNav && this.$refs.sectionNav.offsetHeight) || 48;
+      const marker = scroller.getBoundingClientRect().top + navHeight + 12;
+      let current = "basic";
+      this.sectionTabs.forEach((tab) => {
+        const el = document.getElementById(`goods-section-${tab.name}`);
+        if (el && el.getBoundingClientRect().top <= marker) {
+          current = tab.name;
+        }
+      });
+      if (this.activeTab !== current) {
+        this.activeTab = current;
+        this.handleTabChange(current);
+      }
+    },
+    sectionNo(name) {
+      const index = this.sectionTabs.findIndex((tab) => tab.name === name);
+      return index >= 0 ? index + 1 : "";
+    },
+    jumpToTab(name) {
+      this.activeTab = name;
+      this.scrollingByClick = true;
+      this.handleTabChange(name);
+      this.$nextTick(() => {
+        const el = document.getElementById(`goods-section-${name}`);
+        const scroller = this.scrollParent || this.getScrollParent();
+        if (!el || !scroller) {
+          this.scrollingByClick = false;
+          return;
+        }
+        const navHeight = (this.$refs.sectionNav && this.$refs.sectionNav.offsetHeight) || 48;
+        const top =
+          el.getBoundingClientRect().top -
+          scroller.getBoundingClientRect().top +
+          scroller.scrollTop -
+          navHeight -
+          8;
+        scroller.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+        window.clearTimeout(this._scrollClickTimer);
+        this._scrollClickTimer = window.setTimeout(() => {
+          this.scrollingByClick = false;
+        }, 600);
+      });
+    },
+    tabForInvalidFields(fields) {
+      const keys = Object.keys(fields || {});
+      for (const key of keys) {
+        if (key === "goodsGalleryFiles" || key === "goodsVideo" || key === "intro" || key === "skuList") {
+          return "specs";
+        }
+        if (key === "salesModel" || key === "wholesaleRule") {
+          return "price";
+        }
+        if (key === "shopCategory" || key === "templateId" || key === "weight") {
+          return "other";
+        }
+      }
+      return "basic";
     },
     // 预览图片
     handleView(url) {
@@ -1336,6 +1573,11 @@ export default {
       }
 
       this.renderGoodsDetailSku(response.result.skuList);
+      this.$nextTick(() => {
+        if (this.isAppointmentGoods) {
+          this.$refs.appointmentPanel?.hydrateFromGoods(response.result);
+        }
+      });
 
       /** 查询品牌列表 */
       this.getGoodsBrandList();
@@ -1857,7 +2099,7 @@ export default {
               ...combination,
               id: existingCombination.id || "",
               sn: existingCombination.sn || "",
-              quantity: this.isECouponGoods
+              quantity: this.hideSkuQuantity
                 ? (existingCombination.quantity ?? 0)
                 : (existingCombination.quantity || ""),
               cost: existingCombination.cost || "",
@@ -1917,7 +2159,7 @@ export default {
             ...combination,
             id: existingCombination.id || "",
             sn: existingCombination.sn || "",
-            quantity: this.isECouponGoods
+            quantity: this.hideSkuQuantity
               ? (existingCombination.quantity ?? 0)
               : (existingCombination.quantity || ""),
             cost: existingCombination.cost || "",
@@ -1984,11 +2226,19 @@ export default {
           slot: "weight",
         });
       }
-      pushData.push(
-        {
+      if (this.isAppointmentGoods) {
+        pushData.push({
+          title: "预约规则",
+          slot: "appointmentCapacity",
+          minWidth: 160,
+        });
+      } else {
+        pushData.push({
           title: "库存",
           slot: "quantity",
-        },
+        });
+      }
+      pushData.push(
         // {
         //   title: "库存预警",
         //   slot: "alertQuantity",
@@ -2021,7 +2271,7 @@ export default {
               ...combination,
               id: existingCombination.id || "",
               sn: existingCombination.sn || "",
-              quantity: this.isECouponGoods
+              quantity: this.hideSkuQuantity
                 ? (existingCombination.quantity ?? 0)
                 : (existingCombination.quantity || ""),
               cost: existingCombination.cost || "",
@@ -2240,10 +2490,12 @@ export default {
     /**  添加商品 **/
     save() {
       if (this.containsSameSkuItem) {
+        this.jumpToTab("price");
         this.$Message.error("存在重复规格项！");
         return;
       }
       if (this.containsSameSkuValue) {
+        this.jumpToTab("price");
         this.$Message.error("存在重复规格值！");
         return;
       }
@@ -2261,11 +2513,12 @@ export default {
         }
       });
       if (checkFlag) {
+        this.jumpToTab("basic");
         this.$Message.error(`以下参数为必填项：${missingParams.join('、')}`);
         return;
       }
       this.submitLoading = true;
-      this.$refs["baseInfoForm"].validate((valid) => {
+      this.$refs["baseInfoForm"].validate((valid, fields) => {
         if (valid) {
           if (this.baseInfoForm.salesModel === "WHOLESALE") {
             for (let i = 0; i < this.wholesaleData.length; i++) {
@@ -2287,6 +2540,7 @@ export default {
             submit.goodsGalleryFiles.length <= 0
           ) {
             this.submitLoading = false;
+            this.jumpToTab("specs");
             this.$Message.error("请上传商品图片");
             return;
           }
@@ -2295,6 +2549,7 @@ export default {
           );
           if (invalidGalleryFiles.length > 0) {
             this.submitLoading = false;
+            this.jumpToTab("specs");
             this.$Message.error("存在已失效的商品主图，请删除后重新上传");
             return;
           }
@@ -2303,6 +2558,21 @@ export default {
           if (this.isECouponGoods) {
             submit.templateId = 0;
             submit.salesModel = "RETAIL";
+          }
+          if (this.isAppointmentGoods) {
+            submit.templateId = 0;
+            submit.salesModel = "RETAIL";
+            if (!this.$refs.appointmentPanel?.validateRules()) {
+              this.submitLoading = false;
+              this.jumpToTab("appointment");
+              return;
+            }
+            if (!this.$refs.appointmentPanel?.validateDivision()) {
+              this.submitLoading = false;
+              this.jumpToTab("price");
+              return;
+            }
+            Object.assign(submit, this.$refs.appointmentPanel.buildSubmitPayload());
           }
           let flag = false;
           let paramValue = "";
@@ -2317,6 +2587,7 @@ export default {
             submit.goodsUnit = ""
             this.$Message.error("商品单位不存在");
             this.submitLoading = false;
+            this.jumpToTab("basic");
             return;
           }
           let skuInfoNames = this.skuInfo.map((n) => n.name);
@@ -2355,11 +2626,15 @@ export default {
             for (let skuInfoName of skuInfoNames) {
               skuCopy[skuInfoName] = sku[skuInfoName];
             }
+            if (this.isAppointmentGoods && this.$refs.appointmentPanel) {
+              skuCopy.slotCapacities = this.$refs.appointmentPanel.buildSkuSlotCapacities(sku);
+            }
             submit.skuList.push(skuCopy);
           });
           if (containEmptyImage) {
             this.$Message.error("开启规格图片，所有规格图片不能为空！");
             this.submitLoading = false;
+            this.jumpToTab("price");
             return;
           }
           if (submit.goodsGalleryFiles.length > 0) {
@@ -2400,7 +2675,7 @@ export default {
           }
         } else {
           this.submitLoading = false;
-
+          this.jumpToTab(this.tabForInvalidFields(fields));
           this.$Message.error("还有必填项未做处理，请检查表单");
         }
       });
@@ -2449,6 +2724,14 @@ export default {
       this.GET_GoodsUnit();
       this.GET_ShopGoodsLabel();
     }
+    this.$nextTick(() => {
+      this.bindPublishScroll();
+      this.handleTabChange("specs");
+    });
+  },
+  beforeUnmount() {
+    window.clearTimeout(this._scrollClickTimer);
+    this.unbindPublishScroll();
   },
 };
 </script>
@@ -2463,6 +2746,26 @@ export default {
   white-space: nowrap;
 }
 @import "./addGoods.scss";
+
+.goods-publish-page {
+  .base-info-item {
+    > div {
+      padding-left: 0;
+    }
+
+    h4 {
+      margin: 20px 0 16px;
+      padding: 0 0 0 8px;
+      border: none;
+      border-left: 3px solid var(--el-color-primary);
+      background: transparent;
+      line-height: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #252931;
+    }
+  }
+}
 
 .tree-bar.is-empty {
   min-height: auto !important;
@@ -2515,6 +2818,177 @@ export default {
   display: flex;
   gap: 12px;
   justify-content: center;
+}
+
+.goods-publish-page {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  text-align: left;
+}
+
+.goods-publish-page :deep(.base-info-item > div) {
+  padding-left: 0;
+}
+
+.goods-publish-page :deep(.base-info-item h4) {
+  margin: 20px 0 16px;
+  padding: 0 0 0 8px;
+  border: none;
+  border-left: 3px solid var(--el-color-primary);
+  background: transparent;
+  line-height: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #252931;
+}
+
+.goods-section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  margin: 0 0 12px;
+  padding: 0 12px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.goods-section-nav-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 18px;
+  border: none;
+  background: transparent;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.goods-section-nav-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  border: 1px solid #c9cdd4;
+  border-radius: 50%;
+  color: #85878a;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.goods-section-nav-item.active {
+  color: var(--el-color-primary);
+  font-weight: 600;
+}
+
+.goods-section-nav-item.active .goods-section-nav-index {
+  border-color: var(--el-color-primary);
+  background: var(--el-color-primary);
+  color: #fff;
+}
+
+.goods-section-nav-item.active::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 2px;
+  background: var(--el-color-primary);
+}
+
+.goods-section-nav-item:hover {
+  color: var(--el-color-primary);
+}
+
+.goods-section {
+  scroll-margin-top: 68px;
+  margin-bottom: 12px;
+  padding-left: 0 !important;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.goods-section-hd {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.goods-section-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--el-color-primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 24px;
+  flex-shrink: 0;
+}
+
+.goods-section-hd-text h3 {
+  margin: 0;
+  color: #252931;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.goods-section-hd-text p {
+  margin: 2px 0 0;
+  color: #85878a;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.goods-section-bd {
+  padding: 20px 24px 24px;
+}
+
+.goods-section .form-item-view {
+  padding-left: 0;
+}
+
+.goods-submodule {
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px dashed #eee;
+}
+
+.goods-submodule-hd {
+  margin: 0 0 16px;
+  padding-left: 8px;
+  border-left: 3px solid var(--el-color-primary);
+  color: #252931;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.gallery-hint {
+  color: grey;
+  white-space: nowrap;
+}
+
+.goods-field {
+  width: 260px;
 }
 
 

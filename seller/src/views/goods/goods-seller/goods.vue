@@ -55,6 +55,7 @@
             <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
             <!-- E_COUPON：卡密商品，可跳转卡池管理 -->
             <el-option label="电子卡券" value="E_COUPON" />
+            <el-option label="预约商品" value="APPOINTMENT_GOODS" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -261,6 +262,7 @@ export default {
       if (v === "PHYSICAL_GOODS") return "实物商品";
       if (v === "VIRTUAL_GOODS") return "虚拟商品";
       if (v === "E_COUPON") return "电子卡券"; // 卡密商品
+      if (v === "APPOINTMENT_GOODS") return "预约商品";
       return v || "—";
     },
     /** 跳转卡池管理；单 SKU 商品默认取第一个 SKU（card-key-pool 需 skuId） */

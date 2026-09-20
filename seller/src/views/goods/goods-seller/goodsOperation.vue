@@ -1,6 +1,7 @@
 <template>
   <div class="goods-operation">
-    <div class="step-list">
+    <!-- 填详情/成功页不再展示顶部步骤条 -->
+    <div class="step-list" v-show="activestep === 0">
       <el-steps :active="activestep" align-center style="height: 60px; margin-top: 10px">
         <el-step title="选择商品品类" />
         <el-step title="填写商品详情" />

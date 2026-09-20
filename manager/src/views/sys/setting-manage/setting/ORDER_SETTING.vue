@@ -19,7 +19,7 @@
         <el-input type="number" v-model="formValidate.autoEvaluation">
           <template #append>天</template>
         </el-input>
-        <span class="desc">订单发货后，多少天后自动好评</span>
+        <span class="desc">订单完成后，多少天后自动好评，预约订单同样适用</span>
       </el-form-item>
       <el-form-item label="已完成订单允许退单" prop="closeAfterSale">
         <el-input type="number" v-model="formValidate.closeAfterSale">

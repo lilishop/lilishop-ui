@@ -11,7 +11,9 @@
             @click="checkLogistics"
           >查看物流</el-button>
           <el-button type="primary" @click="orderLog">订单日志</el-button>
-          <el-button v-if="canOrderTake" type="primary" @click="orderTake">订单核销</el-button>
+          <el-button v-if="canOrderTake" type="primary" @click="orderTake">
+            {{ isAppointmentOrder ? "预约核销" : "订单核销" }}
+          </el-button>
           <el-button v-if="canShip" type="primary" @click="openFulfill()">发货</el-button>
           <el-button type="primary" @click="modifyRemark">添加备注</el-button>
           <el-button
@@ -65,9 +67,32 @@
               {{ orderInfo.order.createTime }}
             </div>
           </div>
-          <div class="div-item" v-if="orderInfo.order.verificationCode">
+          <div class="div-item" v-if="orderInfo.order.verificationCode && !isAppointmentOrder">
             <div class="div-item-left">核验码：</div>
             <div class="div-item-right">{{ orderInfo.order.verificationCode }}</div>
+          </div>
+          <div class="div-item" v-if="isAppointmentOrder && appointmentVerification.totalCount">
+            <div class="div-item-left">核销进度：</div>
+            <div class="div-item-right">
+              {{ appointmentVerification.verifiedCount || 0 }}/{{ appointmentVerification.totalCount }}
+              <span v-if="appointmentVerification.workOrderStatus" style="margin-left: 8px; color: #909399">
+                工单：{{ appointmentWorkOrderStatusText }}
+              </span>
+            </div>
+          </div>
+          <div class="div-item" v-if="isAppointmentOrder && appointmentSlotText">
+            <div class="div-item-left">预约时段：</div>
+            <div class="div-item-right">{{ appointmentSlotText }}</div>
+          </div>
+          <div
+            class="div-item"
+            v-for="(rows, gi) in appointmentFormGroups"
+            :key="'form-' + gi"
+          >
+            <div class="div-item-left">{{ appointmentFormGroups.length > 1 ? `补充信息${gi + 1}：` : '补充信息：' }}</div>
+            <div class="div-item-right">
+              <div v-for="row in rows" :key="row.fieldKey">{{ row.fieldLabel }}：{{ row.value }}</div>
+            </div>
           </div>
         </div>
         <div style="width: 30%; float: left; margin-left: 20px">
@@ -805,15 +830,76 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="orderTakeModal" title="订单核销" width="530px">
-      <el-form ref="orderTakeForm" :model="orderTakeForm" label-width="100px" :rules="orderTakeValidate">
+    <el-dialog
+      v-model="orderTakeModal"
+      :title="isAppointmentOrder ? '预约核销' : '订单核销'"
+      width="560px"
+    >
+      <template v-if="isAppointmentOrder">
+        <el-alert
+          v-if="appointmentVerification.verifiedCount > 0"
+          type="info"
+          :closable="false"
+          show-icon
+          class="mb_10"
+        >
+          已核销 {{ appointmentVerification.verifiedCount }}/{{ appointmentVerification.totalCount }}，
+          请继续输入剩余核销码直至全部完成。
+        </el-alert>
+        <el-form ref="appointmentTakeForm" :model="appointmentTakeForm" label-width="100px" :rules="appointmentTakeValidate">
+          <el-form-item label="服务人员" prop="staffId">
+            <el-select
+              v-model="appointmentTakeForm.staffId"
+              placeholder="请选择启用中的服务人员"
+              style="width: 100%"
+              filterable
+            >
+              <el-option
+                v-for="item in enabledStaffList"
+                :key="item.id"
+                :label="item.staffName"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="核销码" prop="code">
+            <el-input
+              v-model="appointmentTakeForm.code"
+              placeholder="请输入预约核销码"
+              maxlength="16"
+              clearable
+              @keyup.enter="appointmentVerifySubmit"
+            />
+          </el-form-item>
+        </el-form>
+        <el-table
+          v-if="appointmentVerification.codes && appointmentVerification.codes.length"
+          :data="appointmentVerification.codes"
+          border
+          size="small"
+          class="mt_10"
+        >
+          <el-table-column prop="seqNo" label="序号" width="70" />
+          <el-table-column prop="code" label="核销码" min-width="120" />
+          <el-table-column label="状态" width="90">
+            <template #default="{ row }">{{ row.status === "USED" ? "已核销" : "待核销" }}</template>
+          </el-table-column>
+        </el-table>
+      </template>
+      <el-form v-else ref="orderTakeForm" :model="orderTakeForm" label-width="100px" :rules="orderTakeValidate">
         <el-form-item label="核销码" prop="qrCode">
           <el-input v-model="orderTakeForm.qrCode" placeholder="请输入核销码" maxlength="10" clearable />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="orderTakeModal = false">取消</el-button>
-        <el-button type="primary" @click="orderTakeSubmit">核销</el-button>
+        <el-button
+          type="primary"
+          :loading="appointmentVerifyLoading"
+          @click="isAppointmentOrder ? appointmentVerifySubmit() : orderTakeSubmit()"
+        >
+          核销
+        </el-button>
       </template>
     </el-dialog>
 
@@ -844,6 +930,12 @@ import {
   resolveDefaultFulfillmentMode,
   canShowShipButton,
 } from "@/utils/orderFulfill";
+import {
+  getEnabledServiceStaff,
+  getAppointmentVerificationByOrderSn,
+  verifyAppointmentCode,
+} from "@/api/appointment";
+import { WORK_ORDER_STATUS_LABEL, parseFormAnswerGroups } from "@/constants/appointment";
 export default {
   name: "orderDetail",
   components: {
@@ -921,6 +1013,23 @@ export default {
       orderTakeForm: {
         qrCode: "",
       },
+      appointmentVerification: {
+        codes: [],
+        totalCount: 0,
+        verifiedCount: 0,
+        workOrderStatus: "",
+        workOrderVisible: false,
+      },
+      enabledStaffList: [],
+      appointmentTakeForm: {
+        staffId: "",
+        code: "",
+      },
+      appointmentVerifyLoading: false,
+      appointmentTakeValidate: {
+        staffId: [{ required: true, message: "请选择服务人员", trigger: "change" }],
+        code: [{ required: true, message: "核销码不能为空", trigger: "blur" }],
+      },
       orderTakeValidate: {
         qrCode: [{ required: true, message: "订单核销码不能为空", trigger: "blur" }],
       },
@@ -967,7 +1076,27 @@ export default {
       return t === "VIRTUAL" || this.$route.query.orderType === "VIRTUAL";
     },
     isNonPhysicalOrder() {
-      return this.isVirtualOrder || this.isECouponOrder;
+      return this.isVirtualOrder || this.isECouponOrder || this.isAppointmentOrder;
+    },
+    isAppointmentOrder() {
+      const t = this.orderInfo?.order?.orderType;
+      // 详情未回时用路由 query 兜底
+      return t === "APPOINTMENT" || this.$route.query.orderType === "APPOINTMENT";
+    },
+    appointmentWorkOrderStatusText() {
+      return WORK_ORDER_STATUS_LABEL[this.appointmentVerification.workOrderStatus]
+        || this.appointmentVerification.workOrderStatus
+        || "—";
+    },
+    appointmentSlotText() {
+      const v = this.appointmentVerification || {};
+      if (!v.slotDate) return "";
+      const date = String(v.slotDate).slice(0, 10);
+      const slot = v.slotStartTime && v.slotEndTime ? `${v.slotStartTime}-${v.slotEndTime}` : "";
+      return [date, slot].filter(Boolean).join(" ");
+    },
+    appointmentFormGroups() {
+      return parseFormAnswerGroups(this.appointmentVerification?.formAnswerJson);
     },
     hasCardKeySection() {
       return orderHasCardKeySection({
@@ -997,6 +1126,12 @@ export default {
       });
     },
     canOrderTake() {
+      if (this.isAppointmentOrder) {
+        const order = this.orderInfo?.order;
+        if (!order || order.orderStatus !== "TAKE") return false;
+        return (this.appointmentVerification.verifiedCount || 0)
+          < (this.appointmentVerification.totalCount || 0);
+      }
       if (this.allowOperation.take) return true;
       const order = this.orderInfo?.order;
       if (!order) return false;
@@ -1299,6 +1434,9 @@ export default {
             : [];
           this.getContentPrice();
           this.getOrderPrice();
+          if (this.isAppointmentOrder) {
+            this.loadAppointmentVerification();
+          }
           if (
             this.autoOpenFulfill &&
             this.canShip &&
@@ -1487,11 +1625,71 @@ export default {
     handelCancel () {
       this.orderLogModal = false;
     },
+    loadAppointmentVerification() {
+      getAppointmentVerificationByOrderSn(this.sn)
+        .then((res) => {
+          if (res.success && res.result) {
+            this.appointmentVerification = res.result;
+          }
+        })
+        .catch(() => {});
+    },
+    loadEnabledStaff() {
+      getEnabledServiceStaff()
+        .then((res) => {
+          if (res.success) {
+            this.enabledStaffList = res.result || [];
+          }
+        })
+        .catch(() => {});
+    },
     orderTake() {
+      if (this.isAppointmentOrder) {
+        this.appointmentTakeForm = { staffId: "", code: "" };
+        this.loadEnabledStaff();
+        this.loadAppointmentVerification();
+        this.orderTakeModal = true;
+        this.$nextTick(() => {
+          this.$refs.appointmentTakeForm?.clearValidate();
+        });
+        return;
+      }
       this.orderTakeForm.qrCode = this.orderInfo.order.verificationCode || "";
       this.orderTakeModal = true;
       this.$nextTick(() => {
         this.$refs.orderTakeForm?.clearValidate();
+      });
+    },
+    appointmentVerifySubmit() {
+      this.$refs.appointmentTakeForm.validate((valid) => {
+        if (!valid) return;
+        this.appointmentVerifyLoading = true;
+        verifyAppointmentCode({
+          code: this.appointmentTakeForm.code,
+          staffId: this.appointmentTakeForm.staffId,
+        })
+          .then((res) => {
+            if (!res.success) return;
+            const result = res.result || {};
+            this.appointmentTakeForm.code = "";
+            this.loadAppointmentVerification();
+            if (result.allVerified) {
+              if (result.orderCompleted) {
+                this.$Message.success("全部核销完成，订单已完成");
+                this.orderTakeModal = false;
+                this.getDataDetail();
+              } else {
+                this.$Message.success("全部核销完成，请在工单中结束服务");
+                this.orderTakeModal = false;
+                this.getDataDetail();
+              }
+            } else {
+              this.$Message.success(`核销成功（${result.verifiedCount}/${result.totalCount}）`);
+            }
+          })
+          .finally(() => {
+            this.appointmentVerifyLoading = false;
+          });
       });
     },
     orderTakeSubmit() {

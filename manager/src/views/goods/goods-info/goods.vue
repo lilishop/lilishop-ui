@@ -55,6 +55,7 @@
             <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
             <!-- E_COUPON：卡密商品；平台无卡池管理权限（S-04） -->
             <el-option label="电子卡券" value="E_COUPON" />
+            <el-option label="预约商品" value="APPOINTMENT_GOODS" />
           </el-select>
         </el-form-item>
         <el-form-item label="商品分组" prop="groupId">
@@ -388,6 +389,7 @@ export default {
       if (v === "PHYSICAL_GOODS") return "实物商品";
       if (v === "VIRTUAL_GOODS") return "虚拟商品";
       if (v === "E_COUPON") return "电子卡券"; // 卡密商品
+      if (v === "APPOINTMENT_GOODS") return "预约商品";
       return v || "—";
     },
     marketEnableText(v) {

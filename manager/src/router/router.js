@@ -129,6 +129,18 @@ export const otherRouter = {
       component: () => import("@/views/order/order/orderDetail.vue")
     },
     {
+      path: "appointment/work-orders",
+      title: "预约工单",
+      name: "manager-appointment-work-orders",
+      component: () => import("@/views/appointment/workOrderList.vue")
+    },
+    {
+      path: "appointment/order-settings",
+      title: "预约订单设置",
+      name: "manager-appointment-order-settings",
+      component: () => import("@/views/appointment/orderSettings.vue")
+    },
+    {
       path: "after-order-detail",
       title: "售后单详情",
       name: "after-order-detail",

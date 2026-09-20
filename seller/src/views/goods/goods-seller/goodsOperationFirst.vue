@@ -1,21 +1,29 @@
 <template>
   <div>
-    <!-- 选择商品类型 -->
-    <el-dialog v-model="selectGoodsType" width="550px" :show-close="false">
-      <div class="goods-type-list">
-        <div
-          class="goods-type-item"
-          :class="{ 'active-goods-type': item.check }"
+    <el-dialog
+      v-model="selectGoodsType"
+      title="选择商品类型"
+      width="720px"
+      :show-close="false"
+      :close-on-click-modal="false"
+    >
+      <div class="goods-type-cards">
+        <button
+          type="button"
+          class="goods-type-card"
+          :class="{ active: pendingGoodsType === item.type }"
+          v-for="item in goodsTypeWay"
+          :key="item.type"
           @click="handleClickGoodsType(item)"
-          v-for="(item, index) in goodsTypeWay"
-          :key="index"
         >
-          <img :src="item.img" />
-          <div>
-            <h2>{{ item.title }}</h2>
+          <div class="card-icon" :class="item.tone">
+            <el-icon :size="26"><component :is="item.icon" /></el-icon>
+          </div>
+          <div class="card-copy">
+            <h3>{{ item.title }}</h3>
             <p>{{ item.desc }}</p>
           </div>
-        </div>
+        </button>
       </div>
       <template #footer>
         <div class="goods-type-actions">
@@ -24,7 +32,7 @@
         </div>
       </template>
     </el-dialog>
-    <!-- 商品分类 -->
+
     <div class="content-goods-publish">
       <div class="goods-category">
         <ul v-if="categoryListLevel1.length > 0">
@@ -61,13 +69,14 @@
         </ul>
       </div>
       <p class="current-goods-category">
-        您当前选择的商品类别是：
-        <span>{{ category[0].name }}</span>
+        您当前选择：
+        <span v-if="selectedTypeTitle">{{ selectedTypeTitle }}</span>
+        <span v-else>未选择商品类型</span>
+        <span v-show="category[0].name"> ／ {{ category[0].name }}</span>
         <span v-show="category[1].name">> {{ category[1].name }}</span>
         <span v-show="category[2].name">> {{ category[2].name }}</span>
       </p>
     </div>
-    <!-- 底部按钮 -->
     <div class="footer">
       <div class="footer-btns">
         <el-button type="primary" @click="openGoodsTypeDialog">商品类型</el-button>
@@ -78,52 +87,60 @@
 </template>
 <script>
 import * as API_GOODS from "@/api/goods";
-import goodsType1Img from "@/assets/goodsType1.png";
-import goodsType2Img from "@/assets/goodsType2.png";
+import { Box, Calendar, CreditCard, Ticket } from "@element-plus/icons-vue";
+
 export default {
+  components: { Box, Calendar, CreditCard, Ticket },
   data() {
     return {
-      selectGoodsType: false, // 展示选择商品分类modal
-      /** 商品类型选项；E_COUPON 为卡密商品（与 VIRTUAL_GOODS 核销型区分，见 FR-S-01） */
+      selectGoodsType: false,
       goodsTypeWay: [
         {
           title: "实物商品",
-          img: goodsType1Img,
           desc: "零售批发，物流配送",
           type: "PHYSICAL_GOODS",
-          check: false,
+          icon: "Box",
+          tone: "tone-physical",
         },
         {
           title: "虚拟商品",
-          img: goodsType2Img,
           desc: "虚拟核验，无需物流",
           type: "VIRTUAL_GOODS",
-          check: false,
+          icon: "Ticket",
+          tone: "tone-virtual",
         },
         {
           title: "电子卡券",
-          img: goodsType2Img,
           desc: "卡密自动发卡，无需物流",
-          type: "E_COUPON", // goodsType；库存由卡池同步，非手动填写
-          check: false,
+          type: "E_COUPON",
+          icon: "CreditCard",
+          tone: "tone-coupon",
+        },
+        {
+          title: "预约商品",
+          desc: "时段预约，到店或上门",
+          type: "APPOINTMENT_GOODS",
+          icon: "Calendar",
+          tone: "tone-appointment",
         },
       ],
-      // 商品分类选择数组
       category: [
         { name: "", id: "" },
         { name: "", id: "" },
         { name: "", id: "" },
       ],
-      // 商品类型
       goodsType: "",
       pendingGoodsType: "",
-      /** 1级分类列表*/
       categoryListLevel1: [],
-      /** 2级分类列表*/
       categoryListLevel2: [],
-      /** 3级分类列表*/
       categoryListLevel3: [],
     };
+  },
+  computed: {
+    selectedTypeTitle() {
+      const hit = this.goodsTypeWay.find((item) => item.type === this.goodsType);
+      return hit ? hit.title : "";
+    },
   },
   watch: {
     selectGoodsType(val) {
@@ -135,19 +152,12 @@ export default {
   methods: {
     syncGoodsTypeSelection() {
       this.pendingGoodsType = this.goodsType;
-      this.goodsTypeWay.forEach((item) => {
-        item.check = item.type === this.goodsType;
-      });
     },
     openGoodsTypeDialog() {
       this.selectGoodsType = true;
     },
-    // 点击商品类型（仅临时选中，确认后才生效）
-    handleClickGoodsType(val) {
-      this.goodsTypeWay.forEach((item) => {
-        item.check = item.type === val.type;
-      });
-      this.pendingGoodsType = val.type;
+    handleClickGoodsType(item) {
+      this.pendingGoodsType = item.type;
     },
     cancelGoodsType() {
       this.syncGoodsTypeSelection();
@@ -161,7 +171,6 @@ export default {
       this.goodsType = this.pendingGoodsType;
       this.selectGoodsType = false;
     },
-    /** 选择商城商品分类 */
     handleSelectCategory(row, index, level) {
       if (level === 1) {
         this.category.forEach((cate) => {
@@ -182,20 +191,18 @@ export default {
         this.category[2].id = row.id;
       }
     },
-    /** 查询下一级 商城商品分类*/
-    GET_NextLevelCategory(row) {
-      const _id = row && row.id !== 0 ? row.id : 0;
+    GET_NextLevelCategory() {
       API_GOODS.getGoodsCategoryAll().then((res) => {
         if (res.success && res.result) {
           this.categoryListLevel1 = res.result;
         }
       });
     },
-    // 下一步
     next() {
       window.scrollTo(0, 0);
       if (!this.goodsType) {
         this.$Message.error("请选择商品类型");
+        this.openGoodsTypeDialog();
         return;
       }
       if (!this.category[0].name) {
@@ -204,13 +211,11 @@ export default {
       } else if (!this.category[2].name) {
         this.$Message.error("必须选择到三级分类");
         return;
-      } else if (this.category[2].name) {
-        let params = {
-          category: this.category,
-          goodsType: this.goodsType,
-        };
-        this.$emit("change", params);
       }
+      this.$emit("change", {
+        category: this.category,
+        goodsType: this.goodsType,
+      });
     },
   },
   mounted() {
@@ -245,5 +250,79 @@ export default {
     border-color: #409eff;
     color: #fff;
   }
+}
+
+.goods-type-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.goods-type-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 18px 16px;
+  border: 1px solid #ebeef5;
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.goods-type-card:hover {
+  border-color: #c6e2ff;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.08);
+}
+
+.goods-type-card.active {
+  border-color: #409eff;
+  background: #f5faff;
+  box-shadow: 0 0 0 1px #409eff inset;
+}
+
+.card-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.tone-physical {
+  background: #409eff;
+}
+
+.tone-virtual {
+  background: #909399;
+}
+
+.tone-coupon {
+  background: #e6a23c;
+}
+
+.tone-appointment {
+  background: #67c23a;
+}
+
+.card-copy h3 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: #303133;
+  font-weight: 600;
+}
+
+.card-copy p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: #909399;
 }
 </style>

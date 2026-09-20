@@ -29,13 +29,18 @@
         <el-form-item label="收货人" prop="shipName">
           <el-input v-model="searchForm.shipName" placeholder="请输入收货人姓名" clearable style="width: 240px" />
         </el-form-item>
-        <el-form-item label="订单类型" prop="orderType">
+        <el-form-item label="促销类型" prop="orderPromotionType">
           <el-select v-model="searchForm.orderPromotionType" placeholder="请选择" clearable style="width: 240px">
             <el-option label="普通订单" value="NORMAL" />
             <el-option label="拼团订单" value="PINTUAN" />
             <el-option label="赠品订单" value="GIFT" />
             <el-option label="积分订单" value="POINTS" />
             <el-option label="砍价订单" value="KANJIA" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="订单类型" prop="orderType">
+          <el-select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 240px">
+            <el-option label="预约商品" value="APPOINTMENT" />
           </el-select>
         </el-form-item>
         <el-form-item label="支付方式" prop="paymentMethod">

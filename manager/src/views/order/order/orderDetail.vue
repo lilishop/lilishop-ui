@@ -6,6 +6,8 @@
           <el-button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</el-button>
           <el-button v-if="allowOperation.editConsignee" plain type="primary" @click="editAddress">修改收货地址</el-button>
           <el-button v-if="allowOperation.cancel" plain type="warning" @click="orderCancel">订单取消</el-button>
+          <el-button v-if="isAppointmentOrder && canPlatformRefund" plain type="danger" @click="openPlatformRefund">平台退款</el-button>
+          <el-button v-if="isAppointmentOrder && canNoShowRefund" plain type="danger" @click="openNoShowRefund">爽约退款</el-button>
           <el-button v-if="orderInfo.order.orderStatus === 'UNPAID'" type="primary" @click="confirmPrice">收款</el-button>
           <el-button plain @click="orderLog">订单日志</el-button>
           <el-button v-if="!isNonPhysicalOrder" plain type="primary" style="float:right;" @click="printOrder">打印发货单</el-button>
@@ -35,6 +37,20 @@
             <div class="div-item-left">下单时间：</div>
             <div class="div-item-right">
               {{ orderInfo.order.createTime }}
+            </div>
+          </div>
+          <div class="div-item" v-if="isAppointmentOrder && appointmentSlotText">
+            <div class="div-item-left">预约时段：</div>
+            <div class="div-item-right">{{ appointmentSlotText }}</div>
+          </div>
+          <div
+            class="div-item"
+            v-for="(rows, gi) in appointmentFormGroups"
+            :key="'form-' + gi"
+          >
+            <div class="div-item-left">{{ appointmentFormGroups.length > 1 ? `补充信息${gi + 1}：` : '补充信息：' }}</div>
+            <div class="div-item-right">
+              <div v-for="row in rows" :key="row.fieldKey">{{ row.fieldLabel }}：{{ row.value }}</div>
             </div>
           </div>
         </div>
@@ -463,11 +479,48 @@
 
 
     <multipleMap ref="map" @callback="selectedRegion" />
+
+    <el-dialog v-model="platformRefundModal" title="平台预约退款" width="520px">
+      <el-form :model="platformRefundForm" label-width="100px">
+        <el-form-item label="退款类型">
+          <el-radio-group v-model="platformRefundForm.refundType">
+            <el-radio label="UNSERVED">未服务</el-radio>
+            <el-radio label="SERVED">已服务</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="退款金额">
+          <el-input-number v-model="platformRefundForm.refundAmount" :min="0.01" :precision="2" />
+        </el-form-item>
+        <el-form-item label="退款原因">
+          <el-input v-model="platformRefundForm.reason" type="textarea" :rows="3" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="platformRefundModal = false">取消</el-button>
+        <el-button type="primary" :loading="refundLoading" @click="submitPlatformRefund">确认退款</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="noShowRefundModal" title="上门爽约退款" width="520px">
+      <el-form :model="noShowRefundForm" label-width="100px">
+        <el-form-item label="退款金额">
+          <el-input-number v-model="noShowRefundForm.refundAmount" :min="0.01" :precision="2" />
+        </el-form-item>
+        <el-form-item label="退款原因">
+          <el-input v-model="noShowRefundForm.reason" type="textarea" :rows="3" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="noShowRefundModal = false">取消</el-button>
+        <el-button type="primary" :loading="refundLoading" @click="submitNoShowRefund">确认退款</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import * as API_Order from "@/api/order";
+import { platformRefund, noShowRefund, getAppointmentOrderDetail } from "@/api/appointment";
 import * as RegExp from "@/libs/RegExp.js";
 
 import multipleMap from "@/components/map/multiple-map";
@@ -494,7 +547,28 @@ export default {
       return t === "VIRTUAL" || this.$route.query.orderType === "VIRTUAL";
     },
     isNonPhysicalOrder() {
-      return this.isVirtualOrder || this.isECouponOrder;
+      return this.isVirtualOrder || this.isECouponOrder || this.isAppointmentOrder;
+    },
+    isAppointmentOrder() {
+      const t = this.orderInfo?.order?.orderType;
+      return t === "APPOINTMENT" || this.$route.query.orderType === "APPOINTMENT";
+    },
+    appointmentSlotText() {
+      const v = this.appointmentExt || {};
+      if (!v.slotDate) return "";
+      const date = String(v.slotDate).slice(0, 10);
+      const slot = v.slotStartTime && v.slotEndTime ? `${v.slotStartTime}-${v.slotEndTime}` : "";
+      return [date, slot].filter(Boolean).join(" ");
+    },
+    appointmentFormGroups() {
+      return this.parseFormAnswerGroups(this.appointmentExt?.formAnswerJson);
+    },
+    canPlatformRefund() {
+      const order = this.orderInfo?.order;
+      return order && order.payStatus === "PAID" && order.orderStatus !== "CANCELLED";
+    },
+    canNoShowRefund() {
+      return this.canPlatformRefund;
     },
     ecouponCardKeyDelivered() {
       return (this.data || []).some((item) => item.cardKeyDelivered);
@@ -529,6 +603,7 @@ export default {
           priceDetailDTO: {},
         },
       },
+      appointmentExt: {},
       modal: false, //弹出调整价格框
       searchForm: {
         pageNumber: 1, // 当前页数
@@ -568,6 +643,18 @@ export default {
       },
       addressModal: false, //弹出修改收件信息框
       printModal: false,
+      platformRefundModal: false,
+      noShowRefundModal: false,
+      refundLoading: false,
+      platformRefundForm: {
+        refundType: "UNSERVED",
+        refundAmount: 0,
+        reason: "",
+      },
+      noShowRefundForm: {
+        refundAmount: 0,
+        reason: "",
+      },
       //收件地址表单
       addressForm: {
         consigneeName: "",
@@ -690,8 +777,50 @@ export default {
           this.typeList = JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail));
           this.getContentPrice()
           this.getOrderPrice()
+          if (this.isAppointmentOrder) {
+            this.loadAppointmentExt();
+          }
         }
       });
+    },
+    loadAppointmentExt() {
+      getAppointmentOrderDetail(this.sn)
+        .then((res) => {
+          if (res.success) {
+            this.appointmentExt = res.result || {};
+          }
+        })
+        .catch(() => {
+          this.appointmentExt = {};
+        });
+    },
+    parseFormAnswerGroups(formAnswerJson) {
+      if (!formAnswerJson) return [];
+      let data = formAnswerJson;
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch (e) {
+          return [];
+        }
+      }
+      const fields = Array.isArray(data?.fields) ? data.fields : [];
+      const answers = Array.isArray(data?.answers) ? data.answers : [];
+      return answers
+        .map((group) => {
+          const map = group && typeof group === "object" && !Array.isArray(group) ? group : {};
+          const source = fields.length
+            ? fields
+            : Object.keys(map).map((key) => ({ fieldKey: key, fieldLabel: key }));
+          return source
+            .map((field) => ({
+              fieldKey: field.fieldKey,
+              fieldLabel: field.fieldLabel || field.fieldKey,
+              value: map[field.fieldKey] ?? "",
+            }))
+            .filter((row) => row.value !== "" && row.value != null);
+        })
+        .filter((rows) => rows.length);
     },
     modifyPrice () {
       //默认要修改的金额为订单总金额
@@ -743,6 +872,57 @@ export default {
           });
         }
       });
+    },
+    openPlatformRefund() {
+      this.platformRefundForm = {
+        refundType: "UNSERVED",
+        refundAmount: this.orderInfo?.order?.flowPrice || 0,
+        reason: "",
+      };
+      this.platformRefundModal = true;
+    },
+    submitPlatformRefund() {
+      if (!this.platformRefundForm.reason) {
+        ElMessage.warning("请填写退款原因");
+        return;
+      }
+      this.refundLoading = true;
+      platformRefund(this.sn, this.platformRefundForm)
+        .then((res) => {
+          if (res.success) {
+            ElMessage.success("退款成功");
+            this.platformRefundModal = false;
+            this.getDataList();
+          }
+        })
+        .finally(() => {
+          this.refundLoading = false;
+        });
+    },
+    openNoShowRefund() {
+      this.noShowRefundForm = {
+        refundAmount: this.orderInfo?.order?.flowPrice || 0,
+        reason: "",
+      };
+      this.noShowRefundModal = true;
+    },
+    submitNoShowRefund() {
+      if (!this.noShowRefundForm.reason) {
+        ElMessage.warning("请填写退款原因");
+        return;
+      }
+      this.refundLoading = true;
+      noShowRefund(this.sn, this.noShowRefundForm)
+        .then((res) => {
+          if (res.success) {
+            ElMessage.success("退款成功");
+            this.noShowRefundModal = false;
+            this.getDataList();
+          }
+        })
+        .finally(() => {
+          this.refundLoading = false;
+        });
     },
     //订单日志
     orderLog () {

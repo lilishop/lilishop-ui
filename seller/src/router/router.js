@@ -71,6 +71,55 @@ export const otherRouter = {
       name: "card-key-pool",
       component: () => import("@/views/goods/card-key/cardKeyPool.vue")
     },
+    /** 预约服务 · 到店/上门设置、服务人员、工单、月历（菜单由后端配置，路由在此注册） */
+    {
+      path: "appointment/in-store-settings",
+      title: "到店服务",
+      name: "appointment-in-store-settings",
+      component: () => import("@/views/appointment/inStoreSettings.vue")
+    },
+    {
+      path: "appointment/on-site-settings",
+      title: "上门服务",
+      name: "appointment-on-site-settings",
+      component: () => import("@/views/appointment/onSiteSettings.vue")
+    },
+    {
+      path: "appointment/service-staff",
+      title: "服务人员管理",
+      name: "appointment-service-staff",
+      component: () => import("@/views/appointment/serviceStaffList.vue")
+    },
+    {
+      path: "appointment/work-orders",
+      title: "工单管理",
+      name: "appointment-work-orders",
+      component: () => import("@/views/appointment/workOrderList.vue")
+    },
+    {
+      path: "appointment/service-calendar",
+      title: "服务月历",
+      name: "appointment-service-calendar",
+      component: () => import("@/views/appointment/serviceCalendar.vue")
+    },
+    {
+      path: "appointment/system-forms",
+      title: "系统表单",
+      name: "appointment-system-forms",
+      component: () => import("@/views/appointment/systemFormList.vue")
+    },
+    {
+      path: "appointment/system-forms/designer",
+      title: "表单设计器",
+      name: "appointment-system-form-designer",
+      component: () => import("@/views/appointment/systemFormDesigner.vue")
+    },
+    {
+      path: "appointment/reschedule-logs",
+      title: "改期记录",
+      name: "appointment-reschedule-logs",
+      component: () => import("@/views/appointment/rescheduleLogList.vue")
+    },
     {
       path: "add-coupon",
       title: "店铺优惠券",
