@@ -35,7 +35,6 @@ const Profile = () => import("@/pages/home/memberCenter/Profile");
 const AccountSafe = () => import("@/pages/home/memberCenter/AccountSafe");
 const ModifyPwd = () => import("@/pages/home/memberCenter/ModifyPwd");
 const Favorites = () => import("@/pages/home/memberCenter/Favorites");
-const Distribution = () => import("@/pages/home/memberCenter/Distribution");
 const CommentList = () => import("@/pages/home/memberCenter/CommentList");
 const AddEval = () => import("@/pages/home/memberCenter/evaluation/AddEval");
 const EvalDetail = () => import("@/pages/home/memberCenter/evaluation/EvalDetail");
@@ -253,12 +252,6 @@ export const router = createRouter({
           name: "Favorites",
           component: Favorites,
           meta: { title: "我的收藏" },
-        },
-        {
-          path: "Distribution",
-          name: "Distribution",
-          component: Distribution,
-          meta: { title: "分销推荐" },
         },
         {
           path: "Point",

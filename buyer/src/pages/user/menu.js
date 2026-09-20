@@ -59,11 +59,6 @@ const member = [{
   },
   {
     icon: '',
-    title: '分销推荐',
-    path: 'Distribution'
-  },
-  {
-    icon: '',
     title: '我的评论',
     path: 'CommentList'
   },
