@@ -53,10 +53,11 @@
     "style-loader": "^3.3.4",
     "style-resources-loader": "^1.5.0",
     "vue-cli-plugin-style-resources-loader": "^0.1.5",
-    "webpack": "^5.95.0"
+    "webpack": "5.108.4"
   },
   "resolutions": {
     "minimatch": "^3.1.2",
-    "@achrinza/node-ipc": "9.2.2"
+    "@achrinza/node-ipc": "9.2.2",
+    "webpack": "5.108.4"
   }
 }
