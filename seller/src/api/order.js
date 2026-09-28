@@ -126,6 +126,18 @@ export const orderTake = (sn, verificationCode) => {
   return putRequest(`/order/order/take/${sn}/${verificationCode}`);
 };
 
+export const previewVerification = (code) => {
+  return getRequest(`/order/order/verification/preview`, { code });
+};
+
+export const confirmVerification = (code) => {
+  return postRequestWithNoForm(`/order/order/verification/confirm`, { code });
+};
+
+export const getVerificationRecords = (params) => {
+  return getRequest(`/order/order/verification/records`, params);
+};
+
 // 售后服务单
 export const afterSaleOrderPage = params => {
   return getRequest(`/order/afterSale/page`, params);

@@ -30,13 +30,16 @@
         >
           <div class="order-header">
             <div>
-              <div>{{ filterOrderStatus(order.orderStatus) }}</div>
-              <div>
+              <div>{{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}</div>
+              <div v-if="order.isAfterSale">
+                售后单号：{{ order.serviceSn }} &nbsp; &nbsp; &nbsp;{{ order.createTime }}
+              </div>
+              <div v-else>
                 订单号：{{ order.sn }} &nbsp; &nbsp; &nbsp;{{order.createTime}}
               </div>
             </div>
             <div>
-              <el-button v-if="order.orderStatus === 'COMPLETED'" @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></el-button>
+              <el-button v-if="!order.isAfterSale && order.orderStatus === 'COMPLETED'" @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></el-button>
               <span>{{ $filters.unitPrice(order.flowPrice, "￥") }}</span>
             </div>
           </div>
@@ -66,7 +69,10 @@
             <div>
               <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
             </div>
-            <div class="order-actions">
+            <div class="order-actions" v-if="order.isAfterSale">
+              <el-button @click="goAfterSaleDetail(order.serviceSn)" type="warning" size="small">售后详情</el-button>
+            </div>
+            <div class="order-actions" v-else>
               <!-- 订单基础操作 -->
               <el-button @click="orderDetail(order.sn)" type="warning" size="small">订单详情</el-button>
               <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
@@ -99,13 +105,16 @@
       >
         <div class="order-header">
           <div>
-            <div>{{ filterOrderStatus(order.orderStatus) }}</div>
-            <div>
+            <div>{{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}</div>
+            <div v-if="order.isAfterSale">
+              售后单号：{{ order.serviceSn }} &nbsp; &nbsp; &nbsp;{{ order.createTime }}
+            </div>
+            <div v-else>
               订单号：{{ order.sn }} &nbsp; &nbsp; &nbsp;{{order.createTime}}
             </div>
           </div>
           <div>
-            <el-button v-if="order.orderStatus === 'COMPLETED'" @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></el-button>
+            <el-button v-if="!order.isAfterSale && order.orderStatus === 'COMPLETED'" @click="delOrder(order.sn)" class="del-btn mr_10 fontsize_16" style="margin-top:-5px;" type="text" icon="ios-trash-outline" size="small"></el-button>
             <span>{{ $filters.unitPrice(order.flowPrice, "￥") }}</span>
           </div>
         </div>
@@ -135,7 +144,10 @@
           <div>
             <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
           </div>
-          <div class="order-actions">
+          <div class="order-actions" v-if="order.isAfterSale">
+            <el-button @click="goAfterSaleDetail(order.serviceSn)" type="warning" size="small">售后详情</el-button>
+          </div>
+          <div class="order-actions" v-else>
             <!-- 订单基础操作 -->
             <el-button @click="orderDetail(order.sn)" type="warning" size="small">订单详情</el-button>
             <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
@@ -178,8 +190,8 @@
 <script>
 import { Message, Modal } from "@/utils/message";
 import { getOrderList, sureReceived, cancelOrder, delOrder } from '@/api/order';
-import { afterSaleReason } from '@/api/member';
-import { orderStatusList } from '../enumeration.js'
+import { afterSaleReason, afterSaleList } from '@/api/member';
+import { orderStatusList, afterSaleStatusList } from '../enumeration.js'
 export default {
   name: 'MyOrder',
   props: {
@@ -204,7 +216,8 @@ export default {
       },
       // 状态数组
       orderStatusList,
-      changeWay: ['全部订单', '待付款', '待收货', '已完成'], // 订单状态
+      afterSaleStatusList,
+      changeWay: ['全部', '待支付', '待发货', '待收货/使用', '评价', '售后'],
       activeOrderTab: 0,
       total: 0, // 数据总数
       spinShow: false, // 加载状态
@@ -246,19 +259,11 @@ export default {
     change (index) {
       this.activeOrderTab = index;
       this.params.pageNumber = 1;
-      switch (index) {
-        case 0:
-          this.params.tag = 'ALL'
-          break;
-        case 1:
-          this.params.tag = 'WAIT_PAY'
-          break;
-        case 2:
-          this.params.tag = 'WAIT_ROG'
-          break;
-        case 3:
-          this.params.tag = 'COMPLETE'
-          break;
+      delete this.params.commentStatus;
+      const tags = ['ALL', 'WAIT_PAY', 'WAIT_SHIP', 'WAIT_USE', 'ALL', 'AFTER_SALE'];
+      this.params.tag = tags[index] || 'ALL';
+      if (index === 4) {
+        this.params.commentStatus = 'UNFINISHED';
       }
       this.getList()
     },
@@ -271,8 +276,10 @@ export default {
       window.open(routeUrl.href, '_blank');
     },
     orderDetail (sn) {
-      // 跳转订单详情
       this.$router.push({ name: 'OrderDetail', query: {sn} });
+    },
+    goAfterSaleDetail (sn) {
+      this.$router.push({ name: 'AfterSaleDetail', query: { sn } });
     },
     received (sn) { // 确认收货
       sureReceived(sn).then(res => {
@@ -324,11 +331,30 @@ export default {
         onCancel: () => {}
       });
     },
-    getList () { // 获取订单列表
+    getList () {
       this.spinShow = true;
+      if (this.activeOrderTab === 5) {
+        afterSaleList({
+          pageNumber: this.params.pageNumber,
+          pageSize: this.params.pageSize,
+          keywords: this.params.keywords,
+          sort: 'createTime',
+          order: 'desc',
+        }).then(res => {
+          this.spinShow = false
+          if (res.success) {
+            this.orderList = (res.result.records || []).map(item => this.mapAfterSaleOrder(item));
+            this.total = res.result.total;
+          }
+        });
+        return;
+      }
       let params = JSON.parse(JSON.stringify(this.params))
       if (params.orderStatus === 'ALL') {
         delete params.orderStatus
+      }
+      if (params.tag === 'AFTER_SALE') {
+        delete params.tag
       }
       getOrderList(params).then(res => {
         this.spinShow = false
@@ -337,6 +363,27 @@ export default {
           this.total = res.result.total;
         }
       });
+    },
+    mapAfterSaleOrder (item) {
+      return {
+        ...item,
+        isAfterSale: true,
+        serviceSn: item.sn,
+        sn: item.orderSn,
+        orderStatus: item.serviceStatus,
+        flowPrice: item.applyRefundPrice,
+        orderItems: [
+          {
+            image: item.goodsImage,
+            name: item.goodsName,
+            skuId: item.skuId,
+            goodsId: item.goodsId,
+            goodsPrice: item.flowPrice,
+            num: item.num,
+          },
+        ],
+        allowOperationVO: {},
+      }
     },
     changePageNum (val) { // 修改页码
       this.params.pageNumber = val;
@@ -369,6 +416,10 @@ export default {
     },
     filterOrderStatus (status) { // 获取订单状态中文
       const ob = this.orderStatusList.filter(e => { return e.status === status });
+      return ob && ob[0] ? ob[0].name : status
+    },
+    filterAfterSaleStatus (status) {
+      const ob = this.afterSaleStatusList.filter(e => e.status === status);
       return ob && ob[0] ? ob[0].name : status
     }
   }

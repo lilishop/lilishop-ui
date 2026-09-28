@@ -55,6 +55,11 @@ export const userInfo = params => {
 export const userMsg = params => {
   return getRequest('/settings/storeSettings', params)
 }
+
+/** 当前店铺首页小程序葵花码 */
+export const getStoreMpQrcode = () => {
+  return getRequest("/settings/storeSettings/mp-qrcode");
+};
 //验证短信验证码
 export const validateCode = params => {
   return postRequestWithNoToken("/passport/login/resetByMobile", params);

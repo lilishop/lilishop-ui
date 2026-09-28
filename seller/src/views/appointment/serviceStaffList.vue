@@ -19,10 +19,9 @@
     </el-card>
 
     <el-card>
-      <el-table v-loading="loading" :data="data" border style="width: 100%">
-        <el-table-column prop="staffName" label="员工姓名" min-width="120" />
-        <el-table-column prop="nickname" label="昵称" min-width="120" />
-        <el-table-column prop="contactPhone" label="联系电话" min-width="130" />
+      <el-table v-loading="loading" :data="data" border :fit="false">
+        <el-table-column prop="staffName" label="员工姓名" width="160" />
+        <el-table-column prop="contactPhone" label="联系电话" width="140" />
         <el-table-column prop="sortOrder" label="排序" width="80" />
         <el-table-column label="人员状态" width="110">
           <template #default="{ row }">
@@ -33,6 +32,13 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="170" />
+        <el-table-column label="操作" width="140" align="center">
+          <template #default="{ row }">
+            <a class="link-text" @click="openEdit(row)">编辑</a>
+            <span class="op-split">|</span>
+            <a class="link-text" @click="handleDelete(row)">删除</a>
+          </template>
+        </el-table-column>
       </el-table>
       <div class="mt_10" style="display: flex; justify-content: flex-end">
         <el-pagination
@@ -46,16 +52,34 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="createVisible" title="新增服务人员" width="480px" destroy-on-close>
+    <el-dialog v-model="createVisible" :title="createForm.id ? '编辑服务人员' : '新增服务人员'" width="480px" destroy-on-close>
       <el-form :model="createForm" label-width="100px">
-        <el-form-item label="店员用户ID">
-          <el-input v-model="createForm.clerkUserId" placeholder="关联店员 clerk_user_id" />
+        <el-form-item label="店员">
+          <el-select
+            v-model="createForm.clerkUserId"
+            filterable
+            clearable
+            placeholder="请选择店员"
+            style="width: 100%"
+            :loading="clerkLoading"
+            @change="onClerkChange"
+          >
+            <el-option
+              v-for="clerk in clerkOptions"
+              :key="clerk.memberId"
+              :label="clerkOptionLabel(clerk)"
+              :value="clerk.memberId"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="员工姓名">
-          <el-input v-model="createForm.staffName" />
+          <el-input v-model="createForm.staffName" placeholder="选择店员后自动填入" />
         </el-form-item>
         <el-form-item label="联系电话">
-          <el-input v-model="createForm.contactPhone" />
+          <el-input v-model="createForm.contactPhone" placeholder="选择店员后自动填入" />
+        </el-form-item>
+        <el-form-item label="排序">
+          <el-input-number v-model="createForm.sortOrder" :min="0" :max="9999" controls-position="right" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -67,10 +91,14 @@
 </template>
 
 <script>
+import { ElMessageBox } from "element-plus";
+import { getUserListData } from "@/api/index";
 import {
   getServiceStaffPage,
   createServiceStaff,
+  updateServiceStaff,
   updateServiceStaffStatus,
+  deleteServiceStaff,
 } from "@/api/appointment";
 
 export default {
@@ -88,10 +116,15 @@ export default {
       },
       createVisible: false,
       createLoading: false,
+      clerkLoading: false,
+      clerkOptions: [],
       createForm: {
+        id: "",
         clerkUserId: "",
         staffName: "",
         contactPhone: "",
+        sortOrder: 0,
+        status: "ENABLED",
       },
     };
   },
@@ -116,16 +149,89 @@ export default {
           this.loading = false;
         });
     },
-    openCreate() {
-      this.createForm = { clerkUserId: "", staffName: "", contactPhone: "" };
-      this.createVisible = true;
+    emptyForm() {
+      return {
+        id: "",
+        clerkUserId: "",
+        staffName: "",
+        contactPhone: "",
+        sortOrder: 0,
+        status: "ENABLED",
+      };
     },
-    submitCreate() {
-      this.createLoading = true;
-      createServiceStaff(this.createForm)
+    openCreate() {
+      this.createForm = this.emptyForm();
+      this.createVisible = true;
+      this.loadClerks();
+    },
+    openEdit(row) {
+      this.createForm = {
+        id: row.id,
+        clerkUserId: row.clerkUserId || "",
+        staffName: row.staffName || "",
+        contactPhone: row.contactPhone || "",
+        sortOrder: row.sortOrder == null ? 0 : row.sortOrder,
+        status: row.status || "ENABLED",
+      };
+      this.createVisible = true;
+      this.loadClerks();
+    },
+    loadClerks() {
+      this.clerkLoading = true;
+      getUserListData({ pageNumber: 1, pageSize: 200 })
         .then((res) => {
           if (res.success) {
-            this.$message.success("创建成功");
+            const records = res.result?.records || [];
+            const usedIds = new Set(
+              (this.data || [])
+                .filter((staff) => staff.id !== this.createForm.id)
+                .map((staff) => staff.clerkUserId)
+                .filter(Boolean)
+            );
+            const options = records.filter(
+              (clerk) => clerk.memberId && clerk.status !== false && !usedIds.has(clerk.memberId)
+            );
+            const currentId = this.createForm.clerkUserId;
+            if (currentId && !options.some((clerk) => clerk.memberId === currentId)) {
+              options.unshift({
+                memberId: currentId,
+                clerkName: this.createForm.staffName || "当前店员",
+              });
+            }
+            this.clerkOptions = options;
+          }
+        })
+        .finally(() => {
+          this.clerkLoading = false;
+        });
+    },
+    clerkOptionLabel(clerk) {
+      return clerk.clerkName || "未命名店员";
+    },
+    onClerkChange(memberId) {
+      const clerk = this.clerkOptions.find((item) => item.memberId === memberId);
+      if (!clerk) {
+        return;
+      }
+      this.createForm.staffName = clerk.clerkName || "";
+      this.createForm.contactPhone = clerk.mobile || "";
+    },
+    submitCreate() {
+      if (!this.createForm.clerkUserId) {
+        this.$message.warning("请选择店员");
+        return;
+      }
+      if (!this.createForm.staffName) {
+        this.$message.warning("请填写员工姓名");
+        return;
+      }
+      const editing = !!this.createForm.id;
+      const request = editing ? updateServiceStaff(this.createForm.id, this.createForm) : createServiceStaff(this.createForm);
+      this.createLoading = true;
+      request
+        .then((res) => {
+          if (res.success) {
+            this.$message.success(editing ? "已保存" : "创建成功");
             this.createVisible = false;
             this.loadData();
           }
@@ -133,6 +239,17 @@ export default {
         .finally(() => {
           this.createLoading = false;
         });
+    },
+    handleDelete(row) {
+      ElMessageBox.confirm(`确认删除服务人员「${row.staffName || ""}」？`, "提示", { type: "warning" })
+        .then(() => deleteServiceStaff(row.id))
+        .then((res) => {
+          if (res && res.success) {
+            this.$message.success("已删除");
+            this.loadData();
+          }
+        })
+        .catch(() => {});
     },
     toggleStatus(row, enabled) {
       updateServiceStaffStatus(row.id, enabled ? "ENABLED" : "DISABLED").then((res) => {

@@ -6,9 +6,6 @@ import { getRequest, postRequestWithNoForm, putRequestWithNoForm } from "@/libs/
 export const getManagerWorkOrderPage = (params) =>
   getRequest("/appointment/work-orders", params);
 
-export const getManagerRescheduleLogs = (params) =>
-  getRequest("/appointment/reschedule-logs", params);
-
 export const getAppointmentOrderSettings = () => getRequest("/appointment/settings");
 
 export const saveAppointmentOrderSettings = (params) =>

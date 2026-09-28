@@ -20,6 +20,7 @@
               align="middle"
               class="user-dropdown-innercon"
             >
+              <store-qrcode />
               <ul class="nav-list">
                 <li class="nav-item" @click="im">
                   <el-tooltip content="联系客服" placement="bottom">
@@ -84,6 +85,7 @@ import shrinkableMenu from "./main-components/shrinkable-menu/shrinkable-menu.vu
 import tagsPageOpened from "./main-components/tags-page-opened.vue";
 import circleLoading from "@/views/my-components/lili/circle-loading.vue";
 import configDrawer from "@/views/main-components/config-drawer.vue";
+import storeQrcode from "@/views/main-components/store-qrcode.vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util.js";
 import { logout } from "@/api/index";
@@ -100,6 +102,7 @@ export default {
     tagsPageOpened,
     circleLoading,
     configDrawer,
+    storeQrcode,
   },
   data() {
     return {

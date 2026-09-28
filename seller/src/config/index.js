@@ -15,6 +15,12 @@ module.exports = {
   //FIXME 请检查当前高德key创建的日期，如果2021年12月02日之前申请的 无需填写安全密钥
   aMapSecurityJsCode: "2bd0fbf621881f4c77be74f0e76495f3", // 高德web端js申请的安全密钥
   aMapKey: "7f11113750315d8543daaf5c3ba353ca", //高德web端js申请的api key
+  /**
+   * 腾讯位置服务 JavaScript API GL，用于上门服务电子围栏
+   * https://lbs.qq.com/webApi/javascriptGL/glGuide/glOverview
+   * 与后端 lili.lbs.key 同一把 Key，控制台需开通 JavaScript API GL
+   */
+  tMapKey: "ACCBZ-MINKJ-CZ2FN-DJFLN-GKORV-B3BIL",
   website: "https://www.pickmall.cn", //官网地址
   aMapSwitch:false, //是否开启高德定位
   enableCDN: true, //生产环境 是否启用cdn加载 vue等js

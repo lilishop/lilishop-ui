@@ -9,54 +9,137 @@
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="商品名称" prop="goodsName">
-          <el-input
-            v-model="searchForm.goodsName"
-            placeholder="请输入商品名称"
-            clearable
-            style="width: 240px"
+        <div class="search-form-row">
+          <el-form-item label="商品名称" prop="goodsName">
+            <el-input
+              v-model="searchForm.goodsName"
+              placeholder="请输入商品名称"
+              clearable
+            />
+          </el-form-item>
+          <el-form-item label="SKU名称" prop="skuName">
+            <el-input
+              v-model="searchForm.skuName"
+              placeholder="请输入SKU名称"
+              clearable
+            />
+          </el-form-item>
+          <el-form-item label="SKU货号" prop="skuSn">
+            <el-input
+              v-model="searchForm.skuSn"
+              placeholder="请输入SKU货号"
+              clearable
+            />
+          </el-form-item>
+          <el-form-item label="商品ID" prop="id">
+            <el-input
+              v-model="searchForm.id"
+              placeholder="请输入商品ID"
+              clearable
+            />
+          </el-form-item>
+        </div>
+        <div class="search-form-row">
+          <el-form-item label="店铺分类" prop="storeCategoryPath">
+            <el-cascader
+              v-model="searchForm.storeCategoryPath"
+              :options="shopCategoryList"
+              :props="shopCategoryProps"
+              clearable
+              filterable
+              placeholder="请选择店铺分类"
+            />
+          </el-form-item>
+          <el-form-item label="平台分类" prop="categoryPath">
+            <el-cascader
+              v-model="searchForm.categoryPath"
+              :options="platformCategoryList"
+              :props="platformCategoryProps"
+              clearable
+              filterable
+              placeholder="请选择平台商品分类"
+            />
+          </el-form-item>
+          <el-form-item label="商品品牌" prop="brandId">
+            <el-select
+              v-model="searchForm.brandId"
+              placeholder="请选择商品品牌"
+              clearable
+              filterable
+            >
+              <el-option
+                v-for="item in brandList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="商品类型" prop="goodsType">
+            <el-select
+              v-model="searchForm.goodsType"
+              placeholder="请选择"
+              clearable
+            >
+              <el-option label="实物商品" value="PHYSICAL_GOODS" />
+              <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
+              <!-- E_COUPON：卡密商品，可跳转卡池管理 -->
+              <el-option label="电子卡券" value="E_COUPON" />
+              <el-option label="预约商品" value="APPOINTMENT_GOODS" />
+            </el-select>
+          </el-form-item>
+        </div>
+        <el-form-item label="创建时间">
+          <el-date-picker
+            v-model="createRange"
+            type="datetimerange"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            start-placeholder="开始"
+            end-placeholder="结束"
+            style="width: 360px"
           />
         </el-form-item>
-        <el-form-item label="商品编号" prop="id">
-          <el-input
-            v-model="searchForm.id"
-            placeholder="请输入商品编号"
-            clearable
-            style="width: 240px"
-          />
-        </el-form-item>
-        <el-form-item label="店铺名称" prop="storeName">
-          <el-input
-            v-model="searchForm.storeName"
-            placeholder="请输入店铺名称"
-            clearable
-            style="width: 240px"
-          />
-        </el-form-item>
-        <el-form-item label="销售模式" prop="salesModel">
+        <el-form-item label="库存状态" prop="stockStatus">
           <el-select
-            v-model="searchForm.salesModel"
-            placeholder="请选择"
+            v-model="searchForm.stockStatus"
+            placeholder="全部"
             clearable
             style="width: 240px"
+            @change="onStockStatusChange"
           >
-            <el-option label="零售" value="RETAIL" />
-            <el-option label="批发" value="WHOLESALE" />
+            <el-option label="有货" value="IN_STOCK" />
+            <el-option label="无货" value="OUT_OF_STOCK" />
           </el-select>
         </el-form-item>
-        <el-form-item label="商品类型" prop="goodsType">
-          <el-select
-            v-model="searchForm.goodsType"
-            placeholder="请选择"
+        <el-form-item v-if="searchForm.stockStatus === 'IN_STOCK'" label="库存区间">
+          <el-input
+            v-model="searchForm.stockMin"
+            placeholder="≥"
             clearable
-            style="width: 240px"
-          >
-            <el-option label="实物商品" value="PHYSICAL_GOODS" />
-            <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
-            <!-- E_COUPON：卡密商品，可跳转卡池管理 -->
-            <el-option label="电子卡券" value="E_COUPON" />
-            <el-option label="预约商品" value="APPOINTMENT_GOODS" />
-          </el-select>
+            style="width: 110px"
+          />
+          <span style="margin: 0 6px">~</span>
+          <el-input
+            v-model="searchForm.stockMax"
+            placeholder="≤"
+            clearable
+            style="width: 110px"
+          />
+        </el-form-item>
+        <el-form-item label="售价区间">
+          <el-input
+            v-model="searchForm.priceMin"
+            placeholder="≥"
+            clearable
+            style="width: 110px"
+          />
+          <span style="margin: 0 6px">~</span>
+          <el-input
+            v-model="searchForm.priceMax"
+            placeholder="≤"
+            clearable
+            style="width: 110px"
+          />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
@@ -130,14 +213,14 @@
         </el-table-column>
         <el-table-column prop="buyCount" label="销量" width="90" />
         <el-table-column prop="quantity" label="库存" width="90" />
-        <el-table-column label="销售模式" width="150">
-          <template #default="{ row }">
-            <span v-if="row">{{ salesModelText(row.salesModel) }}</span>
-          </template>
-        </el-table-column>
         <el-table-column label="商品类型" width="150">
           <template #default="{ row }">
             <span v-if="row">{{ goodsTypeText(row.goodsType) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品分类" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ platformCategoryText(row?.categoryPath) }}
           </template>
         </el-table-column>
         <el-table-column label="状态" width="150">
@@ -150,8 +233,8 @@
             <span v-if="row">{{ authFlagText(row.authFlag) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="storeName" label="店铺名称" width="200" show-overflow-tooltip />
-        <el-table-column label="操作" width="260" align="center" fixed="right">
+        <el-table-column prop="createTime" label="创建时间" width="170" show-overflow-tooltip />
+        <el-table-column label="操作" width="320" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row.marketEnable === 'DOWN'">
               <a class="link-text" @click="upper(row)">上架</a>
@@ -163,6 +246,8 @@
               <span class="op-split">|</span>
               <a class="link-text" @click="editGoods(row)">编辑</a>
             </template>
+            <span class="op-split">|</span>
+            <a class="link-text" @click="copyGoods(row)">复制商品</a>
             <!-- E_COUPON 专属：卡池管理入口（原型 P-03） -->
             <template v-if="row.goodsType === 'E_COUPON'">
               <span class="op-split">|</span>
@@ -202,9 +287,12 @@
 
 <script>
 import {
+  getBrandListData,
+  getCategoryTree,
   getGoodsListData,
   getGoodsNumerData,
   getQueryGoodsIdGoodsList,
+  getShopGoodsLabelListSeller,
   upGoods,
   lowGoods,
 } from "@/api/goods";
@@ -215,12 +303,40 @@ export default {
       id: "", //要操作的id
       loading: true, // 表单加载状态
       modalVisible: false, // 添加或编辑显示
+      createRange: [],
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 20, // 页面大小
         sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
+        storeCategoryPath: "",
+        categoryPath: "",
+        skuName: "",
+        skuSn: "",
+        brandId: "",
+        stockStatus: "",
+        stockMin: "",
+        stockMax: "",
+        priceMin: "",
+        priceMax: "",
+      },
+      brandList: [],
+      platformCategoryList: [],
+      shopCategoryList: [],
+      platformCategoryProps: {
+        value: "id",
+        label: "name",
+        children: "children",
+        checkStrictly: true,
+        emitPath: false,
+      },
+      shopCategoryProps: {
+        value: "value",
+        label: "label",
+        children: "children",
+        checkStrictly: true,
+        emitPath: false,
       },
       underForm: {
         // 下架原因
@@ -253,17 +369,31 @@ export default {
     onStatusTabClick(tab) {
       this.goodsStatusClick(tab.paneName);
     },
-    salesModelText(v) {
-      if (v === "RETAIL") return "零售";
-      if (v === "WHOLESALE") return "批发";
-      return "其他类型";
-    },
     goodsTypeText(v) {
       if (v === "PHYSICAL_GOODS") return "实物商品";
       if (v === "VIRTUAL_GOODS") return "虚拟商品";
       if (v === "E_COUPON") return "电子卡券"; // 卡密商品
       if (v === "APPOINTMENT_GOODS") return "预约商品";
       return v || "—";
+    },
+    findTreeNodeLabel(tree, targetId, valueKey, labelKey) {
+      for (const node of tree || []) {
+        if (String(node[valueKey]) === String(targetId)) {
+          return node[labelKey];
+        }
+        const childLabel = this.findTreeNodeLabel(node.children, targetId, valueKey, labelKey);
+        if (childLabel) return childLabel;
+      }
+      return "";
+    },
+    platformCategoryText(path) {
+      if (!path) return "—";
+      const ids = String(path).split(",").filter(Boolean);
+      if (!ids.length) return "—";
+      const labels = ids
+        .map((id) => this.findTreeNodeLabel(this.platformCategoryList, id, "id", "name"))
+        .filter(Boolean);
+      return labels.length ? labels.join(" / ") : "—";
     },
     /** 跳转卡池管理；单 SKU 商品默认取第一个 SKU（card-key-pool 需 skuId） */
     async goCardKeyPool(row) {
@@ -304,8 +434,76 @@ export default {
     },
     // 初始化数据
     init() {
+      this.loadFilterOptions();
       this.getDataList();
       this.getNumberData();
+    },
+    loadFilterOptions() {
+      getBrandListData().then((res) => {
+        this.brandList = Array.isArray(res) ? res : res?.result || [];
+      });
+      getShopGoodsLabelListSeller().then((res) => {
+        if (res?.success) {
+          this.shopCategoryList = this.formatShopCategory(res.result || []);
+        }
+      });
+      getCategoryTree().then((res) => {
+        if (res?.success) {
+          this.platformCategoryList = res.result || [];
+        }
+      });
+    },
+    onStockStatusChange(value) {
+      if (value !== "IN_STOCK") {
+        this.searchForm.stockMin = "";
+        this.searchForm.stockMax = "";
+      }
+    },
+    buildSearchParams(includeGoodsStatus = true) {
+      const { stockStatus, stockMin, stockMax, priceMin, priceMax, ...rest } = this.searchForm;
+      const params = { ...rest };
+
+      if (!includeGoodsStatus) {
+        delete params.goodsStatus;
+      }
+
+      if (this.createRange && this.createRange.length === 2) {
+        params.startDate = this.createRange[0];
+        params.endDate = this.createRange[1];
+      }
+
+      if (stockStatus === "IN_STOCK") {
+        params.geQuantity = stockMin !== "" && stockMin != null ? Number(stockMin) : 1;
+        if (stockMax !== "" && stockMax != null) {
+          params.leQuantity = Number(stockMax);
+        }
+      } else if (stockStatus === "OUT_OF_STOCK") {
+        params.geQuantity = 0;
+        params.leQuantity = 0;
+      } else {
+        if (stockMin !== "" && stockMin != null) params.geQuantity = Number(stockMin);
+        if (stockMax !== "" && stockMax != null) params.leQuantity = Number(stockMax);
+      }
+
+      if (priceMin !== "" && priceMax !== "") {
+        params.price = `${priceMin}_${priceMax}`;
+      } else if (priceMin !== "") {
+        params.price = String(priceMin);
+      } else if (priceMax !== "") {
+        params.price = `0_${priceMax}`;
+      }
+
+      return params;
+    },
+    formatShopCategory(list) {
+      return (list || []).map((item) => ({
+        value: item.id,
+        label: item.labelName,
+        children:
+          item.children && item.children.length
+            ? this.formatShopCategory(item.children)
+            : undefined,
+      }));
     },
     // 分页 改变页码
     changePage(v) {
@@ -327,7 +525,7 @@ export default {
     // 获取数据
     getDataList() {
       this.loading = true;
-      getGoodsListData(this.searchForm).then((res) => {
+      getGoodsListData(this.buildSearchParams()).then((res) => {
         this.loading = false;
         if (res.success) {
           this.data = res.result.records;
@@ -336,9 +534,7 @@ export default {
       });
     },
     getNumberData() {
-      // 创建一个不包含goodsStatus字段的搜索参数
-      const { goodsStatus, ...searchParams } = this.searchForm;
-      getGoodsNumerData(searchParams).then((res) => {
+      getGoodsNumerData(this.buildSearchParams(false)).then((res) => {
         if (res.success) {
           this.goodsNumerData = res.result;
         }
@@ -397,6 +593,14 @@ export default {
       this.$filters.customRouterPush({
         name: "goods-operation-edit",
         query: { id: v.id },
+      });
+    },
+
+    // 复制商品
+    copyGoods(v) {
+      this.$filters.customRouterPush({
+        name: "goods-operation",
+        query: { copyId: v.id },
       });
     },
 
@@ -500,6 +704,31 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.search-form-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 18px;
+
+  :deep(.el-form-item) {
+    flex: 1;
+    min-width: 0;
+    margin-right: 12px;
+    margin-bottom: 0;
+  }
+
+  :deep(.el-form-item:last-child) {
+    margin-right: 0;
+  }
+
+  :deep(.el-input),
+  :deep(.el-select),
+  :deep(.el-cascader) {
+    width: 100%;
+  }
+}
+
 // Tab组件样式
 .goods-tab {
   :deep(.el-tabs__item) {

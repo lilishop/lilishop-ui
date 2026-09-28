@@ -92,6 +92,16 @@ export const result = [{
             path: "virtualOrderList",
             component: "order/order/virtualOrderList",
             children: null
+          },
+          {
+            name: "orderVerification",
+            level: 2,
+            type: 0,
+            keepAlive: true,
+            title: "订单核销",
+            path: "orderVerification",
+            component: "order/order/orderVerification",
+            children: null
           }
         ]
       },

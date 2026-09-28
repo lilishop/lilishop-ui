@@ -37,8 +37,9 @@
           >打印发货单</el-button>
         </div>
       </el-card>
-      <el-card class="mt_10 clearfix">
-        <div style="width: 30%; float: left; margin-left: 20px">
+      <el-card class="mt_10">
+        <div class="order-info-grid">
+        <div class="order-info-col">
           <div class="div-item">
             <div class="div-item-left">订单号：</div>
             <div class="div-item-right">{{ orderInfo.order.sn }}</div>
@@ -95,7 +96,7 @@
             </div>
           </div>
         </div>
-        <div style="width: 30%; float: left; margin-left: 20px">
+        <div class="order-info-col">
           <div class="div-item" v-if="orderInfo.order.needReceipt == false">
             <div class="div-item-left">发票信息：</div>
             <div class="div-item-right">暂无发票信息</div>
@@ -146,8 +147,8 @@
             </div>
           </div>
         </div>
-        <div style="width: 36%; float: left">
-          <div class="div-item" v-if="!isECouponOrder && orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
+        <div class="order-info-col">
+          <div class="div-item" v-if="!isECouponOrder && !isAppointmentOrder && orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
             <div class="div-item-left">收货信息：</div>
             <div class="div-item-right">
               {{ orderInfo.order.consigneeName }}
@@ -236,51 +237,86 @@
             </div>
           </div>
         </div>
+        </div>
       </el-card>
-      <el-card class="mt_10">
-        <el-table v-loading="loading" border :data="data" ref="table" style="width: 100%">
-          <el-table-column label="商品" min-width="200">
+      <el-card v-if="orderPackages.length" class="mt_10 order-goods-card">
+        <el-divider content-position="left">发货记录</el-divider>
+        <el-table :data="orderPackages" border style="width: 100%">
+          <el-table-column label="发货方式" width="120">
+            <template #default="{ row }">{{ getFulfillmentModeLabel(row.fulfillmentMode) }}</template>
+          </el-table-column>
+          <el-table-column label="物流信息" min-width="220">
             <template #default="{ row }">
-              <div v-if="row" style="margin-top: 5px; height: 80px; display: flex">
-                <div>
-                  <img :src="row.image" style="height: 60px; margin-top: 1px; width: 60px" />
-                </div>
-                <div style="margin-left: 13px">
-                  <div class="div-zoom">
-                    <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
-                  </div>
-                  <span v-for="(item, key) in parseOrderItemSpecs(row.specs)" :key="key">
-                    <span v-show="key != 'images'" style="font-size: 12px; color: #999999">
-                      {{ key }} : {{ item }}</span>
-                  </span>
-                  <el-popover trigger="hover" title="扫码在手机中查看" width="180">
-                    <template #reference>
-                      <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="" style="display: block" />
-                    </template>
-                    <vue-qr :text="wapLinkTo(row.goodsId, row.skuId)" :margin="0" colorDark="#000" colorLight="#fff" :size="150" />
-                  </el-popover>
-                </div>
+              <template v-if="isNoDeliveryPackage(row)">
+                <span>无需配送</span>
+                <span v-if="row.deliveryRemark" class="delivery-remark-text">（{{ row.deliveryRemark }}）</span>
+              </template>
+              <template v-else>
+                {{ row.logisticsName || "-" }} / {{ row.logisticsNo || "-" }}
+              </template>
+            </template>
+          </el-table-column>
+          <el-table-column prop="logisticsTime" label="发货时间" width="170" />
+          <el-table-column label="商品明细" min-width="260">
+            <template #default="{ row }">
+              <div v-for="(item, idx) in row.orderPackageItemList || []" :key="idx" class="package-item-line">
+                {{ item.goodsName }} × {{ item.deliverNumber }}
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="优惠" min-width="100">
-            <template #default="{ row }">
-              <span v-if="row">{{ getPromotionText(row) }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="单价" min-width="100">
-            <template #default="{ row }">
-              <span v-if="row">{{ $filters.unitPrice(row.unitPrice || 0, "￥") }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="num" label="数量" min-width="80" />
-          <el-table-column prop="returnGoodsNumber" label="退款数量" min-width="80" />
-          <el-table-column label="小计" min-width="100">
-            <template #default="{ row }">
-              <span v-if="row">{{ $filters.unitPrice(row.flowPrice, "￥") }}</span>
-            </template>
-          </el-table-column>
         </el-table>
+      </el-card>
+      <el-card class="mt_10 order-goods-card">
+        <div v-loading="loading" class="order-fit-wrap">
+          <table class="order-fit-table">
+            <colgroup>
+              <col style="width: 40%" />
+              <col style="width: 18%" />
+              <col style="width: 12%" />
+              <col style="width: 8%" />
+              <col style="width: 12%" />
+              <col style="width: 10%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>商品</th>
+                <th>优惠</th>
+                <th>单价</th>
+                <th>数量</th>
+                <th>退款数量</th>
+                <th>小计</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in data" :key="row.sn || row.id">
+                <td>
+                  <div class="order-goods-cell">
+                    <img :src="row.image" class="order-goods-img" />
+                    <div class="order-goods-meta">
+                      <div class="div-zoom">
+                        <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
+                      </div>
+                      <span v-for="(item, key) in parseOrderItemSpecs(row.specs)" :key="key">
+                        <span v-show="key != 'images'" class="order-goods-spec">{{ key }} : {{ item }}</span>
+                      </span>
+                      <el-popover trigger="hover" title="扫码在手机中查看" width="180">
+                        <template #reference>
+                          <img src="../../../assets/qrcode.svg" class="hover-pointer" width="20" height="20" alt="" />
+                        </template>
+                        <vue-qr :text="wapLinkTo(row.goodsId, row.skuId)" :margin="0" colorDark="#000" colorLight="#fff" :size="150" />
+                      </el-popover>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ getPromotionText(row) }}</td>
+                <td>{{ $filters.unitPrice(row.unitPrice || 0, "￥") }}</td>
+                <td>{{ row.num }}</td>
+                <td>{{ row.returnGoodsNumber }}</td>
+                <td>{{ $filters.unitPrice(row.flowPrice, "￥") }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <!-- 卡密信息（当前订单 orderItems；满赠赠品卡密在赠品子单详情查看） -->
         <div v-if="hasCardKeySection" class="ecoupon-card-keys mt_10">
@@ -298,28 +334,40 @@
               :title="resolveCardKeyFulfillMessage(line)"
               class="mb_10"
             />
-            <el-table
-              v-else-if="line.cardKeys.length"
-              border
-              :data="lineCardKeyRows(line)"
-              style="width: 100%"
-              class="mb_10"
-            >
-              <el-table-column type="index" label="序号" width="60" align="center" />
-              <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
-              <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
-              <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
-              <el-table-column label="状态" width="90" align="center">
-                <template #default="{ row }">
-                  <span v-if="row">{{ formatCardKeyStatus(row.status || 'ALLOCATED') }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="100" align="center">
-                <template #default="{ row }">
-                  <el-button v-if="row" link type="primary" @click="copyCardKey(row)">复制</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
+            <div v-else-if="line.cardKeys.length" class="order-fit-wrap mb_10">
+              <table class="order-fit-table">
+                <colgroup>
+                  <col style="width: 8%" />
+                  <col style="width: 16%" />
+                  <col style="width: 36%" />
+                  <col style="width: 20%" />
+                  <col style="width: 10%" />
+                  <col style="width: 10%" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>序号</th>
+                    <th>卡号</th>
+                    <th>卡密</th>
+                    <th>发卡时间</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, index) in lineCardKeyRows(line)" :key="row.id || row.cardNo || index">
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ row.cardNo }}</td>
+                    <td class="card-secret-cell">{{ row.cardSecret }}</td>
+                    <td>{{ row.allocatedTime }}</td>
+                    <td>{{ formatCardKeyStatus(row.status || 'ALLOCATED') }}</td>
+                    <td>
+                      <el-button link type="primary" class="card-key-copy" @click="copyCardKey(row)">复制</el-button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -408,34 +456,6 @@
             </li>
           </ul>
         </div>
-      </el-card>
-
-      <el-card v-if="orderPackages.length" class="mt_10">
-        <el-divider content-position="left">发货记录</el-divider>
-        <el-table :data="orderPackages" border style="width: 100%">
-          <el-table-column label="发货方式" width="120">
-            <template #default="{ row }">{{ getFulfillmentModeLabel(row.fulfillmentMode) }}</template>
-          </el-table-column>
-          <el-table-column label="物流信息" min-width="220">
-            <template #default="{ row }">
-              <template v-if="isNoDeliveryPackage(row)">
-                <span>无需配送</span>
-                <span v-if="row.deliveryRemark" class="delivery-remark-text">（{{ row.deliveryRemark }}）</span>
-              </template>
-              <template v-else>
-                {{ row.logisticsName || "-" }} / {{ row.logisticsNo || "-" }}
-              </template>
-            </template>
-          </el-table-column>
-          <el-table-column prop="logisticsTime" label="发货时间" width="170" />
-          <el-table-column label="商品明细" min-width="260">
-            <template #default="{ row }">
-              <div v-for="(item, idx) in row.orderPackageItemList || []" :key="idx" class="package-item-line">
-                {{ item.goodsName }} × {{ item.deliverNumber }}
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
       </el-card>
     </div>
 
@@ -1179,7 +1199,7 @@ export default {
         if (type.indexOf("FULL_DISCOUNT") != -1) resultText += "满减 ";
         if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
       }
-      return resultText === "" ? "暂无未参与任何促销" : resultText;
+      return resultText === "" ? "未参与" : resultText;
     },
     gotoHomes () {
       return false
@@ -1841,6 +1861,93 @@ export default {
   }
 }
 
+.order-goods-card {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.order-info-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  max-width: 100%;
+}
+
+.order-info-col {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.order-fit-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.order-fit-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.order-fit-table th,
+.order-fit-table td {
+  border: 1px solid #ebeef5;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #606266;
+  text-align: left;
+  vertical-align: middle;
+  word-break: break-all;
+}
+
+.order-fit-table th {
+  background: #f5f7fa;
+  color: #909399;
+  font-weight: 500;
+}
+
+.order-fit-table .is-center {
+  text-align: center;
+}
+
+.card-secret-cell {
+  word-break: break-all;
+}
+
+.card-key-copy {
+  padding: 0;
+  height: auto;
+  justify-content: flex-start;
+}
+
+.order-goods-cell {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.order-goods-img {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.order-goods-meta {
+  margin-left: 13px;
+  min-width: 0;
+  flex: 1;
+}
+
+.order-goods-spec {
+  display: inline-block;
+  max-width: 100%;
+  font-size: 12px;
+  color: #999;
+  word-break: break-all;
+}
+
 .delivery-empty {
   color: #999;
 }
@@ -1953,6 +2060,9 @@ export default {
 }
 
 .search {
+  max-width: 100%;
+  overflow-x: clip;
+
   .operation {
     margin-bottom: 2vh;
   }
@@ -1990,32 +2100,37 @@ export default {
   }
 
   .goods-total {
+    box-sizing: border-box;
     padding: 20px;
-    height: 220px;
+    height: auto;
     width: 100%;
+    max-width: 100%;
+    overflow: hidden;
 
     ul {
-      margin-right: 10px;
-      display: block;
-      float: right;
+      margin: 0 10px 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
       list-style-type: none;
+      max-width: 100%;
+    }
 
-      li {
-        text-align: -webkit-match-parent;
-      }
+    li {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      max-width: 100%;
     }
 
     .label {
-      float: left;
-      width: 500px;
       font-size: 14px;
       text-align: right;
     }
 
     .txt {
-      float: left;
+      min-width: 88px;
       font-size: 14px;
-      width: 130px;
       text-align: right;
       font-family: verdana;
     }

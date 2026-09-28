@@ -115,12 +115,6 @@ export const otherRouter = {
       component: () => import("@/views/appointment/systemFormDesigner.vue")
     },
     {
-      path: "appointment/reschedule-logs",
-      title: "改期记录",
-      name: "appointment-reschedule-logs",
-      component: () => import("@/views/appointment/rescheduleLogList.vue")
-    },
-    {
       path: "add-coupon",
       title: "店铺优惠券",
       name: "add-coupon",
@@ -161,6 +155,12 @@ export const otherRouter = {
       title: "订单详情",
       name: "order-detail",
       component: () => import("@/views/order/order/orderDetail.vue")
+    },
+    {
+      path: "orderVerification",
+      title: "订单核销",
+      name: "orderVerification",
+      component: () => import("@/views/order/order/orderVerification.vue")
     },
     {
       path: "/floorList/main",

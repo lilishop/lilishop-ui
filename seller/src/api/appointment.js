@@ -9,9 +9,10 @@ import {
   putRequest,
   deleteRequest,
   postRequestWithNoForm,
+  putRequestWithNoForm,
 } from "@/libs/axios";
 
-/** 店铺预约通用配置（改期审核等） */
+/** 店铺预约通用配置 */
 export const getAppointmentSettings = () => getRequest("/appointment/settings");
 export const saveAppointmentSettings = (params) =>
   putRequest("/appointment/settings", params);
@@ -19,12 +20,12 @@ export const saveAppointmentSettings = (params) =>
 /** 到店服务设置 */
 export const getInStoreSettings = () => getRequest("/appointment/settings/in-store");
 export const saveInStoreSettings = (params) =>
-  putRequest("/appointment/settings/in-store", params);
+  putRequestWithNoForm("/appointment/settings/in-store", params);
 
 /** 上门服务设置 */
 export const getOnSiteSettings = () => getRequest("/appointment/settings/on-site");
 export const saveOnSiteSettings = (params) =>
-  putRequest("/appointment/settings/on-site", params);
+  putRequestWithNoForm("/appointment/settings/on-site", params);
 
 /** 服务人员 §14 */
 export const getServiceStaffPage = (params) =>
@@ -32,7 +33,7 @@ export const getServiceStaffPage = (params) =>
 export const createServiceStaff = (params) =>
   postRequestWithNoForm("/appointment/service-staff", params);
 export const updateServiceStaff = (id, params) =>
-  putRequest(`/appointment/service-staff/${id}`, params);
+  postRequestWithNoForm("/appointment/service-staff", { ...params, id });
 export const updateServiceStaffStatus = (id, status) =>
   putRequest(`/appointment/service-staff/${id}/status`, { status });
 export const deleteServiceStaff = (id) =>
@@ -69,13 +70,3 @@ export const getServiceCalendarDay = (params) =>
 /** 预约单列表 §24 */
 export const getAppointmentBookPage = (params) =>
   getRequest("/appointment/books", params);
-
-/** 改期日志 */
-export const getRescheduleLogPage = (params) =>
-  getRequest("/appointment/reschedule-logs", params);
-export const approveReschedule = (logId) =>
-  postRequest(`/appointment/reschedule/${logId}/approve`);
-export const rejectReschedule = (logId, params) =>
-  postRequestWithNoForm(`/appointment/reschedule/${logId}/reject`, params);
-export const merchantRescheduleBook = (bookId, params) =>
-  postRequestWithNoForm(`/appointment/books/${bookId}/reschedule`, params);

@@ -39,6 +39,10 @@ module.exports = {
           if (message.includes("ResizeObserver loop")) {
             return false;
           }
+          // 腾讯地图 GL 在跨域脚本里抛错时，浏览器只上报 Script error.
+          if (message === "Script error." || message.includes("far <= 0") || message.includes("near <= 0")) {
+            return false;
+          }
           return true;
         },
       },

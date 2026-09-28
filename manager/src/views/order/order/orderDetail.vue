@@ -722,7 +722,7 @@ export default {
         if (type.indexOf("FULL_DISCOUNT") != -1) resultText += "满减 ";
         if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
       }
-      return resultText === "" ? "暂无未参与任何促销" : resultText;
+      return resultText === "" ? "未参与" : resultText;
     },
     gotoHomes () {
       return false
