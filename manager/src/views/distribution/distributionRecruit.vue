@@ -103,6 +103,9 @@
             <el-radio value="MANUAL">手动申请</el-radio>
             <el-radio value="AUTO">满足条件自动申请</el-radio>
           </el-radio-group>
+          <div v-if="planForm.applyMode === 'AUTO'" class="form-desc">
+            达标后系统自动提交申请。若配置了分销推广服务协议，系统将视为已同意。
+          </div>
           <div v-if="planForm.applyMode === 'MANUAL'" class="manual-apply-extra">
             <el-checkbox v-model="planForm.requireApplyInfo">需要填写申请信息</el-checkbox>
             <div class="form-desc">申请人需填写对应字段，方便审核分销员信息。</div>
@@ -166,6 +169,9 @@
       </el-form-item>
       <el-form-item label="分销推广服务协议">
         <editor v-if="editorReady" ref="agreementEditor" open-xss v-model="planForm.agreementContent" />
+        <div v-if="planForm.applyMode === 'AUTO'" class="form-desc">
+          自动申请模式下，达标后系统自动提交并视为已同意协议。
+        </div>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" :loading="planSaveLoading" @click="savePlan">保存</el-button>

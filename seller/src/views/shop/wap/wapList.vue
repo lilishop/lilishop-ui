@@ -26,7 +26,7 @@
               inline-prompt
               active-text="开"
               inactive-text="关"
-              @change="changeSwitch(row)"
+              :before-change="() => beforeRelease(row)"
             />
           </template>
         </el-table-column>
@@ -106,14 +106,27 @@ export default {
       this.params.pageNumber = val;
       this.init();
     },
-    changeSwitch(item) {
-      this.loading = true;
-      API_Other.releasePageHome(item.id).then((res) => {
-        this.loading = false;
-        if (res.result) {
-          this.$Message.success("发布成功");
-          this.init();
-        }
+    beforeRelease(row) {
+      if (row.pageShow) {
+        this.$Message.warning(
+          this.total === 1
+            ? "当前为唯一页面，无法关闭"
+            : "请直接开启其他页面，当前页面会自动关闭"
+        );
+        return false;
+      }
+      return new Promise((resolve, reject) => {
+        API_Other.releasePageHome(row.id).then((res) => {
+          if (res && res.success) {
+            this.$Message.success("发布成功");
+            resolve(true);
+            this.init();
+          } else {
+            reject(new Error("release failed"));
+          }
+        }).catch(() => {
+          reject(new Error("release failed"));
+        });
       });
     },
     init() {

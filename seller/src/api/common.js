@@ -1,4 +1,4 @@
-import { sellerUrl, getRequest, uploadFileRequest, uploadFile, request} from "@/libs/axios";
+import { sellerUrl, getRequest, uploadFileRequest, uploadFile } from "@/libs/axios";
 
 // 通过id获取子地区
 export const getChildRegion = (id) => {

@@ -32,7 +32,7 @@
               inline-prompt
               active-text="开"
               inactive-text="关"
-              @change="releaseTemplate(row.id)"
+              :before-change="() => beforeRelease(row)"
             />
           </template>
         </el-table-column>
@@ -200,12 +200,27 @@ export default {
       });
     },
 
-    releaseTemplate(id) {
-      API_floor.releasePageHome(id).then((res) => {
-        if (res.success) {
-          this.$Message.success("发布模板成功");
-          this.getTemplateList();
-        }
+    beforeRelease(row) {
+      if (row.pageShow) {
+        this.$Message.warning(
+          this.total === 1
+            ? "当前为唯一页面，无法关闭"
+            : "请直接开启其他页面，当前页面会自动关闭"
+        );
+        return false;
+      }
+      return new Promise((resolve, reject) => {
+        API_floor.releasePageHome(row.id).then((res) => {
+          if (res && res.success) {
+            this.$Message.success("发布模板成功");
+            resolve(true);
+            this.getTemplateList();
+          } else {
+            reject(new Error("release failed"));
+          }
+        }).catch(() => {
+          reject(new Error("release failed"));
+        });
       });
     },
     confirmDel(id) {
