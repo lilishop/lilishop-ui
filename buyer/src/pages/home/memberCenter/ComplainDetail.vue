@@ -1,6 +1,6 @@
 <template>
   <div class="add-eval">
-    <UserCenterLayout title="订单投诉" :tabs="['订单投诉']">
+    <UserCenterLayout>
       <div class="title">
       <p>
         <span class="fontsize_16 global_color">{{ statusLabel[detail.complainStatus] }}</span>
@@ -123,7 +123,7 @@
       </tbody>
     </table>
 
-    <el-dialog title="View Image" v-model="visible">
+    <el-dialog title="图片预览" v-model="visible">
       <img :src="previewImage" v-if="visible" style="width: 100%">
     </el-dialog>
     </UserCenterLayout>

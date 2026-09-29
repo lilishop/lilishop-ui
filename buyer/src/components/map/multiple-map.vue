@@ -1,8 +1,8 @@
 <template>
   <el-dialog width="800" v-model="enableMap">
-    <el-radio-group @change="changeMap" v-model="mapDefault" type="button">
-      <el-radio label="select">级联选择</el-radio>
-      <el-radio label="map" v-if="aMapSwitch">高德地图</el-radio>
+    <el-radio-group v-if="aMapSwitch" @change="changeMap" v-model="mapDefault">
+      <el-radio label="select">地区选择</el-radio>
+      <el-radio label="map">高德地图</el-radio>
     </el-radio-group>
     <div>
       <div v-if="mapDefault === 'select'">

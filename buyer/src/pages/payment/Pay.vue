@@ -22,7 +22,10 @@
       <div class="address" v-if="selectedDeliverMethod === 'LOGISTICS' && !isVirtualLikeCheckout">
         <div class="card-head">
           <span>收货人信息</span>
-          <span @click="goAddressManage">管理收货人地址</span>
+          <div class="card-head-links">
+            <span @click="editAddress('')">新增</span>
+            <span @click="goAddressManage">管理</span>
+          </div>
         </div>
         <div class="address-manage">
           <div class="address-item" v-show="moreAddr ? true : index < 3"
@@ -53,15 +56,11 @@
               <el-icon><Check /></el-icon>
             </div>
           </div>
-          <div class="add-address" @click="editAddress('')">
-            <el-icon><Plus /></el-icon>
-            <div>添加新地址</div>
-          </div>
         </div>
         <div class="more-addr" @click="moreAddr = !moreAddr" v-if="addressList.length > 3">
           {{ moreAddr ? "收起地址" : "更多地址" }}
-          <el-icon :v-show="!moreAddr"><ArrowDown /></el-icon>
-          <el-icon :v-show="moreAddr"><ArrowUp /></el-icon>
+          <el-icon v-show="!moreAddr"><ArrowDown /></el-icon>
+          <el-icon v-show="moreAddr"><ArrowUp /></el-icon>
         </div>
       </div>
 
@@ -89,8 +88,8 @@
         </div>
         <div class="more-addr" @click="storeMoreAddr = !storeMoreAddr" v-if="storeAddressList.length > 3">
           {{ storeMoreAddr ? "收起地址" : "更多地址" }}
-          <el-icon :v-show="!storeMoreAddr"><ArrowDown /></el-icon>
-          <el-icon :v-show="storeMoreAddr"><ArrowUp /></el-icon>
+          <el-icon v-show="!storeMoreAddr"><ArrowDown /></el-icon>
+          <el-icon v-show="storeMoreAddr"><ArrowUp /></el-icon>
         </div>
       </div>
       <div>
@@ -128,25 +127,44 @@
                 }}</span>&nbsp;&nbsp;
               </span>
             </div>
+            <div class="goods-head">
+              <span>商品</span>
+              <span>单价</span>
+              <span>数量</span>
+              <span>库存</span>
+              <span>小计</span>
+            </div>
             <div class="goods-list">
               <div class="goods-item" v-for="(goods, goodsIndex) in shop.checkedSkuList" :key="goodsIndex">
-                <span class="hover-color" @click="
+                <span class="goods-main hover-color" @click="
                   goGoodsDetail(goods.goodsSku.id, goods.goodsSku.goodsId)
                 ">
                   <img :src="goods.goodsSku.thumbnail" alt="" />
-                  <span style="vertical-align: top">{{
-                      goods.goodsSku.goodsName
-                  }}</span>
+                  <span class="goods-name">{{ goods.goodsSku.goodsName }}</span>
                 </span>
                 <span class="goods-price">{{ $filters.unitPrice(goods.purchasePrice, "￥") }}</span>
-                <span>x{{ goods.num }}</span>
+                <span>{{ goods.num }}</span>
                 <span>{{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}</span>
                 <span class="goods-price">{{ $filters.unitPrice(goods.subTotal, "￥") }}</span>
               </div>
             </div>
             <div class="order-mark">
-              <el-input type="textarea" maxlength="60" v-model="shop.remark" show-word-limit placeholder="订单备注" />
-              <span style="font-size: 12px; color: #999">提示：请勿填写有关支付、收货、发票方面的信息</span>
+              <div v-if="isRemarkOpen(shop)" class="mark-field">
+                <el-input
+                  :ref="remarkInputRef(shop)"
+                  v-model="shop.remark"
+                  maxlength="60"
+                  show-word-limit
+                  placeholder="选填，请先和商家协商一致"
+                  @blur="closeRemark(shop)"
+                />
+                <span class="mark-tip">请勿填写有关支付、收货、发票方面的信息</span>
+              </div>
+              <button v-else-if="shop.remark" type="button" class="mark-link" @click="openRemark(shop)">
+                <span class="mark-label">订单备注</span>
+                <span class="mark-text">{{ shop.remark }}</span>
+              </button>
+              <button v-else type="button" class="mark-link" @click="openRemark(shop)">添加订单备注</button>
             </div>
           </div>
         </div>
@@ -154,9 +172,7 @@
       <!-- 发票信息（E_COUPON 虚拟型结算不开发票） -->
       <div class="invoice" v-if="!isECouponCheckout">
         <div class="card-head mt_20 mb_20">
-          <span class="relative">发票信息<span class="inv-tips">
-              <el-icon><Warning /></el-icon>开企业抬头发票须填写纳税人识别号，以免影响报销
-            </span></span>
+          <span>发票信息</span>
         </div>
         <div class="inovice-content">
           <template v-if="hasInvoiceInfo">
@@ -172,46 +188,36 @@
         <div class="card-head mt_20 mb_20">
           <span class="relative">优惠券</span>
         </div>
-        <div v-if="couponList.length === 0">无可用优惠券</div>
-        <ul v-else class="coupon-list">
-          <li v-for="(item, index) in couponList" class="coupon-item" :key="index">
-            <div class="c-left">
-              <div>
-                <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
-                <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{
-                    item.discount
-                }}</span>折</span>
-                <span class="describe">满{{ item.consumeThreshold }}元可用</span>
-              </div>
+        <div v-if="couponList.length === 0" class="pay-empty">无可用优惠券</div>
+        <ul v-else class="pay-coupon-list">
+          <li
+            v-for="(item, index) in couponList"
+            class="pay-coupon"
+            :class="{ 'is-used': usedCouponId.includes(item.id) }"
+            :key="index"
+            @click="useCoupon(item.id, !usedCouponId.includes(item.id))"
+          >
+            <div class="pay-coupon-price">
+              <template v-if="item.couponType === 'PRICE'">￥{{ $filters.unitPrice(item.price) }}</template>
+              <template v-else>{{ item.discount }}折</template>
+            </div>
+            <div class="pay-coupon-info">
+              <p>满{{ item.consumeThreshold }}元可用</p>
               <p>使用范围：{{ useScope(item.scopeType, item.storeName) }}</p>
               <p>有效期：{{ item.endTime }}</p>
             </div>
-            <img class="used" v-if="usedCouponId.includes(item.id)" src="../../assets/images/geted.png" alt="" />
-            <b></b>
-            <a
-              class="c-right"
-              v-if="!usedCouponId.includes(item.id)"
-              @click="useCoupon(item.id, true)"
-            >立即使用</a>
-            <a
-              class="c-right c-right-cancel"
-              v-else
-              @click="useCoupon(item.id, false)"
-            >放弃优惠</a>
-            <i class="circle-top"></i>
-            <i class="circle-bottom"></i>
           </li>
         </ul>
       </div>
       <!-- 礼品卡 -->
-      <div class="invoice pay-gcc-module">
-        <div class="pay-gcc-head">
-          <div class="pay-gcc-title">
-            使用礼品卡
+      <div class="invoice">
+        <div class="card-head mt_20 mb_20">
+          <span>
+            礼品卡
             <span class="pay-gcc-deduct">
               (已抵扣 <span class="pay-gcc-deduct-num">{{ $filters.unitPrice(giftCardDeductAmount, "¥") }}</span>)
             </span>
-          </div>
+          </span>
           <a href="javascript:void(0)" class="pay-gcc-help" @click.prevent="giftCardNoticeModal = true">
             使用说明 <el-icon><Help /></el-icon>
           </a>
@@ -225,6 +231,7 @@
                   v-for="(item, index) in giftCardList"
                   :key="item.id || index"
                   class="pay-gcc-item"
+                  :class="{ 'is-selected': isGiftCardSelected(item) }"
                   @click="toggleGiftCard(item)"
                 >
                   <div class="pay-gcc-item-inner">
@@ -312,7 +319,7 @@
 
 <script>
 import { Message, Modal, Spin } from "@/utils/message";
-import { ArrowDown, ArrowUp, Check, Help, Plus, Warning } from '@element-plus/icons-vue';
+import { ArrowDown, ArrowUp, Check, Help } from '@element-plus/icons-vue';
 import invoiceModal from "@/components/invoiceModal";
 import addressManage from "@/components/addressManage";
 import { memberAddress, delMemberAddress } from "@/api/address";
@@ -396,6 +403,7 @@ export default {
       invoiceAvailable: false, // 发票编辑按钮
       showEditBtn: "", // 鼠标移入显示编辑按钮
       orderMark: "", // 订单备注
+      remarkEditing: {}, // 正在填写备注的店铺
       goodsType: "", // 商品类型
       storeMoreAddr: false,
       invoiceData: {
@@ -730,6 +738,31 @@ export default {
         }
       });
     },
+    remarkKey(shop) {
+      return shop.storeId || shop.storeName;
+    },
+    remarkInputRef(shop) {
+      return "remarkInput" + this.remarkKey(shop);
+    },
+    isRemarkOpen(shop) {
+      return !!this.remarkEditing[this.remarkKey(shop)];
+    },
+    openRemark(shop) {
+      const key = this.remarkKey(shop);
+      this.remarkEditing = { ...this.remarkEditing, [key]: true };
+      this.$nextTick(() => {
+        const input = this.$refs[this.remarkInputRef(shop)];
+        const target = Array.isArray(input) ? input[0] : input;
+        target?.focus?.();
+      });
+    },
+    closeRemark(shop) {
+      if (shop.remark) {
+        shop.remark = String(shop.remark).trim();
+      }
+      const key = this.remarkKey(shop);
+      this.remarkEditing = { ...this.remarkEditing, [key]: false };
+    },
     selectAddress(item) {
       // 选择地址
       let params = {
@@ -738,7 +771,7 @@ export default {
       };
       selectAddr(params).then((res) => {
         if (res.success) {
-          Message.success("选择配送方式成功");
+          Message.success("选择收货地址成功");
           this.selectMethod = item;
           this.getGoodsDetail();
         }
@@ -898,7 +931,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "../../assets/styles/coupon.scss";
 
 .goods-msg {
   overflow: hidden;
@@ -965,12 +997,12 @@ export default {
 
   .active {
     border-radius: 50px;
-    background-color: #ff8f23;
+    background-color: $theme_color;
     color: #fff;
   }
 
   .active-arrow {
-    color: #ff8f23;
+    color: $theme_color;
   }
 }
 
@@ -980,84 +1012,66 @@ export default {
   margin: 20px auto;
   background-color: #fff;
   min-height: 200px;
-  padding: 15px 25px;
+  padding: 8px 28px 0;
   box-sizing: border-box;
 }
 
 .delivery-method {
   display: flex;
   flex-wrap: wrap;
-
-  >div {
-    border: 1px dotted #949494;
-    width: 50px;
-    height: 40px;
-    margin: 20px 20px 0 0;
-    padding: 10px;
-    cursor: pointer;
-    color: #999;
-  }
+  gap: 12px;
+  margin-top: 16px;
 
   .method-item {
     position: relative;
-    font-size: 12px;
-
-    >div:nth-child(1) {
-      margin-bottom: 10px;
-
-      span {
-        margin-right: 10px;
-      }
-
-      >span:nth-child(1) {
-        color: #000000;
-        font-size: 14px;
-      }
-    }
-
-    .edit-btn {
-      font-size: 12px;
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      color: $theme_color;
-
-      span:hover {
-        border-bottom: 1px solid $theme_color;
-      }
-    }
-
-    .corner-icon {
-      position: absolute;
-      right: -1px;
-      bottom: -1px;
-
-      div {
-        width: 0;
-        border-top: 20px solid transparent;
-        border-right: 20px solid $theme_color;
-      }
-
-      .el-icon {
-        font-size: 12px;
-        position: absolute;
-        bottom: 0;
-        right: 1px;
-        transform: rotate(-15deg);
-        color: #fff;
-      }
-    }
+    min-width: 108px;
+    height: 44px;
+    margin: 0;
+    padding: 0 20px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #171A26;
+    font-size: 15px;
+    box-sizing: border-box;
   }
 
   .border-red {
     border-color: $theme_color;
+    background: #fff5f4;
+    color: $theme_color;
+  }
+
+  .corner-icon {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+
+    div {
+      width: 0;
+      border-top: 18px solid transparent;
+      border-right: 18px solid $theme_color;
+    }
+
+    .el-icon {
+      font-size: 12px;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      color: #fff;
+    }
   }
 }
 
 /** 地址管理 */
 .address-manage {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
 
   :deep(.address-default-tag) {
     --el-tag-bg-color: var(--el-color-danger);
@@ -1074,49 +1088,51 @@ export default {
   }
 
   >div {
-    border: 1px dotted #949494;
-    width: 265px;
-    height: 120px;
-    margin: 20px 20px 0 0;
-    padding: 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    width: auto;
+    min-height: 128px;
+    height: auto;
+    margin: 0;
+    padding: 14px 16px;
     cursor: pointer;
-    color: #999;
-  }
-
-  .add-address {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-
-    .el-icon {
-      font-size: 24px;
-    }
-
+    color: #666;
+    box-sizing: border-box;
   }
 
   .address-item {
     position: relative;
-    font-size: 12px;
+    font-size: 14px;
+    line-height: 22px;
 
     >div:nth-child(1) {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
 
       span {
-        margin-right: 10px;
+        margin-right: 0;
       }
 
       >span:nth-child(1) {
-        color: #000000;
-        font-size: 14px;
+        color: #171A26;
+        font-size: 16px;
+        font-weight: 600;
       }
     }
 
+    >div:nth-child(2),
+    >div:nth-child(3) {
+      color: #666;
+    }
+
     .edit-btn {
-      font-size: 12px;
+      font-size: 14px;
       position: absolute;
-      top: 15px;
-      right: 20px;
+      top: 14px;
+      right: 14px;
       color: $theme_color;
 
       span:hover {
@@ -1148,6 +1164,7 @@ export default {
 
   .border-red {
     border-color: $theme_color;
+    background: #fff5f4;
   }
 }
 
@@ -1155,9 +1172,12 @@ export default {
 .shop-name {
   display: flex;
   justify-content: space-between;
+  margin-top: 16px;
+  color: #171A26;
+  font-size: 15px;
 
   >span:nth-child(1) {
-    font-weight: bold;
+    font-weight: 600;
 
     .el-icon {
       color: #ff8f23;
@@ -1199,94 +1219,154 @@ export default {
   }
 }
 
+.goods-head,
+.goods-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 72px 72px 120px;
+  column-gap: 12px;
+  align-items: center;
+}
+
+.goods-head {
+  margin-top: 12px;
+  padding: 0 8px 8px;
+  color: #999;
+  font-size: 13px;
+
+  span:not(:first-child) {
+    text-align: center;
+  }
+
+  span:last-child {
+    text-align: right;
+  }
+}
+
 .goods-list {
-  width: 1150px;
-  background-color: #f8f8f8;
-  margin: 10px 0 20px 0;
+  display: block;
+  width: 100%;
+  margin: 0 0 16px;
+  background: transparent;
 
   .goods-item {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 0;
-    margin: 0 20px;
-    border-bottom: 1px dotted #999;
-
-    &:last-child {
-      border: none;
-    }
-
-    img {
-      width: 48px;
-      height: 48px;
-    }
+    width: auto;
+    margin: 0;
+    padding: 14px 8px;
+    border-top: 1px solid #f0f0f0;
+    justify-content: initial;
 
     >span {
+      width: auto;
       text-align: center;
-      width: 100px;
-    }
-
-    >span:nth-child(1) {
-      font-size: 12px;
-
-      flex: 1;
-      text-align: left;
-
-      >span {
-        margin-left: 10px;
-      }
+      color: #171A26;
+      font-size: 14px;
     }
 
     >span:last-child {
+      text-align: right;
       color: $theme_color;
-      font-weight: bold;
+      font-weight: 600;
     }
+  }
 
-    .goods-price {
-      font-size: 16px;
-    }
+  .goods-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    text-align: left;
+  }
+
+  img {
+    width: 72px;
+    height: 72px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #f5f5f5;
+  }
+
+  .goods-name {
+    color: #171A26;
+    font-size: 15px;
+    line-height: 22px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .goods-price {
+    font-size: 15px;
   }
 }
 
 .order-mark {
-  width: 500px;
+  margin-top: 12px;
+}
+
+.mark-link {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #438cde;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    color: $theme_color;
+  }
+}
+
+.mark-label {
+  flex-shrink: 0;
+  color: #666;
+}
+
+.mark-text {
+  color: #171A26;
+  word-break: break-all;
+}
+
+.mark-field {
+  max-width: 640px;
+
+  :deep(.el-input__wrapper) {
+    min-height: 40px;
+  }
+
+  :deep(.el-input__inner) {
+    color: #171A26;
+    font-size: 14px;
+  }
+}
+
+.mark-tip {
+  display: block;
+  margin-top: 8px;
+  color: #999;
+  font-size: 13px;
+  line-height: 20px;
 }
 
 /** 购买商品列表 end */
 /** 发票信息 start */
 .invoice {
-  .inv-tips {
-    position: absolute;
-    border: 1px solid #ddd;
-    width: 310px;
-    padding: 3px;
-    margin: 0 0 0 10px;
-    font-size: 12px !important;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
-
-    &::before {
-      content: "";
-      display: inline-block;
-      width: 12px;
-      height: 17px;
-      background: url(../../assets/images/arrow-left.png) 0 0 no-repeat;
-      background-color: #fff;
-      position: absolute;
-      left: -9px;
-    }
-
-    .el-icon {
-      color: #ff8f23;
-      margin-right: 3px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-  }
-
   .inovice-content {
+    margin-top: 12px;
+    color: #171A26;
+    font-size: 14px;
+    line-height: 22px;
+
     >span {
-      margin-right: 10px;
+      margin-right: 16px;
     }
 
     >span:last-child {
@@ -1305,21 +1385,23 @@ export default {
 /** 订单价格 */
 .order-price {
   text-align: right;
-  margin-top: 30px;
-  font-size: 16px;
-  color: #999;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #666;
+  line-height: 22px;
 
   >div>span:nth-child(2) {
-    width: 130px;
+    width: 140px;
     text-align: right;
     display: inline-block;
-    margin-top: 10px;
+    margin-top: 8px;
+    color: #171A26;
   }
 
   .actrual-price {
     color: $theme_color;
-    font-weight: bold;
-    font-size: 20px;
+    font-weight: 600;
+    font-size: 22px;
   }
 }
 
@@ -1327,32 +1409,35 @@ export default {
 /** 底部支付栏 */
 .order-footer {
   z-index: 20;
-  height: 50px;
-  @include background_color($light_white_background_color);
-  @include title_color($title_color);
+  position: sticky;
+  bottom: 0;
+  height: 64px;
   display: flex;
   align-items: center;
   flex-direction: row-reverse;
-  border-top: 1px solid #ddd;
-  margin: 10px -25px 0;
-  width: calc(100% + 50px);
+  border-top: 1px solid #f0f0f0;
+  margin: 16px -28px 0;
+  padding-left: 28px;
+  width: calc(100% + 56px);
   box-sizing: border-box;
+  background: #fff;
 
   div {
     text-align: center;
   }
 
-  position: sticky;
-  bottom: 0;
-
   .pay {
     background-color: $theme_color;
-    width: 150px;
-    font-size: 20px;
+    width: 160px;
+    font-size: 16px;
     color: #fff;
     height: 100%;
-    line-height: 50px;
+    line-height: 64px;
     cursor: pointer;
+
+    &:hover {
+      opacity: 0.92;
+    }
   }
 }
 
@@ -1364,12 +1449,32 @@ export default {
   border-bottom: 1px solid #dddddd;
   height: 40px;
 
-  span:nth-child(1) {
-    font-size: 18px;
+  > span:first-child {
+    font-size: 16px;
+    font-weight: 600;
+    color: #171A26;
   }
 
-  span:nth-child(2) {
-    font-size: 12px;
+  > span:nth-child(2) {
+    font-size: 14px;
+    font-weight: 400;
+    color: #438cde;
+    cursor: pointer;
+
+    &:hover {
+      color: $theme_color;
+    }
+  }
+}
+
+.card-head-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  span {
+    font-size: 14px;
+    font-weight: 400;
     color: #438cde;
     cursor: pointer;
 
@@ -1384,131 +1489,88 @@ export default {
   height: 2px;
 }
 
-.pay-address {
-  font-size: 12px;
+.order-footer .pay-address {
+  flex: 1;
+  padding-right: 20px;
+  font-size: 14px;
+  line-height: 22px;
+  color: #666;
+  text-align: right;
 }
 
 .more-addr {
   cursor: pointer;
-  margin-top: 10px;
-  display: inline-block;
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #438cde;
+  font-size: 14px;
 }
 
-.coupon-item {
-  width: 280px;
-  height: 125px;
-  margin-left: 0;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  overflow: hidden;
-  $claim-width: 55px;
-
-  .c-left {
-    width: calc(100% - #{$claim-width});
-    padding: 14px 12px;
-    box-sizing: border-box;
-
-    > div,
-    > p {
-      margin-bottom: 8px;
-    }
-
-    > div .price {
-      font-size: 18px;
-    }
-
-    p {
-      margin-bottom: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 12px;
-    }
-  }
-
-  b {
-    right: $claim-width;
-    width: 0;
-    background: none;
-    border-right: 1px dashed #e0e0e0;
-  }
-
-  .c-right {
-    width: $claim-width;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    letter-spacing: 3px;
-    font-size: 14px;
-    line-height: 1;
-    cursor: pointer;
-    text-decoration: none;
-    user-select: none;
-    box-sizing: border-box;
-
-    &:hover {
-      opacity: 0.9;
-    }
-  }
-
-  .c-right-cancel {
-    letter-spacing: 2px;
-    font-size: 13px;
-  }
-
-  .circle-top,
-  .circle-bottom {
-    right: calc(#{$claim-width} - 9px);
-    width: 18px;
-    height: 18px;
-  }
-
-  .circle-top {
-    top: -9px;
-  }
-
-  .circle-bottom {
-    bottom: -9px;
-  }
-
-  .used {
-    position: absolute;
-    top: 50%;
-    right: calc(#{$claim-width} + 8px);
-    transform: translateY(-50%);
-    width: 46px;
-    height: 46px;
-    z-index: 3;
-  }
+.pay-empty {
+  margin-top: 12px;
+  color: #999;
+  font-size: 14px;
+  line-height: 22px;
 }
 
-.coupon-list {
-  max-height: 260px;
-  overflow: scroll;
+.pay-coupon-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0 0;
   padding: 0;
-  margin: 0;
   list-style: none;
-  justify-content: flex-start;
 }
 
-.pay-gcc-module {
-  margin-top: 10px;
-}
-.pay-gcc-head {
+.pay-coupon {
+  width: 360px;
+  min-height: 108px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+  border: 1px solid #f0d0cc;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+  cursor: pointer;
+
+  &.is-used {
+    border-color: $theme_color;
+    background: #fff5f4;
+  }
 }
-.pay-gcc-title {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
+
+.pay-coupon-price {
+  flex-shrink: 0;
+  width: 88px;
+  color: $theme_color;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
 }
+
+.pay-coupon-info {
+  flex: 1;
+  min-width: 0;
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+    line-height: 20px;
+    word-break: break-all;
+  }
+
+  p:first-child {
+    color: #171A26;
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+
 .pay-gcc-deduct {
   margin-left: 8px;
   font-size: 14px;
@@ -1520,12 +1582,14 @@ export default {
   font-weight: 600;
 }
 .pay-gcc-help {
-  font-size: 13px;
-  color: #999;
+  font-size: 14px;
+  font-weight: 400;
+  color: #438cde;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  text-decoration: none;
 }
 .pay-gcc-help:hover {
   color: $theme_color;
@@ -1561,6 +1625,12 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
+  outline: 2px solid transparent;
+  outline-offset: 0;
+
+  &.is-selected {
+    outline-color: $theme_color;
+  }
 }
 .pay-gcc-item:hover {
   transform: translateY(-2px);
@@ -1603,7 +1673,7 @@ export default {
 }
 .pay-gcc-face {
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 14px;
   opacity: 0.92;
 }
 .pay-gcc-right-meta {
@@ -1616,7 +1686,7 @@ export default {
 }
 .pay-gcc-valid {
   margin-top: 6px;
-  font-size: 11px;
+  font-size: 14px;
   opacity: 0.9;
   white-space: nowrap;
 }
@@ -1637,7 +1707,7 @@ export default {
 }
 .pay-gcc-no {
   margin-top: 10px;
-  font-size: 11px;
+  font-size: 14px;
   opacity: 0.75;
   word-break: break-all;
   line-height: 1.4;

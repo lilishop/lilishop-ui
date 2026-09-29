@@ -446,6 +446,15 @@ export function memberMsgList (params) {
  * @param {String} messageId 消息id
  */
 
+export function getMemberMessage (id) {
+  return request({
+    url: `/buyer/message/member/${id}`,
+    method: Method.GET,
+    needToken: true,
+    skipMessage: true
+  });
+}
+
 export function readMemberMsg (id) {
   return request({
     url: `/buyer/message/member/${id}`,

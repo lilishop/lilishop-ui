@@ -36,8 +36,9 @@
   margin-top: 6px;
 }
 .goods-show-detail {
-  height: 36px;
-  font-size: 12px;
+  height: 42px;
+  font-size: 14px;
+  line-height: 21px;
   margin: 6px 0px;
   overflow:hidden;
   text-overflow: ellipsis;
@@ -51,12 +52,12 @@
   color:#E23A3A;
 }
 .goods-show-num {
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 6px;
   color: #666;
 }
 .goods-show-num {
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 6px;
   color: #009688;
 }
@@ -65,7 +66,7 @@
   font-weight: bold;
 }
 .goods-show-seller {
-  font-size: 12px;
+  font-size: 14px;
   color: $theme_color;
 }
 .goods-page {

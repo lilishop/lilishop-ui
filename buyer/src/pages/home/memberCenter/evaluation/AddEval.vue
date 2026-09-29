@@ -1,6 +1,6 @@
 <template>
   <div class="add-eval">
-    <UserCenterLayout title="订单评价" :tabs="['订单评价']">
+    <UserCenterLayout>
       <div class="title">
       <p>
         <span class="color999">订单号：</span><span>{{$route.query.sn}}</span>
@@ -68,7 +68,7 @@
     <div class="submit-row">
       <el-button type="primary" :loading="loading" @click="save">发表</el-button>
     </div>
-    <el-dialog title="View Image" v-model="visible">
+    <el-dialog title="图片预览" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
     </el-dialog>
     </UserCenterLayout>
@@ -326,7 +326,7 @@ export default {
 }
 
 .describe {
-  font-size: 12px;
+  font-size: 14px;
   color: #999;
   margin-top: 8px;
 }

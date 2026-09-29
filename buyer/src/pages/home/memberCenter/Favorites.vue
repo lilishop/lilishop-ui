@@ -2,78 +2,80 @@
   <div class="wrapper">
     <UserCenterLayout
       v-if="!homePage"
-      title="近期收藏"
       :tabs="favoriteWay"
       :active-tab="activeTabIndex"
       @tab-change="change"
     >
-      <div v-if="list.length">
-        <div v-for="(item, index) in list" :key="index">
-          <div class="goodsItem" :key="item.skuId">
-            <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
-              <img :src="item.image" />
+      <empty v-if="!list.length" />
+      <div v-else class="fav-list" :class="{ 'is-store': params.type === 'STORE' }">
+        <div class="fav-cols">
+          <span>{{ params.type === 'GOODS' ? '商品' : '店铺' }}</span>
+          <span v-if="params.type === 'GOODS'">金额</span>
+          <span>操作</span>
+        </div>
+        <div class="fav-row" v-for="(item, index) in list" :key="item.id || item.skuId || index">
+          <div class="fav-goods">
+            <div class="fav-thumb" @click="openItem(item)">
+              <img
+                :src="params.type === 'GOODS' ? item.image : item.storeLogo"
+                alt=""
+                @error="$event.target.style.visibility = 'hidden'"
+              />
             </div>
-            <div class="goodsImg hover-pointer" v-else>
-              <img :src="item.storeLogo" />
+            <div class="fav-info">
+              <div class="fav-name" @click="openItem(item)">
+                {{ params.type === 'GOODS' ? item.goodsName : item.storeName }}
+              </div>
+              <span v-if="params.type === 'STORE' && item.selfOperated" class="self-tag">商家自营</span>
             </div>
-            <div class="goodsTitle hover-color" v-if="params.type === 'GOODS'" @click="buynow(item.skuId, item.goodsId,item.id)">
-              {{ item.goodsName }}
-            </div>
-            <div v-else class="goodsTitle  hover-pointer" @click="buynow(item.skuId, item.goodsId,item.id)" >
-              {{ item.storeName }}
-              <el-tag color="error" class="operated" v-if="item.selfOperated">商家自营</el-tag>
-            </div>
-            <div class="goodsPrice">
-              <span v-if="params.type === 'GOODS'">{{ $filters.unitPrice(item.price, '￥') }}</span>
-
-            </div>
-            <div class="goodsBuy">
-              <el-button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)"
-                v-if="params.type === 'GOODS'">立即购买</el-button>
-              <el-button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</el-button>
-              <el-button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</el-button>
-              <el-button size="small" v-if="params.type === 'STORE'" @click="cancelStore(item.id)">取消收藏</el-button>
-            </div>
+          </div>
+          <div v-if="params.type === 'GOODS'" class="fav-price">{{ $filters.unitPrice(item.price, '￥') }}</div>
+          <div class="fav-ops">
+            <button v-if="params.type === 'GOODS'" type="button" class="op-btn" @click="buynow(item.skuId, item.goodsId)">立即购买</button>
+            <button v-else type="button" class="op-btn" @click="goShop(item.id)">查看店铺</button>
+            <button v-if="params.type === 'GOODS'" type="button" class="text-link" @click="cancel(item.skuId)">取消收藏</button>
+            <button v-else type="button" class="text-link" @click="cancelStore(item.id)">取消收藏</button>
           </div>
         </div>
         <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
       </div>
-      <empty v-else />
     </UserCenterLayout>
 
     <template v-else>
       <card _Title="近期收藏" :_Size="16" :_Tabs="favoriteWay" :_ActiveTab="activeTabIndex" @_Change="change" _More="全部收藏" _Src="/home/Favorites"></card>
-      <div v-if="list.length">
-        <div v-for="(item, index) in list" :key="index">
-          <div class="goodsItem" :key="item.skuId">
-            <div class="goodsImg hover-pointer" v-if="params.type === 'GOODS'">
-              <img :src="item.image" />
+      <empty v-if="!list.length" />
+      <div v-else class="fav-list" :class="{ 'is-store': params.type === 'STORE' }">
+        <div class="fav-cols">
+          <span>{{ params.type === 'GOODS' ? '商品' : '店铺' }}</span>
+          <span v-if="params.type === 'GOODS'">金额</span>
+          <span>操作</span>
+        </div>
+        <div class="fav-row" v-for="(item, index) in list" :key="item.id || item.skuId || index">
+          <div class="fav-goods">
+            <div class="fav-thumb" @click="openItem(item)">
+              <img
+                :src="params.type === 'GOODS' ? item.image : item.storeLogo"
+                alt=""
+                @error="$event.target.style.visibility = 'hidden'"
+              />
             </div>
-            <div class="goodsImg hover-pointer" v-else>
-              <img :src="item.storeLogo" />
+            <div class="fav-info">
+              <div class="fav-name" @click="openItem(item)">
+                {{ params.type === 'GOODS' ? item.goodsName : item.storeName }}
+              </div>
+              <span v-if="params.type === 'STORE' && item.selfOperated" class="self-tag">商家自营</span>
             </div>
-            <div class="goodsTitle hover-color" v-if="params.type === 'GOODS'" @click="buynow(item.skuId, item.goodsId,item.id)">
-              {{ item.goodsName }}
-            </div>
-            <div v-else class="goodsTitle  hover-pointer" @click="buynow(item.skuId, item.goodsId,item.id)" >
-              {{ item.storeName }}
-              <el-tag color="error" class="operated" v-if="item.selfOperated">商家自营</el-tag>
-            </div>
-            <div class="goodsPrice">
-              <span v-if="params.type === 'GOODS'">{{ $filters.unitPrice(item.price, '￥') }}</span>
-            </div>
-            <div class="goodsBuy">
-              <el-button size="small" type="primary" @click="buynow(item.skuId, item.goodsId)"
-                v-if="params.type === 'GOODS'">立即购买</el-button>
-              <el-button size="small" type="primary" @click="goShop(item.id)" v-else>店铺购买</el-button>
-              <el-button size="small" v-if="params.type === 'GOODS'" @click="cancel(item.skuId)">取消收藏</el-button>
-              <el-button size="small" v-if="params.type === 'STORE'" @click="cancelStore(item.id)">取消收藏</el-button>
-            </div>
+          </div>
+          <div v-if="params.type === 'GOODS'" class="fav-price">{{ $filters.unitPrice(item.price, '￥') }}</div>
+          <div class="fav-ops">
+            <button v-if="params.type === 'GOODS'" type="button" class="op-btn" @click="buynow(item.skuId, item.goodsId)">立即购买</button>
+            <button v-else type="button" class="op-btn" @click="goShop(item.id)">查看店铺</button>
+            <button v-if="params.type === 'GOODS'" type="button" class="text-link" @click="cancel(item.skuId)">取消收藏</button>
+            <button v-else type="button" class="text-link" @click="cancelStore(item.id)">取消收藏</button>
           </div>
         </div>
         <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
       </div>
-      <empty v-else />
     </template>
   </div>
 </template>
@@ -172,6 +174,13 @@ export default {
         }
       });
     },
+    openItem (item) {
+      if (this.params.type === 'STORE') {
+        this.goShop(item.id)
+        return
+      }
+      this.buynow(item.skuId, item.goodsId)
+    },
     buynow(skuId, goodsId,storeId) { // 跳转详情
       console.log(this.params.type)
       let url
@@ -206,73 +215,148 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.goodsShop,
-.goodsImg,
-.goodsPrice,
-.goodsShop,
-.goodsTitle {
-  margin: 0 6px;
-}
-
-.operated {
-  margin-left: 10px;
-}
-
 .wrapper {
   margin-bottom: 40px;
 }
 
-.goodsItem {
-  display: flex;
+.fav-list {
+  --fav-cols: minmax(0, 1fr) 140px 200px;
+  --fav-gap: 12px;
+  padding-top: 8px;
+
+  &.is-store {
+    --fav-cols: minmax(0, 1fr) 200px;
+  }
+}
+
+.fav-cols,
+.fav-row {
+  display: grid;
+  grid-template-columns: var(--fav-cols);
+  column-gap: var(--fav-gap);
   align-items: center;
-  height: 60px;
-  margin-bottom: 10px;
+}
 
-  >.goodsImg {
-    width: 60px;
-    height: 60px;
-    overflow: hidden;
-    flex-shrink: 0;
+.fav-cols {
+  padding: 0 8px 10px;
+  color: #999;
+  font-size: 13px;
 
-    >img {
-      width: 100%;
-      height: 100%;
-    }
+  span:first-child {
+    padding-left: 72px;
   }
 
-  >.goodsPrice,
-  .goodsShop {
-    width: 120px;
-    flex-shrink: 0;
+  span:nth-child(n + 2) {
     text-align: center;
   }
+}
 
-  >.goodsTitle {
-    flex: 1;
-    min-width: 0;
-    line-height: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.fav-row {
+  padding: 14px 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.fav-goods {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.fav-thumb {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+  background: #f5f5f5;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 }
 
-.goodsBuy {
+.fav-info {
+  min-width: 0;
+}
+
+.fav-name {
+  color: #333;
+  font-size: 16px;
+  line-height: 22px;
+  max-height: 44px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: break-all;
+  cursor: pointer;
+
+  &:hover {
+    color: $theme_color;
+  }
+}
+
+.self-tag {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: #fff1f0;
+  color: $theme_color;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.fav-price {
+  text-align: center;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.fav-ops {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-shrink: 0;
-  gap: 8px;
-  width: 170px;
-  margin-left: 16px;
-  line-height: normal;
+  justify-content: center;
+  gap: 16px;
+}
 
-  :deep(.el-button) {
-    margin: 0;
+.op-btn {
+  min-width: 96px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid $theme_color;
+  border-radius: 4px;
+  background: $theme_color;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 30px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
   }
 }
 
-.page-size {
-  text-align: right;
+.text-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #171A26;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+
+  &:hover {
+    color: $theme_color;
+  }
 }
 </style>

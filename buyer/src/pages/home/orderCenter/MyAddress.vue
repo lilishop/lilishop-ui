@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <UserCenterLayout title="收货地址" :tabs="['收货地址']" more-text="添加新地址" more-to="/home/addAddress">
+    <UserCenterLayout>
       <template #extra>
         <el-button type="primary" @click="add">添加新地址</el-button>
       </template>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <UserCenterLayout title="收货地址" :tabs="['收货地址']">
+    <UserCenterLayout>
     <div class="add-box">
       <el-form :model="formData" ref="form" label-position="left" label-width="100px" :rules="ruleInline">
         <el-form-item label="收件人" prop="name">
@@ -18,7 +18,7 @@
           <el-input v-model="formData.mobile" placeholder="请输入收件人手机号" style="width: 600px"></el-input>
         </el-form-item>
         <el-form-item label="地址别名">
-          <el-input v-model="formData.alias" length :maxlength="4" placeholder="请输入地址别名，例如公司" style="width: 600px">
+          <el-input v-model="formData.alias" :maxlength="5" show-word-limit placeholder="请输入地址别名，例如公司" style="width: 600px">
           </el-input>
         </el-form-item>
         <el-form-item label="默认地址">

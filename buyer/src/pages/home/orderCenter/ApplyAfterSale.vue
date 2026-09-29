@@ -1,6 +1,6 @@
 <template>
   <div class="apply-after-sale">
-    <UserCenterLayout title="申请售后" :tabs="['申请售后']">
+    <UserCenterLayout>
     <el-table :data="goodsData" border>
       <el-table-column label="商品名称">
         <template #default="{ row }">
@@ -94,7 +94,7 @@
           <el-button type="primary" @click="apply">提交申请</el-button>
         </el-form-item>
       </el-form>
-      <el-dialog title="View Image" v-model="visible">
+      <el-dialog title="图片预览" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
       </el-dialog>
     </div>

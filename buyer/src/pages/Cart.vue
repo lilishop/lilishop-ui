@@ -9,20 +9,17 @@
           购物车(<span>{{ goodsTotal }}</span>)
         </div>
       </div>
-
+      <div class="cart-steps">
+        <span :class="stepIndex == 0 ? 'active' : ''">1.我的购物车</span>
+        <i class="icomoon icon-next" :class="stepIndex == 0 ? 'active-arrow' : ''"></i>
+        <span :class="stepIndex == 1 ? 'active' : ''">2.填写订单信息</span>
+        <i class="icomoon icon-next" :class="stepIndex == 1 ? 'active-arrow' : ''"></i>
+        <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
+      </div>
     </div>
     <el-divider />
     <!-- 购物车主体 -->
     <div class="cart-content width_1200 center">
-      <div class="available-area">
-        <div class="cart-steps">
-          <span :class="stepIndex == 0 ? 'active' : ''">1.我的购物车</span>
-          <i class="icomoon icon-next" :class="stepIndex == 0 ? 'active-arrow' : ''"></i>
-          <span :class="stepIndex == 1 ? 'active' : ''">2.填写订单信息</span>
-          <i class="icomoon icon-next" :class="stepIndex == 1 ? 'active-arrow' : ''"></i>
-          <span :class="stepIndex == 2 ? 'active' : ''">3.成功提交订单</span>
-        </div>
-      </div>
       <!-- 购物车商品列表 -->
       <div class="cart-goods">
         <div class="cart-goods-table">
@@ -168,7 +165,7 @@
                   v-model="goods.num"
                   @change="changeNum(goods.num, goods.goodsSku.id)"
                 ></el-input-number>
-                <div class="fontsize_12 cart-qty-stock">
+                <div class="cart-qty-stock">
                   {{ goods.goodsSku.quantity > 0 ? "有货" : "无货" }}
                 </div>
               </div>
@@ -538,7 +535,7 @@ export default {
   }
 }
 .cart-content {
-  margin: 0 auto;
+  margin: 20px auto;
   width: 1200px;
   position: relative;
 }
@@ -548,7 +545,8 @@ export default {
   height: 30px;
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  gap: 12px;
+
   span {
     @include content_color($light_content_color);
     height: 30px;
@@ -556,45 +554,40 @@ export default {
     line-height: 30px;
     display: inline-block;
     padding: 0 15px;
+    flex-shrink: 0;
   }
 
-  .el-icon {
-    @include content_color($light_content_color);
-    font-size: 20px;
-    margin: 0 15px;
+  .icon-next {
+    flex-shrink: 0;
+    font-size: 14px;
   }
 
   .active {
     border-radius: 50px;
-    background-color: #ff8f23;
+    background-color: $theme_color;
     color: #fff;
   }
 
   .active-arrow {
-    color: #ff8f23;
+    color: $theme_color;
   }
-}
-/** 步骤条和配送区域总体 */
-.available-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 15px;
 }
 /** 商品列表 */
 .cart-goods {
   .cart-goods-table {
-    border: 1px solid #e0e0e0;
-    @include background_color($light_white_background_color);
+    border: 1px solid #eee;
+    background: #fff;
+    padding: 0 8px;
   }
   &-title {
-    height: 50px;
-    @include background_color($light_white_background_color);
-    @include title_color($title_color);
+    height: 44px;
+    background: #fff;
+    color: #999;
+    font-size: 13px;
     display: flex;
     align-items: center;
-    padding: 0 20px;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 0 12px;
+    border-bottom: 1px solid #f0f0f0;
     div:not(.cart-col-check) {
       text-align: center;
     }
@@ -629,10 +622,14 @@ export default {
       border-bottom: 1px solid #e0e0e0;
     }
     .shop-name {
-      height: 50px;
+      min-height: 48px;
+      height: auto;
       display: flex;
       align-items: center;
-      padding: 0 20px;
+      padding: 8px 12px;
+      color: #171A26;
+      font-size: 15px;
+      font-weight: 600;
       position: relative;
       @include title_color($light_title_color);
       .shop-info {
@@ -693,14 +690,14 @@ export default {
               border-radius: 3px;
             }
             span:nth-child(2) {
-              font-size: 12px;
+              font-size: 14px;
               margin-left: 5px;
               color: #999;
             }
             .coupon-btn {
-              height: 26px;
+              height: 28px;
               float: right;
-              font-size: 12px;
+              font-size: 14px;
             }
             &::after {
               display: block;
@@ -712,7 +709,9 @@ export default {
       }
       .promotion-notice {
         text-align: right;
-        font-size: 12px;
+        font-size: 13px;
+        color: #999;
+        font-weight: 400;
         flex-shrink: 0;
         margin-left: 10px;
       }
@@ -725,7 +724,7 @@ export default {
       @extend .cart-goods-title;
       background: transparent;
       border-top: 1px solid #f0f0f0;
-      padding: 10px 20px;
+      padding: 16px 12px 28px;
       height: auto;
       .cart-col-check {
         padding-left: 20px;
@@ -741,14 +740,19 @@ export default {
         padding-left: 20px;
         position: relative;
         img {
-          width: 70px;
-          height: 70px;
+          width: 72px;
+          height: 72px;
+          border-radius: 4px;
+          object-fit: cover;
+          background: #f5f5f5;
+          flex-shrink: 0;
         }
         > div > p {
-          @include content_color($light_content_color);
-          font-size: 13px;
+          color: #171A26;
+          font-size: 15px;
+          line-height: 22px;
           text-align: left;
-          margin-left: 10px;
+          margin-left: 12px;
           &:hover {
             color: $theme_color;
           }
@@ -761,9 +765,12 @@ export default {
         justify-content: center;
         flex-shrink: 0;
         text-align: center;
+        color: #171A26;
+        font-size: 15px;
       }
       .cart-col-subtotal {
-        font-weight: bold;
+        color: $theme_color;
+        font-weight: 600;
       }
       .cart-col-qty {
         position: relative;
@@ -777,6 +784,7 @@ export default {
         }
 
         .cart-qty-stock {
+          font-size: 14px;
           position: absolute;
           top: calc(100% + 4px);
           left: 50%;
@@ -784,6 +792,7 @@ export default {
           white-space: nowrap;
           line-height: 1.2;
           color: #999;
+          font-size: 13px;
         }
       }
       .num-input {
@@ -813,11 +822,14 @@ export default {
     @extend .cart-goods-title;
     position: sticky;
     bottom: 0;
-    border-top: 1px solid #ddd;
-    margin-top: 10px;
-    padding: 0 0 0 20px;
-    line-height: 50px;
+    height: 64px;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 0;
+    padding: 0 0 0 12px;
+    line-height: 64px;
     justify-content: space-between;
+    color: #171A26;
+    font-size: 14px;
     > div {
       display: flex;
     }
@@ -832,21 +844,26 @@ export default {
     }
     .total-price div {
       color: $theme_color;
-      font-size: 20px;
+      font-size: 22px;
+      font-weight: 600;
     }
     .pay {
       background-color: $theme_color;
-      width: 150px;
-      font-size: 20px;
+      width: 160px;
+      font-size: 16px;
       color: #fff;
       height: 100%;
-      line-height: 50px;
+      line-height: 64px;
       cursor: pointer;
+
+      &:hover {
+        opacity: 0.92;
+      }
     }
   }
   .handle-btn {
-    font-size: 12px;
-    color: $handle-btn-color;
+    font-size: 14px;
+    color: #666;
     cursor: pointer;
     &:hover {
       color: $theme_color;
@@ -881,12 +898,12 @@ export default {
   > span {
     border: 1px solid $theme_color;
     color: $theme_color;
-    font-size: 12px;
+    font-size: 14px;
     border-radius: 2px;
     padding: 0 2px;
   }
   > p {
-    font-size: 12px;
+    font-size: 14px;
     margin-left: 10px;
     color: #999;
   }
@@ -915,44 +932,25 @@ export default {
   flex-wrap: nowrap;
 }
 
-.cart-del-btn {
-  background-color: #ff7d79 !important;
-  border-color: #ff7d79 !important;
-  color: #fff !important;
+.cart-del-btn,
+.cart-collect-btn {
+  height: auto !important;
   margin: 0 !important;
+  padding: 0 4px !important;
+  border: none !important;
+  background: transparent !important;
+  color: #171A26 !important;
+  font-size: 14px !important;
 
   &:hover,
   &:focus {
-    background-color: #ff6b66 !important;
-    border-color: #ff6b66 !important;
-    color: #fff !important;
+    color: $theme_color !important;
+    background: transparent !important;
   }
 }
 
-.cart-collect-btn {
-  background-color: #fa6419 !important;
-  border-color: #fa6419 !important;
-  color: #fff !important;
-  margin: 0 !important;
-
-  &:hover,
-  &:focus {
-    background-color: #e55a15 !important;
-    border-color: #e55a15 !important;
-    color: #fff !important;
-  }
-
-  &.is-collected {
-    background-color: $theme_color !important;
-    border-color: $theme_color !important;
-
-    &:hover,
-    &:focus {
-      background-color: $theme_color !important;
-      border-color: $theme_color !important;
-      opacity: 0.9;
-    }
-  }
+.cart-collect-btn.is-collected {
+  color: $theme_color !important;
 }
 </style>
 <style>

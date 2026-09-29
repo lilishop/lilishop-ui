@@ -1,11 +1,11 @@
 <template>
   <div class="wrapper">
-    <UserCenterLayout title="账户安全" :tabs="['账户安全']">
+    <UserCenterLayout>
     <!--  手机号验证  -->
     <el-form ref="formData" :model="formData" label-position="left" label-width="100px" :rules="ruleInLines"
           v-if="(status == 2 || status == 3) && !showPwd">
       <el-form-item label="手机号">
-        <div class="phone">1234567890</div>
+        <div class="phone">{{ displayMobile }}</div>
       </el-form-item>
       <el-form-item label="图片验证码" prop="picture" style="width: 350px">
         <el-input v-model="formData.picture" size="large" maxlength="4"></el-input>
@@ -80,6 +80,8 @@ import {
   setPwd,
   editPwd
 } from '@/api/account';
+import { getMemberMsg } from '@/api/login.js';
+import storage from '@/plugins/storage.js';
 import {md5} from '@/plugins/md5.js'
 
 export default {
@@ -89,6 +91,7 @@ export default {
     return {
       // 1为修改    2为设置     3为提交校验的下一步
       status: '',
+      mobile: '',
       showPwd: false, // 显示密码
       formData: { // 验证表单
         picture: '',
@@ -136,10 +139,33 @@ export default {
       }
     }
   },
+  computed: {
+    displayMobile () {
+      if (!this.mobile) return '未绑定手机号';
+      return this.$filters.secrecyMobile(this.mobile);
+    }
+  },
   mounted () {
     this.status = this.$route.query.status
+    this.loadMobile()
   },
   methods: {
+    loadMobile () {
+      const rawUserInfo = storage.getItem('userInfo');
+      if (rawUserInfo) {
+        try {
+          const userInfo = JSON.parse(rawUserInfo);
+          if (userInfo && userInfo.mobile) this.mobile = userInfo.mobile;
+        } catch (e) {}
+      }
+      if (!storage.getItem('accessToken')) return;
+      getMemberMsg().then(res => {
+        if (res.success && res.result) {
+          storage.setItem('userInfo', res.result);
+          this.mobile = res.result.mobile || '';
+        }
+      }).catch(() => {});
+    },
     normalizePwdError (message) {
       if (!message) return '修改失败，请稍后重试';
       if (String(message).includes('旧密码') || String(message).includes('密码不正确')) {

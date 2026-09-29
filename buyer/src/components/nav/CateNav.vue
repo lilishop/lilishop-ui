@@ -26,31 +26,22 @@
       :style="{'top':!showNavBar ?'60px':'46px'}"
       v-show="showAlways || showFirstList"
       @mouseenter="showFirstList = true"
-      @mouseleave="showFirstList = false"
+      @mouseleave="closePanel"
     >
       <!-- 第一级分类 -->
       <div
         class="nav-side"
         :class="{ 'large-nav': large, 'opacity-nav': opacity }"
-        @mouseleave="panel = false"
       >
         <ul>
           <li
             v-for="(item, index) in cateList"
             :key="index"
+            :class="{ 'is-active': panel && panelIndex === index }"
             @mouseenter="showDetail(index)"
           >
-            <span class="nav-side-item" @click="goGoodsList(item.id)">{{
-              item.name
-            }}</span>
-            <span v-for="(second, secIndex) in item.children" :key="secIndex">
-              <span v-if="secIndex < 2"> / </span>
-              <span
-                @click="goGoodsList(second.id, second.parentId)"
-                class="nav-side-item"
-                v-if="secIndex < 2"
-                >{{ second.name }}</span>
-            </span>
+            <span class="nav-side-item" @click="goGoodsList(item.id)">{{ item.name }}</span>
+            <el-icon><ArrowRight /></el-icon>
           </li>
         </ul>
       </div>
@@ -139,6 +130,7 @@ export default {
   data() {
     return {
       panel: false, // 二级分类展示
+      panelIndex: -1,
       panelData: [], // 二级分类数据
       showFirstList: false, // 始终展示一级列表
       cateList: [], // 商品分类
@@ -189,7 +181,13 @@ export default {
     showDetail(index) {
       // 展示全部分类
       this.panel = true;
+      this.panelIndex = index;
       this.panelData = this.cateList[index].children;
+    },
+    closePanel() {
+      this.showFirstList = false;
+      this.panel = false;
+      this.panelIndex = -1;
     },
     goGoodsList(id, secondId, firstId) {
       // 分类共有三级，传全部分类过去
@@ -278,16 +276,15 @@ export default {
     display: flex;
     align-items: center;
     height: 46px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    padding-left: 37.4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding-left: 16px;
     background: #FFFFFF;
     width: 263.2px;
     border-bottom: none;
-    font-size: 16.8px;
-    font-weight: normal;
-    color: #333333;
-    letter-spacing: 0px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #171A26;
     box-sizing: border-box;
   }
   .nav-item {
@@ -304,9 +301,9 @@ export default {
     display: flex;
     li {
       float: left;
-      font-size: 17px;
-      font-weight: normal;
-      color: #333333;
+      font-size: 15px;
+      font-weight: 400;
+      color: #171A26;
 
 
       &:hover {
@@ -325,14 +322,13 @@ export default {
 
 .nav-side {
   width: 263.2px;
-  color: #666;
+  color: #171A26;
   float: left;
-  overflow:hidden;
-
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+  overflow: hidden;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
   background-color: #fff;
-  height: 340px;
+  height: 344px;
   ////自动移滚动条样式
   //&::-webkit-scrollbar {
   //  width: 1px;
@@ -349,24 +345,53 @@ export default {
 }
 .large-nav {
   height: 470px;
-  ul > li {
-    line-height: 20px;
-  }
 }
 .opacity-nav {
   background-color: rgba(0, 0, 0, 0.5);
 }
 .nav-side ul {
   width: 100%;
+  height: 100%;
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 .nav-side li {
-  padding: 0 0 16.2px 37.4px;
-  font-size: 13px;
-  line-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1 1 0;
+  min-height: 0;
+  height: auto;
+  padding: 0 12px 0 16px;
+  font-size: 14px;
+  line-height: 20px;
   box-sizing: border-box;
+  cursor: pointer;
+
+  .el-icon {
+    flex-shrink: 0;
+    color: #ccc;
+    font-size: 12px;
+  }
+
+  &:hover,
+  &.is-active {
+    background: #fff5f4;
+    color: $theme_color;
+
+    .el-icon {
+      color: $theme_color;
+    }
+  }
+}
+.nav-side-item {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .nav-side-item:hover {
   cursor: pointer;
@@ -375,63 +400,102 @@ export default {
 
 /*显示商品详细信息*/
 .detail-item-panel {
-  width: 1000px;
+  width: 936px;
   min-height: 340px;
   background-color: #fff;
-  box-shadow: 0px 0px 15px #ccc;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 0 4px 4px 0;
   position: absolute;
   top: 0;
-  left: 200px;
+  left: 263.2px;
   z-index: 1000;
-  padding: 15px;
+  padding: 8px 20px 16px;
+  box-sizing: border-box;
 }
 .nav-detail-item {
-  margin-top: 5px;
-  margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 8px 0 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
-  color: #eee;
 }
 .nav-detail-item span {
-  padding: 6px;
-  padding-left: 12px;
-  margin-right: 15px;
-  font-size: 12px;
-  color: #333;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #171A26;
+
+  .el-icon {
+    font-size: 12px;
+    color: #ccc;
+  }
 }
 .nav-detail-item span:hover {
-  background-color: $theme_color;
-  color: #fff;
+  color: $theme_color;
+
+  .el-icon {
+    color: $theme_color;
+  }
 }
 .detail-item-panel li {
-  line-height: 30px;
+  line-height: 28px;
 }
 .detail-item-title {
-  font-weight: bold;
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  width: 108px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 28px;
   cursor: pointer;
-  color: #555555;
-  padding-right: 10px;
-  width: 81px;
-  text-align: right;
+  color: #171A26;
+  text-align: left;
+
+  .glyphicon {
+    display: none;
+  }
+
+  .el-icon {
+    font-size: 12px;
+    color: #ccc;
+  }
 }
 .detail-item-title:hover {
   color: $theme_color;
+
+  .el-icon {
+    color: $theme_color;
+  }
 }
 .detail-item-row {
   display: flex;
+  align-items: flex-start;
+  padding: 6px 0;
+
   > div {
     flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
   }
 }
 .detail-item {
-  font-size: 12px;
-  padding-left: 8px;
-  padding-right: 8px;
+  font-size: 14px;
+  line-height: 28px;
+  padding: 0 12px;
+  color: #666;
   cursor: pointer;
-  border-left: 1px solid #ccc;
+  border: none;
+
   &:first-child {
-    border: none;
-    padding-left: 0;
+    padding-left: 12px;
   }
 }
 .detail-item:hover {

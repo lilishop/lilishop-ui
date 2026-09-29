@@ -177,7 +177,7 @@ export default {
 }
 
 .left-tips-count-down {
-  font-size: 10px;
+  font-size: 14px;
   color: red;
 }
 

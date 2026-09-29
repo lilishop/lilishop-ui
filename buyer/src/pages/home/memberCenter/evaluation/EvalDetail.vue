@@ -1,97 +1,81 @@
 <template>
   <div class="add-eval">
-    <UserCenterLayout title="评价详情" :tabs="['评价详情']">
-      <div class="title">
-      <p>
-        <span class="color999">创建人：</span><span>{{ $filters.secrecyMobile( orderGoods.createBy ) }}</span>
-        <span class="color999 ml_20">{{ orderGoods.createTime }}</span>
-      </p>
-      </div>
-    <!-- 物流评分、服务评分 -->
-    <div class="delivery-rate">
-      <div class="fontsize_16">物流服务评价：</div>
-      <div class="color999 delivery-rate-items">
-        <span>物流评价：<el-rate disabled :model-value="Number(orderGoods.deliveryScore) || 0" :colors="rateThemeColors" class="theme-rate" /></span>
-        <span>服务评价：<el-rate disabled :model-value="Number(orderGoods.serviceScore) || 0" :colors="rateThemeColors" class="theme-rate" /></span>
-        <span>描述评价：<el-rate disabled :model-value="Number(orderGoods.descriptionScore) || 0" :colors="rateThemeColors" class="theme-rate" /></span>
-      </div>
-    </div>
-    <!-- 添加订单评价  左侧商品详情  右侧评价框 -->
-    <ul class="goods-eval">
-      <li>
-        <div class="goods-con">
+    <UserCenterLayout>
+      <div class="order-card status-card" v-if="orderGoods.goodsName || orderGoods.content">
+        <div class="status-head">
+          <div class="status-main">
+            <p class="status-text">{{ gradeText }}</p>
+            <p class="status-sn">评价时间：{{ orderGoods.createTime }}</p>
+          </div>
+        </div>
+        <div class="goods-row" v-if="orderGoods.goodsName">
           <img
             :src="orderGoods.goodsImage"
-            class="hover-pointer"
             alt=""
-            width="100"
             @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)"
+            @error="$event.target.style.visibility = 'hidden'"
           />
-          <p
-            class="hover-pointer color999"
-            @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)"
-          >
+          <div class="goods-name" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
             {{ orderGoods.goodsName }}
-          </p>
+          </div>
         </div>
+      </div>
 
-        <div class="eval-con">
-          <div>
-            <span class="color999">商品评价：</span>
-            <el-radio-group
-              style="margin-bottom: 5px; color: #999"
-              v-model="orderGoods.grade"
-              type="button"
-              button-style="solid"
-            >
-              <el-radio label="GOOD" disabled>好评</el-radio>
-              <el-radio label="MODERATE" disabled>中评</el-radio>
-              <el-radio label="WORSE" disabled>差评</el-radio>
-            </el-radio-group>
-            <el-input
-              type="textarea"
-              maxlength="500"
-              readonly
-              show-word-limit
-              :rows="4"
-              v-model="orderGoods.content"
-            />
+      <div class="order-card">
+        <h3>物流服务评价</h3>
+        <div class="rate-list">
+          <div class="rate-row">
+            <span>物流评价</span>
+            <el-rate disabled :model-value="Number(orderGoods.deliveryScore) || 0" :colors="rateThemeColors" class="theme-rate" />
           </div>
-          <div style="display: flex; align-items: center">
-            <template v-if="orderGoods.images">
-              <div class="demo-upload-list" v-for="(img, index) in orderGoods.images.split(',')" :key="index">
-                <img :src="img" />
-                <div class="demo-upload-list-cover"><el-icon @click="handleView(img)"><View /></el-icon></div>
-              </div>
-            </template>
+          <div class="rate-row">
+            <span>服务评价</span>
+            <el-rate disabled :model-value="Number(orderGoods.serviceScore) || 0" :colors="rateThemeColors" class="theme-rate" />
           </div>
-          <div style="margin-top: 20px;" v-if="orderGoods.reply || orderGoods.replyImage">
-            <span class="color999">商家回复：</span>
-            <span>{{ orderGoods.reply }}</span>
-            <div style="display: flex; align-items: center">
-              <template v-if="orderGoods.replyImage">
-                <div class="demo-upload-list" v-for="(img, index) in orderGoods.replyImage.split(',')" :key="index">
-                  <img :src="img" />
-                  <div class="demo-upload-list-cover"><el-icon @click="handleView(img)"><View /></el-icon></div>
-                </div>
-              </template>
-            </div>
+          <div class="rate-row">
+            <span>描述评价</span>
+            <el-rate disabled :model-value="Number(orderGoods.descriptionScore) || 0" :colors="rateThemeColors" class="theme-rate" />
           </div>
-
         </div>
-      </li>
-    </ul>
-    <el-dialog title="View Image" v-model="visible">
-      <img :src="previewImage" v-if="visible" style="width: 100%" />
-    </el-dialog>
+      </div>
+
+      <div class="order-card">
+        <h3>评价内容</h3>
+        <p class="eval-text">{{ orderGoods.content || '暂无评价内容' }}</p>
+        <div class="image-list" v-if="orderGoods.images">
+          <img
+            v-for="(img, index) in orderGoods.images.split(',')"
+            :key="index"
+            :src="img"
+            alt=""
+            @click="handleView(img)"
+          />
+        </div>
+      </div>
+
+      <div class="order-card" v-if="orderGoods.reply || orderGoods.replyImage">
+        <h3>商家回复</h3>
+        <p class="eval-text" v-if="orderGoods.reply">{{ orderGoods.reply }}</p>
+        <div class="image-list" v-if="orderGoods.replyImage">
+          <img
+            v-for="(img, index) in orderGoods.replyImage.split(',')"
+            :key="index"
+            :src="img"
+            alt=""
+            @click="handleView(img)"
+          />
+        </div>
+      </div>
+
+      <el-dialog title="查看图片" v-model="visible" width="640px">
+        <img :src="previewImage" v-if="visible" class="preview-img" alt="" />
+      </el-dialog>
     </UserCenterLayout>
   </div>
 </template>
 <script>
-import { View } from '@element-plus/icons-vue';
 import { evaluationDetail } from "@/api/member.js";
 export default {
-  components: { View },
   data() {
     return {
       order: {}, // 订单详情
@@ -102,6 +86,12 @@ export default {
       // el-rate SVG 通过 colors 写入 fill-color，跟随平台主题色
       rateThemeColors: ["var(--theme-color)", "var(--theme-color)", "var(--theme-color)"],
     };
+  },
+  computed: {
+    gradeText () {
+      const map = { GOOD: '好评', MODERATE: '中评', WORSE: '差评' }
+      return map[this.orderGoods.grade] || '评价详情'
+    }
   },
   methods: {
     getDetail() {
@@ -130,103 +120,140 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.delivery-rate {
-  display: flex;
-  align-items: center;
-  margin-top: 20px;
-  min-height: 50px;
-  border-bottom: 1px solid #eee;
-  > div:nth-child(1) {
-    width: 120px;
-    font-weight: bold;
+.add-eval {
+  color: #333;
+}
+
+.order-card {
+  padding: 4px 0 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
+  }
+
+  &:last-of-type {
+    border-bottom: none;
   }
 }
 
-.delivery-rate-items {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
+.status-card {
+  padding-top: 8px;
 }
 
-.delivery-rate-items :deep(.theme-rate.el-rate) {
+.status-text {
+  margin: 0;
+  color: $theme_color;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.status-sn {
+  margin: 6px 0 0;
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+
+  span {
+    margin-left: 16px;
+  }
+}
+
+.goods-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+
+  img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border: 1px solid #f0f0f0;
+    background: #f5f5f5;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+}
+
+.goods-name {
+  color: #333;
+  font-size: 16px;
+  line-height: 22px;
+  word-break: break-all;
+  cursor: pointer;
+
+  &:hover {
+    color: $theme_color;
+  }
+}
+
+.rate-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+}
+
+.rate-row {
+  display: flex;
+  align-items: center;
+  min-width: 180px;
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+
+  span {
+    width: 72px;
+    flex-shrink: 0;
+  }
+}
+
+.rate-row :deep(.theme-rate.el-rate) {
   --el-rate-fill-color: #{$theme_color};
   --el-rate-disabled-fill-color: #{$theme_color};
+  height: 22px;
 }
 
 :deep(.theme-rate .el-rate__icon.is-active) {
   color: $theme_color !important;
 }
-.goods-eval li {
+
+.eval-text {
+  margin: 0;
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.image-list {
   display: flex;
-  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
 
-  .goods-con {
-    width: 30%;
-    padding: 20px;
-    text-align: center;
-    p {
-      word-wrap: wrap;
-      &:hover {
-        color: $theme_color;
-      }
-    }
-  }
-  .eval-con {
-    width: 70%;
-    padding: 20px;
-  }
-}
-
-.demo-upload-list {
-  display: inline-block;
-  width: 60px;
-  height: 60px;
-  text-align: center;
-  line-height: 60px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  overflow: hidden;
-  background: #fff;
-  position: relative;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-  margin-right: 4px;
-  margin-top: 10px;
-}
-.demo-upload-list img {
-  width: 100%;
-  height: 100%;
-}
-.demo-upload-list-cover {
-  display: none;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.6);
-}
-.demo-upload-list:hover .demo-upload-list-cover {
-  display: block;
-}
-.demo-upload-list-cover i {
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-  margin: 0 2px;
-}
-.icon-upload {
-  width: 58px;
-  height: 58px;
-  line-height: 58px;
-  text-align: center;
-  display: inline-block;
-  border: 1px dashed #999;
-  border-radius: 4px;
-  margin-top: 10px;
-  &:hover {
+  img {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
     cursor: pointer;
-    border-color: $theme_color;
   }
+}
+
+.preview-img {
+  display: block;
+  width: 100%;
 }
 </style>

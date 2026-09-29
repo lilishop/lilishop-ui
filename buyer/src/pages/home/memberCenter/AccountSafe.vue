@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <UserCenterLayout title="账户安全" :tabs="['账户安全']">
+    <UserCenterLayout>
       <div class="safeList">
       <!-- 密码 -->
       <div class="safeItem">
@@ -365,7 +365,7 @@ export default {
 
   .wechatQrEmpty {
     color: $light_sub_color;
-    font-size: 12px;
+    font-size: 14px;
     text-align: center;
     padding: 0 8px;
   }
@@ -379,7 +379,7 @@ export default {
   .wechatQrTip {
     margin-top: 10px;
     color: $light_sub_color;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.6;
   }
 </style>

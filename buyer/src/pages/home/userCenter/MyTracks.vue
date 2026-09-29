@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <UserCenterLayout title="我的足迹" :tabs="['我的足迹']">
+    <UserCenterLayout>
       <template #extra>
         <el-button class="del-btn" @click="clearAll" type="primary">删除全部</el-button>
       </template>
@@ -12,9 +12,11 @@
         :key="index"
         @click="goodsDetail(item.id, item.goodsId)"
       >
-        <img :src="item.thumbnail" :alt="item.goodsName" />
-        <p class="ellipsis">{{ item.goodsName }}</p>
-        <p>{{ $filters.unitPrice(item.price, "￥") }}</p>
+        <div class="thumb">
+          <img :src="item.thumbnail" :alt="item.goodsName" />
+        </div>
+        <p class="goods-name">{{ item.goodsName }}</p>
+        <p class="goods-price">{{ $filters.unitPrice(item.price, "￥") }}</p>
         <span class="del-icon" @click.stop="clearById(item.goodsId)">
           <el-icon><Delete /></el-icon>
         </span>
@@ -26,7 +28,7 @@
         v-model:current-page="params.pageNumber"
         v-model:page-size="params.pageSize"
         :total="total"
-        :page-sizes="[10, 20, 30, 40, 50, 100]"
+        :page-sizes="[20, 50, 100]"
         layout="sizes, prev, pager, next, jumper"
         @current-change="changePageNum"
         @size-change="changePageSize"
@@ -49,7 +51,7 @@ export default {
       spinShow: false, // 控制loading是否加载
       params: {
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         order: "desc",
         sort: "updateTime",
       },
@@ -135,61 +137,86 @@ export default {
   margin-bottom: 40px;
 }
 .del-btn {
-  margin: 0 0 10px 15px;
+  margin: 0;
 }
 
 .track-list {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  padding: 0 15px;
-  box-sizing: border-box;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
 
   li {
-    width: 100%;
+    display: flex;
+    flex-direction: column;
     min-width: 0;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
     overflow: hidden;
-    border: 1px solid #eee;
+    background: #fff;
     position: relative;
     box-sizing: border-box;
 
+    &:hover {
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+      .del-icon {
+        display: flex;
+      }
+    }
+  }
+
+  .thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    background: #f5f5f5;
+    overflow: hidden;
+
     img {
       width: 100%;
-      aspect-ratio: 1;
+      height: 100%;
       object-fit: cover;
       display: block;
     }
+  }
 
-    &:hover {
-      cursor: pointer;
-      box-shadow: 1px 1px 3px #999;
-      .del-icon {
-        display: block;
-      }
-    }
-    p {
-      padding: 0 5px;
-      margin: 3px 0;
-    }
-    p:nth-child(2) {
-      color: #999;
-    }
-    p:nth-child(3) {
-      color: $theme_color;
-    }
-    .del-icon {
-      display: none;
-      font-size: 30px;
-      background-color: rgba(0, 0, 0, 0.3);
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      line-height: 40px;
-      text-align: center;
-      right: 0;
-      top: 0;
-      cursor: pointer;
-    }
+  .goods-name {
+    margin: 10px 12px 0;
+    color: #333;
+    font-size: 13px;
+    line-height: 1.4;
+    height: 36px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .goods-price {
+    margin: 8px 12px 12px;
+    color: $theme_color;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .del-icon {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
   }
 }
 .page-size {

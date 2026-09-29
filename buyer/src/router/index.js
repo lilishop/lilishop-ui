@@ -303,7 +303,7 @@ export const router = createRouter({
           path: "MsgDetail",
           name: "MsgDetail",
           component: MsgDetail,
-          meta: { title: "我的消息" },
+          meta: { title: "消息详情" },
         },
         {
           path: "MyOrder",

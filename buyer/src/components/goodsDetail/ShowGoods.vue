@@ -19,6 +19,7 @@
 
           <div
             class="item-detail-img-small"
+            :class="{ 'is-active': imgIndex === index }"
             @mouseover="imgIndex = index"
             v-for="(item, index) in imgList"
             :key="index"
@@ -84,7 +85,7 @@
             >
               <p>
                 <span class="item-price-title" v-if="promotionMap['SECKILL']"
-                  >秒 &nbsp;杀&nbsp;价</span>
+                  >秒杀价</span>
                 <span class="item-price">{{ $filters.unitPrice(skuDetail.promotionPrice, "￥") }}</span>
                 <span class="item-price-old">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
               </p>
@@ -94,9 +95,7 @@
               <!-- 批发价格 -->
               <div v-if="!isECouponGoods && wholesaleNum && wholesaleNum.length">
                 <div class="flex">
-                  <div class="item-price-title">
-                    价 &nbsp;&nbsp;&nbsp;&nbsp;格
-                  </div>
+                  <div class="item-price-title">价格</div>
 
                   <div
                     v-for="(item, index) in wholesalePrice"
@@ -107,7 +106,7 @@
                   </div>
                 </div>
                 <div class="flex">
-                  <div class="item-price-title">起 批 量</div>
+                  <div class="item-price-title">起批量</div>
                   <div
                     v-for="(item, index) in wholesaleNum"
                     :key="index"
@@ -120,15 +119,14 @@
 
               <!-- 普通价格 -->
               <div v-else>
-                <span class="item-price-title"
-                  >价 &nbsp;&nbsp;&nbsp;&nbsp;格</span>
+                <span class="item-price-title">价格</span>
                 <span class="item-price">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
               </div>
             </div>
             <!-- 优惠券展示 -->
             <div class="item-price-coupon-row" v-if="promotionMap['COUPON'].length">
               <div class="Ellipsis">
-                <span class="item-price-title">优 惠 券</span>
+                <span class="item-price-title">优惠券</span>
                 <span>
                   <span
                     class="item-coupon"
@@ -168,7 +166,7 @@
             <!-- 限时折扣 -->
             <div class="item-price-row" v-if="promotionMap['DISCOUNT']">
               <p>
-                <span class="item-price-title">促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
+                <span class="item-price-title">促销</span>
                 <span class="item-promotion">限时折扣</span>
                 <span class="item-desc-pintuan" v-if="promotionMap['DISCOUNT'].discount">
                   享 {{ promotionMap["DISCOUNT"].discount }} 折
@@ -178,7 +176,7 @@
             <!-- 第N件优惠 -->
             <div class="item-price-row" v-if="promotionMap['NTH']">
               <p>
-                <span class="item-price-title">促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
+                <span class="item-price-title">促销</span>
                 <span class="item-promotion">第N件</span>
                 <span class="item-desc-pintuan">
                   第 {{ promotionMap["NTH"].nthNum || promotionMap["NTH"].num }} 件优惠
@@ -188,7 +186,7 @@
             <!-- 拼团 -->
             <div class="item-price-row" v-if="promotionMap['PINTUAN']">
               <p>
-                <span class="item-price-title">拼&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;团</span>
+                <span class="item-price-title">拼团</span>
                 <span class="item-promotion">拼团价</span>
                 <span class="item-desc-pintuan" v-if="promotionMap['PINTUAN'].price">
                   {{ $filters.unitPrice(promotionMap["PINTUAN"].price, "￥") }}
@@ -198,8 +196,7 @@
             <!-- 满减展示 -->
             <div class="item-price-row" v-if="promotionMap['FULL_DISCOUNT']">
               <p>
-                <span class="item-price-title"
-                  >促&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;销</span>
+                <span class="item-price-title">促销</span>
                 <span class="item-promotion">满减</span>
                 <span
                   class="item-desc-pintuan"
@@ -300,7 +297,7 @@
             <div class="item-select-column">
               <div class="add-buy-car">
                 <el-button
-                  type="danger"
+                  class="goods-action-btn is-solid"
                   :loading="loading"
                   :disabled="skuDetail.quantity === 0"
                   @click="pointPay"
@@ -324,7 +321,7 @@
                   >加入购物车</el-button
                 >
                 <el-button
-                  class="goods-action-btn"
+                  class="goods-action-btn is-solid"
                   v-if="promotionMap['PINTUAN']"
                   :loading="loadingPintuan"
                   :disabled="isOutOfStock"
@@ -332,7 +329,7 @@
                   >拼团购买</el-button
                 >
                 <el-button
-                  class="goods-action-btn"
+                  class="goods-action-btn is-solid"
                   :loading="loading1"
                   :disabled="isOutOfStock"
                   @click="buyNow"
@@ -778,23 +775,28 @@ export default {
 .item-detail-show {
   width: 1200px;
   margin: 0 auto;
-  padding: 30px;
+  padding: 24px;
   display: flex;
   flex-direction: row;
+  background: #fff;
+  border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .item-detail-left {
   width: 350px;
-
-  margin-right: 30px;
+  margin-right: 32px;
 }
 
 .item-detail-big-img {
   width: 350px;
   height: 350px;
-  box-shadow: 0px 0px 8px $border_color;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  overflow: hidden;
   cursor: pointer;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
+  background: #fff;
 }
 #dplayer{
     width: 100%;
@@ -807,14 +809,21 @@ export default {
 .item-detail-img-row {
   margin-top: 0;
   display: flex;
+  gap: 8px;
 }
 
 .item-detail-img-small {
-  width: 68px;
-  height: 68px;
-  box-shadow: 0px 0px 8px #ccc;
+  width: 64px;
+  height: 64px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  overflow: hidden;
   cursor: pointer;
-  margin-left: 5px;
+  box-sizing: border-box;
+
+  &.is-active {
+    border-color: $theme_color;
+  }
 }
 
 .item-detail-img-small img {
@@ -838,14 +847,17 @@ export default {
 }
 
 .item-detail-name {
-  @include content_color($light_content_color);
-  font-weight: bold;
+  color: #171A26;
+  font-weight: 600;
   font-size: 20px;
-  line-height: 1.4;
+  line-height: 28px;
 }
 
 .goods-type-tag {
   flex-shrink: 0;
+  --el-tag-bg-color: #fafafa;
+  --el-tag-border-color: #eee;
+  --el-tag-text-color: #666;
 }
 
 .item-detail-express {
@@ -859,17 +871,18 @@ export default {
 /*商品标签*/
 .item-detail-tag {
   padding: 8px 0;
-  font-size: 12px;
+  font-size: 14px;
   color: $theme_color;
 }
 
 /*价格详情等*/
 .item-detail-price-row {
-  padding: 10px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  background: url("../../assets/images/goodsDetail/price-bg.png");
+  background: #fafafa;
+  border-radius: 4px;
 }
 
 .item-price-left {
@@ -878,19 +891,30 @@ export default {
 }
 
 .item-price-title {
-  color: #999999;
+  display: inline-block;
+  width: 56px;
+  margin-right: 12px;
+  color: #666;
   font-size: 14px;
-  margin-right: 15px;
+  text-align: left;
 }
 
 .item-price-row {
-  margin: 5px 0px;
+  margin: 4px 0;
+
+  > div,
+  > p {
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
 }
 
 .item-price {
   color: $theme_color;
-  font-size: 20px;
-  cursor: pointer;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1;
 }
 .item-price-old {
   color: gray;
@@ -925,7 +949,7 @@ export default {
   align-items: center;
   color: $theme_color;
   margin: 5px 0;
-  font-size: 12px;
+  font-size: 14px;
   background-color: var(--theme-tint-12, #ffdedf);
   border: 1px dotted $theme_color;
   cursor: pointer;
@@ -950,7 +974,7 @@ export default {
   margin-right: 5px;
   padding: 0 5px;
   color: $theme_color;
-  font-size: 12px;
+  font-size: 14px;
   background-color: var(--theme-tint-12, #ffdedf);
   border: 1px dotted $theme_color;
   cursor: pointer;
@@ -963,7 +987,7 @@ export default {
   margin-right: 5px;
   padding: 3px;
   color: $theme_color;
-  font-size: 12px;
+  font-size: 14px;
   border: 1px solid $theme_color;
 }
 
@@ -974,22 +998,25 @@ export default {
 }
 
 .item-remarks-sum {
-  width: 70px;
+  min-width: 72px;
   text-align: center;
-  padding: 0 10px;
-  border-left: 1px solid $border_color;
+  padding: 0 4px 0 16px;
+  border-left: 1px solid #eee;
 }
 
 .item-remarks-sum p {
-  color: #999999;
-  font-size: 12px;
-  line-height: 10px;
+  color: #999;
+  font-size: 13px;
+  line-height: 20px;
   text-align: center;
+  margin: 0;
 }
 
 .item-remarks-num {
-  line-height: 18px;
-  color: #005eb7;
+  line-height: 24px;
+  color: #171A26;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .item-select {
@@ -1000,10 +1027,10 @@ export default {
 }
 
 .item-select-title {
-  @include content_color($light_content_color);
+  color: #666;
   font-size: 14px;
-  margin-right: 15px;
-  width: 60px;
+  margin-right: 16px;
+  width: 56px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1033,32 +1060,39 @@ export default {
 }
 
 .item-select-box {
-  padding: 5px;
+  min-height: 36px;
+  padding: 0 16px;
   margin-right: 8px;
-  @include background_color($light_background_color);
-  border: 0.5px solid $border_color;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
   cursor: pointer;
-  @include content_color($light_content_color);
+  color: #171A26;
+  box-sizing: border-box;
 }
 
 .item-select-box:hover {
-  border: 0.5px solid $theme_color;
+  border-color: $theme_color;
+  color: $theme_color;
 }
 
 .item-select-box-active {
-  border: 0.5px solid $theme_color;
+  border-color: $theme_color;
+  background: #fff5f4;
+  color: $theme_color;
 }
 
 .item-select-intro p {
-  margin: 0px;
-  padding: 5px;
+  margin: 0;
+  padding: 8px 0;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .add-buy-car-box {
   width: 100%;
-
-  margin-top: 15px;
-  border-top: 1px dotted $border_color;
+  margin-top: 8px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .e-coupon-after-sale-notice {
@@ -1072,7 +1106,7 @@ export default {
   }
 
   :deep(.el-alert__title) {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.5;
   }
 }
@@ -1107,23 +1141,36 @@ export default {
   }
 
   .goods-action-btn {
-    background-color: #ff475d !important;
-    border-color: #ff475d !important;
-    color: #fff !important;
+    height: 40px;
+    min-width: 140px;
+    padding: 0 24px;
+    border-radius: 4px;
+    font-size: 16px;
+    background: #fff !important;
+    border: 1px solid $theme_color !important;
+    color: $theme_color !important;
 
     &:hover,
     &:focus {
-      background-color: #e63e52 !important;
-      border-color: #e63e52 !important;
+      background: #fff5f4 !important;
+      border-color: $theme_color !important;
+      color: $theme_color !important;
+    }
+
+    &.is-solid {
+      background: $theme_color !important;
       color: #fff !important;
+
+      &:hover,
+      &:focus {
+        background: $theme_color !important;
+        color: #fff !important;
+      }
     }
 
     &.is-disabled,
     &.is-disabled:hover,
     &.is-disabled:focus {
-      background-color: #ff475d !important;
-      border-color: #ff475d !important;
-      color: #fff !important;
       opacity: 0.5;
     }
   }
@@ -1160,9 +1207,16 @@ export default {
   }
 }
 .sell-point {
-  font-size: 12px;
-  color: red;
-  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 22px;
+  color: #999;
+  margin-bottom: 12px;
+}
+
+.inventory {
+  padding-left: 8px;
+  color: #999;
+  font-size: 13px;
 }
 .view-video{
   cursor: pointer;

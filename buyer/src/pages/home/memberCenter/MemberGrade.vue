@@ -1,83 +1,73 @@
 <template>
   <div class="memberGrade">
-    <UserCenterLayout title="我的等级" :tabs="['我的等级']">
-    <div class="summary">
-      <div class="gradeCard">
-        <div class="gradeLeft">
-          <img v-if="currentGrade.gradeImage" class="gradeIcon" :src="currentGrade.gradeImage" alt="等级图标" />
-          <div class="gradeInfo">
-            <div class="gradeNameRow">
-              <span class="gradeNameText">{{ currentGrade.gradeName || '暂无等级' }}</span>
-              <span v-if="currentGradeBenefits.length" class="benefitTagsInline">
-                <el-tag v-for="b in currentGradeBenefits" :key="b.id" class="benefitTag" type="primary">{{ b.benefitName || '-' }}</el-tag>
-              </span>
-            </div>
-            <div class="gradeExp">
-              当前经验值：<span class="num">{{ currentExperience || 0 }}</span>
-            </div>
-            <div class="gradeNext" v-if="nextGrade">
-              距 {{ nextGrade.gradeName }} 还差 <span class="num">{{ diffExperience }}</span> 经验值
-            </div>
-            <div class="gradeNext" v-else>已达最高等级</div>
-          </div>
+    <UserCenterLayout>
+    <div class="grade-card">
+      <img v-if="currentGrade.gradeImage" class="grade-icon" :src="currentGrade.gradeImage" alt="" />
+      <div class="grade-info">
+        <div class="grade-name-row">
+          <span class="grade-name">{{ currentGrade.gradeName || '暂无等级' }}</span>
+          <span v-for="b in currentGradeBenefits" :key="b.id" class="benefit-tag">{{ b.benefitName || '-' }}</span>
         </div>
+        <div class="grade-exp">当前经验值：<span class="num">{{ currentExperience || 0 }}</span></div>
+        <div class="grade-next" v-if="nextGrade">
+          距 {{ nextGrade.gradeName }} 还差 <span class="num">{{ diffExperience }}</span> 经验值
+        </div>
+        <div class="grade-next" v-else>已达最高等级</div>
       </div>
     </div>
 
-    <el-tabs v-model="activeGradeTab">
-      <el-tab-pane label="获取经验值方式" name="rules">
-        <el-table v-loading="rulesLoading" :data="ruleList">
-          <el-table-column label="获取方式" min-width="720">
-            <template #default="{ row }">
-              <div class="ruleItem">
-                <div class="ruleTop">
-                  <div class="ruleName">
-                    <span>{{ row.ruleName || row.ruleKey || '-' }}</span>
-                  </div>
-                  <el-tag v-if="row.completed === true" color="success">已完成</el-tag>
-                  <el-tag v-else color="default">未完成</el-tag>
-                </div>
-                <div class="ruleDesc">{{ getRuleDesc(row.ruleKey) }}</div>
-                <div class="ruleMeta">
-                  <span class="metaItem">单次获得：<b>+{{ row.value == null ? 0 : row.value }}</b></span>
-                  <span v-if="row.maxValue != null && Number(row.maxValue) > 0" class="metaItem">限额：<b>{{ row.maxValue }}</b></span>
-                  <span class="metaItem">已获得：<b>{{ row.gainedExperience == null ? 0 : row.gainedExperience }}</b></span>
-                </div>
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div class="rulesDesc" v-if="rulesDescription">{{ rulesDescription }}</div>
-      </el-tab-pane>
-      <el-tab-pane label="经验值记录" name="logs">
-        <el-table v-loading="logLoading" :data="experienceLogs.records || []">
-          <el-table-column prop="createTime" label="时间" align="center" min-width="160" />
-          <el-table-column label="规则" align="center" min-width="160">
-            <template #default="{ row }">
-              <span>{{ getRuleName(row.ruleKey) }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="变动值" align="center" min-width="120">
-            <template #default="{ row }">
-              <div :style="{ color: getLogDeltaColor(row) }">
-                <span v-if="getLogDeltaSign(row) === '+'">+</span>{{ getLogDeltaAbsValue(row) }}
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div class="grade-pagination">
-          <el-pagination
-            v-model:current-page="params.pageNumber"
-            v-model:page-size="params.pageSize"
-            :total="experienceLogs.total || 0"
-            @current-change="changePage"
-            @size-change="changePageSize"
-            :page-sizes="[10, 20, 50]"
-            layout="total, prev, pager, next, jumper"
-          />
+    <div class="grade-tabs">
+      <div class="grade-tab" :class="{ active: activeGradeTab === 'rules' }" @click="activeGradeTab = 'rules'">获取经验值方式</div>
+      <div class="grade-tab" :class="{ active: activeGradeTab === 'logs' }" @click="activeGradeTab = 'logs'">经验值记录</div>
+    </div>
+
+    <div v-show="activeGradeTab === 'rules'" v-loading="rulesLoading">
+      <empty v-if="!rulesLoading && !ruleList.length" />
+      <div v-else class="rule-list">
+        <div class="rule-item" v-for="row in ruleList" :key="row.ruleKey || row.id">
+          <div class="rule-top">
+            <div class="rule-name">{{ row.ruleName || row.ruleKey || '-' }}</div>
+            <span class="rule-status" :class="{ done: row.completed === true }">{{ row.completed === true ? '已完成' : '未完成' }}</span>
+          </div>
+          <div class="rule-desc">{{ getRuleDesc(row.ruleKey) }}</div>
+          <div class="rule-meta">
+            <span>单次获得 <b>+{{ row.value == null ? 0 : row.value }}</b></span>
+            <span v-if="row.maxValue != null && Number(row.maxValue) > 0">限额 <b>{{ row.maxValue }}</b></span>
+            <span>已获得 <b>{{ row.gainedExperience == null ? 0 : row.gainedExperience }}</b></span>
+          </div>
         </div>
-      </el-tab-pane>
-    </el-tabs>
+      </div>
+      <div class="rules-desc" v-if="rulesDescription">{{ rulesDescription }}</div>
+    </div>
+
+    <div v-show="activeGradeTab === 'logs'" v-loading="logLoading">
+      <empty v-if="!(experienceLogs.records || []).length" />
+      <div v-else class="log-list">
+        <div class="log-head">
+          <span>时间</span>
+          <span>规则</span>
+          <span>变动值</span>
+        </div>
+        <div class="log-row" v-for="(row, index) in experienceLogs.records" :key="row.id || index">
+          <div class="log-time">{{ row.createTime }}</div>
+          <div class="log-rule">{{ getRuleName(row.ruleKey) }}</div>
+          <div class="log-point" :class="getLogDeltaSign(row) === '+' ? 'is-plus' : 'is-minus'">
+            {{ getLogDeltaSign(row) }}{{ getLogDeltaAbsValue(row) }}
+          </div>
+        </div>
+      </div>
+      <div class="grade-pagination">
+        <el-pagination
+          v-model:current-page="params.pageNumber"
+          v-model:page-size="params.pageSize"
+          :total="experienceLogs.total || 0"
+          @current-change="changePage"
+          @size-change="changePageSize"
+          :page-sizes="[20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+        />
+      </div>
+    </div>
     </UserCenterLayout>
 
   </div>
@@ -106,7 +96,7 @@ export default {
       gradeLoading: false,
       params: {
         pageNumber: 1,
-        pageSize: 10
+        pageSize: 20
       },
       experienceLogs: {}
     }
@@ -288,131 +278,220 @@ export default {
 </script>
 
 <style scoped lang="scss">
-h3 {
-  font-size: 16px;
-  margin: 20px 10px;
-}
-
-.summary {
-  margin-bottom: 20px;
-}
-
-.rulesDesc {
-  margin: 10px 0 0 0;
-  padding: 10px 12px;
-  border: 1px solid $border_color;
-  border-radius: 4px;
-  background: #fff;
-  color: $light_sub_color;
-  font-size: 12px;
-  line-height: 1.7;
-}
-
-.gradeCard {
-  padding: 16px;
-  border: 1px solid $border_color;
-  border-radius: 6px;
-  background: #fff;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-.gradeLeft {
+.grade-card {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
 }
 
-.gradeIcon {
-  width: 48px;
-  height: 48px;
+.grade-icon {
+  width: 56px;
+  height: 56px;
   object-fit: contain;
-  border-radius: 4px;
-  background: #fff;
+  flex-shrink: 0;
 }
 
-.gradeNameRow {
+.grade-name-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 10px;
+  gap: 8px;
+}
+
+.grade-name {
+  color: #171A26;
+  font-size: 18px;
+  font-weight: 600;
   line-height: 1.4;
 }
 
-.gradeNameText {
-  font-size: 16px;
-  color: $light_title_color;
-  font-weight: 600;
+.benefit-tag {
+  padding: 0 8px;
+  border-radius: 4px;
+  background: #fff;
+  color: $theme_color;
+  font-size: 14px;
+  line-height: 22px;
 }
 
-.benefitTagsInline {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 8px;
-  vertical-align: middle;
-}
-
-.benefitTag {
-  margin: 0 !important;
-}
-
-.gradeExp,
-.gradeNext {
+.grade-exp,
+.grade-next {
   margin-top: 6px;
-  font-size: 12px;
-  color: #000;
+  color: #666;
+  font-size: 14px;
+  line-height: 22px;
 }
 
 .num {
   color: $theme_color;
   font-size: 16px;
+  font-weight: 600;
 }
 
-.ruleItem {
-  padding: 10px 8px;
+.grade-tabs {
+  display: flex;
+  gap: 24px;
+  margin: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.ruleTop {
+.grade-tab {
+  position: relative;
+  padding: 10px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+
+  &.active {
+    color: $theme_color;
+    font-weight: 600;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: $theme_color;
+    }
+  }
+}
+
+.rule-item {
+  padding: 14px 0;
+  border-top: 1px solid #f0f0f0;
+
+  &:first-child {
+    border-top: none;
+  }
+}
+
+.rule-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
-.ruleName {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: $light_title_color;
+.rule-name {
+  color: #171A26;
+  font-size: 16px;
+  line-height: 22px;
+}
+
+.rule-status {
+  flex-shrink: 0;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: #f5f5f5;
+  color: #999;
   font-size: 14px;
+  line-height: 22px;
+
+  &.done {
+    background: #f6ffed;
+    color: #19be6b;
+  }
 }
 
-.ruleDesc {
+.rule-desc {
   margin-top: 6px;
-  color: $light_sub_color;
-  font-size: 12px;
-  line-height: 1.6;
+  color: #666;
+  font-size: 14px;
+  line-height: 22px;
 }
 
-.ruleMeta {
-  margin-top: 8px;
+.rule-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  color: $light_sub_color;
-  font-size: 12px;
+  margin-top: 8px;
+  color: #666;
+  font-size: 14px;
+  line-height: 22px;
+
+  b {
+    color: $theme_color;
+    font-weight: 600;
+  }
 }
 
-.metaItem b {
-  color: $theme_color;
+.rules-desc {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fafafa;
+  color: #666;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-list {
+  --log-cols: 180px minmax(0, 1fr) 100px;
+}
+
+.log-head,
+.log-row {
+  display: grid;
+  grid-template-columns: var(--log-cols);
+  column-gap: 16px;
+  align-items: start;
+}
+
+.log-head {
+  padding: 0 8px 10px;
+  color: #999;
+  font-size: 13px;
+
+  span:nth-child(n + 2) {
+    text-align: center;
+  }
+}
+
+.log-row {
+  padding: 14px 8px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.log-time,
+.log-rule {
+  color: #171A26;
+}
+
+.log-rule,
+.log-point {
+  text-align: center;
+}
+
+.log-point {
   font-weight: 600;
+
+  &.is-plus {
+    color: #19be6b;
+  }
+
+  &.is-minus {
+    color: $theme_color;
+  }
 }
 
 .grade-pagination {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
-}
+  margin-top: 16px;
 
+  :deep(.el-pagination) {
+    justify-content: flex-end;
+  }
+}
 </style>

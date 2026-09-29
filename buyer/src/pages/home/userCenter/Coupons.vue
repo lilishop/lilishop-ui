@@ -1,7 +1,6 @@
 <template>
   <div class="wrapper">
     <UserCenterLayout
-      title="优惠券列表"
       :tabs="statusNameList"
       :active-tab="activeStatusIndex"
       @tab-change="change"
@@ -13,16 +12,16 @@
           <div>
             <span
               v-if="item.couponType === 'PRICE'"
-              class="fontsize_12 global_color"
+              class="global_color coupon-amount"
               >￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
             <span
               v-if="item.couponType === 'DISCOUNT'"
-              class="fontsize_12 global_color"
+              class="global_color coupon-amount"
               ><span class="price">{{ item.discount }}</span>折</span>
             <span class="describe">满{{ item.consumeThreshold }}元可用</span>
           </div>
           <p>使用范围：{{ useScope(item.scopeType, item.storeName) }}</p>
-          <p>有效期：{{ item.endTime }}</p>
+          <p class="coupon-expire">有效期：{{ formatValidity(item) }}</p>
         </div>
         <b></b>
         <a
@@ -40,6 +39,7 @@
           v-model:current-page="params.pageNumber"
           v-model:page-size="params.pageSize"
           :total="total"
+          :page-sizes="[20, 50, 100]"
           @current-change="changePageNum"
           @size-change="changePageSize"
           layout="total, sizes, prev, pager, next, jumper"
@@ -67,7 +67,7 @@ export default {
       params: {
         // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         memberCouponStatus: "NEW",
       },
       total: 0, // 优惠券总数
@@ -84,13 +84,19 @@ export default {
     getList() {
       // 获取优惠券列表
       this.loading = true;
-      memberCouponList(this.params).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.list = res.result.records;
-          this.total = res.result.total;
-        }
-      });
+      memberCouponList(this.params)
+        .then((res) => {
+          this.loading = false;
+          if (res.success) {
+            this.list = res.result.records || [];
+            this.total = res.result.total || 0;
+          }
+        })
+        .catch(() => {
+          this.loading = false;
+          this.list = [];
+          this.total = 0;
+        });
     },
     // 切换优惠券状态
     change(index) {
@@ -139,6 +145,25 @@ export default {
       }
       return `${shop}${goods}可用`;
     },
+    formatValidity(item) {
+      const start = this.formatCouponTime(item && item.startTime);
+      const end = this.formatCouponTime(item && item.endTime);
+      if (start && end) return `${start} 至 ${end}`;
+      if (end) return `至 ${end}`;
+      if (start) return `${start} 起`;
+      return "长期有效";
+    },
+    formatCouponTime(value) {
+      if (!value) return "";
+      const text = String(value).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(text)) {
+        return text.slice(0, 16);
+      }
+      const date = new Date(text);
+      if (Number.isNaN(date.getTime())) return text;
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    },
   },
   mounted() {
     this.getList();
@@ -150,19 +175,31 @@ export default {
 @import "../../../assets/styles/coupon.scss";
 .coupon-item {
   overflow: hidden;
-  height: 145px;
+  height: auto;
+  min-height: 168px;
   margin-left: 0;
   $claim-width: 55px;
 
   .c-left {
     width: calc(100% - #{$claim-width});
     box-sizing: border-box;
-    padding: 20px;
+    padding: 16px 16px 14px;
+
+    .coupon-amount {
+      font-size: 14px;
+    }
+
+    .describe {
+      font-size: 14px;
+    }
 
     p {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 14px;
+      overflow: visible;
+      text-overflow: unset;
+      white-space: normal;
+      word-break: break-all;
+      line-height: 20px;
     }
   }
 

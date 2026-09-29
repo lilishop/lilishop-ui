@@ -1,84 +1,102 @@
 <template>
   <div class="order-detail">
-    <UserCenterLayout title="售后详情" :tabs="['售后详情']">
-    <!-- 操作按钮 -->
-    <el-card class="mb_10" shadow="never" v-if="(afterSale.serviceStatus == 'PASS' &&
-          afterSale.serviceType != 'RETURN_MONEY') || (afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel)">
-      <el-button
-        @click="openModal"
-        v-if="afterSale.serviceStatus == 'PASS' && afterSale.serviceType != 'RETURN_MONEY'"
-        size="small"
-        class="submit-logistics-btn"
-      >提交物流</el-button>&nbsp;
-      <el-button type="danger" @click="cancel(afterSale.sn)" v-if="afterSale.afterSaleAllowOperationVO && afterSale.afterSaleAllowOperationVO.cancel" size="small">取消售后</el-button>
-    </el-card>
-    <div class="order-card">
-      <h3>{{afterSale.serviceName}}</h3>
-      <p class="global_color fontsize_18">{{ afterSale.orderStatusValue }}</p>
-      <p class="order-meta">
-        <span>售后单号：{{ afterSale.sn }} &nbsp;&nbsp;&nbsp;订单号：{{ afterSale.orderSn }}</span>
-        <span class="order-meta-time">创建时间：{{ afterSale.createTime }}</span>
-      </p>
-      <div class="service-after">
-        <div>
-          本次售后服务由<span>{{afterSale.storeName}}</span>为您提供
+    <UserCenterLayout>
+    <div class="order-card status-card" v-if="afterSale.sn">
+      <div class="status-head">
+        <div class="status-main">
+          <p class="status-text">{{ afterSale.serviceName }}</p>
+          <p class="status-sn">
+            售后单号：{{ afterSale.sn }}
+            <span>订单号：{{ afterSale.orderSn }}</span>
+          </p>
         </div>
-        <div class="service-after-goods">
-          <img :src="afterSale.goodsImage" alt="" width="60" height="60">
-          <span>{{afterSale.goodsName}}</span>
+        <div class="status-side">
+          <div class="operation-time">创建时间：{{ afterSale.createTime }}</div>
+          <div class="status-actions" v-if="canSubmitLogistics || canCancel">
+            <button v-if="canSubmitLogistics" type="button" class="op-btn" @click="openModal">提交物流</button>
+            <button v-if="canCancel" type="button" class="text-link" @click="cancel(afterSale.sn)">取消售后</button>
+          </div>
+        </div>
+      </div>
+      <div class="goods-row">
+        <img :src="afterSale.goodsImage" alt="" @error="$event.target.style.visibility = 'hidden'">
+        <div class="goods-info">
+          <div class="goods-name">{{ afterSale.goodsName }}</div>
+          <div class="store-line">
+            本次售后服务由<span @click="shopPage(afterSale.storeId)">{{ afterSale.storeName }}</span>为您提供
+          </div>
         </div>
       </div>
     </div>
-    <div class="order-card">
+    <div class="order-card" v-if="logList.length">
       <h3>售后进程</h3>
-      <el-steps class="progress" :current="logList.length" direction="vertical">
-        <el-step           :content="'操作人：'+ log.operatorName + '   ' + log.createTime"
+      <el-steps
+        class="progress"
+        :active="logList.length - 1"
+        direction="vertical"
+      >
+        <el-step
           :title="log.message"
+          :description="logDesc(log)"
           v-for="(log, index) in logList"
           :key="index"
         ></el-step>
       </el-steps>
     </div>
     <div class="order-card">
-      <h3 class="mb_10">服务单信息</h3>
-      <table border="1" cellpadding='0' cellspacing="0">
-        <tbody>
-        <tr>
-          <td>退款方式</td><td>{{afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款'}}</td>
-        </tr>
-        <tr>
-          <td>申请退款金额</td><td>{{ $filters.unitPrice(afterSale.applyRefundPrice, '￥') }}</td>
-        </tr>
-        <tr v-if="afterSale.actualRefundPrice">
-          <td>实际退款金额</td><td>{{ $filters.unitPrice(afterSale.actualRefundPrice, '￥') }}</td>
-        </tr>
+      <h3>服务单信息</h3>
+      <div class="info-list">
+        <div class="info-row">
+          <span class="label">退款方式</span>
+          <span>{{ afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">申请退款金额</span>
+          <span>{{ $filters.unitPrice(afterSale.applyRefundPrice, '￥') }}</span>
+        </div>
+        <div class="info-row" v-if="afterSale.actualRefundPrice">
+          <span class="label">实际退款金额</span>
+          <span>{{ $filters.unitPrice(afterSale.actualRefundPrice, '￥') }}</span>
+        </div>
         <template v-if="afterSale.refundWay === 'OFFLINE'">
-          <tr>
-            <td>退款开户行</td><td>{{afterSale.bankDepositName}}</td>
-          </tr>
-          <tr>
-            <td>退款开户名</td><td>{{afterSale.bankAccountName}}</td>
-          </tr>
-          <tr>
-            <td>退款卡号</td><td>{{afterSale.bankAccountNumber}}</td>
-          </tr>
+          <div class="info-row">
+            <span class="label">退款开户行</span>
+            <span>{{ afterSale.bankDepositName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">退款开户名</span>
+            <span>{{ afterSale.bankAccountName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">退款卡号</span>
+            <span>{{ afterSale.bankAccountNumber }}</span>
+          </div>
         </template>
-        <tr>
-          <td>商品处理方式</td><td>{{afterSale.serviceType == 'RETURN_MONEY' ? '退款' : '退货'}}</td>
-        </tr>
-        <tr>
-          <td>退款原因</td><td>{{afterSale.reasonName}}</td>
-        </tr>
-        <tr>
-          <td>问题描述</td><td>{{afterSale.problemDesc}}</td>
-        </tr>
-        </tbody>
-      </table>
+        <div class="info-row">
+          <span class="label">商品处理方式</span>
+          <span>{{ afterSale.serviceType == 'RETURN_MONEY' ? '退款' : '退货' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">退款原因</span>
+          <span>{{ afterSale.reasonName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">问题描述</span>
+          <span>{{ afterSale.problemDesc }}</span>
+        </div>
+      </div>
     </div>
     <div class="order-card" v-if="afterSale.afterSaleImage">
-      <h3 class="mb_10">图片信息</h3>
-      <div v-for="img in afterSale.afterSaleImage.split(',')" :key="img">
-        <img :src="img" width="200" height="200" @click="perviewImg(img)" class="hover-pointer" alt="">
+      <h3>图片信息</h3>
+      <div class="image-list">
+        <img
+          v-for="img in afterSale.afterSaleImage.split(',')"
+          :key="img"
+          :src="img"
+          @click="perviewImg(img)"
+          class="hover-pointer"
+          alt=""
+        >
       </div>
     </div>
     <el-dialog v-model="logisticsShow" width="530">
@@ -144,6 +162,14 @@ export default {
       submitLoading: false // 提交加载状态
     };
   },
+  computed: {
+    canSubmitLogistics () {
+      return this.afterSale.serviceStatus == 'PASS' && this.afterSale.serviceType != 'RETURN_MONEY'
+    },
+    canCancel () {
+      return this.afterSale.afterSaleAllowOperationVO && this.afterSale.afterSaleAllowOperationVO.cancel
+    }
+  },
   methods: {
     getDetail () { // 售后详情
       afterSaleDetail(this.$route.query.sn).then(res => {
@@ -174,8 +200,22 @@ export default {
     },
     getLog () { // 获取售后日志
       afterSaleLog(this.$route.query.sn).then(res => {
-        this.logList = res.result;
+        this.logList = (res.result || []).slice().sort((a, b) => {
+          return new Date(a.createTime).getTime() - new Date(b.createTime).getTime()
+        })
       })
+    },
+    logDesc (log) {
+      const operator = log.operatorName ? `操作人：${log.operatorName}` : ''
+      return [operator, log.createTime].filter(Boolean).join('  ')
+    },
+    shopPage (id) {
+      if (!id) return
+      const routeUrl = this.$router.resolve({
+        path: '/merchant',
+        query: { id }
+      })
+      window.open(routeUrl.href, '_blank')
     },
     filterOrderStatus (status) { // 获取订单状态中文
       const ob = this.afterSaleStatusList.filter(e => { return e.status === status });
@@ -240,97 +280,235 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.order-detail {
+  color: #333;
+}
+
 .order-card {
-  padding: 10px;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #e8eaec;
-  position: relative;
-  .global_color {
+  padding: 4px 0 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.status-card {
+  padding-top: 8px;
+}
+
+.status-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.status-text {
+  margin: 0;
+  color: $theme_color;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.status-sn {
+  margin: 6px 0 0;
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+
+  span {
+    margin-left: 16px;
+  }
+}
+
+.status-side {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.operation-time {
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.status-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.goods-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+
+  img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border: 1px solid #f0f0f0;
+    background: #f5f5f5;
+    flex-shrink: 0;
+  }
+}
+
+.goods-info {
+  min-width: 0;
+}
+
+.goods-name {
+  color: #333;
+  font-size: 16px;
+  line-height: 22px;
+  word-break: break-all;
+}
+
+.store-line {
+  margin-top: 6px;
+  color: #666;
+  font-size: 14px;
+  line-height: 22px;
+
+  span {
+    margin: 0 4px;
+    color: #438cde;
+    cursor: pointer;
+
+    &:hover {
+      color: $theme_color;
+    }
+  }
+}
+
+.progress {
+  max-width: 640px;
+  margin: 4px 0 0;
+
+  :deep(.el-step.is-vertical) {
+    padding-bottom: 20px;
+  }
+
+  :deep(.el-step.is-vertical:last-child) {
+    padding-bottom: 0;
+  }
+
+  :deep(.el-step__head.is-finish) {
+    color: #c0c4cc;
+    border-color: #c0c4cc;
+  }
+
+  :deep(.el-step__title.is-finish),
+  :deep(.el-step__description.is-finish) {
+    color: #909399;
+    font-weight: 400;
+  }
+
+  :deep(.el-step__head.is-process) {
+    color: $theme_color;
+    border-color: $theme_color;
+  }
+
+  :deep(.el-step__title.is-process),
+  :deep(.el-step__description.is-process) {
     color: $theme_color;
   }
-  p {
-    color: #999;
-    margin: 3px;
+}
+
+.info-list {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  min-height: 44px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 14px;
+  line-height: 22px;
+
+  &:first-child {
+    border-top: none;
   }
-  .order-meta {
+
+  span {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    padding: 10px 16px;
+    color: #171A26;
+  }
 
-    .order-meta-time {
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-  }
-  h3 {
-    font-weight: normal;
-    font-size: 16px;
-  }
-  &:last-child{
-    border: none;
+  .label {
+    background: #fafafa;
+    color: #666;
   }
 }
-.service-after {
-  border: 1px solid #eee;
+
+.image-list {
   display: flex;
-  height: 80px;
-  padding: 10px;
-  >div:nth-child(1) {
-    width: 400px;
-    font-size: 15px;
-    font-weight: bold;
-    text-align: center;
-    line-height: 60px;
-    span{color: $theme_color;}
-    border-right: 1px solid #eee;
-  }
-  >div:nth-child(2){
-    padding-left: 15px;
-  }
-  .service-after-goods {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  flex-wrap: wrap;
+  gap: 12px;
 
-    img {
-      flex-shrink: 0;
-    }
-
-    span {
-      color: #999;
-    }
-  }
-}
-/** 售后进度条 */
-.progress {
-  margin: 15px 0;
-}
-table{
-  border-color: #eee;
-  width: 100%;
-  color: #999;
-  tr{
-    td:nth-child(1){
-      width: 200px;
-    }
-  }
-  td{
-    padding: 5px;
+  img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+    cursor: pointer;
   }
 }
 
-:deep(.submit-logistics-btn) {
-  background-color: #ff9900 !important;
-  border-color: #ff9900 !important;
-  color: #fff !important;
+.op-btn {
+  min-width: 96px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid $theme_color;
+  border-radius: 4px;
+  background: $theme_color;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 30px;
+  cursor: pointer;
 
-  &:hover,
-  &:focus {
-    background-color: #e68a00 !important;
-    border-color: #e68a00 !important;
-    color: #fff !important;
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.text-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #171A26;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+
+  &:hover {
+    color: $theme_color;
   }
 }
 </style>

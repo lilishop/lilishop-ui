@@ -1,78 +1,85 @@
 <template>
   <div class="wrapper">
-    <UserCenterLayout title="我的售后" :tabs="['我的售后']">
+    <UserCenterLayout
+      :tabs="changeWay.map((item) => item.name)"
+      :active-tab="activeTab"
+      @tab-change="change"
+    >
       <template #extra>
-        <el-input
-          class="width_300"
-          
-          
-          v-model="params.keywords"
-          @keyup.enter="getList"
-          placeholder="请输入订单号搜索"
-        />
+        <div class="order-search">
+          <el-input
+            v-model="params.keywords"
+            size="large"
+            @keyup.enter="getList"
+            placeholder="输入订单号搜索"
+          />
+          <el-button type="primary" @click="getList">搜索</el-button>
+        </div>
       </template>
     <!-- 列表 -->
     <empty v-if="orderList.length === 0"/>
     <div class="order-content" v-else>
-      <template v-for="(order, onderIndex) in orderList" :key="order.sn || onderIndex">
-        <div class="order-list">
-          <div class="order-header">
-            <div>
-              <div v-if="order.serviceStatus">{{ filterOrderStatus(order.serviceStatus) }}</div>
-              <div>
-                售后单号：{{ order.sn }} &nbsp; &nbsp; &nbsp;{{ order.createTime }}
-                &nbsp; &nbsp;{{ $filters.secrecyMobile( order.memberName ) }}
+      <div class="order-cols">
+        <span>订单详情</span>
+        <span>金额</span>
+        <span>操作</span>
+      </div>
+      <div
+        class="order-list"
+        v-for="(order, orderIndex) in orderList"
+        :key="order.sn || orderIndex"
+      >
+        <div class="order-header">
+          <div class="order-sn">
+            {{ order.createTime }}<span>售后单号 {{ order.sn }}</span><span class="order-store" @click="shopPage(order.storeId)">{{ order.storeName }}</span>
+          </div>
+          <div class="order-status">{{ filterOrderStatus(order.serviceStatus) }}</div>
+        </div>
+        <div class="order-body">
+          <div class="col-detail">
+            <div class="goods-item">
+              <div class="goods-thumb">
+                <img
+                  @click="goodsDetail(order.skuId, order.goodsId)"
+                  class="hover-color"
+                  :src="order.goodsImage"
+                  alt=""
+                  @error="$event.target.style.visibility = 'hidden'"
+                />
               </div>
-            </div>
-            <div>
-              <span>申请退款金额：<span class="global_color">{{ $filters.unitPrice(order.applyRefundPrice, "￥") }}</span></span>
+              <div class="goods-info">
+                <div class="goods-name hover-color" @click="goodsDetail(order.skuId, order.goodsId)">{{ order.goodsName }}</div>
+                <div class="goods-num">共{{ order.num }}件</div>
+              </div>
             </div>
           </div>
-          <div class="order-body">
-            <div class="goods-list">
-              <img @click="goodsDetail(order.skuId, order.goodsId)" class="hover-color" :src="order.goodsImage" alt=""/>
-
-              <div>
-                <div class="hover-color" @click="goodsDetail(order.skuId, order.goodsId)">{{ order.goodsName }}</div>
-                <div class="mt_10"> x {{ order.num }}
-                </div>
-              </div>
-            </div>
-            <div>
-              <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
-            </div>
-            <div class="order-actions">
-              <!-- 订单基础操作 -->
-              <el-button
-                @click="goDetail(order.sn)"
-                type="warning"
-                size="small"
-                class="after-sale-action-btn"
-              >售后详情</el-button>
-              <el-button
-                @click="openModal(order)"
-                v-if="order.serviceStatus == 'PASS' && order.serviceType != 'RETURN_MONEY'"
-                size="small"
-                class="after-sale-action-btn submit-logistics-btn"
-              >提交物流</el-button>
-              <el-button
-                @click="cancel(order.sn)"
-                type="danger"
-                v-if="order.afterSaleAllowOperationVO.cancel"
-                size="small"
-                class="after-sale-action-btn"
-              >取消售后</el-button>
-            </div>
+          <div class="col-amount">
+            <div class="order-amount">{{ $filters.unitPrice(order.applyRefundPrice, "￥") }}</div>
+          </div>
+          <div class="col-ops">
+            <button
+              v-if="order.serviceStatus == 'PASS' && order.serviceType != 'RETURN_MONEY'"
+              type="button"
+              class="op-btn"
+              @click="openModal(order)"
+            >提交物流</button>
+            <button type="button" class="text-link" @click="goDetail(order.sn)">售后详情</button>
+            <button
+              v-if="order.afterSaleAllowOperationVO && order.afterSaleAllowOperationVO.cancel"
+              type="button"
+              class="text-link"
+              @click="cancel(order.sn)"
+            >取消售后</button>
           </div>
         </div>
-      </template>
+      </div>
       <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
     </div>
     <!-- 分页 -->
     <div class="page-size">
       <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
-        :total="total" @current-change="changePageNum"
-            @size-change="changePageSize" layout="sizes, prev, pager, next, jumper"></el-pagination>
+        :total="total" :page-sizes="[20, 50, 100]" @current-change="changePageNum"
+            @size-change="changePageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
     </div>
     </UserCenterLayout>
     <el-dialog v-model="logisticsShow" width="530">
@@ -135,7 +142,8 @@ export default {
       orderList: [], // 订单列表
       params: { // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
+        keywords: '',
         sn: '',
         sort: 'createTime',
         order: 'desc'
@@ -158,7 +166,14 @@ export default {
         logisticsNo: [{required: true, message: '请填写物流编号'}],
         mDeliverTime: [{required: true, message: '请选择发货时间'}]
       },
-      submitLoading: false // 提交加载状态
+      submitLoading: false, // 提交加载状态
+      changeWay: [
+        { name: '全部', status: '' },
+        { name: '申请中', status: 'APPLY' },
+        { name: '通过', status: 'PASS' },
+        { name: '完成售后', status: 'COMPLETE' },
+      ],
+      activeTab: 0,
     };
   },
   mounted() {
@@ -203,6 +218,17 @@ export default {
       });
       window.open(routeUrl.href, '_blank');
     },
+    change(index) {
+      this.activeTab = index
+      this.params.pageNumber = 1
+      const current = this.changeWay[index]
+      if (!current || !current.status) {
+        delete this.params.serviceStatus
+      } else {
+        this.params.serviceStatus = current.status
+      }
+      this.getList()
+    },
     getList() { // 获取售后列表
       this.spinShow = true;
       let params = JSON.parse(JSON.stringify(this.params))
@@ -227,7 +253,7 @@ export default {
       const ob = this.afterSaleStatusList.filter(e => {
         return e.status === status
       });
-      return ob[0].name
+      return ob && ob[0] ? ob[0].name : status
     },
     // 获取物流公司列表
     getCompany() {
@@ -275,109 +301,220 @@ export default {
   margin-bottom: 40px;
 }
 
-.box {
-  overflow: hidden;
+.order-search {
+  display: flex;
+  align-items: center;
+  width: 330px;
+
+  :deep(.el-input) {
+    flex: 1;
+  }
+
+  :deep(.el-button) {
+    margin-left: 8px;
+  }
+}
+
+.order-content {
+  --order-cols: minmax(0, 1fr) 120px 120px;
+  --order-gap: 12px;
+  padding-top: 14px;
 }
 
 .page-size {
-  margin: 15px 0px;
+  margin: 15px 0;
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+
+  :deep(.el-pagination) {
+    justify-content: flex-end;
+  }
 }
 
-/** 订单列表 */
+.order-cols {
+  display: grid;
+  grid-template-columns: var(--order-cols);
+  column-gap: var(--order-gap);
+  align-items: center;
+  padding: 0 16px 10px;
+  color: #999;
+  font-size: 13px;
+
+  span:first-child {
+    padding-left: 72px;
+  }
+
+  span:nth-child(n + 2) {
+    text-align: center;
+  }
+}
+
 .order-list {
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  margin-bottom: 10px;
-
-  &:hover {
-    .del-btn {
-      visibility: visible;
-    }
-  }
-
-  .del-btn {
-    visibility: hidden;
-  }
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #fff;
+  overflow: hidden;
 
   .order-header {
+    display: grid;
+    grid-template-columns: var(--order-cols);
+    column-gap: var(--order-gap);
+    align-items: center;
+    padding: 10px 16px;
+    background: #f7f7f7;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .order-sn {
+    grid-column: 1 / 3;
     display: flex;
     align-items: center;
-    padding: 10px;
-    justify-content: space-between;
-    border-bottom: 1px solid #ddd;
+    min-width: 0;
+    font-size: 14px;
+    color: #171A26;
+    line-height: 1.5;
 
-    > div:nth-child(1) > div:nth-child(2) {
-      font-size: 12px;
-      color: #999;
-      margin-top: 3px;
+    span {
+      margin-left: 16px;
     }
+  }
+
+  .order-store {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #438cde;
+    cursor: pointer;
+
+    &:hover {
+      color: $theme_color;
+    }
+  }
+
+  .order-status {
+    grid-column: 3;
+    min-width: 0;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
   }
 
   .order-body {
-    display: flex;
-    justify-content: space-between;
-    color: #999;
-    padding: 10px;
+    display: grid;
+    grid-template-columns: var(--order-cols);
+    column-gap: var(--order-gap);
+    align-items: center;
+    padding: 14px 16px;
+  }
 
-    > div:nth-child(2) {
-      width: 150px;
-      text-align: center;
+  .goods-item {
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: start;
+    width: 100%;
+    min-width: 0;
+  }
 
-      span {
-        color: #438cde;
-        cursor: pointer;
+  .goods-thumb {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+    background: #f5f5f5;
 
-        &:hover {
-          color: $theme_color;
-        }
-      }
-
-      .el-icon {
-        color: #ff8f23;
-        cursor: pointer;
-
-        &:hover {
-          color: $theme_color;
-        }
-      }
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
+  }
 
-    .order-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-width: 100px;
+  .goods-info {
+    min-width: 0;
+    overflow: hidden;
+  }
 
-      .after-sale-action-btn {
-        display: block;
-        margin: 0;
-        min-width: 88px;
-      }
+  .goods-name {
+    max-width: 100%;
+    color: #333;
+    font-size: 16px;
+    line-height: 22px;
+    max-height: 44px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    word-break: break-all;
+  }
 
-      :deep(.submit-logistics-btn) {
-        background-color: #ff9900 !important;
-        border-color: #ff9900 !important;
-        color: #fff !important;
+  .goods-num {
+    margin-top: 6px;
+    color: #999;
+    font-size: 14px;
+    line-height: 1.4;
+  }
 
-        &:hover,
-        &:focus {
-          background-color: #e68a00 !important;
-          border-color: #e68a00 !important;
-          color: #fff !important;
-        }
-      }
+  .col-amount,
+  .col-ops {
+    text-align: center;
+  }
+
+  .order-amount {
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .col-ops {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .op-btn {
+    min-width: 96px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid $theme_color;
+    border-radius: 4px;
+    background: $theme_color;
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 30px;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .text-link {
+    border: none;
+    background: none;
+    padding: 0;
+    color: #171A26;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 22px;
+    cursor: pointer;
+
+    &:hover {
+      color: $theme_color;
     }
   }
 }
 
-.goods-list {
-  // width: 500px;
+.modal-goods {
   display: flex;
+  padding: 5px;
   margin-bottom: 10px;
 
   img {
@@ -389,9 +526,5 @@ export default {
   > div {
     flex: 1;
   }
-}
-
-.modal-goods {
-  padding: 5px;
 }
 </style>

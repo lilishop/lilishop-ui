@@ -193,7 +193,7 @@ export default {
   .qrcode-status-tip {
     margin-top: 8px;
     color: #909399;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .intro {

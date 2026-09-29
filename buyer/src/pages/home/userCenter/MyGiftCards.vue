@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper my-gift-cards">
-    <UserCenterLayout title="我的礼品卡" :tabs="['我的礼品卡']">
+    <UserCenterLayout>
 
     <div class="bind-section mb_20">
       <div class="section-title">兑换礼品卡</div>
@@ -11,7 +11,6 @@
         <el-form-item label="兑换码" prop="cardSecret" label-width="70px">
           <el-input
             v-model="bindForm.cardSecret"
-            type="password"
             placeholder="请输入兑换码（卡密）"
             maxlength="128"
             style="width: 220px"
@@ -75,7 +74,7 @@
     <div class="page-size">
       <el-pagination         v-model:current-page="params.pageNumber"
         v-model:page-size="params.pageSize"
-        :page-sizes="[10, 20, 50]"
+        :page-sizes="[20, 50, 100]"
         :total="total"
         @current-change="changePage"
         @size-change="changePageSize"
@@ -111,7 +110,7 @@ export default {
       list: [],
       params: {
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         sort: "createTime",
         order: "desc",
         memberCardStatus: "AVAILABLE",
@@ -372,12 +371,12 @@ export default {
   }
   .gcc-face {
     margin-top: 8px;
-    font-size: 13px;
+    font-size: 14px;
     opacity: 0.95;
   }
   .gcc-cardno {
     margin-top: 22px;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: 0.02em;
     opacity: 0.75;
     word-break: break-all;
@@ -393,7 +392,7 @@ export default {
   }
   .gcc-expire {
     margin-top: 10px;
-    font-size: 12px;
+    font-size: 14px;
     opacity: 0.9;
     white-space: nowrap;
   }

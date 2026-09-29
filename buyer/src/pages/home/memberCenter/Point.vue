@@ -1,22 +1,32 @@
 <template>
   <div class="point">
-    <UserCenterLayout title="我的积分" :tabs="['我的积分']">
-    <div class="point-content">
-      <span>剩余积分：<span>{{ pointObj.point || 0 }}</span></span>
-      <span>累计获得：<span>{{ pointObj.totalPoint || 0 }}</span></span>
+    <UserCenterLayout>
+    <div class="point-summary">
+      <div class="point-stat">
+        <div class="label">剩余积分</div>
+        <div class="value">{{ pointObj.point || 0 }}</div>
+      </div>
+      <div class="point-stat">
+        <div class="label">累计获得</div>
+        <div class="value">{{ pointObj.totalPoint || 0 }}</div>
+      </div>
     </div>
     <h3>积分日志</h3>
-    <el-table :data="logData.records || []">
-      <el-table-column prop="content" label="日志内容" align="center" />
-      <el-table-column prop="createTime" label="时间" align="center" />
-      <el-table-column label="积分明细" align="center">
-        <template #default="{ row }">
-          <div :style="{ color: row.pointType === 'INCREASE' ? 'green' : 'red' }">
-            <span v-if="row.pointType === 'INCREASE'">+</span>{{ row.variablePoint }}
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
+    <empty v-if="!(logData.records || []).length" />
+    <div v-else class="log-list">
+      <div class="log-head">
+        <span>日志内容</span>
+        <span>时间</span>
+        <span>积分明细</span>
+      </div>
+      <div class="log-row" v-for="(row, index) in logData.records" :key="row.id || index">
+        <div class="log-content">{{ row.content }}</div>
+        <div class="log-time">{{ row.createTime }}</div>
+        <div class="log-point" :class="row.pointType === 'INCREASE' ? 'is-plus' : 'is-minus'">
+          <span v-if="row.pointType === 'INCREASE'">+</span>{{ row.variablePoint }}
+        </div>
+      </div>
+    </div>
     <!-- 分页 -->
     <div class="point-pagination">
       <el-pagination
@@ -25,8 +35,8 @@
         :total="logData.total"
         @current-change="changePage"
         @size-change="changePageSize"
-        :page-sizes="[10, 20, 50]"
-        layout="total, prev, pager, next, jumper"
+        :page-sizes="[20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
       />
     </div>
     </UserCenterLayout>
@@ -44,7 +54,7 @@ export default {
       loading: false, // 请求接口加载框
       params: { // 积分列表请求参数
         pageNumber: 1,
-        pageSize: 10
+        pageSize: 20
       },
     }
   },
@@ -77,28 +87,101 @@ export default {
 </script>
 <style lang="scss" scoped>
 h3 {
-  font-size: 16px;
-  margin: 20px 10px;
+  margin: 8px 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
 }
 
-.point-content {
+.point-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.point-stat {
+  flex: 1;
+  padding: 16px 20px;
+  background: #fafafa;
+  border-radius: 8px;
+
+  .label {
+    color: #666;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .value {
+    margin-top: 4px;
+    color: $theme_color;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+}
+
+.log-list {
+  --log-cols: minmax(0, 1.6fr) 180px 100px;
+}
+
+.log-head,
+.log-row {
+  display: grid;
+  grid-template-columns: var(--log-cols);
+  column-gap: 16px;
+  align-items: start;
+}
+
+.log-head {
+  padding: 0 8px 10px;
+  color: #999;
+  font-size: 13px;
+
+  span:nth-child(n + 2) {
+    text-align: center;
+  }
+}
+
+.log-row {
+  padding: 14px 8px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.log-content {
+  min-width: 0;
+  color: #171A26;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-time {
   text-align: center;
-  margin-bottom: 30px;
+  color: #171A26;
+}
 
-  > span {
-    color: #999;
-    margin-right: 100px;
+.log-point {
+  text-align: center;
+  font-weight: 600;
 
-    span {
-      color: $theme_color;
-      font-size: 24px;
-    }
+  &.is-plus {
+    color: #19be6b;
+  }
+
+  &.is-minus {
+    color: $theme_color;
   }
 }
 
 .point-pagination {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
+  margin-top: 16px;
+
+  :deep(.el-pagination) {
+    justify-content: flex-end;
+  }
 }
 </style>

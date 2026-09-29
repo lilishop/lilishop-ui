@@ -1,5 +1,5 @@
 <template>
-  <div style="background: #fff">
+  <div class="goods-detail-page">
     <BaseHeader></BaseHeader>
     <Search></Search>
     <div class="shop-item-path">
@@ -178,7 +178,10 @@ export default {
           arr.push(e.id);
         }
       });
-      return location.origin + "/goodsList?categoryId=" + arr.toString();
+      return {
+        path: "/goodsList",
+        query: { categoryId: arr.toString() },
+      };
     },
     async collect () {
       // 收藏店铺
@@ -214,10 +217,14 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.goods-detail-page {
+  background: #f5f5f5;
+}
+
 .shop-item-path {
-  height: 38px;
-  @include background_color($light_background_color);
-  color: #2c2c2c;
+  height: 44px;
+  background: transparent;
+  color: #666;
 }
 
 .shop-nav-container {
@@ -230,51 +237,65 @@ export default {
 
   :deep(.el-breadcrumb) {
     line-height: 1;
+    font-size: 14px;
+  }
+
+  :deep(.el-breadcrumb__inner) {
+    color: #666;
+    font-weight: 400;
+  }
+
+  :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+    color: #171A26;
   }
 
   .store-collect {
     position: absolute;
-    right: 20px;
+    right: 0;
     top: 50%;
     transform: translateY(-50%);
-    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #171A26;
+    font-size: 14px;
 
-    span:not(.store-collect-btn):not(.contact-service-btn) {
+    .store-collect-btn,
+    .contact-service-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      color: #171A26;
+
       &:hover {
-        cursor: pointer;
         color: $theme_color;
       }
     }
 
-    .store-collect-btn,
-    .contact-service-btn {
-      cursor: pointer;
-    }
-
     .store-collect-btn {
       .store-collect-icon {
-        color: #666;
-        vertical-align: middle;
+        color: #999;
+        font-size: 16px;
       }
 
+      &.is-collected,
       &.is-collected .store-collect-icon {
         color: $theme_color;
       }
     }
 
     .store-name-link {
-      color: $theme_color;
+      color: #438cde;
       text-decoration: none;
 
       &:hover {
         color: $theme_color;
-        text-decoration: none;
       }
     }
   }
 }
 .sale-btn{
   margin:10px 0
-
 }
 </style>

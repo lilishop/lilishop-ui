@@ -29,9 +29,9 @@
       </template>
       <!-- 无商品分类，展示搜索结果 -->
       <template v-else>
-        <div style="font-size:14px">全部结果</div>
+        <div class="result-label">全部结果</div>
         <el-icon><ArrowRight /></el-icon>
-        <div style="font-weight:bold;" class="mr_10">“{{params.keyword}}”</div>
+        <div class="result-keyword">“{{params.keyword}}”</div>
       </template>
       <!-- 所选分类 -->
       <a
@@ -50,43 +50,26 @@
       <!-- 品牌， 有图片，独立出来 -->
       <div class="brand" v-show="tagsContent[0].show && tagsContent[0].values.length">
         <div>
-          <strong>{{ tagsContent[0].key }}：</strong>
+          {{ tagsContent[0].key }}：
         </div>
         <div>
           <ul :class="{ 'show-more': tagsContent[0].more }">
+            <li :class="{ 'is-active': !isGroupSelected(0) }" @click="selectAll(0)">
+              <span>全部</span>
+            </li>
             <li
               @click="selectBrand(item.name, 0)"
-              :class="{ 'border-color': multSelected.includes(item) }"
               v-for="(item, index) in tagsContent[0].values"
               :key="index"
             >
-              <img :src="item.url" alt="" /><span>{{ item.name }}</span>
-              <div
-                class="corner-icon"
-                v-show="multSelected.includes(item.name)"
-              >
-                <div></div>
-                <el-icon><Check /></el-icon>
-              </div>
+              <span>{{ item.name }}</span>
             </li>
           </ul>
 
-          <div class="btn" v-show="multiple !== 0">
+          <div class="btn" v-show="rowOverflow[0]">
             <span @click="moreBrand(0)"
               >{{ tagsContent[0].more ? "收起" : "更多"
               }}<el-icon><ArrowUp v-if="tagsContent[0].more" /><ArrowDown v-else /></el-icon></span>
-            <span @click="multSelectBrand(0)"><el-icon><Plus /></el-icon>多选</span>
-          </div>
-
-          <div class="multBtn" v-show="multiple === 0">
-            <el-button
-              type="primary"
-              size="small"
-              :disabled="!multSelected.length"
-              @click="sure(0)"
-              >确定</el-button
-            >
-            <el-button size="small" @click="cancel">取消</el-button>
           </div>
         </div>
       </div>
@@ -95,14 +78,19 @@
       <template v-for="(tag, tagIndex) in tagsContent">
         <div class="other" v-if="tag.show && tagIndex !== 0" v-show="tagIndex < showTagCount" :key="tagIndex">
           <div>
-            <strong>{{ tag.key }}：</strong>
+            {{ tag.key }}：
           </div>
           <div>
             <ul
               :class="{ 'show-more': tag.more }"
+              :data-index="tagIndex"
               class="list"
-              v-show="multiple !== tagIndex"
             >
+              <li
+                class="item"
+                :class="{ 'is-active': !isGroupSelected(tagIndex) }"
+                @click="selectAll(tagIndex)"
+              >全部</li>
               <li
                 @click="selectBrand(item, tagIndex)"
                 class="item"
@@ -113,38 +101,10 @@
               </li>
             </ul>
 
-            <el-checkbox-group
-              :class="{ 'show-more': tag.more }"
-              class="list"
-              v-model="multSelected"
-              v-show="multiple === tagIndex"
-            >
-              <el-checkbox
-                class="item"
-                :value="item"
-                v-for="(item, index) in tag.values"
-                :key="index"
-                >{{ item }}</el-checkbox
-              >
-            </el-checkbox-group>
-
-            <div class="btn" v-show="multiple !== tagIndex">
-              <span @click="moreBrand(tagIndex)" v-show="tag.values.length > 9"
+            <div class="btn" v-show="rowOverflow[tagIndex]">
+              <span @click="moreBrand(tagIndex)"
                 >{{ tag.more ? "收起" : "更多"
                 }}<el-icon><ArrowUp v-if="tag.more" /><ArrowDown v-else /></el-icon></span>
-              <span @click="multSelectBrand(tagIndex)"
-                ><el-icon><Plus /></el-icon>多选</span>
-            </div>
-
-            <div class="multBtn" v-show="multiple === tagIndex">
-              <el-button
-                type="primary"
-                size="small"
-                :disabled="!multSelected.length"
-                @click="sure(tagIndex)"
-                >确定</el-button
-              >
-              <el-button size="small" @click="cancel">取消</el-button>
             </div>
           </div>
         </div>
@@ -157,10 +117,10 @@
 </template>
 
 <script>
-import { ArrowDown, ArrowRight, ArrowUp, Check, Close, Plus } from '@element-plus/icons-vue';
+import { ArrowDown, ArrowRight, ArrowUp, Close } from '@element-plus/icons-vue';
 import * as APIGoods from '@/api/goods';
 export default {
-  components: { ArrowDown, ArrowRight, ArrowUp, Check, Close, Plus },
+  components: { ArrowDown, ArrowRight, ArrowUp, Close },
   name: 'GoodsClassNav',
   data () {
     return {
@@ -171,7 +131,6 @@ export default {
         second: null
       },
       showTagCount: 5, // 展示的搜索项数量
-      multiple: false, // 多选
       tagsContent: [
         // 标签
         {
@@ -181,10 +140,10 @@ export default {
           values: []
         }
       ],
-      multSelected: [], // 多选分类
       selectedItem: [], // 已选分类集合 顶部展示
       brandIds: [], // 品牌id合集
-      params: {} // 请求参数
+      params: {}, // 请求参数
+      rowOverflow: {} // 一行排不下时才显示更多
     };
   },
   computed: {
@@ -280,33 +239,30 @@ export default {
           break;
       }
     },
+    isGroupSelected (index) {
+      const group = this.tagsContent[index];
+      if (!group) return false;
+      return this.selectedItem.some((selected) => selected.type === group.key);
+    },
+    selectAll (index) {
+      const group = this.tagsContent[index];
+      if (!group) return;
+      const selectedIndex = this.selectedItem.findIndex((selected) => selected.type === group.key);
+      if (selectedIndex === -1) return;
+      this.cancelSelected(this.selectedItem[selectedIndex], selectedIndex);
+    },
     selectBrand (item, index) {
-      // 选择筛选项
-      if (this.multiple !== false) {
-        // 非多选直接在顶部栏展示，多选则添加选择状态
-
-        let key = this.multSelected.indexOf(item);
-        if (key > -1) {
-          this.multSelected.splice(key, 1);
-        } else {
-          this.multSelected.push(item);
-        }
-      } else {
-        const type = this.tagsContent[index].key;
-        if (this.selectedItem.some((selected) => selected.type === type)) {
-          return;
-        }
-        this.selectedItem.push({
-          type,
-          name: item
-        });
-
-        this.tagsContent[index].show = false;
-
-        if (index === 0) {
-          // 如果是品牌，获取品牌id
-          this.appendBrandIdsByNames([item]);
-        }
+      const type = this.tagsContent[index].key;
+      if (this.selectedItem.some((selected) => selected.type === type)) {
+        return;
+      }
+      this.selectedItem.push({
+        type,
+        name: item
+      });
+      this.tagsContent[index].show = false;
+      if (index === 0) {
+        this.appendBrandIdsByNames([item]);
       }
     },
 
@@ -328,37 +284,25 @@ export default {
       // 更多按钮
       const flag = !this.tagsContent[index].more
       this.tagsContent[index]['more'] = flag
+      this.$nextTick(() => this.measureRows())
     },
-    multSelectBrand (index) {
-      // 多选按钮
-      this.tagsContent[index]['more'] = true
-      this.multiple = index;
-    },
-    sure (index) {
-      // 多选确认按钮
-      const type = this.tagsContent[index].key;
-      if (this.selectedItem.some((selected) => selected.type === type)) {
-        this.cancel();
-        return;
+    measureRows () {
+      if (!this.$el) return
+      const next = {}
+      const brand = this.$el.querySelector('.brand ul')
+      if (brand && brand.offsetParent) {
+        next[0] = !!(this.tagsContent[0] && this.tagsContent[0].more) || brand.scrollHeight > brand.clientHeight + 1
       }
-      this.selectedItem.push({
-        type,
-        name: this.multSelected.join('、')
-      });
-
-      if (index === 0) {
-        // 如果是品牌，获取品牌id
-        this.appendBrandIdsByNames(this.multSelected);
-      }
-
-      this.tagsContent[index].show = false;
-      this.cancel();
-    },
-    cancel () {
-      // 多选取消按钮
-      this.multSelected = [];
-      this.tagsContent[0].more = false;
-      this.multiple = false;
+      this.$el.querySelectorAll('.other .list').forEach((list) => {
+        if (!list.offsetParent) return
+        const index = Number(list.dataset.index)
+        const tag = this.tagsContent[index]
+        next[index] = !!(tag && tag.more) || list.scrollHeight > list.clientHeight + 1
+      })
+      const prev = this.rowOverflow
+      const keys = new Set([...Object.keys(prev), ...Object.keys(next)])
+      const changed = [...keys].some((key) => !!prev[key] !== !!next[key])
+      if (changed) this.rowOverflow = next
     },
     appendBrandIdsByNames (names) {
       const selectedNames = names || [];
@@ -385,12 +329,14 @@ export default {
             item.show = !hiddenKeys.has(item.key);
             item.more = false;
           });
+          this.$nextTick(() => this.measureRows())
         }
       });
     },
     // 展示更多搜索项
     moreOptions () {
       this.showTagCount = this.showTagCount === 5 ? 100 : 5
+      this.$nextTick(() => this.measureRows())
     }
   },
   mounted () {
@@ -404,6 +350,10 @@ export default {
     }
     this.getFilterList(this.params);
     this.getNav();
+    window.addEventListener('resize', this.measureRows)
+  },
+  beforeUnmount () {
+    window.removeEventListener('resize', this.measureRows)
   }
 }
 </script>
@@ -413,70 +363,100 @@ export default {
 .head-bar {
   width: 100%;
   background: #fff;
-  margin-top: -13px;
   display: flex;
-  height: 40px;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 48px;
   align-items: center;
+  padding: 8px 16px;
+  border: 1px solid #eee;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  color: #666;
+  font-size: 14px;
+  box-sizing: border-box;
+
   > div:first-child {
-    padding: 0 8px;
-    font-size: 18px;
-    font-weight: bold;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666;
     &:hover {
       color: $theme_color;
       cursor: pointer;
     }
   }
-  .bar {
+
+  .result-label {
+    color: #666;
+  }
+
+  .result-keyword {
+    margin-left: 4px;
+    color: #171A26;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  > .el-icon {
+    color: #ccc;
     font-size: 12px;
+  }
+
+  .bar {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 28px;
+    margin: 0 4px;
+    padding: 0 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
     background: #fff;
-    border: 1px solid #999;
-    padding: 0 8px;
-    min-width: 85px;
-    text-align: center;
-    margin: 0 3px;
+    color: #171A26;
+    font-size: 14px;
+    line-height: 26px;
+
     &:hover {
-      color: $theme_color;
       border-color: $theme_color;
-      border-bottom-color: #fff;
+      color: $theme_color;
       cursor: pointer;
+
       ul {
-        display: block;
+        display: flex;
       }
-      .el-icon {
+
+      > .el-icon {
         transform: rotate(180deg);
       }
     }
+
     ul {
       display: none;
       position: absolute;
-      top: 18px;
-      left: -1px;
-      width: 300px;
-      padding: 5px 10px;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 5;
+      width: 280px;
+      margin: 0;
+      padding: 8px;
+      flex-wrap: wrap;
+      list-style: none;
       background: #fff;
-      border: 1px solid $theme_color;
-      z-index: 1;
-      &::before {
-        content: "";
-        position: absolute;
-        width: 83px;
-        left: 0;
-        top: -1px;
-        z-index: 2;
-        border-top: 1px solid #fff;
-      }
+      border: 1px solid #eee;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
-      &:hover {
-        display: block;
-      }
-      clear: left;
       li {
-        color: #999;
-        float: left;
-        width: 30%;
-        margin: 3px 0;
+        width: 33.33%;
+        padding: 6px 8px;
+        box-sizing: border-box;
+        color: #171A26;
+        font-size: 14px;
+        line-height: 20px;
         text-align: left;
+
         &:hover {
           color: $theme_color;
           cursor: pointer;
@@ -486,161 +466,154 @@ export default {
   }
   //所选分类
   .selected-item {
-    font-size: 12px;
-    color: #000;
-    padding: 2px 22px 2px 8px;
-    margin-right: 5px;
-    max-width: 250px;
-    height: 24px;
-    overflow: hidden;
-    position: relative;
-    background-color: #f3f3f3;
-    border: 1px solid #ddd;
-    &:hover {
-      border-color: $theme_color;
-      background-color: #fff;
-      .el-icon {
-        color: #fff;
-        background-color: $theme_color;
-      }
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 240px;
+    height: 28px;
+    margin: 0;
+    padding: 0 8px;
+    border: 1px solid #ffd0cb;
+    border-radius: 4px;
+    background: #fff5f4;
+    color: #666;
+    font-size: 13px;
+    line-height: 26px;
+    text-decoration: none;
+    box-sizing: border-box;
+    cursor: pointer;
+
+    span:first-child {
+      flex-shrink: 0;
+      color: #666;
     }
 
     span:nth-child(2) {
+      min-width: 0;
+      overflow: hidden;
       color: $theme_color;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .el-icon {
-      position: absolute;
-      right: 0;
-      top: 0;
-      color: $theme_color;
-      line-height: 22px;
-      width: 21px;
-      height: 22px;
-      font-size: 14px;
+      position: static;
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      color: #999;
+      font-size: 12px;
+      line-height: 1;
+      background: transparent;
+    }
+
+    &:hover {
+      border-color: $theme_color;
+      background: #fff5f4;
+
+      .el-icon {
+        color: $theme_color;
+        background: transparent;
+      }
     }
   }
 }
 /** 筛选主体 */
 .content {
   background: #fff;
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-  margin: 10px 0;
+  border: 1px solid #eee;
+  border-top: none;
+  margin: 0 0 12px;
+  border-radius: 0 0 4px 4px;
 }
 /** 品牌 start */
 .brand {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #f0f0f0;
   display: flex;
-  // min-height: 120px;
-  font-size: 12px;
+  min-height: 44px;
+  font-size: 14px;
   > div:first-child {
-    width: 100px;
-    background: #eee;
-    padding: 10px 0 0 10px;
+    width: 88px;
+    background: transparent;
+    padding-left: 16px;
+    line-height: 44px;
+    color: #666;
+    font-weight: 400;
+    flex-shrink: 0;
   }
   > div:last-child {
-    width: 1100px;
-    padding: 10px;
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    padding: 0 16px;
     position: relative;
     ul {
-      width: 900px;
-      max-height: 100px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      width: calc(100% - 72px);
+      height: 44px;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
-      padding-top: 1px;
-      clear: left;
+      list-style: none;
       li {
-        width: 100px;
-        height: 50px;
-        float: left;
-        line-height: 45px;
-        border: 1px solid #ddd;
-        margin: -1px -1px 0 0;
-        overflow: hidden;
-        position: relative;
-        padding: 2px;
-        img {
-          width: 100%;
-          height: 100%;
+        flex: 0 0 auto;
+        width: auto;
+        max-width: none;
+        height: 44px;
+        margin: 0 40px 0 0;
+        line-height: 44px;
+        overflow: visible;
+        padding: 0;
+        cursor: pointer;
+
+        &:hover span {
+          color: $theme_color;
         }
 
-        &:hover {
-          border-color: $theme_color;
-          border: 2px solid $theme_color;
-          top: 0;
-          left: 0;
-          position: relative;
-          z-index: 1;
-          img {
-            display: none;
-          }
+        &.is-active span {
+          color: $theme_color;
+          font-weight: 400;
         }
 
         span {
-          display: inline-block;
-          width: 100%;
-          height: 100%;
-          color: $theme_color;
-          text-align: center;
-          font-size: 12px;
+          display: block;
+          overflow: visible;
+          color: #171A26;
+          text-align: left;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 44px;
+          white-space: nowrap;
+          text-overflow: clip;
           cursor: pointer;
         }
-
-        .corner-icon {
-          position: absolute;
-          right: -1px;
-          bottom: -1px;
-          div {
-            width: 0;
-            border-top: 20px solid transparent;
-            border-right: 20px solid $theme_color;
-          }
-          .el-icon {
-            font-size: 12px;
-            position: absolute;
-            bottom: 0;
-            right: 1px;
-            transform: rotate(-15deg);
-            color: #fff;
-          }
-        }
-      }
-      .border-color {
-        border-color: $theme_color;
-        z-index: 1;
       }
     }
     .show-more {
       height: auto;
-      max-height: 200px;
-      overflow: scroll;
+      max-height: none;
+      overflow: visible;
     }
     .btn {
       position: absolute;
-      right: 10px;
-      top: 10px;
+      right: 16px;
+      top: 8px;
       span {
-        border: 1px solid #ddd;
-        margin-left: 10px;
-        color: #999;
-        display: inline-block;
-        padding: 1px 3px;
-        font-size: 12px;
+        margin-left: 12px;
+        color: #438cde;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 0;
+        border: none;
+        font-size: 14px;
+        line-height: 28px;
         &:hover {
           cursor: pointer;
           color: $theme_color;
-          border-color: $theme_color;
         }
-      }
-    }
-    .multBtn {
-      text-align: center;
-      margin-top: 10px;
-      .el-button {
-        font-size: 12px !important;
-      }
-      .el-button:last-child {
-        margin-left: 10px;
       }
     }
   }
@@ -648,90 +621,102 @@ export default {
 /** 品牌 end */
 /** 其他筛选项  start */
 .other {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #f0f0f0;
   display: flex;
-  min-height: 30px;
-  font-size: 12px;
+  min-height: 44px;
+  font-size: 14px;
   &:last-child {
     border: none;
   }
   > div:first-child {
-    width: 100px;
-    background: #eee;
-    padding-left: 10px;
-    line-height: 30px;
+    width: 88px;
+    background: transparent;
+    padding-left: 16px;
+    line-height: 44px;
+    color: #666;
+    font-weight: 400;
+    flex-shrink: 0;
   }
   > div:last-child {
-    width: 1100px;
-    padding: 0 10px;
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    padding: 0 16px;
     position: relative;
     .list {
-      width: 900px;
-      height: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      width: calc(100% - 72px);
+      height: 44px;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
-      clear: left;
+      list-style: none;
       .item {
-        width: 100px;
-        height: 30px;
-        float: left;
-        line-height: 30px;
-        color:#4d9cf1;
-        overflow: hidden;
-        position: relative;
-        font-size: 12px;
-        padding: 2px;
+        flex: 0 0 auto;
+        width: auto;
+        max-width: none;
+        height: 44px;
+        margin: 0 40px 0 0;
+        line-height: 44px;
+        color: #171A26;
+        overflow: visible;
+        white-space: nowrap;
+        text-overflow: clip;
+        font-size: 14px;
+        font-weight: 400;
+        padding: 0;
         cursor: pointer;
         &:hover {
           color: $theme_color;
+        }
+
+        &.is-active {
+          color: $theme_color;
+          font-weight: 400;
         }
       }
     }
 
     .show-more {
       height: auto;
+      max-height: none;
+      overflow: visible;
     }
 
     .btn {
       position: absolute;
-      right: 10px;
-      top: 5px;
+      right: 16px;
+      top: 8px;
       span {
-        border: 1px solid #ddd;
-        margin-left: 10px;
-        color: #999;
-        display: inline-block;
-        padding: 1px 3px;
-        font-size: 12px;
+        margin-left: 12px;
+        color: #438cde;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 0;
+        border: none;
+        font-size: 14px;
+        line-height: 28px;
         &:hover {
           cursor: pointer;
           color: $theme_color;
-          border-color: $theme_color;
         }
-      }
-    }
-
-    .multBtn {
-      text-align: center;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      .el-button {
-        font-size: 12px !important;
-      }
-      .el-button:last-child {
-        margin-left: 10px;
       }
     }
   }
 }
 .more-options{
-  margin: 5px;
-  color: #4d9cf1;
-  font-size: 12px;
+  margin: 0;
+  padding: 10px 16px;
+  color: #438cde;
+  font-size: 14px;
   cursor: pointer;
   text-align: right;
 }
 .more-options:hover{
-  color:#0165d1;
+  color: $theme_color;
 }
 /** 其他筛选项  end */
 </style>

@@ -3,65 +3,63 @@
     <BaseHeader/>
     <!-- 搜索栏 -->
     <Search :storeId="storeMsg.storeId || $route.query.id" @search="search"></Search>
-    <!-- 店铺logo -->
-    <div class="shop-logo">
-      <div class="shop-logo-inner">
+    <div class="store-head">
+      <div class="store-head-main">
         <div class="shop-info">
           <p class="shop-name">{{ storeMsg.storeName || '店铺' }}</p>
           <p
             v-if="storeMsg.storeDesc"
-            :alt="storeMsg.storeDesc"
             class="shop-desc ellipsis"
             v-html="storeMsg.storeDesc"
           ></p>
         </div>
         <div class="shop-actions">
-          <span class="hover-pointer store-collect-btn" @click="collect">
-            <el-icon :color="storeCollected ? '#ffc107' : '#fff'">
-              <StarFilled />
-            </el-icon>
-            <span>{{
-              storeCollected ? '已收藏店铺' : '收藏店铺'
-            }}</span>
-          </span>
           <span
-            class="hover-pointer store-service-btn"
-            @click="IMService(storeMsg.storeId, null, null)"
+            class="store-collect-btn"
+            :class="{ 'is-collected': storeCollected }"
+            @click="collect"
           >
-            <i class="icomoon icon-customer-service"></i>联系客服
+            <el-icon><StarFilled /></el-icon>
+            <span>{{ storeCollected ? '已收藏店铺' : '收藏店铺' }}</span>
           </span>
+          <span class="store-service-btn" @click="IMService(storeMsg.storeId, null, null)">联系客服</span>
         </div>
       </div>
-    </div>
-    <div class="store-category">
-      <ul class="cate-list">
-        <li
-          class="cate-item"
-          @click="searchByCate({ id: '', labelName: '店铺推荐' })"
-        >
-          首页
-        </li>
-        <li v-for="(cate, index) in cateList" :key="index" class="cate-item">
-          <el-dropdown v-if="cate.children.length" trigger="hover">
-            <div @click.self="searchByCate(cate)">
-              {{ cate.labelName }}
-              <el-icon><ArrowDown /></el-icon>
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item
-                  v-for="sec in cate.children"
-                  :key="sec.id"
-                  @click="searchByCate(sec)"
-                >{{ sec.labelName }}</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <span v-else @click.self="searchByCate(cate)">{{
-              cate.labelName
-            }}</span>
-        </li>
-      </ul>
+      <div class="store-category">
+        <ul class="cate-list">
+          <li
+            class="cate-item"
+            :class="{ active: !params.storeCatId }"
+            @click="searchByCate({ id: '', labelName: '店铺推荐' })"
+          >
+            首页
+          </li>
+          <li
+            v-for="(cate, index) in cateList"
+            :key="index"
+            class="cate-item"
+            :class="{ active: isCateActive(cate) }"
+            @click="searchByCate(cate)"
+          >
+            <el-dropdown v-if="cate.children && cate.children.length" trigger="hover">
+              <div class="cate-label">
+                {{ cate.labelName }}
+                <el-icon><ArrowDown /></el-icon>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-for="sec in cate.children"
+                    :key="sec.id"
+                    @click.stop="searchByCate(sec)"
+                  >{{ sec.labelName }}</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <span v-else>{{ cate.labelName }}</span>
+          </li>
+        </ul>
+      </div>
     </div>
 
 
@@ -72,42 +70,49 @@
 
 
     <div v-else class="store-goods-section">
-      <div class="promotion-decorate">{{ cateName }}</div>
+      <div class="store-goods-hd">{{ cateName }}</div>
       <div class="goods-list">
         <empty v-if="goodsList.length === 0"/>
+        <template v-else>
         <div
           v-for="(item, index) in goodsList"
-          v-else
           :key="index"
           class="goods-show-info"
           @click="goGoodsDetail(item.id, item.goodsId)"
         >
-
           <div class="goods-show-img">
-            <img :src="item.small" alt=""/>
+            <img :src="item.thumbnail || item.small" alt=""/>
           </div>
           <div class="goods-show-price">
-            <span>
-              <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
-            </span>
+            <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
           </div>
           <div class="goods-show-detail">
+            <el-tag
+              v-if="item.salesModel === 'WHOLESALE'"
+              class="goods-show-tag goods-show-tag-wholesale"
+            >批发</el-tag>
             <span>{{ item.goodsName }}</span>
           </div>
           <div class="goods-show-num">
-            已有<span>{{ item.commentNum || 0 }}</span>人评价
+            <span>{{ formatGrade(item.grade) }}%好评</span>
+            <span class="goods-show-sales">销量 {{ item.buyCount || 0 }}</span>
+          </div>
+          <div class="goods-show-right" v-if="item.selfOperated">
+            <el-tag class="goods-show-tag goods-show-tag-self">自营</el-tag>
           </div>
         </div>
+        </template>
       </div>
-      <div class="goods-page">
-        <el-pagination           v-model:current-page="params.pageNumber"
+      <div class="goods-page" v-if="total > 0">
+        <el-pagination
+          v-model:current-page="params.pageNumber"
           v-model:page-size="params.pageSize"
           :total="total"
           @current-change="changePageNum"
           @size-change="changePageSize"
-         layout="sizes, prev, pager, next"></el-pagination>
+          layout="total, prev, pager, next, sizes"
+        ></el-pagination>
       </div>
-
     </div>
 
     <BaseFooter/>
@@ -311,8 +316,21 @@ export default {
     searchByCate(cate) {
       // 搜索同分类下商品
       this.params.storeCatId = cate.id;
+      this.params.pageNumber = 1;
       this.cateName = cate.labelName;
       this.getGoodsList();
+    },
+    isCateActive(cate) {
+      if (!cate || !this.params.storeCatId) return false;
+      if (this.params.storeCatId === cate.id) return true;
+      return Array.isArray(cate.children) && cate.children.some((sec) => sec.id === this.params.storeCatId);
+    },
+    formatGrade(grade) {
+      if (grade === null || grade === undefined || grade === "") return 100;
+      const num = Number(grade);
+      if (Number.isNaN(num)) return 100;
+      const fixed = Number(num.toFixed(1));
+      return fixed % 1 === 0 ? fixed.toFixed(0) : String(fixed);
     },
     // 分页 修改页码
     changePageNum(val) {
@@ -364,123 +382,285 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "../assets/styles/goodsList.scss";
-
 .merchant {
-  margin: 0 auto;
+  min-height: 100%;
+  background: #f5f5f5;
 }
 
-.shop-logo {
-  position: relative;
-  width: 100%;
-  background-color: #666;
-  padding: 4px;
-  color: #fff;
+.store-head {
+  width: 1200px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 4px;
+}
 
-  .shop-logo-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    width: 1200px;
-    margin: 0 auto;
+.store-head-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px 16px;
+}
+
+.shop-info {
+  min-width: 0;
+}
+
+.shop-name {
+  margin: 0;
+  color: #171A26;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.shop-desc {
+  margin: 6px 0 0;
+  max-width: 760px;
+  color: #999;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.shop-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 20px;
+  color: #171A26;
+  font-size: 14px;
+}
+
+.store-collect-btn,
+.store-service-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+
+  &:hover {
+    color: $theme_color;
+  }
+}
+
+.store-collect-btn {
+  .el-icon {
+    color: #999;
+    font-size: 16px;
   }
 
-  .shop-info {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-  }
-
-  .shop-name {
-    margin: 0;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
-
-  .shop-desc {
-    margin: 0;
-    font-size: 14px;
-    max-height: 40px;
-    max-width: 400px;
-  }
-
-  .shop-actions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
-    flex-shrink: 0;
-  }
-
-  .store-collect-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .store-service-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-width: 80px;
+  &.is-collected,
+  &.is-collected .el-icon {
+    color: $theme_color;
   }
 }
 
 .store-category {
-  background-color: #005aa0;
-  color: #fff;
+  border-top: 1px solid #f0f0f0;
+}
 
-  .cate-list {
-    width: 1200px;
-    margin: 0 auto;
-    clear: left;
-    height: 30px;
-    line-height: 30px;
+.cate-list {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 0 8px;
+  list-style: none;
+  box-sizing: border-box;
+}
 
-    .cate-item {
-      margin-right: 25px;
-      float: left;
+.cate-item {
+  position: relative;
+  height: 48px;
+  padding: 0 18px;
+  color: #666;
+  font-size: 15px;
+  line-height: 48px;
+  cursor: pointer;
+
+  &:hover {
+    color: #171A26;
+  }
+
+  &.active {
+    color: #171A26;
+    font-weight: 600;
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 0;
+      height: 2px;
+      border-radius: 1px;
+      background: $theme_color;
     }
+  }
 
-    .cate-item:hover {
-      cursor: pointer;
-    }
+  :deep(.el-dropdown) {
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    vertical-align: top;
+    outline: none;
+  }
+
+  :deep(.el-tooltip__trigger) {
+    outline: none;
   }
 }
 
-.promotion-decorate::before,
-.promotion-decorate::after {
-  background-image: url("/src/assets/images/sprite@2x.png");
+.cate-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: inherit;
+  line-height: 48px;
+
+  .el-icon {
+    font-size: 12px;
+  }
 }
 
 .store-goods-section {
   width: 1200px;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0 10px;
+  margin: 16px auto 24px;
+  background: #fff;
+  border-radius: 4px;
   box-sizing: border-box;
+  overflow: hidden;
+}
 
-  .goods-list {
-    width: 100%;
-    margin: 0;
-    column-gap: 10px;
-  }
+.store-goods-hd {
+  padding: 16px 24px 0;
+  color: #171A26;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
 
-  .goods-show-info {
-    width: calc(20% - 8px);
-    min-width: 0;
-  }
+.goods-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 12px 16px 4px;
+  box-sizing: border-box;
+}
 
-  .seckill-price {
-    font-size: 16px;
-  }
+.goods-show-info {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  background: #fff;
+  box-sizing: border-box;
+  cursor: pointer;
 
-  .goods-show-detail {
-    height: 32px;
-    line-height: 16px;
+  &:hover {
+    border-color: #f0d0cc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   }
+}
+
+.goods-show-img img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.goods-show-price {
+  margin-top: 8px;
+}
+
+.seckill-price {
+  color: $theme_color;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.goods-show-detail {
+  height: 44px;
+  margin: 6px 0;
+  overflow: hidden;
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.goods-show-num {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  color: #999;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+
+  span {
+    color: #999;
+    font-size: 13px;
+    font-weight: 400;
+  }
+}
+
+.goods-show-sales {
+  flex-shrink: 0;
+}
+
+.goods-show-right {
+  display: flex;
+  margin-top: 6px;
+}
+
+.goods-show-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  margin-right: 4px;
+  padding: 0 4px;
+  line-height: 1;
+  vertical-align: 1px;
+}
+
+.goods-show-tag-self {
+  --el-tag-bg-color: #fa2c19;
+  --el-tag-border-color: #fa2c19;
+  --el-tag-text-color: #fff;
+  background-color: #fa2c19;
+  border-color: #fa2c19;
+  color: #fff;
+}
+
+.goods-show-tag-wholesale {
+  --el-tag-bg-color: #f9f0ff;
+  --el-tag-border-color: #d3adf7;
+  --el-tag-text-color: #9254de;
+  background-color: #f9f0ff;
+  border-color: #d3adf7;
+  color: #9254de;
+}
+
+.goods-page {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin: 0;
+  padding: 16px;
+  box-sizing: border-box;
 }
 </style>

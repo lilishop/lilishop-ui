@@ -57,7 +57,7 @@ export const afterSaleStatusList = [
     status: 'REFUSE'
   },
   {
-    name: '买家退货，待卖家收货',
+    name: '待卖家收货',
     status: 'BUYER_RETURN'
   },
   {

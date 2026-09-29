@@ -1,50 +1,38 @@
 <template>
   <div class="wrapper">
-    <UserCenterLayout title="评论/晒单" :tabs="['评论/晒单']">
+    <UserCenterLayout>
 
-    <div class="order">
-      <div class="order-title">
-        <div class="order-row title">
-          <div class="order-detail-title col-10">订单详情</div>
-          <div class="col-4">收货人</div>
-          <div class="col-4">评价等级</div>
-          <div class="col-4">评价内容</div>
-          <div class="col-2"></div>
-        </div>
+    <empty v-if="list.length === 0" />
+    <div class="comment-list" v-else>
+      <div class="comment-cols">
+        <span>订单详情</span>
+        <span>评价等级</span>
+        <span>评价内容</span>
+        <span>操作</span>
       </div>
-      <empty v-if="list.length === 0" />
-
-      <div class="order-item" v-else v-for="(item, index) in list" :key="index">
-        <div>
-          <div class="title order-item-title">
-            <span>订单号:{{item.orderNo}}</span>
-            <span class="color999 ml_10">{{item.createTime}}</span>
-            <span class="hover-pointer fontsize_12 eval-detail" @click="evaluateDetail(item.id)">评价详情</span>
+      <div class="comment-card" v-for="(item, index) in list" :key="item.id || index">
+        <div class="comment-head">
+          <div class="order-sn">
+            {{ item.createTime }}<span>订单号 {{ item.orderNo }}</span>
           </div>
-          <div class="order-item-view">
-            <div class="item-view-name col-10">
-              <div class="order-img hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
-                <img :src="item.goodsImage" alt="" />
-              </div>
-              <div class="order-name hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
-                {{item.goodsName}}
-              </div>
+        </div>
+        <div class="comment-body">
+          <div class="goods">
+            <div class="goods-thumb" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
+              <img
+                :src="item.goodsImage"
+                alt=""
+                @error="$event.target.style.visibility = 'hidden'"
+              />
             </div>
-            <div class="col-4">{{ $filters.secrecyMobile(item.createBy ) }}</div>
-            <div class="col-4">
-              {{item.grade==='GOOD'?'好评' : item.grade === 'WORSE'?'差评' : '中评'}}
+            <div class="goods-name" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
+              {{ item.goodsName }}
             </div>
-            <div class="col-4">
-              <el-tooltip>
-                  <div class="content">{{item.content}}</div>
-                  <template #content>
-                    <div style="white-space: normal;word-break:break-all">
-                      {{item.content}}
-                    </div>
-                  </template>
-              </el-tooltip>
-            </div>
-            <div class="col-2"></div>
+          </div>
+          <div class="comment-cell">{{ item.grade === 'GOOD' ? '好评' : item.grade === 'WORSE' ? '差评' : '中评' }}</div>
+          <div class="comment-content">{{ item.content }}</div>
+          <div class="comment-ops">
+            <button type="button" class="text-link" @click="evaluateDetail(item.id)">评价详情</button>
           </div>
         </div>
       </div>
@@ -53,7 +41,7 @@
     <!-- 分页 -->
     <div class="page-size">
       <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
-        :total="total" @current-change="changePageNum"
+        :total="total" :page-sizes="[20, 50, 100]" @current-change="changePageNum"
         @size-change="changePageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
     </div>
     </UserCenterLayout>
@@ -72,7 +60,7 @@ export default {
       total: 0, // 评价总数
       params: { // 请求参数
         pageNumber: 1,
-        pageSize: 10
+        pageSize: 20
       }
     };
   },
@@ -112,108 +100,143 @@ export default {
 .page-size {
   display: flex;
   justify-content: flex-end;
-}
-.order-img {
-  > img {
-    width: 60px;
-    height: 60px;
-    border: 1px solid $border_color;
-    box-sizing: border-box;
-  }
-}
-.title {
-  @include background_color($light_background_color);
-}
-.item-view-name {
-  display: flex;
-}
-.order-name {
-  display: -webkit-box;
+  margin-top: 16px;
 
-  -webkit-box-orient: vertical;
-
-  -webkit-line-clamp: 2;
-
-  overflow: hidden;
-  text-align: left;
-  padding: 0 10px;
-  font-size: 13px;
-  @include content_color($light_content_color);
-}
-.order-item-title {
-  padding: 5px 20px;
-  text-align: left;
-  font-size: 13px;
-  position: relative;
-}
-.order-row,
-.order-item-view {
-  display: flex;
-  align-items: center;
-
-  > [class*='col-'] {
-    box-sizing: border-box;
-    padding: 0 8px;
-  }
-
-  > .col-12 {
-    flex: 0 0 50%;
-    max-width: 50%;
-  }
-
-  > .col-10 {
-    flex: 0 0 41.666667%;
-    max-width: 41.666667%;
-  }
-
-  > .col-4 {
-    flex: 0 0 16.666667%;
-    max-width: 16.666667%;
-  }
-
-  > .col-2 {
-    flex: 0 0 8.333333%;
-    max-width: 8.333333%;
-  }
-
-  > .col-6 {
-    flex: 0 0 25%;
-    max-width: 25%;
+  :deep(.el-pagination) {
+    justify-content: flex-end;
   }
 }
 
-.order-item-view {
-  padding: 10px 20px;
-  align-items: flex-start;
+.comment-list {
+  --comment-cols: minmax(220px, 1.3fr) 90px minmax(160px, 1.6fr) 96px;
+  --comment-gap: 12px;
+  padding-top: 8px;
 }
-.order-item {
-  text-align: center;
-  border: 1px solid $border_color;
-  margin: 10px 0;
+
+.comment-cols,
+.comment-body {
+  display: grid;
+  grid-template-columns: var(--comment-cols);
+  column-gap: var(--comment-gap);
+  align-items: start;
 }
-.order-row {
-  padding: 10px 0;
-  text-align: center;
-}
-.order-detail-title {
-  text-align: left;
-  padding-left: 20px !important;
-}
-.content {
+
+.comment-cols {
+  padding: 0 16px 10px;
   color: #999;
-  max-height: 60px;
-  overflow: hidden;
-  // word-wrap: break-word;
-  display:-webkit-box;
-  -webkit-box-orient:vertical;/*设置方向*/
-  -webkit-line-clamp:3;/*设置超过为省略号的行数*/
-  word-break:break-all; 
+  font-size: 13px;
+
+  span:first-child {
+    padding-left: 72px;
+  }
+
+  span:nth-child(n + 2) {
+    text-align: center;
+  }
 }
 
-.eval-detail {
-  position: absolute;
-  right: 20px;
-  &:hover{
+.comment-card {
+  margin-bottom: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.comment-head {
+  padding: 10px 16px;
+  background: #f7f7f7;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-sn {
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+
+  span {
+    margin-left: 16px;
+  }
+}
+
+.comment-body {
+  padding: 14px 16px;
+}
+
+.goods {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+  min-width: 0;
+}
+
+.goods-thumb {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+  background: #f5f5f5;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.goods-name {
+  color: #333;
+  font-size: 16px;
+  line-height: 22px;
+  max-height: 44px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: break-all;
+  cursor: pointer;
+
+  &:hover {
+    color: $theme_color;
+  }
+}
+
+.comment-cell,
+.comment-ops {
+  text-align: center;
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.comment-content {
+  min-width: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.comment-ops {
+  display: flex;
+  justify-content: center;
+}
+
+.text-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #171A26;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+
+  &:hover {
     color: $theme_color;
   }
 }

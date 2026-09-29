@@ -1,7 +1,7 @@
 
 <template>
   <div class="add-eval">
-    <UserCenterLayout title="商品投诉" :tabs="['商品投诉']">
+    <UserCenterLayout>
       <div class="title">
       <p>
         <span class="color999">订单号：</span><span>{{$route.query.sn}}</span>
@@ -55,7 +55,7 @@
         </div>
       </div>
     </div>
-    <el-dialog title="View Image" v-model="visible">
+    <el-dialog title="图片预览" v-model="visible">
         <img :src="previewImage" v-if="visible" style="width: 100%">
     </el-dialog>
     </UserCenterLayout>

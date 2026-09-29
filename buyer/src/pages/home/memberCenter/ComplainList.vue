@@ -1,51 +1,46 @@
 <template>
   <div class="wrapper">
-    <UserCenterLayout title="我的投诉" :tabs="['我的投诉']">
+    <UserCenterLayout>
 
-    <div class="order">
-      <div class="order-title">
-        <div class="order-row title">
-          <div class="order-detail-title col-10">商品信息</div>
-          <div class="col-4">投诉状态</div>
-          <div class="col-4">投诉主题</div>
-          <div class="col-4">投诉内容</div>
-          <div class="col-2"></div>
-        </div>
+    <empty v-if="list.length === 0" />
+    <div class="complain-list" v-else>
+      <div class="complain-cols">
+        <span>商品信息</span>
+        <span>投诉状态</span>
+        <span>投诉主题</span>
+        <span>投诉内容</span>
+        <span>操作</span>
       </div>
-      <empty v-if="list.length === 0" />
-
-      <div class="order-item" v-else v-for="(item, index) in list" :key="index">
-        <div>
-          <div class="title order-item-title">
-            <span>投诉单号:{{item.id}}</span>
-            <span class="color999 ml_10">{{item.createTime}}</span>
-            <span class="hover-pointer fontsize_12 eval-detail" @click="goDetail(item.id)">投诉详情</span>
-            <span class="hover-pointer fontsize_12 eval-detail" style="right: 90px" v-if="item.complainStatus === 'APPLYING' || item.complainStatus === 'NEW'" @click="cancel(item.id)">取消投诉</span>
+      <div class="complain-card" v-for="(item, index) in list" :key="item.id || index">
+        <div class="complain-head">
+          <div class="order-sn">
+            {{ item.createTime }}<span>投诉单号 {{ item.id }}</span>
           </div>
-          <div class="order-item-view">
-            <div class="item-view-name col-10">
-              <div class="order-img hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
-                <img :src="item.goodsImage" alt="" />
-              </div>
-              <div class="order-name hover-color" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
-                {{item.goodsName}}
-              </div>
+        </div>
+        <div class="complain-body">
+          <div class="goods">
+            <div class="goods-thumb" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
+              <img
+                :src="item.goodsImage"
+                alt=""
+                @error="$event.target.style.visibility = 'hidden'"
+              />
             </div>
-            <div class="col-4">{{statusLabel[item.complainStatus]}}</div>
-            <div class="col-4">
-              <div class="content">{{item.complainTopic}}</div>
+            <div class="goods-name" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
+              {{ item.goodsName }}
             </div>
-            <div class="col-4">
-              <el-tooltip>
-                <div class="content">{{item.content}}</div>
-                <template #content>
-                  <div style="white-space: normal;">
-                    {{item.content}}
-                  </div>
-                </template>
-              </el-tooltip>
-            </div>
-            <div class="col-2"></div>
+          </div>
+          <div class="complain-cell">{{ statusLabel[item.complainStatus] || item.complainStatus }}</div>
+          <div class="complain-topic">{{ item.complainTopic }}</div>
+          <div class="complain-content">{{ item.content }}</div>
+          <div class="complain-ops">
+            <button type="button" class="text-link" @click="goDetail(item.id)">投诉详情</button>
+            <button
+              v-if="item.complainStatus === 'APPLYING' || item.complainStatus === 'NEW'"
+              type="button"
+              class="text-link"
+              @click="cancel(item.id)"
+            >取消投诉</button>
           </div>
         </div>
       </div>
@@ -54,7 +49,7 @@
     <!-- 分页 -->
     <div class="page-size">
       <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
-        :total="total" @current-change="changePageNum"
+        :total="total" :page-sizes="[20, 50, 100]" @current-change="changePageNum"
         @size-change="changePageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
     </div>
     </UserCenterLayout>
@@ -81,7 +76,7 @@ export default {
       total: 0, // 投诉总数
       params: { // 请求参数
         pageNumber: 1,
-        pageSize: 10
+        pageSize: 20
       }
     };
   },
@@ -130,101 +125,158 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.order-img {
-  > img {
-    width: 60px;
-    height: 60px;
-    border: 1px solid $border_color;
-    box-sizing: border-box;
-  }
-}
-.title {
-  @include background_color($light_background_color);
-}
-.item-view-name {
+.page-size {
   display: flex;
-}
-.order-name {
-  display: -webkit-box;
+  justify-content: flex-end;
+  margin-top: 16px;
 
-  -webkit-box-orient: vertical;
-
-  -webkit-line-clamp: 2;
-
-  overflow: hidden;
-  text-align: left;
-  padding: 0 10px;
-  font-size: 13px;
-  @include content_color($light_content_color);
-}
-.order-item-title {
-  padding: 5px 20px;
-  text-align: left;
-  font-size: 13px;
-  position: relative;
-}
-.order-row,
-.order-item-view {
-  display: flex;
-  align-items: center;
-
-  > [class*='col-'] {
-    box-sizing: border-box;
-    padding: 0 8px;
-  }
-
-  > .col-10 {
-    flex: 0 0 41.666667%;
-    max-width: 41.666667%;
-  }
-
-  > .col-4 {
-    flex: 0 0 16.666667%;
-    max-width: 16.666667%;
-  }
-
-  > .col-2 {
-    flex: 0 0 8.333333%;
-    max-width: 8.333333%;
+  :deep(.el-pagination) {
+    justify-content: flex-end;
   }
 }
 
-.order-item-view {
-  padding: 10px 20px;
-  align-items: flex-start;
+.complain-list {
+  --complain-cols: minmax(220px, 1.3fr) 90px minmax(100px, 0.8fr) minmax(160px, 1.4fr) 96px;
+  --complain-gap: 12px;
+  padding-top: 8px;
 }
-.order-item {
-  text-align: center;
-  border: 1px solid $border_color;
-  margin: 10px 0;
+
+.complain-cols,
+.complain-body {
+  display: grid;
+  grid-template-columns: var(--complain-cols);
+  column-gap: var(--complain-gap);
+  align-items: start;
 }
-.order-row {
-  padding: 10px 0;
-  text-align: center;
-}
-.order-detail-title {
-  text-align: left;
-  padding-left: 20px !important;
-}
-.content {
+
+.complain-cols {
+  padding: 0 16px 10px;
   color: #999;
-  max-height: 60px;
+  font-size: 13px;
+
+  span:first-child {
+    padding-left: 72px;
+  }
+
+  span:nth-child(n + 2) {
+    text-align: center;
+  }
+}
+
+.complain-card {
+  margin-bottom: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.complain-head {
+  padding: 10px 16px;
+  background: #f7f7f7;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-sn {
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+
+  span {
+    margin-left: 16px;
+  }
+}
+
+.complain-body {
+  padding: 14px 16px;
+}
+
+.goods {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: start;
+  min-width: 0;
+}
+
+.goods-thumb {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+  background: #f5f5f5;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.goods-name {
+  color: #333;
+  font-size: 16px;
+  line-height: 22px;
+  max-height: 44px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
   word-break: break-all;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
+  cursor: pointer;
 
-.eval-detail {
-  position: absolute;
-  right: 20px;
-  &:hover{
+  &:hover {
     color: $theme_color;
   }
 }
-.page-size{
+
+.complain-cell,
+.complain-topic,
+.complain-ops {
+  color: #171A26;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.complain-cell,
+.complain-ops {
+  text-align: center;
+}
+
+.complain-topic,
+.complain-content {
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.complain-content {
+  color: #666;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.complain-ops {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.text-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: #171A26;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+
+  &:hover {
+    color: $theme_color;
+  }
 }
 </style>

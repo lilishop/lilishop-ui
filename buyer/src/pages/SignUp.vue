@@ -1,16 +1,21 @@
 <template>
   <div class="sign-up" @click="hideVerify">
-    <div style="height:50px;"></div>
-    <div class="logo-box">
-      <img
-        width="150"
-        :src="$store.state.logoImg"
-        @click="$router.push('/')"
-      />
-      <div>注册</div>
+    <div class="top-content">
+      <div class="top-inner">
+        <div class="logo-box">
+          <img :src="$store.state.logoImg" @click="$router.push('/')" />
+          <div>欢迎注册</div>
+        </div>
+        <div class="to-login">已有账号？<a @click.stop="$router.push('login')">立即登录</a></div>
+      </div>
     </div>
-    <div class="login-container">
-        <!-- 注册 -->
+    <div class="signup-banner">
+      <img
+        class="signup-bg"
+        src="https://lili-system.oss-cn-beijing.aliyuncs.com/background.jpg"
+        alt=""
+      />
+      <div class="signup-card">
         <el-form
           ref="formRegist"
           :model="formRegist"
@@ -55,27 +60,21 @@
               placeholder="手机验证码"
             >
               <template #prepend><el-icon style="font-weight: bold"><Document /></el-icon></template>
-              <template #append><el-button @click="sendCode">{{ codeMsg }}</el-button></template>
+              <template #append><el-button @click.stop="sendCode">{{ codeMsg }}</el-button></template>
             </el-input>
           </el-form-item>
           <el-form-item>
-            <el-button @click="verifyBtnClick" style="width:100%" :type="verifyStatus?'success':'default'">{{verifyStatus?'验证通过':'点击完成安全验证'}}</el-button>
+            <el-button class="signup-btn" @click="handleRegist">注册</el-button>
           </el-form-item>
-          <el-form-item>
-            <el-button type="danger" size="large" @click="handleRegist" style="width:100%"
-              >注册</el-button
-            >
-          </el-form-item>
-          <el-form-item><span class="color999">点击注册，表示您同意《<router-link to="/article?id=1371992704333905920" target="_blank">商城用户协议</router-link>》</span></el-form-item>
+          <p class="agreement">点击注册，表示您同意《<router-link to="/article?id=1371992704333905920" target="_blank">商城用户协议</router-link>》</p>
         </el-form>
-        <!-- 拼图验证码 -->
         <Verify
           ref="verify"
           class="verify-con"
           :verifyType="verifyType"
           @change="verifyChange"
         ></Verify>
-        <div class="login-btn">已有账号？<a @click.stop="$router.push('login')">立即登录</a></div>
+      </div>
     </div>
     <div class="foot">
       <div type="flex" justify="space-around" class="help">
@@ -164,140 +163,259 @@ export default {
     },
     // 发送短信验证码
     sendCode () {
-      if (this.time === 60) {
-        if (this.formRegist.mobilePhone === '') {
-          Message.warning('请先填写手机号');
-          return;
-        }
-        if (!this.verifyStatus) {
-          Message.warning('请先完成安全验证');
-          return;
-        }
-        let params = {
-          mobile: this.formRegist.mobilePhone,
-          verificationEnums: 'REGISTER'
-        };
-        sendSms(params).then(res => {
-          if (res.success) {
-            Message.success('验证码发送成功');
-            let that = this;
-            this.interval = setInterval(() => {
-              that.time--;
-              if (that.time === 0) {
-                that.time = 60;
-                that.codeMsg = '重新发送';
-                that.verifyStatus = false;
-                clearInterval(that.interval);
-              } else {
-                that.codeMsg = that.time;
-              }
-            }, 1000);
-          } else {
-            Message.warning(res.message || '验证码发送失败');
-          }
-        }).catch(() => {});
+      if (this.time !== 60) return;
+      if (this.formRegist.mobilePhone === '') {
+        Message.warning('请先填写手机号');
+        return;
       }
+      if (!RegExp.mobile.test(this.formRegist.mobilePhone)) {
+        Message.warning('请输入正确的手机号');
+        return;
+      }
+      this.$refs.verify?.init();
     },
-    // 图片验证码成功回调
+    dispatchSms () {
+      sendSms({
+        mobile: this.formRegist.mobilePhone,
+        verificationEnums: 'REGISTER'
+      }).then(res => {
+        if (res.success) {
+          Message.success('验证码发送成功');
+          this.interval = setInterval(() => {
+            this.time--;
+            if (this.time === 0) {
+              this.time = 60;
+              this.codeMsg = '重新发送';
+              this.verifyStatus = false;
+              clearInterval(this.interval);
+            } else {
+              this.codeMsg = this.time;
+            }
+          }, 1000);
+        } else {
+          this.verifyStatus = false;
+          Message.warning(res.message || '验证码发送失败');
+        }
+      }).catch(() => {
+        this.verifyStatus = false;
+      });
+    },
     verifyChange (con) {
       if (!con.status) return;
       this.hideVerify();
       this.verifyStatus = true;
-    },
-    // 打开图片验证码
-    verifyBtnClick () {
-      if (!this.verifyStatus) {
-        this.$refs.verify?.init();
-      }
+      this.dispatchSms();
     }
   },
   mounted () {
     this.$refs.formRegist.resetFields();
-    document.querySelector('.sign-up').style.height = window.innerHeight + 'px'
   }
 };
 </script>
 <style scoped lang="scss">
-.logo-box {
-  width: 600px;
-  height: 80px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  img {
-    width: 150px;
-    cursor: pointer;
-  }
-  div {
-    font-size: 20px;
-    margin-top: 10px;
-  }
-}
-
-.login-container {
-  border-top: 2px solid $theme_color;
-  position: relative;
-  margin: 0 auto;
-  width: 600px;
-  background-color: #fff;
-  padding: 20px 40px;
+.sign-up {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #f5f5f5;
+}
+
+.top-content {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.top-inner {
+  width: 1200px;
+  max-width: calc(100% - 48px);
+  height: 72px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-box {
+  display: flex;
   align-items: center;
 
-  .signup-form {
-    width: 300px;
+  img {
+    height: 36px;
+    width: auto;
+    cursor: pointer;
   }
 
-  .login-btn{
-    position: absolute;
-    right: 20px;
-    top: -45px;
+  div {
+    margin-left: 16px;
+    padding-left: 16px;
+    border-left: 1px solid #e5e5e5;
+    font-size: 18px;
+    font-weight: 600;
+    color: #171A26;
+    line-height: 24px;
   }
 }
 
-.verify-con{
+.to-login {
+  font-size: 15px;
+  color: #666;
+
+  a {
+    margin-left: 4px;
+    color: $theme_color;
+    cursor: pointer;
+  }
+}
+
+.signup-banner {
+  position: relative;
+  height: 680px;
+  overflow: hidden;
+}
+
+.signup-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.signup-card {
+  position: absolute;
+  top: 50%;
+  right: max(72px, 8%);
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 480px;
+  box-sizing: border-box;
+  padding: 36px 40px 28px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.signup-form {
+  width: 100%;
+}
+
+.signup-card {
+  :deep(.el-form-item) {
+    margin-bottom: 22px;
+  }
+
+  :deep(.el-form-item__error) {
+    padding-top: 2px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-input-group__prepend),
+  :deep(.el-input-group__append) {
+    box-shadow: none;
+    background: #fff;
+  }
+
+  :deep(.el-input) {
+    height: 48px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+  }
+
+  :deep(.el-input__inner) {
+    height: 48px;
+    font-size: 16px;
+    color: #171A26;
+  }
+
+  :deep(.el-input-group__prepend) {
+    padding: 0 14px;
+    color: #999;
+    font-size: 18px;
+    border-right: 1px solid #f0f0f0;
+  }
+
+  :deep(.el-input-group__append) {
+    padding: 0;
+    border-left: 1px solid #f0f0f0;
+  }
+
+  :deep(.el-input-group__append .el-button) {
+    height: 46px;
+    margin: 0;
+    padding: 0 14px;
+    border: none;
+    color: $theme_color;
+    font-size: 16px;
+    background: transparent;
+  }
+}
+
+.signup-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 4px;
+  font-size: 18px;
+  background: $theme_color !important;
+  border-color: $theme_color !important;
+  color: #fff !important;
+}
+
+.agreement {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: #999;
+
+  a {
+    color: $theme_color;
+    text-decoration: none;
+  }
+}
+
+.verify-con {
   position: absolute;
   left: 50%;
-  top: 80px;
+  top: 120px;
   transform: translateX(-50%);
   z-index: 10;
 }
 
-.other-login {
-  margin: 0 auto;
-  .el-icon {
-    font-size: 24px;
-  }
-}
-.regist {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -10px;
-  span {
-    margin-left: 10px;
-    &:hover {
-      cursor: pointer;
-      color: $theme_color;
-    }
-  }
-}
 .foot {
   position: fixed;
-  bottom: 4vh;
-  width: 368px;
-  left: calc(50% - 184px);
-  color: rgba(0, 0, 0, 0.45);
+  bottom: 24px;
+  width: 420px;
+  left: calc(50% - 210px);
+  color: #999;
   font-size: 14px;
+  text-align: center;
+
   .help {
-    margin: 0 auto;
-    margin-bottom: 1vh;
-    width: 60%;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 8px;
+
     .item {
-      color: rgba(0, 0, 0, 0.45);
+      color: #666;
+      text-decoration: none;
+
+      &:hover {
+        color: $theme_color;
+      }
     }
-    :hover {
-      color: rgba(0, 0, 0, 0.65);
+  }
+
+  .copyright {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    a {
+      color: #666;
+      text-decoration: none;
     }
   }
 }

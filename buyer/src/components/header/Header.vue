@@ -238,8 +238,8 @@ export default {
 
 .box {
   width: 100%;
-  font-size: 12px !important;
-  height: 36px;
+  font-size: 14px;
+  height: 40px;
   background: #333;
   color: #fff;
   display: flex;
@@ -266,7 +266,7 @@ export default {
 .location > ul.flex > li {
   cursor: pointer;
   float: none;
-  line-height: 36px;
+  line-height: 40px;
   margin-right: 15px;
   display: flex;
   align-items: center;
@@ -274,7 +274,7 @@ export default {
 
 .nav a,
 .nav-item {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: normal;
   text-decoration: none;
   cursor: pointer;
@@ -297,7 +297,7 @@ export default {
     margin: 0;
     padding: 0;
     vertical-align: middle;
-    line-height: 36px;
+    line-height: 40px;
   }
 
   :deep(.el-tooltip__trigger),
@@ -429,7 +429,7 @@ export default {
   justify-content: space-between;
   margin-top: 8px;
   color: #999;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .shopping-price {
@@ -477,7 +477,7 @@ export default {
       padding: 8px 16px;
       line-height: 1.4;
       color: #666;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: normal;
       text-align: center;
       white-space: nowrap;
@@ -556,7 +556,7 @@ export default {
 }
 
 .my-info p {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .sign-out {
@@ -576,7 +576,7 @@ export default {
 }
 
 .sign-out p {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .goods-title:hover {

@@ -4,7 +4,6 @@
 
     <UserCenterLayout
       v-if="!homePage"
-      title="我的订单"
       :tabs="changeWay"
       :active-tab="activeOrderTab"
       @tab-change="change"
@@ -13,6 +12,7 @@
         <div class="order-search">
           <el-input
             v-model="params.keywords"
+            size="large"
             @keyup.enter="getList"
             placeholder="输入订单号搜索"
           />
@@ -23,68 +23,67 @@
       <!-- 订单列表 -->
       <empty v-if="orderList.length === 0" />
       <div class="order-content" v-else>
+        <div class="order-cols">
+          <span>订单详情</span>
+          <span>金额</span>
+          <span>操作</span>
+        </div>
         <div
           class="order-list"
           v-for="(order, onderIndex) in orderList"
           :key="onderIndex"
         >
           <div class="order-header">
-            <div class="order-header-main">
-              <div class="order-status">{{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}</div>
-              <div class="order-sn" v-if="order.isAfterSale">
-                售后单号：{{ order.serviceSn }}<span>{{ order.createTime }}</span>
-              </div>
-              <div class="order-sn" v-else>
-                订单号：{{ order.sn }}<span>{{ order.createTime }}</span>
-              </div>
+            <div class="order-sn" v-if="order.isAfterSale">
+              {{ order.createTime }}<span>售后单号 {{ order.serviceSn }}</span><span class="order-store" @click="shopPage(order.storeId)">{{ order.storeName }}</span>
             </div>
-            <div class="order-header-side">
-              <el-button v-if="!order.isAfterSale && order.orderStatus === 'COMPLETED'" class="del-btn" link @click="delOrder(order.sn)">
-                <el-icon><Delete /></el-icon>
-              </el-button>
-              <span class="order-amount">{{ $filters.unitPrice(order.flowPrice, "￥") }}</span>
+            <div class="order-sn" v-else>
+              {{ order.createTime }}<span>订单号 {{ order.sn }}</span><span class="order-store" @click="shopPage(order.storeId)">{{ order.storeName }}</span>
             </div>
+            <div class="order-status">{{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}</div>
           </div>
           <div class="order-body">
-            <div class="goods-list">
+            <div class="col-detail">
               <div
                 v-for="(goods, goodsIndex) in order.orderItems"
                 :key="goodsIndex"
                 class="goods-item"
               >
-                <img
-                  @click="goodsDetail(goods.skuId, goods.goodsId)"
-                  class="hover-color"
-                  :src="goods.image"
-                  alt=""
-                />
+                <div class="goods-thumb">
+                  <img
+                    @click="goodsDetail(goods.skuId, goods.goodsId)"
+                    class="hover-color"
+                    :src="goods.image"
+                    alt=""
+                    @error="$event.target.style.visibility = 'hidden'"
+                  />
+                </div>
                 <div class="goods-info">
                   <div class="goods-name hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
-                  <div class="goods-meta">
-                    <span class="global_color">{{ $filters.unitPrice(goods.goodsPrice, "￥") }}</span>
-                    <span class="goods-num">x {{ goods.num }}</span>
+                  <div class="goods-num">共{{ goods.num }}件</div>
+                  <div class="goods-extra">
                     <span v-if="refundPriceList(goods.isRefund)" class="refund-tag">{{ refundPriceList(goods.isRefund) }}</span>
-                  </div>
-                  <div class="goods-ops" v-if="goods.commentStatus == 'UNFINISHED' || goods.complainStatus == 'NO_APPLY'">
-                    <el-button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.sn, goodsIndex)" size="small" type="success">评价</el-button>
-                    <el-button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.sn, goodsIndex)" type="danger" size="small">投诉</el-button>
+                    <button v-if="goods.complainStatus == 'NO_APPLY'" type="button" class="sub-btn" @click="complain(order.sn, goodsIndex)">投诉</button>
                   </div>
                 </div>
               </div>
+              <button v-if="canAfterSale(order)" type="button" class="sub-btn" @click="applyAfterSale(order.orderItems)">申请售后</button>
             </div>
-            <div class="store-name">
-              <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
+            <div class="col-amount">
+              <div class="order-amount">{{ $filters.unitPrice(order.flowPrice, "￥") }}</div>
+              <div v-if="paymentLabel(order)" class="pay-method">{{ paymentLabel(order) }}</div>
             </div>
-            <div class="order-actions" v-if="order.isAfterSale">
-              <el-button @click="goAfterSaleDetail(order.serviceSn)" type="warning" size="small">售后详情</el-button>
-            </div>
-            <div class="order-actions" v-else>
-              <el-button @click="orderDetail(order.sn)" type="warning" size="small">订单详情</el-button>
-              <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
-              <el-button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</el-button>
-              <el-button @click="received(order.sn)" size="small" type="primary" v-if="order.allowOperationVO.rog">确认收货</el-button>
-              <el-button v-if="order.orderType !== 'E_COUPON' && order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
-                      @click="applyAfterSale(order.orderItems)" size="small">申请售后</el-button>
+            <div class="col-ops">
+              <template v-if="order.isAfterSale">
+                <button type="button" class="text-link" @click="goAfterSaleDetail(order.serviceSn)">售后详情</button>
+              </template>
+              <template v-else>
+                <button v-if="order.allowOperationVO && order.allowOperationVO.pay" type="button" class="op-btn" @click="goPay(order.sn)">去支付</button>
+                <button v-if="order.allowOperationVO && order.allowOperationVO.rog" type="button" class="op-btn" @click="received(order.sn)">确认收货</button>
+                <button type="button" class="text-link" @click="orderDetail(order.sn)">订单详情</button>
+                <button v-if="order.allowOperationVO && order.allowOperationVO.cancel" type="button" class="text-link" @click="handleCancelOrder(order.sn)">取消订单</button>
+                <button v-if="order.orderStatus === 'COMPLETED'" type="button" class="text-link" @click="delOrder(order.sn)">删除订单</button>
+              </template>
             </div>
           </div>
         </div>
@@ -94,7 +93,7 @@
       <!-- 分页 -->
       <div class="page-size">
         <el-pagination v-model:current-page="params.pageNumber" v-model:page-size="params.pageSize"
-          :total="total" @current-change="changePageNum"
+          :total="total" :page-sizes="[20, 50, 100]" @current-change="changePageNum"
           @size-change="changePageSize" layout="total, sizes, prev, pager, next, jumper"></el-pagination>
       </div>
     </UserCenterLayout>
@@ -102,68 +101,67 @@
     <!-- 个人中心首页订单列表 -->
     <empty v-if="homePage && orderList.length === 0" />
     <div class="order-content" v-else-if="homePage">
+      <div class="order-cols">
+        <span>订单详情</span>
+        <span>金额</span>
+        <span>操作</span>
+      </div>
       <div
         class="order-list"
         v-for="(order, onderIndex) in orderList"
         :key="onderIndex"
       >
         <div class="order-header">
-          <div class="order-header-main">
-            <div class="order-status">{{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}</div>
-            <div class="order-sn" v-if="order.isAfterSale">
-              售后单号：{{ order.serviceSn }}<span>{{ order.createTime }}</span>
-            </div>
-            <div class="order-sn" v-else>
-              订单号：{{ order.sn }}<span>{{ order.createTime }}</span>
-            </div>
+          <div class="order-sn" v-if="order.isAfterSale">
+            {{ order.createTime }}<span>售后单号 {{ order.serviceSn }}</span><span class="order-store" @click="shopPage(order.storeId)">{{ order.storeName }}</span>
           </div>
-          <div class="order-header-side">
-            <el-button v-if="!order.isAfterSale && order.orderStatus === 'COMPLETED'" class="del-btn" link @click="delOrder(order.sn)">
-              <el-icon><Delete /></el-icon>
-            </el-button>
-            <span class="order-amount">{{ $filters.unitPrice(order.flowPrice, "￥") }}</span>
+          <div class="order-sn" v-else>
+            {{ order.createTime }}<span>订单号 {{ order.sn }}</span><span class="order-store" @click="shopPage(order.storeId)">{{ order.storeName }}</span>
           </div>
+          <div class="order-status">{{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}</div>
         </div>
         <div class="order-body">
-          <div class="goods-list">
+          <div class="col-detail">
             <div
               v-for="(goods, goodsIndex) in order.orderItems"
               :key="goodsIndex"
               class="goods-item"
             >
-              <img
-                @click="goodsDetail(goods.skuId, goods.goodsId)"
-                class="hover-color"
-                :src="goods.image"
-                alt=""
-              />
+              <div class="goods-thumb">
+                <img
+                  @click="goodsDetail(goods.skuId, goods.goodsId)"
+                  class="hover-color"
+                  :src="goods.image"
+                  alt=""
+                  @error="$event.target.style.visibility = 'hidden'"
+                />
+              </div>
               <div class="goods-info">
                 <div class="goods-name hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
-                <div class="goods-meta">
-                  <span class="global_color">{{ $filters.unitPrice(goods.goodsPrice, "￥") }}</span>
-                  <span class="goods-num">x {{ goods.num }}</span>
+                <div class="goods-num">共{{ goods.num }}件</div>
+                <div class="goods-extra">
                   <span v-if="refundPriceList(goods.isRefund)" class="refund-tag">{{ refundPriceList(goods.isRefund) }}</span>
-                </div>
-                <div class="goods-ops" v-if="goods.commentStatus == 'UNFINISHED' || goods.complainStatus == 'NO_APPLY'">
-                  <el-button v-if="goods.commentStatus == 'UNFINISHED'" @click="comment(order.sn, goodsIndex)" size="small" type="success">评价</el-button>
-                  <el-button v-if="goods.complainStatus == 'NO_APPLY'" @click="complain(order.sn, goodsIndex)" type="danger" size="small">投诉</el-button>
+                  <button v-if="goods.complainStatus == 'NO_APPLY'" type="button" class="sub-btn" @click="complain(order.sn, goodsIndex)">投诉</button>
                 </div>
               </div>
             </div>
+            <button v-if="canAfterSale(order)" type="button" class="sub-btn" @click="applyAfterSale(order.orderItems)">申请售后</button>
           </div>
-          <div class="store-name">
-            <span @click="shopPage(order.storeId)">{{ order.storeName }}</span>
+          <div class="col-amount">
+            <div class="order-amount">{{ $filters.unitPrice(order.flowPrice, "￥") }}</div>
+            <div v-if="paymentLabel(order)" class="pay-method">{{ paymentLabel(order) }}</div>
           </div>
-          <div class="order-actions" v-if="order.isAfterSale">
-            <el-button @click="goAfterSaleDetail(order.serviceSn)" type="warning" size="small">售后详情</el-button>
-          </div>
-          <div class="order-actions" v-else>
-            <el-button @click="orderDetail(order.sn)" type="warning" size="small">订单详情</el-button>
-            <el-button @click="handleCancelOrder(order.sn)" type="danger" v-if="order.allowOperationVO.cancel" size="small">取消订单</el-button>
-            <el-button @click="goPay(order.sn)" size="small" type="success" v-if="order.allowOperationVO.pay">去支付</el-button>
-            <el-button @click="received(order.sn)" size="small" type="primary" v-if="order.allowOperationVO.rog">确认收货</el-button>
-            <el-button v-if="order.orderType !== 'E_COUPON' && order.groupAfterSaleStatus && (order.groupAfterSaleStatus.includes('NOT_APPLIED')|| order.groupAfterSaleStatus.includes('PART_AFTER_SALE'))"
-                    @click="applyAfterSale(order.orderItems)" size="small">申请售后</el-button>
+          <div class="col-ops">
+            <template v-if="order.isAfterSale">
+              <button type="button" class="text-link" @click="goAfterSaleDetail(order.serviceSn)">售后详情</button>
+            </template>
+            <template v-else>
+              <button v-if="order.allowOperationVO && order.allowOperationVO.pay" type="button" class="op-btn" @click="goPay(order.sn)">去支付</button>
+              <button v-if="order.allowOperationVO && order.allowOperationVO.rog" type="button" class="op-btn" @click="received(order.sn)">确认收货</button>
+              <button type="button" class="text-link" @click="orderDetail(order.sn)">订单详情</button>
+              <button v-if="order.allowOperationVO && order.allowOperationVO.cancel" type="button" class="text-link" @click="handleCancelOrder(order.sn)">取消订单</button>
+              <button v-if="order.orderStatus === 'COMPLETED'" type="button" class="text-link" @click="delOrder(order.sn)">删除订单</button>
+            </template>
           </div>
         </div>
       </div>
@@ -198,12 +196,10 @@
 <script>
 import { Message, Modal } from "@/utils/message";
 import { getOrderList, sureReceived, cancelOrder, delOrder } from '@/api/order';
-import { afterSaleReason, afterSaleList } from '@/api/member';
+import { afterSaleReason } from '@/api/member';
 import { orderStatusList, afterSaleStatusList } from '../enumeration.js'
-import { Delete } from '@element-plus/icons-vue'
 export default {
   name: 'MyOrder',
-  components: { Delete },
   props: {
     homePage: { // 判断是否个人中心首页展示内容
       type: Boolean,
@@ -215,7 +211,7 @@ export default {
       orderList: [], // 订单列表
       params: { // 请求参数
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         // orderStatus: 'ALL',
         keywords: '',
         tag: 'ALL'
@@ -227,7 +223,7 @@ export default {
       // 状态数组
       orderStatusList,
       afterSaleStatusList,
-      changeWay: ['全部', '待支付', '待发货', '待收货/使用', '评价', '售后'],
+      changeWay: ['全部', '待支付', '待发货', '待收货/使用'],
       activeOrderTab: 0,
       total: 0, // 数据总数
       spinShow: false, // 加载状态
@@ -270,11 +266,8 @@ export default {
       this.activeOrderTab = index;
       this.params.pageNumber = 1;
       delete this.params.commentStatus;
-      const tags = ['ALL', 'WAIT_PAY', 'WAIT_SHIP', 'WAIT_USE', 'ALL', 'AFTER_SALE'];
+      const tags = ['ALL', 'WAIT_PAY', 'WAIT_SHIP', 'WAIT_USE'];
       this.params.tag = tags[index] || 'ALL';
-      if (index === 4) {
-        this.params.commentStatus = 'UNFINISHED';
-      }
       this.getList()
     },
     // 跳转店铺首页
@@ -320,9 +313,6 @@ export default {
     afterSaleSelect (item) {
       this.$router.push({name: 'ApplyAfterSale', query: {sn: item.sn}})
     },
-    comment (sn, goodsIndex) { // 评价
-      this.$router.push({path: '/home/addEval', query: {sn, index: goodsIndex}})
-    },
     complain (sn, goodsIndex) { // 投诉
       this.$router.push({name: 'Complain', query: {sn, index: goodsIndex}})
     },
@@ -343,28 +333,9 @@ export default {
     },
     getList () {
       this.spinShow = true;
-      if (this.activeOrderTab === 5) {
-        afterSaleList({
-          pageNumber: this.params.pageNumber,
-          pageSize: this.params.pageSize,
-          keywords: this.params.keywords,
-          sort: 'createTime',
-          order: 'desc',
-        }).then(res => {
-          this.spinShow = false
-          if (res.success) {
-            this.orderList = (res.result.records || []).map(item => this.mapAfterSaleOrder(item));
-            this.total = res.result.total;
-          }
-        });
-        return;
-      }
       let params = JSON.parse(JSON.stringify(this.params))
       if (params.orderStatus === 'ALL') {
         delete params.orderStatus
-      }
-      if (params.tag === 'AFTER_SALE') {
-        delete params.tag
       }
       getOrderList(params).then(res => {
         this.spinShow = false
@@ -431,6 +402,27 @@ export default {
     filterAfterSaleStatus (status) {
       const ob = this.afterSaleStatusList.filter(e => e.status === status);
       return ob && ob[0] ? ob[0].name : status
+    },
+    canAfterSale (order) {
+      if (order.isAfterSale || order.orderType === 'E_COUPON' || !order.groupAfterSaleStatus) {
+        return false
+      }
+      return order.groupAfterSaleStatus.includes('NOT_APPLIED') || order.groupAfterSaleStatus.includes('PART_AFTER_SALE')
+    },
+    paymentLabel (order) {
+      const map = {
+        WECHAT: '微信支付',
+        ALIPAY: '支付宝',
+        WALLET: '余额支付',
+        BANK_TRANSFER: '线下转账'
+      }
+      if (order.paymentMethod && map[order.paymentMethod]) {
+        return map[order.paymentMethod]
+      }
+      if (order.payStatus === 'UNPAID' || order.orderStatus === 'UNPAID') {
+        return '待支付'
+      }
+      return ''
     }
   }
 };
@@ -454,6 +446,8 @@ export default {
   }
 }
 .order-content {
+  --order-cols: minmax(0, 1fr) 120px 120px;
+  --order-gap: 12px;
   padding-top: 14px;
 }
 .page-size {
@@ -466,6 +460,23 @@ export default {
   }
 }
 /** 订单列表 */
+.order-cols {
+  display: grid;
+  grid-template-columns: var(--order-cols);
+  column-gap: var(--order-gap);
+  align-items: center;
+  padding: 0 16px 10px;
+  color: #999;
+  font-size: 13px;
+
+  span:first-child {
+    padding-left: 72px;
+  }
+
+  span:nth-child(n + 2) {
+    text-align: center;
+  }
+}
 .order-list {
   border: 1px solid #eee;
   border-radius: 8px;
@@ -473,120 +484,121 @@ export default {
   background: #fff;
   overflow: hidden;
 
-  &:hover {
-    .del-btn { visibility: visible; }
-  }
-
-  .del-btn {
-    visibility: hidden;
-    padding: 0;
-    height: auto;
-    color: #999;
-  }
-
   .order-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: var(--order-cols);
+    column-gap: var(--order-gap);
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 12px 16px;
-    background: #fafafa;
+    padding: 10px 16px;
+    background: #f7f7f7;
     border-bottom: 1px solid #f0f0f0;
   }
 
-  .order-header-main {
-    min-width: 0;
-  }
-
-  .order-status {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-    line-height: 1.4;
-  }
-
   .order-sn {
-    margin-top: 4px;
-    font-size: 12px;
-    color: #999;
-    line-height: 1.4;
+    grid-column: 1 / 3;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    font-size: 14px;
+    color: #171A26;
+    line-height: 1.5;
 
     span {
       margin-left: 16px;
     }
   }
 
-  .order-header-side {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    gap: 8px;
+  .order-store {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #438cde;
+    cursor: pointer;
+
+    &:hover {
+      color: $theme_color;
+    }
   }
 
-  .order-amount {
-    min-width: 88px;
-    text-align: right;
-    font-size: 16px;
-    font-weight: 600;
-    color: $theme_color;
+  .order-status {
+    grid-column: 3;
+    min-width: 0;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
   }
 
   .order-body {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 120px 100px;
-    gap: 12px;
-    align-items: start;
+    grid-template-columns: var(--order-cols);
+    column-gap: var(--order-gap);
+    align-items: center;
     padding: 14px 16px;
-    color: #999;
   }
 
   .goods-item {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: start;
+    width: 100%;
     min-width: 0;
 
     & + .goods-item {
       margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f5f5f5;
     }
+  }
+
+  .goods-thumb {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+    background: #f5f5f5;
 
     img {
-      width: 72px;
-      height: 72px;
-      margin-right: 12px;
-      border-radius: 6px;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      flex-shrink: 0;
-      background: #f5f5f5;
+      display: block;
     }
   }
 
   .goods-info {
-    flex: 1;
     min-width: 0;
+    overflow: hidden;
   }
 
   .goods-name {
+    max-width: 100%;
     color: #333;
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: 16px;
+    line-height: 22px;
+    max-height: 44px;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow: hidden;
+    word-break: break-all;
   }
 
-  .goods-meta {
+  .goods-num {
+    margin-top: 6px;
+    color: #999;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .goods-extra {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 8px;
-    font-size: 13px;
-    line-height: 1.4;
-  }
-
-  .goods-num {
-    color: #666;
+    margin-top: 6px;
   }
 
   .refund-tag {
@@ -594,47 +606,88 @@ export default {
     border-radius: 4px;
     background: #fff7e8;
     color: #ff9900;
-    font-size: 12px;
-    line-height: 20px;
+    font-size: 14px;
+    line-height: 22px;
   }
 
-  .goods-ops {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  .sub-btn {
+    height: 28px;
     margin-top: 8px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    color: #666;
+    font-size: 14px;
+    line-height: 26px;
+    cursor: pointer;
 
-    .el-button {
-      margin: 0;
+    &:hover {
+      border-color: $theme_color;
+      color: $theme_color;
     }
   }
 
-  .store-name {
-    padding-top: 4px;
+  .goods-extra .sub-btn {
+    margin-top: 0;
+  }
+
+  .col-amount,
+  .col-ops {
     text-align: center;
-    font-size: 13px;
-    line-height: 1.4;
-    word-break: break-all;
-
-    span {
-      color: #438cde;
-      cursor: pointer;
-
-      &:hover {
-        color: $theme_color;
-      }
-    }
   }
 
-  .order-actions {
+  .order-amount {
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .pay-method {
+    margin-top: 4px;
+    color: #999;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .col-ops {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 8px;
+  }
 
-    .el-button {
-      margin: 0;
-      width: 100%;
+  .op-btn {
+    min-width: 96px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid $theme_color;
+    border-radius: 4px;
+    background: #fff;
+    color: #171A26;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 30px;
+    cursor: pointer;
+
+    &:hover {
+      background: #fff5f4;
+    }
+  }
+
+  .text-link {
+    border: none;
+    background: none;
+    padding: 0;
+    color: #171A26;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 22px;
+    cursor: pointer;
+
+    &:hover {
+      color: $theme_color;
     }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="user-home-page">
     <BaseHeader></BaseHeader>
 
     <div class="container width_1200">
@@ -68,6 +68,12 @@ export default {
       return {};
     },
   },
+  mounted() {
+    document.body.classList.add("buyer-user-center");
+  },
+  beforeUnmount() {
+    document.body.classList.remove("buyer-user-center");
+  },
   methods: {
     onSelect(name) {
       this.$router.push({ name });
@@ -132,5 +138,40 @@ export default {
   padding: 0px 15px;
   padding-bottom: 15px;
   text-align: center;
+}
+</style>
+
+<style lang="scss">
+/* 会员中心按钮统一放大一号：small→默认，默认→large，large→48px。弹窗挂到 body，靠页面 class 一起放大。 */
+body.buyer-user-center {
+  .user-home-page .content .el-button.el-button--small:not(.is-link):not(.is-text),
+  .el-overlay .el-button.el-button--small:not(.is-link):not(.is-text) {
+    height: 32px;
+    padding: 8px 15px;
+    font-size: var(--el-font-size-base);
+    border-radius: var(--el-border-radius-base);
+  }
+
+  .user-home-page .content .el-button:not(.el-button--small):not(.el-button--large):not(.is-link):not(.is-text),
+  .el-overlay .el-button:not(.el-button--small):not(.el-button--large):not(.is-link):not(.is-text) {
+    height: 40px;
+    padding: 12px 19px;
+    font-size: var(--el-font-size-base);
+    border-radius: var(--el-border-radius-base);
+  }
+
+  .user-home-page .content .el-button.el-button--large:not(.is-link):not(.is-text),
+  .el-overlay .el-button.el-button--large:not(.is-link):not(.is-text) {
+    --el-button-size: 48px;
+    height: var(--el-button-size);
+    padding: 16px 23px;
+    font-size: var(--el-font-size-base);
+    border-radius: var(--el-border-radius-base);
+  }
+
+  .user-home-page .content .el-button.is-link.el-button--small,
+  .el-overlay .el-button.is-link.el-button--small {
+    font-size: var(--el-font-size-base);
+  }
 }
 </style>

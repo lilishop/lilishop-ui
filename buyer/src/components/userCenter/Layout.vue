@@ -1,8 +1,8 @@
 <template>
   <div class="user-center-page">
-    <div class="user-center-title">{{ title }}</div>
+    <div v-if="title" class="user-center-title">{{ title }}</div>
     <div class="user-center-panel">
-      <div v-if="showToolbar" class="user-center-toolbar">
+      <div v-if="showToolbar" class="user-center-toolbar" :class="{ 'is-actions-only': !tabs.length }">
         <div class="user-center-tabs">
           <div
             v-for="(item, index) in tabs"
@@ -33,7 +33,7 @@ export default {
   props: {
     title: {
       type: String,
-      required: true,
+      default: "",
     },
     tabs: {
       type: Array,
@@ -101,21 +101,35 @@ export default {
   justify-content: space-between;
   min-height: 54px;
   border-bottom: 1px solid #eee;
+  gap: 16px;
+}
+
+.user-center-toolbar.is-actions-only {
+  justify-content: flex-start;
+
+  .user-center-tabs {
+    display: none;
+  }
 }
 
 .user-center-tabs {
   display: flex;
   align-items: center;
   height: 54px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .user-center-tab {
   position: relative;
+  flex-shrink: 0;
   height: 54px;
   line-height: 54px;
   margin-right: 28px;
   color: #333;
   cursor: pointer;
+  white-space: nowrap;
 
   &:hover,
   &.active {
@@ -127,7 +141,7 @@ export default {
     position: absolute;
     left: 0;
     right: 0;
-    bottom: -1px;
+    bottom: 0;
     height: 2px;
     background: $theme_color;
   }
@@ -136,6 +150,7 @@ export default {
 .user-center-extra {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .user-center-content {

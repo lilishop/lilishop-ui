@@ -19,55 +19,13 @@
       </el-carousel>
       <!-- 登录模块 -->
       <div class="form-box" @click="hideVerify">
-        <div class="account-number">
-          <div class="tab-switch">
-            <span>{{ type ? '账号登录' : '验证码登录' }}</span>
-            <span @click="type = !type,scannerCodeLoginFLag=false">{{ type ? '验证码登录' : '账号登录' }}</span>
-          </div>
-          <!---->
-          <div @click="scannerCodeLoginFLag=!scannerCodeLoginFLag">{{!scannerCodeLoginFLag ? '扫码登录' : '返回'}}</div>
-        </div>
-        <!--扫码登录-->
-        <div v-show="scannerCodeLoginFLag">
-          <div class="qr-container">
-            <div class='qr-shadow flex' v-show="qrCodeStatus == 'fail'">
-              <span>
-                二维码已失效
-              </span>
-              <el-button size='small' @click="createPCLoginSession">刷新二维码</el-button>
-            </div>
-            <vue-qr
-              :text="qrCode"
-              :margin="0"
-              colorDark="#000"
-              colorLight="#fff"
-              :size="150"
-            ></vue-qr>
-          </div>
-          <div class="drag-area">
-          <!--    等待扫码-->
-          <div v-if="scannerCodeLoginStatus === 0" class="pending-scan">
-            <p>打开手机App/小程序，扫码登录</p>
-          </div>
-          <!--    已经扫码-->
-          <div v-else-if="scannerCodeLoginStatus === 1" class="scanned">
-            <p>扫码成功，等待确认</p>
-          </div>
-
-          <!--    存在session，等待发送给客户端验证-->
-          <div v-if="scannerCodeLoginStatus === 2" class="scanned">
-            <p>登录成功，正在页面跳转</p>
-          </div>
-
-          <!--    已经发送登录请求-->
-          <div v-else-if="scannerCodeLoginStatus === 3" class="quick-logining">
-            <p>取消登录</p>
-          </div>
-        </div>
+        <div class="login-tabs">
+          <span :class="{ active: type }" @click="type = true">账号登录</span>
+          <span :class="{ active: !type }" @click="type = false">验证码登录</span>
         </div>
 
         <div>
-          <div v-show="!scannerCodeLoginFLag">
+          <div>
           <!-- 账号密码登录 -->
           <el-form ref="formInline" :model="formData" :rules="ruleInline" v-show="type === true"
                 @click.self="hideVerify">
@@ -82,7 +40,7 @@
               </el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="danger" @click.stop="handleSubmit('formInline')" style="width:100%">登录</el-button>
+              <el-button class="login-btn" @click.stop="handleSubmit('formInline')">登录</el-button>
             </el-form-item>
           </el-form>
           <!-- 验证码登录 -->
@@ -90,22 +48,17 @@
                 @click.self="hideVerify">
             <el-form-item prop="mobile">
               <el-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
-                <template #prepend><el-icon><Lock /></el-icon></template>
+                <template #prepend><el-icon><Iphone /></el-icon></template>
               </el-input>
             </el-form-item>
             <el-form-item prop="code">
               <el-input type="text" v-model="formSms.code" placeholder="手机验证码">
                 <template #prepend><el-icon style="font-weight: bold"><Document /></el-icon></template>
-                <template #append><el-button @click="sendCode">{{ codeMsg }}</el-button></template>
+                <template #append><el-button @click.stop="sendCode">{{ codeMsg }}</el-button></template>
               </el-input>
             </el-form-item>
             <el-form-item>
-              <el-button @click.stop="verifyBtnClick" style="width:100%"
-                      :type="verifyStatus?'success':'default'">{{ verifyStatus ? '验证通过' : '点击完成安全验证' }}
-              </el-button>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="danger" @click="handleSubmit('formSms')" style="width:100%">登录</el-button>
+              <el-button class="login-btn" @click="handleSubmit('formSms')">登录</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -126,7 +79,7 @@
               </svg>
             </div>
             <div class="register">
-              <span style="color:red" @click.stop="$router.push('signUp')">还没有账号？点击立即注册</span>
+              <span class="register-link" @click.stop="$router.push('signUp')">立即注册</span>
               <span @click.stop="$router.push('forgetPassword')">忘记密码</span>
             </div>
           </div>
@@ -159,33 +112,23 @@ import * as RegExp from "@/plugins/RegExp.js";
 import { md5 } from "@/plugins/md5.js";
 import * as apiLogin from "@/api/login.js";
 import { sendSms } from "@/api/common.js";
-import { webLogin, loginCallback,sCLogin,getSCLoginCode} from "@/api/login.js";
+import { webLogin, loginCallback } from "@/api/login.js";
 import storage from "@/plugins/storage.js";
 import verify from "@/components/verify";
-import vueQr from "vue-qr";
-import { User, Lock, Document } from "@element-plus/icons-vue";
+import { User, Lock, Document, Iphone } from "@element-plus/icons-vue";
 import config from "@/config";
 
 export default {
   name: "Login",
   components: {
     verify,
-    vueQr,
     User,
     Lock,
     Document,
+    Iphone,
   },
   data() {
     return {
-      qrCodeStatus:"success", //
-      qrCode: '',
-      qrSessionToken:'',
-      //是否是二维码登录
-      scannerCodeLoginFLag: false,
-      scannerCodeLoginStatus: 0,
-      qrCodeTimer:null,
-      qrExpireMs: 20000,
-      qrCreateSeq: 0,
       config,
       type: true, // true 账号登录  false 验证码登录
       formData: {
@@ -234,10 +177,6 @@ export default {
           if (this.type) {
             this.$refs.verify?.init();
           } else {
-            if (!this.verifyStatus) {
-              Message.warning("请先完成安全验证");
-              return;
-            }
             if (!this.codeSent) {
               Message.warning("请先获取短信验证码");
               return;
@@ -274,41 +213,44 @@ export default {
     },
     // 发送手机验证码
     sendCode() {
-      if (this.time === 60) {
-        if (this.formSms.mobile === "") {
-          Message.warning("请先填写手机号");
-          return;
-        }
-        if (!this.verifyStatus) {
-          Message.warning("请先完成安全验证");
-          return;
-        }
-        let params = {
-          mobile: this.formSms.mobile,
-          verificationEnums: "LOGIN",
-        };
-        sendSms(params).then((res) => {
-          if (res.success) {
-            Message.success("验证码发送成功");
-            this.codeSent = true;
-            let that = this;
-            this.interval = setInterval(() => {
-              that.time--;
-              if (that.time === 0) {
-                that.time = 60;
-                that.codeMsg = "重新发送";
-                that.verifyStatus = false;
-                that.codeSent = false;
-                clearInterval(that.interval);
-              } else {
-                that.codeMsg = that.time;
-              }
-            }, 1000);
-          } else {
-            Message.warning(res.message);
-          }
-        }).catch(() => {});
+      if (this.time !== 60) return;
+      if (this.formSms.mobile === "") {
+        Message.warning("请先填写手机号");
+        return;
       }
+      if (!RegExp.mobile.test(this.formSms.mobile)) {
+        Message.warning("请输入正确的手机号");
+        return;
+      }
+      this.$refs.verify?.init();
+    },
+    dispatchSms() {
+      sendSms({
+        mobile: this.formSms.mobile,
+        verificationEnums: "LOGIN",
+      }).then((res) => {
+        if (res.success) {
+          Message.success("验证码发送成功");
+          this.codeSent = true;
+          this.interval = setInterval(() => {
+            this.time--;
+            if (this.time === 0) {
+              this.time = 60;
+              this.codeMsg = "重新发送";
+              this.verifyStatus = false;
+              this.codeSent = false;
+              clearInterval(this.interval);
+            } else {
+              this.codeMsg = this.time;
+            }
+          }, 1000);
+        } else {
+          this.verifyStatus = false;
+          Message.warning(res.message);
+        }
+      }).catch(() => {
+        this.verifyStatus = false;
+      });
     },
     verifyChange(con) {
       // 拼图验证码回显
@@ -336,12 +278,7 @@ export default {
       } else {
         this.verifyStatus = true;
         this.hideVerify();
-      }
-    },
-    // 开启滑块验证
-    verifyBtnClick() {
-      if (!this.verifyStatus) {
-        this.$refs.verify?.init();
+        this.dispatchSms();
       }
     },
     handleWebLogin(type) {
@@ -369,92 +306,9 @@ export default {
       });
     },
 
-    async createPCLoginSession() {
-      const requestId = ++this.qrCreateSeq;
-      this.clearQRLoginInfo();
-      getSCLoginCode({}).then(response=>{
-        if (requestId !== this.qrCreateSeq) return;
-        if (response.code == 200 && response.result) {
-          this.qrCodeStatus = 'success'
-          let session = response.result;
-          this.qrSessionToken = session.token;
-          this.qrExpireMs = Number(session.duration) > 0 ? Number(session.duration) : 20000;
-          if (session.status === 0) {
-            this.qrCode = session.token;
-            this.refreshQrCode();
-          }
-          this.qrLogin();
-        } else {
-          this.markQrExpired();
-        }
-      }).catch(() => {
-        if (requestId !== this.qrCreateSeq) return;
-        this.markQrExpired();
-      });
-    },
-
-    refreshQrCode() {
-      this.clearQrTimer();
-      this.qrCodeTimer = setTimeout(() => {
-        this.qrCodeStatus = 'fail';
-        this.clearQrTimer();
-      }, this.qrExpireMs);
-    },
-
-    clearQrTimer() {
-      if (this.qrCodeTimer) {
-        clearTimeout(this.qrCodeTimer);
-      }
-      this.qrCodeTimer = null;
-    },
-
-    markQrExpired() {
-      this.qrCodeStatus = 'fail';
-      this.scannerCodeLoginStatus = 0;
-      this.qrSessionToken = '';
-      this.clearQrTimer();
-    },
-
-    clearQRLoginInfo(){
-      this.scannerCodeLoginStatus=0;
-      this.qrSessionToken='';
-      this.clearQrTimer();
-    },
-
-    async qrLogin() {
-      const token = this.qrSessionToken;
-      if(!token) return;
-      sCLogin(token,{beforeSessionStatus:this.scannerCodeLoginStatus}).then(response=>{
-        if (token !== this.qrSessionToken) return;
-        if (response.success) {
-          this.scannerCodeLoginStatus = response.result.status;
-          switch (response.result.status) {
-            case 0:
-            case 1:
-              this.qrLogin();break;
-            case 2:
-              this.clearQRLoginInfo();
-              this.loginSuccess(response.result.token.accessToken,response.result.token.refreshToken);
-              break;
-            case 3:
-              this.createPCLoginSession();
-              break;
-            default:
-              this.markQrExpired();
-              break
-          }
-        }  else{
-          this.markQrExpired();
-        }
-      }).catch(() => {
-        if (token !== this.qrSessionToken) return;
-        this.markQrExpired();
-      });
-    },
   },
   beforeUnmount() {
-    this.qrCreateSeq++;
-    this.clearQRLoginInfo();
+    clearInterval(this.interval);
   },
   mounted() {
     let uuid = this.$route.query.state;
@@ -468,16 +322,6 @@ export default {
     }
   },
   watch: {
-    scannerCodeLoginFLag(v){
-      if(v){
-        this.createPCLoginSession();
-        console.log("二维码登录");
-      }else{
-        console.log("取消二维码登录");
-        this.qrCreateSeq++;
-        this.clearQRLoginInfo();
-      }
-    },
     type(v) {
       if (v) {
         this.$refs.formInline.resetFields();
@@ -502,82 +346,43 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-.drag-area{
-  margin: 10px 0;
-}
 .login {
-  height: 100%;
-  background-color: #f0f2f5;
+  min-height: 100vh;
+  background-color: #f5f5f5;
 }
-.other{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.qr-container{
-  text-align: center;
-  margin: 20px 0;
-  position: relative;
-  >.qr-shadow{
-    background: rgba(0, 0, 0, 0.45);
-    position: absolute;
-    left: 50%;
-    margin-left: -75px;
-    top: 0;
-    z-index: 99;
-    width: 150px;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    color: #fff;
-    >span{
-      margin-bottom: 20px;
-      font-size: 13px;
-      letter-spacing: 2px;
-    }
-  }
-}
+
 .top-content {
   width: 100%;
-  height: 80px;
+  height: 72px;
   position: relative;
   z-index: 1;
-
-  box-shadow: 0 1px 1px #ddd;
   background-color: #fff;
+  border-bottom: 1px solid #eee;
 
   .logo-box {
-    width: 80%;
-    max-width: 1200px;
-    height: 80px;
+    width: 1200px;
+    max-width: calc(100% - 48px);
+    height: 72px;
     margin: 0 auto;
     display: flex;
     align-items: center;
 
     img {
-      width: 150px;
+      height: 36px;
+      width: auto;
       cursor: pointer;
     }
 
     div {
-      font-size: 20px;
-      margin-top: 10px;
+      margin-left: 16px;
+      padding-left: 16px;
+      border-left: 1px solid #e5e5e5;
+      font-size: 18px;
+      font-weight: 600;
+      color: #171A26;
+      line-height: 24px;
     }
   }
-}
-.pending-scan{
-  text-align: center;
-  color:black;
-}
-.scanned{
-  text-align: center;
-  color:green;
-}
-.quick-logining{
-  text-align: center;
-  color:red;
 }
 
 .login-carousel {
@@ -586,118 +391,213 @@ export default {
 
   .demo-carousel {
     height: 550px;
-    width: inherit;
-    display: flex;
-    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 550px;
+      object-fit: cover;
+      object-position: center;
+    }
   }
 }
 
 .login-container {
+  --login-card-right: max(96px, 10%);
   position: relative;
   width: 100%;
   height: 550px;
 }
 
 .form-box {
-  width: 350px;
+  width: 460px;
   box-sizing: border-box;
   position: absolute;
-  top: 80px;
-  right: 15%;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.8);
+  top: 48px;
+  right: var(--login-card-right);
+  padding: 32px 32px 24px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 
-  .account-number {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    font-weight: bold;
+  :deep(.el-form-item) {
+    margin-bottom: 22px;
+  }
 
-    > div:nth-child(2) {
-      color: $theme_color;
-      cursor: pointer;
-    }
+  :deep(.el-form-item__error) {
+    padding-top: 2px;
+    font-size: 12px;
+    line-height: 16px;
+  }
 
-    .tab-switch {
-      height: 40px;
-      font-size: 14px;
+  :deep(.el-input__wrapper),
+  :deep(.el-input-group__prepend),
+  :deep(.el-input-group__append) {
+    box-shadow: none;
+    background: #fff;
+  }
 
-      span:nth-child(1) {
-        font-size: 16px;
-        border-right: 1px solid #ddd;
-        padding-right: 10px;
-      }
+  :deep(.el-input) {
+    height: 48px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+  }
 
-      span:nth-child(2) {
-        cursor: pointer;
-        padding-left: 10px;
+  :deep(.el-input__inner) {
+    height: 48px;
+    font-size: 16px;
+    color: #171A26;
+  }
 
-        &:hover {
-          color: $theme_color;
-        }
+  :deep(.el-input-group__prepend) {
+    padding: 0 14px;
+    color: #999;
+    font-size: 18px;
+    border-right: 1px solid #f0f0f0;
+  }
+
+  :deep(.el-input-group__append) {
+    padding: 0;
+    border-left: 1px solid #f0f0f0;
+  }
+
+  :deep(.el-input-group__append .el-button) {
+    height: 46px;
+    margin: 0;
+    padding: 0 14px;
+    border: none;
+    color: $theme_color;
+    font-size: 16px;
+    background: transparent;
+  }
+}
+
+.login-tabs {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #f0f0f0;
+
+  span {
+    position: relative;
+    padding-bottom: 14px;
+    color: #666;
+    font-size: 18px;
+    line-height: 26px;
+    cursor: pointer;
+
+    &.active {
+      color: #171A26;
+      font-weight: 600;
+
+      &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2px;
+        background: $theme_color;
       }
     }
   }
 }
 
+.login-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 4px;
+  font-size: 18px;
+}
+
+.login-btn {
+  background: $theme_color !important;
+  border-color: $theme_color !important;
+  color: #fff !important;
+}
+
 .verify-con {
   position: absolute;
-  right: 16%;
+  right: var(--login-card-right);
   top: 90px;
   z-index: 10;
 }
 
+.other {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
 .other-login {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
   > svg {
     cursor: pointer;
-    width: 24px;
-    margin-right: 10px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
   }
 }
 
 .register {
   display: flex;
-  margin-top: -10px;
-  font-size: 12px;
+  align-items: center;
+  gap: 16px;
+  font-size: 15px;
 
   span {
-    margin-left: 10px;
-    font-size: 12px;
+    color: #666;
+    cursor: pointer;
 
     &:hover {
-      cursor: pointer;
       color: $theme_color;
     }
+  }
+
+  .register-link {
+    color: $theme_color;
   }
 }
 
 .foot {
   position: fixed;
-  bottom: 4vh;
-  width: 368px;
-  left: calc(50% - 184px);
-  color: rgba(0, 0, 0, 0.45);
+  bottom: 24px;
+  width: 420px;
+  left: calc(50% - 210px);
+  color: #999;
   font-size: 14px;
+  text-align: center;
 
   .help {
-    margin: 0 auto;
-    margin-bottom: 1vh;
-    width: 60%;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 8px;
 
     .item {
-      color: rgba(0, 0, 0, 0.45);
-    }
+      color: #666;
+      text-decoration: none;
 
-    :hover {
-      color: rgba(0, 0, 0, 0.65);
+      &:hover {
+        color: $theme_color;
+      }
+    }
+  }
+
+  .copyright {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    a {
+      color: #666;
+      text-decoration: none;
     }
   }
 }
-
-.icon-hover {
-  cursor: pointer;
-}
-
 </style>

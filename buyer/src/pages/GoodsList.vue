@@ -63,12 +63,12 @@
                 <span>{{ item.goodsName }}</span>
               </div>
               <div class="goods-show-num">
-                已有<span>{{ item.commentNum || 0 }}</span>人评价
+                <span>{{ formatGrade(item.grade) }}%好评</span>
+                <span class="goods-show-sales">销量 {{ item.buyCount || 0 }}</span>
               </div>
               <div class="goods-show-seller">
                 <span
                   class="text-bottom hover-pointer"
-                  style="color: #e4393c"
                   @click.stop="goShopPage(item.storeId)"
                 >{{ item.storeName }}</span>
               </div>
@@ -79,25 +79,6 @@
                   v-if="item.selfOperated"
                 >
                   自营
-                </el-tag>
-                <!-- E_COUPON 卡密商品类型标识 -->
-                <el-tag
-                  class="goods-show-tag goods-show-tag-physical goods-show-tag-ecoupon"
-                  v-if="item.goodsType === 'E_COUPON'"
-                >
-                  电子卡券
-                </el-tag>
-                <el-tag
-                  class="goods-show-tag goods-show-tag-physical"
-                  v-else-if="item.goodsType === 'VIRTUAL_GOODS'"
-                >
-                  虚拟
-                </el-tag>
-                <el-tag
-                  class="goods-show-tag goods-show-tag-physical"
-                  v-else-if="item.goodsType === 'PHYSICAL_GOODS'"
-                >
-                  实物
                 </el-tag>
               </div>
             </div>
@@ -125,7 +106,6 @@ import { Message } from "@/utils/message";
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
 import GoodsClassNav from "@/components/nav/GoodsClassNav";
 import * as apiGoods from "@/api/goods";
-import { isBuyerLoggedIn, redirectToLogin } from "@/utils/buyerLogin";
 export default {
   name: "GoodsList",
   beforeRouteEnter(to, from, next) {
@@ -201,15 +181,22 @@ export default {
       }
       this.getGoodsList();
     },
+    formatGrade(grade) {
+      if (grade === null || grade === undefined || grade === "") {
+        return 100;
+      }
+      const num = Number(grade);
+      if (Number.isNaN(num)) {
+        return 100;
+      }
+      const fixed = Number(num.toFixed(1));
+      return fixed % 1 === 0 ? fixed.toFixed(0) : String(fixed);
+    },
     goGoodsDetail(skuId, goodsId) {
       const location = {
         path: "/goodsDetail",
         query: { skuId, goodsId },
       };
-      if (!isBuyerLoggedIn()) {
-        redirectToLogin(this.$router, location);
-        return;
-      }
       window.open(this.$router.resolve(location).href, "_blank");
     },
     goShopPage(id) {
@@ -308,10 +295,6 @@ export default {
   }
 }
 
-.goods-show-tag-ecoupon {
-  padding: 0 5px;
-}
-
 .goods-show-tag-self {
   --el-tag-bg-color: #fa2c19;
   --el-tag-border-color: #fa2c19;
@@ -336,28 +319,18 @@ export default {
   }
 }
 
-.goods-show-tag-physical {
-  background-color: #e6f4ff;
-  border-color: #b3d8ff;
-  color: #409eff;
-
-  :deep(.el-tag__content) {
-    color: #409eff;
-  }
-}
-
 .goods-show-seller {
   // padding:3px 0;
   vertical-align: middle;
 }
 .container {
-  margin:25px auto 15px auto;
-  width: 1184px;
+  margin: 20px auto 24px;
+  width: 1200px;
   min-width: 1000px;
   position: relative;
 }
 .price-sort:hover {
-  color: #e23a3a;
+  color: $theme_color;
 }
 .goods-box {
   display: flex;
@@ -383,16 +356,16 @@ export default {
 }
 .goods-list-tool {
   width: 100%;
-  height: 38px;
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;
+  height: 48px;
+  border: 1px solid #eee;
+  background-color: #fff;
 }
 .goods-list-tool ul {
   display: flex;
   align-items: center;
   height: 100%;
   padding-left: 15px;
-  font-size: 12px;
+  font-size: 14px;
   margin: 0;
   list-style: none;
 
@@ -435,32 +408,104 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 3px 5px;
-  border: 1px solid #ccc;
-  margin-left: -1px;
-  background-color: #fff;
+  height: 48px;
+  padding: 0 16px;
+  border: none;
+  margin-left: 0;
+  background-color: transparent;
+  color: #666;
   line-height: 1;
   white-space: nowrap;
   box-sizing: border-box;
 }
 .goods-list-tool li > span:hover {
-  border-color: $theme_color;
+  color: $theme_color;
   position: relative;
   text-decoration: none;
   z-index: 1;
 }
 .goods-list-tool li > span .el-icon {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1;
 }
 .goods-list-tool-active {
-  color: #fff;
-  border-left: 1px solid #ccc;
-  background-color: $theme_color !important;
+  color: $theme_color !important;
+  background-color: transparent !important;
+  font-weight: 600;
 
   .price-color {
-    color: rgba(255, 255, 255, 0.65) !important;
+    color: $theme_color !important;
   }
+}
+
+.goods-list {
+  column-gap: 12px;
+  padding: 4px 12px 16px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-top: none;
+  box-sizing: border-box;
+}
+
+.goods-show-info {
+  width: calc(20% - 10px);
+  margin: 12px 0 0;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+}
+
+.goods-show-info:hover {
+  border-color: #f0d0cc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.seckill-price {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.goods-show-detail {
+  height: 44px;
+  margin: 8px 0 6px;
+  color: #171A26;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.goods-show-num {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: #999;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.goods-show-num span {
+  color: #999;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.goods-show-sales {
+  flex-shrink: 0;
+}
+
+.goods-show-seller {
+  color: #438cde;
+  font-size: 14px;
+
+  span:hover {
+    color: $theme_color;
+  }
+}
+
+.goods-page {
+  margin: 16px 0 8px;
 }
 
 /* ---------------商品栏结束------------------- */

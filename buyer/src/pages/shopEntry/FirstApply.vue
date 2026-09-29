@@ -183,7 +183,7 @@
         >
       </el-form-item>
     </el-form>
-    <el-dialog title="View Image" v-model="visible">
+    <el-dialog title="图片预览" v-model="visible">
       <img :src="previewPicture" v-if="visible" style="width: 100%" />
     </el-dialog>
 

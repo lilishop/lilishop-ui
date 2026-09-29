@@ -1,56 +1,66 @@
 <template>
   <div class="order-detail" v-if="order.order">
-    <UserCenterLayout title="订单详情" :tabs="['订单详情']">
-    <el-card
-      class="mb_10"
-      shadow="never"
-      v-if="
-        order.allowOperationVO.pay ||
-        order.allowOperationVO.rog ||
-        order.allowOperationVO.cancel
-      "
-    >
-      <el-button
-        type="success"
-        @click="goPay(order.order.sn)"
-        size="small"
-        v-if="order.allowOperationVO.pay"
-        >去支付</el-button>
-      <el-button
-        type="primary"
-        @click="received(order.order.sn)"
-        size="small"
-        v-if="order.allowOperationVO.rog"
-        >确认收货</el-button>
-      <el-button
-        type="danger"
-        @click="handleCancelOrder(order.order.sn)"
-        v-if="order.allowOperationVO.cancel"
-        size="small"
-        >取消订单</el-button>
-      <el-button v-if="order.allowOperationVO.showLogistics || orderPackage.length > 0 || logistics" type="info" @click="logisticsList()" size="small">查看物流</el-button>
-    </el-card>
-    <p class="verificationCode" v-if="order.order.verificationCode && !isECouponOrder">
-      核验码：<span>{{ order.order.verificationCode }}</span>
-    </p>
-    <div class="order-card">
-      <p class="global_color fontsize_18">{{ order.orderStatusValue }}</p>
-      <p>订单号：{{ order.order.sn }}</p>
-      <div style="color: #999" class="operation-time">
-        操作时间：{{ order.order.updateTime || order.order.createTime }}
+    <UserCenterLayout>
+    <div class="order-card status-card">
+      <div class="status-head">
+        <div class="status-main">
+          <p class="status-text">{{ order.orderStatusValue }}</p>
+          <p class="status-sn">订单号：{{ order.order.sn }}</p>
+        </div>
+        <div class="status-side">
+          <div class="operation-time">
+            操作时间：{{ order.order.updateTime || order.order.createTime }}
+          </div>
+          <div
+            class="status-actions"
+            v-if="
+              order.allowOperationVO.pay ||
+              order.allowOperationVO.rog ||
+              order.allowOperationVO.cancel ||
+              order.allowOperationVO.showLogistics ||
+              orderPackage.length > 0 ||
+              logistics
+            "
+          >
+            <el-button
+              type="success"
+              @click="goPay(order.order.sn)"
+              size="small"
+              v-if="order.allowOperationVO.pay"
+              >去支付</el-button>
+            <el-button
+              type="primary"
+              @click="received(order.order.sn)"
+              size="small"
+              v-if="order.allowOperationVO.rog"
+              >确认收货</el-button>
+            <el-button
+              type="danger"
+              @click="handleCancelOrder(order.order.sn)"
+              v-if="order.allowOperationVO.cancel"
+              size="small"
+              >取消订单</el-button>
+            <el-button v-if="order.allowOperationVO.showLogistics || orderPackage.length > 0 || logistics" type="info" @click="logisticsList()" size="small">查看物流</el-button>
+          </div>
+        </div>
       </div>
       <el-steps
+        v-if="progressList.length"
         class="progress"
-        :current="progressList.length"
+        :active="progressList.length - 1"
         direction="vertical"
       >
-        <el-step           :title="progress.message"
-          :content="progress.createTime"
+        <el-step
+          :title="progress.message"
+          :description="progress.createTime"
           v-for="(progress, index) in progressList"
           :key="index"
         ></el-step>
       </el-steps>
     </div>
+    <p class="verificationCode" v-if="order.order.verificationCode && !isECouponOrder">
+      核验码：<span>{{ order.order.verificationCode }}</span>
+    </p>
     <div class="order-card" v-if="order.order.deliveryMethod === 'LOGISTICS' && !isNonPhysicalOrder">
       <h3>收货人信息</h3>
       <p>收货人：{{ order.order.consigneeName }}</p>
@@ -191,28 +201,26 @@
       <table>
         <thead>
           <tr>
-            <th width="30%">商品</th>
-            <th width="15%">货号</th>
+            <th width="28%">商品</th>
+            <th width="16%">货号</th>
             <th width="10%">单价</th>
-            <th width="5%">数量</th>
-            <th width="10%" v-if="!isECouponOrder">退款状态</th>
-            <th width="10%" v-if="!isECouponOrder">实际退款金额</th>
+            <th width="8%">数量</th>
             <th width="10%">小计</th>
-            <th width="10%">操作</th>
+            <th width="8%">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(goods, goodsIndex) in order.orderItems" :key="goodsIndex">
             <td>
-              <img
-                @click="goodsDetail(goods.skuId, goods.goodsId)"
-                :src="goods.image"
-                alt=""
-              />
-              <div>
+              <div class="goods-cell">
+                <img
+                  @click="goodsDetail(goods.skuId, goods.goodsId)"
+                  :src="goods.image"
+                  alt=""
+                />
                 <p
                   @click="goodsDetail(goods.skuId, goods.goodsId)"
-                  class="hover-color"
+                  class="hover-color goods-name"
                 >
                   {{ goods.goodsName }}
                 </p>
@@ -221,23 +229,19 @@
             <td>{{ goods.id }}</td>
             <td>{{ $filters.unitPrice(goods.goodsPrice, "￥") }}</td>
             <td>{{ goods.num }}</td>
-            <td v-if="!isECouponOrder">{{refundPriceList(goods.isRefund)}}</td>
-            <td v-if="!isECouponOrder">{{ $filters.unitPrice(goods.refundPrice, "￥") }}</td>
             <td>{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</td>
             <td class="order-item-actions">
-              <el-button
+              <button
                 v-if="goods.commentStatus == 'UNFINISHED'"
+                type="button"
+                class="comment-text"
                 @click="comment(order.order.sn, goodsIndex)"
-                size="small"
-                type="success"
-                class="order-item-action-btn fontsize_12 mb_5"
-                >评价</el-button
-              >
+              >评价</button>
               <el-button
                 v-if="goods.complainStatus == 'NO_APPLY'"
                 @click="complain(order.order.sn, goodsIndex)"
                 type="danger"
-                class="order-item-action-btn fontsize_12 mb_5"
+                class="order-item-action-btn mb_5"
                 size="small"
                 >投诉</el-button
               >
@@ -575,21 +579,6 @@ export default {
       }
       window.open(invoiceAddress, "_blank");
     },
-    // 退款状态枚举
-    refundPriceList(status) {
-      switch (status) {
-      case 'ALL_REFUND':
-        return "全部退款";
-      case 'PART_REFUND':
-        return "部分退款";
-      case 'NO_REFUND':
-        return "未退款";
-      case 'REFUNDING':
-        return "退款中";
-      default:
-          return "未退款";
-      }
-    },
     goodsDetail(skuId, goodsId) {
       // 跳转商品详情
       let routeUrl = this.$router.resolve({
@@ -621,7 +610,9 @@ export default {
               this.order["receipt"] = receiptRes.result;
             }
           }
-          this.progressList = res.result.orderLogs;
+          this.progressList = (res.result.orderLogs || []).slice().sort((a, b) => {
+            return new Date(a.createTime).getTime() - new Date(b.createTime).getTime();
+          });
           if (this.order.order.deliveryMethod === 'LOGISTICS') {
             this.getOrderPackage(this.order.order.sn);
           }
@@ -727,109 +718,237 @@ export default {
 .mb_5 {
   margin-bottom: 5px;
 }
+.order-detail {
+  color: #333;
+}
+
 .order-card {
-  padding: 10px;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #e8eaec;
-  position: relative;
-  .global_color {
-    color: $theme_color;
-  }
-  p {
-    color: #999;
-    margin: 3px;
-    margin-left: 5px;
-  }
+  padding: 4px 0 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+
   h3 {
-    font-weight: normal;
-    font-size: 16px;
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
   }
-  .operation-time {
-    position: absolute;
-    right: 20px;
-    top: 20px;
+
+  p {
+    margin: 0;
+    padding: 4px 0;
+    color: #666;
+    line-height: 22px;
   }
 }
-/** 店铺名称 */
+
+.status-card {
+  padding-top: 8px;
+}
+
+.status-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.status-text {
+  color: $theme_color;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.status-sn {
+  margin-top: 6px;
+  color: #666;
+}
+
+.status-side {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.operation-time {
+  color: #999;
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.status-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+
+  .el-button {
+    margin: 0;
+  }
+}
+
+.progress {
+  max-width: 640px;
+  margin: 20px 0 0;
+
+  :deep(.el-step.is-vertical) {
+    padding-bottom: 20px;
+  }
+
+  :deep(.el-step.is-vertical:last-child) {
+    padding-bottom: 0;
+  }
+
+  :deep(.el-step__head.is-finish) {
+    color: #c0c4cc;
+    border-color: #c0c4cc;
+  }
+
+  :deep(.el-step__title.is-finish),
+  :deep(.el-step__description.is-finish) {
+    color: #909399;
+    font-weight: 400;
+  }
+
+  :deep(.el-step__head.is-process) {
+    color: $theme_color;
+    border-color: $theme_color;
+  }
+
+  :deep(.el-step__title.is-process),
+  :deep(.el-step__description.is-process) {
+    color: $theme_color;
+  }
+}
+
+.goods {
+  padding-top: 8px;
+}
+
 .shop-name {
-  margin: 15px 0;
+  margin: 8px 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+
   span {
     color: #438cde;
     cursor: pointer;
-    &:hover {
-      color: $theme_color;
-    }
-  }
-  .el-icon {
-    color: #ff8f23;
-    cursor: pointer;
+
     &:hover {
       color: $theme_color;
     }
   }
 }
-/** 商品列表 */
+
 table {
-  border: 1px solid #ddd;
-  color: #999;
+  border: 1px solid #eee;
+  color: #666;
   border-collapse: collapse;
   width: 100%;
+
   tr {
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #eee;
   }
+
   thead > tr {
     height: 40px;
-    background: #eee;
+    background: #fafafa;
   }
+
   th {
-    font-size: 12px;
-    font-weight: normal;
+    padding: 0 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #666;
   }
+
   td {
-    padding: 5px;
+    padding: 12px 8px;
     text-align: center;
+    vertical-align: middle;
+
     &:first-child {
       text-align: left;
-      display: flex;
-      img {
-        width: 70px;
-        height: 70px;
-        margin-right: 10px;
-        margin-left: 10px;
-        cursor: pointer;
-      }
-    }
-    &:last-child {
-      color: $theme_color;
     }
   }
+}
+
+.goods-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+
+  img {
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #f5f5f5;
+    cursor: pointer;
+  }
+}
+
+.goods-name {
+  min-width: 0;
+  color: #333;
+  line-height: 20px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: break-word;
+  cursor: pointer;
 }
 
 .order-item-actions {
   vertical-align: middle;
 
+  .comment-text {
+    display: block;
+    margin: 0 auto 6px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: $theme_color;
+    font-size: 14px;
+    line-height: 22px;
+    cursor: pointer;
+  }
+
   .order-item-action-btn {
     display: block;
-    margin: 0 auto 5px;
+    margin: 0 auto 6px;
     min-width: 88px;
   }
 }
-/** 订单价格 */
+
 .order-price {
-  text-align: right;
-  margin-top: 30px;
-  font-size: 16px;
-  color: #999;
-  > div > span:nth-child(2) {
-    width: 130px;
-    text-align: right;
-    display: inline-block;
-    margin-top: 10px;
+  margin-top: 16px;
+  padding-top: 8px;
+  font-size: 14px;
+  color: #666;
+
+  > div {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    line-height: 28px;
   }
+
+  > div > span:nth-child(2) {
+    width: 140px;
+    margin-top: 0;
+    text-align: right;
+    color: #333;
+  }
+
   .actrual-price {
     color: $theme_color;
-    font-weight: bold;
+    font-weight: 600;
     font-size: 20px;
   }
 }
@@ -875,11 +994,6 @@ table {
     display: none;
   }
 }
-/** 订单进度条 */
-.progress {
-  margin: 15px 0;
-}
-
 .layui-layer-wrap {
   dl {
     border-top: solid 1px #f5f5f5;

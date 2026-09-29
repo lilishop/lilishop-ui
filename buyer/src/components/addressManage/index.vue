@@ -24,8 +24,8 @@
         <el-form-item label="地址别名">
           <el-input
             v-model="formData.alias"
-            length
-            :maxlength="4"
+            :maxlength="5"
+            show-word-limit
             placeholder="请输入地址别名，例如公司"
             style="width: 600px"
           ></el-input>
