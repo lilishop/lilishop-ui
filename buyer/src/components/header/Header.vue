@@ -52,7 +52,7 @@
               购物车（{{ cartNum < 100 ? cartNum : '99' }}）
             </span>
             <template #dropdown>
-              <div class="shopping-cart-null" style="width:200px" v-show="shoppingCart.length <= 0">
+              <div class="shopping-cart-null" v-show="shoppingCart.length <= 0">
                 <el-icon class="cart-null-icon"><ShoppingCart /></el-icon>
                 <span>你的购物车没有宝贝哦</span>
                 <span>赶快去添加商品吧~</span>
@@ -60,20 +60,13 @@
               <div class="shopping-cart-list" v-show="shoppingCart.length > 0">
                 <div class="shopping-cart-box" v-for="(item, index) in shoppingCart" @click="goToPay" :key="index">
                   <div class="shopping-cart-img">
-                    <img :src="item.goodsSku.thumbnail" class="hover-pointer"/>
+                    <img :src="item.goodsSku.thumbnail" alt="" />
                   </div>
                   <div class="shopping-cart-info">
-                    <div class="shopping-cart-title ">
-                      <p class="hover-pointer goods-title ellipsis">{{ item.goodsSku.goodsName }}</p>
-                    </div>
+                    <p class="goods-title">{{ item.goodsSku.goodsName }}</p>
                     <div class="shopping-cart-detail">
-                      <div>
-                        数量:
-                        <span class="shopping-cart-text">{{ item.num }}</span>
-                      </div>
-                      <div class="shopping-price">
-                        {{ $filters.unitPrice(item.purchasePrice, '￥') }}
-                      </div>
+                      <span>数量 {{ item.num }}</span>
+                      <span class="shopping-price">{{ $filters.unitPrice(item.purchasePrice, '￥') }}</span>
                     </div>
                   </div>
                 </div>
@@ -178,9 +171,9 @@ export default {
             this.$router.push({
               path: '/login',
               query: {
-                rePath: this.$router.history.current.path,
-                query: JSON.stringify(this.$router.history.current.query)
-              }
+                rePath: this.$route.path,
+                query: JSON.stringify(this.$route.query || {}),
+              },
             });
           }
         });
@@ -346,30 +339,10 @@ export default {
 }
 
 
-.shopping-cart-img {
-  margin-right: 15px;
-  width: 40px;
-  height: 40px;
-}
-
-.shopping-cart-img img {
-  width: 100%;
-}
-
-.shopping-cart-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-content: space-between;
-  width: 200px;
-  overflow: hidden;
-  font-size: 12px;
-  line-height: 20px;
-}
-
-
 .shopping-cart-null {
-  padding: 15px;
+  width: 320px;
+  padding: 28px 16px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -377,13 +350,92 @@ export default {
 }
 
 .cart-null-icon {
-  font-size: 38px;
-  margin-bottom: 15px;
+  font-size: 36px;
+  margin-bottom: 12px;
+  color: #ccc;
 }
 
 .shopping-cart-null span {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #999;
+}
+
+.shopping-cart-list {
+  width: 320px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px 0;
+  box-sizing: border-box;
+  color: #333;
+}
+
+.shopping-cart-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+
+  &:hover {
+    background: #fafafa;
+  }
+
+  & + .shopping-cart-box {
+    border-top: 1px solid #f2f2f2;
+  }
+}
+
+.shopping-cart-img {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.shopping-cart-info {
+  flex: 1;
+  min-width: 0;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.shopping-cart-info .goods-title {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
+}
+
+.shopping-cart-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: #999;
   font-size: 12px;
-  line-height: 16px;
+}
+
+.shopping-price {
+  color: $theme_color;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .username-p {
@@ -546,34 +598,4 @@ export default {
   z-index: 3;
   top: 3px;
 }
-
-.shopping-cart-box {
-  padding: 8px 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px #ccc dotted;
-}
-
-.shopping-cart-list {
-  padding: 10px 10px;
-  box-sizing: border-box;
-  max-height: 300px;
-  overflow-y: scroll;
-  color: #333;
-
-}
-
-.shopping-cart-detail {
-  color: #999;
-  font-size: 12px;
-
-}
-
-.shopping-price {
-  color: $theme_color;
-  font-size: 14px;
-  font-weight: bold;
-}
-
 </style>

@@ -104,7 +104,10 @@ export const Modal = {
           return options.onOk();
         }
       })
-      .catch(() => {
+      .catch((reason) => {
+        if (reason !== "cancel" && reason !== "close") {
+          return;
+        }
         if (typeof options.onCancel === "function") {
           options.onCancel();
         }

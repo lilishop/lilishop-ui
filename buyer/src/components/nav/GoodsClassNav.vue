@@ -3,29 +3,29 @@
     <div class="head-bar">
       <!-- 有商品分类展示商品分类 -->
       <template v-if="$route.query.categoryId">
-        <!-- 头部展示筛选信息 -->
-        <div @click="cateClick(tabBar,1)">{{ tabBar.name }}</div>
-        <el-icon><ArrowRight /></el-icon>
-
-        <div class="bar" v-if="tabBar.first">
-          {{ tabBar.first.name }} <el-icon><ArrowDown /></el-icon>
-          <ul>
-            <li v-for="item in tabBar.children" :key="item.id"  @click="cateClick(item,2)">
-              {{ item.name }}
-            </li>
-          </ul>
-        </div>
-        <el-icon :v-if="tabBar.first"><ArrowRight /></el-icon>
-
-        <div class="bar" v-if="tabBar.second">
-          {{ tabBar.second.name }} <el-icon><ArrowDown /></el-icon>
-          <ul>
-            <li v-for="item in tabBar.first.children" :key="item.id"  @click="cateClick(item,3)">
-              {{ item.name }}
-            </li>
-          </ul>
-        </div>
-        <el-icon :v-if="tabBar.second"><ArrowRight /></el-icon>
+        <div @click="cateClick(tabBar, 1)">{{ tabBar.name }}</div>
+        <template v-if="tabBar.first && tabBar.first.name">
+          <el-icon><ArrowRight /></el-icon>
+          <div class="bar">
+            {{ tabBar.first.name }} <el-icon><ArrowDown /></el-icon>
+            <ul>
+              <li v-for="item in tabBar.children" :key="item.id" @click="cateClick(item, 2)">
+                {{ item.name }}
+              </li>
+            </ul>
+          </div>
+        </template>
+        <template v-if="tabBar.second && tabBar.second.name">
+          <el-icon><ArrowRight /></el-icon>
+          <div class="bar">
+            {{ tabBar.second.name }} <el-icon><ArrowDown /></el-icon>
+            <ul>
+              <li v-for="item in tabBar.first.children" :key="item.id" @click="cateClick(item, 3)">
+                {{ item.name }}
+              </li>
+            </ul>
+          </div>
+        </template>
       </template>
       <!-- 无商品分类，展示搜索结果 -->
       <template v-else>
@@ -164,10 +164,11 @@ export default {
   name: 'GoodsClassNav',
   data () {
     return {
-      tabBar: { // 分类数据
+      tabBar: {
         name: '',
-        first: {},
-        second: {}
+        children: [],
+        first: null,
+        second: null
       },
       showTagCount: 5, // 展示的搜索项数量
       multiple: false, // 多选
@@ -239,23 +240,23 @@ export default {
         return
       }
       const arr = this.$route.query.categoryId.split(',')
-      if (arr.length > 0) {
-        this.tabBar = this.cateList.filter(e => {
-          return e.id === arr[0]
-        })[0]
+      const source = this.cateList.find((e) => e.id === arr[0])
+      if (!source) return
+      const tabBar = {
+        id: source.id,
+        name: source.name,
+        parentId: source.parentId,
+        children: source.children || [],
+        first: null,
+        second: null,
       }
       if (arr.length > 1) {
-        const first = this.tabBar.children.filter(e => {
-          return e.id === arr[1]
-        })[0]
-        this.tabBar['first'] = first
+        tabBar.first = tabBar.children.find((e) => e.id === arr[1]) || null
       }
-      if (arr.length > 2) {
-        const second = this.tabBar.first.children.filter(e => {
-          return e.id === arr[2]
-        })[0]
-        this.tabBar['second'] = second
+      if (arr.length > 2 && tabBar.first && tabBar.first.children) {
+        tabBar.second = tabBar.first.children.find((e) => e.id === arr[2]) || null
       }
+      this.tabBar = tabBar
     },
     cateClick (item, index) { // 点选分类
       switch (index) {

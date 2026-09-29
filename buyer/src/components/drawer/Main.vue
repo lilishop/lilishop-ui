@@ -65,9 +65,9 @@ export default {
             this.$router.push({
               path: '/login',
               query: {
-                rePath: this.$router.history.current.path,
-                query: JSON.stringify(this.$router.history.current.query)
-              }
+                rePath: this.$route.path,
+                query: JSON.stringify(this.$route.query || {}),
+              },
             });
           }
         });
