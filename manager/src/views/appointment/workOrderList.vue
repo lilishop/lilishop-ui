@@ -8,6 +8,11 @@
         <el-form-item label="工单编号">
           <el-input v-model="searchForm.workOrderSn" clearable style="width: 200px" />
         </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="searchForm.serviceStatus" clearable placeholder="全部" style="width: 160px">
+            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
         </el-form-item>
@@ -22,7 +27,9 @@
           <template #default="{ row }">{{ row.serviceMode === 'ON_SITE' ? '上门' : '到店' }}</template>
         </el-table-column>
         <el-table-column prop="appointmentTime" label="预约时间" min-width="170" />
-        <el-table-column prop="serviceStatus" label="状态" width="120" />
+        <el-table-column label="状态" width="120">
+          <template #default="{ row }">{{ statusText(row.serviceStatus) }}</template>
+        </el-table-column>
       </el-table>
       <el-pagination
         class="mt_10"
@@ -39,6 +46,17 @@
 <script>
 import { getManagerWorkOrderPage } from "@/api/appointment";
 
+const STATUS_OPTIONS = [
+  { label: "未完成", value: "OPEN" },
+  { label: "待领取", value: "PENDING_CLAIM" },
+  { label: "已领取", value: "CLAIMED" },
+  { label: "待核销", value: "WAIT_VERIFY" },
+  { label: "服务中", value: "IN_SERVICE" },
+  { label: "服务结束", value: "SERVICE_ENDED" },
+  { label: "已退款", value: "REFUNDED" },
+  { label: "逾期未到店", value: "NO_SHOW" },
+];
+
 export default {
   name: "managerAppointmentWorkOrders",
   data() {
@@ -46,18 +64,28 @@ export default {
       loading: false,
       data: [],
       total: 0,
+      statusOptions: STATUS_OPTIONS,
       searchForm: {
         pageNumber: 1,
         pageSize: 10,
         orderSn: "",
         workOrderSn: "",
+        serviceStatus: "",
       },
     };
   },
   mounted() {
+    const status = this.$route.query.serviceStatus;
+    if (status) {
+      this.searchForm.serviceStatus = status;
+    }
     this.getData();
   },
   methods: {
+    statusText(value) {
+      const found = STATUS_OPTIONS.find((item) => item.value === value);
+      return found ? found.label : value || "—";
+    },
     handleSearch() {
       this.searchForm.pageNumber = 1;
       this.getData();

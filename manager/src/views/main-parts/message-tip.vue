@@ -28,6 +28,12 @@
           <el-dropdown-item v-if="res.waitPayBill" command="accountStatementBill">
             <el-badge :value="res.waitPayBill">待与商家对账</el-badge>
           </el-dropdown-item>
+          <el-dropdown-item v-if="res.appointmentWorkOrder" command="manager-appointment-work-orders">
+            <el-badge :value="res.appointmentWorkOrder">未完成预约工单</el-badge>
+          </el-dropdown-item>
+          <el-dropdown-item v-if="res.procurementAudit" command="manager-procurement-order-list">
+            <el-badge :value="res.procurementAudit">待审核采购单</el-badge>
+          </el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
@@ -58,6 +64,14 @@ export default {
   },
   methods: {
     navigateTo(name) {
+      if (name === "manager-appointment-work-orders") {
+        this.$router.push({ name, query: { serviceStatus: "OPEN" } });
+        return;
+      }
+      if (name === "manager-procurement-order-list") {
+        this.$router.push({ name, query: { status: "SUBMITTED" } });
+        return;
+      }
       this.$router.push({ name });
     },
   },

@@ -482,6 +482,12 @@ export const otherRouter = {
       component: () => import("@/views/distribution/distributionGradeHistory.vue")
     },
     {
+      path: "procurement/purchase-order/list",
+      title: "采购单",
+      name: "manager-procurement-order-list",
+      component: () => import("@/views/procurement/purchase-order/list.vue")
+    },
+    {
       path: "procurement/purchase-order/detail",
       title: "采购单详情",
       name: "manager-procurement-order-detail",

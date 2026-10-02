@@ -4,51 +4,41 @@
       <el-form
         ref="searchForm"
         :model="searchForm"
-        inline
         label-width="70px"
-        class="search-form"
+        class="search-form order-search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="关键字" prop="keywords">
-          <el-input
-            v-model="searchForm.keywords"
-            placeholder="请输入商品名称/收货人/收货人手机号/店铺名称"
-            clearable
-            style="width: 380px"
-          />
-        </el-form-item>
         <el-form-item label="订单号" prop="orderSn">
-          <el-input v-model="searchForm.orderSn" placeholder="请输入订单号" clearable style="width: 240px" />
+          <el-input v-model="searchForm.orderSn" placeholder="请输入订单号" clearable />
         </el-form-item>
         <el-form-item label="会员名称" prop="buyerName">
-          <el-input v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable style="width: 240px" />
+          <el-input v-model="searchForm.buyerName" placeholder="请输入会员名称" clearable />
         </el-form-item>
         <el-form-item label="商品名称" prop="goodsName">
-          <el-input v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 240px" />
+          <el-input v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable />
+        </el-form-item>
+        <el-form-item label="店铺名称" prop="storeName">
+          <el-input v-model="searchForm.storeName" placeholder="请输入店铺名称" clearable />
         </el-form-item>
         <el-form-item label="收货人" prop="shipName">
-          <el-input v-model="searchForm.shipName" placeholder="请输入收货人姓名" clearable style="width: 240px" />
+          <el-input v-model="searchForm.shipName" placeholder="请输入收货人姓名" clearable />
+        </el-form-item>
+        <el-form-item label="收货手机" prop="consigneeMobile">
+          <el-input v-model="searchForm.consigneeMobile" placeholder="请输入收货人手机号" clearable />
         </el-form-item>
         <el-form-item label="促销类型" prop="orderPromotionType">
-          <el-select v-model="searchForm.orderPromotionType" placeholder="请选择" clearable style="width: 240px">
-            <el-option label="普通订单" value="NORMAL" />
-            <el-option label="拼团订单" value="PINTUAN" />
-            <el-option label="赠品订单" value="GIFT" />
-            <el-option label="积分订单" value="POINTS" />
-            <el-option label="砍价订单" value="KANJIA" />
+          <el-select v-model="searchForm.orderPromotionType" placeholder="请选择" clearable>
+            <el-option v-for="item in promotionOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="订单类型" prop="orderType">
-          <el-select v-model="searchForm.orderType" placeholder="请选择" clearable style="width: 240px">
-            <el-option label="预约商品" value="APPOINTMENT" />
+          <el-select v-model="searchForm.orderType" placeholder="请选择" clearable>
+            <el-option v-for="item in orderTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="支付方式" prop="paymentMethod">
-          <el-select v-model="searchForm.paymentMethod" placeholder="请选择支付方式" clearable style="width: 240px">
-            <el-option label="微信支付" value="WECHAT" />
-            <el-option label="支付宝" value="ALIPAY" />
-            <el-option label="余额支付" value="WALLET" />
-            <el-option label="线下转账" value="BANK_TRANSFER" />
+          <el-select v-model="searchForm.paymentMethod" placeholder="请选择支付方式" clearable>
+            <el-option v-for="item in paymentOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="下单时间">
@@ -59,12 +49,12 @@
             clearable
             start-placeholder="开始时间"
             end-placeholder="结束时间"
-            style="width: 360px"
             @change="selectDateRange"
           />
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+        <el-form-item class="order-search-action">
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -73,38 +63,61 @@
       <div class="order-tab">
         <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
           <el-tab-pane
-            v-for="(item, index) in orderStatusWithCount"
-            :key="index"
+            v-for="item in orderStatusWithCount"
+            :key="item.value"
             :label="item.title"
             :name="item.value"
           />
         </el-tabs>
       </div>
       <div>
-        <el-button type="warning" class="export" @click="exportOrder">导出订单</el-button>
+        <el-button type="warning" class="export" :loading="exporting" @click="exportOrder">导出订单</el-button>
       </div>
 
       <el-table v-loading="loading" :data="data" ref="table" class="mt_10" style="width: 100%">
-        <el-table-column prop="sn" label="订单号" min-width="240" show-overflow-tooltip />
-        <el-table-column label="订单来源" width="120">
+        <el-table-column prop="sn" label="订单号" min-width="200" show-overflow-tooltip />
+        <el-table-column label="商品" min-width="280">
+          <template #default="{ row }">
+            <div v-if="orderGoods(row).length" class="goods-cell">
+              <div v-for="(item, index) in orderGoods(row)" :key="item.sn || index" class="goods-line">
+                <img v-if="item.image" class="goods-img" :src="item.image" alt="" />
+                <div class="goods-text">
+                  <div class="goods-name">{{ item.name || "—" }}</div>
+                  <div class="goods-meta">
+                    <span v-if="item.specs">{{ item.specs }}</span>
+                    <span>x{{ item.num || 0 }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <span v-else>—</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="订单来源" width="110">
           <template #default="{ row }">{{ clientTypeText(row.clientType) }}</template>
         </el-table-column>
-        <el-table-column label="订单类型" width="120">
+        <el-table-column label="订单类型" width="110">
+          <template #default="{ row }">{{ orderTypeText(row.orderType) }}</template>
+        </el-table-column>
+        <el-table-column label="促销类型" width="110">
           <template #default="{ row }">
             <el-tag :type="orderPromotionTagType(row.orderPromotionType)">
               {{ orderPromotionText(row.orderPromotionType) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="memberName" label="买家名称" min-width="130" show-overflow-tooltip />
+        <el-table-column prop="memberName" label="买家名称" min-width="120" show-overflow-tooltip />
         <el-table-column prop="memberId" label="会员ID" min-width="120" show-overflow-tooltip />
-        <el-table-column prop="storeName" label="店铺名称" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="storeName" label="店铺名称" min-width="140" show-overflow-tooltip />
+        <el-table-column label="配送方式" width="110">
+          <template #default="{ row }">{{ deliveryMethodText(row.deliveryMethod) }}</template>
+        </el-table-column>
         <el-table-column label="订单金额" min-width="100">
           <template #default="{ row }">
-            <span :style="{ color: $mainColor }">{{ unitPrice(row.flowPrice, '￥') }}</span>
+            <span :style="{ color: $mainColor }">{{ unitPrice(row.flowPrice, "￥") }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="支付方式" width="120">
+        <el-table-column label="支付方式" width="110">
           <template #default="{ row }">{{ paymentMethodText(row.paymentMethod) }}</template>
         </el-table-column>
         <el-table-column label="订单状态" min-width="100">
@@ -113,7 +126,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="下单时间" width="170" />
-        <el-table-column label="操作" width="100" align="center" fixed="right">
+        <el-table-column label="操作" width="80" align="center" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="detail(row)">查看</a>
           </template>
@@ -124,7 +137,7 @@
         <el-pagination
           v-model:current-page="searchForm.pageNumber"
           v-model:page-size="searchForm.pageSize"
-          :page-sizes="[20, 50, 100]"
+          :page-sizes="pageSizes"
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
@@ -138,53 +151,95 @@
 
 <script>
 import * as API_Order from "@/api/order";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
+
+const QUERY_KEY = "manager-order-list-query";
+const PAGE_SIZES = [20, 50, 100];
+
+const PROMOTION_OPTIONS = [
+  { label: "普通订单", value: "NORMAL" },
+  { label: "拼团订单", value: "PINTUAN" },
+  { label: "赠品订单", value: "GIFT" },
+  { label: "积分订单", value: "POINTS" },
+  { label: "砍价订单", value: "KANJIA" },
+];
+
+const ORDER_TYPE_OPTIONS = [
+  { label: "普通订单", value: "NORMAL" },
+  { label: "虚拟订单", value: "VIRTUAL" },
+  { label: "电子卡券", value: "E_COUPON" },
+  { label: "预约订单", value: "APPOINTMENT" },
+];
+
+const PAYMENT_OPTIONS = [
+  { label: "微信支付", value: "WECHAT" },
+  { label: "支付宝", value: "ALIPAY" },
+  { label: "余额支付", value: "WALLET" },
+  { label: "线下转账", value: "BANK_TRANSFER" },
+];
+
+function emptySearchForm(pageSize = 20) {
+  return {
+    pageNumber: 1,
+    pageSize,
+    sort: "createTime",
+    order: "desc",
+    startDate: "",
+    endDate: "",
+    orderType: "",
+    orderSn: "",
+    buyerName: "",
+    goodsName: "",
+    shipName: "",
+    consigneeMobile: "",
+    storeName: "",
+    orderStatus: "",
+    paymentMethod: "",
+    orderPromotionType: "",
+  };
+}
+
+function readSavedQuery() {
+  const raw = sessionStorage.getItem(QUERY_KEY);
+  if (!raw) return null;
+  try {
+    const saved = JSON.parse(raw);
+    const form = emptySearchForm();
+    const src = saved && saved.searchForm ? saved.searchForm : {};
+    Object.keys(form).forEach((key) => {
+      if (src[key] !== undefined && src[key] !== null) {
+        form[key] = src[key];
+      }
+    });
+    form.pageNumber = Number(form.pageNumber) || 1;
+    form.pageSize = PAGE_SIZES.includes(Number(form.pageSize)) ? Number(form.pageSize) : 20;
+    const currentStatus = saved.currentStatus || form.orderStatus || "ALL";
+    if (!currentStatus || currentStatus === "ALL") {
+      form.orderStatus = "";
+    }
+    return {
+      searchForm: form,
+      selectDate: Array.isArray(saved.selectDate) ? saved.selectDate : null,
+      currentStatus: currentStatus || "ALL",
+    };
+  } catch (e) {
+    sessionStorage.removeItem(QUERY_KEY);
+    return null;
+  }
+}
 
 export default {
   name: "orderList",
   data() {
     return {
-      fields: {
-        订单编号: "sn",
-        下单时间: "createTime",
-        客户名称: "memberName",
-        支付方式: {
-          field: "clientType",
-          callback: (value) => {
-            if (value == "H5") return "移动端";
-            if (value == "PC") return "PC端";
-            if (value == "WECHAT_MP") return "小程序端";
-            if (value == "APP") return "移动应用端";
-            return value;
-          },
-        },
-        商品数量: "groupNum",
-        付款状态: {
-          field: "payStatus",
-          callback: (value) =>
-            value == "UNPAID" ? "未付款" : value == "PAID" ? "已付款" : "",
-        },
-        店铺: "storeName",
-      },
       loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-        orderType: "",
-        orderSn: "",
-        keywords: "",
-        buyerName: "",
-        goodsName: "",
-        shipName: "",
-        orderStatus: "",
-        paymentMethod: "",
-        orderPromotionType: "",
-      },
+      exporting: false,
+      pageSizes: PAGE_SIZES,
+      promotionOptions: PROMOTION_OPTIONS,
+      orderTypeOptions: ORDER_TYPE_OPTIONS,
+      paymentOptions: PAYMENT_OPTIONS,
+      searchForm: emptySearchForm(),
       selectDate: null,
       data: [],
       total: 0,
@@ -194,44 +249,18 @@ export default {
   },
   computed: {
     orderStatusWithCount() {
+      const count = (value) => (value ? `(${value})` : "");
       return [
         { title: "全部", value: "ALL" },
-        {
-          title: `未付款${this.orderNumData.waitPayNum ? "(" + this.orderNumData.waitPayNum + ")" : ""}`,
-          value: "UNPAID",
-        },
-        {
-          title: `已付款${this.orderNumData.waitDeliveryNum ? "(" + this.orderNumData.waitDeliveryNum + ")" : ""}`,
-          value: "PAID",
-        },
-        {
-          title: `待发货${this.orderNumData.waitShipNum ? "(" + this.orderNumData.waitShipNum + ")" : ""}`,
-          value: "UNDELIVERED",
-        },
-        {
-          title: `部分发货${this.orderNumData.partsDeliveredNumNum ? "(" + this.orderNumData.partsDeliveredNumNum + ")" : ""}`,
-          value: "PARTS_DELIVERED",
-        },
-        {
-          title: `待收货${this.orderNumData.deliveredNum ? "(" + this.orderNumData.deliveredNum + ")" : ""}`,
-          value: "DELIVERED",
-        },
-        {
-          title: `待核验${this.orderNumData.waitCheckNum ? "(" + this.orderNumData.waitCheckNum + ")" : ""}`,
-          value: "TAKE",
-        },
-        {
-          title: `待自提${this.orderNumData.waitSelfPickNum ? "(" + this.orderNumData.waitSelfPickNum + ")" : ""}`,
-          value: "STAY_PICKED_UP",
-        },
-        {
-          title: `已完成${this.orderNumData.finishNum ? "(" + this.orderNumData.finishNum + ")" : ""}`,
-          value: "COMPLETED",
-        },
-        {
-          title: `已关闭${this.orderNumData.closeNum ? "(" + this.orderNumData.closeNum + ")" : ""}`,
-          value: "CANCELLED",
-        },
+        { title: `未付款${count(this.orderNumData.waitPayNum)}`, value: "UNPAID" },
+        { title: `已付款${count(this.orderNumData.waitDeliveryNum)}`, value: "PAID" },
+        { title: `待发货${count(this.orderNumData.waitShipNum)}`, value: "UNDELIVERED" },
+        { title: `部分发货${count(this.orderNumData.partsDeliveredNumNum)}`, value: "PARTS_DELIVERED" },
+        { title: `待收货${count(this.orderNumData.deliveredNum)}`, value: "DELIVERED" },
+        { title: `待核验${count(this.orderNumData.waitCheckNum)}`, value: "TAKE" },
+        { title: `待自提${count(this.orderNumData.waitSelfPickNum)}`, value: "STAY_PICKED_UP" },
+        { title: `已完成${count(this.orderNumData.finishNum)}`, value: "COMPLETED" },
+        { title: `已关闭${count(this.orderNumData.closeNum)}`, value: "CANCELLED" },
       ];
     },
   },
@@ -240,19 +269,21 @@ export default {
     onStatusTabClick(tab) {
       this.orderStatusClick(tab.paneName);
     },
+    orderGoods(row) {
+      const items = row && row.orderItems;
+      return items && items.length ? items : [];
+    },
     clientTypeText(v) {
       const map = { H5: "移动端", PC: "PC端", WECHAT_MP: "小程序端", APP: "移动应用端" };
-      return map[v] || v || "-";
+      return map[v] || v || "—";
+    },
+    orderTypeText(v) {
+      const found = ORDER_TYPE_OPTIONS.find((item) => item.value === v);
+      return found ? found.label : v || "—";
     },
     orderPromotionText(v) {
-      const map = {
-        NORMAL: "普通订单",
-        PINTUAN: "拼团订单",
-        GIFT: "赠品订单",
-        POINTS: "积分订单",
-        KANJIA: "砍价订单",
-      };
-      return map[v] || v || "-";
+      const found = PROMOTION_OPTIONS.find((item) => item.value === v);
+      return found ? found.label : v || "—";
     },
     orderPromotionTagType(v) {
       const map = {
@@ -264,15 +295,24 @@ export default {
       };
       return map[v] || "info";
     },
+    deliveryMethodText(v) {
+      const map = {
+        SELF_PICK_UP: "自提",
+        LOCAL_TOWN_DELIVERY: "同城配送",
+        LOGISTICS: "物流",
+        VIRTUAL: "虚拟发货",
+      };
+      return map[v] || v || "—";
+    },
     paymentMethodText(v) {
       const map = {
-        NOT_ACTUALLY_PAID: "-",
+        NOT_ACTUALLY_PAID: "—",
         WECHAT: "微信支付",
         ALIPAY: "支付宝",
         WALLET: "余额支付",
         BANK_TRANSFER: "线下转账",
       };
-      return map[v] || v || "-";
+      return map[v] || v || "—";
     },
     orderStatusText(v) {
       const map = {
@@ -286,7 +326,7 @@ export default {
         TAKE: "待核验",
         CANCELLED: "已关闭",
       };
-      return map[v] || v || "-";
+      return map[v] || v || "—";
     },
     orderStatusTagType(v) {
       const map = {
@@ -301,6 +341,23 @@ export default {
         CANCELLED: "danger",
       };
       return map[v] || "info";
+    },
+    rememberQuery() {
+      sessionStorage.setItem(
+        QUERY_KEY,
+        JSON.stringify({
+          searchForm: this.searchForm,
+          selectDate: this.selectDate,
+          currentStatus: this.currentStatus,
+        })
+      );
+    },
+    restoreQuery() {
+      const saved = readSavedQuery();
+      if (!saved) return;
+      this.searchForm = saved.searchForm;
+      this.selectDate = saved.selectDate;
+      this.currentStatus = saved.currentStatus;
     },
     init() {
       this.getDataList();
@@ -317,9 +374,16 @@ export default {
     },
     handleSearch() {
       this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
       this.getDataList();
       this.getOrderNumData();
+    },
+    handleReset() {
+      const pageSize = this.searchForm.pageSize;
+      this.searchForm = emptySearchForm(pageSize);
+      this.selectDate = null;
+      this.currentStatus = "ALL";
+      sessionStorage.removeItem(QUERY_KEY);
+      this.init();
     },
     selectDateRange(v) {
       if (v && v.length === 2) {
@@ -330,17 +394,26 @@ export default {
         this.searchForm.endDate = "";
       }
     },
+    countParams() {
+      const params = { ...this.searchForm };
+      delete params.orderStatus;
+      delete params.pageNumber;
+      delete params.pageSize;
+      delete params.sort;
+      delete params.order;
+      return params;
+    },
     getDataList() {
       this.loading = true;
+      this.rememberQuery();
       API_Order.getOrderList(this.searchForm)
         .then((res) => {
-          this.loading = false;
           if (res.success) {
             this.data = res.result.records;
             this.total = res.result.total;
           }
         })
-        .catch(() => {
+        .finally(() => {
           this.loading = false;
         });
     },
@@ -352,29 +425,36 @@ export default {
     },
     async exportOrder() {
       if (!this.searchForm.startDate || !this.searchForm.endDate) {
-        ElMessage.error("必须选择时间范围，搜索后进行导出！");
-        return;
+        try {
+          await ElMessageBox.confirm(
+            "未选择下单时间，将按当前筛选条件导出全部匹配订单。",
+            "导出订单",
+            { type: "warning", confirmButtonText: "继续导出", cancelButtonText: "取消" }
+          );
+        } catch (e) {
+          return;
+        }
       }
+      this.exporting = true;
       API_Order.exportOrder(this.searchForm)
         .then((res) => {
           const blob = new Blob([res], {
             type: "application/vnd.ms-excel;charset=utf-8",
           });
-          if ("download" in document.createElement("a")) {
-            const link = document.createElement("a");
-            link.download = "订单列表.xlsx";
-            link.style.display = "none";
-            link.href = URL.createObjectURL(blob);
-            document.body.appendChild(link);
-            link.click();
-            URL.revokeObjectURL(link.href);
-            document.body.removeChild(link);
-          } else {
-            navigator.msSaveBlob(blob, "订单列表.xlsx");
-          }
+          const link = document.createElement("a");
+          link.download = "订单列表.xlsx";
+          link.style.display = "none";
+          link.href = URL.createObjectURL(blob);
+          document.body.appendChild(link);
+          link.click();
+          URL.revokeObjectURL(link.href);
+          document.body.removeChild(link);
         })
-        .catch((err) => {
-          console.log(err);
+        .catch(() => {
+          ElMessage.error("导出失败");
+        })
+        .finally(() => {
+          this.exporting = false;
         });
     },
     orderStatusClick(name) {
@@ -385,21 +465,23 @@ export default {
         this.searchForm.orderStatus = name;
         this.currentStatus = name;
       }
+      this.searchForm.pageNumber = 1;
       this.getDataList();
     },
     getOrderNumData() {
-      // orderNum 接口仅查 li_order，不含 order_item 关联；keywords/goodsName 会引用 oi 字段导致 SQL 报错
-      const { orderStatus, keywords, goodsName, ...searchParams } = this.searchForm;
-      API_Order.getOrderNum(searchParams)
+      API_Order.getOrderNum(this.countParams())
         .then((res) => {
           if (res.success) {
             this.orderNumData = res.result;
           }
         })
-        .catch((err) => {
-          console.error("获取订单数量统计失败:", err);
+        .catch(() => {
+          this.orderNumData = {};
         });
     },
+  },
+  created() {
+    this.restoreQuery();
   },
   mounted() {
     this.init();
@@ -408,6 +490,37 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.order-search-form {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  align-items: start;
+
+  > :deep(.el-form-item) {
+    display: flex;
+    width: auto;
+    min-width: 0;
+    margin: 8px 0 !important;
+  }
+
+  :deep(.el-form-item__content) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  :deep(.el-input),
+  :deep(.el-select),
+  :deep(.el-date-editor) {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+}
+.order-search-action :deep(.el-form-item__content) {
+  display: flex;
+  gap: 8px;
+}
 .export {
   margin: 10px 20px 10px 0;
 }
@@ -420,5 +533,44 @@ export default {
   color: #409eff;
   cursor: pointer;
   text-decoration: none;
+}
+.goods-cell {
+  max-height: 168px;
+  overflow: auto;
+}
+.goods-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+}
+.goods-line + .goods-line {
+  border-top: 1px solid #f2f3f5;
+}
+.goods-img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #f5f7fa;
+  flex: none;
+}
+.goods-text {
+  min-width: 0;
+}
+.goods-name {
+  line-height: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.goods-meta {
+  margin-top: 2px;
+  color: #909399;
+  font-size: 12px;
+  line-height: 18px;
+  display: flex;
+  gap: 8px;
 }
 </style>

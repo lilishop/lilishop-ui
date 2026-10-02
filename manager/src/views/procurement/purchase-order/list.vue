@@ -69,6 +69,10 @@ export default {
     };
   },
   mounted() {
+    const status = this.$route.query.status;
+    if (status) {
+      this.searchForm.status = status;
+    }
     this.getDataList();
   },
   methods: {

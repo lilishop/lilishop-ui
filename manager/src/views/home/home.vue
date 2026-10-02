@@ -73,6 +73,14 @@
           <div class="counts">{{ $store.state.notices.waitPayBill || 0 }}</div>
           <div>待审核分账</div>
         </div>
+        <div class="todo-item" @click="goAppointmentWorkOrders">
+          <div class="counts">{{ $store.state.notices.appointmentWorkOrder || 0 }}</div>
+          <div>未完成预约工单</div>
+        </div>
+        <div class="todo-item" @click="goProcurementAudit">
+          <div class="counts">{{ $store.state.notices.procurementAudit || 0 }}</div>
+          <div>待审核采购单</div>
+        </div>
       </div>
     </div>
 
@@ -127,10 +135,7 @@
             </div>
             <div class="today-item">
               <div>今日交易额</div>
-              <span v-if="homeData.todayOrderPrice"
-                >{{ $filters.unitPrice(homeData.todayOrderPrice, '￥') }}</span
-              >
-              <span v-else>￥0.00</span>
+              <span>{{ $filters.unitPrice(homeData.todayOrderPrice || 0, "￥") }}</span>
             </div>
             <div class="today-item">
               <div>今日新增店铺</div>
@@ -160,6 +165,34 @@
         <div id="historyMemberChart"></div>
       </div>
     </div>
+    <div class="card range-card">
+      <div class="range-bar">
+        <h4>统计范围</h4>
+        <div class="range-options">
+          <span
+            v-for="item in rangeOptions"
+            :key="item.searchType"
+            :class="{ active: !rangeMonth && rangeKey === item.searchType }"
+            @click="changeRange(item)"
+          >{{ item.title }}</span>
+          <el-select
+            v-model="rangeMonth"
+            clearable
+            placeholder="按月"
+            style="width: 140px"
+            @change="changeMonth"
+          >
+            <el-option
+              v-for="item in recentMonths"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </div>
+      </div>
+      <p class="range-tip">流量走势、交易趋势和热卖 TOP10 使用同一时间范围，当前为{{ rangeTitle }}。</p>
+    </div>
     <!-- chart -->
     <div class="charts flex">
       <div class="chart-item">
@@ -174,7 +207,7 @@
 
     <!-- top10商品 -->
     <div class="card transform">
-      <h4>热卖商品TOP10</h4>
+      <h4>热卖商品TOP10 · {{ rangeTitle }}</h4>
       <el-table stripe :data="topHotGoodsData" style="width: 100%">
         <el-table-column type="index" label="排名" width="100" align="center" />
         <el-table-column prop="goodsName" label="商品名称" />
@@ -189,7 +222,7 @@
 
     <!-- top10店铺 -->
     <div class="card transform">
-      <h4>热卖店铺TOP10</h4>
+      <h4>热卖店铺TOP10 · {{ rangeTitle }}</h4>
       <el-table stripe :data="topHotShopsData" style="width: 100%">
         <el-table-column type="index" label="排名" width="100" align="center" />
         <el-table-column prop="storeName" label="店铺名称" />
@@ -223,18 +256,39 @@ export default {
       pvChart: "", // 流量统计
       orderChart: "", // 订单统计
       historyMemberChart: "", // 最近会员流量统计
-      params: {
-        // 请求参数
-        searchType: "LAST_SEVEN",
-      },
-      // 订单传参
-      orderParams: {
-        searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        year: "",
-        shopId: "",
-        memberId: "",
-      },
+      rangeKey: "LAST_SEVEN",
+      rangeMonth: "",
+      rangeOptions: [
+        { title: "今天", searchType: "TODAY" },
+        { title: "昨天", searchType: "YESTERDAY" },
+        { title: "过去7天", searchType: "LAST_SEVEN" },
+        { title: "过去30天", searchType: "LAST_THIRTY" },
+      ],
     };
+  },
+  computed: {
+    recentMonths() {
+      const list = [];
+      const now = new Date();
+      for (let i = 0; i < 12; i += 1) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        list.push({
+          value: `${year}-${month}`,
+          label: `${year}年${month}月`,
+        });
+      }
+      return list;
+    },
+    rangeTitle() {
+      if (this.rangeMonth) {
+        const found = this.recentMonths.find((item) => item.value === this.rangeMonth);
+        return found ? found.label : this.rangeMonth;
+      }
+      const found = this.rangeOptions.find((item) => item.searchType === this.rangeKey);
+      return found ? found.title : "过去7天";
+    },
   },
   methods: {
     // 路由跳转
@@ -250,16 +304,53 @@ export default {
         query: { tabStatus: 'APPLY' }
       });
     },
+    goAppointmentWorkOrders() {
+      this.$router.push({
+        name: "manager-appointment-work-orders",
+        query: { serviceStatus: "OPEN" },
+      });
+    },
+    goProcurementAudit() {
+      this.$router.push({
+        name: "manager-procurement-order-list",
+        query: { status: "SUBMITTED" },
+      });
+    },
+    rangeQuery() {
+      if (this.rangeMonth) {
+        const [year, month] = this.rangeMonth.split("-");
+        return { year, month };
+      }
+      return { searchType: this.rangeKey || "LAST_SEVEN" };
+    },
+    changeRange(item) {
+      this.rangeMonth = "";
+      this.rangeKey = item.searchType;
+      this.reloadRange();
+    },
+    changeMonth(value) {
+      this.rangeMonth = value || "";
+      if (!this.rangeMonth) {
+        this.rangeKey = "LAST_SEVEN";
+      }
+      this.reloadRange();
+    },
+    reloadRange() {
+      this.toHotGoods();
+      this.topHotShops();
+      this.getPvChart();
+      this.initOrderChartList();
+    },
     // top10热卖商品
     async toHotGoods() {
-      let res = await hotGoods(this.params);
-      res.success ? (this.topHotGoodsData = res.result) : "";
+      let res = await hotGoods(this.rangeQuery());
+      this.topHotGoodsData = res.success ? res.result || [] : [];
     },
 
     // top10热卖店铺
     async topHotShops() {
-      let res = await hotShops(this.params);
-      res.success ? (this.topHotShopsData = res.result) : "";
+      let res = await hotShops(this.rangeQuery());
+      this.topHotShopsData = res.success ? res.result || [] : [];
     },
     // 今日待办
     async awaitTodo() {
@@ -271,25 +362,21 @@ export default {
     async getHomeData() {
       let res = await homeStatistics();
       if (res.success) {
-        if (
-          res.result.todayOrderPrice &&
-          res.result.todayOrderPrice != "null"
-        ) {
-          res.result.todayOrderPrice = parseInt(res.result.todayOrderPrice);
-        } else {
-          res.result.todayOrderPrice = 0;
-        }
-
+        const price = res.result.todayOrderPrice;
+        const amount = price === null || price === undefined || price === "" || price === "null"
+          ? 0
+          : Number(price);
+        res.result.todayOrderPrice = Number.isNaN(amount) ? 0 : amount;
         this.homeData = res.result;
       }
     },
 
     // 实例化订单图表
-    async initOrderChartList(name) {
+    async initOrderChartList() {
       this.orderChart ? this.orderChart.clear() : ''
-      const res = await API_Goods.getOrderChart(this.orderParams);
+      const res = await API_Goods.getOrderChart(this.rangeQuery());
       if (res.success) {
-        this.chartList = res.result;
+        this.orderChartData = res.result || [];
 
         if (!this.orderChart) {
           this.orderChart = new Chart({
@@ -306,11 +393,11 @@ export default {
 
     // 订单表
     initOrderChart() {
-      // 默认已经加载 legend-filter 交互
-      let data = this.chartList;
+      let data = this.orderChartData || [];
 
       data.forEach((item) => {
-        item.createTime = item.createTime.split(" ")[0];
+        const time = item.createTime ? String(item.createTime) : "";
+        item.createTime = time.includes(" ") ? time.split(" ")[0] : time;
         item.title = "交易额";
       });
       this.orderChart.data(data);
@@ -346,7 +433,8 @@ export default {
     initPvChart() {
       let uv = [];
       let pv = [];
-      this.data.forEach((item) => {
+      const rows = Array.isArray(this.data) ? this.data : [];
+      rows.forEach((item) => {
         uv.push({
           date: item.date,
           uvNum: item.uvNum,
@@ -364,7 +452,6 @@ export default {
 
       let data = [...uv, ...pv];
 
-      console.log("pv", data);
       this.pvChart.data(data);
 
       this.pvChart.tooltip({
@@ -397,9 +484,9 @@ export default {
     // 浏览量
     async getPvChart() {
       this.pvChart ? this.pvChart.clear() : ''
-      API_Member.getStatisticsList(this.params).then((res) => {
+      API_Member.getStatisticsList(this.rangeQuery()).then((res) => {
         if (res.result) {
-          this.data = res.result;
+          this.data = res.result || [];
 
           if (!this.pvChart) {
             this.pvChart = new Chart({

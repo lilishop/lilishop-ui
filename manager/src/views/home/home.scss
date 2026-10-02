@@ -29,7 +29,14 @@ h4 {
   margin-right: 20px;
 }
 
+.todo-list {
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .todo-item {
+  flex: 1 1 140px;
+  min-width: 120px;
+  margin-right: 0;
   flex-direction: column;
   background: #ebebeb88;
   .counts {
@@ -256,4 +263,35 @@ h4 {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
+}
+.range-card {
+  padding-bottom: 8px;
+}
+.range-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  h4 {
+    margin: 16px 0;
+  }
+}
+.range-options {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  span {
+    cursor: pointer;
+  }
+  .active {
+    color: $theme_color;
+    font-weight: 600;
+  }
+}
+.range-tip {
+  margin: 0 0 12px;
+  color: #909399;
+  font-size: 13px;
 }
