@@ -4,9 +4,9 @@
       <el-card style="height: 60px">
         <div>
           <el-button v-if="allowOperation.editPrice" type="primary" @click="modifyPrice">调整价格</el-button>
-          <el-button v-if="allowOperation.editConsignee" type="primary" @click="editAddress">修改收货地址</el-button>
+          <el-button v-if="showDelivery && allowOperation.editConsignee" type="primary" @click="editAddress">修改收货地址</el-button>
           <el-button
-            v-if="allowOperation.showLogistics || orderPackages.length > 0"
+            v-if="showDelivery && (allowOperation.showLogistics || orderPackages.length > 0)"
             type="primary"
             @click="checkLogistics"
           >查看物流</el-button>
@@ -14,22 +14,22 @@
           <el-button v-if="canOrderTake" type="primary" @click="orderTake">
             {{ isAppointmentOrder ? "预约核销" : "订单核销" }}
           </el-button>
-          <el-button v-if="canShip" type="primary" @click="openFulfill()">发货</el-button>
+          <el-button v-if="showDelivery && canShip" type="primary" @click="openFulfill()">发货</el-button>
           <el-button type="primary" @click="modifyRemark">添加备注</el-button>
           <el-button
-            v-if="allowOperation.showLogistics && logisticsType === 'SHUNFENG'"
+            v-if="showDelivery && allowOperation.showLogistics && logisticsType === 'SHUNFENG'"
             type="primary"
             plain
             @click="sfPrint"
           >下载面单</el-button>
           <el-button
-            v-if="canShip && logisticsType !== 'SHUNFENG'"
+            v-if="showDelivery && canShip && logisticsType !== 'SHUNFENG'"
             type="primary"
             plain
             @click="toPrint"
           >打印电子面单</el-button>
           <el-button
-            v-if="!isNonPhysicalOrder"
+            v-if="showDelivery"
             type="primary"
             plain
             style="float: right"
@@ -68,7 +68,7 @@
               {{ orderInfo.order.createTime }}
             </div>
           </div>
-          <div class="div-item" v-if="orderInfo.order.verificationCode && !isAppointmentOrder">
+          <div class="div-item" v-if="orderInfo.order.verificationCode && !isAppointmentOrder && !isECouponOrder">
             <div class="div-item-left">核验码：</div>
             <div class="div-item-right">{{ orderInfo.order.verificationCode }}</div>
           </div>
@@ -96,7 +96,7 @@
             </div>
           </div>
         </div>
-        <div class="order-info-col">
+        <div class="order-info-col" v-if="showInvoice">
           <div class="div-item" v-if="orderInfo.order.needReceipt == false">
             <div class="div-item-left">发票信息：</div>
             <div class="div-item-right">暂无发票信息</div>
@@ -148,7 +148,7 @@
           </div>
         </div>
         <div class="order-info-col">
-          <div class="div-item" v-if="!isECouponOrder && !isAppointmentOrder && orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
+          <div class="div-item" v-if="showDelivery && orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
             <div class="div-item-left">收货信息：</div>
             <div class="div-item-right">
               {{ orderInfo.order.consigneeName }}
@@ -157,7 +157,7 @@
               {{ orderInfo.order.consigneeDetail }}
             </div>
           </div>
-          <div class="div-item" v-if="orderInfo.order.deliveryMethod == 'SELF_PICK_UP'">
+          <div class="div-item" v-if="showDelivery && orderInfo.order.deliveryMethod == 'SELF_PICK_UP'">
             <div class="div-item-left">自提信息：</div>
             <div class="div-item-right">
               {{ orderInfo.order.storeAddressPath }}
@@ -176,61 +176,7 @@
             <div class="div-item-right">{{ orderInfo.order.remark }}</div>
           </div>
 
-          <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == false">
-            <div class="div-item-left">发票信息：</div>
-            <div class="div-item-right">暂无发票信息</div>
-          </div> -->
-
-          <!-- <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-            <div class="div-item-left">发票抬头：</div>
-            <div class="div-item-right">
-              {{
-                orderInfo.receipt && orderInfo.receipt.receiptTitle ? orderInfo.receipt.receiptTitle : "暂无"
-              }}
-            </div>
-          </div>
-
-          <div class="div-item"
-            v-if="orderInfo.order.needReceipt == true && orderInfo.receipt && orderInfo.receipt.taxpayerId">
-            <div class="div-item-left">发票税号：</div>
-            <div class="div-item-right">
-              {{ orderInfo.receipt && orderInfo.receipt.taxpayerId ? orderInfo.receipt.taxpayerId : "暂无" }}
-            </div>
-          </div>
-
-          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-            <div class="div-item-left">发票内容：</div>
-            <div class="div-item-right">
-              {{
-                orderInfo.receipt && orderInfo.receipt.receiptContent
-                ? orderInfo.receipt.receiptContent
-                : "暂无"
-              }}
-            </div>
-          </div>
-
-          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-            <div class="div-item-left">发票金额：</div>
-            <div class="div-item-right">
-              {{
-                $filters.unitPrice(
-                  orderInfo.receipt && orderInfo.receipt.receiptPrice
-                    ? orderInfo.receipt.receiptPrice
-                    : "暂无",
-                  "￥"
-                )
-              }}
-            </div>
-          </div>
-
-          <div class="div-item" v-if="orderInfo.order.needReceipt == true">
-            <div class="div-item-left">是否开票：</div>
-            <div class="div-item-right">
-              {{ orderInfo.receipt ? (orderInfo.receipt.receiptStatus == 0 ? "未开" : "已开") : "空" }}
-            </div>
-          </div> -->
-
-          <div class="div-item" v-if="!isNonPhysicalOrder">
+          <div class="div-item" v-if="showDelivery">
             <div class="div-item-left">配送方式：</div>
             <div class="div-item-right">
               {{ orderInfo.deliveryMethodValue }}
@@ -239,7 +185,7 @@
         </div>
         </div>
       </el-card>
-      <el-card v-if="orderPackages.length" class="mt_10 order-goods-card">
+      <el-card v-if="showDelivery && orderPackages.length" class="mt_10 order-goods-card">
         <el-divider content-position="left">发货记录</el-divider>
         <el-table :data="orderPackages" border style="width: 100%">
           <el-table-column label="发货方式" width="120">
@@ -434,7 +380,7 @@
                 <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
                 <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
               </li> -->
-            <li v-if="!isECouponOrder">
+            <li v-if="showDelivery">
               <span class="label">运费：</span>
               <span class="txt">{{
                 $filters.unitPrice(orderInfo.order.freightPrice, "￥")
@@ -1097,6 +1043,17 @@ export default {
     },
     isNonPhysicalOrder() {
       return this.isVirtualOrder || this.isECouponOrder || this.isAppointmentOrder;
+    },
+    /** 实物订单才展示收货、配送、运费和发货记录 */
+    showDelivery() {
+      return !this.isNonPhysicalOrder;
+    },
+    /** 实物订单始终展示发票；卡密、预约、虚拟仅在买家索取发票时展示 */
+    showInvoice() {
+      const order = this.orderInfo && this.orderInfo.order;
+      if (!order) return false;
+      if (order.needReceipt == true) return true;
+      return this.showDelivery;
     },
     isAppointmentOrder() {
       const t = this.orderInfo?.order?.orderType;

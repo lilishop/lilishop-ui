@@ -159,7 +159,7 @@
       </el-form-item>
     </div>
 
-    <!-- 时段划分挂到价格库存区，单实例避免 v-model 互相覆盖 -->
+    <!-- 时段划分挂到预约规则区，单实例避免 v-model 互相覆盖 -->
     <Teleport
       v-if="!divisionTarget || divisionReady"
       :to="divisionTarget || 'body'"

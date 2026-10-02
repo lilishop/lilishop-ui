@@ -225,7 +225,7 @@
               <span class="goods-section-index">{{ sectionNo("appointment") }}</span>
               <div class="goods-section-hd-text">
                 <h3>预约规则</h3>
-                <p>服务模式、可约日期与预约政策</p>
+                <p>服务模式、可约日期、时段与预约政策</p>
               </div>
             </div>
             <div class="goods-section-bd">
@@ -237,19 +237,23 @@
                 :sku-info="skuInfo"
                 division-target="#appointment-slot-mount"
               />
+              <div class="goods-submodule">
+                <div class="goods-submodule-hd">时段划分</div>
+                <div id="appointment-slot-mount"></div>
+              </div>
             </div>
           </div>
           <div id="goods-section-price" class="goods-section" data-section="price">
             <div class="goods-section-hd">
               <span class="goods-section-index">{{ sectionNo("price") }}</span>
               <div class="goods-section-hd-text">
-                <h3>价格库存</h3>
-                <p>销售模式、时段、规格与库存</p>
+                <h3>{{ priceSectionTitle }}</h3>
+                <p>{{ priceSectionDesc }}</p>
               </div>
             </div>
             <div class="goods-section-bd">
           <div class="form-item-view">
-            <el-form-item class="form-item-view-el" label="销售模式" prop="salesModel">
+            <el-form-item v-if="showSalesModel" class="form-item-view-el" label="销售模式" prop="salesModel">
               <el-radio-group
                 v-if="!isVirtualLikeGoods"
                 v-model="baseInfoForm.salesModel"
@@ -336,11 +340,14 @@
                 </div>
               </div>
             </el-form-item>
-            <div v-if="isAppointmentGoods" class="goods-submodule">
-              <div class="goods-submodule-hd">时段划分</div>
-              <!-- AppointmentPublishPanel Teleport 挂载点 -->
-              <div id="appointment-slot-mount"></div>
-            </div>
+            <el-alert
+              v-if="isECouponGoods"
+              class="mb_10"
+              type="info"
+              show-icon
+              :closable="false"
+              title="卡密库存不在这里填写。商品保存后，到商品列表的「卡池管理」导入卡密。"
+            />
             <div class="layout" style="width: 100%">
               <el-collapse v-model="open_panel">
                 <el-collapse-item title="自定义规格项" name="1">
@@ -569,7 +576,7 @@
               <span class="goods-section-index">{{ sectionNo("other") }}</span>
               <div class="goods-section-hd-text">
                 <h3>其他信息</h3>
-                <p>上架状态、运费模板与店内分类</p>
+                <p>{{ otherSectionDesc }}</p>
               </div>
             </div>
             <div class="goods-section-bd">
@@ -714,6 +721,24 @@ export default {
     /** 仅实物需要运费模板；E_COUPON 强制 templateId=0（§6.1） */
     needsLogistics() {
       return this.baseInfoForm.goodsType === "PHYSICAL_GOODS";
+    },
+    /** 预约、卡券固定零售，不展示销售模式切换 */
+    showSalesModel() {
+      return !this.isECouponGoods && !this.isAppointmentGoods;
+    },
+    priceSectionTitle() {
+      if (this.isAppointmentGoods) return "规格与可约数量";
+      if (this.isECouponGoods) return "规格价格";
+      return "价格库存";
+    },
+    priceSectionDesc() {
+      if (this.isAppointmentGoods) return "规格、售价与各时段可预约数量";
+      if (this.isECouponGoods) return "规格与售价，库存由卡池管理";
+      return "销售模式、规格与库存";
+    },
+    otherSectionDesc() {
+      if (this.needsLogistics) return "上架状态、运费模板与店内分类";
+      return "上架状态与店内分类";
     },
     sectionTabs() {
       const tabs = [
@@ -1568,7 +1593,11 @@ export default {
         this.wholesaleData = response.result.wholesaleList;
       }
 
-      if (response.result.salesModel === "WHOLESALE") {
+      if (this.isECouponGoods || this.isAppointmentGoods) {
+        this.baseInfoForm.salesModel = "RETAIL";
+      }
+
+      if (response.result.salesModel === "WHOLESALE" && this.showSalesModel) {
         this.baseInfoForm.weight = response.result.skuList[0].weight;
       }
 
@@ -2228,11 +2257,11 @@ export default {
       }
       if (this.isAppointmentGoods) {
         pushData.push({
-          title: "预约规则",
+          title: "可预约数量",
           slot: "appointmentCapacity",
           minWidth: 160,
         });
-      } else {
+      } else if (!this.isECouponGoods) {
         pushData.push({
           title: "库存",
           slot: "quantity",
@@ -2569,7 +2598,7 @@ export default {
             }
             if (!this.$refs.appointmentPanel?.validateDivision()) {
               this.submitLoading = false;
-              this.jumpToTab("price");
+              this.jumpToTab("appointment");
               return;
             }
             Object.assign(submit, this.$refs.appointmentPanel.buildSubmitPayload());

@@ -20,6 +20,37 @@
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="核销记录" name="records">
+          <el-form class="record-search" @submit.prevent @keyup.enter="searchRecords">
+            <el-form-item label="商品名称">
+              <el-input
+                v-model="recordQuery.goodsName"
+                placeholder="请输入商品名称"
+                clearable
+                style="width: 200px"
+              />
+            </el-form-item>
+            <el-form-item label="核销员">
+              <el-input
+                v-model="recordQuery.verifierName"
+                placeholder="请输入核销员"
+                clearable
+                style="width: 160px"
+              />
+            </el-form-item>
+            <el-form-item label="核销时间">
+              <el-date-picker
+                v-model="verifiedRange"
+                type="datetimerange"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                start-placeholder="开始时间"
+                end-placeholder="结束时间"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="searchRecords">搜索</el-button>
+            </el-form-item>
+          </el-form>
           <el-table v-loading="loading" :data="records" border style="width: 100%">
             <el-table-column prop="code" label="核销码" min-width="120" />
             <el-table-column prop="orderSn" label="订单编号" min-width="200" show-overflow-tooltip />
@@ -104,6 +135,11 @@ export default {
       total: 0,
       pageNumber: 1,
       pageSize: 20,
+      verifiedRange: null,
+      recordQuery: {
+        goodsName: "",
+        verifierName: "",
+      },
     };
   },
   methods: {
@@ -175,12 +211,24 @@ export default {
       this.pageNumber = 1;
       this.loadRecords();
     },
+    searchRecords() {
+      this.pageNumber = 1;
+      this.loadRecords();
+    },
     loadRecords() {
       this.loading = true;
-      getVerificationRecords({
+      const range = this.verifiedRange;
+      const params = {
         pageNumber: this.pageNumber,
         pageSize: this.pageSize,
-      })
+        goodsName: (this.recordQuery.goodsName || "").trim(),
+        verifierName: (this.recordQuery.verifierName || "").trim(),
+      };
+      if (range && range.length === 2) {
+        params.startTime = range[0];
+        params.endTime = range[1];
+      }
+      getVerificationRecords(params)
         .then((res) => {
           this.loading = false;
           if (res.success) {
@@ -202,6 +250,16 @@ export default {
   align-items: center;
   gap: 16px;
   padding: 12px 0 4px;
+}
+.record-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+.record-search :deep(.el-form-item) {
+  margin-bottom: 0;
 }
 .preview-meta {
   display: flex;

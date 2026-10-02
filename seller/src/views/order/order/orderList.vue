@@ -11,15 +11,12 @@
         <el-form-item label="关键字" prop="keywords">
           <el-input
             v-model="searchForm.keywords"
-            placeholder="商品名称/收货人/手机号/店铺名称"
+            placeholder="商品名称/收货人/手机号"
             clearable
           />
         </el-form-item>
         <el-form-item label="订单号" prop="orderSn">
           <el-input v-model="searchForm.orderSn" placeholder="请输入订单号" clearable />
-        </el-form-item>
-        <el-form-item label="商品名称" prop="goodsName">
-          <el-input v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable />
         </el-form-item>
         <el-form-item label="商品类型" prop="goodsType">
           <el-select v-model="searchForm.goodsType" placeholder="请选择商品类型" clearable>
@@ -29,16 +26,12 @@
             <el-option label="预约商品" value="APPOINTMENT_GOODS" />
           </el-select>
         </el-form-item>
-        <el-form-item label="收货人" prop="shipName">
-          <el-input v-model="searchForm.shipName" placeholder="请输入收货人姓名" clearable />
-        </el-form-item>
         <el-form-item label="订单类型" prop="orderType">
           <el-select v-model="searchForm.orderPromotionType" placeholder="请选择" clearable>
             <el-option label="普通订单" value="NORMAL" />
             <el-option label="拼团订单" value="PINTUAN" />
             <el-option label="赠品订单" value="GIFT" />
             <el-option label="积分订单" value="POINTS" />
-            <el-option label="砍价订单" value="KANJIA" />
           </el-select>
         </el-form-item>
         <el-form-item label="支付方式" prop="paymentMethod">
@@ -205,9 +198,7 @@ export default {
         orderType: "",
         orderSn: "",
         keywords: "",
-        goodsName: "",
         goodsType: "",
-        shipName: "",
         orderStatus: "",
         paymentMethod: "",
         orderPromotionType: "",
@@ -460,8 +451,7 @@ export default {
       this.getDataList();
     },
     getOrderNumData() {
-      // orderNum 接口仅查 li_order；keywords/goodsName 会引用 oi 字段。goodsType 用 EXISTS，可以带上。
-      const { orderStatus, keywords, goodsName, ...searchParams } = this.searchForm;
+      const { orderStatus, pageNumber, pageSize, sort, order, ...searchParams } = this.searchForm;
       API_Order.getOrderNum(searchParams)
         .then((res) => {
           if (res.success) {
