@@ -21,32 +21,34 @@
               >
                 <span :class="{ 'goods-list-tool-active': index === sortIndex }">
                   {{ item.title }}
-                  <el-icon><ArrowDown /></el-icon>
+                  <el-icon v-if="index === sortIndex" class="sort-arrow"><ArrowDown /></el-icon>
                 </span>
               </li>
-              <li @click="orderBy('price', 5, 'up')" class="price-sort">
-                <span :class="{ 'goods-list-tool-active': 5 === sortIndex }">
+              <li @click="orderBy('price', priceSortIndex)" class="price-sort">
+                <span :class="{ 'goods-list-tool-active': priceSortIndex === sortIndex }">
                   价格
                   <span class="price-arrows">
-                    <el-icon :class="{ 'price-color': sortPriceIndex == 'desc' }"><ArrowUp /></el-icon>
-                    <el-icon :class="{ 'price-color': sortPriceIndex == 'asc' }"><ArrowDown /></el-icon>
+                    <el-icon :class="{ 'is-on': priceSortIndex === sortIndex && sortPriceIndex === 'asc' }"><ArrowUp /></el-icon>
+                    <el-icon :class="{ 'is-on': priceSortIndex === sortIndex && sortPriceIndex === 'desc' }"><ArrowDown /></el-icon>
                   </span>
                 </span>
               </li>
             </ul>
           </div>
           <!-- 列表 -->
-          <div class="goods-list">
-            <empty v-if="goodsList.length === 0" />
+          <div v-if="searched && !loading && goodsList.length === 0" class="list-empty">
+            <empty :_Title="emptyTitle" />
+            <div v-if="recommendList.length" class="recommend-title">为你推荐</div>
+          </div>
+          <div class="goods-list" v-if="displayGoods.length">
             <div
-              v-else
               class="goods-show-info"
-              v-for="(item, index) in goodsList"
-              :key="index"
+              v-for="(item, index) in displayGoods"
+              :key="item.id || index"
               @click="goGoodsDetail(item.id, item.goodsId)"
             >
               <div class="goods-show-img">
-                <img :src="item.thumbnail" />
+                <GoodsThumb :src="item.thumbnail" :alt="item.goodsName" />
               </div>
               <div class="goods-show-price">
                 <span>
@@ -85,7 +87,7 @@
           </div>
         </div>
       </div>
-      <div class="goods-page">
+      <div class="goods-page" v-if="total > 0">
         <el-pagination
           v-model:current-page="params.pageNumber"
           v-model:page-size="params.pageSize"
@@ -105,6 +107,7 @@
 import { Message } from "@/utils/message";
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
 import GoodsClassNav from "@/components/nav/GoodsClassNav";
+import GoodsThumb from "@/components/goods/GoodsThumb.vue";
 import * as apiGoods from "@/api/goods";
 export default {
   name: "GoodsList",
@@ -115,7 +118,10 @@ export default {
   data() {
     return {
       sortIndex: 0, // 排序状态
+      priceSortIndex: 4,
       sortPriceIndex: false, // 判断价格升序还是降序
+      searched: false,
+      recommendList: [],
       goodsTool: [
         // 排序类型
         { title: "综合", en: "" },
@@ -152,6 +158,16 @@ export default {
         this.params.promotionsId = this.$route.query.promotionsId;
       }
       this.getGoodsList();
+    },
+  },
+  computed: {
+    displayGoods() {
+      if (this.goodsList.length) return this.goodsList;
+      return this.searched && !this.loading ? this.recommendList : [];
+    },
+    emptyTitle() {
+      const keyword = this.params.keyword;
+      return keyword ? `没有找到与“${keyword}”相关的商品` : "暂无商品";
     },
   },
   methods: {
@@ -204,11 +220,10 @@ export default {
         Message.warning("店铺信息不存在");
         return;
       }
-      const routeUrl = this.$router.resolve({
+      this.$router.push({
         path: "/merchant",
         query: { id },
       });
-      window.open(routeUrl.href, "_blank");
     },
     // 分页 修改页码
     changePageNum(val) {
@@ -230,13 +245,27 @@ export default {
         .then((res) => {
           this.loading = false;
           if (res.success) {
-            this.goodsList = res.result.records;
+            this.goodsList = res.result.records || [];
             this.total = res.result.total;
+            if (!this.goodsList.length) this.loadRecommend();
           }
         })
         .catch(() => {
+          this.goodsList = [];
+        })
+        .finally(() => {
           this.loading = false;
+          this.searched = true;
         });
+    },
+    loadRecommend() {
+      if (this.recommendList.length) return;
+      apiGoods
+        .goodsList({ pageNumber: 1, pageSize: 10, sort: "buyCount", order: "desc" })
+        .then((res) => {
+          if (res.success) this.recommendList = res.result.records || [];
+        })
+        .catch(() => {});
     },
     getParams(val) {
       // 筛选条件回显
@@ -256,6 +285,7 @@ export default {
   },
   components: {
     GoodsClassNav,
+    GoodsThumb,
     ArrowDown,
     ArrowUp,
   },
@@ -395,8 +425,12 @@ export default {
         }
       }
 
-      .price-color {
-        color: #b3b3b3;
+      .el-icon {
+        color: #c8c8c8;
+      }
+
+      .el-icon.is-on {
+        color: $theme_color;
       }
     }
   }
@@ -433,9 +467,30 @@ export default {
   background-color: transparent !important;
   font-weight: 600;
 
-  .price-color {
-    color: $theme_color !important;
+  .sort-arrow {
+    color: $theme_color;
   }
+
+  .price-arrows .el-icon {
+    color: #c8c8c8;
+  }
+
+  .price-arrows .el-icon.is-on {
+    color: $theme_color;
+  }
+}
+
+.list-empty {
+  background: #fff;
+  border: 1px solid #eee;
+  border-top: none;
+}
+
+.recommend-title {
+  padding: 4px 16px 12px;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .goods-list {

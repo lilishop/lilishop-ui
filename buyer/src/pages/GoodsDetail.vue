@@ -6,27 +6,10 @@
       <div class="shop-nav-container">
         <el-breadcrumb>
           <el-breadcrumb-item to="/">首页</el-breadcrumb-item>
-          <el-breadcrumb-item v-for="(item, index) in categoryBar" :to="goGoodsList(index)" target="_blank" :key="index">
+          <el-breadcrumb-item v-for="(item, index) in categoryBar" :to="goGoodsList(index)" :key="index">
             {{ item.name }}
           </el-breadcrumb-item>
         </el-breadcrumb>
-        <div class="store-collect" v-if="!takeDownSale && goodsMsg.data">
-          <span class="mr_10" v-if="goodsMsg.data">
-            <router-link
-              class="store-name-link"
-              :to="{ path: '/merchant', query: { id: goodsMsg.data.storeId } }"
-            >{{ goodsMsg.data.storeName }}</router-link>
-          </span>
-          <span
-            class="store-collect-btn"
-            :class="{ 'is-collected': storeCollected }"
-            @click="collect"
-          >
-            <el-icon class="store-collect-icon"><StarFilled /></el-icon>
-            {{ storeCollected? "已收藏店铺": "收藏店铺" }}
-          </span>
-          <span class="ml_10 contact-service-btn" @click="IMService(goodsMsg.data.storeId,goodsMsg.data.goodsId,goodsMsg.data.id)">联系客服</span>
-        </div>
       </div>
     </div>
 
@@ -48,21 +31,13 @@
 
 <script>
 import { Message } from "@/utils/message";
-import { StarFilled } from '@element-plus/icons-vue';
 import Search from "@/components/Search";
 
 import ShowGoods from "@/components/goodsDetail/ShowGoods";
 import empty from "@/components/empty/Main";
 import ShowGoodsDetail from "@/components/goodsDetail/ShowGoodsDetail";
 import { goodsSkuDetail } from "@/api/goods";
-import {
-  cancelStoreCollect,
-  collectStore,
-  isStoreCollection,
-  getGoodsDistribution,
-} from "@/api/member";
-import { getDetailById } from "@/api/shopentry";
-import imTalk from '@/components/mixes/talkIm'
+import { getGoodsDistribution } from "@/api/member";
 export default {
   name: "GoodsDetail",
   beforeRouteEnter (to, from, next) {
@@ -72,14 +47,11 @@ export default {
   created () {
     this.getGoodsDetail();
   },
-  mixins: [imTalk],
   data () {
     return {
       goodsMsg: {}, // 商品信息
       isLoading: false, // 加载状态
       categoryBar: [], // 分类
-      storeCollected: false, // 商品收藏
-      storeMsg: {}, // 店铺信息
       takeDownSale:false, // 是否下架
 
     };
@@ -140,24 +112,6 @@ export default {
             if (!this.goodsMsg.data.intro) {
               this.goodsMsg.data.intro = ''
             }
-            // 判断是否收藏（须同时有 token，避免未登录/ token 失效时误跳登录页）
-            if (this.Cookies.getItem("accessToken") && this.Cookies.getItem("userInfo")) {
-              isStoreCollection("STORE", this.goodsMsg.data.storeId).then((res) => {
-                if (res.success && res.result) {
-                  this.storeCollected = true;
-                }
-              });
-            }
-
-            if (!this.storeMsg) {
-              // 获取店铺信息
-              getDetailById(this.goodsMsg.data.storeId).then((res) => {
-                if (res.success) {
-                  this.storeMsg = res.result;
-
-                }
-              });
-            }
           } else {
             Message.error(res.message);
             this.isLoading = false
@@ -183,37 +137,12 @@ export default {
         query: { categoryId: arr.toString() },
       };
     },
-    async collect () {
-      // 收藏店铺
-      const storeId = this.goodsMsg.data && this.goodsMsg.data.storeId;
-      if (!storeId) {
-        return;
-      }
-      if (!this.Cookies.getItem("userInfo")) {
-        Message.warning("请先登录");
-        this.$router.push("/login");
-        return;
-      }
-      if (this.storeCollected) {
-        let cancel = await cancelStoreCollect("STORE", storeId);
-        if (cancel.success) {
-          Message.success("已取消收藏");
-          this.storeCollected = false;
-        }
-      } else {
-        let collect = await collectStore("STORE", storeId);
-        if (collect.code === 200) {
-          this.storeCollected = true;
-          Message.success("收藏店铺成功,可以前往个人中心我的收藏查看");
-        }
-      }
-    },
   },
   watch: {},
   components: { Search,
     ShowGoods,
     ShowGoodsDetail,
-    empty, StarFilled },
+    empty },
 };
 </script>
 <style scoped lang="scss">
@@ -247,52 +176,6 @@ export default {
 
   :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
     color: #171A26;
-  }
-
-  .store-collect {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    color: #171A26;
-    font-size: 14px;
-
-    .store-collect-btn,
-    .contact-service-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      color: #171A26;
-
-      &:hover {
-        color: $theme_color;
-      }
-    }
-
-    .store-collect-btn {
-      .store-collect-icon {
-        color: #999;
-        font-size: 16px;
-      }
-
-      &.is-collected,
-      &.is-collected .store-collect-icon {
-        color: $theme_color;
-      }
-    }
-
-    .store-name-link {
-      color: #438cde;
-      text-decoration: none;
-
-      &:hover {
-        color: $theme_color;
-      }
-    }
   }
 }
 .sale-btn{

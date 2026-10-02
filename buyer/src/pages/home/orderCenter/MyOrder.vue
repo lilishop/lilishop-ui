@@ -223,7 +223,7 @@ export default {
       // 状态数组
       orderStatusList,
       afterSaleStatusList,
-      changeWay: ['全部', '待支付', '待发货', '待收货/使用'],
+      changeWay: ['全部', '待付款', '待发货', '待收货/使用'],
       activeOrderTab: 0,
       total: 0, // 数据总数
       spinShow: false, // 加载状态
@@ -235,7 +235,17 @@ export default {
   },
   mounted () {
     if (this.homePage) this.params.pageSize = 5;
+    if (!this.homePage) this.applyRouteTag();
     this.getList();
+  },
+  watch: {
+    '$route.query.tag' () {
+      if (this.homePage || this.$route.name !== 'MyOrder') return;
+      const next = this.$route.query.tag || 'ALL';
+      if (this.params.tag === next) return;
+      this.applyRouteTag();
+      this.getList();
+    }
   },
   methods: {
     // 退款状态枚举
@@ -261,22 +271,39 @@ export default {
       });
       window.open(routeUrl.href, '_blank');
     },
+    orderTags () {
+      return ['ALL', 'WAIT_PAY', 'WAIT_SHIP', 'WAIT_USE'];
+    },
+    applyRouteTag () {
+      const tags = this.orderTags();
+      const tag = this.$route.query.tag;
+      const index = tags.indexOf(tag);
+      this.activeOrderTab = index > -1 ? index : 0;
+      this.params.tag = tags[this.activeOrderTab];
+      this.params.pageNumber = 1;
+    },
     // 切换订单状态
     change (index) {
       this.activeOrderTab = index;
       this.params.pageNumber = 1;
       delete this.params.commentStatus;
-      const tags = ['ALL', 'WAIT_PAY', 'WAIT_SHIP', 'WAIT_USE'];
+      const tags = this.orderTags();
       this.params.tag = tags[index] || 'ALL';
+      const query = { ...this.$route.query };
+      if (index === 0) delete query.tag;
+      else query.tag = this.params.tag;
+      const current = this.$route.query.tag || 'ALL';
+      if (current !== this.params.tag) {
+        this.$router.replace({ name: 'MyOrder', query });
+      }
       this.getList()
     },
     // 跳转店铺首页
     shopPage (id) {
-      let routeUrl = this.$router.resolve({
+      this.$router.push({
         path: '/merchant',
         query: { id: id }
       });
-      window.open(routeUrl.href, '_blank');
     },
     orderDetail (sn) {
       this.$router.push({ name: 'OrderDetail', query: {sn} });

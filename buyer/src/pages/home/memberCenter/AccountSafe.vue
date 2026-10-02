@@ -1,44 +1,36 @@
 <template>
   <div class="wrapper">
     <UserCenterLayout>
-      <div class="safeList">
-      <!-- 密码 -->
-      <div class="safeItem">
-        <div class="safeItem-icon">
-          <el-icon :size="40"><Key /></el-icon>
+      <div class="safe-list">
+      <div class="safe-card">
+        <div class="safe-icon">
+          <el-icon :size="22"><Key /></el-icon>
         </div>
-        <div class="safeItem-content">
-          <div class="setDivItem">登录密码</div>
-          <div class="setDivItem theme">互联网账号存在被盗风险，建议您定期更改密码以保护账户安全。</div>
+        <div class="safe-body">
+          <p class="safe-title">登录密码</p>
+          <p class="safe-desc">互联网账号存在被盗风险，建议您定期更改密码以保护账户安全。</p>
         </div>
-        <div class="safeItem-action">
-          <el-button @click="modifyPwd">修改密码</el-button>
-        </div>
+        <el-button @click="modifyPwd">修改密码</el-button>
       </div>
 
-      <div class="safeItem safeItem-connect">
-        <div class="safeItem-main">
-          <div class="safeItem-icon">
-            <el-icon :size="40"><Link /></el-icon>
+      <div class="safe-card safe-card-connect">
+        <div class="safe-card-main">
+          <div class="safe-icon">
+            <el-icon :size="22"><Link /></el-icon>
           </div>
-          <div class="safeItem-content">
-            <div class="setDivItem">第三方账户绑定</div>
-            <div class="setDivItem theme">绑定后可使用第三方账号快捷登录。</div>
+          <div class="safe-body">
+            <p class="safe-title">第三方账户绑定</p>
+            <p class="safe-desc">绑定后可使用第三方账号快捷登录。</p>
           </div>
-          <div class="safeItem-action">
-            <el-button v-if="!isBound(wechatConnect.type)" type="primary" @click="openBindModal(wechatConnect)">绑定</el-button>
-            <el-button v-else @click="confirmUnbind(wechatConnect)">解绑</el-button>
-          </div>
+          <el-button v-if="!isBound(wechatConnect.type)" type="primary" @click="openBindModal(wechatConnect)">绑定</el-button>
+          <el-button v-else @click="confirmUnbind(wechatConnect)">解绑</el-button>
         </div>
-        <div class="connectList">
-          <div class="connectRow">
-            <div class="connectRowLeft">
-              <span class="connectName">{{ wechatConnect.label }}</span>
-              <el-tag v-if="isBound(wechatConnect.type)" color="success">已绑定</el-tag>
-              <el-tag v-else>未绑定</el-tag>
-            </div>
-          </div>
-          <el-skeleton size="large" fix v-if="connectLoading"></el-skeleton>
+        <div class="connect-row">
+          <span class="connect-name">{{ wechatConnect.label }}</span>
+          <span class="connect-status" :class="{ 'is-bound': isBound(wechatConnect.type) }">
+            {{ isBound(wechatConnect.type) ? "已绑定" : "未绑定" }}
+          </span>
+          <el-skeleton v-if="connectLoading" animated class="connect-skeleton" />
         </div>
       </div>
       </div>
@@ -273,73 +265,101 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  .theme {
-    color: $theme_color;
+  .safe-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 4px;
   }
 
-  .setDivItem {
-    line-height: 1.75;
-  }
-
-  .safeItem {
+  .safe-card,
+  .safe-card-main {
     display: flex;
     align-items: center;
     gap: 16px;
-    border-bottom: 1px solid $border_color;
-    padding: 16px 0;
   }
 
-  .safeItem-connect {
+  .safe-card {
+    padding: 20px;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+  }
+
+  .safe-card-connect {
     display: block;
+    padding: 0;
   }
 
-  .safeItem-main {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  .safe-card-main {
+    padding: 20px 20px 16px;
   }
 
-  .safeItem-icon {
+  .safe-icon {
     flex-shrink: 0;
-    width: 56px;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: #fff5f4;
+    color: $theme_color;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: $theme_color;
   }
 
-  .safeItem-content {
+  .safe-body {
     flex: 1;
     min-width: 0;
   }
 
-  .safeItem-action {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
+  .safe-title {
+    margin: 0;
+    color: #171A26;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
   }
 
-  .connectList {
+  .safe-desc {
+    margin: 6px 0 0;
+    color: #999;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .connect-row {
     position: relative;
-    margin-top: 8px;
-    margin-left: 72px;
-  }
-
-  .connectRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 0;
-  }
-
-  .connectRowLeft {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin: 0 20px 16px 84px;
+    padding-top: 12px;
+    border-top: 1px solid #f5f5f5;
   }
 
-  .connectName {
-    color: $title_color;
+  .connect-name {
+    color: #171A26;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .connect-status {
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 4px;
+    background: #f5f5f5;
+    color: #999;
+    font-size: 12px;
+    line-height: 22px;
+  }
+
+  .connect-status.is-bound {
+    background: #f0faf3;
+    color: #1f9d55;
+  }
+
+  .connect-skeleton {
+    width: 120px;
+    height: 22px;
   }
 
   .wechatQrBox {

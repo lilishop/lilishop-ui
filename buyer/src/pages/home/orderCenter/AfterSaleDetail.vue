@@ -211,11 +211,10 @@ export default {
     },
     shopPage (id) {
       if (!id) return
-      const routeUrl = this.$router.resolve({
+      this.$router.push({
         path: '/merchant',
         query: { id }
       })
-      window.open(routeUrl.href, '_blank')
     },
     filterOrderStatus (status) { // 获取订单状态中文
       const ob = this.afterSaleStatusList.filter(e => { return e.status === status });

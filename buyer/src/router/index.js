@@ -51,7 +51,9 @@ const MoneyManagement = () => import("@/pages/home/userCenter/MoneyManagement");
 const MyGiftCards = () => import("@/pages/home/userCenter/MyGiftCards");
 
 const Home = () => import("@/pages/user/Home");
+const UserCenter = () => import("@/pages/home/Main");
 const Merchant = () => import("@/pages/Merchant");
+const NotFound = () => import("@/pages/NotFound");
 const topic = () => import("@/pages/Topic");
 const ShopEntry = () => import("@/pages/shopEntry/ShopEntry");
 
@@ -178,8 +180,13 @@ export const router = createRouter({
     {
       path: "/home",
       component: Home,
-      redirect: { name: "MyOrder" },
       children: [
+        {
+          path: "",
+          name: "UserCenter",
+          component: UserCenter,
+          meta: { title: "个人中心" },
+        },
         {
           path: "MyTracks",
           name: "MyTracks",
@@ -213,19 +220,19 @@ export const router = createRouter({
           path: "CommentList",
           name: "CommentList",
           component: CommentList,
-          mate: { title: "评价列表" },
+          meta: { title: "评价列表" },
         },
         {
           path: "AddEval",
           name: "AddEval",
           component: AddEval,
-          mate: { title: "添加评价" },
+          meta: { title: "添加评价" },
         },
         {
           path: "EvalDetail",
           name: "EvalDetail",
           component: EvalDetail,
-          mate: { title: "评价详情" },
+          meta: { title: "评价详情" },
         },
         {
           path: "ComplainList",
@@ -330,6 +337,12 @@ export const router = createRouter({
       name: "Merchant",
       component: Merchant,
       meta: { title: "店铺" },
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "NotFound",
+      component: NotFound,
+      meta: { title: "页面不存在" },
     },
   ],
 });

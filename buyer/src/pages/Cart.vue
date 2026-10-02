@@ -281,11 +281,10 @@ export default {
     },
     // 跳转店铺首页
     goShopPage(id) {
-      let routeUrl = this.$router.resolve({
+      this.$router.push({
         path: "/merchant",
         query: { id },
       });
-      window.open(routeUrl.href, "_blank");
     },
     // 同步购物车商品收藏状态
     async syncCartCollectionStatus() {
@@ -959,3 +958,6 @@ export default {
 }
 
 </style>
+
+
+

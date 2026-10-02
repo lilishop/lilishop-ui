@@ -92,9 +92,9 @@
     </div>
     <div class="foot">
       <div type="flex" justify="space-around" class="help">
-        <router-link to="/article" class="item" target="_blank">帮助</router-link>
-        <router-link to="/article?id=1371779927900160000" class="item" target="_blank">隐私</router-link>
-        <router-link to="/article?id=1371992704333905920" class="item" target="_blank">条款</router-link>
+        <router-link to="/article" class="item">帮助</router-link>
+        <router-link to="/article?id=1371779927900160000" class="item">隐私</router-link>
+        <router-link to="/article?id=1371992704333905920" class="item">条款</router-link>
       </div>
       <div type="flex" justify="center" class="copyright">
         Copyright © {{year}} - Present
@@ -601,3 +601,5 @@ export default {
   }
 }
 </style>
+
+

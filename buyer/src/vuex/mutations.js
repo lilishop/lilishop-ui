@@ -9,6 +9,9 @@ export const SET_NAVLIST = (state, data) => {
 export const SET_CARTNUM = (state, data) => {
   state.cartNum = data
 }
+export const SET_UNREAD_MSG = (state, data) => {
+  state.unreadMsg = Number(data) || 0
+}
 export const SET_HOTWORDS = (state, data) => {
   state.hotWordsList = data
 }

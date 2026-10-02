@@ -90,10 +90,7 @@ export default {
   methods: {
     goArticle() {
       // 跳转文章页
-      let routeUrl = this.$router.resolve({
-        path: "/article",
-      });
-      window.open(routeUrl.href, "_blank");
+      this.$router.push("/article");
     },
   },
 };

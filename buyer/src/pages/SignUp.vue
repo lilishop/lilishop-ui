@@ -66,7 +66,7 @@
           <el-form-item>
             <el-button class="signup-btn" @click="handleRegist">注册</el-button>
           </el-form-item>
-          <p class="agreement">点击注册，表示您同意《<router-link to="/article?id=1371992704333905920" target="_blank">商城用户协议</router-link>》</p>
+          <p class="agreement">点击注册，表示您同意《<router-link to="/article?id=1371992704333905920">商城用户协议</router-link>》</p>
         </el-form>
         <Verify
           ref="verify"
@@ -78,9 +78,9 @@
     </div>
     <div class="foot">
       <div type="flex" justify="space-around" class="help">
-        <router-link to="/article" class="item" target="_blank">帮助</router-link>
-        <router-link to="/article?id=1371779927900160000" class="item" target="_blank">隐私</router-link>
-        <router-link to="/article?id=1371992704333905920" class="item" target="_blank">条款</router-link>
+        <router-link to="/article" class="item">帮助</router-link>
+        <router-link to="/article?id=1371779927900160000" class="item">隐私</router-link>
+        <router-link to="/article?id=1371992704333905920" class="item">条款</router-link>
       </div>
       <div type="flex" justify="center" class="copyright">
         Copyright © {{year}} - Present

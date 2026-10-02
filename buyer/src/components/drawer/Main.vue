@@ -7,7 +7,7 @@
           <el-icon :size="20"><component :is="resolveIcon(item.icon)" /></el-icon>
           <p class="barTitle" v-if="item.titleShow"> {{item.title}}</p>
           <div class="circle" v-if="item.title === '购物车'">
-            {{cartNum < 100 ? cartNum : 99}}
+            {{ Number(cartNum) > 99 ? '99+' : cartNum }}
           </div>
         </el-tooltip>
       </div>
@@ -79,20 +79,14 @@ export default {
           this.handleDrawer = false
           switch (val.title) {
             case '会员中心':
-              this.openBlank('/home')
+              this.$router.push('/home')
               break;
             case '我的资产':
-              this.openBlank('/home/MoneyManagement')
+              this.$router.push('/home/MoneyManagement')
               break;
           }
         }
       }
-    },
-    openBlank (path) { // 新页面打开地址
-      let routerUrl = this.$router.resolve({
-        path: path
-      })
-      window.open(routerUrl.href, '_blank')
     },
     getCartList () { // 获取购物车列表
       cartCount().then(res => {
@@ -131,11 +125,15 @@ export default {
   }
 
   .circle {
-    width: 20px;
+    min-width: 20px;
     height: 20px;
-    border-radius: 50%;
+    padding: 0 4px;
+    border-radius: 10px;
     color: #fff;
     background: $theme_color;
+    font-size: 12px;
+    line-height: 20px;
+    box-sizing: border-box;
   }
 
   .wrapper {

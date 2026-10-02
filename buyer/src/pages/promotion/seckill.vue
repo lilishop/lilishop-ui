@@ -29,45 +29,31 @@
       <div v-else class="goods-show-info1" v-for="(item, index) in goodsList" :key="index"
         @click="goGoodsDetail(item.skuId, item.goodsId)">
         <div class="goods-show-img">
-          <img width="200" height="200" :src="item.goodsImage" />
+          <img :src="item.goodsImage" :alt="item.goodsName" />
         </div>
         <div class="goods-show-price">
-          <span>
-            <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
-            <span style="color: #999; text-decoration: line-through">{{ $filters.unitPrice(item.originalPrice, "￥") }}</span>
-          </span>
+          <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
+          <span class="origin-price">{{ $filters.unitPrice(item.originalPrice, "￥") }}</span>
         </div>
-        <div class="goods-show-detail" style="margin-bottom: 20px">
+        <div class="goods-show-detail">
           <span>{{ item.goodsName }}</span>
         </div>
-        <div class="goods-seckill-btn" :class="{
-          'goods-seckill-btn-gray': nowHour < list[currIndex].timeLine,
-        }">
-          {{ nowHour >= list[currIndex].timeLine ? "立即抢购" : "即将开始" }}
-        </div>
-        <div v-if="nowHour >= list[currIndex].timeLine && item.quantity <= item.salesNum"
-          class="goods-seckill-btn goods-seckill-btn-gray">
-          已售罄
-        </div>
         <div v-if="nowHour >= list[currIndex].timeLine" class="goods-show-num1">
-          <span>已售{{
-            (item.quantity && item.quantity > 0
-              ? Math.ceil(
-                (item.salesNum / (item.quantity)) * 100
-              )
-              : 100) + "%"
-          }}</span><el-progress
+          <span>已售{{ salePercent(item) }}%</span>
+          <el-progress
             :show-text="false"
-            color="#df0021"
-            style="width: 110px"
-            class="ml_10"
-            :percentage="item.quantity && item.quantity > 0
-              ? Math.ceil((item.salesNum / item.quantity) * 100)
-              : 100"
+            :color="'var(--theme-color, #ff3c2a)'"
+            :percentage="salePercent(item)"
           />
         </div>
         <div class="goods-show-seller">
           <span>{{ item.storeName }}</span>
+        </div>
+        <div
+          class="goods-seckill-btn"
+          :class="{ 'is-disabled': !canBuy(item) }"
+        >
+          {{ buyText(item) }}
         </div>
       </div>
       </div>
@@ -142,6 +128,25 @@ export default {
       });
       window.open(routeUrl.href, "_blank");
     },
+    // 已售占比。没有库存时按售罄展示
+    salePercent (item) {
+      if (!item.quantity || item.quantity <= 0) return 100;
+      return Math.min(100, Math.ceil((item.salesNum / item.quantity) * 100));
+    },
+    // 场次已开始，且销量达到库存
+    isSoldOut (item) {
+      return this.nowHour >= this.list[this.currIndex].timeLine && item.quantity <= item.salesNum;
+    },
+    // 场次已开始且未售罄才可抢
+    canBuy (item) {
+      return this.nowHour >= this.list[this.currIndex].timeLine && !this.isSoldOut(item);
+    },
+    // 按钮文案：未开始 / 已售罄 / 立即抢购
+    buyText (item) {
+      if (this.nowHour < this.list[this.currIndex].timeLine) return "即将开始";
+      if (this.isSoldOut(item)) return "已售罄";
+      return "立即抢购";
+    },
     countDown (currIndex) {
       // 倒计时
       // 0点时间戳
@@ -175,73 +180,96 @@ export default {
 <style lang="scss" scoped>
 @import "../../assets/styles/goodsList.scss";
 
-.goods-seckill-btn {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 80px;
-  color: #fff;
-  height: 35px;
-  text-align: center;
-  line-height: 35px;
-  font-size: 14px;
-  background-color: $theme_color;
-  margin-bottom: 1px;
-  margin-right: 1px;
+.seckill-list {
+  background: #f5f5f5;
 }
 
-.goods-seckill-btn-gray {
-  background-color: #666;
-}
+.promotion-decorate {
+  width: auto;
+  margin: 28px auto 16px;
+  color: #171A26;
+  font-size: 22px;
+  font-weight: 600;
 
-.promotion-decorate::before,
-.promotion-decorate::after {
-  background-image: url("/src/assets/images/sprite@2x.png");
+  &::before,
+  &::after {
+    display: none;
+  }
 }
 
 .time-line {
   width: 1200px;
   max-width: 1200px;
-  height: 60px;
+  height: auto;
   margin: 0 auto;
-  background-color: #fff;
+  background: #fff;
   display: flex;
   box-sizing: border-box;
+  border-radius: 8px;
+  overflow: hidden;
 
   li {
-    padding: 0 30px;
-    font-size: 16px;
-    font-weight: bold;
-    width: 240px;
-    height: 100%;
+    flex: 1;
+    width: auto;
+    min-height: 78px;
+    padding: 12px 20px;
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #171A26;
+    box-sizing: border-box;
+
+    & + li {
+      box-shadow: inset 1px 0 0 #f2f2f2;
+    }
 
     &:hover {
       cursor: pointer;
+      background: #fafafa;
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 18px;
     }
 
     .not-curr {
-      border: 1px solid #999;
-      border-radius: 20px;
-      padding: 3px 10px;
-      margin-left: 10px;
-      font-size: 12px;
-      font-weight: normal;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      margin: 0;
+      font-size: 13px;
+      font-weight: 400;
+      color: #999;
     }
   }
 
   .currTimeline {
-    background-color: $theme_color;
+    background: $theme_color;
     color: #fff;
 
-    >div:nth-child(1) {
-      font-size: 20px;
+    &:hover {
+      background: $theme_color;
     }
 
-    >div:nth-child(2) {
-      font-size: 14px;
-      margin-left: 10px;
+    > div:nth-child(1) {
+      font-size: 22px;
+      line-height: 28px;
+    }
+
+    > div:nth-child(2) {
+      margin-left: 0;
+    }
+
+    .not-curr {
+      color: #fff;
     }
   }
 }
@@ -249,55 +277,116 @@ export default {
 .seckill-goods-wrap {
   width: 1200px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 16px auto 40px;
+  padding: 16px;
   box-sizing: border-box;
+  background: #fff;
+  border-radius: 8px;
+  min-height: 320px;
 
   .goods-list {
     width: 100%;
     margin: 0;
-    column-gap: 10px;
+    column-gap: 16px;
+  }
+
+  :deep(.empty) {
+    margin: 48px 0;
+    color: #999;
   }
 }
 
 .goods-show-info1 {
-  width: calc(25% - 8px);
+  width: calc(25% - 12px);
   min-width: 0;
-  padding: 6px;
-  margin: 10px 0;
+  padding: 12px;
+  margin: 0 0 16px;
   position: relative;
-  border: 1px solid #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
   cursor: pointer;
   background-color: #fff;
   box-sizing: border-box;
-}
+  display: flex;
+  flex-direction: column;
 
-.goods-show-info1:hover {
-  border: 1px solid #ccc;
-  box-shadow: 0px 0px 15px #ccc;
+  &:hover {
+    border-color: #eee;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  }
 }
 
 .goods-show-img {
   display: flex;
   justify-content: center;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fafafa;
 
   img {
     width: 100%;
-    max-width: 200px;
     height: auto;
     aspect-ratio: 1;
     object-fit: cover;
   }
 }
 
+.goods-show-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.origin-price {
+  color: #999;
+  font-size: 13px;
+  text-decoration: line-through;
+}
+
+.goods-show-detail {
+  height: 40px;
+  margin: 8px 0;
+  color: #333;
+  font-size: 14px;
+  line-height: 20px;
+}
+
 .goods-show-num1 {
   display: flex;
   align-items: center;
+  gap: 8px;
   font-size: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: #666;
+
+  span {
+    flex-shrink: 0;
+  }
+
+  :deep(.el-progress) {
+    flex: 1;
+  }
 }
 
-.el-progress-bar__inner {
-  background-color: #df0021;
+.goods-show-seller {
+  margin-bottom: 10px;
+  color: #999;
+  font-size: 13px;
+}
+
+.goods-seckill-btn {
+  margin-top: auto;
+  height: 34px;
+  border-radius: 4px;
+  color: #fff;
+  text-align: center;
+  line-height: 34px;
+  font-size: 14px;
+  background-color: $theme_color;
+
+  &.is-disabled {
+    background: #c8c8c8;
+  }
 }
 </style>

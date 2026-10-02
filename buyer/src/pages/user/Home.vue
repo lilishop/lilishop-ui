@@ -24,17 +24,25 @@
               <p>{{ userInfo.nickName }}</p>
             </div>
 
+            <el-menu-item index="UserCenter">
+              <el-icon><House /></el-icon>
+              <span>我的主页</span>
+            </el-menu-item>
             <template v-for="(menu, index) in menuList" :key="index">
               <el-sub-menu v-if="menu.display" :index="menu.title">
                 <template #title>
-                  <el-icon><Location /></el-icon>
+                  <el-icon><component :is="menuIcon(menu.icon)" /></el-icon>
                   <span>{{ menu.title }}</span>
                 </template>
                 <el-menu-item
                   v-for="(chlidren, i) in menu.menus"
                   :key="i"
                   :index="chlidren.path"
-                >{{ chlidren.title }}</el-menu-item>
+                >
+                  <el-icon><component :is="menuIcon(chlidren.icon)" /></el-icon>
+                  <span>{{ chlidren.title }}</span>
+                  <span v-if="chlidren.path === 'MsgList' && unreadMsg > 0" class="menu-badge">{{ unreadLabel }}</span>
+                </el-menu-item>
               </el-sub-menu>
             </template>
           </el-menu>
@@ -48,12 +56,51 @@
 </template>
 
 <script>
-import { Location, User } from '@element-plus/icons-vue';
+import {
+  Bell,
+  ChatDotRound,
+  Clock,
+  Coin,
+  Goods,
+  House,
+  List,
+  Location,
+  Lock,
+  Present,
+  RefreshLeft,
+  Star,
+  Ticket,
+  Trophy,
+  User,
+  Wallet,
+  Warning,
+} from '@element-plus/icons-vue';
 import menuList from "./menu";
 import Storage from "@/plugins/storage.js";
+import { refreshUnreadMessage } from "@/utils/unreadMessage";
+
+const MENU_ICONS = {
+  Bell,
+  ChatDotRound,
+  Clock,
+  Coin,
+  Goods,
+  House,
+  List,
+  Location,
+  Lock,
+  Present,
+  RefreshLeft,
+  Star,
+  Ticket,
+  Trophy,
+  User,
+  Wallet,
+  Warning,
+};
 
 export default {
-  components: { Location, User },
+  components: { House, User },
   name: "Home",
   data() {
     return {
@@ -67,14 +114,24 @@ export default {
       }
       return {};
     },
+    unreadMsg() {
+      return Number(this.$store.state.unreadMsg) || 0;
+    },
+    unreadLabel() {
+      return this.unreadMsg > 99 ? "99+" : String(this.unreadMsg);
+    },
   },
   mounted() {
     document.body.classList.add("buyer-user-center");
+    refreshUnreadMessage();
   },
   beforeUnmount() {
     document.body.classList.remove("buyer-user-center");
   },
   methods: {
+    menuIcon(name) {
+      return MENU_ICONS[name] || Goods;
+    },
     onSelect(name) {
       this.$router.push({ name });
     },
@@ -132,6 +189,38 @@ export default {
   height: 96px;
   border-radius: 48px;
   overflow: hidden;
+}
+
+.side-menu {
+  :deep(.el-menu-item),
+  :deep(.el-sub-menu__title) {
+    display: flex;
+    align-items: center;
+  }
+
+  :deep(.el-menu-item .el-icon),
+  :deep(.el-sub-menu__title .el-icon) {
+    margin-right: 6px;
+  }
+}
+
+.menu-badge {
+  margin-left: auto;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: $theme_color;
+  color: #fff;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* 选中项会把文字设成主题红。角标用 span，避免 i 继承成红底红字 */
+.side-menu :deep(.el-menu-item.is-active) .menu-badge {
+  color: #fff;
 }
 
 .layout-footer-center {

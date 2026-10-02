@@ -19,7 +19,7 @@
         <span @mouseenter="getCartList">
           <el-icon class="cart-icon" :size="20" @click="goCartList"><ShoppingCart /></el-icon>
         </span>
-        <i class="cart-badge">{{ cartNum < 100 ? cartNum : "99" }}</i>
+        <i class="cart-badge">{{ Number(cartNum) > 99 ? "99+" : cartNum }}</i>
       </div>
     </div>
   </div>
@@ -45,8 +45,7 @@ export default {
   },
   methods: {
     goCartList() {
-      const routerUrl = this.$router.resolve({ path: '/cart' })
-      window.open(routerUrl.href, '_blank')
+      this.$router.push('/cart')
     },
     getCartList() {
       if (storage.getItem('userInfo')) {
@@ -71,7 +70,7 @@ $cart-col-width: 40px;
 
 .scroll-show {
   height: 60px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .content {
@@ -125,8 +124,9 @@ $cart-col-width: 40px;
   background-color: $theme_color;
   color: #fff;
   font-size: 12px;
-  width: 17px;
+  min-width: 17px;
   height: 17px;
+  padding: 0 4px;
   border-radius: 10px;
   line-height: 17px;
   text-align: center;

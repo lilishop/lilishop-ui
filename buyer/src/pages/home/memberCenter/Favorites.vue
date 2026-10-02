@@ -200,11 +200,10 @@ export default {
 
     },
     goShop(id) { // 跳转店铺页面
-      let url = this.$router.resolve({
+      this.$router.push({
         path: '/merchant',
         query: { id }
       })
-      window.open(url.href, '_blank')
     }
   },
   mounted() {

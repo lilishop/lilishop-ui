@@ -7,10 +7,23 @@
           size="large"
           class="search-input"
           placeholder="输入你想查找的商品"
+          @focus="openPanel"
+          @input="queueSuggest"
           @keyup.enter="search"
         />
         <div class="search-btn" @click="search">
           <el-icon :size="21"><SearchIcon /></el-icon>
+        </div>
+        <div v-if="showPanel" class="suggest-panel" @mousedown.prevent>
+          <SearchSuggest
+            :keyword="trimmedKeyword"
+            :history="history"
+            :hot-words="promotionTags"
+            :suggestions="suggestions"
+            :suggesting="suggesting"
+            @pick="selectTags"
+            @clear="clearHistory"
+          />
         </div>
       </div>
     </template>
@@ -30,10 +43,23 @@
               size="large"
               class="search-input"
               placeholder="输入你想查找的商品"
+              @focus="openPanel"
+              @input="queueSuggest"
               @keyup.enter="search"
             />
             <div class="search-btn" @click="search">
               <el-icon :size="21"><SearchIcon /></el-icon>
+            </div>
+            <div v-if="showPanel" class="suggest-panel" @mousedown.prevent>
+              <SearchSuggest
+                :keyword="trimmedKeyword"
+                :history="history"
+                :hot-words="promotionTags"
+                :suggestions="suggestions"
+                :suggesting="suggesting"
+                @pick="selectTags"
+                @clear="clearHistory"
+              />
             </div>
           </div>
           <template v-if="showTag">
@@ -56,22 +82,49 @@
 
 <script>
 import storage from '@/plugins/storage.js'
-import {hotWords} from '@/api/goods.js'
+import { goodsList, hotWords } from '@/api/goods.js'
 import { Search as SearchIcon } from '@element-plus/icons-vue'
+import SearchSuggest from '@/components/SearchSuggest.vue'
+
+const HISTORY_KEY = 'buyerSearchHistory'
+const HISTORY_LIMIT = 10
+
+function readHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY)
+    const list = raw ? JSON.parse(raw) : []
+    return Array.isArray(list) ? list.filter((item) => typeof item === 'string' && item.trim()) : []
+  } catch {
+    return []
+  }
+}
+
+function parseHotWords(raw) {
+  if (!raw) return []
+  if (Array.isArray(raw)) return raw.filter(Boolean)
+  if (typeof raw !== 'string') return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) return parsed.filter(Boolean)
+  } catch {
+    // 旧数据可能是逗号拼接
+  }
+  return raw.split(',').map((item) => item.trim()).filter(Boolean)
+}
 
 export default {
   name: 'search',
-  components: { SearchIcon },
+  components: { SearchIcon, SearchSuggest },
   props: {
-    showTag: { // 是否展示搜索栏下方热门搜索
+    showTag: {
       type: Boolean,
       default: true
     },
-    showLogo: { // 是否展示左侧logo
+    showLogo: {
       type: Boolean,
       default: true
     },
-    storeId: { // 是否为店铺页面
+    storeId: {
       type: String,
       default: ""
     },
@@ -86,64 +139,148 @@ export default {
   },
   data() {
     return {
-      searchData: '', // 搜索内容
+      searchData: '',
+      history: [],
+      panelVisible: false,
+      suggestions: [],
+      suggesting: false,
+      suggestTimer: null,
+      suggestSeq: 0,
     };
   },
   methods: {
-    selectTags(item) { // 选择热门标签
+    selectTags(item) {
       this.searchData = item;
       this.search();
     },
-    search () { // 全平台搜索商品
+    remember(keyword) {
+      const next = [keyword, ...this.history.filter((item) => item !== keyword)].slice(0, HISTORY_LIMIT)
+      this.history = next
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(next))
+    },
+    clearHistory() {
+      this.history = []
+      localStorage.removeItem(HISTORY_KEY)
+    },
+    openPanel() {
+      this.panelVisible = true
+      if (this.trimmedKeyword) this.queueSuggest()
+    },
+    closePanel() {
+      this.panelVisible = false
+    },
+    onDocumentClick(event) {
+      if (this.$el && !this.$el.contains(event.target)) this.closePanel()
+    },
+    queueSuggest() {
+      this.panelVisible = true
+      clearTimeout(this.suggestTimer)
+      const keyword = this.trimmedKeyword
+      if (!keyword) {
+        this.suggestions = []
+        this.suggesting = false
+        return
+      }
+      this.suggesting = true
+      this.suggestTimer = setTimeout(() => this.fetchSuggest(keyword), 300)
+    },
+    fetchSuggest(keyword) {
+      const seq = ++this.suggestSeq
+      const params = { keyword, pageNumber: 1, pageSize: 8 }
+      if (this.storeId) params.storeId = this.storeId
+      goodsList(params).then((res) => {
+        if (seq !== this.suggestSeq || keyword !== this.trimmedKeyword) return
+        const records = res && res.success ? (res.result.records || []) : []
+        const seen = new Set()
+        const names = []
+        this.promotionTags.forEach((word) => {
+          if (word && String(word).toLowerCase().includes(keyword.toLowerCase()) && !seen.has(word)) {
+            seen.add(word)
+            names.push(word)
+          }
+        })
+        records.forEach((item) => {
+          const name = item && item.goodsName
+          if (name && !seen.has(name)) {
+            seen.add(name)
+            names.push(name)
+          }
+        })
+        this.suggestions = names.slice(0, 8)
+      }).catch(() => {
+        if (seq === this.suggestSeq) this.suggestions = []
+      }).finally(() => {
+        if (seq === this.suggestSeq) this.suggesting = false
+      })
+    },
+    search () {
+      const keyword = this.trimmedKeyword
+      this.searchData = keyword
+      this.closePanel()
+      if (keyword) this.remember(keyword)
       const url = this.$route.path;
       if(url == '/goodsList'){
-        this.$emit('search', this.searchData)
+        this.$emit('search', keyword)
       }else{
         const pushData = {
           path:'/goodsList',
-          query: { keyword: this.searchData },
+          query: { keyword },
         }
         if(this.storeId) pushData.query.storeId = this.storeId
 
         this.$router.push(pushData);
       }
     },
-    searchStore() { // 店铺搜索商品
-      this.$emit('search', this.searchData)
+    searchStore() {
+      this.$emit('search', this.trimmedKeyword)
+    },
+    applyHotWords(result) {
+      const list = parseHotWords(result)
+      this.$store.commit('SET_HOTWORDS', list)
+      storage.setItem('hotWordsList', JSON.stringify(list))
+    },
+    loadHotWords() {
+      hotWords({ count: 5 }).then((res) => {
+        if (res.success && res.result) this.applyHotWords(res.result)
+      }).catch(() => {})
+      storage.setItem('hotWordsReloadTime', new Date().getTime())
     }
   },
   computed: {
+    trimmedKeyword() {
+      return (this.searchData || '').trim()
+    },
     promotionTags() {
-      const raw = this.$store.state.hotWordsList;
-      if (!raw) {
-        return [];
-      }
-      try {
-        return typeof raw === "string" ? JSON.parse(raw) : raw;
-      } catch {
-        return [];
-      }
+      return parseHotWords(this.$store.state.hotWordsList)
+    },
+    showPanel() {
+      if (!this.panelVisible) return false
+      if (this.trimmedKeyword) return true
+      return this.history.length > 0 || this.promotionTags.length > 0
+    }
+  },
+  watch: {
+    '$route.query.keyword'(value) {
+      this.searchData = value || ''
     }
   },
   created() {
-    this.searchData = this.$route.query.keyword
+    this.searchData = this.$route.query.keyword || ''
+    this.history = readHistory()
 
-    if (!this.hover) { // 首页顶部固定搜索栏不调用热词接口
-      // 搜索热词每5分钟请求一次
+    if (!this.hover) {
       const reloadTime = storage.getItem('hotWordsReloadTime')
       const time = new Date().getTime() - 5 * 60 * 1000
-      if (!reloadTime) {
-        hotWords({count: 5}).then(res => {
-          if (res.success && res.result) storage.setItem('hotWordsList', res.result)
-        }).catch(() => {})
-        storage.setItem('hotWordsReloadTime', new Date().getTime())
-      } else if (reloadTime && time > reloadTime) {
-        hotWords({count: 5}).then(res => {
-          if (res.success && res.result) storage.setItem('hotWordsList', res.result)
-        }).catch(() => {})
-        storage.setItem('hotWordsReloadTime', new Date().getTime())
-      }
+      if (!reloadTime || time > reloadTime) this.loadHotWords()
     }
+  },
+  mounted() {
+    this.onDocumentClick = this.onDocumentClick.bind(this)
+    document.addEventListener('click', this.onDocumentClick)
+  },
+  beforeUnmount() {
+    clearTimeout(this.suggestTimer)
+    document.removeEventListener('click', this.onDocumentClick)
   }
 };
 </script>
@@ -169,7 +306,6 @@ export default {
 
 .container {
   position: relative;
-
   height: 100%;
 }
 
@@ -217,6 +353,11 @@ export default {
     color: #ffffff;
   }
 }
+
+.search-embedded.search {
+  width: 100%;
+}
+
 .search-box{
   margin-left: 28px;
 }
@@ -225,28 +366,7 @@ export default {
   cursor: pointer;
 }
 
-.store-search {
-  width: 55.6px;
-  padding: 0 9px;
-  border-radius: 0;
-  border-radius: 3px;
-
-  &:nth-child(2) {
-    width: 55px;
-    margin-left: -2px;
-    border-radius: 3px;
-  }
-}
-
-.btn-div {
-  position: relative;
-  height: 0px;
-  top: -38px;
-  left: 352px;
-}
-
 .history-list {
-
   margin-left: 28px;
 }
 
@@ -259,4 +379,18 @@ export default {
   color: #666666;
   cursor: pointer;
 }
+
+.suggest-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 30;
+  padding: 8px 0;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
 </style>

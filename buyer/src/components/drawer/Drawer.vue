@@ -26,7 +26,7 @@
               v-for="(img,imgIndex) in order.orderItems"
               :key="imgIndex" width="40" height="40" alt="">
           </div>
-          <div class="order-handle"><span>{{ $filters.unitPrice(order.flowPrice, "￥") }}</span><span class="hover-color" @click="linkTo(`home/OrderDetail?sn=${order.sn}`)">查看订单</span></div>
+          <div class="order-handle"><span>{{ $filters.unitPrice(order.flowPrice, "￥") }}</span><span class="hover-color" @click="linkTo(`/home/OrderDetail?sn=${order.sn}`)">查看订单</span></div>
         </li>
       </ul>
       <el-button type="primary" @click="linkTo('/home/MyOrder')" style="width:100%">查看全部订单</el-button>

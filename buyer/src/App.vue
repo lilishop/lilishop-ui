@@ -23,7 +23,9 @@ export default {
       storage.setItem("siteIcon", data.buyerSideIcon);
       this.$store.commit("SET_SITENAME", data.siteName);
       this.$store.commit("SET_LOGOIMG", data.buyerSideLogo);
-      window.document.title = data.siteName;
+      if (this.$route.meta.title === undefined) {
+        window.document.title = data.siteName;
+      }
       let link =
         document.querySelector("link[rel*='icon']") ||
         document.createElement("link");

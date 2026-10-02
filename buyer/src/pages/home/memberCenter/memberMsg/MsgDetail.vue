@@ -25,6 +25,7 @@
 <script>
 import { Message, Modal } from "@/utils/message";
 import { delMemberMsg, getMemberMessage, readMemberMsg } from '@/api/member.js';
+import { refreshUnreadMessage } from '@/utils/unreadMessage';
 
 const CACHE_KEY = 'buyer-member-message';
 
@@ -71,7 +72,10 @@ export default {
     markRead () {
       if (!this.detail.id || this.detail.status !== 'UN_READY') return
       readMemberMsg(this.detail.id).then(res => {
-        if (res && res.success) this.detail.status = 'ALREADY_READY'
+        if (res && res.success) {
+          this.detail.status = 'ALREADY_READY'
+          refreshUnreadMessage()
+        }
       }).catch(() => {})
     },
     goBack () {
@@ -86,6 +90,7 @@ export default {
           delMemberMsg(this.detail.id).then((res) => {
             if (res.success) {
               Message.success('消息已成功放入回收站')
+              refreshUnreadMessage()
               this.goBack()
             }
           })

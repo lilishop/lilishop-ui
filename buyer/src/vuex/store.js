@@ -8,6 +8,7 @@ export default createStore({
   state: {
     navList: [],
     cartNum: storage.getItem("cartNum") || 0,
+    unreadMsg: 0,
     logoImg: storage.getItem("logoImg") || defaultLogo,
     siteName: storage.getItem("siteName") || "lilishop",
     hotWordsList: storage.getItem("hotWordsList"),

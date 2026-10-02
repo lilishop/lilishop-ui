@@ -6,20 +6,20 @@
 
 // 订单中心
 const order = [{
-  icon: '',
+  icon: 'List',
   title: '订单中心',
   menus: [{
-    icon: '',
+    icon: 'Goods',
     title: '我的订单',
     path: 'MyOrder'
   },
   {
-    icon: '',
+    icon: 'Location',
     title: '收货地址',
     path: 'MyAddress'
   },
   {
-    icon: '',
+    icon: 'RefreshLeft',
     title: '售后订单',
     path: 'AfterSale'
   }
@@ -29,66 +29,66 @@ const order = [{
 
 // 会员中心
 const member = [{
-  icon: '',
+  icon: 'User',
   title: '会员中心',
   menus: [{
-    icon: '',
+    icon: 'User',
     title: '用户信息',
     path: 'Profile'
   },
   {
-    icon: '',
+    icon: 'Lock',
     title: '账户安全',
     path: 'AccountSafe'
   },
   {
-    icon: '',
+    icon: 'Bell',
     title: '我的消息',
     path: 'MsgList'
   },
   {
-    icon: '',
+    icon: 'Clock',
     title: '我的足迹',
     path: 'MyTracks'
   },
 
   {
-    icon: '',
+    icon: 'Star',
     title: '我的收藏',
     path: 'Favorites'
   },
   {
-    icon: '',
+    icon: 'ChatDotRound',
     title: '我的评论',
     path: 'CommentList'
   },
   {
-    icon: '',
+    icon: 'Warning',
     title: '我的投诉',
     path: 'ComplainList'
   },
   {
-    icon: '',
+    icon: 'Coin',
     title: '我的积分',
     path: 'Point'
   },
   {
-    icon: '',
+    icon: 'Trophy',
     title: '我的等级',
     path: 'MemberGrade'
   },
   {
-    icon: '',
+    icon: 'Ticket',
     title: '我的优惠券',
     path: 'Coupons'
   },
   {
-    icon: '',
+    icon: 'Wallet',
     title: '我的余额',
     path: 'MoneyManagement'
   },
   {
-    icon: '',
+    icon: 'Present',
     title: '我的礼品卡',
     path: 'MyGiftCards'
   }

@@ -87,11 +87,10 @@ export default {
       })
     },
     goArticle (id) { // 跳转文章详情
-      let routeUrl = this.$router.resolve({
+      this.$router.push({
         path: '/article',
         query: {id}
       });
-      window.open(routeUrl.href, '_blank');
     }
   },
   mounted () {

@@ -836,11 +836,10 @@ export default {
     },
     // 跳转店铺首页
     goShopPage(id) {
-      let routeUrl = this.$router.resolve({
+      this.$router.push({
         path: "/merchant",
         query: { id: id },
       });
-      window.open(routeUrl.href, "_blank");
     },
     useCoupon(id, used) {
       // 使用优惠券

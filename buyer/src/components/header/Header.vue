@@ -29,7 +29,7 @@
             </div>
             <transition name='fade'>
               <ul class="drop-items">
-                <li @click="goUserCenter('/home/MyOrder')">我的主页</li>
+                <li @click="goUserCenter('/home')">我的主页</li>
                 <li @click="goUserCenter('/home/Coupons')">优惠券</li>
                 <li @click="goUserCenter('/home/Favorites')">我的收藏</li>
                 <li @click="signOutFun">退出登录</li>
@@ -39,7 +39,12 @@
         </li>
         <li @click="goUserCenter('/home/MyOrder')"><span class="nav-item">我的订单</span></li>
         <li @click="goUserCenter('/home/MyTracks')"><span class="nav-item">我的足迹</span></li>
-        <li @click="goUserCenter('/home/MsgList')"><span class="nav-item">我的消息</span></li>
+        <li @click="goUserCenter('/home/MsgList')">
+          <span class="nav-item">
+            我的消息
+            <i v-if="unreadMsg > 0" class="msg-badge">{{ unreadLabel }}</i>
+          </span>
+        </li>
         <li v-if="$route.name !== 'Cart'" class="cart-nav-item">
           <el-dropdown
             class="cart-nav-dropdown"
@@ -49,7 +54,7 @@
           >
             <span class="nav-item" @click="goToPay">
               <el-icon :size="18"><ShoppingCart /></el-icon>
-              购物车（{{ cartNum < 100 ? cartNum : '99' }}）
+              购物车（{{ Number(cartNum) > 99 ? '99+' : cartNum }}）
             </span>
             <template #dropdown>
               <div class="shopping-cart-null" v-show="shoppingCart.length <= 0">
@@ -90,6 +95,7 @@ import storage from '@/plugins/storage.js';
 import {cartGoodsAll} from '@/api/cart.js';
 import {logout} from '@/api/account.js';
 import config from '@/config';
+import { refreshUnreadMessage } from '@/utils/unreadMessage';
 
 export default {
   components: { ShoppingCart },
@@ -97,6 +103,7 @@ export default {
   created() {
     if (storage.getItem('userInfo')) {
       this.userInfo = JSON.parse(storage.getItem('userInfo'));
+      refreshUnreadMessage();
     }
   },
 
@@ -114,6 +121,12 @@ export default {
     // 购物车商品数量
     cartNum() {
       return this.$store.state.cartNum;
+    },
+    unreadMsg() {
+      return Number(this.$store.state.unreadMsg) || 0;
+    },
+    unreadLabel() {
+      return this.unreadMsg > 99 ? '99+' : String(this.unreadMsg);
     }
   },
   methods: {
@@ -136,16 +149,10 @@ export default {
         });
         return;
       }
-      const url = this.$router.resolve({
-        path: '/cart',
-      });
-      window.open(url.href, '_blank');
+      this.$router.push('/cart');
     },
     myInfo() { // 跳转会员中心
-      let url = this.$router.resolve({
-        path: '/home/MyOrder'
-      });
-      window.open(url.href, '_blank');
+      this.$router.push('/home');
     },
     signOutFun() { // 退出登录
       logout().then(res => {
@@ -154,6 +161,7 @@ export default {
         storage.removeItem('userInfo');
         storage.removeItem('cartNum');
         this.$store.commit('SET_CARTNUM', 0)
+        this.$store.commit('SET_UNREAD_MSG', 0)
         this.$router.push('/login');
       });
     },
@@ -181,11 +189,10 @@ export default {
     },
     shopEntry() {
       if (storage.getItem('accessToken')) {
-        const routeUrl = this.$router.resolve({
+        this.$router.push({
           path: '/shopEntry',
           query: { id: 1 },
         });
-        window.open(routeUrl.href, '_blank');
         return;
       }
       Modal.confirm({
@@ -287,6 +294,19 @@ export default {
 .nav-item {
   padding-left: 20px;
   gap: 4px;
+}
+
+.msg-badge {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: $theme_color;
+  color: #fff;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 16px;
+  text-align: center;
 }
 
 .cart-nav-item {

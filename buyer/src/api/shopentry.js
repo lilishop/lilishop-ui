@@ -42,6 +42,15 @@ export function applyThird (params) {
   })
 }
 
+// 店铺信息（含评分）
+export function getStoreById (id) {
+  return request({
+    url: `/buyer/store/store/store/${id}`,
+    needToken: false,
+    method: Method.GET
+  })
+}
+
 // 店铺详情
 export function getDetailById (id) {
   return request({

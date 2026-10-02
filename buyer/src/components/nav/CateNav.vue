@@ -198,11 +198,10 @@ export default {
       if (!arr[0]) {
         arr.shift();
       }
-      let routerUrl = this.$router.resolve({
+      this.$router.push({
         path: "/goodsList",
         query: { categoryId: arr.toString() },
       });
-      window.open(routerUrl.href, "_blank");
     },
   },
   mounted() {

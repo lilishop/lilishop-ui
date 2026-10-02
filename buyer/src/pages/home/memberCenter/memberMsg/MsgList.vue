@@ -94,6 +94,9 @@ export default {
       memberMsgList(this.params).then(res => {
         if (res.success) {
           this.messageData = res.result;
+          if (this.params.status === 'UN_READY') {
+            this.$store.commit('SET_UNREAD_MSG', Number(res.result.total) || 0);
+          }
         }
       })
     },

@@ -1,5 +1,8 @@
 <template>
   <div class="goods-detail-extra">
+    <div class="goods-detail-extra__main">
+    <div class="detail-layout">
+    <div class="detail-main">
     <div class="detail-anchor" ref="tabNav" :class="{ 'is-stuck': anchorStuck }">
       <button
         v-for="tab in detailTabs"
@@ -117,15 +120,25 @@
         <div class="detail-empty" v-else>暂无商品参数</div>
       </section>
     </div>
+    </div>
+    <StoreSide
+      :store-id="skuDetail.storeId"
+      :goods-id="skuDetail.goodsId"
+      :sku-id="skuDetail.id"
+      :store-name-fallback="skuDetail.storeName"
+    />
+    </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { Refresh } from '@element-plus/icons-vue';
 import { goodsComment, goodsCommentNum } from '@/api/member.js';
+import StoreSide from './StoreSide.vue';
 
 export default {
-  components: { Refresh },
+  components: { Refresh, StoreSide },
   name: 'ShowGoodsDetail',
   props: {
     detail: {
@@ -277,8 +290,25 @@ export default {
 
 <style scoped lang="scss">
 .goods-detail-extra {
+  width: 100%;
+  background: #fff;
+}
+
+.goods-detail-extra__main {
   width: 1200px;
-  margin: 16px auto 24px;
+  margin: 0 auto;
+  padding-bottom: 16px;
+}
+
+.detail-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.detail-main {
+  flex: 1;
+  min-width: 0;
 }
 
 .detail-anchor {
@@ -334,6 +364,7 @@ export default {
 .detail-panel {
   background: #fff;
   border-radius: 0 0 4px 4px;
+  padding-bottom: 32px;
 }
 
 .detail-section + .detail-section {
@@ -381,7 +412,7 @@ export default {
 .item-param-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin: 16px 24px 24px;
+  margin: 16px 24px 0;
   border-top: 1px solid #f0f0f0;
   border-left: 1px solid #f0f0f0;
   border-radius: 4px;

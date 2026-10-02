@@ -8,9 +8,8 @@
         <div class="item-detail-big-img" v-if="imgList[imgIndex]">
           <el-image
             :src="currentImg"
-            :preview-src-list="previewList"
-            fit="contain"
-            style="width: 100%; height: 350px"
+            fit="cover"
+            style="width: 100%; height: 100%"
           />
         </div>
 
@@ -44,27 +43,6 @@
         <div class="item-detail-title">
           <div class="item-detail-title-row">
             <span class="item-detail-name">{{ skuDetail.goodsName }}</span>
-            <el-tag
-              v-if="isECouponGoods"
-              class="goods-type-tag"
-              size="small"
-            >
-              电子卡券
-            </el-tag>
-            <el-tag
-              v-else-if="skuDetail.goodsType !== 'VIRTUAL_GOODS'"
-              class="goods-type-tag"
-              size="small"
-            >
-              实物商品
-            </el-tag>
-            <el-tag
-              v-else-if="skuDetail.goodsType == 'VIRTUAL_GOODS'"
-              class="goods-type-tag"
-              size="small"
-            >
-              虚拟商品
-            </el-tag>
           </div>
         </div>
         <div class="sell-point">
@@ -95,7 +73,7 @@
               <!-- 批发价格 -->
               <div v-if="!isECouponGoods && wholesaleNum && wholesaleNum.length">
                 <div class="flex">
-                  <div class="item-price-title">价格</div>
+                  <div class="item-price-title"></div>
 
                   <div
                     v-for="(item, index) in wholesalePrice"
@@ -119,7 +97,6 @@
 
               <!-- 普通价格 -->
               <div v-else>
-                <span class="item-price-title">价格</span>
                 <span class="item-price">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
               </div>
             </div>
@@ -228,7 +205,7 @@
         </div>
         <!-- 选择颜色 -->
         <div
-          class="item-select"
+          class="item-select item-spec"
           v-for="(sku, index) in formatList"
           :key="sku.name"
         >
@@ -257,7 +234,7 @@
           </div>
         </div>
         <div class="add-buy-car-box">
-          <div class="item-select">
+          <div class="item-select item-spec">
             <div class="item-select-title">
               <p>数量</p>
             </div>
@@ -271,23 +248,8 @@
                   :precision="0"
                   @blur="changeCount"
                 ></el-input-number>
-                <span class="inventory">&nbsp;&nbsp;库存{{ displayStock }}</span>
+                <span class="inventory">（库存：{{ displayStock }}）</span>
               </div>
-            </div>
-          </div>
-          <div
-            class="item-select"
-            v-if="
-              !isECouponGoods &&
-              skuDetail.goodsType !== 'VIRTUAL_GOODS' &&
-              skuDetail.weight !== 0
-            "
-          >
-            <div class="item-select-title">
-              <p>重量</p>
-            </div>
-            <div class="item-select-column">
-              <span class="inventory">{{ skuDetail.weight }}kg</span>
             </div>
           </div>
           <div
@@ -438,9 +400,6 @@ export default {
     currentImg() {
       const item = this.imgList[this.imgIndex];
       return item ? item.url || item : "";
-    },
-    previewList() {
-      return this.imgList.map((item) => item.url || item);
     },
     wholesalePrice(key) {
       return this.wholesaleList.length
@@ -624,6 +583,16 @@ export default {
         });
     },
     async collect() {
+      if (!this.Cookies.getItem("accessToken") || !this.Cookies.getItem("userInfo")) {
+        this.$router.push({
+          path: "/login",
+          query: {
+            rePath: this.$route.path,
+            query: JSON.stringify(this.$route.query || {}),
+          },
+        });
+        return;
+      }
       // 收藏商品
       if (this.isCollected) {
         let cancel = await cancelCollect("GOODS", this.skuDetail.id);
@@ -717,16 +686,18 @@ export default {
         }
       }
     },
+    // 相册里会混进规格 JSON，只留图片地址；没有相册时用主图
     swiperGoodsImg() {
-      this.skuDetail.specList.forEach((e) => {
-        if (e.specName === "images") {
-          this.imgList = this.skuDetail.goodsGalleryList.filter(i => i.indexOf("\"url\":") === -1 && i.indexOf("\"status\":") === -1);
-        }
+      const source = this.skuDetail.goodsGalleryList || [];
+      const gallery = Array.from(source).filter((item) => {
+        if (typeof item !== "string") return false;
+        return item.indexOf('"url":') === -1 && item.indexOf('"status":') === -1;
       });
-      if (!this.imgList) {
-        this.imgList = [this.skuDetail.original];
+      if (gallery.length) {
+        this.imgList = gallery;
+        return;
       }
-
+      this.imgList = this.skuDetail.original ? [this.skuDetail.original] : [];
     },
   },
   mounted() {
@@ -784,42 +755,50 @@ export default {
 }
 
 .item-detail-left {
-  width: 350px;
+  width: 500px;
   margin-right: 32px;
+  flex-shrink: 0;
 }
 
 .item-detail-big-img {
-  width: 350px;
-  height: 350px;
-  border: 1px solid #eee;
-  border-radius: 4px;
+  width: 500px;
+  height: 500px;
+  border-radius: 16px;
   overflow: hidden;
-  cursor: pointer;
-  margin-bottom: 12px;
-  background: #fff;
+  margin-bottom: 16px;
+  background: #f5f5f5;
+
+  :deep(.el-image),
+  :deep(.el-image__inner) {
+    width: 100%;
+    height: 100%;
+  }
+
+  :deep(.el-image__inner) {
+    object-fit: cover;
+  }
 }
 #dplayer{
     width: 100%;
     height: 100%;
   }
-.item-detail-big-img img {
-  width: 100%;
-}
 
 .item-detail-img-row {
   margin-top: 0;
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .item-detail-img-small {
-  width: 64px;
-  height: 64px;
-  border: 1px solid #eee;
-  border-radius: 4px;
+  width: 86px;
+  height: 86px;
+  border: 2px solid transparent;
+  border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
   box-sizing: border-box;
+  background: #f5f5f5;
 
   &.is-active {
     border-color: $theme_color;
@@ -829,6 +808,7 @@ export default {
 .item-detail-img-small img {
   height: 100%;
   width: 100%;
+  object-fit: cover;
 }
 
 /*商品选购详情*/
@@ -848,16 +828,9 @@ export default {
 
 .item-detail-name {
   color: #171A26;
-  font-weight: 600;
+  font-weight: 400;
   font-size: 20px;
   line-height: 28px;
-}
-
-.goods-type-tag {
-  flex-shrink: 0;
-  --el-tag-bg-color: #fafafa;
-  --el-tag-border-color: #eee;
-  --el-tag-text-color: #666;
 }
 
 .item-detail-express {
@@ -1024,6 +997,22 @@ export default {
   flex-direction: row;
   align-items: center;
   margin-top: 15px;
+}
+
+.item-spec {
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+
+  .item-select-title {
+    width: auto;
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+
+  .item-select-column {
+    width: 100%;
+  }
 }
 
 .item-select-title {
@@ -1215,8 +1204,9 @@ export default {
 
 .inventory {
   padding-left: 8px;
-  color: #999;
-  font-size: 13px;
+  color: #666;
+  font-size: 15px;
+  line-height: 22px;
 }
 .view-video{
   cursor: pointer;

@@ -80,8 +80,7 @@ export default {
   },
   methods: {
     goToSeckill() {
-      const routeUrl = this.$router.resolve({ path: "/seckill" });
-      window.open(routeUrl.href, "_blank");
+      this.$router.push("/seckill");
     },
     countDown(currIndex) {
       const zeroTime = new Date(new Date().toLocaleDateString()).getTime();

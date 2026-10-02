@@ -164,7 +164,7 @@ export default {
         },
         {
           value: "0",
-          label: "代付款"
+          label: "待付款"
         },
       ],
     };
@@ -184,7 +184,12 @@ export default {
       };
     },
     isMemberRoute(location) {
-      return location.path.startsWith("/home/") || location.path === "/cart";
+      const path = location.path && location.path.charAt(0) === "/" ? location.path : `/${location.path || ""}`;
+      return path === "/home" || path.startsWith("/home/") || path === "/cart";
+    },
+    normalizeLocation(location) {
+      if (!location.path || location.path.charAt(0) === "/") return location;
+      return { ...location, path: `/${location.path}` };
     },
     promptLoginThenNavigate(location) {
       Modal.confirm({
@@ -208,13 +213,12 @@ export default {
     },
     // 快捷跳转中心
     entryControl(val) {
-      const location = this.resolveRoute(val.path);
+      const location = this.normalizeLocation(this.resolveRoute(val.path));
       if (this.isMemberRoute(location) && !storage.getItem("userInfo")) {
         this.promptLoginThenNavigate(location);
         return;
       }
-      const url = this.$router.resolve(location);
-      window.open(url.href, "_blank");
+      this.$router.push(location);
     },
   },
   mounted() {
