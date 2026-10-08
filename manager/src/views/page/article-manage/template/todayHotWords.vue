@@ -10,13 +10,19 @@
       title="这里展示今日系统中搜索前一百的搜索热词，分数为热词在排序系统中的分数，分数越高，可以在用户获取热词时进行优先展示（首页商品搜索栏下方推荐位）（分数可以填写负数，会降低推荐度）"
     />
 
-    <div class="card-list">
-      <el-card v-for="words in data" :key="words" class="card-item" shadow="hover">
-        <div class="card-item-inner">
-          <a href="#" class="word-link" @click.prevent="add(words)">{{ words }}</a>
-          <el-icon class="close-icon" @click="deleteWords(words)"><Close /></el-icon>
-        </div>
-      </el-card>
+    <div class="word-list">
+      <el-tag
+        v-for="words in data"
+        :key="words"
+        size="large"
+        closable
+        class="word-tag"
+        @close="deleteWords(words)"
+        @click="add(words)"
+      >
+        {{ words }}
+      </el-tag>
+      <el-empty v-if="!data.length" description="暂无热词，点击上方按钮设置" :image-size="80" />
     </div>
 
     <el-dialog
@@ -44,13 +50,11 @@
 </template>
 
 <script>
-import { Close } from "@element-plus/icons-vue";
 import { getHotWords, setHotWords, deleteHotWords } from "@/api/index";
 import { regular } from "@/utils";
 
 export default {
   name: "todayHotWords",
-  components: { Close },
   data() {
     return {
       submitLoading: false,
@@ -127,36 +131,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.card-list {
+.word-list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 12px;
   margin-top: 16px;
 }
 
-.card-item {
-  min-width: 100px;
-  margin: 10px;
-}
-
-.card-item-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.word-link {
-  color: var(--el-color-primary);
-  text-decoration: none;
-}
-
-.close-icon {
+.word-tag {
   cursor: pointer;
-  color: var(--el-text-color-secondary);
+  padding: 0 14px;
+  height: 32px;
+  font-size: 14px;
 
   &:hover {
-    color: var(--el-color-danger);
+    color: var(--el-color-primary);
+    border-color: var(--el-color-primary);
   }
 }
 </style>

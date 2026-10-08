@@ -1103,7 +1103,6 @@ export default {
 
 
     handleContextMenu(val) {
-      console.log('handleContextMenu', val);
       this.selectedGroupData = val;
     },
     // 编辑分组
@@ -1450,10 +1449,7 @@ export default {
               this.init();
               ElMessage.success("批量删除文件成功");
             }
-          })
-            .catch((err) => {
-              console.log("失败", err);
-            });
+          });
       }).catch(() => {});
     },
     // 单个删除文件

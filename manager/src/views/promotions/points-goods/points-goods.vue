@@ -69,29 +69,19 @@
         class="mt_10"
         style="width: 100%"
       >
-        <el-table-column label="商品名称" min-width="200" fixed="left" show-overflow-tooltip>
+        <el-table-column prop="goodsId" label="商品编号" width="180" show-overflow-tooltip />
+        <el-table-column label="商品图片" width="100" align="center">
           <template #default="{ row }">
-            <template v-if="row">
-              <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
-              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
-                <template #reference>
-                  <img
-                    src="../../../assets/qrcode.svg"
-                    class="hover-pointer"
-                    width="20"
-                    height="20"
-                    alt="qrcode"
-                  />
-                </template>
-                <vue-qr
-                  :text="wapLinkTo(row.goodsId, row.skuId)"
-                  :margin="0"
-                  color-dark="#000"
-                  color-light="#fff"
-                  :size="150"
-                />
-              </el-popover>
-            </template>
+            <img
+              v-if="row && row.thumbnail"
+              :src="row.thumbnail"
+              style="height: 50px; width: 50px; object-fit: cover"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">
+            <a v-if="row" class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
           </template>
         </el-table-column>
         <el-table-column label="市场价" width="110">
@@ -171,11 +161,9 @@ import {
   editPointsGoodsStatus,
   deletePointsGoodsStatus,
 } from "@/api/promotion";
-import vueQr from "vue-qr";
 
 export default {
   name: "pointsGoods",
-  components: { vueQr },
   data() {
     return {
       loading: true,
@@ -306,13 +294,6 @@ export default {
   color: #409eff;
   cursor: pointer;
   text-decoration: none;
-}
-.mr_10 {
-  margin-right: 10px;
-}
-.hover-pointer {
-  cursor: pointer;
-  vertical-align: middle;
 }
 .op-split {
   margin: 0 8px;

@@ -282,7 +282,7 @@
           </el-tab-pane>
 
           <el-tab-pane label="结算信息" class="tab" name="settlement">
-            <el-alert type="error" :closable="false" show-icon>
+            <el-alert type="info" :closable="false" show-icon>
               已添加<span class="theme_color">{{ settlementCycle.length }}</span
               >个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日
             </el-alert>

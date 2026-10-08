@@ -24,6 +24,7 @@ function refreshAccessToken(token) {
   return service({
     method: "get",
     url: `/passport/user/refresh/${token}`,
+    _isRefreshRequest: true
   });
 }
 
@@ -40,8 +41,6 @@ function redirectToLogin(message) {
     router.push("/login");
   }
 }
-var isRefreshToken = 0;
-const refreshToken = getTokenDebounce();
 service.interceptors.request.use(
   config => {
     if (config.method == "get") {
@@ -69,113 +68,86 @@ service.interceptors.response.use(
   response => {
     const data = response.data;
     // 根据返回的code值来做不同的处理(和后端约定)
-    if (!data.success && data.message) {
-      Message.error(data.message);
-    }
     switch (data.code) {
-      case 400:
-        if (data.message !== null) {
-          Message.error(data.message);
-        } else {
-          Message.error("系统异常");
-        }
-        break;
-      case 20004:
       case 401:
-        redirectToLogin(data.message !== null ? data.message : null);
+      case 20004:
+        redirectToLogin(data.message || null);
         return data;
-        break;
+      case 400:
       case 500:
-        // 系统异常
-        if (data.message !== null) {
-          Message.error(data.message);
-        } else {
-          Message.error("系统异常");
-        }
-        break;
+        Message.error(data.message || "系统异常");
+        return data;
       default:
+        if (!data.success && data.message) {
+          Message.error(data.message);
+        }
         return data;
     }
   },
   async error => {
-    // 返回状态码不为200时候的错误处理
-    if (error.response) {
-      if (error.response.status === 401) {
+    const response = error.response;
+    const config = error.config;
+    if (response) {
+      const code = response.data && response.data.code;
+      if (response.status === 401) {
         // 这种情况一般调到登录页
-      } else if (error.response.status === 404) {
-        // 避免刷新token报错
-      } else if (error.response.status === 403 || error.response.data.code === 20004) {
-        isRefreshToken++;
-        if (isRefreshToken === 1) {
-          const getTokenRes = await refreshToken();
-          if (getTokenRes === "success") {
-            // 刷新token
-            if (isRefreshToken === 1) {
-              error.response.config.headers.accessToken = getStore(
-                "accessToken"
-              );
-              return service(error.response.config);
-            } else {
-              const router = getRouter();
-              if (router) router.go(0);
-            }
-          } else {
-            redirectToLogin(null);
-          }
-          isRefreshToken = 0;
+        redirectToLogin("登录状态已过期，请重新登录");
+      } else if (
+        (response.status === 403 || code === 20004) &&
+        config &&
+        !config._isRefreshRequest &&
+        !config._retryAfterRefresh
+      ) {
+        // accessToken 过期：刷新 token 后重试原请求
+        config._retryAfterRefresh = true;
+        const result = await refreshToken();
+        if (result === "success") {
+          config.headers.accessToken = getStore("accessToken");
+          return service(config);
         }
+        redirectToLogin(null);
+      } else if (response.status === 404) {
+        // 避免刷新token报错
+        Message.error("请求的资源不存在");
       } else {
         // 其他错误处理
-        Message.error(error.response.data.message);
+        Message.error(
+          (response.data && response.data.message) || "系统异常，请稍后重试"
+        );
       }
+    } else {
+      // 断网/超时等无响应的错误
+      Message.error(
+        error.code === "ECONNABORTED"
+          ? "请求超时，请稍后重试"
+          : "网络异常，请检查网络连接"
+      );
     }
-    /* router.push("/login") */
-    return Promise.resolve(error);
+    return Promise.reject(error);
   }
 );
 
-// 防抖闭包来一波
-function getTokenDebounce() {
-  let lock = false;
-  let success = false;
-  return function() {
-    if (!lock) {
-      lock = true;
-      let oldRefreshToken = getStore("refreshToken");
-      refreshAccessToken(oldRefreshToken)
-        .then(res => {
-          if (res.success) {
-            let { accessToken, refreshToken } = res.result;
-            setStore("accessToken", accessToken);
-            setStore("refreshToken", refreshToken);
-
-            success = true;
-            lock = false;
-          } else {
-            success = false;
-            lock = false;
-            redirectToLogin(null);
-          }
-        })
-        .catch(err => {
-          success = false;
-          lock = false;
-        });
-    }
-    return new Promise(resolve => {
-      // 一直看lock,直到请求失败或者成功
-      const timer = setInterval(() => {
-        if (!lock) {
-          clearInterval(timer);
-          if (success) {
-            resolve("success");
-          } else {
-            resolve("fail");
-          }
+// 刷新 token 单例 Promise：并发 403 时共享同一次刷新，避免重复请求
+let refreshTokenPromise = null;
+function refreshToken() {
+  if (!refreshTokenPromise) {
+    const oldRefreshToken = getStore("refreshToken");
+    refreshTokenPromise = refreshAccessToken(oldRefreshToken)
+      .then(res => {
+        if (res.success) {
+          const { accessToken, refreshToken: newRefreshToken } = res.result;
+          setStore("accessToken", accessToken);
+          setStore("refreshToken", newRefreshToken);
+          return "success";
         }
-      }, 500); // 轮询时间间隔
-    });
-  };
+        return "fail";
+      })
+      .catch(() => "fail")
+      .finally(() => {
+        refreshTokenPromise = null;
+      });
+  }
+  return refreshTokenPromise;
 }
 
 export const getRequest = (url, params, resBlob) => {

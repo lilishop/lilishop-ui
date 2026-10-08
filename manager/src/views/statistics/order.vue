@@ -458,7 +458,6 @@ export default {
 
     clickBreadcrumb(item, index) {
       let callback = JSON.parse(JSON.stringify(item));
-      console.log("callback",callback)
       this.orderParams = callback;
 
       this.overViewParams = callback;
@@ -482,6 +481,8 @@ export default {
         this.chartList = res.result;
 
         if (!this.orderChart) {
+          const container = document.getElementById("orderChart");
+          if (!container) return;
           this.orderChart = new Chart({
             container: "orderChart",
             autoFit: true,

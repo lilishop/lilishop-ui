@@ -175,8 +175,10 @@ export default {
         this.loadData();
       },
       deep: true,
-      immediate: true,
     },
+  },
+  mounted() {
+    this.loadData();
   },
   beforeUnmount() {
     if (this.trendChart) {
@@ -244,6 +246,8 @@ export default {
         this.trendChart = null;
       }
       this.$nextTick(() => {
+        const container = document.getElementById("memberTrendChart");
+        if (!container) return;
         this.trendChart = new Chart({
           container: "memberTrendChart",
           autoFit: true,
@@ -280,13 +284,15 @@ export default {
     },
     async loadData() {
       const query = { ...this.params };
-      const [overviewRes, analysisRes, genderRes, regionRes, trendRes] = await Promise.all([
-        API_Statistics.getMemberOverview(query),
-        API_Statistics.getMemberAnalysis(query),
-        API_Statistics.getMemberGenderDistribution(),
-        API_Statistics.getMemberRegionDistribution(),
-        API_Statistics.getMemberNewTrend(query),
-      ]);
+      const [overviewRes, analysisRes, genderRes, regionRes, trendRes] = (
+        await Promise.allSettled([
+          API_Statistics.getMemberOverview(query),
+          API_Statistics.getMemberAnalysis(query),
+          API_Statistics.getMemberGenderDistribution(),
+          API_Statistics.getMemberRegionDistribution(),
+          API_Statistics.getMemberNewTrend(query),
+        ])
+      ).map((r) => (r.status === "fulfilled" ? r.value : null));
       if (overviewRes && overviewRes.success) {
         this.overview = overviewRes.result || {};
       }

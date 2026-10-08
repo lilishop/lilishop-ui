@@ -46,9 +46,6 @@ importers:
       nprogress:
         specifier: ^0.2.0
         version: 0.2.0
-      price-color:
-        specifier: 1.0.2
-        version: 1.0.2
       sass:
         specifier: ^1.63.6
         version: 1.101.0
@@ -67,15 +64,9 @@ importers:
       vue:
         specifier: ^3.5.35
         version: 3.5.39
-      vue-awesome-swiper:
-        specifier: ^4.1.1
-        version: 4.1.1(swiper@6.8.4)(vue@3.5.39)
       vue-i18n:
         specifier: ^9.10.2
         version: 9.14.5(vue@3.5.39)
-      vue-json-excel:
-        specifier: ^0.3.0
-        version: 0.3.0
       vue-qr:
         specifier: ^5.0.3
         version: 5.0.3(vue@3.5.39)
@@ -1148,9 +1139,6 @@ packages:
   '@vue/compiler-dom@3.5.39':
     resolution: {integrity: sha512-oQPigALqYbNxTNPvNgSOe+czwVExfbVF02lz8jP0S3AXJiu3jxYDygNUiqSep4ezzW8XgnubqH63My2A7JR/vg==}
 
-  '@vue/compiler-sfc@2.7.16':
-    resolution: {integrity: sha512-KWhJ9k5nXuNtygPU7+t1rX6baZeqOYLEforUPjgNDBnLicfHCoi48H87Q8XyLZOrNNsmhuwKqtpDQWjEFe6Ekg==}
-
   '@vue/compiler-sfc@3.5.39':
     resolution: {integrity: sha512-d0ki86iOyN8LoZPBmk5SJWNwHP19CnDDCfuo//+2WJa2g5Ke0Jay983PIBIcSSzldC68I8DrD5GrHV3OSDfodg==}
 
@@ -2036,9 +2024,6 @@ packages:
     resolution: {integrity: sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==}
     engines: {node: '>=10'}
 
-  downloadjs@1.4.7:
-    resolution: {integrity: sha512-LN1gO7+u9xjU5oEScGFKvXhYf7Y/empUIIEAGBs1LzUq/rg5duiDrkuH5A2lQGd5jfMOb9X9usDa2oVXwJ0U/Q==}
-
   dplayer@1.27.1:
     resolution: {integrity: sha512-2laBMXs5V1B9zPwJ7eAIw/OBo+Xjvy03i4GHTk3Cg+IWbrq8rKMFO0fFr6ClAYotYOCcFGOvaJDkOZcgKllsCA==}
 
@@ -2313,7 +2298,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+    deprecated: Glob versions prior to v9 are no longer supported
 
   globby@11.1.0:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
@@ -3322,9 +3307,6 @@ packages:
   pretty-error@4.0.0:
     resolution: {integrity: sha512-AoJ5YMAcXKYxKhuJGdcvse+Voc6v1RgnsR3nWcYU7q4t6z0Q6T86sv5Zq8VIRbOWWFpvdGE83LtdSMNd+6Y0xw==}
 
-  price-color@1.0.2:
-    resolution: {integrity: sha512-QkgrM0RxjAB+yxcRVuVTzgkxoYoGTAKbxIzJAZFFbActqKC4n9U4eDFWTpKQ+0FklRdZCnKenSPe+upfpe8+PQ==}
-
   process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
 
@@ -3913,13 +3895,6 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
-  vue-awesome-swiper@4.1.1:
-    resolution: {integrity: sha512-50um10t6N+lJaORkpwSi1wWuMmBI1sgFc9Znsi5oUykw2cO5DzLaBHcO2JNX21R+Ue4TGoIJDhhxjBHtkFrTEQ==}
-    engines: {node: '>=8'}
-    peerDependencies:
-      swiper: ^5.2.0
-      vue: 2.x
-
   vue-cli-plugin-style-resources-loader@0.1.5:
     resolution: {integrity: sha512-LluhjWTZmpGl3tiXg51EciF+T70IN/9t6UvfmgluJBqxbrb6OV9i7L5lTd+OKtcTeghDkhcBmYhtTxxU4w/8sQ==}
 
@@ -3935,9 +3910,6 @@ packages:
     deprecated: v9 and v10 no longer supported. please migrate to v11. about maintenance status, see https://vue-i18n.intlify.dev/guide/maintenance.html
     peerDependencies:
       vue: ^3.0.0
-
-  vue-json-excel@0.3.0:
-    resolution: {integrity: sha512-FrSh0tVUpw4K+ilLO8g0Qp52eFJw/hkk3rZPTEKo9qVkJgVfQtZwzj3UWc5ACYxA3jLk9HtjK+f9xKHCN4Kgag==}
 
   vue-loader@15.11.1:
     resolution: {integrity: sha512-0iw4VchYLePqJfJu9s62ACWUXeSqM30SQqlIftbYWM3C+jpPcEHKSPUZBLjSF9au4HTHQ/naF6OGnO3Q/qGR3Q==}
@@ -3985,10 +3957,6 @@ packages:
 
   vue-template-es2015-compiler@1.9.1:
     resolution: {integrity: sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==}
-
-  vue@2.7.16:
-    resolution: {integrity: sha512-4gCtFXaAA3zYZdTp5s4Hl2sozuySsgz4jy1EnpBHNfpMa9dK1ZCG7viqBPCwXtmgc8nHqUsAu3G4gtmXkkY3Sw==}
-    deprecated: Vue 2 has reached EOL and is no longer actively maintained. See https://v2.vuejs.org/eol/ for more details.
 
   vue@3.5.39:
     resolution: {integrity: sha512-xmZCYabFGcirU8r0fTuvl/LICc1OU620rnqepaJDL/a141ZigkG7AyaxQLdqJ02ZRYzWe6YPaDHeQx7MfknQfA==}
@@ -5608,14 +5576,6 @@ snapshots:
       '@vue/compiler-core': 3.5.39
       '@vue/shared': 3.5.39
 
-  '@vue/compiler-sfc@2.7.16':
-    dependencies:
-      '@babel/parser': 7.29.7
-      postcss: 8.5.15
-      source-map: 0.6.1
-    optionalDependencies:
-      prettier: 2.8.8
-
   '@vue/compiler-sfc@3.5.39':
     dependencies:
       '@babel/parser': 7.29.7
@@ -6485,8 +6445,6 @@ snapshots:
   dotenv-expand@5.1.0: {}
 
   dotenv@10.0.0: {}
-
-  downloadjs@1.4.7: {}
 
   dplayer@1.27.1:
     dependencies:
@@ -7694,11 +7652,6 @@ snapshots:
       lodash: 4.18.1
       renderkid: 3.0.0
 
-  price-color@1.0.2:
-    dependencies:
-      core-js: 3.49.0
-      vue: 2.7.16
-
   process-nextick-args@2.0.1: {}
 
   progress-webpack-plugin@1.0.16(webpack@5.108.4(postcss@8.5.15)):
@@ -8290,11 +8243,6 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vue-awesome-swiper@4.1.1(swiper@6.8.4)(vue@3.5.39):
-    dependencies:
-      swiper: 6.8.4
-      vue: 3.5.39
-
   vue-cli-plugin-style-resources-loader@0.1.5: {}
 
   vue-component-type-helpers@3.3.5: {}
@@ -8307,10 +8255,6 @@ snapshots:
       '@intlify/shared': 9.14.5
       '@vue/devtools-api': 6.6.4
       vue: 3.5.39
-
-  vue-json-excel@0.3.0:
-    dependencies:
-      downloadjs: 1.4.7
 
   vue-loader@15.11.1(@vue/compiler-sfc@3.5.39)(css-loader@6.11.0(webpack@5.108.4(postcss@8.5.15)))(lodash@4.18.1)(webpack@5.108.4(postcss@8.5.15)):
     dependencies:
@@ -8403,11 +8347,6 @@ snapshots:
       loader-utils: 1.4.2
 
   vue-template-es2015-compiler@1.9.1: {}
-
-  vue@2.7.16:
-    dependencies:
-      '@vue/compiler-sfc': 2.7.16
-      csstype: 3.2.3
 
   vue@3.5.39:
     dependencies:

@@ -70,7 +70,6 @@ export default {
       this.selected = v;
       getSetting(v).then((res) => {
         if (res.result) {
-          console.log(res);
           this.modalVisible = true;
           this.form = res;
         }

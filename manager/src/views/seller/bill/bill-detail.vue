@@ -43,38 +43,38 @@
       <div>
         <h3 class="ml_10">结算详细</h3>
         <el-table :data="billData" border style="width: 100%">
-          <el-table-column label="结算金额" prop="billPrice" align="center" width="200" fixed="left">
+          <el-table-column label="结算金额" prop="billPrice" align="center" width="160" fixed="left">
             <template #default="{ row }">
               <span v-if="row">{{ formatPrice(row.billPrice) }}</span>
             </template>
           </el-table-column>
           <el-table-column label="收入" align="center">
-            <el-table-column label="用户实付" prop="orderPrice" align="center" width="200">
+            <el-table-column label="用户实付" prop="orderPrice" align="center" width="160">
               <template #default="{ row }">
                 <span v-if="row">{{ formatPrice(row.orderPrice) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="平台优惠券补贴" prop="siteCouponCommission" align="center" width="200">
+            <el-table-column label="平台优惠券补贴" prop="siteCouponCommission" align="center" width="160">
               <template #default="{ row }">
                 <span v-if="row">{{ formatPrice(row.siteCouponCommission) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="积分商品补贴" prop="pointSettlementPrice" align="center" width="200">
+            <el-table-column label="积分商品补贴" prop="pointSettlementPrice" align="center" width="160">
               <template #default="{ row }">
                 <span v-if="row">{{ formatPrice(row.pointSettlementPrice) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="砍价商品补贴" prop="kanjiaSettlementPrice" align="center" width="200">
+            <el-table-column label="砍价商品补贴" prop="kanjiaSettlementPrice" align="center" width="160">
               <template #default="{ row }">
                 <span v-if="row">{{ formatPrice(row.kanjiaSettlementPrice) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="礼品卡补贴" prop="giftCardSubsidy" align="center" width="200">
+            <el-table-column label="礼品卡补贴" prop="giftCardSubsidy" align="center" width="160">
               <template #default="{ row }">
                 <span v-if="row">{{ formatPrice(row.giftCardSubsidy) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="分销佣金" prop="distributionCommission" align="center" width="200">
+            <el-table-column label="分销佣金" prop="distributionCommission" align="center" width="160">
               <template #default="{ row }">
                 <priceColorScheme
                   v-if="row"
@@ -83,7 +83,7 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column label="平台服务费" prop="commissionPrice" align="center" width="200">
+            <el-table-column label="平台服务费" prop="commissionPrice" align="center" width="160">
               <template #default="{ row }">
                 <priceColorScheme
                   v-if="row"
@@ -94,7 +94,7 @@
             </el-table-column>
           </el-table-column>
           <el-table-column label="退款" align="center">
-            <el-table-column label="退款金额" prop="refundPrice" align="center" width="200">
+            <el-table-column label="退款金额" prop="refundPrice" align="center" width="160">
               <template #default="{ row }">
                 <priceColorScheme v-if="row" :value="negate(row.refundPrice)" :color="$mainColor" />
               </template>
@@ -103,7 +103,7 @@
               label="退单返还平台优惠券补贴"
               prop="siteCouponRefundCommission"
               align="center"
-              width="200"
+              width="160"
             >
               <template #default="{ row }">
                 <priceColorScheme
@@ -117,7 +117,7 @@
               label="退单返还积分商品补贴"
               prop="pointRefundSettlementPrice"
               align="center"
-              width="200"
+              width="160"
             >
               <template #default="{ row }">
                 <priceColorScheme
@@ -131,7 +131,7 @@
               label="退单返还砍价商品补贴"
               prop="kanjiaRefundSettlementPrice"
               align="center"
-              width="200"
+              width="160"
             >
               <template #default="{ row }">
                 <priceColorScheme
@@ -141,7 +141,7 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column label="礼品卡返还" prop="giftCardRefundSubsidy" align="center" width="200">
+            <el-table-column label="礼品卡返还" prop="giftCardRefundSubsidy" align="center" width="160">
               <template #default="{ row }">
                 <priceColorScheme
                   v-if="row"
@@ -154,7 +154,7 @@
               label="退单返还分销佣金"
               prop="distributionRefundCommission"
               align="center"
-              width="200"
+              width="160"
             >
               <template #default="{ row }">
                 <span v-if="row">{{ formatPrice(row.distributionRefundCommission) }}</span>
@@ -164,7 +164,7 @@
               label="退单返还平台服务费"
               prop="refundCommissionPrice"
               align="center"
-              width="200"
+              width="160"
             >
               <template #default="{ row }">
                 <span v-if="row">{{ formatPrice(row.refundCommissionPrice) }}</span>
@@ -450,9 +450,6 @@ export default {
           } else {
             navigator.msSaveBlob(blob, "结算单-" + this.id + ".xlsx");
           }
-        })
-        .catch((err) => {
-          console.log(err);
         });
     },
     init() {
@@ -556,12 +553,16 @@ table {
   margin-left: 40px;
 
   tr {
-    font-size: 12px;
     height: 40px;
-    padding: 10px;
 
     td:nth-child(1) {
-      width: 120px;
+      width: 140px;
+      color: #909399;
+    }
+
+    td:nth-child(2) {
+      color: #303133;
+      font-weight: 500;
     }
   }
 }

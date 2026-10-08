@@ -16,7 +16,7 @@
       >
         <el-table-column prop="articleCategoryName" label="分类名称" min-width="200" />
         <el-table-column prop="sort" label="排序" width="120" />
-        <el-table-column label="操作" width="320" align="center">
+        <el-table-column label="操作" width="320" align="right">
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="edit(row)">编辑</a>

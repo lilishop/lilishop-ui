@@ -1,16 +1,3 @@
-import * as API_Other from "@/api/other";
-
-// 获取楼层装修信息
-export function initData(id) {
-  API_Other.getHomeData(id).then(res => {
-    debugger
-    homeData = res;
-    console.log(res)
-  });
-}
-
-export let homeData = {};
-
 /**
  * drawer:true   广告右侧打开抽屉中显示
  * drawerPromotions:true   广告右侧打开抽屉中显示

@@ -60,29 +60,19 @@
         style="width: 100%"
         @sort-change="changeSort"
       >
+        <el-table-column prop="goodsId" label="商品编号" width="180" show-overflow-tooltip />
+        <el-table-column label="商品图片" width="100" align="center">
+          <template #default="{ row }">
+            <img
+              v-if="row && row.thumbnail"
+              :src="row.thumbnail"
+              style="height: 50px; width: 50px; object-fit: cover"
+            />
+          </template>
+        </el-table-column>
         <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <template v-if="row">
-              <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
-              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
-                <template #reference>
-                  <img
-                    src="../../../assets/qrcode.svg"
-                    class="hover-pointer"
-                    width="20"
-                    height="20"
-                    alt="qrcode"
-                  />
-                </template>
-                <vue-qr
-                  :text="wapLinkTo(row.goodsId, row.skuId)"
-                  :margin="0"
-                  color-dark="#000"
-                  color-light="#fff"
-                  :size="150"
-                />
-              </el-popover>
-            </template>
+            <a v-if="row" class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
           </template>
         </el-table-column>
         <el-table-column label="库存数量" width="100">
@@ -156,11 +146,9 @@
 
 <script>
 import { getKanJiaGoodsList, delKanJiaGoods } from "@/api/promotion";
-import vueQr from "vue-qr";
 
 export default {
   name: "kanjia-activity-goods",
-  components: { vueQr },
   data() {
     return {
       selectDate: [],
@@ -290,13 +278,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.mr_10 {
-  margin-right: 10px;
-}
-.hover-pointer {
-  cursor: pointer;
-  vertical-align: middle;
-}
 .padding-row {
   margin-bottom: 10px;
 }

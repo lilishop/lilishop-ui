@@ -285,7 +285,6 @@ export default {
     },
     // 选择商品回调
     selectedGoodsData(val) {
-      console.log(val);
       let goods = val[0];
       this.selected.img = goods.thumbnail;
       this.selected.price = goods.price;

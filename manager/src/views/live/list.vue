@@ -327,8 +327,7 @@ export default {
           if (res.success && res.result?.buyerDomain) {
             this.wapUrl = res.result.buyerDomain;
           }
-        })
-        .catch(() => {});
+        });
     },
   },
 };

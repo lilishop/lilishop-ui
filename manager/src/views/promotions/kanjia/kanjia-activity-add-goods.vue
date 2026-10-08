@@ -286,6 +286,8 @@ export default {
           storeId: e.storeId,
           storeName: e.storeName,
           skuId: e.id,
+          goodsId: e.goodsId,
+          thumbnail: e.thumbnail || "",
           goodsType: e.goodsType,
         });
       });

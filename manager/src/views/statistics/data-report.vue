@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import { markRaw } from "vue";
 import {
   ArrowRight,
   DataAnalysis,
@@ -40,25 +41,25 @@ const REPORT_MODULES = [
     name: "storePerformanceReport",
     title: "店铺业绩报表",
     desc: "支付金额、营业额、转化率及同环比分析",
-    icon: TrendCharts,
+    icon: markRaw(TrendCharts),
   },
   {
     name: "goodsComparisonReport",
     title: "商品同比环比报表",
     desc: "商品销售金额、销量占比及同环比对比",
-    icon: DataAnalysis,
+    icon: markRaw(DataAnalysis),
   },
   {
     name: "salesOrderDetailReport",
     title: "销售订单明细报表",
     desc: "订单流水、收款明细与优惠明细",
-    icon: Document,
+    icon: markRaw(Document),
   },
   {
     name: "goodsSalesSummaryReport",
     title: "商品销售汇总报表",
     desc: "商品销量、净销售额及优惠汇总",
-    icon: Goods,
+    icon: markRaw(Goods),
   },
 ];
 

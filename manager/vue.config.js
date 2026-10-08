@@ -36,6 +36,16 @@ module.exports = {
           if (message.includes("ResizeObserver loop")) {
             return false;
           }
+          // axios 请求错误已由拦截器统一 toast 提示，不再重复弹浮层
+          if (
+            error?.isAxiosError ||
+            error?.name === "AxiosError" ||
+            message.includes("Request failed with status code") ||
+            message.includes("Network Error") ||
+            message.includes("timeout of")
+          ) {
+            return false;
+          }
           return true;
         },
       },
@@ -78,11 +88,19 @@ module.exports = {
       args[0].cdn = { css: [], js: [] };
       return args;
     });
+    if (enableProduction) {
+      // 生产环境移除所有 console.* 调用
+      config.optimization.minimizer("terser").tap((args) => {
+        const terserOptions = args[0].terserOptions || (args[0].terserOptions = {});
+        terserOptions.compress = { ...terserOptions.compress, drop_console: true };
+        return args;
+      });
+    }
   },
   pluginOptions: {
     "style-resources-loader": {
       preProcessor: "scss",
-      patterns: [path.resolve(__dirname, "./src/styles/common.scss")],
+      patterns: [path.resolve(__dirname, "./src/styles/variables.scss")],
     },
   },
 };

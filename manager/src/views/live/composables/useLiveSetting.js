@@ -21,7 +21,6 @@ export async function fetchLiveSetting(force = false) {
         cachedSetting = res.result;
         return cachedSetting;
       }
-      console.warn("获取直播配置失败", res);
       return null;
     } catch (error) {
       console.error("获取直播配置异常:", error);

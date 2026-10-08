@@ -142,8 +142,7 @@ export default {
               value: String(item.sortOrder),
               label: item.gradeName || `等级值${item.sortOrder}`,
             }));
-        })
-        .catch(() => {});
+        });
     },
     formatGrade(name, gradeId) {
       if (name) {

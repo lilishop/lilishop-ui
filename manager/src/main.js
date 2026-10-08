@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import "core-js/stable";
 import "./styles/theme.less";
+import "@/styles/common.scss";
 import App from "./App.vue";
 import { router } from "./router/index";
 import store from "./store";
@@ -83,6 +84,13 @@ app.config.globalProperties.wapLinkTo = function (goodsId, skuId) {
 
 router.isReady().then(() => {
   app.mount("#app");
+});
+
+// axios 错误已在拦截器统一 toast 提示，页面未写 .catch 时不再触发未捕获 rejection 浮层
+window.addEventListener("unhandledrejection", (event) => {
+  if (event.reason && event.reason.isAxiosError) {
+    event.preventDefault();
+  }
 });
 
 // 登录后由 App.vue 触发 initRouter 拉取/更新菜单

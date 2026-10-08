@@ -621,8 +621,6 @@ export default {
           return item.___index != this.goodsSelectedIndex;
         });
       this.res.options.list[0].titleWay[this.goodsSelectedIndex] = data;
-
-      console.log(this.res.options.list[0]);
     },
     // 商品排序
     slotGoods(list, key, val) {
@@ -659,7 +657,6 @@ export default {
 
     // 轮播图排序
     slotBanner(val, key, index, down) {
-      console.log(val);
       if (down == "down") {
         this.downData(val.options.list, index);
       } else {

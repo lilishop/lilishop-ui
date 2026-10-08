@@ -4,7 +4,6 @@
 export function printElement(elementId, title = "打印") {
   const el = document.getElementById(elementId);
   if (!el) {
-    console.warn(`[print] element #${elementId} not found`);
     return;
   }
   const iframe = document.createElement("iframe");

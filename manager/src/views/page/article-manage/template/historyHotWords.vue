@@ -17,14 +17,14 @@
       title="这里展示历史某一天的热词数据统计，可根据需求配置每日持久化多少条数据。"
     />
 
-    <div id="container"></div>
+    <div v-show="hasData" id="container"></div>
+    <el-empty v-if="!hasData" description="该日期暂无热词数据" :image-size="100" />
   </div>
 </template>
 
 <script>
 import { Chart } from "@antv/g2";
 import { getHotWordsHistory } from "@/api/index";
-import { Message } from "@/utils/message";
 
 export default {
   data() {
@@ -34,6 +34,7 @@ export default {
       },
       hotWordsChart: null,
       hotWordsData: [],
+      hasData: true,
       endMonth: null,
     };
   },
@@ -60,12 +61,10 @@ export default {
       const res = await getHotWordsHistory(this.params);
       if (res.success) {
         this.hotWordsData = res.result || [];
-        if (this.hotWordsChart) {
+        this.hasData = this.hotWordsData.length > 0;
+        if (this.hasData && this.hotWordsChart) {
           this.hotWordsChart.changeData(this.hotWordsData);
           this.hotWordsChart.render();
-        }
-        if (!this.hotWordsData.length) {
-          Message.error("暂无数据");
         }
       }
     },

@@ -160,9 +160,7 @@ export default {
   watch: {
     modelForm: {
       deep: true,
-      handler: function (val) {
-        console.log(val);
-      },
+      handler: function (val) {},
     },
   },
 };

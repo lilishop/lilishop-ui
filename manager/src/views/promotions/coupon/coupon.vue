@@ -461,7 +461,6 @@ export default {
             });
           }
         })
-        .catch(() => {})
         .finally(() => {
           this.loading = false;
         });

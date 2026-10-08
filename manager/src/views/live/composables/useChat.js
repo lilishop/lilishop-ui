@@ -60,7 +60,6 @@ export function useChat(liveId, userInfo, liveDetail) {
     }
     if (!groupID.value) {
       initError.value = "直播间群组 ID 不存在";
-      console.warn("groupID 不存在，跳过 IM 初始化");
       return;
     }
 
@@ -160,18 +159,15 @@ export function useChat(liveId, userInfo, liveDetail) {
   }
 
   function onSdkNotReady() {
-    console.log("[SDK Not Ready]");
     imReady.value = false;
   }
 
   function onSdkReady() {
-    console.log("[SDK Ready]");
     imReady.value = true;
     updateUserInfo();
   }
 
   function onKickedOut() {
-    console.log("[用户被踢下线]");
     imReady.value = false;
     initError.value = "IM 已下线，请刷新页面";
   }
@@ -203,11 +199,10 @@ export function useChat(liveId, userInfo, liveDetail) {
     }
 
     try {
-      const imResponse = await chat.value.joinGroup({
+      await chat.value.joinGroup({
         groupID: groupID.value,
         type: TencentCloudChat.TYPES.GRP_AVCHATROOM,
       });
-      console.log("[加群成功]", imResponse);
     } catch (imError) {
       console.warn("joinGroup error:", imError);
       throw imError;

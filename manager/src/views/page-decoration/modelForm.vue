@@ -232,9 +232,7 @@ export default {
     handleAddNav() {
       this.navList.list.push({ name: "", url: "", title: "" });
     },
-    handleMoveEnd({ newIndex, oldIndex }) {
-      console.log("index", newIndex, oldIndex);
-    },
+    handleMoveEnd({ newIndex, oldIndex }) {},
     handleModel(type) {
       if (type == "topAdvert") {
         this.draftTopAdvert = JSON.parse(JSON.stringify(this.topAdvert));

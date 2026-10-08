@@ -759,9 +759,7 @@ export default {
           }
         }
       }
-      console.log(this.typeList)
       if (this.typeList.length >= 3) {
-        console.log(123123)
         this.getContentPrice()
       }
     },

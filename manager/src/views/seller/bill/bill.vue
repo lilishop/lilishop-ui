@@ -1,6 +1,56 @@
 <template>
   <div class="search">
     <el-card>
+      <el-form
+        ref="searchForm"
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @keyup.enter="handleSearch"
+      >
+        <el-form-item label="账单号">
+          <el-input
+            v-model="searchForm.sn"
+            placeholder="请输入账单号"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="店铺名称">
+          <el-input
+            v-model="searchForm.storeName"
+            placeholder="请输入店铺名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="生成时间">
+          <el-date-picker
+            v-model="selectDate"
+            type="daterange"
+            clearable
+            value-format="yyyy-MM-dd HH:mm:ss"
+            :default-time="defaultTime"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="width: 260px"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <el-card>
+      <el-tabs v-model="activeStatus" @tab-change="handleStatusChange">
+        <el-tab-pane label="全部" name="" />
+        <el-tab-pane label="已出账" name="OUT" />
+        <el-tab-pane label="已对账" name="CHECK" />
+        <el-tab-pane label="已付款" name="COMPLETE" />
+      </el-tabs>
       <div class="mb_10">
         <el-button type="primary" @click="handleExportList">导出列表</el-button>
         <el-button :disabled="selectCount === 0" @click="handleBatchDownload">批量下载</el-button>
@@ -66,11 +116,19 @@ export default {
   data() {
     return {
       loading: true,
+      selectDate: [],
+      defaultTime: [new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)],
+      activeStatus: "",
       searchForm: {
         pageNumber: 1,
         pageSize: 20,
         sort: "createTime",
         order: "desc",
+        sn: "",
+        storeName: "",
+        billStatus: "",
+        startDate: null,
+        endDate: null,
       },
       selectList: [],
       selectCount: 0,
@@ -102,14 +160,32 @@ export default {
       this.selectList = e;
       this.selectCount = e.length;
     },
+    handleStatusChange(name) {
+      this.searchForm.billStatus = name;
+      this.searchForm.pageNumber = 1;
+      this.getDataList();
+    },
+    handleSearch() {
+      this.searchForm.pageNumber = 1;
+      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
+        this.searchForm.startDate = this.selectDate[0];
+        this.searchForm.endDate = this.selectDate[1];
+      } else {
+        this.searchForm.startDate = null;
+        this.searchForm.endDate = null;
+      }
+      this.getDataList();
+    },
+    handleReset() {
+      this.selectDate = [];
+      this.searchForm.sn = "";
+      this.searchForm.storeName = "";
+      this.searchForm.startDate = null;
+      this.searchForm.endDate = null;
+      this.handleSearch();
+    },
     getDataList() {
       this.loading = true;
-      if (this.searchForm.startTime) {
-        this.searchForm.startTime = this.$filters.unixToDate(this.searchForm.startTime / 1000);
-      }
-      if (this.searchForm.endTime) {
-        this.searchForm.endTime = this.$filters.unixToDate(this.searchForm.endTime / 1000);
-      }
       API_Shop.getBuyBillPage(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {

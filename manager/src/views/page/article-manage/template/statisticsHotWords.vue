@@ -13,11 +13,12 @@
       </div>
     </el-affix>
 
-    <div id="container"></div>
-    <el-table border :data="hotWordsData" style="width: 100%">
+    <div v-show="hasData" id="container"></div>
+    <el-table v-if="hasData" border :data="hotWordsData" style="width: 100%">
       <el-table-column prop="keywords" label="热词名称" min-width="160" />
       <el-table-column prop="score" label="搜索次数" min-width="120" />
     </el-table>
+    <el-empty v-else description="暂无热词统计数据" :image-size="100" />
   </div>
 </template>
 
@@ -40,6 +41,7 @@ export default {
       },
       hotWordsChart: "",
       hotWordsData: [],
+      hasData: true,
     };
   },
   watch: {
@@ -61,7 +63,11 @@ export default {
     async search() {
       const res = await getHotWordsStatistics(this.params);
       if (res.success) {
-        this.hotWordsData = res.result;
+        this.hotWordsData = res.result || [];
+        this.hasData = this.hotWordsData.length > 0;
+        if (!this.hasData) {
+          return;
+        }
         if (!this.hotWordsChart) {
           this.hotWordsChart = new Chart({
             container: "container",

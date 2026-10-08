@@ -116,10 +116,6 @@ export default {
     advertising: {
       handler(val) {
         this.$store.state.openStyleStore = val;
-        console.log(
-          "this.$store.state.openStyleStore",
-          this.$store.state.openStyleStore
-        );
       },
       deep: true,
     },
