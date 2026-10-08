@@ -20,7 +20,7 @@
     <ul class="goods-eval">
       <li >
         <div class="goods-con">
-          <img :src="orderGoods.image" class="hover-pointer" alt="" width="100" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
+          <img :src="orderGoods.image" loading="lazy" decoding="async" class="hover-pointer" alt="" width="100" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">
           <p class="hover-pointer color999" @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)">{{orderGoods.goodsName}}</p>
           <p>{{ $filters.unitPrice(orderGoods.goodsPrice, '￥') }}</p>
         </div>
@@ -40,7 +40,7 @@
           <div class="upload-section">
             <div class="upload-row">
               <div class="demo-upload-list" v-for="(img, index) in orderGoods.uploadList" :key="index">
-                <img :src="img">
+                <img :src="img" loading="lazy" decoding="async">
                 <div class="demo-upload-list-cover">
                   <el-icon @click="handleView(img)"><View /></el-icon>
                   <el-icon @click="handleRemove(index)"><Delete /></el-icon>
@@ -69,7 +69,7 @@
       <el-button type="primary" :loading="loading" @click="save">发表</el-button>
     </div>
     <el-dialog title="图片预览" v-model="visible">
-        <img :src="previewImage" v-if="visible" style="width: 100%">
+        <img :src="previewImage" loading="lazy" decoding="async" v-if="visible" style="width: 100%">
     </el-dialog>
     </UserCenterLayout>
   </div>

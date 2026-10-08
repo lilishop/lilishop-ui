@@ -15,7 +15,7 @@
         <span class="line btm-line"></span>
         <p>{{ item.describe }}</p>
       </div>
-      <img :src="item.img" width="170" height="170" alt="" />
+      <img :src="item.img" loading="lazy" decoding="async" width="170" height="170" alt="" />
     </div>
   </div>
 </template>

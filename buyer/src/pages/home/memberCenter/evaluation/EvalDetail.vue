@@ -11,6 +11,8 @@
         <div class="goods-row" v-if="orderGoods.goodsName">
           <img
             :src="orderGoods.goodsImage"
+            loading="lazy"
+            decoding="async"
             alt=""
             @click="goGoodsDetail(orderGoods.skuId, orderGoods.goodsId)"
             @error="$event.target.style.visibility = 'hidden'"
@@ -47,6 +49,8 @@
             v-for="(img, index) in orderGoods.images.split(',')"
             :key="index"
             :src="img"
+            loading="lazy"
+            decoding="async"
             alt=""
             @click="handleView(img)"
           />
@@ -61,6 +65,8 @@
             v-for="(img, index) in orderGoods.replyImage.split(',')"
             :key="index"
             :src="img"
+            loading="lazy"
+            decoding="async"
             alt=""
             @click="handleView(img)"
           />
@@ -68,7 +74,7 @@
       </div>
 
       <el-dialog title="查看图片" v-model="visible" width="640px">
-        <img :src="previewImage" v-if="visible" class="preview-img" alt="" />
+        <img :src="previewImage" loading="lazy" decoding="async" v-if="visible" class="preview-img" alt="" />
       </el-dialog>
     </UserCenterLayout>
   </div>

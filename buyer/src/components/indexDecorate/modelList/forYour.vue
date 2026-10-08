@@ -3,7 +3,7 @@
     <div class="for-your">{{ data.options.title }}</div>
     <div class="flex card">
       <div class="left hover-pointer" @click="linkTo(data.options.data.image.url)">
-        <img :src="data.options.data.image.src" alt="" />
+        <img :src="data.options.data.image.src" loading="lazy" decoding="async" alt="" />
       </div>
       <div class="right flex">
         <!-- 商品区 -->
@@ -18,7 +18,7 @@
               <div class="goods-name">{{ item.title }}</div>
               <div class="goods-desc">{{ item.desc }}</div>
             </div>
-            <img class="goods-img" :src="item.img" alt="" />
+            <img class="goods-img" :src="item.img" loading="lazy" decoding="async" alt="" />
           </div>
         </div>
         <!-- 热卖区 -->
@@ -30,7 +30,7 @@
             :key="index"
             @click="linkTo(item.url)"
           >
-            <img :src="item.img" alt="" />
+            <img :src="item.img" loading="lazy" decoding="async" alt="" />
             <div class="hot-goods">
               <div class="hot-goods-title">{{ item.title }}</div>
               <div>

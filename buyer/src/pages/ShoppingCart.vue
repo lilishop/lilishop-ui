@@ -13,7 +13,7 @@
           </div>
           <div class="add-info-box-row">
             <div class="add-info-img">
-              <img :src="detail.thumbnail" alt="">
+              <img :src="detail.thumbnail" loading="lazy" decoding="async" alt="">
             </div>
             <div class="add-info-intro">
               <p>{{detail.goodsName}}</p>

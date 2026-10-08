@@ -18,7 +18,7 @@
         @click="goGoodsDetail(item.id)"
       >
         <div class="goods-show-img">
-          <img :src="itemThumbnail(item)" />
+          <img :src="itemThumbnail(item)" loading="lazy" decoding="async" />
         </div>
         <div class="goods-show-price">
           <span>

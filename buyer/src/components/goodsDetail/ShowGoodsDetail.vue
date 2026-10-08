@@ -62,7 +62,7 @@
                   :class="{ borderColor: img === item.previewImg }"
                   :key="imgIndex"
                 >
-                  <img :src="img" alt="">
+                  <img :src="img" loading="lazy" decoding="async" alt="">
                 </div>
               </div>
 
@@ -71,7 +71,7 @@
                   <span @click.stop="rotatePreviewImg(0, item)"><el-icon><Refresh /></el-icon>左转</span>
                   <span @click.stop="rotatePreviewImg(1, item)"><el-icon><Refresh /></el-icon>右转</span>
                 </div>
-                <img :src="item.previewImg" :style="{ transform: `rotate(${item.deg || 0}deg)` }" width="198" alt="">
+                <img :src="item.previewImg" loading="lazy" decoding="async" :style="{ transform: `rotate(${item.deg || 0}deg)` }" width="198" alt="">
               </div>
               <p class="remarks-sub">
                 <span class="remarks-item">{{ item.goodsName }}</span>
@@ -88,7 +88,7 @@
                     :class="{ borderColor: img === item.previewImg }"
                     @click="previewImg(img, item)"
                   >
-                    <img :src="img" alt="">
+                    <img :src="img" loading="lazy" decoding="async" alt="">
                   </div>
                 </div>
               </div>

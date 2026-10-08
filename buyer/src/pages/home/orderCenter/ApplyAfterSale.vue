@@ -5,7 +5,7 @@
       <el-table-column label="商品名称">
         <template #default="{ row }">
           <div style="padding:5px;display:flex;">
-            <img :src="row.image" style="vertical-align: top;" width="60" height="60" alt="">
+            <img :src="row.image" loading="lazy" decoding="async" style="vertical-align: top;" width="60" height="60" alt="">
             <span class="ml_10">{{ row.goodsName }}</span>
           </div>
         </template>
@@ -50,7 +50,7 @@
           <div class="upload-section">
             <div class="upload-row">
               <div class="demo-upload-list" v-for="(img, index) in uploadList" :key="index">
-                <img :src="img">
+                <img :src="img" loading="lazy" decoding="async">
                 <div class="demo-upload-list-cover">
                     <el-icon @click="handleView(img)"><View /></el-icon>
                     <el-icon @click="handleRemove(index)"><Delete /></el-icon>
@@ -95,7 +95,7 @@
         </el-form-item>
       </el-form>
       <el-dialog title="图片预览" v-model="visible">
-        <img :src="previewImage" v-if="visible" style="width: 100%">
+        <img :src="previewImage" loading="lazy" decoding="async" v-if="visible" style="width: 100%">
       </el-dialog>
     </div>
     </UserCenterLayout>

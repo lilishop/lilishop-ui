@@ -4,33 +4,33 @@
       <template #extra>
         <el-button type="primary" @click="add">添加新地址</el-button>
       </template>
-      <div class="address-box" v-for="(item, index) in list" :key="index">
-        <div class="address-header">
-          <span>
-            {{ item.name }}
-            <el-tag class="ml_10 default-address-tag" v-if="item.isDefault">默认地址</el-tag>
-            <el-tag class="ml_10" v-if="item.alias" color="warning">{{item.alias}}</el-tag>
-          </span>
-          <div class="address-action">
-            <span @click="edit(item.id)"><el-icon><Edit /></el-icon>修改</span>
-            <span @click="del(item.id)"><el-icon><Delete /></el-icon>删除</span>
+      <div class="address-list" v-if="list.length">
+        <div class="address-box" v-for="(item, index) in list" :key="index">
+          <div class="address-header">
+            <div class="address-title">
+              <span class="address-name">{{ item.name }}</span>
+              <span class="address-mobile">{{ item.mobile }}</span>
+              <el-tag size="small" class="default-address-tag" v-if="item.isDefault">默认地址</el-tag>
+              <el-tag size="small" class="alias-tag" v-if="item.alias">{{item.alias}}</el-tag>
+            </div>
+            <div class="address-action">
+              <span @click="edit(item.id)"><el-icon><Edit /></el-icon>修改</span>
+              <span class="del-btn" @click="del(item.id)"><el-icon><Delete /></el-icon>删除</span>
+            </div>
+          </div>
+          <div class="address-content">
+            <p>
+              <span class="address-content-title">收货地区</span>
+              <span>{{ $filters.unitAddress(item.consigneeAddressPath) }}</span>
+            </p>
+            <p>
+              <span class="address-content-title">详细地址</span>
+              <span>{{ item.detail }}</span>
+            </p>
           </div>
         </div>
-        <div class="address-content">
-          <p>
-            <span class="address-content-title"> 收 货 人 :</span> {{ item.name }}
-          </p>
-          <p>
-            <span class="address-content-title">收货地区:</span>{{ $filters.unitAddress(item.consigneeAddressPath) }}
-          </p>
-          <p>
-            <span class="address-content-title">详细地址:</span> {{ item.detail }}
-          </p>
-          <p>
-            <span class="address-content-title">手机号码:</span> {{ item.mobile }}
-          </p>
-        </div>
       </div>
+      <el-empty v-else description="暂无收货地址" />
     </UserCenterLayout>
   </div>
 </template>
@@ -95,61 +95,108 @@ export default {
 .wrapper {
   margin-bottom: 40px;
 }
+
 .address-box {
-  padding: 15px;
-  margin: 0;
-  border-bottom: 1px solid $border_color;
+  margin-bottom: 16px;
+  padding: 18px 20px;
+  border: 1px solid #ebedf0;
+  border-radius: 8px;
+  background: #fff;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 
   &:last-child {
-    border-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    border-color: #dcdfe6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   }
 }
 
 .address-header {
-  cursor: pointer;
-  height: 35px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  @include title_color($light_title_color);
-  font-size: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #ebedf0;
+}
+
+.address-title {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.address-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: $light_title_color;
+}
+
+.address-mobile {
+  margin-left: 14px;
+  font-size: 14px;
+  color: #909399;
 }
 
 .address-content {
-  cursor: pointer;
+  padding-top: 6px;
   font-size: 14px;
+  color: #606266;
 
   > p {
-    padding: 12px 0;
+    display: flex;
+    padding: 6px 0;
+    line-height: 22px;
   }
 }
 
 .address-content-title {
- 
+  flex-shrink: 0;
+  width: 70px;
+  color: #909399;
 }
 
 .address-action {
   display: flex;
   align-items: center;
-  gap: 15px;
+  flex-shrink: 0;
+  gap: 16px;
+  margin-left: 16px;
 
   span {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 14px;
-    color: $theme_color;
+    font-size: 13px;
+    color: #909399;
     cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $theme_color;
+    }
 
     .el-icon {
       font-size: 14px;
     }
   }
+
+  .del-btn:hover {
+    color: #f56c6c;
+  }
 }
 
 .default-address-tag {
+  margin-left: 10px;
   background-color: #fff3f2 !important;
   border: 1px solid $theme_color !important;
   color: $theme_color !important;
+}
+
+.alias-tag {
+  margin-left: 10px;
 }
 
 #map-container {

@@ -19,7 +19,7 @@
         class="content hover-pointer"
         @click.stop="goToSeckill"
       >
-        <img :src="item.goodsImage" width="140" height="140" :alt="item.goodsName" />
+        <img :src="item.goodsImage" loading="lazy" decoding="async" width="140" height="140" :alt="item.goodsName" />
         <div class="ellipsis">{{ item.goodsName }}</div>
         <div>
           <span>{{ $filters.unitPrice(item.price, "￥") }}</span>

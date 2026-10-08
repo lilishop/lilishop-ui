@@ -1,7 +1,7 @@
 <template>
   <div class="mix-panel flex" v-if="data.options.left.model == 'goods'">
     <div class="left-side hover-pointer" @click="linkTo(data.options.left.data.image.url)">
-      <img :src="data.options.left.data.image.src" alt="" />
+      <img :src="data.options.left.data.image.src" loading="lazy" decoding="async" alt="" />
     </div>
     <div class="right-side">
       <div class="badge-box flex">
@@ -17,7 +17,7 @@
           v-for="(item, index) in data.options.left.data.list"
         >
           <div class="goods-thumbnail">
-            <img :src="item.img" alt="" />
+            <img :src="item.img" loading="lazy" decoding="async" alt="" />
           </div>
           <div class="goods-detail">
             <div class="goods-detail-title">{{ item.title }}</div>

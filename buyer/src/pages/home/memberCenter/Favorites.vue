@@ -18,6 +18,8 @@
             <div class="fav-thumb" @click="openItem(item)">
               <img
                 :src="params.type === 'GOODS' ? item.image : item.storeLogo"
+                loading="lazy"
+                decoding="async"
                 alt=""
                 @error="$event.target.style.visibility = 'hidden'"
               />
@@ -55,6 +57,8 @@
             <div class="fav-thumb" @click="openItem(item)">
               <img
                 :src="params.type === 'GOODS' ? item.image : item.storeLogo"
+                loading="lazy"
+                decoding="async"
                 alt=""
                 @error="$event.target.style.visibility = 'hidden'"
               />

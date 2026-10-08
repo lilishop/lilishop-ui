@@ -13,7 +13,7 @@
           <div class="goods-desc">{{ item.desc }}</div>
         </div>
         <div class="goods-img">
-          <img :src="item.img" />
+          <img :src="item.img" loading="lazy" decoding="async" />
         </div>
       </div>
     </div>

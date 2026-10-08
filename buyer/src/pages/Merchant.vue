@@ -81,7 +81,7 @@
           @click="goGoodsDetail(item.id, item.goodsId)"
         >
           <div class="goods-show-img">
-            <img :src="item.thumbnail || item.small" alt=""/>
+            <img :src="item.thumbnail || item.small" loading="lazy" decoding="async" alt=""/>
           </div>
           <div class="goods-show-price">
             <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>

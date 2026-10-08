@@ -13,7 +13,7 @@
         @click="goodsDetail(item.id, item.goodsId)"
       >
         <div class="thumb">
-          <img :src="item.thumbnail" :alt="item.goodsName" />
+          <img :src="item.thumbnail" loading="lazy" decoding="async" :alt="item.goodsName" />
         </div>
         <p class="goods-name">{{ item.goodsName }}</p>
         <p class="goods-price">{{ $filters.unitPrice(item.price, "￥") }}</p>

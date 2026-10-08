@@ -14,7 +14,7 @@
       <tbody>
       <tr>
         <td>投诉商品</td>
-        <td class="hover-color" @click="linkTo(`/goodsDetail?goodsId=${detail.goodsId}&skuId=${detail.skuId}`)"><img :src="detail.goodsImage" width="60" alt=""> &nbsp;{{ detail.goodsName }}</td>
+        <td class="hover-color" @click="linkTo(`/goodsDetail?goodsId=${detail.goodsId}&skuId=${detail.skuId}`)"><img :src="detail.goodsImage" loading="lazy" decoding="async" width="60" alt=""> &nbsp;{{ detail.goodsName }}</td>
       </tr>
       <tr>
         <td>投诉主题</td>
@@ -30,7 +30,7 @@
           <div style="display:flex;align-items:center;">
             <template v-if="detail.images">
               <div class="demo-upload-list" v-for="(img, index) in detail.images.split(',')" :key="index">
-                <img :src="img">
+                <img :src="img" loading="lazy" decoding="async">
                 <div class="demo-upload-list-cover">
                   <el-icon @click="handleView(img)"><View /></el-icon>
                 </div>
@@ -61,7 +61,7 @@
           <div style="display:flex;align-items:center;">
             <template v-if="detail.appealImages">
               <div class="demo-upload-list" v-for="(img, index) in detail.appealImages.split(',')" :key="index">
-                <img :src="img">
+                <img :src="img" loading="lazy" decoding="async">
                 <div class="demo-upload-list-cover">
                   <el-icon @click="handleView(img)"><View /></el-icon>
                 </div>
@@ -124,7 +124,7 @@
     </table>
 
     <el-dialog title="图片预览" v-model="visible">
-      <img :src="previewImage" v-if="visible" style="width: 100%">
+      <img :src="previewImage" loading="lazy" decoding="async" v-if="visible" style="width: 100%">
     </el-dialog>
     </UserCenterLayout>
   </div>

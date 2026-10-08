@@ -6,7 +6,7 @@
           :key="index"
           @click="linkTo(item.url)"
         >
-          <img :src="item.img" class="three-column-img" alt="" />
+          <img :src="item.img" loading="lazy" decoding="async" class="three-column-img" alt="" />
         </div>
     </div>
 </template>

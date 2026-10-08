@@ -22,7 +22,7 @@
         class="hover-pointer"
         @click="linkTo(item.url)"
       >
-        <img :src="item.img" width="210" height="210" :alt="item.name" />
+        <img :src="item.img" loading="lazy" decoding="async" width="210" height="210" :alt="item.name" />
         <p>{{ item.name }}</p>
         <p>
           <span>{{ $filters.unitPrice(Number(item.price), "￥") }}</span>

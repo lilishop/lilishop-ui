@@ -54,6 +54,8 @@
                     @click="goodsDetail(goods.skuId, goods.goodsId)"
                     class="hover-color"
                     :src="goods.image"
+                    loading="lazy"
+                    decoding="async"
                     alt=""
                     @error="$event.target.style.visibility = 'hidden'"
                   />
@@ -132,6 +134,8 @@
                   @click="goodsDetail(goods.skuId, goods.goodsId)"
                   class="hover-color"
                   :src="goods.image"
+                  loading="lazy"
+                  decoding="async"
                   alt=""
                   @error="$event.target.style.visibility = 'hidden'"
                 />

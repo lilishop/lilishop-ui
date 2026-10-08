@@ -17,7 +17,7 @@
             <p>{{ item.name }}</p>
             <p class="describe">{{ item.describe }}</p>
           </div>
-          <img :src="item.img" alt="" />
+          <img :src="item.img" loading="lazy" decoding="async" alt="" />
         </div>
       </div>
     </div>
@@ -39,7 +39,7 @@
             <p>{{ item.name }}</p>
             <p class="describe">{{ item.describe }}</p>
           </div>
-          <img :src="item.img" alt="" />
+          <img :src="item.img" loading="lazy" decoding="async" alt="" />
         </div>
       </div>
     </div>
@@ -58,7 +58,7 @@
           @click="linkTo(item.url)"
         >
           <div class="img-wrap">
-            <img :src="item.img" alt="" />
+            <img :src="item.img" loading="lazy" decoding="async" alt="" />
             <div class="jiaobiao" :class="'jiaobiao' + (index + 1)">
               {{ index + 1 }}
             </div>

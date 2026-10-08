@@ -216,6 +216,8 @@
                 <img
                   @click="goodsDetail(goods.skuId, goods.goodsId)"
                   :src="goods.image"
+                  loading="lazy"
+                  decoding="async"
                   alt=""
                 />
                 <p

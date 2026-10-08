@@ -29,7 +29,7 @@
       <div v-else class="goods-show-info1" v-for="(item, index) in goodsList" :key="index"
         @click="goGoodsDetail(item.skuId, item.goodsId)">
         <div class="goods-show-img">
-          <img :src="item.goodsImage" :alt="item.goodsName" />
+          <img :src="item.goodsImage" loading="lazy" decoding="async" :alt="item.goodsName" />
         </div>
         <div class="goods-show-price">
           <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>

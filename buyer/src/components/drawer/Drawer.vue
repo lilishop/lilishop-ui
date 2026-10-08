@@ -4,7 +4,7 @@
       <ul>
         <li v-for="(goods,goodsIndex) in cartList" :key="goodsIndex">
           <div>
-            <img :src="goods.goodsSku.thumbnail" width="90" height="90" alt="">
+            <img :src="goods.goodsSku.thumbnail" loading="lazy" decoding="async" width="90" height="90" alt="">
           </div>
           <div>
             <p class="hover-color" @click="linkTo(`/goodsDetail?skuId=${goods.goodsSku.id}&goodsId=${goods.goodsSku.goodsId}`)">{{goods.goodsSku.goodsName}}</p>
@@ -21,7 +21,7 @@
         <li v-for="(order,orderIndex) in orderList" :key="orderIndex">
           <div class="order-status"><span>{{filterOrderStatus(order.orderStatus)}}</span><span>{{order.createTime}}</span></div>
           <div class="goods-img">
-            <img :src="img.image"
+            <img :src="img.image" loading="lazy" decoding="async"
               @click="linkTo(`/goodsDetail?skuId=${img.skuId}&goodsId=${img.goodsId}`)"
               v-for="(img,imgIndex) in order.orderItems"
               :key="imgIndex" width="40" height="40" alt="">
@@ -54,7 +54,7 @@
     <div v-else-if="title === '我的足迹'" class="tracks-con">
       <ul>
         <li v-for="(track,trackIndex) in tracksList" :key="trackIndex">
-          <img :src="track.thumbnail" :alt="track.thumbnail" @click="linkTo(`/goodsDetail?skuId=${track.id}&goodsId=${track.goodsId}`)" width="100" height="100">
+          <img :src="track.thumbnail" loading="lazy" decoding="async" :alt="track.thumbnail" @click="linkTo(`/goodsDetail?skuId=${track.id}&goodsId=${track.goodsId}`)" width="100" height="100">
           <div @click="addToCart(track.id)">加入购物车</div>
           <p class="global_color">{{ $filters.unitPrice(track.price, '￥') }}</p>
         </li>
@@ -64,7 +64,7 @@
     <div v-else-if="title === '我的收藏'" class="collect-con">
       <ul>
         <li v-for="(collect,collectIndex) in collectList" :key="collectIndex">
-          <img :src="collect.image" :alt="collect.image" @click="linkTo(`/goodsDetail?skuId=${collect.skuId}&goodsId=${collect.goodsId}`)" width="100" height="100">
+          <img :src="collect.image" loading="lazy" decoding="async" :alt="collect.image" @click="linkTo(`/goodsDetail?skuId=${collect.skuId}&goodsId=${collect.goodsId}`)" width="100" height="100">
           <div @click="addToCart(collect.skuId)">加入购物车</div>
           <span class="del-icon" @click.stop="cancelCollect(collect.skuId)">
             <el-icon><Delete /></el-icon>

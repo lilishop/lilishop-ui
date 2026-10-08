@@ -21,6 +21,8 @@
             <div class="goods-thumb" @click="linkTo(`/goodsDetail?goodsId=${item.goodsId}&skuId=${item.skuId}`)">
               <img
                 :src="item.goodsImage"
+                loading="lazy"
+                decoding="async"
                 alt=""
                 @error="$event.target.style.visibility = 'hidden'"
               />

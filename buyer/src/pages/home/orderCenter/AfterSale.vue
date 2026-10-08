@@ -43,6 +43,8 @@
                   @click="goodsDetail(order.skuId, order.goodsId)"
                   class="hover-color"
                   :src="order.goodsImage"
+                  loading="lazy"
+                  decoding="async"
                   alt=""
                   @error="$event.target.style.visibility = 'hidden'"
                 />
@@ -89,7 +91,7 @@
       <div>
         <div class="goods-list modal-goods">
           <img @click="goodsDetail(singleOrder.skuId, singleOrder.goodsId)" class="hover-color"
-               :src="singleOrder.goodsImage" alt=""/>
+               :src="singleOrder.goodsImage" loading="lazy" decoding="async" alt=""/>
           <div>
             <div class="hover-color" @click="goodsDetail(singleOrder.skuId, singleOrder.goodsId)">
               {{ singleOrder.goodsName }}

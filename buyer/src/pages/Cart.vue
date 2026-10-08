@@ -111,6 +111,8 @@
                     goods.goodsSku.thumbnail ||
                     '../assets/images/goodsDetail/item-detail-1.jpg'
                   "
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div>
                   <p>

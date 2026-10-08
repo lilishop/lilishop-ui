@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="goods-row">
-        <img :src="afterSale.goodsImage" alt="" @error="$event.target.style.visibility = 'hidden'">
+        <img :src="afterSale.goodsImage" loading="lazy" decoding="async" alt="" @error="$event.target.style.visibility = 'hidden'">
         <div class="goods-info">
           <div class="goods-name">{{ afterSale.goodsName }}</div>
           <div class="store-line">
@@ -93,6 +93,8 @@
           v-for="img in afterSale.afterSaleImage.split(',')"
           :key="img"
           :src="img"
+          loading="lazy"
+          decoding="async"
           @click="perviewImg(img)"
           class="hover-pointer"
           alt=""

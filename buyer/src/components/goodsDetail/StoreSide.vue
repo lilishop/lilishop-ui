@@ -6,6 +6,8 @@
           v-if="store.storeLogo && !logoError"
           class="store-logo"
           :src="store.storeLogo"
+          loading="lazy"
+          decoding="async"
           :alt="storeName"
           @error="logoError = true"
         />
@@ -50,7 +52,7 @@
         :key="item.id"
         @click="goGoods(item)"
       >
-        <img class="recommend-img" :src="item.thumbnail || item.small" :alt="item.goodsName" />
+        <img class="recommend-img" :src="item.thumbnail || item.small" loading="lazy" decoding="async" :alt="item.goodsName" />
         <div class="recommend-info">
           <p class="recommend-name">{{ item.goodsName }}</p>
           <div class="recommend-meta">
