@@ -1,3 +1,20 @@
+import xss from "xss";
+
+// 富文本 XSS 过滤：默认白名单基础上放行 style 属性（内容由 cssfilter 过滤）
+const richTextWhiteList = { ...xss.whiteList };
+Object.keys(richTextWhiteList).forEach((tag) => {
+  richTextWhiteList[tag] = [...(richTextWhiteList[tag] || []), "style"];
+});
+const richTextFilter = new xss.FilterXSS({
+  whiteList: richTextWhiteList,
+  css: true
+});
+
+// 渲染服务端 HTML 前过滤，配合 v-html 使用：v-html="$filters.xssFilter(html)"
+export function xssFilter(html) {
+  return html ? richTextFilter.process(html) : "";
+}
+
 /**
  * 金钱单位置换  2999 --> 2,999.00
  * @param val
@@ -154,6 +171,10 @@ export function secrecyMobile(mobile) {
   return mobile.replace(/(\d{3})(\d{4})(\d{4})/, "$1****$3");
 }
 
+function padLeftZero(str) {
+  return ("00" + str).substr(str.length);
+}
+
 export function formatDate(date, fmt) {
   if (/(y+)/.test(fmt)) {
     fmt = fmt.replace(
@@ -181,8 +202,8 @@ export function formatDate(date, fmt) {
 }
 
 // 楼层装修，选择链接处理跳转方式
+// 所有跳转的分类 依次为 商品、分类、店铺、活动、页面、其他
 export function formatLinkType (item) {
-  const types = ['goods', 'category', 'shops', 'marketing', 'pages', 'other'] // 所有跳转的分类 依次为 商品、分类、店铺、活动、页面、其他
   let url = '';
   switch (item.___type) {
     case 'goods':

@@ -35,7 +35,7 @@ export default {
     initDepartmentData() {
       initDepartment().then((res) => {
         if (res.success) {
-          const arr = res.result;
+          const arr = Array.isArray(res.result) ? res.result : [];
           this.filterData(arr);
           this.department = arr;
         }

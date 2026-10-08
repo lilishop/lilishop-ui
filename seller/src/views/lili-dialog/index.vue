@@ -59,6 +59,7 @@ export default {
     goodsDialog,
     linkDialog,
   },
+  emits: ["closeFlag", "selectedGoodsData", "selectedLink"],
   data() {
     return {
       goodsVisible: false,

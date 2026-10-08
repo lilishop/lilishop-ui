@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { getFlashDiscountList, updateFlashDiscountStatus, getFlashDiscountDetail, saveFlashDiscount, editFlashDiscount } from "@/api/promotion.js";
+import { getFlashDiscountList, updateFlashDiscountStatus } from "@/api/promotion.js";
 
 export default {
   data() {

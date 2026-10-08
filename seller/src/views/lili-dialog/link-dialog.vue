@@ -25,6 +25,7 @@ import wap from "./wap.js";
 import goodsDialog from "./goods-dialog";
 import templateWay from "./template/index";
 export default {
+  emits: ["selectedLink"],
   components: {
     goodsDialog,
   },

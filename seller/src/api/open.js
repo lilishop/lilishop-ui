@@ -1,5 +1,5 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import { getRequest, postRequest, putRequest, deleteRequest, importRequest, uploadFileRequest } from '@/libs/axios';
+import { getRequest, postRequest, putRequest, deleteRequest } from '@/libs/axios';
 
 
 // 认证

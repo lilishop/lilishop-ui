@@ -1,5 +1,5 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import { getRequest, putRequest, postRequest } from "@/libs/axios";
+import { getRequest, putRequest, postRequest, deleteRequest } from "@/libs/axios";
 
 // 分页获取会员评价
 export const getMemberReview = (params) => {
@@ -26,13 +26,9 @@ export const getMember = (params) => {
   return getRequest("/member/getByPage", params);
 };
 
-//  添加或修改
-export const insertOrUpdateSpec = (params) => {
+//  添加或修改会员通知发送设置
+export const insertOrUpdateMemberNotice = (params) => {
   return postRequest("/memberNoticeSenter/insertOrUpdate", params);
-};
-//删除gUI个
-export const delSpec = (id, params) => {
-  return deleteRequest(`/goods/spec/del/${id}`, params);
 };
 
 //  获取会员列表

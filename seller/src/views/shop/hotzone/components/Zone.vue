@@ -36,7 +36,7 @@
         @mouseup.stop
         @mousemove.stop
       >
-        <img width="17" height="17" src="../assets/styles/icons8-edit-64.png"></img>
+        <img width="17" height="17" src="../assets/styles/icons8-edit-64.png" />
       </li>
       <li class="hz-flex-img">
         <img class="hz-u-img" :src="zoneForm.img" />

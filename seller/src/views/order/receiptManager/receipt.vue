@@ -227,13 +227,13 @@ export default {
       const map = {
         UNPAID: "danger",
         PAID: "primary",
-        UNDELIVERED: "",
+        UNDELIVERED: "info",
         DELIVERED: "info",
         COMPLETED: "success",
         TAKE: "warning",
         CANCELLED: "danger",
       };
-      return map[status] || "";
+      return map[status] || "info";
     },
     canInvoicing(row) {
       if (!row) return false;

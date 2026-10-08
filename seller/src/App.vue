@@ -20,11 +20,13 @@ export default {
       this.$store.commit("setOpenedList");
       this.$store.commit("initCachepage");
       if (!localStorage.getItem("category")) {
-        getCategoryTree().then((res) => {
-          if (res.success && Array.isArray(res.result)) {
-            localStorage.setItem("category", JSON.stringify(res.result));
-          }
-        });
+        getCategoryTree()
+          .then((res) => {
+            if (res.success && Array.isArray(res.result)) {
+              localStorage.setItem("category", JSON.stringify(res.result));
+            }
+          })
+          .catch(() => {});
       }
     }
   },

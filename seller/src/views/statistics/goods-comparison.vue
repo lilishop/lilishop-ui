@@ -196,12 +196,16 @@ export default {
       }
     },
     loadOptions() {
-      getCategoryTree().then((res) => {
-        if (res.success) this.categoryList = res.result || [];
-      });
-      getBrandListData().then((res) => {
-        if (res.success) this.brandList = res.result || [];
-      });
+      getCategoryTree()
+        .then((res) => {
+          if (res.success) this.categoryList = res.result || [];
+        })
+        .catch(() => {});
+      getBrandListData()
+        .then((res) => {
+          if (res.success) this.brandList = res.result || [];
+        })
+        .catch(() => {});
     },
     formatDate(date, startOfDay) {
       const y = date.getFullYear();

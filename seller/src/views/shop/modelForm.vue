@@ -219,7 +219,7 @@ export default {
     handleAddNav() {
       this.navList.list.push({ name: "", url: "", title: "" });
       this.$nextTick(() => {
-        this.selectedNav.title = val.title;
+        this.selectedNav = this.navList.list[this.navList.list.length - 1];
       });
     },
     handleMoveEnd({ newIndex, oldIndex }) {

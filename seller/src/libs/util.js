@@ -176,7 +176,7 @@ util.getRouterObjByName = function (routers, name) {
   if (!name || !routers || !routers.length) {
     return null;
   }
-  let routerObj = null;
+  let routerObj;
   for (let item of routers) {
     if (item.name == name) {
       return item;
@@ -221,7 +221,7 @@ util.setCurrentPath = function (vm, name) {
       });
     }
   });
-  let currentPathArr = [];
+  let currentPathArr;
   if (name == "home_index") {
     currentPathArr = [
       {

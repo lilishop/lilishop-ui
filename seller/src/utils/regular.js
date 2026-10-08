@@ -85,7 +85,7 @@ export const VARCHAR255 = {
 }
 
 export const URL200 = {
-  pattern: /[a-zA-z]+\:\/\/[^\s]{1,190}/,
+  pattern: /[a-zA-z]+:\/\/[^\s]{1,190}/,
   message: '请输入长度不超过200的URL地址'
 }
 export const REQUIRED = {

@@ -1,6 +1,6 @@
 
 // 统一请求路径前缀在libs/axios.js中修改
-import {getRequest, postRequest, postRequestWithNoForm, putRequest, deleteRequest, importRequest, getRequestWithNoToken} from '@/libs/axios';
+import {getRequest, postRequest, postRequestWithNoForm, putRequest, deleteRequest} from '@/libs/axios';
 
 
 //获取分销商品列表

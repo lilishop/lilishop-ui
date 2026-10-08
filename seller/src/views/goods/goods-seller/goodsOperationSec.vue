@@ -46,7 +46,7 @@
             <el-form-item label="商品卖点" prop="sellingPoint">
               <el-input v-model="baseInfoForm.sellingPoint" class="goods-field" clearable placeholder="商品卖点" type="text" />
             </el-form-item>
-            <el-form-item label="商品品牌" prop="brandId">
+            <el-form-item class="goods-field-with-refresh" label="商品品牌" prop="brandId">
               <el-select
                 v-model="baseInfoForm.brandId"
                 class="goods-field"
@@ -61,7 +61,7 @@
               </el-button>
             </el-form-item>
              
-              <el-form-item class="form-item-view-el" label="计量单位" prop="goodsUnit">
+              <el-form-item class="form-item-view-el goods-field-with-refresh" label="计量单位" prop="goodsUnit">
               <el-select v-model="baseInfoForm.goodsUnit" class="goods-field">
                 <el-option v-for="(item, index) in goodsUnitList" :key="index" :label="item" :value="item" />
               </el-select>
@@ -587,7 +587,7 @@
                 <el-radio-button :value="0">下架</el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item v-if="needsLogistics" class="form-item-view-el" label="运费模板" prop="templateId">
+            <el-form-item v-if="needsLogistics" class="form-item-view-el goods-field-with-refresh" label="运费模板" prop="templateId">
               <el-select v-model="baseInfoForm.templateId" class="goods-field">
                 <el-option v-for="item in logisticsTemplate" :key="item.id" :label="item.name" :value="item.id" />
               </el-select>
@@ -672,7 +672,6 @@ import tinymec from "@/views/lili-components/editor/index.vue";
 
 import { uploadFile } from "@/libs/axios";
 import { regular } from "@/utils";
-import DPlayer from 'dplayer';
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import AppointmentPublishPanel from "./components/AppointmentPublishPanel.vue";
 import {
@@ -696,7 +695,7 @@ export default {
   },
   props: {
     firstData: {
-      default: {},
+      default: () => ({}),
       type: Object,
     },
   },
@@ -1162,8 +1161,9 @@ export default {
       this.showSkuPicture = true;
     },
     // 初始化视频操作
-    initVideo() {
+    async initVideo() {
       if (this.baseInfoForm.goodsVideo) {
+        const { default: DPlayer } = await import("dplayer");
         this.goodsVideo = new DPlayer({
           container: document.getElementById('dplayer'),
           video: {
@@ -1338,8 +1338,6 @@ export default {
         file.url = file.response.result;
         if (images) {
           images.push(file.url);
-        } else {
-          images = [file.url];
         }
         this.previewPicture = file.url;
       }
@@ -1447,6 +1445,20 @@ export default {
         title: "文件格式不正确",
         desc: "文件 " + file.name + " 的格式不正确",
       });
+    },
+    beforeVideoUpload(file) {
+      const allowTypes = ["avi", "wmv", "mpeg", "mp4", "mov"];
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      if (!allowTypes.includes(ext)) {
+        this.$Message.warning("视频格式仅支持 avi、wmv、mpeg、mp4、mov");
+        return false;
+      }
+      const maxSize = 50 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.$Message.warning("视频大小不能超过 50MB");
+        return false;
+      }
+      this.loadingVideo = true;
     },
     handleSuccessGoodsVideo(res, file) {
       if (file.response) {
@@ -2097,7 +2109,6 @@ export default {
           this.$Message.error("规格值不能大于10个！");
           return;
         }
-        let beforeLength = item.spec_values.length;
         let itemValue = {
           name: item.name,
           value: this.newSkuValues[$index],

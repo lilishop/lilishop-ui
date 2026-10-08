@@ -1,123 +1,104 @@
 <template>
   <div class="message-main-con">
     <div class="message-mainlist-con">
-      <div>
-        <el-button size="large" text style="width: 100%" @click="setCurrentMesType('unread')">
-          <div class="mes-wrap">
-            <transition name="mes-current-type-btn">
-              <el-icon v-show="currentMessageType == 'unread'"><Check /></el-icon>
-            </transition>
-            <span class="mes-type-btn-text">未读消息</span>
-            <el-badge :value="unReadCount" class="message-count-badge-outer" />
-          </div>
-        </el-button>
-      </div>
-      <div>
-        <el-button size="large" text style="width: 100%" @click="setCurrentMesType('read')">
-          <div class="mes-wrap">
-            <transition name="mes-current-type-btn">
-              <el-icon v-show="currentMessageType == 'read'"><Check /></el-icon>
-            </transition>
-            <span class="mes-type-btn-text">已读消息</span>
-          </div>
-        </el-button>
-      </div>
-      <div>
-        <el-button size="large" text style="width: 100%" @click="setCurrentMesType('recycleBin')">
-          <div class="mes-wrap">
-            <transition name="mes-current-type-btn">
-              <el-icon v-show="currentMessageType == 'recycleBin'"><Check /></el-icon>
-            </transition>
-            <span class="mes-type-btn-text">回收站</span>
-          </div>
-        </el-button>
+      <div
+        v-for="item in mesTypeList"
+        :key="item.type"
+        class="mes-type-item"
+        :class="{ active: currentMessageType === item.type }"
+        @click="setCurrentMesType(item.type)"
+      >
+        <span class="mes-type-btn-text">{{ item.title }}</span>
+        <el-badge
+          v-if="item.type === 'unread' && unReadCount > 0"
+          :value="unReadCount"
+          class="message-count-badge-outer"
+        />
       </div>
     </div>
     <div class="message-content-con">
-      <transition name="view-message">
-        <div v-if="showMesTitleList" class="message-title-list-con">
-          <el-table
-            ref="messageList"
-            v-loading="loading"
-            class="mt_10"
-            :data="currentMesList"
-            :empty-text="noDataText"
-            style="width: 100%"
-          >
-            <el-table-column label=" " min-width="300">
-              <template #default="{ row }">
-                <a class="link-text mes-title-link" @click="openMessage(row)">{{ row.title }}</a>
+      <div v-if="showMesTitleList" class="message-title-list-con">
+        <el-table
+          ref="messageList"
+          v-loading="loading"
+          :data="currentMesList"
+          :empty-text="noDataText"
+          :show-header="false"
+          style="width: 100%"
+        >
+          <el-table-column min-width="300">
+            <template #default="{ row }">
+              <a class="link-text mes-title-link" @click="openMessage(row)">{{ row.title }}</a>
+            </template>
+          </el-table-column>
+          <el-table-column width="200" align="center">
+            <template #default="{ row }">
+              <el-icon class="mes-time-icon"><Clock /></el-icon>
+              <span>{{ row.createTime }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column width="180" align="center">
+            <template #default="{ row }">
+              <template v-if="currentMessageType == 'unread'">
+                <a class="link-text" @click="markAsRead(row)">标为已读</a>
               </template>
-            </el-table-column>
-            <el-table-column label=" " width="190" align="center">
-              <template #default="{ row }">
-                <el-icon style="margin-right: 5px; vertical-align: middle"><Clock /></el-icon>
-                <span>{{ row.createTime }}</span>
+              <template v-else-if="currentMessageType == 'read'">
+                <a class="link-text" @click="deleteMes(row)">删除</a>
               </template>
-            </el-table-column>
-            <el-table-column label=" " width="210" align="center">
-              <template #default="{ row }">
-                <template v-if="currentMessageType == 'unread'">
-                  <a class="link-text" @click="markAsRead(row)">标为已读</a>
-                </template>
-                <template v-else-if="currentMessageType == 'read'">
-                  <a class="link-text" @click="deleteMes(row)">删除</a>
-                </template>
-                <template v-else>
-                  <a class="link-text" @click="restoreMes(row)">还原</a>
-                  <span class="op-split">|</span>
-                  <a class="link-text" @click="deleteReal(row)">彻底删除</a>
-                </template>
+              <template v-else>
+                <a class="link-text" @click="restoreMes(row)">还原</a>
+                <span class="op-split">|</span>
+                <a class="link-text" @click="deleteReal(row)">彻底删除</a>
               </template>
-            </el-table-column>
-          </el-table>
-          <div class="page-fix mt_10" style="display: flex; justify-content: flex-end">
-            <el-pagination
-              v-model:current-page="params.pageNumber"
-              v-model:page-size="params.pageSize"
-              :page-sizes="[5, 10]"
-              :total="total"
-              layout="total, sizes, prev, pager, next, jumper"
-              size="small"
-              @current-change="changePage"
-              @size-change="changePageSize"
-            />
-          </div>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="page-bar">
+          <el-pagination
+            v-model:current-page="params.pageNumber"
+            v-model:page-size="params.pageSize"
+            :page-sizes="[5, 10]"
+            :total="total"
+            layout="total, sizes, prev, pager, next, jumper"
+            size="small"
+            @current-change="changePage"
+            @size-change="changePageSize"
+          />
         </div>
-      </transition>
-      <transition name="back-message-list">
-        <div v-if="!showMesTitleList" class="message-view-content-con">
-          <div class="message-content-top-bar">
-            <span class="mes-back-btn-con">
-              <el-button type="primary" link @click="backMesTitleList">
-                <el-icon><ArrowLeft /></el-icon>&nbsp;&nbsp;返回
-              </el-button>
-            </span>
-            <h3 class="mes-title">{{ mes.title }}</h3>
-          </div>
-          <p class="mes-time-con">
-            <el-icon><Clock /></el-icon>
-            &nbsp;&nbsp;{{ mes.time }}
-          </p>
-          <div class="message-content-body">
-            <p class="message-content" v-html="mes.content"></p>
-          </div>
+      </div>
+      <div v-else class="message-view-content-con">
+        <div class="message-content-top-bar">
+          <el-button type="primary" link @click="backMesTitleList">
+            <el-icon><ArrowLeft /></el-icon>返回
+          </el-button>
+          <h3 class="mes-title">{{ mes.title }}</h3>
         </div>
-      </transition>
+        <p class="mes-time-con">
+          <el-icon class="mes-time-icon"><Clock /></el-icon>{{ mes.time }}
+        </p>
+        <div class="message-content-body">
+          <p class="message-content" v-html="$filters.xssFilter(mes.content)"></p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { Check, Clock, ArrowLeft } from "@element-plus/icons-vue";
+import { Clock, ArrowLeft } from "@element-plus/icons-vue";
 import * as API_Index from "@/api/index";
 
 export default {
   name: "message_index",
-  components: { Check, Clock, ArrowLeft },
+  components: { Clock, ArrowLeft },
   data() {
     return {
       loading: true,
+      mesTypeList: [
+        { type: "unread", title: "未读消息" },
+        { type: "read", title: "已读消息" },
+        { type: "recycleBin", title: "回收站" },
+      ],
       params: {
         status: "UN_READY",
         pageNumber: 1,
@@ -146,7 +127,7 @@ export default {
       this.refreshMessage();
     },
     refreshMessage() {
-      let status = "UN_READY";
+      let status;
       const type = this.currentMessageType;
       if (type == "unread") status = "UN_READY";
       else if (type == "read") status = "ALREADY_READY";

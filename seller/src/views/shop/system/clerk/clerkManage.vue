@@ -194,7 +194,6 @@ import {validateMobile} from "@/libs/validate";
 import { Search } from "@element-plus/icons-vue";
 import departmentChoose from "@/views/my-components/lili/department-choose";
 import departmentTreeChoose from "@/views/my-components/lili/department-tree-choose";
-import uploadPicInput from "@/views/my-components/lili/upload-pic-input";
 
 export default {
   name: "clerk-manage",
@@ -202,7 +201,6 @@ export default {
     Search,
     departmentChoose,
     departmentTreeChoose,
-    uploadPicInput,
   },
   data() {
     return {

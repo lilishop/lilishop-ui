@@ -112,7 +112,7 @@
         </el-table-column>
         <el-table-column label="活动时间" width="200">
           <template #default="{ row }">
-            <div v-if="row" class="activity-time" v-html="formatActivityTime(row)"></div>
+            <div v-if="row" class="activity-time" v-html="$filters.xssFilter(formatActivityTime(row))"></div>
           </template>
         </el-table-column>
         <el-table-column
@@ -298,7 +298,7 @@ export default {
         INSIDE: "success",
         IGAME: "success",
       };
-      return map[type] || "";
+      return map[type] || "info";
     },
     couponTypeText(type) {
       const map = {
@@ -312,7 +312,7 @@ export default {
         DISCOUNT: "primary",
         PRICE: "info",
       };
-      return map[type] || "";
+      return map[type] || "info";
     },
     isSameSelection(next, current) {
       const a = next || [];

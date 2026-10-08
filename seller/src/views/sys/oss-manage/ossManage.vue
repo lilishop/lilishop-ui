@@ -382,7 +382,6 @@ import {
   renameFile,
   updateFileDirectory,
 } from "@/api/index";
-import DPlayer from "dplayer";
 import {sellerUrl} from "@/libs/axios";
 import config from "@/config/index";
 
@@ -587,7 +586,7 @@ export default {
           key: "createBy",
           width: 200,
           render: (h, params) => {
-            let m = "";
+            let m;
             if (params.row.userEnums == "MANAGER") {
               m = "[管理员]";
             } else if (params.row.userEnums == "STORE") {
@@ -771,7 +770,7 @@ export default {
           width: 120,
           sortable: true,
           render: (h, params) => {
-            let m = "";
+            let m;
             if (params.row.userEnums == "MANAGER") {
               m = "[管理员]";
             } else if (params.row.userEnums == "STORE") {
@@ -1293,13 +1292,14 @@ export default {
       this.pendingVideoUrl = v.url;
       this.videoVisible = true;
     },
-    initDPlayer() {
+    async initDPlayer() {
       const container = this.$refs.dplayerRef;
       if (!container || !this.pendingVideoUrl) return;
       if (dp) {
         dp.destroy();
         dp = null;
       }
+      const { default: DPlayer } = await import("dplayer");
       dp = new DPlayer({
         container,
         screenshot: true,

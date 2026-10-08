@@ -249,7 +249,6 @@
 </template>
 <script>
 import * as API_Goods from "@/api/goods";
-import { Chart } from "@antv/g2";
 import orderRow from "./order/orderDetail";
 import refundRow from "./order/refundOrder";
 import affixTime from "@/views/lili-components/affix-time";
@@ -467,6 +466,7 @@ export default {
         this.chartList = res.result;
 
         if (!this.orderChart) {
+          const { Chart } = await import("@antv/g2");
           this.orderChart = new Chart({
             container: "orderChart",
             autoFit: true,

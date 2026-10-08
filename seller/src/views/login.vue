@@ -140,7 +140,7 @@ export default {
   },
   data() {
     return {
-      loginBg: require("@/assets/login-bg.png"),
+      loginBg: require("@/assets/login-bg.jpg"),
       loginLogo: require("@/assets/logo-lilishop.png"),
       saveLogin: true,
       sendCodeLoading: false,
@@ -203,28 +203,32 @@ export default {
       this.setStore("accessToken", accessToken);
       this.setStore("refreshToken", res.result.refreshToken);
 
-      userMsg().then((res) => {
-        if (res.success) {
-          this.setStore("saveLogin", this.saveLogin);
-          if (this.saveLogin) {
-            Cookies.set("userInfoSeller", JSON.stringify(res.result), {
-              expires: 7,
+      userMsg()
+        .then((res) => {
+          if (res.success) {
+            this.setStore("saveLogin", this.saveLogin);
+            if (this.saveLogin) {
+              Cookies.set("userInfoSeller", JSON.stringify(res.result), {
+                expires: 7,
+              });
+            } else {
+              Cookies.set("userInfoSeller", JSON.stringify(res.result));
+            }
+
+            util.initRouter(this);
+            this.$store.commit("setAvatarPath", res.result.storeLogo);
+
+            const redirectRouter = this.$route.query.redirect;
+            this.$router.push({
+              path: redirectRouter || "/home",
             });
           } else {
-            Cookies.set("userInfoSeller", JSON.stringify(res.result));
+            this.loading = false;
           }
-
-          util.initRouter(this);
-          this.$store.commit("setAvatarPath", res.result.storeLogo);
-
-          const redirectRouter = this.$route.query.redirect;
-          this.$router.push({
-            path: redirectRouter || "/home",
-          });
-        } else {
+        })
+        .catch(() => {
           this.loading = false;
-        }
-      });
+        });
     },
     sendCode() {
       if (!this.isMobileValid) {

@@ -17,22 +17,6 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="商品品牌" prop="brandId">
-          <el-select
-            v-model="searchForm.brandId"
-            placeholder="请选择商品品牌"
-            clearable
-            filterable
-            style="width: 240px"
-          >
-            <el-option
-              v-for="item in brandList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item label="店铺分类" prop="storeCategoryPath">
           <el-cascader
             v-model="searchForm.storeCategoryPath"
@@ -245,7 +229,7 @@ import {
   distributionGoodsBatchCheck,
   updateDistributionGoodsCommission,
 } from "@/api/distribution";
-import { getBrandListData, getShopGoodsLabelListSeller } from "@/api/goods";
+import { getShopGoodsLabelListSeller } from "@/api/goods";
 import liliDialog from "@/views/lili-dialog";
 
 export default {
@@ -266,12 +250,10 @@ export default {
         sort: "createTime",
         order: "desc",
         goodsName: "",
-        brandId: "",
         storeCategoryPath: "",
         goodsType: "",
         authStatus: "",
       },
-      brandList: [],
       shopCategoryList: [],
       shopCategoryProps: {
         value: "value",
@@ -298,14 +280,13 @@ export default {
       this.getDataList();
     },
     loadFilterOptions() {
-      getBrandListData().then((res) => {
-        this.brandList = Array.isArray(res) ? res : res?.result || [];
-      });
-      getShopGoodsLabelListSeller().then((res) => {
-        if (res?.success) {
-          this.shopCategoryList = this.formatShopCategory(res.result || []);
-        }
-      });
+      getShopGoodsLabelListSeller()
+        .then((res) => {
+          if (res?.success) {
+            this.shopCategoryList = this.formatShopCategory(res.result || []);
+          }
+        })
+        .catch(() => {});
     },
     formatShopCategory(list) {
       return (list || []).map((item) => ({

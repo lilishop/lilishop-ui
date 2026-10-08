@@ -4,9 +4,7 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
-  getRequestHasHeader,
-  importRequest,
-  getRequestWithNoToken
+  getRequestHasHeader
 } from "@/libs/axios";
 
 

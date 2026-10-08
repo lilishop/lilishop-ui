@@ -8,16 +8,20 @@
     </div>
     <!-- 二级分类 -->
     <div class="list">
-      <div class="list-item" :class="{active:secondIndex === secondI}" @click="handleClickSecondChild(second,secondI)" v-if="secondLevel.length != 0" v-for="(second,secondI) in secondLevel"
-        :key="secondI">
-        {{second.name}}
-      </div>
+      <template v-if="secondLevel.length != 0">
+        <div class="list-item" :class="{active:secondIndex === secondI}" @click="handleClickSecondChild(second,secondI)" v-for="(second,secondI) in secondLevel"
+          :key="secondI">
+          {{second.name}}
+        </div>
+      </template>
     </div>
     <!--三级分类 -->
     <div class="list">
-      <div class="list-item" :class="{active:thirdIndex === thirdI}" @click="handleClickthirdChild(third,thirdI)" v-if="thirdLevel.length != 0" v-for="(third,thirdI) in thirdLevel" :key="thirdI">
-        {{third.name}}
-      </div>
+      <template v-if="thirdLevel.length != 0">
+        <div class="list-item" :class="{active:thirdIndex === thirdI}" @click="handleClickthirdChild(third,thirdI)" v-for="(third,thirdI) in thirdLevel" :key="thirdI">
+          {{third.name}}
+        </div>
+      </template>
     </div>
   </div>
 

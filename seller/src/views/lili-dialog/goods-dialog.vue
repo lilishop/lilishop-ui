@@ -213,6 +213,7 @@ const defaultFilterForm = () => ({
 });
 
 export default {
+  emits: ["selected"],
   props: {
     selectedWay: {
       type: Array,
@@ -453,19 +454,25 @@ export default {
     },
     init() {
       this.getQueryGoodsList();
-      API_Goods.getCategoryTree().then((res) => {
-        if (res?.success) {
-          this.platformCategoryList = res.result || [];
-        }
-      });
-      API_Goods.getShopGoodsLabelListSeller().then((res) => {
-        if (res?.success) {
-          this.shopCategoryList = this.formatShopCategory(res.result || []);
-        }
-      });
-      API_Goods.getBrandListData().then((res) => {
-        this.brandList = Array.isArray(res) ? res : res?.result || [];
-      });
+      API_Goods.getCategoryTree()
+        .then((res) => {
+          if (res?.success) {
+            this.platformCategoryList = res.result || [];
+          }
+        })
+        .catch(() => {});
+      API_Goods.getShopGoodsLabelListSeller()
+        .then((res) => {
+          if (res?.success) {
+            this.shopCategoryList = this.formatShopCategory(res.result || []);
+          }
+        })
+        .catch(() => {});
+      API_Goods.getBrandListData()
+        .then((res) => {
+          this.brandList = Array.isArray(res) ? res : res?.result || [];
+        })
+        .catch(() => {});
     },
   },
 };

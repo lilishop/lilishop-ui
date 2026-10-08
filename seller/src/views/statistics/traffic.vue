@@ -43,7 +43,6 @@
 <script>
 import affixTime from "@/views/lili-components/affix-time";
 import * as API_Member from "@/api/member";
-import { Chart } from "@antv/g2";
 
 export default {
   components: { affixTime },
@@ -131,7 +130,7 @@ export default {
     },
     init() {
       this.orderChart ? this.orderChart.clear() : "";
-      API_Member.getStatisticsList(this.params).then((res) => {
+      API_Member.getStatisticsList(this.params).then(async (res) => {
         if (res.result) {
           this.data = res.result;
           res.result.forEach((item) => {
@@ -140,6 +139,7 @@ export default {
           });
 
           if (!this.orderChart) {
+            const { Chart } = await import("@antv/g2");
             this.orderChart = new Chart({
               container: "orderChart",
               autoFit: true,

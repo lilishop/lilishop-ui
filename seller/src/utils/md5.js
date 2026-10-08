@@ -152,19 +152,6 @@ function binl2hex(binarray) {
 }
 
 /*
- * Convert an array of little-endian words to a base64 encoded string.
- */
-function binl2b64(binarray) {
-  var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-  var str = ""
-  for (var i = 0; i < binarray.length * 32; i += 6) {
-    str += tab.charAt(((binarray[i >> 5] << (i % 32)) & 0x3F) |
-      ((binarray[i >> 5 + 1] >> (32 - i % 32)) & 0x3F))
-  }
-  return str
-}
-
-/*
  * Convert an 8-bit character string to a sequence of 16-word blocks, stored
  * as an array, and append appropriate padding for MD4/5 calculation.
  * If any of the characters are >255, the high byte is silently ignored.
@@ -173,7 +160,7 @@ function str2binl(str) {
   var nblk = ((str.length + 8) >> 6) + 1 // number of 16-word blocks
   var blks = new Array(nblk * 16)
   for (var i = 0; i < nblk * 16; i++) blks[i] = 0
-  for (var i = 0; i < str.length; i++)
+  for (i = 0; i < str.length; i++)
     blks[i >> 2] |= (str.charCodeAt(i) & 0xFF) << ((i % 4) * 8)
   blks[i >> 2] |= 0x80 << ((i % 4) * 8)
   blks[nblk * 16 - 2] = str.length * 8
@@ -181,40 +168,9 @@ function str2binl(str) {
 }
 
 /*
- * Convert a wide-character string to a sequence of 16-word blocks, stored as
- * an array, and append appropriate padding for MD4/5 calculation.
- */
-function strw2binl(str) {
-  var nblk = ((str.length + 4) >> 5) + 1 // number of 16-word blocks
-  var blks = new Array(nblk * 16)
-  for (var i = 0; i < nblk * 16; i++) blks[i] = 0
-  for (var i = 0; i < str.length; i++)
-    blks[i >> 1] |= str.charCodeAt(i) << ((i % 2) * 16)
-  blks[i >> 1] |= 0x80 << ((i % 2) * 16)
-  blks[nblk * 16 - 2] = str.length * 16
-  return blks
-}
-
-/*
  * External interface
  */
 function hexMD5(str) {
-  return binl2hex(coreMD5(str2binl(str)))
-}
-
-function hexMD5w(str) {
-  return binl2hex(coreMD5(strw2binl(str)))
-}
-
-function b64MD5(str) {
-  return binl2b64(coreMD5(str2binl(str)))
-}
-
-function b64MD5w(str) {
-  return binl2b64(coreMD5(strw2binl(str)))
-}
-/* Backward compatibility */
-function calcMD5(str) {
   return binl2hex(coreMD5(str2binl(str)))
 }
 

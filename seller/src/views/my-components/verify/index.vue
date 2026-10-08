@@ -119,14 +119,18 @@ export default {
       this.distance = 0;
       this.bgColor = "#04ad11";
       this.verifyText = "拖动滑块解锁";
-      getVerifyImg(this.type).then((res) => {
-        if (res.result) {
-          this.data = res.result;
-          this.show = true;
-        } else {
-          this.$Message.warning("请求失败请重试！");
-        }
-      });
+      getVerifyImg(this.type)
+        .then((res) => {
+          if (res.result) {
+            this.data = res.result;
+            this.show = true;
+          } else {
+            this.$Message.warning("请求失败请重试！");
+          }
+        })
+        .catch(() => {
+          this.$Message.warning("验证码加载失败，请点击重试");
+        });
     },
   },
   watch: {

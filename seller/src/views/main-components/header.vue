@@ -7,7 +7,6 @@
 </template>
 
 <script>
-import defaultLogo from "@/assets/logo.png";
 import { getBaseSite } from "@/api/common.js";
 
 export default {
@@ -43,19 +42,21 @@ export default {
       document.getElementsByTagName("head")[0].appendChild(link);
     },
     getSite() {
-      getBaseSite().then((res) => {
-        if (res.success && res.result.settingValue) {
-          const data = JSON.parse(res.result.settingValue);
-          const expirationTime = new Date().setHours(new Date().getHours() + 1);
-          localStorage.setItem("seller_expiration_time", expirationTime);
-          localStorage.setItem("sellersiteName", data.siteName);
-          localStorage.setItem("sellerlogoImg", data.storeSideLogo);
-          localStorage.setItem("sellerIconImg", data.storeSideIcon);
-          this.storeSideLogo = data.storeSideLogo;
-          window.document.title = data.siteName;
-          this.applyFavicon(data.storeSideIcon);
-        }
-      });
+      getBaseSite()
+        .then((res) => {
+          if (res.success && res.result.settingValue) {
+            const data = JSON.parse(res.result.settingValue);
+            const expirationTime = new Date().setHours(new Date().getHours() + 1);
+            localStorage.setItem("seller_expiration_time", expirationTime);
+            localStorage.setItem("sellersiteName", data.siteName);
+            localStorage.setItem("sellerlogoImg", data.storeSideLogo);
+            localStorage.setItem("sellerIconImg", data.storeSideIcon);
+            this.storeSideLogo = data.storeSideLogo;
+            window.document.title = data.siteName;
+            this.applyFavicon(data.storeSideIcon);
+          }
+        })
+        .catch(() => {});
     },
   },
   mounted() {

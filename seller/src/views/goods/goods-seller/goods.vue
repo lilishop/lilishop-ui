@@ -60,21 +60,6 @@
               placeholder="请选择平台商品分类"
             />
           </el-form-item>
-          <el-form-item label="商品品牌" prop="brandId">
-            <el-select
-              v-model="searchForm.brandId"
-              placeholder="请选择商品品牌"
-              clearable
-              filterable
-            >
-              <el-option
-                v-for="item in brandList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
           <el-form-item label="商品类型" prop="goodsType">
             <el-select
               v-model="searchForm.goodsType"
@@ -287,7 +272,6 @@
 
 <script>
 import {
-  getBrandListData,
   getCategoryTree,
   getGoodsListData,
   getGoodsNumerData,
@@ -314,14 +298,12 @@ export default {
         categoryPath: "",
         skuName: "",
         skuSn: "",
-        brandId: "",
         stockStatus: "",
         stockMin: "",
         stockMax: "",
         priceMin: "",
         priceMax: "",
       },
-      brandList: [],
       platformCategoryList: [],
       shopCategoryList: [],
       platformCategoryProps: {
@@ -439,19 +421,20 @@ export default {
       this.getNumberData();
     },
     loadFilterOptions() {
-      getBrandListData().then((res) => {
-        this.brandList = Array.isArray(res) ? res : res?.result || [];
-      });
-      getShopGoodsLabelListSeller().then((res) => {
-        if (res?.success) {
-          this.shopCategoryList = this.formatShopCategory(res.result || []);
-        }
-      });
-      getCategoryTree().then((res) => {
-        if (res?.success) {
-          this.platformCategoryList = res.result || [];
-        }
-      });
+      getShopGoodsLabelListSeller()
+        .then((res) => {
+          if (res?.success) {
+            this.shopCategoryList = this.formatShopCategory(res.result || []);
+          }
+        })
+        .catch(() => {});
+      getCategoryTree()
+        .then((res) => {
+          if (res?.success) {
+            this.platformCategoryList = res.result || [];
+          }
+        })
+        .catch(() => {});
     },
     onStockStatusChange(value) {
       if (value !== "IN_STOCK") {

@@ -1,8 +1,6 @@
 // 统一请求路径前缀在libs/axios.js中修改
 import { getRequest, postRequest, putRequest, deleteRequest, postRequestWithNoForm } from "@/libs/axios";
 
-import { baseUrl } from "@/libs/axios.js";
-
 // 下载待发货的订单列表
 export const verificationCode = verificationCode => {
   return getRequest(`/order/order/getOrderByVerificationCode/${verificationCode}`);

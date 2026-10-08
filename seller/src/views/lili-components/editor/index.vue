@@ -10,6 +10,7 @@
 </template>
 <script>
 import { initEditor } from "@/views/lili-components/editor/config";
+import { loadTinymce } from "@/views/lili-components/editor/load-tinymce";
 
 import uploadImage from "@/views/lili-components/editor/upload-image.vue";
 export default {
@@ -154,11 +155,18 @@ export default {
     },
   },
   mounted() {
-    this.init();
+    // 编辑器脚本改为按需加载，加载完成后再初始化
+    loadTinymce().then(() => {
+      this.init();
+    });
   },
   activated() {
     if (window.tinymce) {
       this.initTinymce();
+    } else {
+      loadTinymce().then(() => {
+        this.initTinymce();
+      });
     }
   },
   deactivated() {

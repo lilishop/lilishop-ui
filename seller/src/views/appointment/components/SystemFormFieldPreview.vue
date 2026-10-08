@@ -1,7 +1,7 @@
 <template>
   <div class="field-preview" :class="{ 'is-inline': isInlineOptions }">
     <template v-if="field.field_type === 'RICH_TEXT'">
-      <div class="rich-preview" v-html="field.rich_text_content || '富文本说明'" />
+      <div class="rich-preview" v-html="$filters.xssFilter(field.rich_text_content) || '富文本说明'" />
     </template>
     <template v-else>
       <div class="field-label">

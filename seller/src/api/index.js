@@ -281,11 +281,6 @@ export const delGoodsUnit = (ids) => {
   return deleteRequest(`/goods/goodsUnit/delete/${ids}`);
 };
 
-//
-export const handleRefreshToken = (token) => {
-  return getRequestWithNoToken(`/passport/login/refresh/${token}`);
-};
-
 // 获取一级部门
 export const initDepartment = (params) => {
   return getRequest("/department", params);

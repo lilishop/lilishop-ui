@@ -125,7 +125,7 @@
 </template>
 
 <script>
-import { addLiveStoreGoods, getLiveGoods } from "@/api/promotion.js";
+import { getLiveInfo } from "@/api/promotion.js";
 export default {
   data() {
     return {

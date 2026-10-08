@@ -145,7 +145,6 @@ export default {
             new Date().getTime()) /
           1000
         );
-        const that = this;
         this.interval = setInterval(() => {
           this.diffSeconds--;
         }, 1000);

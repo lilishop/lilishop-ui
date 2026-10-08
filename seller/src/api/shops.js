@@ -1,12 +1,5 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import {getRequest, postRequest, putRequest, deleteRequest, importRequest, getRequestWithNoToken} from '@/libs/axios';
-
-
-// 获取数据字典
-export const getDictData = "/dictData/getByType/"
-// Websocket
-export const ws = "/ws"
-
+import {getRequest, postRequest, putRequest, deleteRequest} from '@/libs/axios';
 
 //查询店铺列表
 export const getShopListData = (params) => {

@@ -1,5 +1,4 @@
 import { createApp } from "vue";
-import "core-js/stable";
 import "./styles/theme.less";
 import App from "./App.vue";
 import { router } from "./router/index";
@@ -82,6 +81,15 @@ app.config.globalProperties.wapLinkTo = function (goodsId, skuId) {
 
 router.isReady().then(() => {
   app.mount("#app");
+});
+
+// axios 拦截器已对所有请求失败统一弹出提示（Message.error），
+// 调用方未写 .catch 的 axios rejection 不再触发开发环境错误弹层；
+// 非 axios 的未处理 rejection（真代码 bug）仍会正常暴露
+window.addEventListener("unhandledrejection", (event) => {
+  if (event.reason && event.reason.isAxiosError) {
+    event.preventDefault();
+  }
 });
 
 export { app, util };

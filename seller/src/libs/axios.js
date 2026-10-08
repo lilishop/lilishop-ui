@@ -3,7 +3,6 @@ import { getStore, setStore } from "./storage";
 import { router  } from "../router/index";
 import { Message } from "@/utils/message";
 import Cookies from "js-cookie";
-import { handleRefreshToken } from "@/api/index";
 import {v4 as uuidv4} from 'uuid';
 
 // 统一请求路径前缀
@@ -14,20 +13,23 @@ export const sellerUrl =
 export const baseUrl = sellerUrl + BASE.PREFIX;
 // 文件上传接口
 export const uploadFile = sellerUrl + "/store/common/upload/file";
-var isRefreshToken = 0;
-const refreshToken = getTokenDebounce();
 const service = axios.create({
-
+  // 实例级超时：商家端有 Excel 导入导出、文件上传等慢操作，给 60s
+  timeout: 60000,
   baseURL: baseUrl
 });
-axios.defaults.timeout = 100000
 const recordCurrentPath = () => {
   return router.currentRoute.value.fullPath;
 };
 // 跳转登录页
-const redirectLogin = () => {
-  router.push({path:'/login',query:{redirect: recordCurrentPath()}});
-}
+const redirectLogin = (message) => {
+  if (router.currentRoute.value.name !== "login") {
+    if (message) {
+      Message.error(message);
+    }
+    router.push({ path: "/login", query: { redirect: recordCurrentPath() } });
+  }
+};
 
 service.interceptors.request.use(
   config => {
@@ -48,7 +50,7 @@ service.interceptors.request.use(
   },
   err => {
     Message.error("请求超时");
-    return Promise.resolve(err);
+    return Promise.reject(err);
   }
 );
 
@@ -57,123 +59,106 @@ service.interceptors.response.use(
   response => {
     const data = response.data;
     // 根据返回的code值来做不同的处理(和后端约定)
-    if (!data.success && data.message) {
-      Message.error(data.message);
-    }
     switch (data.code) {
-      case 400:
-        if (data.message !== null) {
-          Message.error(data.message);
-        } else {
-          Message.error("系统异常");
-        }
-        break;
       case 401:
         // 未登录 清除已登录状态
         Cookies.set("userInfoSeller", "");
         setStore("accessToken", "");
-        if (router.history.current.name != "login") {
-          if (data.message !== null) {
-            Message.error(data.message);
-          } else {
-            Message.error("未知错误，请重新登录");
-          }
-          redirectLogin();
-        }
-        break;
+        redirectLogin(data.message || "未知错误，请重新登录");
+        return data;
+      case 400:
       case 500:
         // 系统异常
-        if (data.message !== null) {
-          Message.error(data.message);
-        } else {
-          Message.error("系统异常");
-        }
-        break;
+        Message.error(data.message || "系统异常");
+        return data;
       default:
+        if (!data.success && data.message) {
+          Message.error(data.message);
+        }
         return data;
     }
   },
   async error => {
     // 返回状态码不为200时候的错误处理
-    if (error.response) {
-      if (error.response.status === 401) {
+    const response = error.response;
+    const config = error.config;
+    if (response) {
+      if (response.status === 401) {
         // 这种情况一般调到登录页
-      } else if (error.response.status === 404) {
-        // 避免刷新token报错
-      } else if (error.response.status === 403) {
-        isRefreshToken++;
-        if (isRefreshToken === 1) {
-          const getTokenRes = await refreshToken();
-          if (getTokenRes === "success") {
-            // 刷新token
-            if (isRefreshToken === 1) {
-              error.response.config.headers.accessToken = getStore(
-                "accessToken"
-              );
-              return service(error.response.config);
-            } else {
-              router.go(0);
-            }
-          } else {
-            Cookies.set("userInfoSeller", "");
-            redirectLogin();
-          }
-          isRefreshToken = 0;
+        redirectLogin("登录状态已过期，请重新登录");
+      } else if (
+        response.status === 403 &&
+        config &&
+        !config._isRefreshRequest &&
+        !config._retryAfterRefresh
+      ) {
+        // accessToken 过期：刷新 token 后重试原请求
+        config._retryAfterRefresh = true;
+        const result = await refreshToken();
+        if (result === "success") {
+          config.headers.accessToken = getStore("accessToken");
+          return service(config);
         }
+        Cookies.set("userInfoSeller", "");
+        redirectLogin();
+      } else if (response.status === 404) {
+        // 刷新请求已用 _isRefreshRequest 标记隔离，这里的 404 都是真实业务请求
+        Message.error(
+          (response.data && response.data.message) || "请求的资源不存在"
+        );
       } else {
         // 其他错误处理
-        Message.error(error.response.data.message);
+        Message.error(
+          (response.data && response.data.message) || "系统异常，请稍后重试"
+        );
       }
+    } else {
+      // 断网/超时等无响应的错误
+      Message.error(
+        error.code === "ECONNABORTED"
+          ? "请求超时，请稍后重试"
+          : "网络异常，请检查网络连接"
+      );
     }
-
-    /* router.push("/login") */
-    return Promise.resolve(error);
+    return Promise.reject(error);
   }
 );
 
-// 防抖闭包来一波
-function getTokenDebounce() {
-  let lock = false;
-  let success = false;
-  return function() {
-    if (!lock) {
-      lock = true;
-      let oldRefreshToken = getStore("refreshToken");
-      handleRefreshToken(oldRefreshToken)
-        .then(res => {
-          if (res.success) {
-            let { accessToken, refreshToken } = res.result;
-            setStore("accessToken", accessToken);
-            setStore("refreshToken", refreshToken);
-
-            success = true;
-            lock = false;
-          } else {
-            success = false;
-            lock = false;
-            // router.push('/login')
-          }
-        })
-        .catch(err => {
-          success = false;
-          lock = false;
-        });
-    }
-    return new Promise(resolve => {
-      // 一直看lock,直到请求失败或者成功
-      const timer = setInterval(() => {
-        if (!lock) {
-          clearInterval(timer);
-          if (success) {
-            resolve("success");
-          } else {
-            resolve("fail");
-          }
+// 刷新 token 单例 Promise：并发 403 时共享同一次刷新，避免重复请求与轮询
+let refreshTokenPromise = null;
+function refreshToken() {
+  if (!refreshTokenPromise) {
+    const oldRefreshToken = getStore("refreshToken");
+    refreshTokenPromise = service({
+      method: "get",
+      url: `/passport/login/refresh/${oldRefreshToken}`,
+      _isRefreshRequest: true
+    })
+      .then(res => {
+        if (res.success) {
+          const { accessToken, refreshToken: newRefreshToken } = res.result;
+          setStore("accessToken", accessToken);
+          setStore("refreshToken", newRefreshToken);
+          return "success";
         }
-      }, 500); // 轮询时间间隔
-    });
-  };
+        return "fail";
+      })
+      .catch(() => "fail")
+      .finally(() => {
+        refreshTokenPromise = null;
+      });
+  }
+  return refreshTokenPromise;
 }
+
+// 将对象序列化为 application/x-www-form-urlencoded 格式
+const formSerialize = (data) => {
+  let ret = "";
+  for (let it in data) {
+    ret += encodeURIComponent(it) + "=" + encodeURIComponent(data[it]) + "&";
+  }
+  return ret.substring(0, ret.length - 1);
+};
 
 export const getRequest = (url, params, resBlob) => {
   let accessToken = getStore("accessToken");
@@ -200,22 +185,7 @@ export const getRequestHasHeader = (url, params, headers) => {
     method: "get",
     url: `${url}`,
     params: params,
-    transformRequest: headers
-      ? undefined
-      : [
-          function(data) {
-            let ret = "";
-            for (let it in data) {
-              ret +=
-                encodeURIComponent(it) +
-                "=" +
-                encodeURIComponent(data[it]) +
-                "&";
-            }
-            ret = ret.substring(0, ret.length - 1);
-            return ret;
-          }
-        ],
+    transformRequest: headers ? undefined : [formSerialize],
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       accessToken: accessToken,
@@ -232,22 +202,7 @@ export const postRequest = (url, params, headers) => {
     method: "post",
     url: `${url}`,
     data: params,
-    transformRequest: headers
-      ? undefined
-      : [
-          function(data) {
-            let ret = "";
-            for (let it in data) {
-              ret +=
-                encodeURIComponent(it) +
-                "=" +
-                encodeURIComponent(data[it]) +
-                "&";
-            }
-            ret = ret.substring(0, ret.length - 1);
-            return ret;
-          }
-        ],
+    transformRequest: headers ? undefined : [formSerialize],
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       accessToken: accessToken,
@@ -270,42 +225,13 @@ export const postRequestWithNoForm = (url, params) => {
   });
 };
 
-export const postRequestWithHeaders = (url, params) => {
-  let accessToken = getStore("accessToken");
-  return axios({
-    method: "post",
-    url: `${url}`,
-    data: params,
-
-    headers: {
-      accessToken: accessToken,
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
-  });
-};
-
 export const putRequest = (url, params, headers) => {
   let accessToken = getStore("accessToken");
   return service({
     method: "put",
     url: `${url}`,
     data: params,
-    transformRequest: headers
-      ? undefined
-      : [
-          function(data) {
-            let ret = "";
-            for (let it in data) {
-              ret +=
-                encodeURIComponent(it) +
-                "=" +
-                encodeURIComponent(data[it]) +
-                "&";
-            }
-            ret = ret.substring(0, ret.length - 1);
-            return ret;
-          }
-        ],
+    transformRequest: headers ? undefined : [formSerialize],
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       accessToken: accessToken,

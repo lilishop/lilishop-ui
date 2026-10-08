@@ -448,7 +448,7 @@ export default {
       selectedNodes.forEach((e) => {
         let perm = {
           title: e.title,
-          isSuper: e.isSuper ? (e.isSuper = 1) : (e.isSuper = 0) || 0,
+          isSuper: e.isSuper ? 1 : 0,
           menuId: e.id,
           roleId: this.editRolePermId,
         };

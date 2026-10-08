@@ -4,8 +4,6 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
-  importRequest,
-  getRequestWithNoToken,
   postRequestWithNoForm
 } from "@/libs/axios";
 // 获取数据字典

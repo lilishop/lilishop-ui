@@ -227,25 +227,27 @@ export default {
           mobile: this.formFirst.mobile,
           verificationEnums: "FIND_USER",
         };
-        sendSms(params).then((res) => {
-          if (res.success) {
-            this.$Message.success("验证码发送成功");
-            const that = this;
-            this.interval = setInterval(() => {
-              that.time--;
-              if (that.time === 0) {
-                that.time = 60;
-                that.codeMsg = "重新发送";
-                that.verifyStatus = false;
-                clearInterval(that.interval);
-              } else {
-                that.codeMsg = that.time;
-              }
-            }, 1000);
-          } else {
-            this.$Message.warning(res.message);
-          }
-        });
+        sendSms(params)
+          .then((res) => {
+            if (res.success) {
+              this.$Message.success("验证码发送成功");
+              const that = this;
+              this.interval = setInterval(() => {
+                that.time--;
+                if (that.time === 0) {
+                  that.time = 60;
+                  that.codeMsg = "重新发送";
+                  that.verifyStatus = false;
+                  clearInterval(that.interval);
+                } else {
+                  that.codeMsg = that.time;
+                }
+              }, 1000);
+            } else {
+              this.$Message.warning(res.message);
+            }
+          })
+          .catch(() => {});
       }
     },
     verifyChange(con) {

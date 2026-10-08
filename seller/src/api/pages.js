@@ -1,5 +1,5 @@
 // 统一请求路径前缀在libs/axios.js中修改
-import {getRequest, postRequest, putRequest, deleteRequest, importRequest, getRequestWithNoToken} from '@/libs/axios';
+import {getRequest, postRequest, putRequest, deleteRequest} from '@/libs/axios';
 
 //保存导航栏
 export const save = (params) => {

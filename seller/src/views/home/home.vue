@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog v-model="noticeFlage" :title="noticesDetail.title">
-      <div v-if="noticesDetail" class="noticesDetail" v-html="noticesDetail.content"></div>
+      <div v-if="noticesDetail" class="noticesDetail" v-html="$filters.xssFilter(noticesDetail.content)"></div>
     </el-dialog>
     <div class="box flex">
       <div class="box-left">
@@ -32,11 +32,11 @@
                 type="circle"
                 :width="120"
                 :stroke-width="5"
-                :percentage="userData.serviceScore * 20"
+                :percentage="scorePercent(userData.serviceScore)"
                 color="#fecb89"
               >
                 <template #default>
-                  <p class="bold">{{ userData.serviceScore }}分</p>
+                  <p class="bold">{{ userData.serviceScore || 0 }}分</p>
                 </template>
               </el-progress>
               <h5>服务得分</h5>
@@ -46,11 +46,11 @@
                 type="circle"
                 :width="120"
                 :stroke-width="5"
-                :percentage="userData.deliveryScore * 20"
+                :percentage="scorePercent(userData.deliveryScore)"
                 color="#a7c5eb"
               >
                 <template #default>
-                  <p class="bold">{{ userData.deliveryScore }}分</p>
+                  <p class="bold">{{ userData.deliveryScore || 0 }}分</p>
                 </template>
               </el-progress>
               <h5>交货得分</h5>
@@ -60,11 +60,11 @@
                 type="circle"
                 :width="120"
                 :stroke-width="5"
-                :percentage="userData.descriptionScore * 20"
+                :percentage="scorePercent(userData.descriptionScore)"
                 color="#848ccf"
               >
                 <template #default>
-                  <p class="bold">{{ userData.descriptionScore }}分</p>
+                  <p class="bold">{{ userData.descriptionScore || 0 }}分</p>
                 </template>
               </el-progress>
               <h5>评价得分</h5>
@@ -249,7 +249,7 @@ export default {
       topGoodsData: [],
       afterSaleNumData: {},
       procurementStatusCount: {},
-      userData: "",
+      userData: {},
       notices: "",
       noticesDetail: {
         title: "",
@@ -300,6 +300,11 @@ export default {
       if (t > y) return "compare-up";
       if (t < y) return "compare-down";
       return "compare-flat";
+    },
+    // ElProgress 的 percentage 必须是 0-100 的数字，评分缺失/异常时兜底为 0
+    scorePercent(score) {
+      const n = Number(score) * 20;
+      return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0;
     },
     async init() {
       const userInfo = JSON.parse(Cookies.get("userInfoSeller"));

@@ -84,7 +84,7 @@ export default {
   },
   mounted() {
     this.getFiveYears();
-    this.getShopList();
+    if (!this.closeShop) this.getShopList();
   },
   methods: {
     getShopList() {

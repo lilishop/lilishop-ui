@@ -247,13 +247,22 @@ div.base-info-item {
     min-width: 300px;
   }
 
+  /* 带刷新按钮的表单项：select(260px) + 按钮一行放下 */
+  .el-form-item.goods-field-with-refresh {
+    width: auto;
+    min-width: 430px;
+
+    :deep(.el-form-item__content) {
+      flex-wrap: nowrap;
+    }
+  }
+
   .goods-name-width {
     width: 50%;
     min-width: 300px;
   }
 
   .el-form-item__content {
-    margin-left: 120px;
     text-align: left;
   }
 
@@ -291,7 +300,6 @@ div.base-info-item {
   }
 
   :deep(.el-form-item__content) {
-    margin-left: 120px;
     text-align: left;
   }
 

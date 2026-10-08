@@ -566,7 +566,7 @@ export default {
   },
   watch: {
     res: {
-      handler: (val) => {},
+      handler(val) {},
       deep: true,
     },
   },
