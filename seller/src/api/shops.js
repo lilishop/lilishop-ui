@@ -105,11 +105,6 @@ export const updatEmerchantId = (params) => {
   return putRequest(`/settings/storeSettings/merchantEuid`, params)
 }
 
-
-//修改保存库存预警数
-export const updateStockWarning = (params) => {
-  return putRequest(`/settings/storeSettings/updateStockWarning`, params)
-}
 //查询运费模板
 export const getShipTemplate = () => {
   return getRequest(`/setting/freightTemplate`)

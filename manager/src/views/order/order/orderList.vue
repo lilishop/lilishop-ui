@@ -107,7 +107,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="memberName" label="买家名称" min-width="120" show-overflow-tooltip />
-        <el-table-column prop="memberId" label="会员ID" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="memberId" label="会员ID" min-width="185" show-overflow-tooltip />
         <el-table-column prop="storeName" label="店铺名称" min-width="140" show-overflow-tooltip />
         <el-table-column label="配送方式" width="110">
           <template #default="{ row }">{{ deliveryMethodText(row.deliveryMethod) }}</template>

@@ -86,19 +86,6 @@
             </el-form-item>
           </el-form>
         </el-tab-pane>
-        <el-tab-pane label="库存预警" name="STOCK_WARNING">
-          <el-form ref="stockWarningForm" :model="stockWarningForm" label-width="100px" :rules="stockWarningFormValidate">
-            <el-form-item label="预警数" prop="stockWarning">
-              <el-input-number :min="0" :max="99999" v-model="stockWarningForm.stockWarning" style="width: 20%" />
-            </el-form-item>
-
-            <el-form-item>
-              <el-button @click="stockWarningHandleSubmit" :loading="submitLoading" type="primary"
-                style="margin-right: 5px">修改
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
         <!-- Udesk 坐席功能 后续维护 -->
         <!-- <el-tab-pane label="客服设置" name="UDESK">
           <el-form
@@ -165,18 +152,9 @@ export default {
         salesConsigneeAddressPath: "", // 售后地址，逗号分割
         salesConsigneeDetail: "", // 详细地址
       },
-      //库存预警form
-      stockWarningForm: {
-        stockWarning: 0, // 库存预警数量
-      },
       //im form
       udeskForm: {
         merchantEuid: "",
-      },
-      stockWarningFormValidate: {
-        stockWarning: [
-          { required: true, type: 'number', message: "请输入库存预警数", trigger: "blur" },
-        ],
       },
       udeskFormValidate: {
         merchantEuid: [
@@ -357,10 +335,6 @@ export default {
           this.storeName = res.result.storeName;
           this.form.storeCenter = res.result.storeCenter;
           Cookies.set("userInfoSeller", JSON.stringify(res.result));
-          //库存预警数赋值
-          this.$nextTick(() => {
-            this.stockWarningForm.stockWarning = res.result.stockWarning;
-          });
           if (res.result.merchantEuid) {
             //赋予坐席id
             this.udeskForm.merchantEuid = res.result.merchantEuid;
@@ -398,21 +372,6 @@ export default {
         if (valid) {
           this.submitLoading = true;
           API_Shop.saveShopInfo(this.form).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("修改成功");
-              this.getShopInfo();
-            }
-          });
-        }
-      });
-    },
-    //修改库存预警数
-    stockWarningHandleSubmit() {
-      this.$refs.stockWarningForm.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          API_Shop.updateStockWarning(this.stockWarningForm).then((res) => {
             this.submitLoading = false;
             if (res.success) {
               this.$Message.success("修改成功");

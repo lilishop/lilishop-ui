@@ -120,7 +120,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="memberId" label="会员ID" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="memberId" label="会员ID" min-width="185" show-overflow-tooltip />
         <el-table-column prop="memberName" label="会员名称" width="140" />
         <el-table-column prop="storeName" label="店铺名称" width="100" show-overflow-tooltip />
         <el-table-column label="售后金额" width="110">

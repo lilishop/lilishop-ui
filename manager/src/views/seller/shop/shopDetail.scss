@@ -1,125 +1,160 @@
-.head-title {
-  font-size: 18px;
-  color: rgba(0, 0, 0, 0.85);
-  font-weight: 400;
-}
-.detail-body{
-  margin-top: 17px;
-  overflow: hidden;
+.shop-header-card {
+  border: none;
+  background: transparent;
+
+  :deep(.el-card__body) {
+    padding: 0;
+  }
 }
 
-
-.head-info {
-  display: flex;
-  height: 130px;
-  background: #93b5e1;
-  padding: 12px;
-  border-radius: 4px;
-  align-items: center;
-}
-
-.ant-layout, .ant-layout * {
-  box-sizing: border-box;
-}
-
-.base-info {
-  background-color: #fff;
-  padding: 20px;
-  margin-bottom: 12px;
-  height: 250px;
-}
-
-.ant-col-md-6 {
-  display: block;
-  box-sizing: border-box;
-  width: 33%;
-  float: left;
-  margin-left: 20px;
-}
-.info-2{
-  float: left;
-}
-
-.ant-row {
+.shop-banner {
   position: relative;
-  height: auto;
-  margin-right: 0;
-  margin-left: 0;
-  zoom: 1;
-  display: block;
-  box-sizing: border-box;
-}
-.bottom-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 12px;
-  margin-top: 6px;
-  height: 36px;
-  background: #f5f5f5;
-  border-radius: 4px;
+  padding: 22px 32px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #4a7bc8 0%, #355fa8 55%, #2b4c8c 100%);
+  box-shadow: 0 4px 16px rgba(53, 95, 168, 0.25);
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -80px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    right: 120px;
+    bottom: -110px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+  }
 }
 
-.ant-layout * {
-  box-sizing: border-box;
-}
-.name{
-  margin-left: 10px;
-  color: #fff;
-  font-size: 18px;
-}
-.phone{
-  margin-left: 20px;
-  font-size: 14px;
-  color: #fff;
-}
-.item {
+.banner-left {
   display: flex;
-  align-items: flex-start;
-  line-height: 30px;
-  margin-bottom: 2px;
+  align-items: center;
+  min-width: 0;
   position: relative;
+  z-index: 1;
 }
 
-.label {
-  flex-basis: 95px;
-  //text-align: right;
-  color: rgba(0, 0, 0, 0.4);
+.shop-avatar {
   flex-shrink: 0;
+  border: 3px solid rgba(255, 255, 255, 0.55);
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.shop-title {
+  margin-left: 18px;
+  min-width: 0;
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.shop-name {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  max-width: 420px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.info {
-  font-weight: 500;
-  padding-left: 0;
-  margin-bottom: 0;
-  width: 100%;
+
+.status-tag {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #fff;
 }
 
-.pointsTitle {
-  background-color: #fafafa;
-  padding: 15px 20px;
+.shop-meta {
+  margin-top: 8px;
   display: flex;
-  font-size: 16px;
-  line-height: 1.8;
-  flex-direction: row;
-  justify-content: space-around;
-  color: #333;
-  text-align: center;
-  margin-bottom: 16px;
-  .points-top-title{
-    font-size: 14px;
-    font-weight: 400;
-    color: rgba(0, 0, 0, 0.4);
-    line-height: 14px;
-    margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+
+  span + span::before {
+    content: "·";
+    margin: 0 10px;
+    color: rgba(255, 255, 255, 0.45);
   }
-  .points-top-text {
-    font-size: 16px;
-    font-weight: 500;
-    color: #93b5e1;
-    line-height: 16px;
+}
+
+.banner-right {
+  flex-shrink: 0;
+  padding-left: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.switch-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+}
+
+// 详情描述列表
+.shop-desc {
+  max-width: 880px;
+
+  :deep(.el-descriptions__label) {
+    width: 180px;
+    color: rgba(0, 0, 0, 0.45);
+    background: #fafbfc;
+    font-weight: 400;
+  }
+
+  :deep(.el-descriptions__content) {
+    color: rgba(0, 0, 0, 0.85);
+  }
+
+  :deep(.el-descriptions__cell) {
+    padding: 14px 16px !important;
+  }
+}
+
+.cert-img {
+  width: 100px;
+  height: 100px;
+  margin: 0 10px 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ebeef5;
+  cursor: pointer;
+  vertical-align: top;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
   }
 }
 

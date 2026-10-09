@@ -1,262 +1,203 @@
 <template>
-  <div>
-    <el-card style="padding: 10px 12px 0px">
-      <div class="head-title">基本信息</div>
-      <div class="detail-body">
-        <div class="ant-col-md-6" style="width: 25%">
-          <div class="info">
-            <div class="head-info">
-              <el-avatar :size="64" :src="storeInfo.storeLogo" />
-              <div>
-                <div class="name" v-if="storeInfo.storeName && storeInfo.storeName.length > 15">
-                  {{ storeInfo.storeName.slice(0, 15) }}...
-                </div>
-                <div class="name" v-else>
-                  {{ storeInfo.storeName }}
-                </div>
-              </div>
+  <div class="shop-detail">
+    <!-- 店铺名片头 -->
+    <el-card class="shop-header-card" :body-style="{ padding: 0 }" shadow="never">
+      <div class="shop-banner">
+        <div class="banner-left">
+          <el-avatar :size="72" :src="storeInfo.storeLogo" class="shop-avatar" />
+          <div class="shop-title">
+            <div class="name-row">
+              <span class="shop-name" :title="storeInfo.storeName">{{ storeInfo.storeName }}</span>
+              <el-tag v-if="storeInfo.selfOperated == 1" type="success" size="small" effect="dark">自营</el-tag>
+              <el-tag v-else type="danger" size="small" effect="dark">非自营</el-tag>
+              <el-tag :type="storeEnabled ? 'success' : 'info'" size="small" effect="plain" class="status-tag">
+                {{ storeEnabled ? "营业中" : "已禁用" }}
+              </el-tag>
             </div>
-            <div class="bottom-info">
-              <p v-if="storeInfo.createTime">{{ storeInfo.createTime }}&nbsp;开店</p>
-              <p v-if="storeInfo.selfOperated == 1">
-                <el-tag type="success">自营</el-tag>
-              </p>
-              <p v-else>
-                <el-tag type="danger">非自营</el-tag>
-              </p>
-              <p>
-                <el-switch
-                  v-model="storeEnabled"
-                  :active-value="true"
-                  :inactive-value="false"
-                  :loading="storeStatusChanging"
-                  active-text="启用"
-                  inactive-text="禁用"
-                  @change="shopStatusChange"
-                />
-              </p>
-            </div>
-            <div style="margin-top: 20px">
-              <p class="item">
-                <span class="label">公司名称：</span>
-                <span class="info">{{ storeInfo.companyName }}</span>
-              </p>
-              <p class="item">
-                <span class="label">公司电话：</span>
-                <span class="info">{{ storeInfo.companyPhone }}</span>
-              </p>
-              <p class="item">
-                <span class="label">电子邮箱：</span>
-                <span class="info">{{ storeInfo.companyEmail }}</span>
-              </p>
-              <p class="item">
-                <span class="label">员工总数：</span>
-                <span class="info">{{ storeInfo.employeeNum }}人</span>
-              </p>
-              <p class="item">
-                <span class="label">注册资金：</span>
-                <span class="info">{{ storeInfo.registeredCapital }}万</span>
-              </p>
-              <p class="item">
-                <span class="label">电子邮箱：</span>
-                <span class="info">{{ storeInfo.companyEmail }}</span>
-              </p>
-              <p class="item">
-                <span class="label">联系人姓名：</span>
-                <span class="info">{{ storeInfo.linkName }}</span>
-              </p>
-              <p class="item">
-                <span class="label">联系人电话：</span>
-                <span class="info">{{ storeInfo.linkPhone }}</span>
-              </p>
-              <p class="item">
-                <span class="label">公司地址：</span>
-                <span class="info">
-                  {{
-                    storeInfo.companyAddressPath || storeInfo.companyAddress
-                      ? storeInfo.companyAddressPath + " " + storeInfo.companyAddress
-                      : "暂未完善"
-                  }}</span>
-              </p>
+            <div class="shop-meta">
+              <span>商家账号：{{ storeInfo.memberName || "-" }}</span>
+              <span v-if="storeInfo.createTime">开店时间：{{ storeInfo.createTime }}</span>
             </div>
           </div>
         </div>
-        <div class="ant-col-md-6">
-          <p class="item">
-            <span class="label">商家账号：</span>
-            <span class="info">{{ storeInfo.memberName }}</span>
-          </p>
-          <p class="item">
-            <span class="label">库存预警数：</span>
-            <span class="info">{{ storeInfo.stockWarning ? storeInfo.stockWarning : "0" }}</span>
-          </p>
-          <p class="item">
-            <span class="label">店铺所在地：</span>
-            <span class="info">
-              <span>
-                {{
-                  storeInfo.storeAddressPath !== null &&
-                  storeInfo.storeAddressPath !== "" &&
-                  storeInfo.storeAddressPath !== "null" &&
-                  storeInfo.storeAddressPath !== undefined
-                    ? storeInfo.storeAddressPath
-                    : ""
-                }}</span>
-              <span>
-                {{
-                  storeInfo.storeAddressDetail !== null &&
-                  storeInfo.storeAddressDetail !== "" &&
-                  storeInfo.storeAddressDetail !== "null" &&
-                  storeInfo.storeAddressDetail !== undefined
-                    ? storeInfo.storeAddressDetail
-                    : ""
-                }}</span>
-              {{
-                (storeInfo.storeAddressPath !== null &&
-                  storeInfo.storeAddressPath !== "" &&
-                  storeInfo.storeAddressPath !== "null" &&
-                  storeInfo.storeAddressPath !== undefined) ||
-                (storeInfo.storeAddressDetail !== null &&
-                  storeInfo.storeAddressDetail !== "" &&
-                  storeInfo.storeAddressDetail !== "null" &&
-                  storeInfo.storeAddressDetail !== undefined)
-                  ? ""
-                  : "暂未完善"
-              }}</span>
-          </p>
-          <p class="item">
-            <span class="label">退货地址：</span>
-            <span class="info">
-              {{
-                storeInfo.salesConsigneeName !== "null"
-                  ? storeInfo.salesConsigneeName
-                  : "" || storeInfo.salesConsigneeMobile !== "null"
-                    ? storeInfo.salesConsigneeMobile
-                    : "" || storeInfo.salesConsigneeAddressPath !== "null"
-                      ? storeInfo.salesConsigneeAddressPath
-                      : "" || storeInfo.salesConsigneeDetail !== "null"
-                        ? storeInfo.salesConsigneeDetail
-                        : ""
-                          ? storeInfo.salesConsigneeName +
-                            storeInfo.salesConsigneeMobile +
-                            " " +
-                            storeInfo.salesConsigneeAddressPath +
-                            storeInfo.salesConsigneeDetail
-                          : "暂未完善"
-              }}</span>
-          </p>
-          <p class="item">
-            <span class="label">店铺定位：</span>
-            <span class="info">{{ storeInfo.storeCenter ? "已定位" : "未定位" }}</span>
-          </p>
-          <p class="item">
-            <span class="label">经营范围：</span>
-            <span class="info">
-              <template v-if="displayCategories.length">
-                <el-tag
-                  v-for="item in displayCategories"
-                  :key="item.id"
-                  type="info"
-                  class="category-tag"
-                >
-                  {{ item.name }}
-                </el-tag>
-              </template>
-              <span v-else>暂未完善</span>
-            </span>
-          </p>
-          <p class="item">
-            <span class="label">店铺简介：</span>
-            <span class="info">
-              {{ storeInfo.storeDesc ? storeInfo.storeDesc : "暂未完善" }}</span>
-          </p>
-        </div>
-        <div class="ant-col-md-6">
-          <p class="item">
-            <span class="label">法人姓名：</span>
-            <span class="info">{{ storeInfo.legalName }}</span>
-          </p>
-          <p class="item">
-            <span class="label">法人身份证：</span>
-            <span class="info">{{ storeInfo.legalId }}</span>
-          </p>
-          <p class="item">
-            <span class="label">身份证照片：</span>
-            <span class="info">
-              <img
-                style="height: 100px; width: 100px"
-                class="mr_10"
-                v-for="item in storeInfo.legalPhoto"
-                :src="item"
-                :key="item"
-              />
-            </span>
-          </p>
-          <p class="item">
-            <span class="label">营业执照号：</span>
-            <span class="info">{{ storeInfo.licenseNum }}</span>
-          </p>
-          <p class="item">
-            <span class="label">法定经营范围：</span>
-            <span class="info">{{ storeInfo.scope }}</span>
-          </p>
-          <p class="item">
-            <span class="label">营业执照电子版：</span>
-            <span class="info">
-              <img style="height: 100px; width: 100px" :src="storeInfo.licencePhoto" />
-            </span>
-          </p>
-          <p class="item">
-            <span class="label">银行名称：</span>
-            <span class="info">
-              {{
-                storeInfo.settlementBankAccountName == "null" || !storeInfo.settlementBankAccountName
-                  ? ""
-                  : storeInfo.settlementBankAccountName
-              }}</span>
-          </p>
-          <p class="item">
-            <span class="label">银行账号：</span>
-            <span class="info">
-              {{
-                storeInfo.settlementBankAccountNum == "null" || !storeInfo.settlementBankAccountNum
-                  ? ""
-                  : storeInfo.settlementBankAccountNum
-              }}</span>
-          </p>
-          <p class="item">
-            <span class="label">银行开户支行名称：</span>
-            <span class="info">
-              {{
-                storeInfo.settlementBankBranchName == "null" || !storeInfo.settlementBankBranchName
-                  ? ""
-                  : storeInfo.settlementBankBranchName
-              }}</span>
-          </p>
-          <p class="item">
-            <span class="label">银行支行联行号：</span>
-            <span class="info">
-              {{
-                storeInfo.settlementBankJointName == "null" || !storeInfo.settlementBankJointName
-                  ? ""
-                  : storeInfo.settlementBankJointName
-              }}</span>
-          </p>
-          <p class="item">
-            <span class="label">结算周期：</span>
-            <span class="info" v-if="storeInfo.settlementCycle">
-              <template v-for="item in storeInfo.settlementCycle.split(',')">
-                <el-tag :key="item" v-if="item !== ''" style="margin-left: 10px">{{ item }}</el-tag>
-              </template>
-            </span>
-          </p>
+        <div class="banner-right">
+          <div class="status-pill">
+            <span class="switch-label">{{ storeEnabled ? "店铺启用中" : "店铺已禁用" }}</span>
+            <el-switch
+              v-model="storeEnabled"
+              :active-value="true"
+              :inactive-value="false"
+              :loading="storeStatusChanging"
+              @change="shopStatusChange"
+            />
+          </div>
         </div>
       </div>
     </el-card>
 
-    <el-card class="mt_10">
+    <!-- 详情页签 -->
+    <el-card class="mt_10" shadow="never">
       <el-tabs v-model="activeTab" @tab-change="storeInfoChange">
-        <el-tab-pane label="TA的订单" name="order" style="min-height: 200px">
+        <el-tab-pane label="基本信息" name="basic">
+          <el-descriptions :column="1" border class="shop-desc">
+            <el-descriptions-item label="店铺名称">{{ storeInfo.storeName || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="商家账号">{{ storeInfo.memberName || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="店铺定位">
+              {{ storeInfo.storeCenter || "未定位" }}
+            </el-descriptions-item>
+            <el-descriptions-item label="店铺所在地">{{ storeAddress }}</el-descriptions-item>
+            <el-descriptions-item label="退货地址">{{ returnAddress }}</el-descriptions-item>
+            <el-descriptions-item label="联系人姓名">{{ storeInfo.linkName || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="联系人电话">{{ storeInfo.linkPhone || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="店铺简介">
+              {{ storeInfo.storeDesc || "暂未完善" }}
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-tab-pane>
+
+        <el-tab-pane label="工商信息" name="business">
+          <el-descriptions :column="1" border class="shop-desc">
+            <el-descriptions-item label="公司名称">{{ storeInfo.companyName || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="公司电话">{{ storeInfo.companyPhone || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="电子邮箱">{{ storeInfo.companyEmail || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="员工总数">
+              {{ storeInfo.employeeNum ? storeInfo.employeeNum + " 人" : "-" }}
+            </el-descriptions-item>
+            <el-descriptions-item label="注册资金">
+              {{ storeInfo.registeredCapital ? storeInfo.registeredCapital + " 万" : "-" }}
+            </el-descriptions-item>
+            <el-descriptions-item label="公司地址">{{ companyAddress }}</el-descriptions-item>
+            <el-descriptions-item label="法人姓名">{{ storeInfo.legalName || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="法人身份证">{{ storeInfo.legalId || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="身份证照片">
+              <template v-if="storeInfo.legalPhoto && storeInfo.legalPhoto.length">
+                <el-image
+                  v-for="item in storeInfo.legalPhoto"
+                  :key="item"
+                  :src="item"
+                  :preview-src-list="storeInfo.legalPhoto"
+                  fit="cover"
+                  preview-teleported
+                  class="cert-img"
+                />
+              </template>
+              <span v-else>暂未上传</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="营业执照号">{{ storeInfo.licenseNum || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="法定经营范围">{{ storeInfo.scope || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="营业执照电子版">
+              <el-image
+                v-if="storeInfo.licencePhoto"
+                :src="storeInfo.licencePhoto"
+                :preview-src-list="[storeInfo.licencePhoto]"
+                fit="cover"
+                preview-teleported
+                class="cert-img"
+              />
+              <span v-else>暂未上传</span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-tab-pane>
+
+        <el-tab-pane label="财务信息" name="finance">
+          <el-descriptions :column="1" border class="shop-desc">
+            <el-descriptions-item label="银行名称">{{ blankFilter(storeInfo.settlementBankAccountName) }}</el-descriptions-item>
+            <el-descriptions-item label="银行账号">{{ blankFilter(storeInfo.settlementBankAccountNum) }}</el-descriptions-item>
+            <el-descriptions-item label="银行开户支行名称">{{ blankFilter(storeInfo.settlementBankBranchName) }}</el-descriptions-item>
+            <el-descriptions-item label="银行支行联行号">{{ blankFilter(storeInfo.settlementBankJointName) }}</el-descriptions-item>
+            <el-descriptions-item label="结算日">
+              <span v-if="settlementCycles.length">每月 {{ settlementCycles.join("、") }} 日</span>
+              <span v-else>-</span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-tab-pane>
+
+        <el-tab-pane label="签约信息" name="contract">
+          <el-descriptions :column="1" border class="shop-desc">
+            <el-descriptions-item label="店铺类型">
+              <el-tag v-if="storeInfo.selfOperated == 1" type="success" size="small">自营</el-tag>
+              <el-tag v-else type="danger" size="small">非自营</el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="开店时间">{{ storeInfo.createTime || "-" }}</el-descriptions-item>
+            <el-descriptions-item label="经营类目">
+              <span v-if="displayCategories.length">
+                {{ displayCategories.map((item) => item.name).join("、") }}
+              </span>
+              <span v-else>暂未签约经营类目</span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-tab-pane>
+
+        <el-tab-pane label="店员列表" name="clerk">
+          <el-form
+            ref="clerkSearchForm"
+            :model="clerkSearchForm"
+            inline
+            label-width="70px"
+            class="search-form"
+          >
+            <el-form-item label="店员名称" prop="clerkName">
+              <el-input
+                v-model="clerkSearchForm.clerkName"
+                placeholder="请输入店员名称"
+                clearable
+                style="width: 200px"
+              />
+            </el-form-item>
+            <el-form-item label="手机号" prop="mobile">
+              <el-input
+                v-model="clerkSearchForm.mobile"
+                placeholder="请输入手机号"
+                clearable
+                style="width: 200px"
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" class="search-btn" @click="getClerkData">搜索</el-button>
+            </el-form-item>
+          </el-form>
+
+          <div style="min-height: 180px">
+            <el-table v-loading="clerkLoading" border :data="clerkData" class="mt_10" style="width: 100%">
+              <el-table-column prop="clerkName" label="店员名称" min-width="140" show-overflow-tooltip />
+              <el-table-column prop="mobile" label="手机号" width="150" />
+              <el-table-column label="角色" width="120">
+                <template #default="{ row }">
+                  <el-tag v-if="row && row.shopkeeper" type="danger" size="small">店主</el-tag>
+                  <el-tag v-else-if="row" type="info" size="small">店员</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="departmentTitle" label="所属部门" min-width="120" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span v-if="row">{{ row.departmentTitle || "-" }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" width="100">
+                <template #default="{ row }">
+                  <el-tag v-if="row" :type="row.status ? 'success' : 'info'" size="small">
+                    {{ row.status ? "启用" : "禁用" }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="createTime" label="创建时间" width="170" />
+            </el-table>
+
+            <div class="mt_10" style="display: flex; justify-content: flex-end; margin-top: 10px">
+              <el-pagination
+                v-model:current-page="clerkSearchForm.pageNumber"
+                v-model:page-size="clerkSearchForm.pageSize"
+                :page-sizes="[20, 50, 100]"
+                :total="clerkTotal"
+                layout="total, sizes, prev, pager, next, jumper"
+                size="small"
+                @current-change="clerkChangePage"
+                @size-change="clerkChangePageSize"
+              />
+            </div>
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="订单列表" name="order" style="min-height: 200px">
           <el-form ref="searchForm" :model="orderSearchForm" inline label-width="70px" class="search-form">
             <el-form-item label="订单号" prop="orderSn">
               <el-input
@@ -287,8 +228,8 @@
               <el-select v-model="orderSearchForm.orderType" placeholder="请选择" clearable style="width: 200px">
                 <el-option label="普通订单" value="NORMAL" />
                 <el-option label="虚拟订单" value="VIRTUAL" />
-                <el-option label="赠品订单" value="GIFT" />
-                <el-option label="拼团订单" value="PINTUAN" />
+                <el-option label="电子卡券订单" value="E_COUPON" />
+                <el-option label="预约服务订单" value="APPOINTMENT" />
               </el-select>
             </el-form-item>
             <el-form-item label="订单来源" prop="clientType">
@@ -383,17 +324,17 @@
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="TA的退货单" name="refundGoods">
+        <el-tab-pane label="售后列表" name="afterSale">
           <el-form
-            ref="refundGoodsOrderSearchForm"
-            :model="refundGoodsOrderSearchForm"
+            ref="afterSaleSearchForm"
+            :model="afterSaleSearchForm"
             inline
             label-width="70px"
             class="search-form"
           >
             <el-form-item label="订单编号" prop="orderSn">
               <el-input
-                v-model="refundGoodsOrderSearchForm.orderSn"
+                v-model="afterSaleSearchForm.orderSn"
                 placeholder="请输入订单编号"
                 clearable
                 style="width: 200px"
@@ -401,15 +342,27 @@
             </el-form-item>
             <el-form-item label="售后单号" prop="sn">
               <el-input
-                v-model="refundGoodsOrderSearchForm.sn"
+                v-model="afterSaleSearchForm.sn"
                 placeholder="请输入售后单号"
                 clearable
                 style="width: 200px"
               />
             </el-form-item>
+            <el-form-item label="售后类型">
+              <el-select
+                v-model="afterSaleSearchForm.serviceType"
+                placeholder="全部"
+                clearable
+                style="width: 200px"
+              >
+                <el-option label="退款" value="RETURN_MONEY" />
+                <el-option label="退货" value="RETURN_GOODS" />
+                <el-option label="换货" value="EXCHANGE_GOODS" />
+              </el-select>
+            </el-form-item>
             <el-form-item label="售后状态">
               <el-select
-                v-model="refundGoodsOrderSearchForm.serviceStatus"
+                v-model="afterSaleSearchForm.serviceStatus"
                 placeholder="全部"
                 clearable
                 style="width: 200px"
@@ -428,7 +381,7 @@
             </el-form-item>
             <el-form-item label="申请时间">
               <el-date-picker
-                v-model="refundGoodsSelectDate"
+                v-model="afterSaleSelectDate"
                 type="datetimerange"
                 value-format="YYYY-MM-DD HH:mm:ss"
                 clearable
@@ -436,32 +389,24 @@
                 end-placeholder="结束时间"
                 placeholder="选择起始时间"
                 style="width: 360px"
-                @change="selectRefundGoodsDateRange"
-              />
-            </el-form-item>
-            <el-form-item label="商家名称" prop="storeName">
-              <el-input
-                v-model="refundGoodsOrderSearchForm.storeName"
-                placeholder="请输入商家名称"
-                clearable
-                style="width: 200px"
+                @change="selectAfterSaleDateRange"
               />
             </el-form-item>
             <el-form-item label="会员名称" prop="memberName">
               <el-input
-                v-model="refundGoodsOrderSearchForm.memberName"
+                v-model="afterSaleSearchForm.memberName"
                 placeholder="请输入会员名称"
                 clearable
                 style="width: 200px"
               />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" class="search-btn" @click="getRefundGoodsOrderData">搜索</el-button>
+              <el-button type="primary" class="search-btn" @click="getAfterSaleData">搜索</el-button>
             </el-form-item>
           </el-form>
 
           <div style="min-height: 180px">
-            <el-table v-loading="loading" border :data="refundGoodsOrderData" class="mt_10" style="width: 100%">
+            <el-table v-loading="loading" border :data="afterSaleData" class="mt_10" style="width: 100%">
               <el-table-column label="售后服务单号" min-width="140">
                 <template #default="{ row }">
                   <a
@@ -516,160 +461,14 @@
 
             <div class="mt_10" style="display: flex; justify-content: flex-end; margin-top: 10px">
               <el-pagination
-                v-model:current-page="refundGoodsOrderSearchForm.pageNumber"
-                v-model:page-size="refundGoodsOrderSearchForm.pageSize"
+                v-model:current-page="afterSaleSearchForm.pageNumber"
+                v-model:page-size="afterSaleSearchForm.pageSize"
                 :page-sizes="[20, 50, 100]"
-                :total="refundGoodsOrderTotal"
+                :total="afterSaleTotal"
                 layout="total, sizes, prev, pager, next, jumper"
                 size="small"
-                @current-change="refundGoodsOrderChangePage"
-                @size-change="refundGoodsOrderChangePageSize"
-              />
-            </div>
-          </div>
-        </el-tab-pane>
-
-        <el-tab-pane label="TA的退款单" name="refund">
-          <el-form
-            ref="refundOrderSearchForm"
-            :model="refundOrderSearchForm"
-            inline
-            label-width="70px"
-            class="search-form"
-          >
-            <el-form-item label="订单编号" prop="orderSn">
-              <el-input
-                v-model="refundOrderSearchForm.orderSn"
-                placeholder="请输入订单编号"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item label="售后单号" prop="sn">
-              <el-input
-                v-model="refundOrderSearchForm.sn"
-                placeholder="请输入售后单号"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item label="售后状态">
-              <el-select
-                v-model="refundOrderSearchForm.serviceStatus"
-                placeholder="全部"
-                clearable
-                style="width: 200px"
-              >
-                <el-option label="申请售后" value="APPLY" />
-                <el-option label="通过售后" value="PASS" />
-                <el-option label="拒绝售后" value="REFUSE" />
-                <el-option label="买家退货，待卖家收货" value="BUYER_RETURN" />
-                <el-option label="商家换货/补发" value="SELLER_RE_DELIVERY" />
-                <el-option label="卖家确认收货" value="SELLER_CONFIRM" />
-                <el-option label="卖家终止售后" value="SELLER_TERMINATION" />
-                <el-option label="买家确认收货" value="BUYER_CONFIRM" />
-                <el-option label="买家取消售后" value="BUYER_CANCEL" />
-                <el-option label="完成售后" value="COMPLETE" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="申请时间">
-              <el-date-picker
-                v-model="refundSelectDate"
-                type="datetimerange"
-                value-format="YYYY-MM-DD HH:mm:ss"
-                clearable
-                start-placeholder="开始时间"
-                end-placeholder="结束时间"
-                placeholder="选择起始时间"
-                style="width: 360px"
-                @change="selectRefundDateRange"
-              />
-            </el-form-item>
-            <el-form-item label="商家名称" prop="storeName">
-              <el-input
-                v-model="refundOrderSearchForm.storeName"
-                placeholder="请输入商家名称"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item label="会员名称" prop="memberName">
-              <el-input
-                v-model="refundOrderSearchForm.memberName"
-                placeholder="请输入会员名称"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" class="search-btn" @click="getRefundOrder">搜索</el-button>
-            </el-form-item>
-          </el-form>
-
-          <div style="min-height: 180px">
-            <el-table v-loading="loading" border :data="refundOrderData" class="mt_10" style="width: 100%">
-              <el-table-column label="售后服务单号" min-width="140">
-                <template #default="{ row }">
-                  <a
-                    v-if="row"
-                    class="link-text"
-                    @click="$router.push({ name: 'after-order-detail', query: { sn: row.sn } })"
-                  >{{ row.sn }}</a>
-                </template>
-              </el-table-column>
-              <el-table-column label="订单编号" min-width="120">
-                <template #default="{ row }">
-                  <a
-                    v-if="row"
-                    class="link-text"
-                    @click="$router.push({ name: 'order-detail', query: { sn: row.orderSn } })"
-                  >{{ row.orderSn }}</a>
-                </template>
-              </el-table-column>
-              <el-table-column label="商品" min-width="300">
-                <template #default="{ row }">
-                  <div v-if="row" style="margin-top: 5px; height: 80px; display: flex">
-                    <div>
-                      <img :src="row.goodsImage" style="height: 60px; margin-top: 3px" />
-                    </div>
-                    <div style="margin-left: 13px; margin-top: 3px">
-                      <div class="div-zoom">
-                        <a>{{ row.goodsName }}</a>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column prop="memberName" label="会员名称" width="140" />
-              <el-table-column prop="storeName" label="商家名称" min-width="100" show-overflow-tooltip />
-              <el-table-column label="售后金额" width="110">
-                <template #default="{ row }">
-                  <priceColorScheme v-if="row" :value="row.applyRefundPrice" :color="$mainColor" />
-                </template>
-              </el-table-column>
-              <el-table-column label="售后类型" width="100">
-                <template #default="{ row }">
-                  <span v-if="row">{{ serviceTypeText(row.serviceType) }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="售后状态" width="110">
-                <template #default="{ row }">
-                  <span v-if="row">{{ serviceStatusText(row.serviceStatus) }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="createTime" label="申请时间" min-width="145" show-overflow-tooltip />
-            </el-table>
-
-            <div class="mt_10" style="display: flex; justify-content: flex-end; margin-top: 10px">
-              <el-pagination
-                v-model:current-page="refundOrderSearchForm.pageNumber"
-                v-model:page-size="refundOrderSearchForm.pageSize"
-                :page-sizes="[20, 50, 100]"
-                :total="refundOrderTotal"
-                layout="total, sizes, prev, pager, next, jumper"
-                size="small"
-                @current-change="refundOrderChangePage"
-                @size-change="refundOrderChangePageSize"
+                @current-change="afterSaleChangePage"
+                @size-change="afterSaleChangePageSize"
               />
             </div>
           </div>
@@ -685,6 +484,8 @@ import { getCategoryTree } from "@/api/goods";
 import * as API_Store from "@/api/shops.js";
 import * as API_Order from "@/api/order.js";
 
+const isValid = (v) => v !== null && v !== undefined && v !== "" && v !== "null";
+
 export default {
   name: "member",
   components: {
@@ -693,7 +494,7 @@ export default {
   data() {
     return {
       id: "",
-      activeTab: "order",
+      activeTab: "basic",
       categories: [],
       loading: true,
       storeInfo: {},
@@ -701,8 +502,7 @@ export default {
       storeStatusChanging: false,
       checkAllGroup: [],
       orderSelectDate: null,
-      refundGoodsSelectDate: null,
-      refundSelectDate: null,
+      afterSaleSelectDate: null,
       orderData: [],
       orderTotal: 0,
       orderSearchForm: {
@@ -712,18 +512,21 @@ export default {
         orderSn: "",
         orderType: "",
       },
-      refundGoodsOrderData: [],
-      refundGoodsOrderTotal: 0,
-      refundGoodsOrderSearchForm: {
+      afterSaleData: [],
+      afterSaleTotal: 0,
+      afterSaleSearchForm: {
         pageNumber: 1,
         pageSize: 20,
       },
-      refundOrderSearchForm: {
+      clerkData: [],
+      clerkTotal: 0,
+      clerkLoading: false,
+      clerkSearchForm: {
         pageNumber: 1,
         pageSize: 20,
+        clerkName: "",
+        mobile: "",
       },
-      refundOrderData: [],
-      refundOrderTotal: 0,
     };
   },
   computed: {
@@ -736,14 +539,44 @@ export default {
         (item) => item?.id != null && selected.has(String(item.id))
       );
     },
+    storeAddress() {
+      const path = isValid(this.storeInfo.storeAddressPath) ? this.storeInfo.storeAddressPath : "";
+      const detail = isValid(this.storeInfo.storeAddressDetail) ? this.storeInfo.storeAddressDetail : "";
+      return path || detail ? `${path} ${detail}`.trim() : "暂未完善";
+    },
+    returnAddress() {
+      const s = this.storeInfo;
+      const consignee = [s.salesConsigneeName, s.salesConsigneeMobile].filter(isValid).join(" ");
+      const addr = [s.salesConsigneeAddressPath, s.salesConsigneeDetail].filter(isValid).join(" ");
+      const text = `${consignee} ${addr}`.trim();
+      return text || "暂未完善";
+    },
+    companyAddress() {
+      const s = this.storeInfo;
+      if (!isValid(s.companyAddressPath) && !isValid(s.companyAddress)) {
+        return "暂未完善";
+      }
+      return `${isValid(s.companyAddressPath) ? s.companyAddressPath : ""} ${
+        isValid(s.companyAddress) ? s.companyAddress : ""
+      }`.trim();
+    },
+    settlementCycles() {
+      if (!this.storeInfo.settlementCycle) {
+        return [];
+      }
+      return this.storeInfo.settlementCycle.split(",").filter(Boolean);
+    },
   },
   methods: {
+    blankFilter(v) {
+      return isValid(v) ? v : "-";
+    },
     orderTypeText(v) {
       const map = {
         NORMAL: "普通订单",
         VIRTUAL: "虚拟订单",
-        GIFT: "赠品订单",
-        PINTUAN: "拼团订单",
+        E_COUPON: "电子卡券订单",
+        APPOINTMENT: "预约服务订单",
       };
       return map[v] || v || "";
     },
@@ -822,17 +655,16 @@ export default {
     init() {
       this.getStoreInfo();
       this.getCategories();
-      this.getOrderData();
     },
     storeInfoChange(v) {
       if (v == "order") {
         this.getOrderData();
       }
-      if (v == "refundGoods") {
-        this.getRefundGoodsOrderData();
+      if (v == "afterSale") {
+        this.getAfterSaleData();
       }
-      if (v == "refund") {
-        this.getRefundOrder();
+      if (v == "clerk") {
+        this.getClerkData();
       }
     },
     getStoreInfo() {
@@ -844,7 +676,9 @@ export default {
             .split(",")
             .filter(Boolean);
         }
-        this.storeInfo.legalPhoto = this.storeInfo.legalPhoto.split(",");
+        this.storeInfo.legalPhoto = (this.storeInfo.legalPhoto || "")
+          .split(",")
+          .filter(Boolean);
       });
     },
     shopStatusChange(v) {
@@ -878,28 +712,14 @@ export default {
       });
       this.loading = false;
     },
-    getRefundOrder() {
+    getAfterSaleData() {
       this.loading = true;
-      this.refundOrderSearchForm.storeId = this.id;
-      this.refundOrderSearchForm.serviceType = "RETURN_MONEY";
-      API_Order.getAfterSaleOrderPage(this.refundOrderSearchForm).then((res) => {
+      this.afterSaleSearchForm.storeId = this.id;
+      API_Order.getAfterSaleOrderPage(this.afterSaleSearchForm).then((res) => {
         this.loading = false;
         if (res.success) {
-          this.refundOrderData = res.result.records;
-          this.refundOrderTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    getRefundGoodsOrderData() {
-      this.loading = true;
-      this.refundGoodsOrderSearchForm.storeId = this.id;
-      this.refundGoodsOrderSearchForm.serviceType = "RETURN_GOODS";
-      API_Order.getAfterSaleOrderPage(this.refundGoodsOrderSearchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.refundGoodsOrderData = res.result.records;
-          this.refundGoodsOrderTotal = res.result.total;
+          this.afterSaleData = res.result.records;
+          this.afterSaleTotal = res.result.total;
         }
       });
       this.loading = false;
@@ -911,23 +731,36 @@ export default {
         }
       });
     },
-    refundGoodsOrderChangePage(v) {
-      this.refundGoodsOrderSearchForm.pageNumber = v;
-      this.getRefundGoodsOrderData();
+    afterSaleChangePage(v) {
+      this.afterSaleSearchForm.pageNumber = v;
+      this.getAfterSaleData();
     },
-    refundGoodsOrderChangePageSize(v) {
-      this.refundGoodsOrderSearchForm.pageSize = v;
-      this.refundGoodsOrderSearchForm.pageNumber = 1;
-      this.getRefundGoodsOrderData();
+    afterSaleChangePageSize(v) {
+      this.afterSaleSearchForm.pageSize = v;
+      this.afterSaleSearchForm.pageNumber = 1;
+      this.getAfterSaleData();
     },
-    refundOrderChangePage(v) {
-      this.refundOrderSearchForm.pageNumber = v;
-      this.getRefundOrder();
+    getClerkData() {
+      this.clerkLoading = true;
+      API_Store.getShopClerkPage(this.id, this.clerkSearchForm)
+        .then((res) => {
+          if (res.success) {
+            this.clerkData = res.result.records;
+            this.clerkTotal = res.result.total;
+          }
+        })
+        .finally(() => {
+          this.clerkLoading = false;
+        });
     },
-    refundOrderChangePageSize(v) {
-      this.refundOrderSearchForm.pageSize = v;
-      this.refundOrderSearchForm.pageNumber = 1;
-      this.getRefundOrder();
+    clerkChangePage(v) {
+      this.clerkSearchForm.pageNumber = v;
+      this.getClerkData();
+    },
+    clerkChangePageSize(v) {
+      this.clerkSearchForm.pageSize = v;
+      this.clerkSearchForm.pageNumber = 1;
+      this.getClerkData();
     },
     orderChangePage(v) {
       this.orderSearchForm.pageNumber = v;
@@ -947,22 +780,13 @@ export default {
         this.orderSearchForm.endDate = "";
       }
     },
-    selectRefundGoodsDateRange(v) {
+    selectAfterSaleDateRange(v) {
       if (v && v.length === 2) {
-        this.refundGoodsOrderSearchForm.startDate = v[0];
-        this.refundGoodsOrderSearchForm.endDate = v[1];
+        this.afterSaleSearchForm.startDate = v[0];
+        this.afterSaleSearchForm.endDate = v[1];
       } else {
-        this.refundGoodsOrderSearchForm.startDate = "";
-        this.refundGoodsOrderSearchForm.endDate = "";
-      }
-    },
-    selectRefundDateRange(v) {
-      if (v && v.length === 2) {
-        this.refundOrderSearchForm.startDate = v[0];
-        this.refundOrderSearchForm.endDate = v[1];
-      } else {
-        this.refundOrderSearchForm.startDate = "";
-        this.refundOrderSearchForm.endDate = "";
+        this.afterSaleSearchForm.startDate = "";
+        this.afterSaleSearchForm.endDate = "";
       }
     },
   },

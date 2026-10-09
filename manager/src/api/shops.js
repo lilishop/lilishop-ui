@@ -82,6 +82,11 @@ export const getShopByMemberId = (id) => {
   return getRequest(`/store/store/${id}/member`)
 }
 
+//查询店铺店员分页列表（包含店主）
+export const getShopClerkPage = (id, params) => {
+  return getRequest(`/store/store/clerk/${id}`, params)
+}
+
 //根据id获取店铺信息
 export const downloadBill = (id) => {
   return getRequest(`/order/bill/downLoad/${id}`, {}, 'blob')

@@ -498,7 +498,7 @@ export default {
       checkAll: false, // 全选
       checkAllGroup: [], // 全选数组
       submitLoading: false, // 添加或编辑提交状态
-      settlementCycle: [], // 结算周期
+      settlementCycle: [], // 结算日
       shopForm: {
         // 店铺数据
         storeAddressPath: "",
@@ -588,11 +588,11 @@ export default {
     //添加结算日
     addsettlementCycleConfirm() {
       if (!this.day) {
-        this.$Message.warning("请输入正确的结算周期，1-31的整数");
+        this.$Message.warning("请输入正确的结算日，1-31的整数");
         return;
       }
       if (this.settlementCycle.includes(this.day)) {
-        this.$Message.warning("已有该结算周期，不能重复输入");
+        this.$Message.warning("已有该结算日，不能重复输入");
         return;
       }
       this.settlementCycle.push(this.day);
