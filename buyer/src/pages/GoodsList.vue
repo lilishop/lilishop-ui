@@ -142,22 +142,25 @@ export default {
   },
   watch: {
     $route() {
-      const keyword = this.$route.query.keyword;
-      if (keyword) {
-        this.handleSearch(keyword);
-      }
-      if (this.$route.query.categoryId) {
-        let cateId = this.$route.query.categoryId.split(",");
+      const { keyword, categoryId, promotionType, promotionsId } = this.$route.query;
+      if (categoryId) {
+        const cateId = categoryId.split(",");
         Object.assign(this.params, this.$route.query);
         this.params.categoryId = cateId[cateId.length - 1];
       }
-      if (this.$route.query.promotionType) {
-        this.params.promotionType = this.$route.query.promotionType;
+      if (promotionType) {
+        this.params.promotionType = promotionType;
       }
-      if (this.$route.query.promotionsId) {
-        this.params.promotionsId = this.$route.query.promotionsId;
+      if (promotionsId) {
+        this.params.promotionsId = promotionsId;
       }
-      this.getGoodsList();
+      if (keyword) {
+        // handleSearch 内部会调 getGoodsList，此处不再重复请求
+        this.handleSearch(keyword);
+      } else {
+        this.params.keyword = "";
+        this.getGoodsList();
+      }
     },
   },
   computed: {
