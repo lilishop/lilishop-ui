@@ -265,7 +265,9 @@ export default {
         .then((res) => {
           if (res.success) this.recommendList = res.result.records || [];
         })
-        .catch(() => {});
+        .catch(() => {
+          // 推荐列表为可选数据，加载失败不阻塞搜索页
+        });
     },
     getParams(val) {
       // 筛选条件回显

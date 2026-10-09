@@ -171,7 +171,7 @@ export default {
               Message.warning(res.message);
             }
           }).catch(() => { this.loading = false; });
-        } else {}
+        }
       });
     },
     handleSubmit () { // 提交密码
@@ -189,7 +189,6 @@ export default {
 
           apiLogin.resetPassword(params).then(res => {
             this.loading1 = false;
-            console.log(res);
             if (res.success) {
               Message.success('修改密码成功');
               this.$router.push('login');

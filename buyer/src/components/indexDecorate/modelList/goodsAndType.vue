@@ -15,9 +15,8 @@
       </div>
     </div>
     <!-- 商品部分 -->
-    <div class="only-goods-list flex-j-sb">
+    <div class="only-goods-list flex-j-sb" v-if="paramData.options">
       <div
-        v-if="paramData.options"
         class="only-goods-list-item "
         v-for="(item, index) in paramData.options.list.filter((client) => {
           return client.___index == current;
@@ -50,7 +49,7 @@ export default {
   props: {
     paramData: {
       type: Object,
-      default: {},
+      default: () => ({}),
     },
   },
   data() {

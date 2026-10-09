@@ -58,10 +58,14 @@ export default {
             // 站点配置解析失败时使用缓存
           }
         }
-      }).catch(() => {});
+      }).catch((err) => {
+        console.warn('获取站点配置失败', err);
+      });
     },
     getTheme() {
-      fetchAndApplyTheme(getThemeSetting).catch(() => {});
+      fetchAndApplyTheme(getThemeSetting).catch((err) => {
+        console.warn('获取主题配置失败', err);
+      });
     },
   },
 };

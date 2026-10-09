@@ -186,7 +186,6 @@ export default {
       this.buynow(item.skuId, item.goodsId)
     },
     buynow(skuId, goodsId,storeId) { // 跳转详情
-      console.log(this.params.type)
       let url
       if (this.params.type === 'STORE') {
         url = this.$router.resolve({

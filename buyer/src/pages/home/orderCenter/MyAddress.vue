@@ -78,7 +78,6 @@ export default {
     getAddrList () {
       // 获取地址列表
       memberAddress().then((res) => {
-        console.log(res);
         if (res.success) {
           this.list = res.result.records;
         }

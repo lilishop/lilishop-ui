@@ -109,7 +109,7 @@ export default {
   emits: ['change'],
   props: {
     content: {
-      default: {},
+      default: () => ({}),
       type: Object
     }
   },
@@ -164,8 +164,6 @@ export default {
             .catch(() => {
               this.loading = false;
             });
-        } else {
-          console.log('error');
         }
       });
     },

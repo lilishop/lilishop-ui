@@ -242,7 +242,9 @@ export default {
     loadHotWords() {
       hotWords({ count: 5 }).then((res) => {
         if (res.success && res.result) this.applyHotWords(res.result)
-      }).catch(() => {})
+      }).catch(() => {
+        // 热词为可选数据，失败时沿用缓存或默认热词
+      })
       storage.setItem('hotWordsReloadTime', new Date().getTime())
     }
   },

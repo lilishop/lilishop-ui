@@ -28,6 +28,8 @@
                   userInfo.nickName ? userInfo.nickName : userInfo.username ) }}</span>
             </div>
             <transition name='fade'>
+              <!-- 下拉菜单通过父级 hover 的 CSS 控制显隐，transition 内无需 v-if/v-show -->
+              <!-- eslint-disable-next-line vue/require-toggle-inside-transition -->
               <ul class="drop-items">
                 <li @click="goUserCenter('/home')">我的主页</li>
                 <li @click="goUserCenter('/home/Coupons')">优惠券</li>

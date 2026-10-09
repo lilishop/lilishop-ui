@@ -136,7 +136,9 @@ export default {
     loadStore(id) {
       getStoreById(id).then((res) => {
         if (res.success && res.result) this.store = res.result;
-      }).catch(() => {});
+      }).catch((err) => {
+        console.warn('获取店铺信息失败', err);
+      });
     },
     // 按销量取店内商品，去掉当前商品，最多 4 个
     loadRecommend(id) {
@@ -151,14 +153,18 @@ export default {
         this.recommends = records
           .filter((item) => String(item.goodsId) !== String(this.goodsId))
           .slice(0, 4);
-      }).catch(() => {});
+      }).catch(() => {
+        // 推荐商品为可选数据，加载失败时静默
+      });
     },
     // 同时有 token 和用户信息才查收藏，避免残留 userInfo 触发登录跳转
     loadCollected(id) {
       if (!this.Cookies.getItem("accessToken") || !this.Cookies.getItem("userInfo")) return;
       isStoreCollection("STORE", id).then((res) => {
         if (res.success && res.result) this.collected = true;
-      }).catch(() => {});
+      }).catch(() => {
+        // 收藏状态为可选数据，失败时静默
+      });
     },
     goStore() {
       this.$router.push({ path: "/merchant", query: { id: this.storeId } });

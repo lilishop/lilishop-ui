@@ -176,7 +176,9 @@ export default {
           // 存放分类信息
           localStorage.setItem("category", JSON.stringify(res.result));
         }
-      }).catch(() => {});
+      }).catch((err) => {
+        console.warn('获取分类失败', err);
+      });
     },
     showDetail(index) {
       // 展示全部分类

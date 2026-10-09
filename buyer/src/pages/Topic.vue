@@ -23,7 +23,6 @@ export default {
     async init(id) {
       const res = await getTopicData(id)
       if (res.success) {
-        console.log(res.result)
         // 直接复用首页就行
         if (res.result.pageData) {
           this.pageData = JSON.parse(res.result.pageData)

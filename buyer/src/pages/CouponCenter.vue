@@ -137,7 +137,9 @@ export default {
             },
           });
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.warn('领取优惠券失败', err);
+        });
     },
     // 发行量已领完
     isFinished(item) {

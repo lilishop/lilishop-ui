@@ -133,7 +133,6 @@ import {
 import {goodsList} from "@/api/goods";
 import Search from "@/components/Search";
 import ModelForm from "@/components/indexDecorate/ModelForm";
-import HoverSearch from "@/components/header/hoverSearch";
 import storage from "@/plugins/storage";
 import {getFloorStoreData} from "@/api/index.js";
 import { seckillByDay } from "@/api/promotion";
@@ -141,7 +140,7 @@ import imTalk from '@/components/mixes/talkIm'
 
 export default {
   name: "Merchant",
-  components: { Search, ModelForm, HoverSearch, StarFilled, ArrowDown },
+  components: { Search, ModelForm, StarFilled, ArrowDown },
   mixins: [imTalk],
   data() {
     return {
@@ -249,7 +248,9 @@ export default {
             this.storeCollected = true;
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          // 收藏状态查询失败不影响店铺页展示，静默处理
+        });
     },
     getStoreMsg() {
       const storeId = this.$route.query.id;
@@ -283,7 +284,6 @@ export default {
       getCateById(this.$route.query.id).then((res) => {
         if (res.success) {
           this.cateList = res.result;
-          console.log(this.cateList,'cateList')
         }
       });
     },
@@ -296,7 +296,8 @@ export default {
             this.total = res.result.total;
           }
         })
-        .catch(() => {
+        .catch((err) => {
+          console.warn('获取商品列表失败', err);
         });
     },
     goGoodsDetail(skuId, goodsId) {
@@ -309,7 +310,6 @@ export default {
     },
     search(val) {
       // 搜索本店商品
-      console.log(val);
       this.params.keyword = val;
       this.getGoodsList();
     },

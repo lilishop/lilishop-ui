@@ -78,5 +78,15 @@ module.exports = {
       args[0].title = configs.title;
       return args;
     });
+    // 生产环境兜底：压缩时移除所有 console 输出
+    if (enableProduction) {
+      config.optimization.minimizer("terser").tap((args) => {
+        args[0].terserOptions.compress = {
+          ...args[0].terserOptions.compress,
+          drop_console: true,
+        };
+        return args;
+      });
+    }
   },
 };

@@ -54,7 +54,9 @@ export default {
           this.detail = res.result
           sessionStorage.setItem(CACHE_KEY, JSON.stringify(res.result))
         }
-      }).catch(() => {}).finally(() => {
+      }).catch((err) => {
+        console.warn('获取消息详情失败', err)
+      }).finally(() => {
         this.loaded = true
         this.markRead()
       })
@@ -76,7 +78,9 @@ export default {
           this.detail.status = 'ALREADY_READY'
           refreshUnreadMessage()
         }
-      }).catch(() => {})
+      }).catch(() => {
+        // 标记已读为尽力而为操作，失败可忽略
+      })
     },
     goBack () {
       this.$router.push({ name: 'MsgList' })

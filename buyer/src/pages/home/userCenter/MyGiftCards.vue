@@ -260,7 +260,9 @@ export default {
               this.getList();
             }
           })
-          .catch(() => {})
+          .catch((err) => {
+            console.warn('激活礼品卡失败', err);
+          })
           .finally(() => {
             this.activatingId = "";
           });

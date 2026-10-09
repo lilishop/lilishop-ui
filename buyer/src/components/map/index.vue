@@ -117,7 +117,9 @@ export default {
             that.addrContent = positionResult;
           });
         })
-        .catch((e) => { });
+        .catch((e) => {
+          console.warn('地图组件加载失败', e);
+        });
     },
     searchOfMap(val) {
       // 地图搜索

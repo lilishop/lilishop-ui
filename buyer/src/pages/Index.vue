@@ -42,7 +42,6 @@
 </template>
 
 <script>
-import { InfoFilled } from '@element-plus/icons-vue';
 import Search from '@/components/Search';
 import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
@@ -145,14 +144,18 @@ export default {
               }
               storage.setItem('getTimes',datas)//存储缓存
             }
-      }).catch(() => {});
+      }).catch((err) => {
+        console.warn('获取自动发券信息失败', err);
+      });
     },
     handleReachBottom(){
 
     } ,
     getIndexData () {
       if(this.pageData){
-        this.parsePageData(JSON.stringify(this.pageData)).catch(() => {});
+        this.parsePageData(JSON.stringify(this.pageData)).catch(() => {
+          // 装修数据解析失败时保持默认空楼层
+        });
       }
       else{
         // 获取首页装修数据
@@ -164,7 +167,9 @@ export default {
               // 装修数据解析失败时保持默认空楼层
             }
           }
-        }).catch(() => {});
+        }).catch((err) => {
+          console.warn('获取首页装修数据失败', err);
+        });
       }
     },
 
@@ -212,7 +217,7 @@ export default {
   components: { Search,
     ModelForm,
     HoverSearch,
-    fixedBar, InfoFilled }
+    fixedBar }
 };
 </script>
 

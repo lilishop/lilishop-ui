@@ -113,7 +113,6 @@ export default {
   data () {
     const checkNum = (rule, value, callback) => {
       if (value === '') {
-        console.log(RegExp);
         callback(new Error('请填写提交数量'));
       } else if (value > this.info.num) {
         callback(new Error('提交数量不能大于购买数量'));

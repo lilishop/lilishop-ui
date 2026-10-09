@@ -156,7 +156,9 @@ export default {
         try {
           const userInfo = JSON.parse(rawUserInfo);
           if (userInfo && userInfo.mobile) this.mobile = userInfo.mobile;
-        } catch (e) {}
+        } catch {
+          // 缓存的用户信息解析失败时忽略，改走接口获取
+        }
       }
       if (!storage.getItem('accessToken')) return;
       getMemberMsg().then(res => {
@@ -164,7 +166,9 @@ export default {
           storage.setItem('userInfo', res.result);
           this.mobile = res.result.mobile || '';
         }
-      }).catch(() => {});
+      }).catch((err) => {
+        console.warn('获取会员信息失败', err);
+      });
     },
     normalizePwdError (message) {
       if (!message) return '修改失败，请稍后重试';

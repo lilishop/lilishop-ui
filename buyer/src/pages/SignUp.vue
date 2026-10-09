@@ -158,8 +158,12 @@ export default {
           } else {
             Message.warning(res.message || '注册失败');
           }
-        }).catch(() => {});
-      }).catch(() => {});
+        }).catch((err) => {
+          console.warn('注册请求失败', err);
+        });
+      }).catch(() => {
+        // 表单校验使用回调模式，此 catch 仅为兜底
+      });
     },
     // 发送短信验证码
     sendCode () {

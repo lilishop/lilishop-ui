@@ -206,7 +206,9 @@ export default {
               } else {
                 Message.error(res.message);
               }
-            }).catch(() => {});
+            }).catch((err) => {
+              console.warn('短信登录失败', err);
+            });
           }
         }
       });

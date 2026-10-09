@@ -244,7 +244,6 @@
 <script>
 import { Message, Modal } from "@/utils/message";
 import Promotion from "@/components/goodsDetail/Promotion";
-import Search from "@/components/Search";
 import * as APICart from "@/api/cart";
 import * as APIMember from "@/api/member";
 import { isECoupon } from "@/constants/goodsType";
@@ -255,7 +254,6 @@ export default {
     next();
   },
   components: {
-    Search,
     Promotion,
   },
   data() {

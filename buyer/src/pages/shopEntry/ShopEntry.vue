@@ -168,7 +168,9 @@ export default {
         if (res.success && res.result) {
           this.assignApplyData(res.result);
         }
-      }).catch(() => {});
+      }).catch((err) => {
+        console.warn('获取入驻申请状态失败', err);
+      });
     },
     // 下一步：先拉最新申请数据，再切步骤，避免第三步挂载后再改 content 触发校验
     async nextPage(step) {

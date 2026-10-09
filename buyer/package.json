@@ -5,7 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "dev": "vue-cli-service serve"
+    "dev": "vue-cli-service serve",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix"
   },
   "engines": {
     "node": ">=16"
@@ -34,6 +36,9 @@
     "@vue/cli-service": "^5.0.9",
     "@vue/compiler-sfc": "^3.5.35",
     "compression-webpack-plugin": "^10.0.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.13.0",
     "less": "^4.2.0",
     "less-loader": "^11.1.4",
     "webpack": "^5.95.0"

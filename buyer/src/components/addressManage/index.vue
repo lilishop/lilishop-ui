@@ -119,7 +119,6 @@ export default {
       // 获取地址详情
       getAddrDetail(id).then((res) => {
         if (res.success) {
-          console.log(res);
           const data = res.result;
           data.address = res.result.consigneeAddressPath.replace(/,/g, ' ');
           this.formData = data;
