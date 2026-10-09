@@ -102,42 +102,40 @@
             </div>
             <!-- 优惠券展示 -->
             <div class="item-price-coupon-row" v-if="promotionMap['COUPON'].length">
-              <div class="Ellipsis">
-                <span class="item-price-title">优惠券</span>
-                <span>
-                  <span
-                    class="item-coupon"
-                    v-for="(item, index) in promotionMap['COUPON'].slice(0, 6)"
-                    :key="index"
-                    @click="receiveCoupon(item.id)"
-                  >
-                    <span v-if="item.couponType == 'PRICE'"
-                      >满{{ item.consumeThreshold }}减{{ item.price }}</span>
-                    <span v-if="item.couponType == 'DISCOUNT'"
-                      >满{{ item.consumeThreshold }}打{{
-                        item.couponDiscount
-                      }}折</span>
-                  </span>
+              <span class="item-price-title">优惠券</span>
+              <div class="coupon-tags">
+                <span
+                  class="item-coupon"
+                  v-for="(item, index) in promotionMap['COUPON'].slice(0, 6)"
+                  :key="index"
+                  @click="receiveCoupon(item.id)"
+                >
+                  <span v-if="item.couponType == 'PRICE'"
+                    >满{{ item.consumeThreshold }}减{{ item.price }}</span>
+                  <span v-if="item.couponType == 'DISCOUNT'"
+                    >满{{ item.consumeThreshold }}打{{
+                      item.couponDiscount
+                    }}折</span>
                 </span>
 
                 <div class="dropdown" v-if="promotionMap['COUPON'].length > 6">
-                    <span>展开更多</span>
-                    <div class="dropdown-content">
-                      <span
-                        class="item-coupon"
-                        v-for="(item, index) in promotionMap['COUPON'].slice(6, promotionMap['COUPON'].length)"
-                        :key="index"
-                        @click="receiveCoupon(item.id)"
-                      >
-                        <span v-if="item.couponType == 'PRICE'"
-                          >满{{ item.consumeThreshold }}减{{ item.price }}</span>
-                        <span v-if="item.couponType == 'DISCOUNT'"
-                          >满{{ item.consumeThreshold }}打{{
-                            item.couponDiscount
-                          }}折</span>
-                      </span>
-                    </div>
+                  <span class="dropdown-more">展开更多 ▾</span>
+                  <div class="dropdown-content">
+                    <span
+                      class="item-coupon"
+                      v-for="(item, index) in promotionMap['COUPON'].slice(6, promotionMap['COUPON'].length)"
+                      :key="index"
+                      @click="receiveCoupon(item.id)"
+                    >
+                      <span v-if="item.couponType == 'PRICE'"
+                        >满{{ item.consumeThreshold }}减{{ item.price }}</span>
+                      <span v-if="item.couponType == 'DISCOUNT'"
+                        >满{{ item.consumeThreshold }}打{{
+                          item.couponDiscount
+                        }}折</span>
+                    </span>
                   </div>
+                </div>
               </div>
             </div>
             <!-- 限时折扣 -->
@@ -898,62 +896,75 @@ export default {
 
 .item-price-coupon-row {
   display: flex;
-  align-items: center;
-  margin: 5px 0px;
+  align-items: flex-start;
+  margin: 8px 0px;
+
+  .item-price-title {
+    flex-shrink: 0;
+    line-height: 22px;
+  }
 }
 
-.Ellipsis {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; //控制显示几行
-  -webkit-box-orient: vertical; //webbox方向
+.coupon-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
   z-index: 999;
 }
 
-.dropdown .item-coupon {
-  display: flex;
-  align-content: center;
-  align-items: center;
-  color: $theme_color;
-  margin: 5px 0;
-  font-size: 14px;
-  background-color: var(--theme-tint-12, #ffdedf);
-  border: 1px dotted $theme_color;
-  cursor: pointer;
+.dropdown-more {
+  font-size: 12px;
+  color: #999;
+  line-height: 22px;
+  white-space: nowrap;
 
-  span {
-    padding: 3px;
+  &:hover {
+    color: $theme_color;
   }
 }
+
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  padding: 12px 16px;
+  top: 24px;
+  left: 0;
+  background-color: #fff;
+  min-width: 220px;
+  max-width: 320px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .dropdown:hover .dropdown-content {
-  display: block;
+  display: flex;
 }
 
 .item-coupon {
-  margin-right: 5px;
-  padding: 0 5px;
+  position: relative;
+  padding: 2px 10px;
   color: $theme_color;
-  font-size: 14px;
-  background-color: var(--theme-tint-12, #ffdedf);
-  border: 1px dotted $theme_color;
+  font-size: 12px;
+  line-height: 18px;
+  background-color: #fff;
+  border: 1px solid $theme_color;
+  border-radius: 3px;
   cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  white-space: nowrap;
 
-  span {
-    padding: 3px;
+  &:hover {
+    background-color: $theme_color;
+    color: #fff;
   }
 }
 .item-promotion {

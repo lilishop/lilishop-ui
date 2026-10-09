@@ -161,9 +161,10 @@ service.interceptors.response.use(
     const errorData = errorResponse.data || {};
 
     if (
-      errorResponse.status === 401 ||
-      errorResponse.status === 403 ||
-      error.response?.data?.code === 20004
+      !error.config?.skipAuthHandler &&
+      (errorResponse.status === 401 ||
+        errorResponse.status === 403 ||
+        error.response?.data?.code === 20004)
     ) {
       isRefreshToken++;
       if (isRefreshToken === 1) {
@@ -212,8 +213,12 @@ function getTokenDebounce() {
   let success = false;
   return function () {
     if (!lock) {
-      lock = true;
       const oldRefreshToken = Storage.getItem("refreshToken");
+      // 无 refreshToken（未登录）时不发起刷新请求，直接判失败，避免请求 /refresh/undefined 造成拦截器死锁
+      if (!oldRefreshToken) {
+        return Promise.resolve("fail");
+      }
+      lock = true;
       handleRefreshToken(oldRefreshToken)
         .then((res) => {
           if (res.success) {

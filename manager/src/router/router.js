@@ -362,12 +362,6 @@ export const otherRouter = {
       component: () => import("@/views/page-decoration/wap/main.vue")
     },
     {
-      path: "/floorList/theme-setting",
-      title: "主题色设置",
-      name: "theme-setting",
-      component: () => import("@/views/page-decoration/theme-setting.vue")
-    },
-    {
       path: "add-sms-sign",
       title: "短信签名",
       name: "add-sms-sign",

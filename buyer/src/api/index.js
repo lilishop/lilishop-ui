@@ -63,6 +63,9 @@ export function handleRefreshToken(token) {
     url: `/buyer/passport/member/refresh/${token}`,
     method: Method.GET,
     needToken: false,
+    // 刷新令牌请求自身不再进入 401/403 刷新分支，避免拦截器递归死锁；失败也不弹全局错误提示
+    skipAuthHandler: true,
+    skipMessage: true,
   });
 }
 
