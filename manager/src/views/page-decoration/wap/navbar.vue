@@ -300,7 +300,7 @@ export default {
 }
 .model-title {
   height: 60px;
-  margin-top: 12px;
+  margin: 12px 0;
   padding: 0 16px;
   display: flex;
   justify-content: space-between;

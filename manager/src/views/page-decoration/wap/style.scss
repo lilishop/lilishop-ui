@@ -1,8 +1,11 @@
 .model-view {
   display: flex;
+  gap: 12px;
+  height: calc(100vh - 96px);
   .model-view-menu {
     flex: 1.5;
     min-width: 250px;
+    overflow-y: auto;
     .model-view-menu-item {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
