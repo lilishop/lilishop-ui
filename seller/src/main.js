@@ -8,7 +8,6 @@ import { setupLegacyMessage } from "@/utils/message";
 import liliDialog from "@/views/lili-dialog";
 import PriceColorScheme from "@/components/price-color-scheme.vue";
 import { install as installVueQr } from "vue-qr";
-import VueLazyload from "vue-lazyload";
 import {
   getRequest,
   postRequest,
@@ -22,8 +21,6 @@ import util from "@/libs/util";
 import { md5 } from "@/utils/md5.js";
 import * as filters from "@/utils/filters";
 import config from "@/config/index";
-import imgError from "./assets/img-error.png";
-import loadingGif from "./assets/loading2.gif";
 
 const { aMapSecurityJsCode, mainColor } = config;
 
@@ -43,11 +40,6 @@ const app = createApp(App);
 setupElementPlus(app);
 setupLegacyMessage(app);
 installVueQr(app);
-
-app.use(VueLazyload, {
-  error: imgError,
-  loading: loadingGif,
-});
 
 app.use(router);
 app.use(createPinia());

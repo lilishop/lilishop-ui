@@ -30,7 +30,6 @@
     "swiper": "^6.3.5",
     "uuid": "^8.3.2",
     "vue": "^3.5.35",
-    "vue-lazyload": "^3.0.0",
     "vue-qr": "^5.0.3",
     "vue-router": "^4.6.4",
     "vuedraggable": "^4.1.0",
@@ -52,12 +51,13 @@
     "less-loader": "^11.1.4",
     "style-loader": "^3.3.4",
     "style-resources-loader": "^1.5.0",
+    "unplugin-vue-components": "0.27.5",
     "vue-cli-plugin-style-resources-loader": "^0.1.5",
     "vue-eslint-parser": "^10",
     "webpack": "^5.95.0"
   },
   "resolutions": {
-    "minimatch": "^3.1.2",
-    "@achrinza/node-ipc": "9.2.2"
+    "@achrinza/node-ipc": "9.2.2",
+    "unplugin-vue-components/minimatch": "^9.0.5"
   }
 }
