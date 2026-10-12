@@ -10,7 +10,13 @@
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
-      padding: 0 5px;
+    }
+    .model-group {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 14px 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     }
     .model-group-title {
       display: flex;
@@ -18,7 +24,7 @@
       font-size: 15px;
       font-weight: 400;
       color: #303133;
-      margin: 14px 5px 10px;
+      margin: 0 0 12px;
       &::before {
         content: "";
         width: 3px;
@@ -27,9 +33,6 @@
         background: #409eff;
         margin-right: 6px;
       }
-    }
-    .model-group:first-child .model-group-title {
-      margin-top: 0;
     }
   }
   .model-config {
