@@ -95,11 +95,10 @@
 .content {
   box-sizing: border-box;
   margin: 20px 0;
-  padding: 50px 13px;
-  width: 360px;
-  background: url("../../../assets/iPhoneX_model.png") no-repeat;
+  width: 375px;
+  background: #ebebeb;
   height: 780px;
-  background-size: 100% 100%;
+  border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
