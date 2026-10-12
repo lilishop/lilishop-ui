@@ -690,5 +690,17 @@ export const modelData = [
         },
       ],
     }
+  },
+  {
+    type: "blank",
+    name: "辅助空白",
+    group: "tools",
+    img: "md-image",
+    options: {
+      bgColor: "#f5f5f5",
+      height: 10,
+      paddingX: 0,
+      pageGap: 10
+    }
   }
 ];
