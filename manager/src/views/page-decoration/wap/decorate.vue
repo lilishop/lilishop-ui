@@ -20,7 +20,7 @@
         style="margin-left: 20px"
         size="small"
         plain
-        v-if="res.type == 'promotions' || res.drawerPromotions"
+        v-if="res.drawerPromotions"
         type="primary"
         @click="selectPromotions()"
         >选择促销活动</el-button
@@ -95,9 +95,7 @@
     <div
       class="decorate-list"
       v-if="
-        (res.type != 'tpl_ad_list' &&
-          res.type != 'tpl_activity_list' &&
-          res.type != 'promotions') ||
+        (res.type != 'tpl_ad_list' && res.type != 'tpl_activity_list') ||
         res.drawer ||
         res.drawerPromotions
       "

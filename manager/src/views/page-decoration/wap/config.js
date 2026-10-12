@@ -6,12 +6,14 @@
  * notLink: true 没有链接功能
  * notImg: true 没有选择图片功能
  * close:true 右侧关闭按钮
+ * group: 'base' | 'marketing' | 'tools'  组件面板分组（无 group 的条目不在面板显示，仅供抽屉使用）
  */
 export const modelData = [
 
   {
     type: "flexOne",
     name: "图片",
+    group: "base",
     // drawer: true,
     notAdd: true,
     onlyImg: true,
@@ -31,6 +33,7 @@ export const modelData = [
   {
     type: "carousel",
     name: "轮播图",
+    group: "base",
     img: "md-image",
     // onlyImg: true,
     notTitle: false,
@@ -98,6 +101,7 @@ export const modelData = [
   {
     type: "title",
     name: "标题栏",
+    group: "tools",
     img: "md-image",
     // notTitle:true,
     notAdd: true,
@@ -366,6 +370,7 @@ export const modelData = [
   {
     type: "textPicture",
     name: "文字图片",
+    group: "base",
     drawer: true,
     notAdd: true,
 
@@ -411,6 +416,7 @@ export const modelData = [
   {
     type: "tpl_ad_list",
     name: "广告魔方",
+    group: "base",
     img: "md-image",
     options: {
       list: [
@@ -425,6 +431,7 @@ export const modelData = [
   {
     type: "menu",
     name: "宫格导航",
+    group: "base",
     img: "md-image",
     close: true,
     options: {
@@ -475,6 +482,7 @@ export const modelData = [
   {
     type: "search",
     name: "搜索",
+    group: "base",
     img: "md-image",
     notAdd: true,
     notLink: true,
@@ -490,6 +498,7 @@ export const modelData = [
   {
     type: "goods",
     name: "商品分类",
+    group: "base",
     img: "md-image",
     notAdd: true,
     notLink: true,
@@ -556,6 +565,7 @@ export const modelData = [
   {
     type: "notice",
     name: "公告",
+    group: "base",
     img: "md-image",
     notAdd: false,
     notLink: true,
@@ -573,22 +583,11 @@ export const modelData = [
     }
   },
   {
-    type: "promotions",
-    name: "促销活动",
-    img: "md-image",
-    notAdd: true,
-    notLink: true,
-    notImg: true,
-    close: true,
-    options: {
-      list: []
-    }
-  },
-  {
     notAdd: true,
     notImg: true,
     notLink: true,
     drawerPromotions: true,
+    group: "marketing",
     type: "promotionDetail",
     promotionsType: "PINTUAN",
     name: "拼团活动",
@@ -605,6 +604,7 @@ export const modelData = [
     notImg: true,
     notLink: true,
     drawerPromotions: true,
+    group: "marketing",
     type: "promotionDetail",
     promotionsType: "LIVE",
     name: "直播活动",
@@ -621,6 +621,7 @@ export const modelData = [
     notImg: true,
     notLink: true,
     drawerPromotions: true,
+    group: "marketing",
     type: "promotionDetail",
     promotionsType: "SECKILL",
     name: "秒杀活动",
@@ -637,6 +638,7 @@ export const modelData = [
     notImg: true,
     notLink: true,
     drawerPromotions: true,
+    group: "marketing",
     type: "promotionDetail",
     promotionsType: "KANJIA",
     name: "砍价活动",
@@ -651,6 +653,7 @@ export const modelData = [
   {
     type: "video",
     name: "视频",
+    group: "base",
     img: "md-image",
     notAdd: true,
     notImg: true,

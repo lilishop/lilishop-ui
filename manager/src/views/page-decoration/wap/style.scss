@@ -3,10 +3,19 @@
   .model-view-menu {
     flex: 1.5;
     min-width: 250px;
-    > .model-view-menu-item {
+    .model-view-menu-item {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
+    }
+    .model-group-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #303133;
+      margin: 10px 5px 8px;
+    }
+    .model-group:first-child .model-group-title {
+      margin-top: 0;
     }
   }
   .model-config {

@@ -3,26 +3,30 @@
     <!-- 拖拽栏 ，展示栏  -->
     <div class="model-view">
       <div class="model-view-menu">
-        <draggable
-          class="model-view-menu-item"
-          :list="modelData"
-          :item-key="getModelKey"
-          :clone="cloneModel"
-          :move="handleMove"
-          :group="{ name: 'model', pull: 'clone', put: false, animation: 150 }"
-          :sort="false"
-          ghost-class="ghost"
+        <div
+          v-for="grp in modelGroups"
+          :key="grp.key"
+          class="model-group"
         >
-          <template #item="{ element: model }">
-            <li
-              v-if="!model.drawer && !model.drawerPromotions"
-              class="model-item"
-            >
-              <img src alt />
-              <span>{{ model.name }}</span>
-            </li>
-          </template>
-        </draggable>
+          <div class="model-group-title">{{ grp.title }}</div>
+          <draggable
+            class="model-view-menu-item"
+            :list="grp.list"
+            :item-key="getModelKey"
+            :clone="cloneModel"
+            :move="handleMove"
+            :group="{ name: 'model', pull: 'clone', put: false, animation: 150 }"
+            :sort="false"
+            ghost-class="ghost"
+          >
+            <template #item="{ element: model }">
+              <li class="model-item">
+                <img src alt />
+                <span>{{ model.name }}</span>
+              </li>
+            </template>
+          </draggable>
+        </div>
       </div>
 
       <div class="model-view-content">
@@ -40,6 +44,7 @@
             <template #item="{ element, index }">
               <div class="list">
                 <component
+                  v-if="templates[element.type]"
                   class="component"
                   :class="{ active: selected == index }"
                   @click="handleComponent(element, index)"
@@ -108,6 +113,20 @@ export default {
       deep: true,
     },
   },
+  computed: {
+    // 组件面板三类分组（无 group 的条目仅供抽屉使用，不进面板）
+    modelGroups() {
+      const groups = [
+        { key: "base", title: "基础组件" },
+        { key: "marketing", title: "营销组件" },
+        { key: "tools", title: "工具组件" },
+      ];
+      return groups.map((g) => ({
+        ...g,
+        list: this.modelData.filter((m) => m.group === g.key),
+      }));
+    },
+  },
   mounted() {
     this.init();
   },
@@ -150,7 +169,10 @@ export default {
       API_Other.getHomeData(this.$route.query.id).then((res) => {
         this.contentData = JSON.parse(res.result.pageData);
 
-        this.handleComponent(this.contentData.list[0], 0);
+        const first = this.contentData.list[0];
+        if (first && this.templates[first.type]) {
+          this.handleComponent(first, 0);
+        }
       });
 
     },
