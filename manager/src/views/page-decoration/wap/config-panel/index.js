@@ -6,6 +6,7 @@ import PanelRichText from "./PanelRichText.vue";
 import PanelIntegral from "./PanelIntegral.vue";
 import PanelCoupon from "./PanelCoupon.vue";
 import PanelArticle from "./PanelArticle.vue";
+import PanelShop from "./PanelShop.vue";
 
 export default {
   blank: PanelBlank,
@@ -14,4 +15,5 @@ export default {
   integral: PanelIntegral,
   coupon: PanelCoupon,
   article: PanelArticle,
+  shop: PanelShop,
 };

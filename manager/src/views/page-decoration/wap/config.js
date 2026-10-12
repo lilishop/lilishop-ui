@@ -768,5 +768,18 @@ export const modelData = [
       pageGap: 10,
       borderRadius: 0
     }
+  },
+  {
+    type: "shop",
+    name: "店铺列表",
+    group: "base",
+    img: "md-image",
+    options: {
+      list: [{ title: "店铺列表", count: 4 }],
+      bgColor: "#FFFFFF",
+      paddingX: 0,
+      pageGap: 10,
+      borderRadius: 0
+    }
   }
 ];

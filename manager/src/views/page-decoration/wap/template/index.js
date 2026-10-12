@@ -28,6 +28,7 @@ import tpl_line from "./tpl_line";
 import tpl_rich_text from "./tpl_rich_text";
 import tpl_coupon from "./tpl_coupon";
 import tpl_article from "./tpl_article";
+import tpl_shop from "./tpl_shop";
 
 export default {
   notice: tpl_notice,
@@ -60,4 +61,5 @@ export default {
   richText: tpl_rich_text,
   coupon: tpl_coupon,
   article: tpl_article,
+  shop: tpl_shop,
 };
