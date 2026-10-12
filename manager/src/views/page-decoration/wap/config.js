@@ -742,5 +742,18 @@ export const modelData = [
       pageGap: 10,
       borderRadius: 0
     }
+  },
+  {
+    type: "coupon",
+    name: "优惠券",
+    group: "marketing",
+    img: "md-image",
+    options: {
+      list: [{ title: "优惠券", count: 3 }],
+      bgColor: "#FFFFFF",
+      paddingX: 0,
+      pageGap: 10,
+      borderRadius: 0
+    }
   }
 ];

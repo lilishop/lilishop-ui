@@ -4,10 +4,12 @@ import PanelBlank from "./PanelBlank.vue";
 import PanelLine from "./PanelLine.vue";
 import PanelRichText from "./PanelRichText.vue";
 import PanelIntegral from "./PanelIntegral.vue";
+import PanelCoupon from "./PanelCoupon.vue";
 
 export default {
   blank: PanelBlank,
   line: PanelLine,
   richText: PanelRichText,
   integral: PanelIntegral,
+  coupon: PanelCoupon,
 };
