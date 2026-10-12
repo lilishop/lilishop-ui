@@ -6,17 +6,21 @@
     flex: 1.5;
     min-width: 250px;
     overflow-y: auto;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    padding: 14px 12px;
+    box-sizing: border-box;
     .model-view-menu-item {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
     }
     .model-group {
-      background: #ffffff;
-      border-radius: 8px;
-      padding: 14px 12px;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      margin-bottom: 16px;
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
     .model-group-title {
       display: flex;
