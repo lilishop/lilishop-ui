@@ -280,7 +280,7 @@ export default {
   color: #333;
   font-size: 14px;
   > .model-title-view-btn {
-    margin-right: 15%;
+    margin-right: 5%;
     > * {
       margin: 0 10px;
     }
