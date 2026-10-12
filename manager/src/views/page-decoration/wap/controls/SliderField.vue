@@ -14,7 +14,6 @@
         :model-value="modelValue"
         :min="min"
         :max="max"
-        size="small"
         @update:model-value="onInput"
       />
     </div>
@@ -52,7 +51,7 @@ export default {
 }
 
 .ctrl-number {
-  width: 110px;
+  width: 130px;
   flex-shrink: 0;
 }
 </style>
