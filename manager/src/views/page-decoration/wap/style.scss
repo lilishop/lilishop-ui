@@ -148,18 +148,19 @@
 }
 .floor-tools {
   position: absolute;
-  right: -44px;
+  right: -56px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 100;
   display: flex;
   flex-direction: column;
   background: #ffffff;
-  border-radius: 6px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 4px 0;
   .el-icon {
-    padding: 6px 8px;
+    font-size: 20px;
+    padding: 9px 12px;
     cursor: pointer;
     color: #606266;
     &:hover {
