@@ -40,12 +40,11 @@ export default {
 </script>
 <style scoped lang="scss">
 .box {
-  height: calc(100vh - 120px);
-  width: 98%;
-  margin: 0 auto;
+  height: 100vh;
+  width: 100%;
+  margin: 0;
   padding: 0 20px;
   background: #fff;
-  border-radius: 0.4em;
   overflow: hidden;
 }
 </style>

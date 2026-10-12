@@ -1,7 +1,9 @@
 <template>
   <!-- 预览保存 -->
   <div class="model-title">
-    <div></div>
+    <div>
+      <el-button size="default" @click="goBack">返回</el-button>
+    </div>
     <div class="model-title-view-btn">
       <!-- TODO 后期会补全 目前版本暂无 -->
       <!-- <Poptip placement="bottom" width="100">

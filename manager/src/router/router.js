@@ -11,6 +11,16 @@ export const loginRouter = {
   component: () => import("@/views/login.vue")
 };
 
+// 移动端楼层装修编辑器：全屏独立页，不在 Main（左侧菜单）布局内
+export const floorDecorationRouter = {
+  path: "/floorList/main",
+  name: "main",
+  meta: {
+    title: "编辑模板"
+  },
+  component: () => import("@/views/page-decoration/wap/main.vue")
+};
+
 // 作为Main组件的子页面展示但是不在左侧菜单显示的路由写在otherRouter里
 export const otherRouter = {
   path: "/",
@@ -356,12 +366,6 @@ export const otherRouter = {
       component: () => import("@/views/page-decoration/renovation.vue")
     },
     {
-      path: "/floorList/main",
-      title: "编辑模板",
-      name: "main",
-      component: () => import("@/views/page-decoration/wap/main.vue")
-    },
-    {
       path: "add-sms-sign",
       title: "短信签名",
       name: "add-sms-sign",
@@ -545,4 +549,4 @@ export const externalLink = {
 };
 
 // 所有上面定义的路由都要写在下面的routers里
-export const routers = [loginRouter, otherRouter, page500, page403, externalLink];
+export const routers = [loginRouter, floorDecorationRouter, otherRouter, page500, page403, externalLink];
