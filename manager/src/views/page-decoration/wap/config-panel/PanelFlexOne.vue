@@ -166,19 +166,24 @@ export default {
 <style scoped lang="scss">
 .panel-tabs {
   display: flex;
-  justify-content: center;
-  gap: 8px;
+  background: #f4f4f5;
+  border-radius: 8px;
+  padding: 3px;
   margin-bottom: 14px;
   .panel-tab {
-    padding: 5px 18px;
+    flex: 1;
+    text-align: center;
+    padding: 6px 0;
     font-size: 13px;
-    border-radius: 999px;
+    border-radius: 6px;
     cursor: pointer;
     color: #606266;
-    background: #f4f4f5;
+    transition: all 0.2s ease;
     &.active {
-      background: #409eff;
-      color: #fff;
+      background: #ffffff;
+      color: #409eff;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
     }
   }
 }
