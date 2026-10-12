@@ -755,5 +755,18 @@ export const modelData = [
       pageGap: 10,
       borderRadius: 0
     }
+  },
+  {
+    type: "article",
+    name: "文章列表",
+    group: "base",
+    img: "md-image",
+    options: {
+      list: [{ title: "文章列表", categoryId: "", count: 3 }],
+      bgColor: "#FFFFFF",
+      paddingX: 0,
+      pageGap: 10,
+      borderRadius: 0
+    }
   }
 ];
