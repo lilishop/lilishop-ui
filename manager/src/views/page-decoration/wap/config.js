@@ -13,6 +13,7 @@ export const modelData = [
   {
     type: "flexOne",
     name: "图片",
+    icon: "Picture",
     group: "base",
     // drawer: true,
     notAdd: true,
@@ -33,6 +34,7 @@ export const modelData = [
   {
     type: "carousel",
     name: "轮播图",
+    icon: "PictureFilled",
     group: "base",
     img: "md-image",
     // onlyImg: true,
@@ -101,6 +103,7 @@ export const modelData = [
   {
     type: "title",
     name: "标题栏",
+    icon: "Collection",
     group: "tools",
     img: "md-image",
     // notTitle:true,
@@ -370,6 +373,7 @@ export const modelData = [
   {
     type: "textPicture",
     name: "文字图片",
+    icon: "Document",
     group: "base",
     drawer: true,
     notAdd: true,
@@ -416,6 +420,7 @@ export const modelData = [
   {
     type: "tpl_ad_list",
     name: "广告魔方",
+    icon: "Grid",
     group: "base",
     img: "md-image",
     options: {
@@ -431,6 +436,7 @@ export const modelData = [
   {
     type: "menu",
     name: "宫格导航",
+    icon: "Menu",
     group: "base",
     img: "md-image",
     close: true,
@@ -482,6 +488,7 @@ export const modelData = [
   {
     type: "search",
     name: "搜索",
+    icon: "Search",
     group: "base",
     img: "md-image",
     notAdd: true,
@@ -498,6 +505,7 @@ export const modelData = [
   {
     type: "goods",
     name: "商品分类",
+    icon: "Goods",
     group: "base",
     img: "md-image",
     notAdd: true,
@@ -565,6 +573,7 @@ export const modelData = [
   {
     type: "notice",
     name: "公告",
+    icon: "Bell",
     group: "base",
     img: "md-image",
     notAdd: false,
@@ -591,6 +600,7 @@ export const modelData = [
     type: "promotionDetail",
     promotionsType: "PINTUAN",
     name: "拼团活动",
+    icon: "UserFilled",
     subBkColor: "#e1212b",
     subName: "惊喜折扣",
     subColor: "#fff",
@@ -608,6 +618,7 @@ export const modelData = [
     type: "promotionDetail",
     promotionsType: "LIVE",
     name: "直播活动",
+    icon: "VideoPlay",
     subBkColor: "#e1212b",
     subName: "优惠好价",
     subColor: "#fff",
@@ -625,6 +636,7 @@ export const modelData = [
     type: "promotionDetail",
     promotionsType: "SECKILL",
     name: "秒杀活动",
+    icon: "Timer",
     subBkColor: "#e1212b",
     subName: "x点场",
     subColor: "#fff",
@@ -642,6 +654,7 @@ export const modelData = [
     type: "promotionDetail",
     promotionsType: "KANJIA",
     name: "砍价活动",
+    icon: "Scissor",
     subBkColor: "#e1212b",
     subName: "超值好物",
     subColor: "#fff",
@@ -653,6 +666,7 @@ export const modelData = [
   {
     type: "video",
     name: "视频",
+    icon: "VideoCamera",
     group: "base",
     img: "md-image",
     notAdd: true,
@@ -694,6 +708,7 @@ export const modelData = [
   {
     type: "blank",
     name: "辅助空白",
+    icon: "Crop",
     group: "tools",
     img: "md-image",
     options: {
@@ -706,6 +721,7 @@ export const modelData = [
   {
     type: "line",
     name: "辅助线",
+    icon: "Minus",
     group: "tools",
     img: "md-image",
     options: {
@@ -720,6 +736,7 @@ export const modelData = [
   {
     type: "richText",
     name: "富文本",
+    icon: "EditPen",
     group: "tools",
     img: "md-image",
     options: {
@@ -733,6 +750,7 @@ export const modelData = [
   {
     type: "integral",
     name: "积分商城",
+    icon: "Coin",
     group: "marketing",
     img: "md-image",
     options: {
@@ -746,6 +764,7 @@ export const modelData = [
   {
     type: "coupon",
     name: "优惠券",
+    icon: "Ticket",
     group: "marketing",
     img: "md-image",
     options: {
@@ -759,6 +778,7 @@ export const modelData = [
   {
     type: "article",
     name: "文章列表",
+    icon: "Tickets",
     group: "base",
     img: "md-image",
     options: {
@@ -772,6 +792,7 @@ export const modelData = [
   {
     type: "shop",
     name: "店铺列表",
+    icon: "Shop",
     group: "base",
     img: "md-image",
     options: {

@@ -4,9 +4,10 @@
     flex: 1.5;
     min-width: 250px;
     .model-view-menu-item {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 5px;
     }
     .model-group-title {
       font-size: 13px;
@@ -25,17 +26,23 @@
     flex: 6;
   }
   .model-item {
-    line-height: 1.75;
-    font-size: 13px;
-    margin: 0 5px 10px 5px;
+    line-height: 1.5;
+    font-size: 12px;
     border: 1px solid #ededed;
     background: #f6f6f9;
-    width: 70px;
-    height: 70px;
+    border-radius: 6px;
+    height: 64px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    gap: 4px;
+    color: #606266;
+    cursor: grab;
+    &:hover {
+      border-color: #409eff;
+      color: #409eff;
+    }
   }
 }
 .model-view-content {

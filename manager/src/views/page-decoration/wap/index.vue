@@ -21,7 +21,9 @@
           >
             <template #item="{ element: model }">
               <li class="model-item">
-                <img src alt />
+                <el-icon v-if="model.icon" :size="22">
+                  <component :is="model.icon" />
+                </el-icon>
                 <span>{{ model.name }}</span>
               </li>
             </template>
@@ -85,7 +87,30 @@
   </div>
 </template>
 <script>
-import { CircleClose } from "@element-plus/icons-vue";
+import {
+  CircleClose,
+  Picture,
+  PictureFilled,
+  Document,
+  Grid,
+  Menu,
+  Search,
+  Goods,
+  Bell,
+  VideoCamera,
+  VideoPlay,
+  Tickets,
+  Shop,
+  UserFilled,
+  Timer,
+  Scissor,
+  Coin,
+  Ticket,
+  Collection,
+  Crop,
+  Minus,
+  EditPen,
+} from "@element-plus/icons-vue";
 import templates from "./template/index";
 import Draggable from "vuedraggable";
 import { modelData } from "./config";
@@ -97,6 +122,27 @@ export default {
     Draggable,
     decorate,
     CircleClose,
+    Picture,
+    PictureFilled,
+    Document,
+    Grid,
+    Menu,
+    Search,
+    Goods,
+    Bell,
+    VideoCamera,
+    VideoPlay,
+    Tickets,
+    Shop,
+    UserFilled,
+    Timer,
+    Scissor,
+    Coin,
+    Ticket,
+    Collection,
+    Crop,
+    Minus,
+    EditPen,
   },
   data() {
     return {
