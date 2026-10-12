@@ -702,5 +702,19 @@ export const modelData = [
       paddingX: 0,
       pageGap: 10
     }
+  },
+  {
+    type: "line",
+    name: "辅助线",
+    group: "tools",
+    img: "md-image",
+    options: {
+      bgColor: "#FFFFFF",
+      lineColor: "#979797",
+      lineStyle: "dashed",
+      lineHeight: 1,
+      paddingX: 0,
+      pageGap: 10
+    }
   }
 ];

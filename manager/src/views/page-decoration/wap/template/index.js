@@ -24,6 +24,7 @@ import tpl_goods from "./tpl_goods";
 import tpl_notice from "./tpl_notice";
 import tpl_promotions from "./tpl_promotions";
 import tpl_blank from "./tpl_blank";
+import tpl_line from "./tpl_line";
 
 export default {
   notice: tpl_notice,
@@ -52,4 +53,5 @@ export default {
   promotions: tpl_promotions,
   tpl_activity_list,
   blank: tpl_blank,
+  line: tpl_line,
 };
