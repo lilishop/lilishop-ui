@@ -16,63 +16,71 @@
     </div>
 
     <template v-if="activeTab === 'content'">
-      <div class="section-title">内容设置</div>
-      <div class="section-tip">选定布局区域，在下方添加图片，建议添加比例一致的图片</div>
-      <div class="img-preview" v-if="item.img">
-        <img :src="item.img" alt="" />
-      </div>
-      <div class="img-placeholder" v-else>尺寸不限</div>
-      <div class="btn-row">
-        <el-button plain type="primary" @click="pickImage">选择照片</el-button>
-        <el-button plain type="primary" @click="openHotzone">绘制热区</el-button>
+      <div class="panel-card">
+        <div class="section-title">内容设置</div>
+        <div class="section-tip">选定布局区域，在下方添加图片，建议添加比例一致的图片</div>
+        <div class="img-preview" v-if="item.img">
+          <img :src="item.img" alt="" />
+        </div>
+        <div class="img-placeholder" v-else>尺寸不限</div>
+        <div class="btn-row">
+          <el-button plain type="primary" @click="pickImage">选择照片</el-button>
+          <el-button plain type="primary" @click="openHotzone">绘制热区</el-button>
+        </div>
       </div>
     </template>
 
     <template v-else>
-      <div class="section-title">颜色设置</div>
-      <color-field
-        v-model="res.options.bgColor"
-        label="背景颜色"
-        :default-value="defaults.bgColor"
-      />
-      <div class="section-title">边距设置</div>
-      <slider-field
-        v-model="res.options.paddingTop"
-        label="上边距"
-        :min="0"
-        :max="100"
-      />
-      <slider-field
-        v-model="res.options.paddingBottom"
-        label="下边距"
-        :min="0"
-        :max="100"
-      />
-      <slider-field
-        v-model="res.options.paddingX"
-        label="左右边距"
-        :min="0"
-        :max="30"
-      />
-      <slider-field
-        v-model="res.options.pageGap"
-        label="页面间距"
-        :min="0"
-        :max="100"
-      />
-      <div class="section-title">圆角设置</div>
-      <slider-field
-        v-model="res.options.borderRadius"
-        label="背景圆角"
-        :min="0"
-        :max="50"
-      />
-      <slider-field
-        v-model="res.options.imgRadius"
-        label="内容圆角"
-        :min="0"
-        :max="50"
-      />
+      <div class="panel-card">
+        <div class="section-title">颜色设置</div>
+        <color-field
+          v-model="res.options.bgColor"
+          label="背景颜色"
+          :default-value="defaults.bgColor"
+        />
+      </div>
+      <div class="panel-card">
+        <div class="section-title">边距设置</div>
+        <slider-field
+          v-model="res.options.paddingTop"
+          label="上边距"
+          :min="0"
+          :max="100"
+        />
+        <slider-field
+          v-model="res.options.paddingBottom"
+          label="下边距"
+          :min="0"
+          :max="100"
+        />
+        <slider-field
+          v-model="res.options.paddingX"
+          label="左右边距"
+          :min="0"
+          :max="30"
+        />
+        <slider-field
+          v-model="res.options.pageGap"
+          label="页面间距"
+          :min="0"
+          :max="100"
+        />
+      </div>
+      <div class="panel-card">
+        <div class="section-title">圆角设置</div>
+        <slider-field
+          v-model="res.options.borderRadius"
+          label="背景圆角"
+          :min="0"
+          :max="50"
+        />
+        <slider-field
+          v-model="res.options.imgRadius"
+          label="内容圆角"
+          :min="0"
+          :max="50"
+        />
+      </div>
     </template>
 
     <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
@@ -168,17 +176,31 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.panel-flex-one {
+  background: #f5f7fa;
+  margin: 0 -20px -120px;
+  padding: 0 12px 120px;
+  min-height: calc(100vh - 70px);
+  box-sizing: border-box;
+}
 .panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 50px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   .panel-name {
     font-size: 14px;
     font-weight: bold;
     color: #303133;
   }
+}
+.panel-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 .panel-tabs {
   display: inline-flex;
@@ -204,10 +226,7 @@ export default {
   font-size: 13px;
   font-weight: 600;
   color: #303133;
-  margin: 14px 0 10px;
-  &:first-of-type {
-    margin-top: 0;
-  }
+  margin: 0 0 12px;
 }
 .section-tip {
   font-size: 12px;
