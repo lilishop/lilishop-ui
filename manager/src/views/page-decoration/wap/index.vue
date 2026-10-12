@@ -45,6 +45,7 @@
           >
             <template #item="{ element, index }">
               <div class="list">
+                <div class="floor-name">{{ element.name || element.type }}</div>
                 <component
                   v-if="templates[element.type]"
                   class="component"
@@ -60,15 +61,24 @@
                 >
                   未知组件「{{ element.type }}」已下线，点击删除
                 </div>
-                <el-icon
-                  v-if="selected == index"
-                  @click="closeComponent(index)"
-                  class="close"
-                  :size="25"
-                  color="#e1251b"
-                >
-                  <CircleClose />
-                </el-icon>
+                <div v-if="element.hidden" class="floor-hidden-mask">已隐藏</div>
+                <div v-if="selected == index" class="floor-tools">
+                  <el-icon
+                    :class="{ disabled: index === 0 }"
+                    @click="moveComponent(index, -1)"
+                    ><Top
+                  /></el-icon>
+                  <el-icon
+                    :class="{ disabled: index === contentData.list.length - 1 }"
+                    @click="moveComponent(index, 1)"
+                    ><Bottom
+                  /></el-icon>
+                  <el-icon @click="copyComponent(index)"><CopyDocument /></el-icon>
+                  <el-icon @click="closeComponent(index)"><Delete /></el-icon>
+                  <el-icon @click="toggleHide(index)"
+                    ><View v-if="!element.hidden" /><Hide v-else
+                  /></el-icon>
+                </div>
               </div>
             </template>
           </draggable>
@@ -88,7 +98,6 @@
 </template>
 <script>
 import {
-  CircleClose,
   Picture,
   PictureFilled,
   Document,
@@ -110,6 +119,12 @@ import {
   Crop,
   Minus,
   EditPen,
+  Top,
+  Bottom,
+  CopyDocument,
+  Delete,
+  View,
+  Hide,
 } from "@element-plus/icons-vue";
 import templates from "./template/index";
 import Draggable from "vuedraggable";
@@ -121,7 +136,6 @@ export default {
   components: {
     Draggable,
     decorate,
-    CircleClose,
     Picture,
     PictureFilled,
     Document,
@@ -143,6 +157,12 @@ export default {
     Crop,
     Minus,
     EditPen,
+    Top,
+    Bottom,
+    CopyDocument,
+    Delete,
+    View,
+    Hide,
   },
   data() {
     return {
@@ -267,6 +287,29 @@ export default {
     handleUnknownComponent(element, index) {
       console.warn(`[page-decoration] 未知组件类型: ${element.type}`);
       this.closeComponent(index);
+    },
+    // 上移/下移楼层
+    moveComponent(index, dir) {
+      const target = index + dir;
+      if (target < 0 || target >= this.contentData.list.length) return;
+      const list = this.contentData.list;
+      [list[index], list[target]] = [list[target], list[index]];
+      this.selected = target;
+      this.handleComponent(this.contentData.list[target], target);
+    },
+    // 复制楼层
+    copyComponent(index) {
+      const cloned = JSON.parse(JSON.stringify(this.contentData.list[index]));
+      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+      cloned.key = key;
+      cloned.model = cloned.type + "_" + key;
+      this.contentData.list.splice(index + 1, 0, cloned);
+      this.handleComponent(this.contentData.list[index + 1], index + 1);
+    },
+    // 隐藏/显示楼层（渲染端跳过 hidden 楼层）
+    toggleHide(index) {
+      const item = this.contentData.list[index];
+      item.hidden = !item.hidden;
     },
     // 右侧栏回调
     handleDrawer(val) {

@@ -124,11 +124,57 @@
 .list {
   position: relative;
 }
-.close {
+.floor-name {
   position: absolute;
-  right: 5px;
-  top: 10px;
-  z-index: 99;
+  left: 4px;
+  top: 4px;
+  z-index: 60;
+  background: #ffffff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  color: #606266;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+.floor-tools {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  .el-icon {
+    padding: 6px 8px;
+    cursor: pointer;
+    color: #606266;
+    &:hover {
+      color: #409eff;
+    }
+    &.disabled {
+      color: #dcdfe6;
+      cursor: not-allowed;
+    }
+  }
+}
+.floor-hidden-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 .unknown-component {
   padding: 16px 10px;
