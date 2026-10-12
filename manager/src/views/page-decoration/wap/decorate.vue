@@ -26,6 +26,15 @@
         >选择促销活动</el-button
       >
     </div>
+
+    <!-- 新组件独立配置面板（按 type 分发） -->
+    <component
+      v-if="panelComponent"
+      :is="panelComponent"
+      :res="res"
+    />
+    <!-- 老组件遗留配置分支 -->
+    <template v-else>
     <el-alert
       v-if="res.name == '商品分类'"
       type="warning"
@@ -533,6 +542,7 @@
         ref="ossManage"
       />
     </el-dialog>
+    </template>
   </div>
 </template>
 <script>
@@ -543,6 +553,7 @@ import hotzone from "@/components/hotzone";
 import ways from "@/components/lili-dialog/wap.js";
 import categoryTemplate from "@/components/lili-dialog/template/category";
 import VideoConfig from "./video-config";
+import panelMap from "./config-panel";
 import alignTextLeft from "@/assets/align-text-left.png";
 import alignTextCenter from "@/assets/align-text-center.png";
 import alignTextRight from "@/assets/align-text-right.png";
@@ -563,9 +574,10 @@ export default {
       picModelFlag: false, //图片选择器
       linkType: "goods", // dialog弹窗口类型
       styleFlag: false, //广告魔方开关
-      textAlign: this.res.options.list[0]
-        ? this.res.options.list[0].textAlign
-        : "center", //文字对齐方式
+      textAlign:
+        this.res.options.list && this.res.options.list[0]
+          ? this.res.options.list[0].textAlign
+          : "center", //文字对齐方式
       promotionsFlag: false, //广告魔方开关
       selectedLinkIndex: "", //选择链接的索引
       modelData, // 装修数据
@@ -585,6 +597,12 @@ export default {
     },
   },
   props: ["res"],
+  computed: {
+    // 新组件按 type 分发到独立配置面板；老组件走下方遗留分支
+    panelComponent() {
+      return (this.res && panelMap[this.res.type]) || null;
+    },
+  },
   methods: {
     // 选择分类（弹窗内暂存，确定后写回）
     onCategorySelected(val) {
