@@ -12,30 +12,30 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { useRouter } from "vue-router";
 import { Bell } from "@element-plus/icons-vue";
 import util from "@/libs/util.js";
 
-export default {
-  name: "messageTip",
-  components: { Bell },
-  props: {
-    value: {
-      type: Number,
-      default: 0,
-    },
-    message: {
-      type: String,
-      default: "",
-    },
+defineOptions({ name: "messageTip" });
+
+const props = defineProps({
+  value: {
+    type: Number,
+    default: 0,
   },
-  methods: {
-    showMessage() {
-      util.openNewPage(this, "message_index");
-      this.$router.push({
-        name: "message_index",
-      });
-    },
+  message: {
+    type: String,
+    default: "",
   },
-};
+});
+
+const router = useRouter();
+
+function showMessage() {
+  util.openNewPage("message_index");
+  router.push({
+    name: "message_index",
+  });
+}
 </script>

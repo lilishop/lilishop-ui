@@ -85,143 +85,142 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, markRaw, onMounted, ref, watch } from "vue";
 import * as API_GOODS from "@/api/goods";
 import { Box, Calendar, CreditCard, Ticket } from "@element-plus/icons-vue";
+import { Message } from "@/utils/message";
 
-export default {
-  components: { Box, Calendar, CreditCard, Ticket },
-  data() {
-    return {
-      selectGoodsType: false,
-      goodsTypeWay: [
-        {
-          title: "实物商品",
-          desc: "零售批发，物流配送",
-          type: "PHYSICAL_GOODS",
-          icon: "Box",
-          tone: "tone-physical",
-        },
-        {
-          title: "虚拟商品",
-          desc: "虚拟核验，无需物流",
-          type: "VIRTUAL_GOODS",
-          icon: "Ticket",
-          tone: "tone-virtual",
-        },
-        {
-          title: "电子卡券",
-          desc: "卡密自动发卡，无需物流",
-          type: "E_COUPON",
-          icon: "CreditCard",
-          tone: "tone-coupon",
-        },
-        {
-          title: "预约商品",
-          desc: "时段预约，到店或上门",
-          type: "APPOINTMENT_GOODS",
-          icon: "Calendar",
-          tone: "tone-appointment",
-        },
-      ],
-      category: [
-        { name: "", id: "" },
-        { name: "", id: "" },
-        { name: "", id: "" },
-      ],
-      goodsType: "",
-      pendingGoodsType: "",
-      categoryListLevel1: [],
-      categoryListLevel2: [],
-      categoryListLevel3: [],
-    };
+const emit = defineEmits(["change"]);
+
+const selectGoodsType = ref(false);
+// icon 直接存组件对象：<script setup> 下无 components 选项，字符串名无法在 <component :is> 中解析
+const goodsTypeWay = ref([
+  {
+    title: "实物商品",
+    desc: "零售批发，物流配送",
+    type: "PHYSICAL_GOODS",
+    icon: markRaw(Box),
+    tone: "tone-physical",
   },
-  computed: {
-    selectedTypeTitle() {
-      const hit = this.goodsTypeWay.find((item) => item.type === this.goodsType);
-      return hit ? hit.title : "";
-    },
+  {
+    title: "虚拟商品",
+    desc: "虚拟核验，无需物流",
+    type: "VIRTUAL_GOODS",
+    icon: markRaw(Ticket),
+    tone: "tone-virtual",
   },
-  watch: {
-    selectGoodsType(val) {
-      if (val) {
-        this.syncGoodsTypeSelection();
-      }
-    },
+  {
+    title: "电子卡券",
+    desc: "卡密自动发卡，无需物流",
+    type: "E_COUPON",
+    icon: markRaw(CreditCard),
+    tone: "tone-coupon",
   },
-  methods: {
-    syncGoodsTypeSelection() {
-      this.pendingGoodsType = this.goodsType;
-    },
-    openGoodsTypeDialog() {
-      this.selectGoodsType = true;
-    },
-    handleClickGoodsType(item) {
-      this.pendingGoodsType = item.type;
-    },
-    cancelGoodsType() {
-      this.syncGoodsTypeSelection();
-      this.selectGoodsType = false;
-    },
-    confirmGoodsType() {
-      if (!this.pendingGoodsType) {
-        this.$Message.error("请选择商品类型");
-        return;
-      }
-      this.goodsType = this.pendingGoodsType;
-      this.selectGoodsType = false;
-    },
-    handleSelectCategory(row, index, level) {
-      if (level === 1) {
-        this.category.forEach((cate) => {
-          (cate.name = ""), (cate.id = "");
-        });
-        this.category[0].name = row.name;
-        this.category[0].id = row.id;
-        this.categoryListLevel2 = this.categoryListLevel1[index].children;
-        this.categoryListLevel3 = [];
-      } else if (level === 2) {
-        this.category[1].name = row.name;
-        this.category[1].id = row.id;
-        this.category[2].name = "";
-        this.category[2].id = "";
-        this.categoryListLevel3 = this.categoryListLevel2[index].children;
-      } else {
-        this.category[2].name = row.name;
-        this.category[2].id = row.id;
-      }
-    },
-    GET_NextLevelCategory() {
-      API_GOODS.getGoodsCategoryAll().then((res) => {
-        if (res.success && res.result) {
-          this.categoryListLevel1 = res.result;
-        }
-      });
-    },
-    next() {
-      window.scrollTo(0, 0);
-      if (!this.goodsType) {
-        this.$Message.error("请选择商品类型");
-        this.openGoodsTypeDialog();
-        return;
-      }
-      if (!this.category[0].name) {
-        this.$Message.error("请选择商品分类");
-        return;
-      } else if (!this.category[2].name) {
-        this.$Message.error("必须选择到三级分类");
-        return;
-      }
-      this.$emit("change", {
-        category: this.category,
-        goodsType: this.goodsType,
-      });
-    },
+  {
+    title: "预约商品",
+    desc: "时段预约，到店或上门",
+    type: "APPOINTMENT_GOODS",
+    icon: markRaw(Calendar),
+    tone: "tone-appointment",
   },
-  mounted() {
-    this.GET_NextLevelCategory();
-  },
-};
+]);
+const category = ref([
+  { name: "", id: "" },
+  { name: "", id: "" },
+  { name: "", id: "" },
+]);
+const goodsType = ref("");
+const pendingGoodsType = ref("");
+const categoryListLevel1 = ref([]);
+const categoryListLevel2 = ref([]);
+const categoryListLevel3 = ref([]);
+
+const selectedTypeTitle = computed(() => {
+  const hit = goodsTypeWay.value.find((item) => item.type === goodsType.value);
+  return hit ? hit.title : "";
+});
+
+watch(selectGoodsType, (val) => {
+  if (val) {
+    syncGoodsTypeSelection();
+  }
+});
+
+function syncGoodsTypeSelection() {
+  pendingGoodsType.value = goodsType.value;
+}
+function openGoodsTypeDialog() {
+  selectGoodsType.value = true;
+}
+function handleClickGoodsType(item) {
+  pendingGoodsType.value = item.type;
+}
+function cancelGoodsType() {
+  syncGoodsTypeSelection();
+  selectGoodsType.value = false;
+}
+function confirmGoodsType() {
+  if (!pendingGoodsType.value) {
+    Message.error("请选择商品类型");
+    return;
+  }
+  goodsType.value = pendingGoodsType.value;
+  selectGoodsType.value = false;
+}
+function handleSelectCategory(row, index, level) {
+  if (level === 1) {
+    category.value.forEach((cate) => {
+      (cate.name = ""), (cate.id = "");
+    });
+    category.value[0].name = row.name;
+    category.value[0].id = row.id;
+    categoryListLevel2.value = categoryListLevel1.value[index].children;
+    categoryListLevel3.value = [];
+  } else if (level === 2) {
+    category.value[1].name = row.name;
+    category.value[1].id = row.id;
+    category.value[2].name = "";
+    category.value[2].id = "";
+    categoryListLevel3.value = categoryListLevel2.value[index].children;
+  } else {
+    category.value[2].name = row.name;
+    category.value[2].id = row.id;
+  }
+}
+function GET_NextLevelCategory() {
+  API_GOODS.getGoodsCategoryAll().then((res) => {
+    if (res.success && res.result) {
+      categoryListLevel1.value = res.result;
+    }
+  });
+}
+function next() {
+  window.scrollTo(0, 0);
+  if (!goodsType.value) {
+    Message.error("请选择商品类型");
+    openGoodsTypeDialog();
+    return;
+  }
+  if (!category.value[0].name) {
+    Message.error("请选择商品分类");
+    return;
+  } else if (!category.value[2].name) {
+    Message.error("必须选择到三级分类");
+    return;
+  }
+  emit("change", {
+    category: category.value,
+    goodsType: goodsType.value,
+  });
+}
+
+onMounted(() => {
+  GET_NextLevelCategory();
+});
+
+// 父组件 goodsOperation.vue 通过 ref 直接赋值 selectGoodsType 打开弹窗
+defineExpose({ selectGoodsType });
 </script>
 <style lang="scss" scoped>
 @import "./addGoods.scss";

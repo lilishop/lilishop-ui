@@ -8,7 +8,7 @@
         :key="i"
       >
         <component
-          ref="lili-component"
+          ref="liliComponentRef"
           :is="templateWay[item.name]"
           @selected="
             (val) => {
@@ -20,94 +20,85 @@
     </el-tabs>
   </div>
 </template>
-<script>
-import wap from "./wap.js";
+<script setup>
+import { nextTick, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import wapList from "./wap.js";
 import goodsDialog from "./goods-dialog";
 import templateWay from "./template/index";
-export default {
-  components: {
-    goodsDialog
+
+const emit = defineEmits(["selectedLink"]);
+
+const route = useRoute();
+
+const changed = ref(""); // 变更模板
+const selected = ref(0); // 已选数据
+const selectedLink = ref(""); //选中的链接
+// wap 为共享的模块级数组，保持原 data 引用同一数组的行为
+const wap = ref(wapList); // tab标签
+const activeTab = ref(wapList[0]?.title || "");
+// v-for 内模板 ref 收集为数组；原名 lili-component 含连字符，改名并同步 script
+const liliComponentRef = ref([]);
+
+watch(
+  changed,
+  (val) => {
+    emit("selectedLink", val[0]); //因为是单选，所以直接返回第一个
   },
-  setup() {
-    return { templateWay };
-  },
-  data() {
-    return {
-      changed: "", // 变更模板
-      selected: 0, // 已选数据
-      selectedLink: "", //选中的链接
-      wap, // tab标签
-      activeTab: wap[0]?.title || "",
-    };
-  },
-  watch: {
-    changed: {
-      handler(val) {
-        this.$emit("selectedLink", val[0]); //因为是单选，所以直接返回第一个
-      },
-      deep: true
+  { deep: true }
+);
+
+onMounted(() => {
+  nextTick(() => {
+    if (liliComponentRef.value?.[0]) {
+      liliComponentRef.value[0].type = "single"; //商品页面设置成为单选
     }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.$refs["lili-component"][0].type = "single"; //商品页面设置成为单选
-    });
-    let url  = window.location.href
-    if(url.indexOf('/floorList/renovation') != -1){
-      //此处去重防止移动楼层多次点击push 太多数据
-      let obj = {};
-            this.wap = this.wap.reduce((cur, next) => {
-              //对象去重
-              if (next.title != undefined) {
-                obj[next.title]
-                  ? ""
-                  : (obj[next.title] = true && cur.push(next));
-              }
-              return cur;
-      }, []);
-      if (this.$route.path !== '/floorList/main') {
-        this.wap.forEach((items, indexs) => {
-          if (items.title == '活动') {
-            this.wap.splice(indexs, 1)
-          }
-        })
+  });
+  let url = window.location.href;
+  if (url.indexOf("/floorList/renovation") != -1) {
+    //此处去重防止移动楼层多次点击push 太多数据
+    let obj = {};
+    wap.value = wap.value.reduce((cur, next) => {
+      //对象去重
+      if (next.title != undefined) {
+        obj[next.title]
+          ? ""
+          : (obj[next.title] = true && cur.push(next));
       }
-    }else{
-      this.wap.push( {
-        title: "活动",
-        url: "3",
-        name: "marketing"
-      })
-      let obj = {};
-            this.wap = this.wap.reduce((cur, next) => {
-              //对象去重
-              if (next.title != undefined) {
-                obj[next.title]
-                  ? ""
-                  : (obj[next.title] = true && cur.push(next));
-              }
-              return cur;
-      }, []);
+      return cur;
+    }, []);
+    if (route.path !== "/floorList/main") {
+      wap.value.forEach((items, indexs) => {
+        if (items.title == "活动") {
+          wap.value.splice(indexs, 1);
+        }
+      });
     }
-    this.wap.forEach((item) => {
-      if (item) {
-        item.selected = false;
-      }
+  } else {
+    wap.value.push({
+      title: "活动",
+      url: "3",
+      name: "marketing",
     });
-  },
-  methods: {
-    // isVisible(item) {
-    //   const type = this.$route.query.pagetype;
-    //   if (type == "INDEX" && [ "discover"].includes(item.name)) {
-    //     return false;
-    //   }else if(type == "DISCOVER" && item.name == 'special'){
-    //     return false;
-    //   }else{
-    //     return true
-    //   }
-    // },
+    let obj = {};
+    wap.value = wap.value.reduce((cur, next) => {
+      //对象去重
+      if (next.title != undefined) {
+        obj[next.title]
+          ? ""
+          : (obj[next.title] = true && cur.push(next));
+      }
+      return cur;
+    }, []);
   }
-};
+  wap.value.forEach((item) => {
+    if (item) {
+      item.selected = false;
+    }
+  });
+});
+
+// 无 defineExpose：grep manager/src 全量确认无外部 ref/$refs/$parent 访问本组件成员
 </script>
 <style scoped lang="scss">
 @import "./style.scss";

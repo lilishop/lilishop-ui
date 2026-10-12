@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -57,7 +57,7 @@
       </div>
 
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         border
         :data="data"
@@ -126,107 +126,106 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Order from "@/api/order";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "fictitiousOrderList",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "",
-        order: "",
-        startDate: "",
-        endDate: "",
-        orderType: "VIRTUAL",
-        orderSn: "",
-        buyerName: "",
-        orderStatus: "",
-      },
-      selectDate: null,
-      data: [],
-      total: 0,
-      orderStatus: [
-        { title: "全部", value: "" },
-        { title: "未付款", value: "UNPAID" },
-        { title: "已付款", value: "PAID" },
-        { title: "待核验", value: "TAKE" },
-        { title: "已完成", value: "COMPLETED" },
-        { title: "已关闭", value: "CANCELLED" },
-      ],
-      currentStatus: "",
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.prop;
-      this.searchForm.order = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
-      this.getDataList();
-    },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
+defineOptions({ name: "fictitiousOrderList" });
+
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "",
+  order: "",
+  startDate: "",
+  endDate: "",
+  orderType: "VIRTUAL",
+  orderSn: "",
+  buyerName: "",
+  orderStatus: "",
+});
+const selectDate = ref(null);
+const data = ref([]);
+const total = ref(0);
+const orderStatus = ref([
+  { title: "全部", value: "" },
+  { title: "未付款", value: "UNPAID" },
+  { title: "已付款", value: "PAID" },
+  { title: "待核验", value: "TAKE" },
+  { title: "已完成", value: "COMPLETED" },
+  { title: "已关闭", value: "CANCELLED" },
+]);
+const currentStatus = ref("");
+
+onMounted(() => {
+  init();
+});
+
+function init() {
+  getDataList();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function changeSort(e) {
+  searchForm.sort = e.prop;
+  searchForm.order = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
+  getDataList();
+}
+function selectDateRange(v) {
+  if (v) {
+    searchForm.startDate = v[0];
+    searchForm.endDate = v[1];
+  }
+}
+function getDataList() {
+  loading.value = true;
+  API_Order.getOrderList(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function confirmPrice(v) {
+  ElMessageBox.confirm("您确定要收款吗？", "确认收款", { type: "warning" }).then(() => {
+    API_Order.orderPay(v.sn).then((res) => {
+      if (res.success) {
+        ElMessage.success("收款成功");
+        getDataList();
       }
-    },
-    getDataList() {
-      this.loading = true;
-      API_Order.getOrderList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    confirmPrice(v) {
-      ElMessageBox.confirm("您确定要收款吗？", "确认收款", { type: "warning" }).then(() => {
-        API_Order.orderPay(v.sn).then((res) => {
-          if (res.success) {
-            ElMessage.success("收款成功");
-            this.getDataList();
-          }
-        });
-      }).catch(() => {});
-    },
-    detail(v) {
-      let sn = v.sn;
-      customRouterPush({
-        name: "order-detail",
-        query: { sn: sn, orderType: v.orderType },
-      });
-    },
-    onStatusTabClick(tab) {
-      const item = tab.paneName;
-      this.currentStatus = item;
-      this.searchForm.orderStatus = item;
-      this.getDataList();
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    });
+  }).catch(() => {});
+}
+function detail(v) {
+  let sn = v.sn;
+  customRouterPush({
+    name: "order-detail",
+    query: { sn: sn, orderType: v.orderType },
+  });
+}
+function onStatusTabClick(tab) {
+  const item = tab.paneName;
+  currentStatus.value = item;
+  searchForm.orderStatus = item;
+  getDataList();
+}
 </script>
 
 <style lang="scss" scoped>

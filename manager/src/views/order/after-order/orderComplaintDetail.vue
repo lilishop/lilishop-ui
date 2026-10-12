@@ -203,140 +203,141 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import * as API_Order from "@/api/order";
 import { ElMessage } from "element-plus";
 import { unitPrice } from "@/utils/filters";
+
+defineOptions({ name: "orderComplaintDetail" });
+
+const route = useRoute();
+const router = useRouter();
 
 const emptyComplaint = () => ({
   id: "",
   orderComplaintCommunications: [],
 });
 
-export default {
-  name: "orderComplaintDetail",
-  data() {
-    return {
-      loading: false,
-      id: "",
-      complaintInfo: emptyComplaint(),
-      images: [],
-      appealImages: [],
-      submitLoading: false,
-      params: {
-        content: "",
-        complainId: "",
-      },
-      arbitrationParams: {
-        arbitrationResult: "",
-      },
-      arbitrationResultShow: false,
-    };
-  },
-  methods: {
-    unitPrice,
-    complainStatusText(v) {
-      const map = {
-        NEW: "新投诉",
-        CANCEL: "已撤销",
-        WAIT_APPEAL: "待申诉",
-        COMMUNICATION: "对话中",
-        WAIT_ARBITRATION: "等待仲裁",
-        COMPLETE: "已完成",
-      };
-      return map[v] || v || "-";
-    },
-    handleStoreComplaint() {
-      API_Order.storeComplain({
-        complainStatus: "WAIT_APPEAL",
-        complainId: this.complaintInfo.id,
-      }).then((res) => {
-        if (res.success) {
-          ElMessage.success("操作成功");
-          this.getDetail();
-        }
-      });
-    },
-    getDetail() {
-      if (!this.id) return;
-      this.loading = true;
-      API_Order.getOrderComplainDetail(this.id)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.complaintInfo = res.result || emptyComplaint();
-            this.images = (res.result.images || "")
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean);
-            this.appealImages = (res.result.appealImages || "")
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean);
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    returnDataList() {
-      this.$router.push({ name: "orderComplaint" });
-    },
-    arbitrationHandle() {
-      this.arbitrationResultShow = true;
-    },
-    arbitrationHandleSubmit() {
-      if (!this.arbitrationParams.arbitrationResult) {
-        ElMessage.error("请填写仲裁内容");
-        return;
+const loading = ref(false);
+const id = ref("");
+const complaintInfo = ref(emptyComplaint());
+const images = ref([]);
+const appealImages = ref([]);
+const submitLoading = ref(false);
+const params = reactive({
+  content: "",
+  complainId: "",
+});
+const arbitrationParams = reactive({
+  arbitrationResult: "",
+});
+const arbitrationResultShow = ref(false);
+
+function complainStatusText(v) {
+  const map = {
+    NEW: "新投诉",
+    CANCEL: "已撤销",
+    WAIT_APPEAL: "待申诉",
+    COMMUNICATION: "对话中",
+    WAIT_ARBITRATION: "等待仲裁",
+    COMPLETE: "已完成",
+  };
+  return map[v] || v || "-";
+}
+function handleStoreComplaint() {
+  API_Order.storeComplain({
+    complainStatus: "WAIT_APPEAL",
+    complainId: complaintInfo.value.id,
+  }).then((res) => {
+    if (res.success) {
+      ElMessage.success("操作成功");
+      getDetail();
+    }
+  });
+}
+function getDetail() {
+  if (!id.value) return;
+  loading.value = true;
+  API_Order.getOrderComplainDetail(id.value)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        complaintInfo.value = res.result || emptyComplaint();
+        images.value = (res.result.images || "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        appealImages.value = (res.result.appealImages || "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
       }
-      this.submitLoading = true;
-      API_Order.orderComplete(this.id, this.arbitrationParams)
-        .then((res) => {
-          this.submitLoading = false;
-          if (res.success) {
-            ElMessage.success("仲裁成功");
-            this.arbitrationParams.arbitrationResult = "";
-            this.arbitrationResultShow = false;
-            this.getDetail();
-          }
-        })
-        .catch(() => {
-          this.submitLoading = false;
-        });
-    },
-    handleSubmit() {
-      if (!this.params.content) {
-        ElMessage.error("请填写对话内容");
-        return;
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+function returnDataList() {
+  router.push({ name: "orderComplaint" });
+}
+function arbitrationHandle() {
+  arbitrationResultShow.value = true;
+}
+function arbitrationHandleSubmit() {
+  if (!arbitrationParams.arbitrationResult) {
+    ElMessage.error("请填写仲裁内容");
+    return;
+  }
+  submitLoading.value = true;
+  API_Order.orderComplete(id.value, arbitrationParams)
+    .then((res) => {
+      submitLoading.value = false;
+      if (res.success) {
+        ElMessage.success("仲裁成功");
+        arbitrationParams.arbitrationResult = "";
+        arbitrationResultShow.value = false;
+        getDetail();
       }
-      this.submitLoading = true;
-      this.params.complainId = this.id;
-      API_Order.addOrderCommunication(this.params)
-        .then((res) => {
-          this.submitLoading = false;
-          if (res.success) {
-            ElMessage.success("对话成功");
-            this.params.content = "";
-            this.getDetail();
-          }
-        })
-        .catch(() => {
-          this.submitLoading = false;
-        });
-    },
-  },
-  mounted() {
-    this.id = this.$route.query.id;
-    this.getDetail();
-  },
-  watch: {
-    "$route.query.id"(val) {
-      this.id = val;
-      this.getDetail();
-    },
-  },
-};
+    })
+    .catch(() => {
+      submitLoading.value = false;
+    });
+}
+function handleSubmit() {
+  if (!params.content) {
+    ElMessage.error("请填写对话内容");
+    return;
+  }
+  submitLoading.value = true;
+  params.complainId = id.value;
+  API_Order.addOrderCommunication(params)
+    .then((res) => {
+      submitLoading.value = false;
+      if (res.success) {
+        ElMessage.success("对话成功");
+        params.content = "";
+        getDetail();
+      }
+    })
+    .catch(() => {
+      submitLoading.value = false;
+    });
+}
+
+onMounted(() => {
+  id.value = route.query.id;
+  getDetail();
+});
+
+watch(
+  () => route.query.id,
+  (val) => {
+    id.value = val;
+    getDetail();
+  }
+);
 </script>
 
 <style lang="scss" scoped>

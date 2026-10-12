@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="90px"
@@ -181,315 +181,350 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import {
   getShopCouponList,
   updateCouponStatus,
   deleteShopCoupon,
 } from "@/api/promotion";
 import { formatPromotionCouponValidityHtml } from "@/utils/promotions";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "coupon",
-  props: {
-    getType: {
-      type: String,
-      default: "",
-    },
-    promotionStatus: {
-      type: String,
-      default: "",
-    },
-    selectedList: {
-      type: Array,
-      default: () => [],
-    },
+defineOptions({ name: "coupon" });
+
+const props = defineProps({
+  getType: {
+    type: String,
+    default: "",
   },
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-        getType: "",
-      },
-      selectList: [],
-      selectCount: 0,
-      data: [],
-      total: 0,
-      selectDate: [],
-      showActionColumn: true,
-      showStatusColumn: true,
-      isSyncingSelection: false,
-    };
+  promotionStatus: {
+    type: String,
+    default: "",
   },
-  watch: {
-    $route(to) {
-      if (to.fullPath == "/promotions/manager-coupon") {
-        this.init();
+  selectedList: {
+    type: Array,
+    default: () => [],
+  },
+});
+const emit = defineEmits(["selected"]);
+
+const route = useRoute();
+const router = useRouter();
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "create_time",
+  order: "desc",
+  getType: "",
+});
+const selectList = ref([]);
+const selectCount = ref(0);
+const data = ref([]);
+const total = ref(0);
+const selectDate = ref([]);
+const showActionColumn = ref(true);
+const showStatusColumn = ref(true);
+const isSyncingSelection = ref(false);
+
+// searchFormRef/table：模板 ref 绑定（searchFormRef 原名 searchForm，改名避免与顶层变量互相覆盖）
+const searchFormRef = ref(null);
+const table = ref(null);
+
+watch(
+  () => route.fullPath,
+  (fullPath) => {
+    if (fullPath == "/promotions/manager-coupon") {
+      init();
+    }
+  }
+);
+
+watch(
+  () => props.selectedList,
+  (val) => {
+    if (isSyncingSelection.value) return;
+    if (isSameSelection(val, selectList.value)) return;
+    nextTick(() => {
+      syncTableSelection(val);
+    });
+  },
+  { deep: true }
+);
+
+function formatActivityTime(row) {
+  return formatPromotionCouponValidityHtml(row);
+}
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+
+function scopeTypeText(type) {
+  const map = {
+    ALL: "全品类",
+    PORTION_GOODS_CATEGORY: "商品分类",
+    PORTION_SHOP_CATEGORY: "店铺分类",
+    PORTION_GOODS: "指定商品",
+  };
+  return map[type] || "未知";
+}
+
+function scopeTypeTagType(type) {
+  const map = {
+    ALL: "info",
+    PORTION_GOODS_CATEGORY: "warning",
+    PORTION_SHOP_CATEGORY: "warning",
+    PORTION_GOODS: "primary",
+  };
+  return map[type] || "danger";
+}
+
+function getTypeText(type) {
+  const map = {
+    FREE: "免费获取",
+    ACTIVITY: "活动获取",
+    INSIDE: "内购",
+    IGAME: "游戏人生",
+  };
+  return map[type] || "未知";
+}
+
+function getTypeTagType(type) {
+  const map = {
+    FREE: "danger",
+    ACTIVITY: "warning",
+    INSIDE: "success",
+    IGAME: "success",
+  };
+  return map[type] || "info";
+}
+
+function couponTypeText(type) {
+  const map = {
+    DISCOUNT: "打折",
+    PRICE: "减免现金",
+  };
+  return map[type] || "未知";
+}
+
+function couponTypeTagType(type) {
+  const map = {
+    DISCOUNT: "primary",
+    PRICE: "info",
+  };
+  return map[type] || "info";
+}
+
+function isSameSelection(next, current) {
+  const a = next || [];
+  const b = current || [];
+  if (a.length !== b.length) return false;
+  const nextIds = a.map((item) => item.id).sort().join(",");
+  const currentIds = b.map((item) => item.id).sort().join(",");
+  return nextIds === currentIds;
+}
+
+function syncTableSelection(selected) {
+  const tableEl = table.value;
+  if (!tableEl) return;
+  const nextList = selected ? [...selected] : [];
+  isSyncingSelection.value = true;
+  tableEl.clearSelection();
+  if (nextList.length) {
+    data.value.forEach((row) => {
+      if (nextList.some((item) => item.id === row.id)) {
+        tableEl.toggleRowSelection(row, true);
       }
-    },
-    selectedList: {
-      handler(val) {
-        if (this.isSyncingSelection) return;
-        if (this.isSameSelection(val, this.selectList)) return;
-        this.$nextTick(() => {
-          this.syncTableSelection(val);
-        });
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    formatActivityTime(row) {
-      return formatPromotionCouponValidityHtml(row);
-    },
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    scopeTypeText(type) {
-      const map = {
-        ALL: "全品类",
-        PORTION_GOODS_CATEGORY: "商品分类",
-        PORTION_SHOP_CATEGORY: "店铺分类",
-        PORTION_GOODS: "指定商品",
-      };
-      return map[type] || "未知";
-    },
-    scopeTypeTagType(type) {
-      const map = {
-        ALL: "info",
-        PORTION_GOODS_CATEGORY: "warning",
-        PORTION_SHOP_CATEGORY: "warning",
-        PORTION_GOODS: "primary",
-      };
-      return map[type] || "danger";
-    },
-    getTypeText(type) {
-      const map = {
-        FREE: "免费获取",
-        ACTIVITY: "活动获取",
-        INSIDE: "内购",
-        IGAME: "游戏人生",
-      };
-      return map[type] || "未知";
-    },
-    getTypeTagType(type) {
-      const map = {
-        FREE: "danger",
-        ACTIVITY: "warning",
-        INSIDE: "success",
-        IGAME: "success",
-      };
-      return map[type] || "info";
-    },
-    couponTypeText(type) {
-      const map = {
-        DISCOUNT: "打折",
-        PRICE: "减免现金",
-      };
-      return map[type] || "未知";
-    },
-    couponTypeTagType(type) {
-      const map = {
-        DISCOUNT: "primary",
-        PRICE: "info",
-      };
-      return map[type] || "info";
-    },
-    isSameSelection(next, current) {
-      const a = next || [];
-      const b = current || [];
-      if (a.length !== b.length) return false;
-      const nextIds = a.map((item) => item.id).sort().join(",");
-      const currentIds = b.map((item) => item.id).sort().join(",");
-      return nextIds === currentIds;
-    },
-    syncTableSelection(selected) {
-      const table = this.$refs.table;
-      if (!table) return;
-      const nextList = selected ? [...selected] : [];
-      this.isSyncingSelection = true;
-      table.clearSelection();
-      if (nextList.length) {
-        this.data.forEach((row) => {
-          if (nextList.some((item) => item.id === row.id)) {
-            table.toggleRowSelection(row, true);
+    });
+  }
+  selectList.value = nextList;
+  selectCount.value = nextList.length;
+  nextTick(() => {
+    isSyncingSelection.value = false;
+  });
+}
+
+function check() {
+  emit("selected", selectList.value);
+}
+
+function receivePage(id) {
+  if (id) {
+    router.push({ name: "coupon-receive", query: { couponId: id } });
+  } else {
+    router.push({ name: "coupon-receive" });
+  }
+}
+
+function init() {
+  getDataList();
+}
+
+function add() {
+  router.push({ name: "add-coupon" });
+}
+
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function clearSelectAll() {
+  table.value?.clearSelection();
+}
+
+function changeSelect(e) {
+  if (isSyncingSelection.value) return;
+  selectList.value = e;
+  selectCount.value = e.length;
+  if (props.getType === "ACTIVITY") check();
+}
+
+function getDataList() {
+  loading.value = true;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.startTime = new Date(selectDate.value[0]).getTime();
+    searchForm.endTime = new Date(selectDate.value[1]).getTime();
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  getShopCouponList(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
+        nextTick(() => {
+          if (props.selectedList.length) {
+            syncTableSelection(props.selectedList);
           }
         });
       }
-      this.selectList = nextList;
-      this.selectCount = nextList.length;
-      this.$nextTick(() => {
-        this.isSyncingSelection = false;
-      });
-    },
-    check() {
-      this.$emit("selected", this.selectList);
-    },
-    receivePage(id) {
-      if (id) {
-        this.$router.push({ name: "coupon-receive", query: { couponId: id } });
-      } else {
-        this.$router.push({ name: "coupon-receive" });
-      }
-    },
-    init() {
-      this.getDataList();
-    },
-    add() {
-      this.$router.push({ name: "add-coupon" });
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table?.clearSelection();
-    },
-    changeSelect(e) {
-      if (this.isSyncingSelection) return;
-      this.selectList = e;
-      this.selectCount = e.length;
-      if (this.getType === "ACTIVITY") this.check();
-    },
-    getDataList() {
-      this.loading = true;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
-        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
-      }
-      getShopCouponList(this.searchForm)
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function see(v, only) {
+  const data = only ? { onlyView: true, id: v.id } : { id: v.id };
+  router.push({ name: "add-coupon", query: data });
+}
+
+function close(v) {
+  Modal.confirm({
+    title: "确认关闭",
+    content: "确认要关闭此优惠券么?",
+    loading: true,
+    onOk: () => {
+      updateCouponStatus({
+        couponIds: v.id,
+        effectiveDays: 0,
+      })
         .then((res) => {
+          Modal.remove();
           if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-            this.$nextTick(() => {
-              if (this.selectedList.length) {
-                this.syncTableSelection(this.selectedList);
-              }
-            });
+            Message.success("优惠券已关闭");
+            getDataList();
           }
         })
-        .finally(() => {
-          this.loading = false;
+        .catch(() => {
+          Modal.remove();
         });
     },
-    see(v, only) {
-      const data = only ? { onlyView: true, id: v.id } : { id: v.id };
-      this.$router.push({ name: "add-coupon", query: data });
+  });
+}
+
+function remove(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "确认要删除此优惠券么?",
+    loading: true,
+    onOk: () => {
+      deleteShopCoupon(v.id)
+        .then((res) => {
+          Modal.remove();
+          if (res.success) {
+            Message.success("优惠券已删除");
+            getDataList();
+          }
+        })
+        .catch(() => {
+          Modal.remove();
+        });
     },
-    close(v) {
-      this.$Modal.confirm({
-        title: "确认关闭",
-        content: "确认要关闭此优惠券么?",
-        loading: true,
-        onOk: () => {
-          updateCouponStatus({
-            couponIds: v.id,
-            effectiveDays: 0,
-          })
-            .then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("优惠券已关闭");
-                this.getDataList();
-              }
-            })
-            .catch(() => {
-              this.$Modal.remove();
-            });
-        },
+  });
+}
+
+function delAll() {
+  if (selectCount.value <= 0) {
+    Message.warning("您还未选择要下架的优惠券");
+    return;
+  }
+  Modal.confirm({
+    title: "确认下架",
+    content: "您确认要下架所选的 " + selectCount.value + " 条数据?",
+    loading: true,
+    onOk: () => {
+      const ids = selectList.value.map((e) => e.id);
+      updateCouponStatus({
+        couponIds: ids.toString(),
+        promotionStatus: "CLOSE",
+      }).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("下架成功");
+          clearSelectAll();
+          getDataList();
+        }
       });
     },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "确认要删除此优惠券么?",
-        loading: true,
-        onOk: () => {
-          deleteShopCoupon(v.id)
-            .then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success("优惠券已删除");
-                this.getDataList();
-              }
-            })
-            .catch(() => {
-              this.$Modal.remove();
-            });
-        },
-      });
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要下架的优惠券");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认下架",
-        content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
-          const ids = this.selectList.map((e) => e.id);
-          updateCouponStatus({
-            couponIds: ids.toString(),
-            promotionStatus: "CLOSE",
-          }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("下架成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    if (this.getType) {
-      this.searchForm.getType = this.getType;
-      this.showActionColumn = false;
-    }
-    if (this.promotionStatus) {
-      this.searchForm.promotionStatus = this.promotionStatus;
-      this.showStatusColumn = false;
-    }
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  if (props.getType) {
+    searchForm.getType = props.getType;
+    showActionColumn.value = false;
+  }
+  if (props.promotionStatus) {
+    searchForm.promotionStatus = props.promotionStatus;
+    showStatusColumn.value = false;
+  }
+  init();
+});
 </script>
 
 <style scoped>

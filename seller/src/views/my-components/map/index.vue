@@ -17,116 +17,114 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, ref, watch } from "vue";
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { getRegion } from "@/api/common.js";
 import config from "@/config/index";
-export default {
-  name: "map",
-  data() {
-    return {
-      config,
-      showMap: false,
-      mapSearch: "",
-      map: null,
-      autoComplete: null,
-      geocoder: null,
-      positionPicker: null,
-      tips: [],
-      addrContent: {},
-      loading: false,
+import { Message } from "@/utils/message";
+
+defineOptions({ name: "map" });
+
+const emit = defineEmits(["getAddress"]);
+
+const showMap = ref(false);
+const mapSearch = ref("");
+const map = ref(null);
+const autoComplete = ref(null);
+const geocoder = ref(null);
+const positionPicker = ref(null);
+const tips = ref([]);
+const addrContent = ref({});
+const loading = ref(false);
+
+watch(mapSearch, (val) => {
+  searchOfMap(val);
+});
+
+function ok() {
+  if (addrContent.value && addrContent.value.regeocode) {
+    const params = {
+      cityCode: addrContent.value.regeocode.addressComponent.citycode,
+      townName: addrContent.value.regeocode.addressComponent.township,
     };
-  },
-  watch: {
-    mapSearch(val) {
-      this.searchOfMap(val);
-    },
-  },
-  methods: {
-    ok() {
-      if (this.addrContent && this.addrContent.regeocode) {
-        const params = {
-          cityCode: this.addrContent.regeocode.addressComponent.citycode,
-          townName: this.addrContent.regeocode.addressComponent.township,
-        };
-        getRegion(params).then((res) => {
-          if (res.success) {
-            this.addrContent.addr = res.result.name.replace(/,/g, " ");
-            this.addrContent.addrId = res.result.id;
-            this.loading = false;
-            this.$emit("getAddress", this.addrContent);
-          }
-        });
-      } else {
-        this.$Message.error("未获取到坐标信息！请查看高德API配置是否正确");
+    getRegion(params).then((res) => {
+      if (res.success) {
+        addrContent.value.addr = res.result.name.replace(/,/g, " ");
+        addrContent.value.addrId = res.result.id;
+        loading.value = false;
+        emit("getAddress", addrContent.value);
       }
+    });
+  } else {
+    Message.error("未获取到坐标信息！请查看高德API配置是否正确");
+  }
+}
+function init() {
+  AMapLoader.load({
+    key: config.aMapKey,
+    version: "",
+    plugins: [
+      "AMap.ToolBar",
+      "AMap.Autocomplete",
+      "AMap.PlaceSearch",
+      "AMap.Geolocation",
+      "AMap.Geocoder",
+    ],
+    AMapUI: {
+      version: "1.1",
+      plugins: ["misc/PositionPicker"],
     },
-    init() {
-      AMapLoader.load({
-        key: this.config.aMapKey,
-        version: "",
-        plugins: [
-          "AMap.ToolBar",
-          "AMap.Autocomplete",
-          "AMap.PlaceSearch",
-          "AMap.Geolocation",
-          "AMap.Geocoder",
-        ],
-        AMapUI: {
-          version: "1.1",
-          plugins: ["misc/PositionPicker"],
-        },
-      })
-        .then((AMap) => {
-          let that = this;
-          this.map = new AMap.Map("map-container", {
-            zoom: 12,
-          });
-          that.map.addControl(new AMap.ToolBar());
-          that.map.addControl(new AMap.Autocomplete());
-          that.map.addControl(new AMap.PlaceSearch());
-          that.map.addControl(new AMap.Geocoder());
-
-          let autoOptions = {
-            city: "全国",
-          };
-          that.autoComplete = new AMap.Autocomplete(autoOptions);
-          that.geocoder = new AMap.Geocoder(autoOptions);
-
-          that.positionPicker = new AMapUI.PositionPicker({
-            mode: "dragMap",
-            map: that.map,
-          });
-          that.positionPicker.start();
-          that.positionPicker.on("success", function (positionResult) {
-            that.addrContent = positionResult;
-          });
-        })
-        .catch(() => {});
-    },
-    searchOfMap(val) {
-      let that = this;
-      this.autoComplete.search(val, function (status, result) {
-        if (status == "complete" && result.info == "OK") {
-          that.tips = result.tips;
-        } else {
-          that.tips = [];
-        }
+  })
+    .then((AMap) => {
+      map.value = new AMap.Map("map-container", {
+        zoom: 12,
       });
-    },
-    selectAddr(location) {
-      if (!location) {
-        this.$Message.warning("请选择正确点位");
-        return false;
-      }
-      const lnglat = [location.lng, location.lat];
-      this.positionPicker.start(lnglat);
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+      map.value.addControl(new AMap.ToolBar());
+      map.value.addControl(new AMap.Autocomplete());
+      map.value.addControl(new AMap.PlaceSearch());
+      map.value.addControl(new AMap.Geocoder());
+
+      let autoOptions = {
+        city: "全国",
+      };
+      autoComplete.value = new AMap.Autocomplete(autoOptions);
+      geocoder.value = new AMap.Geocoder(autoOptions);
+
+      positionPicker.value = new AMapUI.PositionPicker({
+        mode: "dragMap",
+        map: map.value,
+      });
+      positionPicker.value.start();
+      positionPicker.value.on("success", function (positionResult) {
+        addrContent.value = positionResult;
+      });
+    })
+    .catch(() => {});
+}
+function searchOfMap(val) {
+  autoComplete.value.search(val, function (status, result) {
+    if (status == "complete" && result.info == "OK") {
+      tips.value = result.tips;
+    } else {
+      tips.value = [];
+    }
+  });
+}
+function selectAddr(location) {
+  if (!location) {
+    Message.warning("请选择正确点位");
+    return false;
+  }
+  const lnglat = [location.lng, location.lat];
+  positionPicker.value.start(lnglat);
+}
+
+onMounted(() => {
+  init();
+});
+
+// 唯一引用方 multiple-map.vue 通过 ref 引用本组件但从不访问任何成员（仅监听 getAddress 事件），无需暴露成员
 </script>
 <style lang="scss" scoped>
 #map-container {

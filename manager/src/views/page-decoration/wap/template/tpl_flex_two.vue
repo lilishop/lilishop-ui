@@ -10,11 +10,10 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  title: "两张横图",
-  props: ["res"],
-};
+<script setup>
+defineOptions({ title: "两张横图" });
+
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

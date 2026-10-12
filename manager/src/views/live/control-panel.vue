@@ -238,7 +238,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import {
   endLive,
   getLiveInfo,
@@ -248,450 +250,450 @@ import {
 } from "@/api/live";
 import config from "@/config";
 import { DocumentCopy, Refresh } from "@element-plus/icons-vue";
+import { Message, Modal } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 import CommentReview from "./components/CommentReview.vue";
 import Coupon from "./components/Coupon.vue";
 import LiveChatPanel from "./components/LiveChatPanel.vue";
 import LiveGoods from "./components/LiveGoods.vue";
 import LivePurchaseRecords from "./components/LivePurchaseRecords.vue";
 
-export default {
-  name: "live-control-panel",
-  components: { CommentReview, Coupon, LiveChatPanel, LiveGoods, LivePurchaseRecords, DocumentCopy, Refresh },
-  data() {
-    return {
-      loading: false,
-      liveId: "",
-      videoUrl: "",
-      wapUrl: "",
-      aspectRatio: "16:9",
-      chatTab: "chat",
-      statsTab: "general",
-      manageTab: "comment",
-      liveDetail: {},
-      orderStats: {},
-      onlineUserList: [],
-      onlineLoading: false,
-      onlinePagination: {
-        pageNumber: 1,
-        pageSize: 10,
-        total: 0,
-      },
-      nowTick: Date.now(),
-      durationTimer: null,
-      pollTimer: null,
-      hlsHttpFallbackUsed: false,
-      lastHlsPullUrl: "",
-    };
-  },
-  created() {
-    this.hlsInstance = null;
-    this.hlsVideoElement = null;
-    this._hlsVideoClickHandler = null;
-  },
-  computed: {
-    liveStatus() {
-      return this.liveDetail.liveStatus || this.liveDetail.status || "";
-    },
-    isLiving() {
-      return this.liveStatus === "LIVING";
-    },
-    shouldPlayStream() {
-      return this.isLiving && !!this.videoUrl;
-    },
-    showPlayerCover() {
-      return !this.shouldPlayStream;
-    },
-    cumulativeViewers() {
-      return Number(this.liveDetail.actualViewNumber ?? 0);
-    },
-    currentViewers() {
-      return this.cumulativeViewers;
-    },
-    commentPeopleNumber() {
-      return Number(this.liveDetail.commentPeopleNumber ?? 0);
-    },
-    interactionRate() {
-      if (!this.cumulativeViewers) return "0.00%";
-      return `${((this.commentPeopleNumber / this.cumulativeViewers) * 100).toFixed(2)}%`;
-    },
-    dealConversionRate() {
-      if (!this.cumulativeViewers) return "0%";
-      const dealCount = Number(this.orderStats.dealUserCount ?? 0);
-      return `${((dealCount / this.cumulativeViewers) * 100).toFixed(0)}%`;
-    },
-    liveDuration() {
-      void this.nowTick;
-      const startMs = this.parseDateTime(this.liveDetail.startTime);
-      if (!startMs || Date.now() < startMs) return "00:00:00";
-      let endMs = Date.now();
-      if (this.liveStatus === "ENDED") {
-        const endTimeMs = this.parseDateTime(this.liveDetail.endTime);
-        if (endTimeMs && endTimeMs > startMs) {
-          endMs = endTimeMs;
-        }
+defineOptions({ name: "live-control-panel" });
+
+const route = useRoute();
+
+const purchaseRecords = ref(null);
+const hlsContainer = ref(null);
+
+const loading = ref(false);
+const liveId = ref("");
+const videoUrl = ref("");
+const wapUrl = ref("");
+const aspectRatio = ref("16:9");
+const chatTab = ref("chat");
+const statsTab = ref("general");
+const manageTab = ref("comment");
+const liveDetail = ref({});
+const orderStats = ref({});
+const onlineUserList = ref([]);
+const onlineLoading = ref(false);
+const onlinePagination = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+  total: 0,
+});
+const nowTick = ref(Date.now());
+const durationTimer = ref(null);
+const pollTimer = ref(null);
+const hlsHttpFallbackUsed = ref(false);
+const lastHlsPullUrl = ref("");
+
+// 原 created 中直接挂到 this 上的字段（未在 data 声明），保持非响应式
+let hlsInstance = null;
+let hlsVideoElement = null;
+let _hlsVideoClickHandler = null;
+
+const liveStatus = computed(() => {
+  return liveDetail.value.liveStatus || liveDetail.value.status || "";
+});
+const isLiving = computed(() => {
+  return liveStatus.value === "LIVING";
+});
+const shouldPlayStream = computed(() => {
+  return isLiving.value && !!videoUrl.value;
+});
+const showPlayerCover = computed(() => {
+  return !shouldPlayStream.value;
+});
+const cumulativeViewers = computed(() => {
+  return Number(liveDetail.value.actualViewNumber ?? 0);
+});
+const currentViewers = computed(() => {
+  return cumulativeViewers.value;
+});
+const commentPeopleNumber = computed(() => {
+  return Number(liveDetail.value.commentPeopleNumber ?? 0);
+});
+const interactionRate = computed(() => {
+  if (!cumulativeViewers.value) return "0.00%";
+  return `${((commentPeopleNumber.value / cumulativeViewers.value) * 100).toFixed(2)}%`;
+});
+const dealConversionRate = computed(() => {
+  if (!cumulativeViewers.value) return "0%";
+  const dealCount = Number(orderStats.value.dealUserCount ?? 0);
+  return `${((dealCount / cumulativeViewers.value) * 100).toFixed(0)}%`;
+});
+const liveDuration = computed(() => {
+  void nowTick.value;
+  const startMs = parseDateTime(liveDetail.value.startTime);
+  if (!startMs || Date.now() < startMs) return "00:00:00";
+  let endMs = Date.now();
+  if (liveStatus.value === "ENDED") {
+    const endTimeMs = parseDateTime(liveDetail.value.endTime);
+    if (endTimeMs && endTimeMs > startMs) {
+      endMs = endTimeMs;
+    }
+  }
+  return formatDuration(endMs - startMs);
+});
+
+watch(videoUrl, () => {
+  syncH5Player();
+});
+watch(isLiving, () => {
+  syncH5Player();
+  if (isLiving.value) {
+    startPolling();
+  } else {
+    stopPolling();
+  }
+});
+watch(aspectRatio, () => {
+  lastHlsPullUrl.value = "";
+  nextTick(() => syncH5Player());
+});
+watch(chatTab, (tab) => {
+  if (tab === "online") loadOnlineUsers();
+});
+watch(statsTab, (tab) => {
+  if (tab === "purchase") purchaseRecords.value?.refresh();
+});
+
+onMounted(() => {
+  liveId.value = String(route.query.id || "");
+  if (!liveId.value) {
+    Message.error("缺少直播ID");
+    return;
+  }
+  refreshAll();
+  startDurationTimer();
+});
+
+onBeforeUnmount(() => {
+  destroyH5HlsPlayer();
+  stopPolling();
+  stopDurationTimer();
+});
+
+function parseDateTime(value) {
+  if (!value) return null;
+  if (typeof value === "string" && value.includes("-")) {
+    return new Date(value.replace(/-/g, "/")).getTime();
+  }
+  if (typeof value === "number") {
+    return value > 1e12 ? value : value * 1000;
+  }
+  return null;
+}
+function formatDuration(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
+function startDurationTimer() {
+  stopDurationTimer();
+  durationTimer.value = setInterval(() => {
+    nowTick.value = Date.now();
+  }, 1000);
+}
+function stopDurationTimer() {
+  if (durationTimer.value) {
+    clearInterval(durationTimer.value);
+    durationTimer.value = null;
+  }
+}
+function formatTime(time) {
+  if (!time) return "-";
+  if (typeof time === "string" && time.includes("-")) return time;
+  const ts = typeof time === "number" ? (time > 1e12 ? time / 1000 : time) : time;
+  return unixToDate(ts);
+}
+function formatAmount(val) {
+  return Number(val || 0).toFixed(2);
+}
+function liveStatusText(status) {
+  const map = { NEW: "未开始", LIVING: "直播中", PAUSED: "已暂停", ENDED: "已结束" };
+  return map[status] || "未知";
+}
+function liveStatusTagType(status) {
+  const map = { NEW: "info", LIVING: "success", PAUSED: "warning", ENDED: "warning" };
+  return map[status] || "info";
+}
+function startPolling() {
+  stopPolling();
+  if (!isLiving.value) return;
+  pollTimer.value = setInterval(() => {
+    loadDetail(false);
+  }, 5000);
+}
+function stopPolling() {
+  if (pollTimer.value) {
+    clearInterval(pollTimer.value);
+    pollTimer.value = null;
+  }
+}
+function refreshAll() {
+  loadDetail();
+  loadOrderStats();
+  purchaseRecords.value?.refresh();
+  if (chatTab.value === "online") loadOnlineUsers();
+}
+function buildHlsPlayUrl(url, useHttpFallback = false) {
+  if (!url) return "";
+  const httpUrl =
+    useHttpFallback && url.startsWith("https://")
+      ? url.replace("https://", "http://")
+      : url;
+  return httpUrl.replace(".flv", ".m3u8");
+}
+function syncH5Player(retry = 0) {
+  const shouldPlay = shouldPlayStream.value;
+  if (!shouldPlay) {
+    destroyH5HlsPlayer();
+    lastHlsPullUrl.value = "";
+    return;
+  }
+  if (
+    videoUrl.value === lastHlsPullUrl.value &&
+    hlsInstance &&
+    hlsVideoElement &&
+    !hlsVideoElement.paused
+  ) {
+    return;
+  }
+  if (videoUrl.value === lastHlsPullUrl.value && hlsInstance) {
+    ensureH5VideoPlaying(hlsVideoElement);
+    return;
+  }
+  lastHlsPullUrl.value = videoUrl.value;
+  hlsHttpFallbackUsed.value = false;
+  nextTick(() => {
+    const container = hlsContainer.value;
+    if (!container) {
+      if (retry < 8) {
+        setTimeout(() => syncH5Player(retry + 1), 80);
       }
-      return this.formatDuration(endMs - startMs);
-    },
-  },
-  watch: {
-    videoUrl() {
-      this.syncH5Player();
-    },
-    isLiving() {
-      this.syncH5Player();
-      if (this.isLiving) {
-        this.startPolling();
-      } else {
-        this.stopPolling();
-      }
-    },
-    aspectRatio() {
-      this.lastHlsPullUrl = "";
-      this.$nextTick(() => this.syncH5Player());
-    },
-    chatTab(tab) {
-      if (tab === "online") this.loadOnlineUsers();
-    },
-    statsTab(tab) {
-      if (tab === "purchase") this.$refs.purchaseRecords?.refresh();
-    },
-  },
-  mounted() {
-    this.liveId = String(this.$route.query.id || "");
-    if (!this.liveId) {
-      this.$Message.error("缺少直播ID");
       return;
     }
-    this.refreshAll();
-    this.startDurationTimer();
-  },
-  beforeUnmount() {
-    this.destroyH5HlsPlayer();
-    this.stopPolling();
-    this.stopDurationTimer();
-  },
-  methods: {
-    parseDateTime(value) {
-      if (!value) return null;
-      if (typeof value === "string" && value.includes("-")) {
-        return new Date(value.replace(/-/g, "/")).getTime();
-      }
-      if (typeof value === "number") {
-        return value > 1e12 ? value : value * 1000;
-      }
-      return null;
-    },
-    formatDuration(ms) {
-      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-      const pad = (n) => String(n).padStart(2, "0");
-      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-    },
-    startDurationTimer() {
-      this.stopDurationTimer();
-      this.durationTimer = setInterval(() => {
-        this.nowTick = Date.now();
-      }, 1000);
-    },
-    stopDurationTimer() {
-      if (this.durationTimer) {
-        clearInterval(this.durationTimer);
-        this.durationTimer = null;
-      }
-    },
-    formatTime(time) {
-      if (!time) return "-";
-      if (typeof time === "string" && time.includes("-")) return time;
-      const ts = typeof time === "number" ? (time > 1e12 ? time / 1000 : time) : time;
-      return this.$filters.unixToDate(ts);
-    },
-    formatAmount(val) {
-      return Number(val || 0).toFixed(2);
-    },
-    liveStatusText(status) {
-      const map = { NEW: "未开始", LIVING: "直播中", PAUSED: "已暂停", ENDED: "已结束" };
-      return map[status] || "未知";
-    },
-    liveStatusTagType(status) {
-      const map = { NEW: "info", LIVING: "success", PAUSED: "warning", ENDED: "warning" };
-      return map[status] || "info";
-    },
-    startPolling() {
-      this.stopPolling();
-      if (!this.isLiving) return;
-      this.pollTimer = setInterval(() => {
-        this.loadDetail(false);
-      }, 5000);
-    },
-    stopPolling() {
-      if (this.pollTimer) {
-        clearInterval(this.pollTimer);
-        this.pollTimer = null;
-      }
-    },
-    refreshAll() {
-      this.loadDetail();
-      this.loadOrderStats();
-      this.$refs.purchaseRecords?.refresh();
-      if (this.chatTab === "online") this.loadOnlineUsers();
-    },
-    buildHlsPlayUrl(url, useHttpFallback = false) {
-      if (!url) return "";
-      const httpUrl =
-        useHttpFallback && url.startsWith("https://")
-          ? url.replace("https://", "http://")
-          : url;
-      return httpUrl.replace(".flv", ".m3u8");
-    },
-    syncH5Player(retry = 0) {
-      const shouldPlay = this.shouldPlayStream;
-      if (!shouldPlay) {
-        this.destroyH5HlsPlayer();
-        this.lastHlsPullUrl = "";
-        return;
-      }
-      if (
-        this.videoUrl === this.lastHlsPullUrl &&
-        this.hlsInstance &&
-        this.hlsVideoElement &&
-        !this.hlsVideoElement.paused
-      ) {
-        return;
-      }
-      if (this.videoUrl === this.lastHlsPullUrl && this.hlsInstance) {
-        this.ensureH5VideoPlaying(this.hlsVideoElement);
-        return;
-      }
-      this.lastHlsPullUrl = this.videoUrl;
-      this.hlsHttpFallbackUsed = false;
-      this.$nextTick(() => {
-        const container = this.$refs.hlsContainer;
-        if (!container) {
-          if (retry < 8) {
-            setTimeout(() => this.syncH5Player(retry + 1), 80);
+    initH5HlsPlayer();
+  });
+}
+function ensureH5VideoPlaying(video) {
+  if (!video) return Promise.resolve();
+  const tryPlay = (muted) => {
+    video.muted = muted;
+    return video.play().catch(() => Promise.reject());
+  };
+  return tryPlay(false)
+    .catch(() => tryPlay(true))
+    .catch(() => {
+      console.warn("[HLS] 自动播放被阻止，请点击画面播放");
+    });
+}
+async function initH5HlsPlayer(useHttpFallback = false) {
+  const originalUrl = videoUrl.value;
+  const container = hlsContainer.value;
+  if (!originalUrl || !container) return;
+
+  const url = buildHlsPlayUrl(originalUrl, useHttpFallback);
+  destroyH5HlsPlayer();
+
+  const video = document.createElement("video");
+  video.style.cssText = "width:100%;height:100%;object-fit:cover;background:#000;";
+  video.autoplay = true;
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  video.setAttribute("autoplay", "");
+  video.setAttribute("muted", "");
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
+  video.controls = false;
+
+  const onVideoClick = () => {
+    if (video.muted) {
+      video.muted = false;
+    }
+    video.play().catch(() => {});
+  };
+  video.addEventListener("click", onVideoClick);
+  container.appendChild(video);
+  hlsVideoElement = video;
+  _hlsVideoClickHandler = onVideoClick;
+
+  const onReadyPlay = () => {
+    ensureH5VideoPlaying(video);
+  };
+
+  let Hls = null;
+  try {
+    const hlsModule = await import("hls.js");
+    Hls = hlsModule.default;
+  } catch (error) {
+    console.error("[HLS] 加载播放器失败:", error);
+    Message.error("直播播放器加载失败，请刷新页面重试");
+    return;
+  }
+
+  if (Hls.isSupported()) {
+    const hls = new Hls({
+      enableWorker: true,
+      lowLatencyMode: true,
+      liveSyncDurationCount: 3,
+      liveMaxLatencyDurationCount: 6,
+      maxBufferLength: 10,
+      maxMaxBufferLength: 30,
+    });
+    hlsInstance = hls;
+    hls.on(Hls.Events.MEDIA_ATTACHED, onReadyPlay);
+    hls.on(Hls.Events.MANIFEST_PARSED, onReadyPlay);
+    hls.attachMedia(video);
+    hls.loadSource(url);
+    hls.on(Hls.Events.ERROR, (_event, data) => {
+      if (!data.fatal) return;
+      switch (data.type) {
+        case Hls.ErrorTypes.NETWORK_ERROR:
+          if (!hlsHttpFallbackUsed.value && originalUrl.startsWith("https://")) {
+            console.warn("[HLS] HTTPS 加载失败，尝试 HTTP 降级...");
+            hlsHttpFallbackUsed.value = true;
+            destroyH5HlsPlayer();
+            nextTick(() => initH5HlsPlayer(true));
+          } else {
+            console.error("[HLS] 网络错误，尝试重连...");
+            hls.startLoad();
           }
-          return;
-        }
-        this.initH5HlsPlayer();
-      });
-    },
-    ensureH5VideoPlaying(video) {
-      if (!video) return Promise.resolve();
-      const tryPlay = (muted) => {
-        video.muted = muted;
-        return video.play().catch(() => Promise.reject());
-      };
-      return tryPlay(false)
-        .catch(() => tryPlay(true))
-        .catch(() => {
-          console.warn("[HLS] 自动播放被阻止，请点击画面播放");
-        });
-    },
-    async initH5HlsPlayer(useHttpFallback = false) {
-      const originalUrl = this.videoUrl;
-      const container = this.$refs.hlsContainer;
-      if (!originalUrl || !container) return;
-
-      const url = this.buildHlsPlayUrl(originalUrl, useHttpFallback);
-      this.destroyH5HlsPlayer();
-
-      const video = document.createElement("video");
-      video.style.cssText = "width:100%;height:100%;object-fit:cover;background:#000;";
-      video.autoplay = true;
-      video.muted = true;
-      video.defaultMuted = true;
-      video.playsInline = true;
-      video.setAttribute("autoplay", "");
-      video.setAttribute("muted", "");
-      video.setAttribute("playsinline", "");
-      video.setAttribute("webkit-playsinline", "");
-      video.controls = false;
-
-      const onVideoClick = () => {
-        if (video.muted) {
-          video.muted = false;
-        }
-        video.play().catch(() => {});
-      };
-      video.addEventListener("click", onVideoClick);
-      container.appendChild(video);
-      this.hlsVideoElement = video;
-      this._hlsVideoClickHandler = onVideoClick;
-
-      const onReadyPlay = () => {
-        this.ensureH5VideoPlaying(video);
-      };
-
-      let Hls = null;
-      try {
-        const hlsModule = await import("hls.js");
-        Hls = hlsModule.default;
-      } catch (error) {
-        console.error("[HLS] 加载播放器失败:", error);
-        this.$Message.error("直播播放器加载失败，请刷新页面重试");
-        return;
+          break;
+        case Hls.ErrorTypes.MEDIA_ERROR:
+          console.error("[HLS] 媒体错误，尝试恢复...");
+          hls.recoverMediaError();
+          break;
+        default:
+          console.error("[HLS] 致命错误:", data);
+          destroyH5HlsPlayer();
+          Message.error("直播加载失败");
+          break;
       }
-
-      if (Hls.isSupported()) {
-        const hls = new Hls({
-          enableWorker: true,
-          lowLatencyMode: true,
-          liveSyncDurationCount: 3,
-          liveMaxLatencyDurationCount: 6,
-          maxBufferLength: 10,
-          maxMaxBufferLength: 30,
-        });
-        this.hlsInstance = hls;
-        hls.on(Hls.Events.MEDIA_ATTACHED, onReadyPlay);
-        hls.on(Hls.Events.MANIFEST_PARSED, onReadyPlay);
-        hls.attachMedia(video);
-        hls.loadSource(url);
-        hls.on(Hls.Events.ERROR, (_event, data) => {
-          if (!data.fatal) return;
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              if (!this.hlsHttpFallbackUsed && originalUrl.startsWith("https://")) {
-                console.warn("[HLS] HTTPS 加载失败，尝试 HTTP 降级...");
-                this.hlsHttpFallbackUsed = true;
-                this.destroyH5HlsPlayer();
-                this.$nextTick(() => this.initH5HlsPlayer(true));
-              } else {
-                console.error("[HLS] 网络错误，尝试重连...");
-                hls.startLoad();
-              }
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              console.error("[HLS] 媒体错误，尝试恢复...");
-              hls.recoverMediaError();
-              break;
-            default:
-              console.error("[HLS] 致命错误:", data);
-              this.destroyH5HlsPlayer();
-              this.$Message.error("直播加载失败");
-              break;
-          }
-        });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = url;
-        video.addEventListener("loadedmetadata", onReadyPlay);
-        video.addEventListener("canplay", onReadyPlay);
-      } else {
-        this.$Message.error("当前浏览器不支持 HLS 播放");
+    });
+  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = url;
+    video.addEventListener("loadedmetadata", onReadyPlay);
+    video.addEventListener("canplay", onReadyPlay);
+  } else {
+    Message.error("当前浏览器不支持 HLS 播放");
+  }
+}
+function destroyH5HlsPlayer() {
+  if (hlsInstance) {
+    hlsInstance.destroy();
+    hlsInstance = null;
+  }
+  if (hlsVideoElement) {
+    if (_hlsVideoClickHandler) {
+      hlsVideoElement.removeEventListener("click", _hlsVideoClickHandler);
+      _hlsVideoClickHandler = null;
+    }
+    hlsVideoElement.remove();
+    hlsVideoElement = null;
+  }
+  const container = hlsContainer.value;
+  if (container) {
+    container.innerHTML = "";
+  }
+}
+function loadDetail(showLoading = true) {
+  if (showLoading) loading.value = true;
+  getLiveInfo(liveId.value)
+    .then((res) => {
+      if (showLoading) loading.value = false;
+      if (res.success) {
+        const data = res.result || {};
+        liveDetail.value = data;
+        videoUrl.value = data.pullStreamUrl || data.streamUrl || "";
+        syncH5Player();
       }
-    },
-    destroyH5HlsPlayer() {
-      if (this.hlsInstance) {
-        this.hlsInstance.destroy();
-        this.hlsInstance = null;
+    })
+    .catch(() => {
+      if (showLoading) loading.value = false;
+    });
+}
+function loadOrderStats() {
+  getLiveOrderStatistics(liveId.value).then((res) => {
+    if (res.success) {
+      orderStats.value = res.result || {};
+    }
+  });
+}
+function loadOnlineUsers() {
+  onlineLoading.value = true;
+  liveUserList({
+    liveRoomId: liveId.value,
+    pageNumber: onlinePagination.pageNumber,
+    pageSize: onlinePagination.pageSize,
+  })
+    .then((res) => {
+      onlineLoading.value = false;
+      if (res.success) {
+        onlineUserList.value = res.result?.records || [];
+        onlinePagination.total = res.result?.total || 0;
       }
-      if (this.hlsVideoElement) {
-        if (this._hlsVideoClickHandler) {
-          this.hlsVideoElement.removeEventListener("click", this._hlsVideoClickHandler);
-          this._hlsVideoClickHandler = null;
-        }
-        this.hlsVideoElement.remove();
-        this.hlsVideoElement = null;
-      }
-      const container = this.$refs.hlsContainer;
-      if (container) {
-        container.innerHTML = "";
-      }
-    },
-    loadDetail(showLoading = true) {
-      if (showLoading) this.loading = true;
-      getLiveInfo(this.liveId)
-        .then((res) => {
-          if (showLoading) this.loading = false;
-          if (res.success) {
-            const data = res.result || {};
-            this.liveDetail = data;
-            this.videoUrl = data.pullStreamUrl || data.streamUrl || "";
-            this.syncH5Player();
-          }
-        })
-        .catch(() => {
-          if (showLoading) this.loading = false;
-        });
-    },
-    loadOrderStats() {
-      getLiveOrderStatistics(this.liveId).then((res) => {
+    })
+    .catch(() => {
+      onlineLoading.value = false;
+    });
+}
+function buildShareUrl() {
+  const base = (wapUrl.value || BASE?.WAP_URL || config.website || "").replace(/\/?$/, "/");
+  return `${base}pages/promotion/live/room?id=${liveId.value}`;
+}
+function handleShare() {
+  const url = buildShareUrl();
+  if (!url) {
+    Message.warning("未配置移动端地址");
+    return;
+  }
+  copyText(url, "分享链接");
+}
+function copyText(text, label = "内容") {
+  if (!text) {
+    Message.warning(`${label}为空，无法复制`);
+    return;
+  }
+  navigator.clipboard.writeText(text);
+  Message.success(`${label}已复制`);
+}
+function handleStart() {
+  Modal.confirm({
+    title: "确认开播",
+    content: "确定要开始该直播吗？",
+    onOk: () => {
+      return startLive(liveId.value).then((res) => {
         if (res.success) {
-          this.orderStats = res.result || {};
+          Message.success("开播成功");
+          refreshAll();
         }
       });
     },
-    loadOnlineUsers() {
-      this.onlineLoading = true;
-      liveUserList({
-        liveRoomId: this.liveId,
-        pageNumber: this.onlinePagination.pageNumber,
-        pageSize: this.onlinePagination.pageSize,
-      })
-        .then((res) => {
-          this.onlineLoading = false;
-          if (res.success) {
-            this.onlineUserList = res.result?.records || [];
-            this.onlinePagination.total = res.result?.total || 0;
-          }
-        })
-        .catch(() => {
-          this.onlineLoading = false;
-        });
-    },
-    buildShareUrl() {
-      const base = (this.wapUrl || BASE?.WAP_URL || config.website || "").replace(/\/?$/, "/");
-      return `${base}pages/promotion/live/room?id=${this.liveId}`;
-    },
-    handleShare() {
-      const url = this.buildShareUrl();
-      if (!url) {
-        this.$Message.warning("未配置移动端地址");
-        return;
-      }
-      this.copyText(url, "分享链接");
-    },
-    copyText(text, label = "内容") {
-      if (!text) {
-        this.$Message.warning(`${label}为空，无法复制`);
-        return;
-      }
-      navigator.clipboard.writeText(text);
-      this.$Message.success(`${label}已复制`);
-    },
-    handleStart() {
-      this.$Modal.confirm({
-        title: "确认开播",
-        content: "确定要开始该直播吗？",
-        onOk: () => {
-          return startLive(this.liveId).then((res) => {
-            if (res.success) {
-              this.$Message.success("开播成功");
-              this.refreshAll();
-            }
-          });
-        },
+  });
+}
+function handleEnd() {
+  Modal.confirm({
+    title: "确认结束",
+    content: "确定要结束该直播吗？",
+    onOk: () => {
+      return endLive(liveId.value).then((res) => {
+        if (res.success) {
+          Message.success("直播已结束");
+          destroyH5HlsPlayer();
+          stopPolling();
+          refreshAll();
+        }
       });
     },
-    handleEnd() {
-      this.$Modal.confirm({
-        title: "确认结束",
-        content: "确定要结束该直播吗？",
-        onOk: () => {
-          return endLive(this.liveId).then((res) => {
-            if (res.success) {
-              this.$Message.success("直播已结束");
-              this.destroyH5HlsPlayer();
-              this.stopPolling();
-              this.refreshAll();
-            }
-          });
-        },
-      });
-    },
-  },
-};
+  });
+}
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form :model="liveForm" ref="liveForm" :rules="liveRulesForm" label-width="120px">
+      <el-form :model="liveForm" ref="liveFormRef" :rules="liveRulesForm" label-width="120px">
         <el-form-item label="直播标题" prop="name">
           <div class="form-field-block">
             <el-input disabled v-model="liveForm.name" style="width:460px"></el-input>
@@ -124,68 +124,76 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getLiveInfo } from "@/api/promotion.js";
-export default {
-  data() {
-    return {
-      imageVisible: false,
-      imageSrc: "",
-      liveForm: {
-        name: "",
-        anchorName: "",
-        anchorWechat: "",
-        feedsImg: "",
-        coverImg: "",
-        shareImg: "",
-        startTime: "",
-      },
-      times: [],
-      liveData: [],
-      commodityList: "",
-    };
-  },
-  mounted() {
-    if (this.$route.query.id) {
-      this.getLiveDetail();
+import { Notice } from "@/utils/message";
+import { getStore } from "@/libs/storage";
+import { unixToDate } from "@/utils/filters";
+
+const route = useRoute();
+
+const imageVisible = ref(false);
+const imageSrc = ref("");
+const liveForm = reactive({
+  name: "",
+  anchorName: "",
+  anchorWechat: "",
+  feedsImg: "",
+  coverImg: "",
+  shareImg: "",
+  startTime: "",
+});
+const times = ref([]);
+const liveData = ref([]);
+const commodityList = ref("");
+
+// liveFormRef：模板 ref 改名避免与 liveForm 变量互相覆盖
+const liveFormRef = ref(null);
+
+// 原代码未在 data 声明、直接挂 this 的字段，script setup 下需显式声明
+let accessToken;
+let liveStatus;
+
+onMounted(() => {
+  if (route.query.id) {
+    getLiveDetail();
+  }
+  accessToken = {
+    accessToken: getStore("accessToken"),
+  };
+});
+
+function handleView(src) {
+  imageVisible.value = true;
+  imageSrc.value = src;
+}
+function handleMaxSize(file) {
+  Notice.warning({
+    title: "文件大小过大",
+    desc: "所选文件大小过大, 不得超过 1M.",
+  });
+}
+async function getLiveDetail() {
+  let result = await getLiveInfo(route.query.id);
+
+  if (result.success) {
+    let data = result.result;
+    for (let key in data) {
+      liveForm[key] = data[key];
     }
-    this.accessToken = {
-      accessToken: this.getStore("accessToken"),
-    };
-  },
 
-  methods: {
-    handleView(src) {
-      this.imageVisible = true;
-      this.imageSrc = src;
-    },
-    handleMaxSize(file) {
-      this.$Notice.warning({
-        title: "文件大小过大",
-        desc: "所选文件大小过大, 不得超过 1M.",
-      });
-    },
-    async getLiveDetail() {
-      let result = await getLiveInfo(this.$route.query.id);
+    liveData.value = data.commodityList;
+    commodityList.value = data.commodityList;
 
-      if (result.success) {
-        let data = result.result;
-        for (let key in data) {
-          this.liveForm[key] = data[key];
-        }
-
-        this.liveData = data.commodityList;
-        this.commodityList = data.commodityList;
-
-        this.times = [
-          this.$filters.unixToDate(data.startTime, "yyyy-MM-dd hh:mm"),
-          this.$filters.unixToDate(data.endTime, "yyyy-MM-dd hh:mm"),
-        ];
-        this.liveStatus = data.status;
-      }
-    },
-  },
-};
+    times.value = [
+      unixToDate(data.startTime, "yyyy-MM-dd hh:mm"),
+      unixToDate(data.endTime, "yyyy-MM-dd hh:mm"),
+    ];
+    liveStatus = data.status;
+  }
+}
 </script>
 
 <style lang="scss" scoped>

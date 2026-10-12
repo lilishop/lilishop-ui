@@ -2,7 +2,7 @@
   <div class="search seckill">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -131,125 +131,125 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getSeckillList, delSeckill, updateSeckillStatus } from "@/api/promotion";
+import { Message, Modal } from "@/utils/message";
 import setupSeckill from "@/views/promotions/seckill/seckill-setup";
 
-export default {
-  name: "seckill",
-  components: {
-    setupSeckill,
-  },
-  data() {
-    return {
-      activeTab: "list",
-      selectDate: [],
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    edit(v) {
-      this.$router.push({ name: "manager-seckill-add", query: { id: v.id } });
-    },
-    manage(v) {
-      this.$router.push({ name: "seckill-goods", query: { id: v.id } });
-    },
-    off(v) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "您确定要下架该活动吗？",
-        onOk: () => {
-          updateSeckillStatus(v.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("下架成功");
-              this.getDataList();
-            }
-          });
-        },
+defineOptions({ name: "seckill" });
+
+const router = useRouter();
+
+const searchFormRef = ref(null);
+const table = ref(null);
+
+const activeTab = ref("list");
+const selectDate = ref([]);
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const data = ref([]);
+const total = ref(0);
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getDataList();
+}
+function edit(v) {
+  router.push({ name: "manager-seckill-add", query: { id: v.id } });
+}
+function manage(v) {
+  router.push({ name: "seckill-goods", query: { id: v.id } });
+}
+function off(v) {
+  Modal.confirm({
+    title: "提示",
+    content: "您确定要下架该活动吗？",
+    onOk: () => {
+      updateSeckillStatus(v.id).then((res) => {
+        if (res.success) {
+          Message.success("下架成功");
+          getDataList();
+        }
       });
     },
-    expire(v) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "您确定要作废该活动吗？",
-        onOk: () => {
-          delSeckill(v.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("作废成功");
-              this.getDataList();
-            }
-          });
-        },
+  });
+}
+function expire(v) {
+  Modal.confirm({
+    title: "提示",
+    content: "您确定要作废该活动吗？",
+    onOk: () => {
+      delSeckill(v.id).then((res) => {
+        if (res.success) {
+          Message.success("作废成功");
+          getDataList();
+        }
       });
     },
-    getDataList() {
-      this.loading = true;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
-        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
+  });
+}
+function getDataList() {
+  loading.value = true;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.value.startTime = new Date(selectDate.value[0]).getTime();
+    searchForm.value.endTime = new Date(selectDate.value[1]).getTime();
+  } else {
+    searchForm.value.startTime = null;
+    searchForm.value.endTime = null;
+  }
+  getSeckillList(searchForm.value)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-      getSeckillList(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -61,101 +61,107 @@
     </UserCenterLayout>
   </div>
 </template>
-<script>
+<script setup>
+import { getCurrentInstance, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message, Notice } from "@/utils/message";
 import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { orderDetail } from '@/api/order.js';
 import { afterSaleReason, handleComplain } from '@/api/member.js';
 import { buyerUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
-export default {
-  components: { Camera, Delete, View },
-  data () {
-    return {
-      order: {}, // 订单详情
-      orderGoods: {}, // 订单商品
-      form: { // 投诉表单
-        complainTopic: '',
-        content: ''
-      }, // 表单
-      visible: false, // 图片预览
-      action: buyerUrl + '/buyer/common/upload/file', // 上传地址
-      accessToken: {}, // 验证token
-      previewImage: '', // 图片地址
-      loading: false, // 加载状态
-      reasonList: [] // 投诉原因
+
+const route = useRoute();
+const router = useRouter();
+const instance = getCurrentInstance();
+
+const order = ref({}); // 订单详情
+const orderGoods = ref({}); // 订单商品
+const form = reactive({ // 投诉表单
+  complainTopic: '',
+  content: ''
+}); // 表单
+const visible = ref(false); // 图片预览
+const action = ref(buyerUrl + '/buyer/common/upload/file'); // 上传地址
+const accessToken = reactive({}); // 验证token
+const previewImage = ref(''); // 图片地址
+const loading = ref(false); // 加载状态
+const reasonList = ref([]); // 投诉原因
+
+function getOrderDetail() { // 获取订单详情
+  orderDetail(route.query.sn).then(res => {
+    order.value = res.result
+    orderGoods.value = res.result.orderItems[route.query.index]
+    orderGoods.value.uploadList = []
+  })
+  afterSaleReason('COMPLAIN').then(res => {
+    if (res.success) {
+      reasonList.value = res.result
+      form['complainTopic'] = res.result[0].reason
+      instance.proxy.$forceUpdate()
     }
-  },
-  methods: {
-    getOrderDetail () { // 获取订单详情
-      orderDetail(this.$route.query.sn).then(res => {
-        this.order = res.result
-        this.orderGoods = res.result.orderItems[this.$route.query.index]
-        this.orderGoods.uploadList = []
-      })
-      afterSaleReason('COMPLAIN').then(res => {
-        if (res.success) {
-          this.reasonList = res.result
-          this.form['complainTopic'] = res.result[0].reason
-          this.$forceUpdate()
-        }
-      })
-    },
-    save () { // 提交投诉信息
-      if (!this.form.content || !String(this.form.content).trim()) {
-        Message.warning('投诉内容不能为空')
-        return
-      }
-      let params = {
-        goodsId: this.orderGoods.goodsId,
-        complainTopic: this.form.complainTopic,
-        content: this.form.content,
-        images: this.orderGoods.uploadList.toString(),
-        orderSn: this.$route.query.sn,
-        skuId: this.orderGoods.skuId
-      }
-      handleComplain(params).then(res => {
-        if (res.success) {
-          Message.success('投诉申请已提交，感谢您的反馈')
-          this.$router.push({name: 'ComplainList'})
-        }
-      })
-    },
-    goGoodsDetail (skuId, goodsId) { // 跳转商品详情
-      let routerUrl = this.$router.resolve({
-        path: '/goodsDetail',
-        query: {skuId, goodsId}
-      })
-      window.open(routerUrl.href, '_blank')
-    },
-    handleView (name) { // 预览图片
-      this.previewImage = name;
-      this.visible = true;
-    },
-    handleRemove (index) { // 移除图片
-      this.orderGoods.uploadList.splice(index, 1)
-      this.$forceUpdate()
-    },
-    handleSuccess (res, file) { // 上传成功回调
-      this.orderGoods.uploadList.push(res.result)
-      this.$forceUpdate()
-    },
-    handleBeforeUpload () { // 上传之前钩子函数
-      const check = this.orderGoods.uploadList.length < 6;
-      if (!check) {
-        Notice.warning({
-          title: '最多可以上传五张图片'
-        });
-        return check;
-      }
+  })
+}
+
+function save() { // 提交投诉信息
+  if (!form.content || !String(form.content).trim()) {
+    Message.warning('投诉内容不能为空')
+    return
+  }
+  let params = {
+    goodsId: orderGoods.value.goodsId,
+    complainTopic: form.complainTopic,
+    content: form.content,
+    images: orderGoods.value.uploadList.toString(),
+    orderSn: route.query.sn,
+    skuId: orderGoods.value.skuId
+  }
+  handleComplain(params).then(res => {
+    if (res.success) {
+      Message.success('投诉申请已提交，感谢您的反馈')
+      router.push({name: 'ComplainList'})
     }
-  },
-  mounted () {
-    this.accessToken.accessToken = storage.getItem('accessToken');
-    this.getOrderDetail()
-    window.scrollTo(0, 0)
+  })
+}
+
+function goGoodsDetail(skuId, goodsId) { // 跳转商品详情
+  let routerUrl = router.resolve({
+    path: '/goodsDetail',
+    query: {skuId, goodsId}
+  })
+  window.open(routerUrl.href, '_blank')
+}
+
+function handleView(name) { // 预览图片
+  previewImage.value = name;
+  visible.value = true;
+}
+
+function handleRemove(index) { // 移除图片
+  orderGoods.value.uploadList.splice(index, 1)
+  instance.proxy.$forceUpdate()
+}
+
+function handleSuccess(res, file) { // 上传成功回调
+  orderGoods.value.uploadList.push(res.result)
+  instance.proxy.$forceUpdate()
+}
+
+function handleBeforeUpload() { // 上传之前钩子函数
+  const check = orderGoods.value.uploadList.length < 6;
+  if (!check) {
+    Notice.warning({
+      title: '最多可以上传五张图片'
+    });
+    return check;
   }
 }
+
+onMounted(() => {
+  accessToken.accessToken = storage.getItem('accessToken');
+  getOrderDetail()
+  window.scrollTo(0, 0)
+})
 </script>
 <style lang="scss" scoped>
 .delivery-rate {

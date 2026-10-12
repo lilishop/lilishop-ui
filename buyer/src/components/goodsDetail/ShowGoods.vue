@@ -108,7 +108,7 @@
                   class="item-coupon"
                   v-for="(item, index) in promotionMap['COUPON'].slice(0, 6)"
                   :key="index"
-                  @click="receiveCoupon(item.id)"
+                  @click="handleReceiveCoupon(item.id)"
                 >
                   <span v-if="item.couponType == 'PRICE'"
                     >满{{ item.consumeThreshold }}减{{ item.price }}</span>
@@ -125,7 +125,7 @@
                       class="item-coupon"
                       v-for="(item, index) in promotionMap['COUPON'].slice(6, promotionMap['COUPON'].length)"
                       :key="index"
-                      @click="receiveCoupon(item.id)"
+                      @click="handleReceiveCoupon(item.id)"
                     >
                       <span v-if="item.couponType == 'PRICE'"
                         >满{{ item.consumeThreshold }}减{{ item.price }}</span>
@@ -318,11 +318,14 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import { StarFilled } from '@element-plus/icons-vue';
 import Promotion from "./Promotion.vue";
 import DPlayer from "dplayer";
+import storage from "@/plugins/storage.js";
 import {
   collectGoods,
   isCollection,
@@ -344,375 +347,389 @@ import {
   E_COUPON_CART_POINTS,
 } from "@/constants/goodsType";
 
-export default {
-  name: "ShowGoods",
-  props: {
-    // 商品数据
-    detail: {
-      type: Object,
-      default: null,
-    },
+defineOptions({ name: "ShowGoods" });
+
+const props = defineProps({
+  // 商品数据
+  detail: {
+    type: Object,
+    default: null,
   },
-  watch: {
-    detail: {
-      handler(val) {
-        this.skuDetail = val.data;
-        this.wholesaleList = val.wholesaleList;
-        this.syncCountWithQuantity();
-        this.promotion();
-        this.swiperGoodsImg();
-      },
-      deep: true,
-      immediate: true,
-    },
-    showGoodsVideo(val){
-      if(val){
-        this.initVideo();
+});
+
+const emit = defineEmits(["handleClickSku"]);
+
+const route = useRoute();
+const router = useRouter();
+
+const showGoodsVideo = ref(false);
+const goodsVideo = ref("");
+const wholesaleList = ref([]);
+const count = ref(1); // 商品数量
+const imgIndex = ref(0); // 展示图片下标
+const currentSelceted = ref([]); // 当前商品sku
+const imgList = ref([]); // 商品图片列表
+const skuDetail = ref({
+  specList: [],
+}); // sku详情
+const goodsSpecList = ref(props.detail.specs); // 商品spec
+const promotionMap = ref(createEmptyPromotionMap());
+const formatList = ref([]); // 选择商品品类的数组
+const loading = ref(false); // 立即购买loading
+const loading1 = ref(false); // 加入购物车loading
+const loadingPintuan = ref(false);
+const isCollected = ref(false); // 是否收藏
+const skuList = ref([]); // formatSku 中赋值（原 data 未声明）
+
+// startCheckout 通过字符串 key 操作对应 loading
+const loadings = { loading, loading1, loadingPintuan };
+
+const currentImg = computed(() => {
+  const item = imgList.value[imgIndex.value];
+  return item ? item.url || item : "";
+});
+
+const wholesalePrice = computed(() => {
+  return wholesaleList.value.length
+    ? wholesaleList.value.map((item) => {
+        return item.price;
+      })
+    : [];
+});
+
+const wholesaleNum = computed(() => {
+  return wholesaleList.value.length
+    ? wholesaleList.value.map((item) => {
+        return item.num;
+      })
+    : [];
+});
+
+/** 卡密商品：禁加购，仅立即购买；库存读 quantity（M-02 起支持促销） */
+const isECouponGoods = computed(() => {
+  return isECoupon(skuDetail.value.goodsType);
+});
+
+const displayStock = computed(() => {
+  if (isECouponGoods.value) {
+    return getECouponStock(skuDetail.value);
+  }
+  return Number(skuDetail.value.quantity) || 0;
+});
+
+const quantityMax = computed(() => {
+  if (isECouponGoods.value) {
+    return getECouponMaxBuyNum(skuDetail.value);
+  }
+  const qty = Number(skuDetail.value.quantity) || 0;
+  return qty > 0 ? qty : 1;
+});
+
+const isOutOfStock = computed(() => {
+  if (isECouponGoods.value) {
+    return getECouponStock(skuDetail.value) <= 0;
+  }
+  return (Number(skuDetail.value.quantity) || 0) <= 0;
+});
+
+watch(
+  () => props.detail,
+  (val) => {
+    skuDetail.value = val.data;
+    wholesaleList.value = val.wholesaleList;
+    syncCountWithQuantity();
+    promotion();
+    swiperGoodsImg();
+  },
+  { deep: true, immediate: true }
+);
+
+watch(showGoodsVideo, (val) => {
+  if (val) {
+    initVideo();
+  }
+});
+
+// 初始化video
+function initVideo() {
+  if (!goodsVideo.value) {
+    setTimeout(() => {
+      goodsVideo.value = new DPlayer({
+        container: document.getElementById('dplayer'),
+        video: {
+          url: skuDetail.value.goodsVideo,
+        },
+      });
+    }, 100);
+  }
+}
+
+function syncCountWithQuantity() {
+  const qty = isECouponGoods.value
+    ? getECouponStock(skuDetail.value)
+    : Number(skuDetail.value.quantity) || 0;
+  if (qty <= 0) {
+    count.value = 1;
+    return;
+  }
+  if (!isECouponGoods.value && wholesaleList.value && wholesaleList.value.length > 0) {
+    count.value = Math.min(Math.max(wholesaleList.value[0].num, 1), qty);
+    return;
+  }
+  const max = isECouponGoods.value ? getECouponMaxBuyNum(skuDetail.value) : qty;
+  if (count.value > max) {
+    count.value = max;
+  } else if (count.value < 1) {
+    count.value = 1;
+  }
+}
+
+function changeCount(val) {
+  if (wholesaleList.value && wholesaleList.value.length > 0) {
+    if (count.value <= wholesaleList.value[0].num) {
+      Message.warning("批发商品购买数量不能小于起批数量");
+      count.value = wholesaleList.value[0].num;
+    }
+  }
+}
+
+function select(index, value) {
+  // 选择规格
+  currentSelceted.value[index] = value;
+  let selectedSkuId = goodsSpecList.value.find((i) => {
+    let matched = true;
+    let specValues = i.specValues.filter((j) => j.specName !== "images");
+    for (let n = 0; n < specValues.length; n++) {
+      if (specValues[n].specValue !== currentSelceted.value[n]) {
+        matched = false;
+        return;
       }
     }
-  },
-  data() {
-    return {
-      playIcon,
-      showGoodsVideo:false,
-      goodsVideo:"",
-      wholesaleList: [],
-      count: 1, // 商品数量
-      imgIndex: 0, // 展示图片下标
-      currentSelceted: [], // 当前商品sku
-      imgList: [], // 商品图片列表
-      skuDetail: {
-        specList: [],
-      }, // sku详情
-      goodsSpecList: this.detail.specs, // 商品spec
-      promotionMap: createEmptyPromotionMap(),
-      formatList: [], // 选择商品品类的数组
-      loading: false, // 立即购买loading
-      loading1: false, // 加入购物车loading
-      loadingPintuan: false,
-      isCollected: false, // 是否收藏
-    };
-  },
-  components: { Promotion, StarFilled },
-  computed: {
-    currentImg() {
-      const item = this.imgList[this.imgIndex];
-      return item ? item.url || item : "";
-    },
-    wholesalePrice(key) {
-      return this.wholesaleList.length
-        ? this.wholesaleList.map((item) => {
-            return item.price;
-          })
-        : [];
-    },
-    wholesaleNum(key) {
-      return this.wholesaleList.length
-        ? this.wholesaleList.map((item) => {
-            return item.num;
-          })
-        : [];
-    },
-    /** 卡密商品：禁加购，仅立即购买；库存读 quantity（M-02 起支持促销） */
-    isECouponGoods() {
-      return isECoupon(this.skuDetail.goodsType);
-    },
-    displayStock() {
-      if (this.isECouponGoods) {
-        return getECouponStock(this.skuDetail);
-      }
-      return Number(this.skuDetail.quantity) || 0;
-    },
-    quantityMax() {
-      if (this.isECouponGoods) {
-        return getECouponMaxBuyNum(this.skuDetail);
-      }
-      const qty = Number(this.skuDetail.quantity) || 0;
-      return qty > 0 ? qty : 1;
-    },
-    isOutOfStock() {
-      if (this.isECouponGoods) {
-        return getECouponStock(this.skuDetail) <= 0;
-      }
-      return (Number(this.skuDetail.quantity) || 0) <= 0;
-    },
-  },
-  methods: {
-    eCouponAfterSaleHint,
-    // 初始化video
-    initVideo(){
-      if(!this.goodsVideo ){
-        setTimeout(()=>{
-        this.goodsVideo = new DPlayer({
-          container: document.getElementById('dplayer'),
-          video: {
-              url:this.skuDetail.goodsVideo,
-          },
-      });
-      },100)
-      }
+    if (matched) {
+      return i;
+    }
+  });
+  emit("handleClickSku", {
+    skuId: selectedSkuId.skuId,
+    goodsId: skuDetail.value.goodsId,
+  });
+}
 
-
-
-    },
-
-
-    syncCountWithQuantity() {
-      const qty = this.isECouponGoods
-        ? getECouponStock(this.skuDetail)
-        : Number(this.skuDetail.quantity) || 0;
-      if (qty <= 0) {
-        this.count = 1;
-        return;
-      }
-      if (!this.isECouponGoods && this.wholesaleList && this.wholesaleList.length > 0) {
-        this.count = Math.min(Math.max(this.wholesaleList[0].num, 1), qty);
-        return;
-      }
-      const max = this.isECouponGoods ? getECouponMaxBuyNum(this.skuDetail) : qty;
-      if (this.count > max) {
-        this.count = max;
-      } else if (this.count < 1) {
-        this.count = 1;
-      }
-    },
-    changeCount(val) {
-      if (this.wholesaleList && this.wholesaleList.length > 0) {
-        if (this.count <= this.wholesaleList[0].num) {
-          Message.warning("批发商品购买数量不能小于起批数量");
-          this.count = this.wholesaleList[0].num;
-        }
-      }
-    },
-    select(index, value) {
-      // 选择规格
-      this.currentSelceted[index] = value;
-      let selectedSkuId = this.goodsSpecList.find((i) => {
-        let matched = true;
-        let specValues = i.specValues.filter((j) => j.specName !== "images");
-        for (let n = 0; n < specValues.length; n++) {
-          if (specValues[n].specValue !== this.currentSelceted[n]) {
-            matched = false;
-            return;
-          }
-        }
-        if (matched) {
-          return i;
-        }
-      });
-      this.$emit("handleClickSku", {
-        skuId: selectedSkuId.skuId,
-        goodsId: this.skuDetail.goodsId,
-      });
-    },
-
-    addShoppingCartBtn() {
-      // FR-B-01：E_COUPON 禁止加购物车（后端亦返回 CARD_KEY_E_COUPON_CART_FORBIDDEN）
-      if (this.isECouponGoods) {
-        Message.warning("电子卡券请使用立即购买");
-        return;
-      }
-      // 添加购物车
-      const params = {
-        num: this.count,
-        skuId: this.skuDetail.id,
-      };
-      this.loading = true;
-      addCartGoods(params)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.$router.push({
-              path: "/shoppingCart",
-              query: {
-                skuId: this.skuDetail.id,
-                goodsId: this.skuDetail.goodsId,
-                thumbnail: this.skuDetail.thumbnail,
-                goodsName: this.skuDetail.goodsName,
-                count: this.count,
-              },
-            });
-          } else {
-            Message.warning(res.message);
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    buyNow() {
-      this.startCheckout(E_COUPON_CART_BUY_NOW, "loading1");
-    },
-    pintuanBuy() {
-      this.startCheckout(E_COUPON_CART_PINTUAN, "loadingPintuan");
-    },
-    pointPay() {
-      this.startCheckout(E_COUPON_CART_POINTS, "loading");
-    },
-    startCheckout(action, loadingKey) {
-      const params = {
-        num: this.count,
-        skuId: this.skuDetail.id,
-        cartType: "BUY_NOW",
-      };
-      if (this.skuDetail.goodsType === "VIRTUAL_GOODS") {
-        params.cartType = "VIRTUAL";
-      } else if (this.isECouponGoods) {
-        params.cartType = resolveECouponCartType({
-          routeWay: this.$route.query.way,
-          action,
-        });
-      }
-      this[loadingKey] = true;
-      addCartGoods(params)
-        .then((res) => {
-          this[loadingKey] = false;
-          if (res.success) {
-            this.$router.push({
-              path: "/pay",
-              query: { way: params.cartType },
-            });
-          } else {
-            Message.warning(res.message);
-          }
-        })
-        .catch(() => {
-          this[loadingKey] = false;
-        });
-    },
-    async collect() {
-      if (!this.Cookies.getItem("accessToken") || !this.Cookies.getItem("userInfo")) {
-        this.$router.push({
-          path: "/login",
+function addShoppingCartBtn() {
+  // FR-B-01：E_COUPON 禁止加购物车（后端亦返回 CARD_KEY_E_COUPON_CART_FORBIDDEN）
+  if (isECouponGoods.value) {
+    Message.warning("电子卡券请使用立即购买");
+    return;
+  }
+  // 添加购物车
+  const params = {
+    num: count.value,
+    skuId: skuDetail.value.id,
+  };
+  loading.value = true;
+  addCartGoods(params)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        router.push({
+          path: "/shoppingCart",
           query: {
-            rePath: this.$route.path,
-            query: JSON.stringify(this.$route.query || {}),
+            skuId: skuDetail.value.id,
+            goodsId: skuDetail.value.goodsId,
+            thumbnail: skuDetail.value.thumbnail,
+            goodsName: skuDetail.value.goodsName,
+            count: count.value,
           },
         });
-        return;
-      }
-      // 收藏商品
-      if (this.isCollected) {
-        let cancel = await cancelCollect("GOODS", this.skuDetail.id);
-        if (cancel.success) {
-          Message.success("取消收藏成功");
-          this.isCollected = false;
-        }
       } else {
-        let collect = await collectGoods("GOODS", this.skuDetail.id);
-        if (collect.code === 200) {
-          this.isCollected = true;
-          Message.success("收藏商品成功,可以前往个人中心我的收藏查看");
-        }
+        Message.warning(res.message);
       }
-    },
-    // 格式化数据
-    formatSku(list) {
-      let arr = [{}];
-      list.forEach((item, index) => {
-        item.specValues.forEach((spec, specIndex) => {
-          let name = spec.specName;
-          let values = {
-            value: spec.specValue,
-            quantity: item.quantity,
-          };
-          if (name === "images") {
-            return;
-          }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
 
-          arr.forEach((arrItem, arrIndex) => {
-            if (
-              arrItem.name === name &&
-              arrItem.values &&
-              !arrItem.values.find((i) => i.value === values.value)
-            ) {
-              arrItem.values.push(values);
-            }
+function buyNow() {
+  startCheckout(E_COUPON_CART_BUY_NOW, "loading1");
+}
 
-            let keys = arr.map((key) => {
-              return key.name;
-            });
-            if (!keys.includes(name)) {
-              arr.push({
-                name: name,
-                values: [values],
-              });
-            }
-          });
+function pintuanBuy() {
+  startCheckout(E_COUPON_CART_PINTUAN, "loadingPintuan");
+}
+
+function pointPay() {
+  startCheckout(E_COUPON_CART_POINTS, "loading");
+}
+
+function startCheckout(action, loadingKey) {
+  const params = {
+    num: count.value,
+    skuId: skuDetail.value.id,
+    cartType: "BUY_NOW",
+  };
+  if (skuDetail.value.goodsType === "VIRTUAL_GOODS") {
+    params.cartType = "VIRTUAL";
+  } else if (isECouponGoods.value) {
+    params.cartType = resolveECouponCartType({
+      routeWay: route.query.way,
+      action,
+    });
+  }
+  loadings[loadingKey].value = true;
+  addCartGoods(params)
+    .then((res) => {
+      loadings[loadingKey].value = false;
+      if (res.success) {
+        router.push({
+          path: "/pay",
+          query: { way: params.cartType },
         });
-      });
-      arr.shift();
-      this.formatList = arr;
-
-      let cur = list.filter((i) => i.skuId === this.$route.query.skuId)[0];
-      if (cur) {
-        cur.specValues
-          .filter((i) => i.specName !== "images")
-          .forEach((value, _index) => {
-            this.currentSelceted[_index] = value.specValue;
-          });
+      } else {
+        Message.warning(res.message);
       }
-      this.skuList = list;
-    },
-    receiveCoupon(id) {
-      // 领取优惠券
-      receiveCoupon(id).then((res) => {
-        if (res.success) {
-          Message.success("优惠券领取成功");
-        } else {
-          Message.warning(res.message);
-        }
-      });
-    },
-    promotion() {
-      this.promotionMap = createEmptyPromotionMap();
-      if (!this.detail || !this.detail.promotionMap) return false;
-      const keysArr = Object.keys(this.detail.promotionMap);
-      if (keysArr.length === 0) return false;
+    })
+    .catch(() => {
+      loadings[loadingKey].value = false;
+    });
+}
 
-      for (let i = 0; i < keysArr.length; i++) {
-        const key = keysArr[i].split("-")[0];
-        if (key === "COUPON") {
-          if (!Array.isArray(this.promotionMap.COUPON)) {
-            this.promotionMap.COUPON = [];
-          }
-          this.promotionMap.COUPON.push(this.detail.promotionMap[keysArr[i]]);
-        } else if (Object.prototype.hasOwnProperty.call(this.promotionMap, key)) {
-          this.promotionMap[key] = this.detail.promotionMap[keysArr[i]];
-        } else {
-          this.promotionMap[key] = this.detail.promotionMap[keysArr[i]];
-        }
-      }
-    },
-    // 相册里会混进规格 JSON，只留图片地址；没有相册时用主图
-    swiperGoodsImg() {
-      const source = this.skuDetail.goodsGalleryList || [];
-      const gallery = Array.from(source).filter((item) => {
-        if (typeof item !== "string") return false;
-        return item.indexOf('"url":') === -1 && item.indexOf('"status":') === -1;
-      });
-      if (gallery.length) {
-        this.imgList = gallery;
+async function collect() {
+  if (!storage.getItem("accessToken") || !storage.getItem("userInfo")) {
+    router.push({
+      path: "/login",
+      query: {
+        rePath: route.path,
+        query: JSON.stringify(route.query || {}),
+      },
+    });
+    return;
+  }
+  // 收藏商品
+  if (isCollected.value) {
+    let cancel = await cancelCollect("GOODS", skuDetail.value.id);
+    if (cancel.success) {
+      Message.success("取消收藏成功");
+      isCollected.value = false;
+    }
+  } else {
+    let collect = await collectGoods("GOODS", skuDetail.value.id);
+    if (collect.code === 200) {
+      isCollected.value = true;
+      Message.success("收藏商品成功,可以前往个人中心我的收藏查看");
+    }
+  }
+}
+
+// 格式化数据
+function formatSku(list) {
+  let arr = [{}];
+  list.forEach((item, index) => {
+    item.specValues.forEach((spec, specIndex) => {
+      let name = spec.specName;
+      let values = {
+        value: spec.specValue,
+        quantity: item.quantity,
+      };
+      if (name === "images") {
         return;
       }
-      this.imgList = this.skuDetail.original ? [this.skuDetail.original] : [];
-    },
-  },
-  mounted() {
-    // 用户登录才会判断是否收藏（须同时有 token，避免残留 userInfo 触发 401 跳转登录）
-    if (this.Cookies.getItem("accessToken") && this.Cookies.getItem("userInfo")) {
-      isCollection("GOODS", this.skuDetail.id).then((res) => {
-        if (res.success && res.result) {
-          this.isCollected = true;
+
+      arr.forEach((arrItem, arrIndex) => {
+        if (
+          arrItem.name === name &&
+          arrItem.values &&
+          !arrItem.values.find((i) => i.value === values.value)
+        ) {
+          arrItem.values.push(values);
+        }
+
+        let keys = arr.map((key) => {
+          return key.name;
+        });
+        if (!keys.includes(name)) {
+          arr.push({
+            name: name,
+            values: [values],
+          });
         }
       });
-    }
+    });
+  });
+  arr.shift();
+  formatList.value = arr;
 
-    this.formatSku(this.goodsSpecList);
-    // this.promotion();
-    document.title = this.skuDetail.goodsName;
-  },
-};
+  let cur = list.filter((i) => i.skuId === route.query.skuId)[0];
+  if (cur) {
+    cur.specValues
+      .filter((i) => i.specName !== "images")
+      .forEach((value, _index) => {
+        currentSelceted.value[_index] = value.specValue;
+      });
+  }
+  skuList.value = list;
+}
+
+function handleReceiveCoupon(id) {
+  // 领取优惠券
+  receiveCoupon(id).then((res) => {
+    if (res.success) {
+      Message.success("优惠券领取成功");
+    } else {
+      Message.warning(res.message);
+    }
+  });
+}
+
+function promotion() {
+  promotionMap.value = createEmptyPromotionMap();
+  if (!props.detail || !props.detail.promotionMap) return false;
+  const keysArr = Object.keys(props.detail.promotionMap);
+  if (keysArr.length === 0) return false;
+
+  for (let i = 0; i < keysArr.length; i++) {
+    const key = keysArr[i].split("-")[0];
+    if (key === "COUPON") {
+      if (!Array.isArray(promotionMap.value.COUPON)) {
+        promotionMap.value.COUPON = [];
+      }
+      promotionMap.value.COUPON.push(props.detail.promotionMap[keysArr[i]]);
+    } else if (Object.prototype.hasOwnProperty.call(promotionMap.value, key)) {
+      promotionMap.value[key] = props.detail.promotionMap[keysArr[i]];
+    } else {
+      promotionMap.value[key] = props.detail.promotionMap[keysArr[i]];
+    }
+  }
+}
+
+// 相册里会混进规格 JSON，只留图片地址；没有相册时用主图
+function swiperGoodsImg() {
+  const source = skuDetail.value.goodsGalleryList || [];
+  const gallery = Array.from(source).filter((item) => {
+    if (typeof item !== "string") return false;
+    return item.indexOf('"url":') === -1 && item.indexOf('"status":') === -1;
+  });
+  if (gallery.length) {
+    imgList.value = gallery;
+    return;
+  }
+  imgList.value = skuDetail.value.original ? [skuDetail.value.original] : [];
+}
+
+onMounted(() => {
+  // 用户登录才会判断是否收藏（须同时有 token，避免残留 userInfo 触发 401 跳转登录）
+  if (storage.getItem("accessToken") && storage.getItem("userInfo")) {
+    isCollection("GOODS", skuDetail.value.id).then((res) => {
+      if (res.success && res.result) {
+        isCollected.value = true;
+      }
+    });
+  }
+
+  formatSku(goodsSpecList.value);
+  // promotion();
+  document.title = skuDetail.value.goodsName;
+});
 </script>
 
 <style scoped lang="scss">

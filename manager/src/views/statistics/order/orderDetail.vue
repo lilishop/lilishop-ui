@@ -81,32 +81,31 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      orderStatusList: {
-        // 订单状态
-        UNDELIVERED: "待发货",
-        UNPAID: "未付款",
-        PAID: "已付款",
-        DELIVERED: "已发货",
-        CANCELLED: "已关闭",
-        COMPLETED: "已完成",
-        TAKE: "已完成",
-      },
-    };
-  },
-  props: ["res"],
-  methods: {
-    handleClickGoods(id) {
-      this.$router.push({
-        query: { id },
-        path: "/goods/goods-info/goodsDetail",
-      });
-    },
-  },
-};
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+defineProps(["res"]);
+
+// 订单状态
+const orderStatusList = ref({
+  UNDELIVERED: "待发货",
+  UNPAID: "未付款",
+  PAID: "已付款",
+  DELIVERED: "已发货",
+  CANCELLED: "已关闭",
+  COMPLETED: "已完成",
+  TAKE: "已完成",
+});
+
+function handleClickGoods(id) {
+  router.push({
+    query: { id },
+    path: "/goods/goods-info/goodsDetail",
+  });
+}
 </script>
 <style lang="scss" scoped>
 .shop {

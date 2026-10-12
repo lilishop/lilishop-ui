@@ -4,7 +4,7 @@
       <el-tabs v-model="activeTab" class="setting-tabs">
         <el-tab-pane label="基础设置" name="base">
           <el-form
-            ref="form"
+            ref="formRef"
             :model="form"
             :rules="formRule"
             label-width="180px"
@@ -69,7 +69,7 @@
 
         <el-tab-pane label="客户关系" name="customer">
           <el-form
-            ref="customerForm"
+            ref="customerFormRef"
             :model="customerForm"
             label-width="180px"
             label-position="right"
@@ -116,7 +116,7 @@
 
         <el-tab-pane label="结算方案" name="settlement">
           <el-form
-            ref="settlementForm"
+            ref="settlementFormRef"
             :model="settlementForm"
             label-width="180px"
             label-position="right"
@@ -234,7 +234,7 @@
 
         <el-tab-pane label="商品分销设置" name="featured">
           <el-form
-            ref="featuredForm"
+            ref="featuredFormRef"
             :model="featuredForm"
             label-width="220px"
             label-position="right"
@@ -428,7 +428,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 import { setSetting, getSetting } from "@/api/index";
 import {
   getDistributionCustomerSetting,
@@ -445,6 +446,7 @@ import {
 } from "@/api/distribution";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import { regular } from "@/utils";
+import { Message } from "@/utils/message";
 
 const DEFAULT_FORM = {
   isOpen: true,
@@ -485,430 +487,426 @@ const DEFAULT_SORT_OPTIONS = [
   { value: "LATEST_LISTING", label: "商品上架越晚越靠前" },
 ];
 
-export default {
-  name: "distributionSetting",
-  components: {
-    uploadPicInput,
-  },
-  data() {
-    return {
-      activeTab: "base",
-      saving: {
-        base: false,
-        customer: false,
-        settlement: false,
-        featured: false,
-        poster: false,
-        inviteCard: false,
-      },
-      form: { ...DEFAULT_FORM },
-      formRule: {
-        isOpen: [regular.REQUIRED],
-        distributorName: [regular.REQUIRED, regular.VARCHAR20],
-      },
-      customerForm: {
-        bindMode: "SHORT_TERM",
-        permanentBindMode: "PAID_WITHIN_DAYS",
-        permanentPaidDays: 1,
-        shortTermBindDays: 7,
-      },
-      settlementForm: {
-        selfPurchaseCommissionMode: "SELF",
-      },
-      posterForm: { ...DEFAULT_POSTER_FORM },
-      inviteCardForm: { ...DEFAULT_INVITE_CARD_FORM },
-      featuredForm: { ...DEFAULT_FEATURED_FORM },
-      defaultSortOptions: DEFAULT_SORT_OPTIONS,
-      featuredCustomGoods: [],
-      featuredPickerVisible: false,
-      featuredPickerLoading: false,
-      featuredPickerList: [],
-      featuredPickerTotal: 0,
-      featuredPickerDraft: [],
-      featuredPickerSelection: [],
-      syncingFeaturedPickerSelection: false,
-      featuredPickerSearch: {
-        goodsName: "",
-        authStatus: "PASS",
-        pageNumber: 1,
-        pageSize: 20,
-      },
+defineOptions({ name: "distributionSetting" });
+
+const formRef = ref(null);
+const featuredPickerTable = ref(null);
+
+const activeTab = ref("base");
+const saving = reactive({
+  base: false,
+  customer: false,
+  settlement: false,
+  featured: false,
+  poster: false,
+  inviteCard: false,
+});
+const form = ref({ ...DEFAULT_FORM });
+const formRule = reactive({
+  isOpen: [regular.REQUIRED],
+  distributorName: [regular.REQUIRED, regular.VARCHAR20],
+});
+const customerForm = ref({
+  bindMode: "SHORT_TERM",
+  permanentBindMode: "PAID_WITHIN_DAYS",
+  permanentPaidDays: 1,
+  shortTermBindDays: 7,
+});
+const settlementForm = ref({
+  selfPurchaseCommissionMode: "SELF",
+});
+const posterForm = ref({ ...DEFAULT_POSTER_FORM });
+const inviteCardForm = ref({ ...DEFAULT_INVITE_CARD_FORM });
+const featuredForm = ref({ ...DEFAULT_FEATURED_FORM });
+const defaultSortOptions = ref(DEFAULT_SORT_OPTIONS);
+const featuredCustomGoods = ref([]);
+const featuredPickerVisible = ref(false);
+const featuredPickerLoading = ref(false);
+const featuredPickerList = ref([]);
+const featuredPickerTotal = ref(0);
+const featuredPickerDraft = ref([]);
+const featuredPickerSelection = ref([]);
+const syncingFeaturedPickerSelection = ref(false);
+const featuredPickerSearch = reactive({
+  goodsName: "",
+  authStatus: "PASS",
+  pageNumber: 1,
+  pageSize: 20,
+});
+
+const featuredGoodsLimit = computed(() => {
+  return featuredForm.value.displayCount === 10 ? 10 : 5;
+});
+const featuredGoodsOverLimit = computed(() => {
+  return featuredForm.value.sourceMode === "CUSTOM" && featuredCustomGoods.value.length > featuredGoodsLimit.value;
+});
+const featuredDisplayCountDesc = computed(() => {
+  if (featuredForm.value.sourceMode === "CUSTOM") {
+    return `最多选择 ${featuredGoodsLimit.value} 个，分销员端按顺序展示。`;
+  }
+  return `分销员端展示前 ${featuredGoodsLimit.value} 个。`;
+});
+
+watch(
+  () => customerForm.value.permanentBindMode,
+  (value) => {
+    if (value === "PAID_WITHIN_DAYS") {
+      normalizePermanentPaidDays();
+    }
+  }
+);
+
+onMounted(() => {
+  init();
+});
+
+function init() {
+  loadBaseSetting();
+  loadFeaturedSetting();
+  loadPosterSetting();
+  loadInviteCardSetting();
+  loadCustomerSetting();
+  loadSettlementSetting();
+}
+function loadBaseSetting() {
+  getSetting("DISTRIBUTION_SETTING").then((res) => {
+    if (!res.success || !res.result) {
+      return;
+    }
+    const result = res.result;
+    form.value = {
+      ...DEFAULT_FORM,
+      ...result,
+      distributorName: result.distributorName || "分销员",
+      parentAttributionMode: result.parentAttributionMode || DEFAULT_FORM.parentAttributionMode,
     };
-  },
-  computed: {
-    featuredGoodsLimit() {
-      return this.featuredForm.displayCount === 10 ? 10 : 5;
-    },
-    featuredGoodsOverLimit() {
-      return this.featuredForm.sourceMode === "CUSTOM" && this.featuredCustomGoods.length > this.featuredGoodsLimit;
-    },
-    featuredDisplayCountDesc() {
-      if (this.featuredForm.sourceMode === "CUSTOM") {
-        return `最多选择 ${this.featuredGoodsLimit} 个，分销员端按顺序展示。`;
+  });
+}
+function loadPosterSetting() {
+  getDistributionPromotionPosterSetting().then((res) => {
+    if (!res.success || !res.result) {
+      return;
+    }
+    const result = res.result;
+    posterForm.value = {
+      ...DEFAULT_POSTER_FORM,
+      memberInfoVisible: result.memberInfoVisible !== false,
+      backgroundImage: result.backgroundImage || "",
+      slogan: result.slogan || DEFAULT_POSTER_FORM.slogan,
+      textColor: result.textColor || DEFAULT_POSTER_FORM.textColor,
+    };
+  });
+}
+function submitPoster() {
+  const slogan = (posterForm.value.slogan || "").trim();
+  if (!slogan) {
+    Message.warning("请填写推荐语");
+    return;
+  }
+  saving.poster = true;
+  putDistributionPromotionPosterSetting({
+    memberInfoVisible: posterForm.value.memberInfoVisible,
+    backgroundImage: (posterForm.value.backgroundImage || "").trim(),
+    slogan,
+    textColor: posterForm.value.textColor || DEFAULT_POSTER_FORM.textColor,
+  })
+    .then((res) => {
+      if (res.success) {
+        Message.success("操作成功");
+        loadPosterSetting();
       }
-      return `分销员端展示前 ${this.featuredGoodsLimit} 个。`;
-    },
-  },
-  mounted() {
-    this.init();
-  },
-  watch: {
-    "customerForm.permanentBindMode"(value) {
-      if (value === "PAID_WITHIN_DAYS") {
-        this.normalizePermanentPaidDays();
+    })
+    .finally(() => {
+      saving.poster = false;
+    });
+}
+function loadInviteCardSetting() {
+  getDistributionInviteCardSetting().then((res) => {
+    if (!res.success || !res.result) {
+      return;
+    }
+    const result = res.result;
+    inviteCardForm.value = {
+      ...DEFAULT_INVITE_CARD_FORM,
+      memberInfoVisible: result.memberInfoVisible !== false,
+      backgroundImage: result.backgroundImage || "",
+      slogan: result.slogan || DEFAULT_INVITE_CARD_FORM.slogan,
+      textColor: result.textColor || DEFAULT_INVITE_CARD_FORM.textColor,
+    };
+  });
+}
+function submitInviteCard() {
+  const slogan = (inviteCardForm.value.slogan || "").trim();
+  if (!slogan) {
+    Message.warning("请填写推荐语");
+    return;
+  }
+  saving.inviteCard = true;
+  putDistributionInviteCardSetting({
+    memberInfoVisible: inviteCardForm.value.memberInfoVisible,
+    backgroundImage: (inviteCardForm.value.backgroundImage || "").trim(),
+    slogan,
+    textColor: inviteCardForm.value.textColor || DEFAULT_INVITE_CARD_FORM.textColor,
+  })
+    .then((res) => {
+      if (res.success) {
+        Message.success("操作成功");
+        loadInviteCardSetting();
       }
-    },
-  },
-  methods: {
-    init() {
-      this.loadBaseSetting();
-      this.loadFeaturedSetting();
-      this.loadPosterSetting();
-      this.loadInviteCardSetting();
-      this.loadCustomerSetting();
-      this.loadSettlementSetting();
-    },
-    loadBaseSetting() {
-      getSetting("DISTRIBUTION_SETTING").then((res) => {
-        if (!res.success || !res.result) {
-          return;
-        }
-        const result = res.result;
-        this.form = {
-          ...DEFAULT_FORM,
-          ...result,
-          distributorName: result.distributorName || "分销员",
-          parentAttributionMode: result.parentAttributionMode || DEFAULT_FORM.parentAttributionMode,
-        };
+    })
+    .finally(() => {
+      saving.inviteCard = false;
+    });
+}
+function loadFeaturedSetting() {
+  getDistributionFeaturedGoodsSetting().then((res) => {
+    if (!res.success || !res.result) {
+      return;
+    }
+    const result = res.result;
+    featuredForm.value = {
+      ...DEFAULT_FEATURED_FORM,
+      defaultSort: result.defaultSort || DEFAULT_FEATURED_FORM.defaultSort,
+      defaultShareText: result.defaultShareText || "",
+      centerVisible: !!result.centerVisible,
+      showSales: !!result.showSales,
+      sourceMode: result.sourceMode || DEFAULT_FEATURED_FORM.sourceMode,
+      matchRule: result.matchRule || DEFAULT_FEATURED_FORM.matchRule,
+      displayCount: result.displayCount === 10 ? 10 : 5,
+    };
+    featuredCustomGoods.value = Array.isArray(result.customGoods) ? [...result.customGoods] : [];
+  });
+}
+function loadCustomerSetting() {
+  getDistributionCustomerSetting().then((res) => {
+    if (res.success && res.result) {
+      customerForm.value = { ...customerForm.value, ...res.result };
+      normalizePermanentPaidDays();
+    }
+  });
+}
+function normalizePermanentPaidDays() {
+  const days = Number(customerForm.value.permanentPaidDays);
+  if (!Number.isFinite(days) || days < 1) {
+    customerForm.value.permanentPaidDays = 1;
+  } else {
+    customerForm.value.permanentPaidDays = Math.floor(days);
+  }
+}
+function onPermanentPaidDaysChange(value) {
+  if (value == null || value < 1) {
+    customerForm.value.permanentPaidDays = 1;
+  }
+}
+function loadSettlementSetting() {
+  getDistributionSettlementSetting().then((res) => {
+    if (res.success && res.result) {
+      settlementForm.value = { ...settlementForm.value, ...res.result };
+    }
+  });
+}
+function openFeaturedGoodsPicker() {
+  featuredPickerDraft.value = featuredCustomGoods.value.map((item) => ({ ...item }));
+  featuredPickerVisible.value = true;
+}
+function loadFeaturedPickerGoods() {
+  featuredPickerLoading.value = true;
+  syncingFeaturedPickerSelection.value = true;
+  getDistributionGoods({ ...featuredPickerSearch })
+    .then((res) => {
+      if (res.success) {
+        featuredPickerList.value = res.result?.records || [];
+        featuredPickerTotal.value = res.result?.total || 0;
+      }
+    })
+    .finally(() => {
+      featuredPickerLoading.value = false;
+      nextTick(() => {
+        syncFeaturedPickerSelection();
+        nextTick(() => {
+          syncingFeaturedPickerSelection.value = false;
+        });
       });
-    },
-    loadPosterSetting() {
-      getDistributionPromotionPosterSetting().then((res) => {
-        if (!res.success || !res.result) {
-          return;
-        }
-        const result = res.result;
-        this.posterForm = {
-          ...DEFAULT_POSTER_FORM,
-          memberInfoVisible: result.memberInfoVisible !== false,
-          backgroundImage: result.backgroundImage || "",
-          slogan: result.slogan || DEFAULT_POSTER_FORM.slogan,
-          textColor: result.textColor || DEFAULT_POSTER_FORM.textColor,
-        };
-      });
-    },
-    submitPoster() {
-      const slogan = (this.posterForm.slogan || "").trim();
-      if (!slogan) {
-        this.$Message.warning("请填写推荐语");
-        return;
+    });
+}
+function syncFeaturedPickerSelection() {
+  const table = featuredPickerTable.value;
+  if (!table) {
+    return;
+  }
+  const selectedSkuIds = new Set(
+    featuredPickerDraft.value.map((item) => item.skuId).filter(Boolean)
+  );
+  table.clearSelection();
+  featuredPickerList.value.forEach((row) => {
+    if (row.skuId && selectedSkuIds.has(row.skuId)) {
+      table.toggleRowSelection(row, true);
+    }
+  });
+}
+function searchFeaturedPickerGoods() {
+  featuredPickerSearch.pageNumber = 1;
+  loadFeaturedPickerGoods();
+}
+function onFeaturedPickerPageSizeChange() {
+  featuredPickerSearch.pageNumber = 1;
+  loadFeaturedPickerGoods();
+}
+function onFeaturedPickerSelectionChange(selection) {
+  if (syncingFeaturedPickerSelection.value) {
+    return;
+  }
+  const selectedSkuIds = new Set((selection || []).map((item) => item.skuId).filter(Boolean));
+  const currentPageSkuIds = new Set(featuredPickerList.value.map((item) => item.skuId).filter(Boolean));
+  const remaining = featuredPickerDraft.value.filter((item) => {
+    if (!currentPageSkuIds.has(item.skuId)) {
+      return true;
+    }
+    return selectedSkuIds.has(item.skuId);
+  });
+  const remainingSkuIds = new Set(remaining.map((item) => item.skuId));
+  const added = [];
+  (selection || []).forEach((item) => {
+    if (!item.skuId || remainingSkuIds.has(item.skuId)) {
+      return;
+    }
+    remainingSkuIds.add(item.skuId);
+    added.push(toFeaturedGoodsItem(item));
+  });
+  featuredPickerDraft.value = [...remaining, ...added];
+  featuredPickerSelection.value = selection || [];
+}
+function toFeaturedGoodsItem(item) {
+  return {
+    id: item.id,
+    goodsId: item.goodsId,
+    skuId: item.skuId,
+    goodsName: item.goodsName,
+    specs: item.specs,
+    thumbnail: item.thumbnail,
+    price: item.price,
+    commission: item.commission,
+    storeName: item.storeName,
+  };
+}
+function featuredGoodsLimitMessage() {
+  const limit = featuredGoodsLimit.value;
+  return `主推商品数量为${limit}时，最多选择${limit}个自定义商品`;
+}
+function confirmFeaturedPicker() {
+  const next = featuredPickerDraft.value.filter((item) => item.skuId);
+  if (!next.length) {
+    Message.warning("请至少选择一个分销商品");
+    return;
+  }
+  const limit = featuredGoodsLimit.value;
+  if (next.length > limit) {
+    Message.warning(featuredGoodsLimitMessage());
+    return;
+  }
+  featuredCustomGoods.value = next;
+  featuredPickerVisible.value = false;
+  featuredPickerSelection.value = [];
+}
+function removeFeaturedGoods(index) {
+  featuredCustomGoods.value.splice(index, 1);
+}
+function buildFeaturedPayload() {
+  return {
+    defaultSort: featuredForm.value.defaultSort,
+    defaultShareText: (featuredForm.value.defaultShareText || "").trim(),
+    centerVisible: featuredForm.value.centerVisible,
+    showSales: featuredForm.value.showSales,
+    sourceMode: featuredForm.value.sourceMode,
+    matchRule: featuredForm.value.matchRule,
+    displayCount: featuredForm.value.displayCount === 10 ? 10 : 5,
+    skuIds:
+      featuredForm.value.sourceMode === "CUSTOM"
+        ? featuredCustomGoods.value.map((item) => item.skuId).filter(Boolean)
+        : undefined,
+  };
+}
+function submitFeatured() {
+  if (featuredForm.value.sourceMode === "CUSTOM" && !featuredCustomGoods.value.length) {
+    Message.warning("请至少选择一个自定义主推商品");
+    return;
+  }
+  if (featuredGoodsOverLimit.value) {
+    Message.warning(featuredGoodsLimitMessage());
+    return;
+  }
+  saving.featured = true;
+  putDistributionFeaturedGoodsSetting(buildFeaturedPayload())
+    .then((res) => {
+      if (res.success) {
+        Message.success("操作成功");
+        loadFeaturedSetting();
       }
-      this.saving.poster = true;
-      putDistributionPromotionPosterSetting({
-        memberInfoVisible: this.posterForm.memberInfoVisible,
-        backgroundImage: (this.posterForm.backgroundImage || "").trim(),
-        slogan,
-        textColor: this.posterForm.textColor || DEFAULT_POSTER_FORM.textColor,
+    })
+    .finally(() => {
+      saving.featured = false;
+    });
+}
+function buildBasePayload() {
+  return {
+    isOpen: form.value.isOpen,
+    distributorName: (form.value.distributorName || "分销员").trim(),
+    upgradeConditionVisible: form.value.upgradeConditionVisible,
+    parentDistributorVisible: form.value.parentDistributorVisible,
+    parentAttributionMode: form.value.parentAttributionMode,
+  };
+}
+function submitBase() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    saving.base = true;
+    setSetting("DISTRIBUTION_SETTING", buildBasePayload())
+      .then((res) => {
+        if (res.success) {
+          Message.success("操作成功");
+          loadBaseSetting();
+        }
       })
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.loadPosterSetting();
-          }
-        })
-        .finally(() => {
-          this.saving.poster = false;
-        });
-    },
-    loadInviteCardSetting() {
-      getDistributionInviteCardSetting().then((res) => {
-        if (!res.success || !res.result) {
-          return;
-        }
-        const result = res.result;
-        this.inviteCardForm = {
-          ...DEFAULT_INVITE_CARD_FORM,
-          memberInfoVisible: result.memberInfoVisible !== false,
-          backgroundImage: result.backgroundImage || "",
-          slogan: result.slogan || DEFAULT_INVITE_CARD_FORM.slogan,
-          textColor: result.textColor || DEFAULT_INVITE_CARD_FORM.textColor,
-        };
+      .finally(() => {
+        saving.base = false;
       });
-    },
-    submitInviteCard() {
-      const slogan = (this.inviteCardForm.slogan || "").trim();
-      if (!slogan) {
-        this.$Message.warning("请填写推荐语");
-        return;
+  });
+}
+function submitCustomer() {
+  normalizePermanentPaidDays();
+  if (
+    customerForm.value.bindMode === "PERMANENT" &&
+    customerForm.value.permanentBindMode === "PAID_WITHIN_DAYS" &&
+    customerForm.value.permanentPaidDays < 1
+  ) {
+    Message.warning("永久锁客支付天数不能低于1天");
+    return;
+  }
+  saving.customer = true;
+  putDistributionCustomerSetting(customerForm.value)
+    .then((res) => {
+      if (res.success) {
+        Message.success("操作成功");
+        loadCustomerSetting();
       }
-      this.saving.inviteCard = true;
-      putDistributionInviteCardSetting({
-        memberInfoVisible: this.inviteCardForm.memberInfoVisible,
-        backgroundImage: (this.inviteCardForm.backgroundImage || "").trim(),
-        slogan,
-        textColor: this.inviteCardForm.textColor || DEFAULT_INVITE_CARD_FORM.textColor,
-      })
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.loadInviteCardSetting();
-          }
-        })
-        .finally(() => {
-          this.saving.inviteCard = false;
-        });
-    },
-    loadFeaturedSetting() {
-      getDistributionFeaturedGoodsSetting().then((res) => {
-        if (!res.success || !res.result) {
-          return;
-        }
-        const result = res.result;
-        this.featuredForm = {
-          ...DEFAULT_FEATURED_FORM,
-          defaultSort: result.defaultSort || DEFAULT_FEATURED_FORM.defaultSort,
-          defaultShareText: result.defaultShareText || "",
-          centerVisible: !!result.centerVisible,
-          showSales: !!result.showSales,
-          sourceMode: result.sourceMode || DEFAULT_FEATURED_FORM.sourceMode,
-          matchRule: result.matchRule || DEFAULT_FEATURED_FORM.matchRule,
-          displayCount: result.displayCount === 10 ? 10 : 5,
-        };
-        this.featuredCustomGoods = Array.isArray(result.customGoods) ? [...result.customGoods] : [];
-      });
-    },
-    loadCustomerSetting() {
-      getDistributionCustomerSetting().then((res) => {
-        if (res.success && res.result) {
-          this.customerForm = { ...this.customerForm, ...res.result };
-          this.normalizePermanentPaidDays();
-        }
-      });
-    },
-    normalizePermanentPaidDays() {
-      const days = Number(this.customerForm.permanentPaidDays);
-      if (!Number.isFinite(days) || days < 1) {
-        this.customerForm.permanentPaidDays = 1;
-      } else {
-        this.customerForm.permanentPaidDays = Math.floor(days);
+    })
+    .finally(() => {
+      saving.customer = false;
+    });
+}
+function submitSettlement() {
+  saving.settlement = true;
+  putDistributionSettlementSetting(settlementForm.value)
+    .then((res) => {
+      if (res.success) {
+        Message.success("操作成功");
+        loadSettlementSetting();
       }
-    },
-    onPermanentPaidDaysChange(value) {
-      if (value == null || value < 1) {
-        this.customerForm.permanentPaidDays = 1;
-      }
-    },
-    loadSettlementSetting() {
-      getDistributionSettlementSetting().then((res) => {
-        if (res.success && res.result) {
-          this.settlementForm = { ...this.settlementForm, ...res.result };
-        }
-      });
-    },
-    openFeaturedGoodsPicker() {
-      this.featuredPickerDraft = this.featuredCustomGoods.map((item) => ({ ...item }));
-      this.featuredPickerVisible = true;
-    },
-    loadFeaturedPickerGoods() {
-      this.featuredPickerLoading = true;
-      this.syncingFeaturedPickerSelection = true;
-      getDistributionGoods({ ...this.featuredPickerSearch })
-        .then((res) => {
-          if (res.success) {
-            this.featuredPickerList = res.result?.records || [];
-            this.featuredPickerTotal = res.result?.total || 0;
-          }
-        })
-        .finally(() => {
-          this.featuredPickerLoading = false;
-          this.$nextTick(() => {
-            this.syncFeaturedPickerSelection();
-            this.$nextTick(() => {
-              this.syncingFeaturedPickerSelection = false;
-            });
-          });
-        });
-    },
-    syncFeaturedPickerSelection() {
-      const table = this.$refs.featuredPickerTable;
-      if (!table) {
-        return;
-      }
-      const selectedSkuIds = new Set(
-        this.featuredPickerDraft.map((item) => item.skuId).filter(Boolean)
-      );
-      table.clearSelection();
-      this.featuredPickerList.forEach((row) => {
-        if (row.skuId && selectedSkuIds.has(row.skuId)) {
-          table.toggleRowSelection(row, true);
-        }
-      });
-    },
-    searchFeaturedPickerGoods() {
-      this.featuredPickerSearch.pageNumber = 1;
-      this.loadFeaturedPickerGoods();
-    },
-    onFeaturedPickerPageSizeChange() {
-      this.featuredPickerSearch.pageNumber = 1;
-      this.loadFeaturedPickerGoods();
-    },
-    onFeaturedPickerSelectionChange(selection) {
-      if (this.syncingFeaturedPickerSelection) {
-        return;
-      }
-      const selectedSkuIds = new Set((selection || []).map((item) => item.skuId).filter(Boolean));
-      const currentPageSkuIds = new Set(this.featuredPickerList.map((item) => item.skuId).filter(Boolean));
-      const remaining = this.featuredPickerDraft.filter((item) => {
-        if (!currentPageSkuIds.has(item.skuId)) {
-          return true;
-        }
-        return selectedSkuIds.has(item.skuId);
-      });
-      const remainingSkuIds = new Set(remaining.map((item) => item.skuId));
-      const added = [];
-      (selection || []).forEach((item) => {
-        if (!item.skuId || remainingSkuIds.has(item.skuId)) {
-          return;
-        }
-        remainingSkuIds.add(item.skuId);
-        added.push(this.toFeaturedGoodsItem(item));
-      });
-      this.featuredPickerDraft = [...remaining, ...added];
-      this.featuredPickerSelection = selection || [];
-    },
-    toFeaturedGoodsItem(item) {
-      return {
-        id: item.id,
-        goodsId: item.goodsId,
-        skuId: item.skuId,
-        goodsName: item.goodsName,
-        specs: item.specs,
-        thumbnail: item.thumbnail,
-        price: item.price,
-        commission: item.commission,
-        storeName: item.storeName,
-      };
-    },
-    featuredGoodsLimitMessage() {
-      const limit = this.featuredGoodsLimit;
-      return `主推商品数量为${limit}时，最多选择${limit}个自定义商品`;
-    },
-    confirmFeaturedPicker() {
-      const next = this.featuredPickerDraft.filter((item) => item.skuId);
-      if (!next.length) {
-        this.$Message.warning("请至少选择一个分销商品");
-        return;
-      }
-      const limit = this.featuredGoodsLimit;
-      if (next.length > limit) {
-        this.$Message.warning(this.featuredGoodsLimitMessage());
-        return;
-      }
-      this.featuredCustomGoods = next;
-      this.featuredPickerVisible = false;
-      this.featuredPickerSelection = [];
-    },
-    removeFeaturedGoods(index) {
-      this.featuredCustomGoods.splice(index, 1);
-    },
-    buildFeaturedPayload() {
-      return {
-        defaultSort: this.featuredForm.defaultSort,
-        defaultShareText: (this.featuredForm.defaultShareText || "").trim(),
-        centerVisible: this.featuredForm.centerVisible,
-        showSales: this.featuredForm.showSales,
-        sourceMode: this.featuredForm.sourceMode,
-        matchRule: this.featuredForm.matchRule,
-        displayCount: this.featuredForm.displayCount === 10 ? 10 : 5,
-        skuIds:
-          this.featuredForm.sourceMode === "CUSTOM"
-            ? this.featuredCustomGoods.map((item) => item.skuId).filter(Boolean)
-            : undefined,
-      };
-    },
-    submitFeatured() {
-      if (this.featuredForm.sourceMode === "CUSTOM" && !this.featuredCustomGoods.length) {
-        this.$Message.warning("请至少选择一个自定义主推商品");
-        return;
-      }
-      if (this.featuredGoodsOverLimit) {
-        this.$Message.warning(this.featuredGoodsLimitMessage());
-        return;
-      }
-      this.saving.featured = true;
-      putDistributionFeaturedGoodsSetting(this.buildFeaturedPayload())
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.loadFeaturedSetting();
-          }
-        })
-        .finally(() => {
-          this.saving.featured = false;
-        });
-    },
-    buildBasePayload() {
-      return {
-        isOpen: this.form.isOpen,
-        distributorName: (this.form.distributorName || "分销员").trim(),
-        upgradeConditionVisible: this.form.upgradeConditionVisible,
-        parentDistributorVisible: this.form.parentDistributorVisible,
-        parentAttributionMode: this.form.parentAttributionMode,
-      };
-    },
-    submitBase() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.saving.base = true;
-        setSetting("DISTRIBUTION_SETTING", this.buildBasePayload())
-          .then((res) => {
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.loadBaseSetting();
-            }
-          })
-          .finally(() => {
-            this.saving.base = false;
-          });
-      });
-    },
-    submitCustomer() {
-      this.normalizePermanentPaidDays();
-      if (
-        this.customerForm.bindMode === "PERMANENT" &&
-        this.customerForm.permanentBindMode === "PAID_WITHIN_DAYS" &&
-        this.customerForm.permanentPaidDays < 1
-      ) {
-        this.$Message.warning("永久锁客支付天数不能低于1天");
-        return;
-      }
-      this.saving.customer = true;
-      putDistributionCustomerSetting(this.customerForm)
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.loadCustomerSetting();
-          }
-        })
-        .finally(() => {
-          this.saving.customer = false;
-        });
-    },
-    submitSettlement() {
-      this.saving.settlement = true;
-      putDistributionSettlementSetting(this.settlementForm)
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.loadSettlementSetting();
-          }
-        })
-        .finally(() => {
-          this.saving.settlement = false;
-        });
-    },
-  },
-};
+    })
+    .finally(() => {
+      saving.settlement = false;
+    });
+}
 </script>
 
 <style scoped lang="scss">

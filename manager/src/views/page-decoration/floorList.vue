@@ -82,159 +82,162 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import * as API_floor from "@/api/other.js";
-export default {
-  name: "floorList",
-  data() {
-    return {
-      showModal: false,
-      total: 0,
-      formData: {
-        status: false,
-        name: "",
-      },
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        pageType: "INDEX",
-        pageClientType: "PC",
-      },
-      loading: false,
-      pageTypes: [
-        { type: "INDEX", title: "首页" },
-        { type: "SPECIAL", title: "专题" },
-      ],
-      list: [],
-    };
-  },
-  mounted() {
-    this.getTemplateList();
-  },
-  methods: {
-    newTemplate() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          const data = this.formData;
-          data.status ? (data.pageShow = "OPEN") : (data.pageShow = "CLOSE");
-          delete data.status;
-          (data.pageType = this.searchForm.pageType),
-            (data.pageClientType = "PC");
-          if (data.id) {
-            API_floor.updateHome(data.id, data).then((res) => {
-              this.$Message.success("编辑模板成功");
-              this.showModal = false;
-              this.getTemplateList();
-            });
-          } else {
-            API_floor.setHomeSetup(data).then((res) => {
-              this.$Message.success("新建模板成功");
-              this.showModal = false;
-              this.getTemplateList();
-            });
-          }
-        } else {
-          this.loading = false;
-        }
-      });
-    },
+import { Message, Modal } from "@/utils/message";
 
-    handleTabChange(type) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageType = type;
-      this.getTemplateList();
-    },
+defineOptions({ name: "floorList" });
 
-    createTemp() {
-      this.$refs.form?.resetFields();
-      this.formData = { status: false, name: "" };
-      this.showModal = true;
-    },
+const router = useRouter();
 
-    Template(item) {
-      item.status = item.pageShow;
-      this.formData = { ...item };
-      this.showModal = true;
-    },
+const showModal = ref(false);
+const total = ref(0);
+const formData = ref({
+  status: false,
+  name: "",
+});
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  pageType: "INDEX",
+  pageClientType: "PC",
+});
+const loading = ref(false);
+const pageTypes = ref([
+  { type: "INDEX", title: "首页" },
+  { type: "SPECIAL", title: "专题" },
+]);
+const list = ref([]);
 
-    decorate(val) {
-      const data = { id: val.id, pageShow: val.pageShow, pageType: this.searchForm.pageType };
+const form = ref(null);
 
-      this.$router.push({
-        name: "renovation",
-        query: data,
-      });
-    },
+onMounted(() => {
+  getTemplateList();
+});
 
-    changePageNum(val) {
-      this.searchForm.pageNumber = val;
-      this.getTemplateList();
-    },
-    changePageSize(val) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = val;
-      this.getTemplateList();
-    },
-    getTemplateList() {
-      this.loading = true;
-      API_floor.getHomeList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.total = res.result.total;
-          this.list = res.result.records;
-          this.list.forEach((e) => {
-            if (e.pageShow === "OPEN") {
-              e.pageShow = true;
-            } else {
-              e.pageShow = false;
-            }
-          });
-        }
-      });
-    },
-
-    beforeRelease(row) {
-      if (row.pageShow) {
-        this.$Message.warning(
-          this.total === 1
-            ? "当前为唯一页面，无法关闭"
-            : "请直接开启其他页面，当前页面会自动关闭"
-        );
-        return false;
-      }
-      return new Promise((resolve, reject) => {
-        API_floor.releasePageHome(row.id).then((res) => {
-          if (res && res.success) {
-            this.$Message.success("发布模板成功");
-            resolve(true);
-            this.getTemplateList();
-          } else {
-            reject(new Error("release failed"));
-          }
-        }).catch(() => {
-          reject(new Error("release failed"));
+function newTemplate() {
+  form.value.validate((valid) => {
+    if (valid) {
+      const data = formData.value;
+      data.status ? (data.pageShow = "OPEN") : (data.pageShow = "CLOSE");
+      delete data.status;
+      (data.pageType = searchForm.pageType),
+        (data.pageClientType = "PC");
+      if (data.id) {
+        API_floor.updateHome(data.id, data).then((res) => {
+          Message.success("编辑模板成功");
+          showModal.value = false;
+          getTemplateList();
         });
-      });
-    },
-    confirmDel(id) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "删除此模板？",
-        onOk: () => this.delTemplate(id),
-      });
-    },
-    delTemplate(id) {
-      API_floor.removePageHome(id).then((res) => {
-        if (res.success) {
-          this.$Message.success("删除模板成功");
-          this.getTemplateList();
+      } else {
+        API_floor.setHomeSetup(data).then((res) => {
+          Message.success("新建模板成功");
+          showModal.value = false;
+          getTemplateList();
+        });
+      }
+    } else {
+      loading.value = false;
+    }
+  });
+}
+
+function handleTabChange(type) {
+  searchForm.pageNumber = 1;
+  searchForm.pageType = type;
+  getTemplateList();
+}
+
+function createTemp() {
+  form.value?.resetFields();
+  formData.value = { status: false, name: "" };
+  showModal.value = true;
+}
+
+function Template(item) {
+  item.status = item.pageShow;
+  formData.value = { ...item };
+  showModal.value = true;
+}
+
+function decorate(val) {
+  const data = { id: val.id, pageShow: val.pageShow, pageType: searchForm.pageType };
+
+  router.push({
+    name: "renovation",
+    query: data,
+  });
+}
+
+function changePageNum(val) {
+  searchForm.pageNumber = val;
+  getTemplateList();
+}
+function changePageSize(val) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = val;
+  getTemplateList();
+}
+function getTemplateList() {
+  loading.value = true;
+  API_floor.getHomeList(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      total.value = res.result.total;
+      list.value = res.result.records;
+      list.value.forEach((e) => {
+        if (e.pageShow === "OPEN") {
+          e.pageShow = true;
+        } else {
+          e.pageShow = false;
         }
       });
-    },
-  },
-};
+    }
+  });
+}
+
+function beforeRelease(row) {
+  if (row.pageShow) {
+    Message.warning(
+      total.value === 1
+        ? "当前为唯一页面，无法关闭"
+        : "请直接开启其他页面，当前页面会自动关闭"
+    );
+    return false;
+  }
+  return new Promise((resolve, reject) => {
+    API_floor.releasePageHome(row.id).then((res) => {
+      if (res && res.success) {
+        Message.success("发布模板成功");
+        resolve(true);
+        getTemplateList();
+      } else {
+        reject(new Error("release failed"));
+      }
+    }).catch(() => {
+      reject(new Error("release failed"));
+    });
+  });
+}
+function confirmDel(id) {
+  Modal.confirm({
+    title: "提示",
+    content: "删除此模板？",
+    onOk: () => delTemplate(id),
+  });
+}
+function delTemplate(id) {
+  API_floor.removePageHome(id).then((res) => {
+    if (res.success) {
+      Message.success("删除模板成功");
+      getTemplateList();
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

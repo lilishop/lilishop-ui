@@ -1,8 +1,8 @@
 import { createApp } from "vue";
+import { createPinia } from "pinia";
 import "./styles/theme.less";
 import App from "./App.vue";
 import { router } from "./router/index";
-import store from "./store";
 import { setupElementPlus } from "@/plugins/element";
 import { setupLegacyMessage } from "@/utils/message";
 import liliDialog from "@/views/lili-dialog";
@@ -50,7 +50,7 @@ app.use(VueLazyload, {
 });
 
 app.use(router);
-app.use(store);
+app.use(createPinia());
 
 app.component("liliDialog", liliDialog);
 app.component("priceColorScheme", PriceColorScheme);

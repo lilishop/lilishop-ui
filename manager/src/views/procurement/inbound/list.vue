@@ -39,45 +39,43 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getProcurementInboundPage } from "@/api/procurement";
 import { formatMoney } from "../constants";
 
-export default {
-  name: "manager-procurement-inbound-list",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      searchForm: { pageNumber: 1, pageSize: 10, inboundSn: "" },
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    formatMoney,
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getProcurementInboundPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    goDetail(row) {
-      this.$router.push({ name: "manager-procurement-inbound-detail", query: { id: row.id } });
-    },
-  },
-};
+defineOptions({ name: "manager-procurement-inbound-list" });
+
+const router = useRouter();
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const searchForm = reactive({ pageNumber: 1, pageSize: 10, inboundSn: "" });
+
+onMounted(() => {
+  getDataList();
+});
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getProcurementInboundPage(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function goDetail(row) {
+  router.push({ name: "manager-procurement-inbound-detail", query: { id: row.id } });
+}
 </script>

@@ -1,7 +1,7 @@
 import { createApp, h } from "vue";
 import UserCardDetail from "./UserCardDetail";
 import router from "@/router";
-import store from "@/store";
+import { createPinia } from "pinia";
 import { setupElementPlus } from "@/plugins/element";
 import { setupLegacyMessage } from "@/utils/message";
 import { registerDirectives } from "@/core/directives";
@@ -35,7 +35,7 @@ export default {
       cardApp.component("legacy-el-icon", LegacyElIcon);
       cardApp.config.globalProperties.$legacyIcon = resolveLegacyIcon;
       cardApp.use(router);
-      cardApp.use(store);
+      cardApp.use(createPinia());
       cardApp.mount(container);
     }
 

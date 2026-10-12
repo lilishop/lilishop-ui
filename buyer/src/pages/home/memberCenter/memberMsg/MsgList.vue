@@ -47,85 +47,85 @@
     </UserCenterLayout>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
 import {memberMsgList, readMemberMsg, delMemberMsg} from '@/api/member.js'
-export default {
-  data() {
-    return {
-      messageData: {},
-      status: ['未读', '已读', '回收站'],
-      params: {
-        pageNumber: 1,
-        pageSize: 20,
-        status: 'UN_READY'
-      },
-    }
-  },
-  computed: {
-    activeStatusIndex () {
-      const map = ['UN_READY', 'ALREADY_READY', 'ALREADY_REMOVE'];
-      const index = map.indexOf(this.params.status);
-      return index > -1 ? index : 0;
-    }
-  },
-  methods: {
-    statusChange (index) {
-      if (index === 0) { this.params.status = 'UN_READY' }
-      if (index === 1) { this.params.status = 'ALREADY_READY' }
-      if (index === 2) { this.params.status = 'ALREADY_REMOVE' }
-      this.params.pageNumber = 1
-      this.getList()
-    },
-    changePage (v) {
-      this.params.pageNumber = v;
-      this.getList();
-    },
-    changePageSize (v) {
-      this.params.pageNumber = 1
-      this.params.pageSize = v;
-      this.getList();
-    },
-    openDetail (row) {
-      sessionStorage.setItem('buyer-member-message', JSON.stringify(row))
-      this.$router.push({ name: 'MsgDetail', query: { id: row.id } })
-    },
-    getList () {
-      memberMsgList(this.params).then(res => {
-        if (res.success) {
-          this.messageData = res.result;
-          if (this.params.status === 'UN_READY') {
-            this.$store.commit('SET_UNREAD_MSG', Number(res.result.total) || 0);
-          }
-        }
-      })
-    },
-    setRead (id) {
-      readMemberMsg(id).then(res => {
-        if (res.success) {
-          this.getList()
-        }
-      })
-    },
-    removeMessage (id) {
-      Modal.confirm({
-        title: '确认删除',
-        content: '确认要删除此消息?',
-        loading: true,
-        onOk: () =>
-          delMemberMsg(id).then((res) => {
-            if (res.success) {
-              Message.success('消息已成功放入回收站');
-              this.getList();
-            }
-          }),
-      });
-    }
-  },
-  mounted () {
-    this.getList()
-  }
+import { useAppStore } from "@/stores/app";
+
+const router = useRouter();
+const appStore = useAppStore();
+
+const messageData = ref({});
+const status = ref(['未读', '已读', '回收站']);
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  status: 'UN_READY'
+});
+
+const activeStatusIndex = computed(() => {
+  const map = ['UN_READY', 'ALREADY_READY', 'ALREADY_REMOVE'];
+  const index = map.indexOf(params.status);
+  return index > -1 ? index : 0;
+});
+
+function statusChange (index) {
+  if (index === 0) { params.status = 'UN_READY' }
+  if (index === 1) { params.status = 'ALREADY_READY' }
+  if (index === 2) { params.status = 'ALREADY_REMOVE' }
+  params.pageNumber = 1
+  getList()
 }
+function changePage (v) {
+  params.pageNumber = v;
+  getList();
+}
+function changePageSize (v) {
+  params.pageNumber = 1
+  params.pageSize = v;
+  getList();
+}
+function openDetail (row) {
+  sessionStorage.setItem('buyer-member-message', JSON.stringify(row))
+  router.push({ name: 'MsgDetail', query: { id: row.id } })
+}
+function getList () {
+  memberMsgList(params).then(res => {
+    if (res.success) {
+      messageData.value = res.result;
+      if (params.status === 'UN_READY') {
+        appStore.setUnreadMsg(Number(res.result.total) || 0);
+      }
+    }
+  })
+}
+function setRead (id) {
+  readMemberMsg(id).then(res => {
+    if (res.success) {
+      getList()
+    }
+  })
+}
+function removeMessage (id) {
+  Modal.confirm({
+    title: '确认删除',
+    content: '确认要删除此消息?',
+    loading: true,
+    onOk: () =>
+      delMemberMsg(id).then((res) => {
+        if (res.success) {
+          Message.success('消息已成功放入回收站');
+          getList();
+        }
+      }),
+  });
+}
+
+onMounted(() => {
+  getList()
+})
 </script>
 <style lang="scss" scoped>
 .msg-table {

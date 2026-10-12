@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <el-card>
-      <el-form ref="form" :model="form" :rules="formRule" label-width="120px">
+      <el-form ref="formRef" :model="form" :rules="formRule" label-width="120px">
         <div class="base-info-item">
           <div class="form-item-view">
             <el-form-item style="width: 100%">
@@ -115,164 +115,174 @@
         </div>
       </el-form>
     </el-card>
-    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
+    <sku-select ref="skuSelectRef" @selectedGoodsData="selectedGoodsData"></sku-select>
   </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { addPointsGoods, getPointsGoodsCategoryList } from "@/api/promotion";
 import skuSelect from "@/components/lili-dialog";
 import { isECoupon, goodsTypeLabel } from "@/constants/goodsType";
+import { Message, Modal } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "addPoinsGoods",
-  components: {
-    skuSelect,
-  },
-  data() {
-    return {
-      form: {
-        rangeTime: null,
-        promotionGoodsList: [],
-      },
-      showTable: true,
-      promotionGoodsList: [],
-      categoryList: [],
-      submitLoading: false,
-      selectedGoods: [],
-      formRule: {
-        rangeTime: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!value || !Array.isArray(value) || value.length < 2 || !value[0] || !value[1]) {
-                callback(new Error("请选择活动时间"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "change",
-          },
-        ],
-      },
-      options: {
-        disabledDate(date) {
-          return date && date.valueOf() < Date.now() - 86400000;
-        },
-      },
-    };
-  },
-  async mounted() {
-    await this.getCategory();
-  },
-  methods: {
-    goodsTypeLabel,
-    async getCategory() {
-      let res = await getPointsGoodsCategoryList();
-      this.categoryList = res.result.records;
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        let params = this.promotionGoodsList;
-        if (!params || params.length === 0) {
-          this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
-          return;
-        }
-        for (const row of params) {
-          const stock = Number(row.quantity) || 0;
-          if (isECoupon(row.goodsType) && Number(row.activeStock) > stock) {
-            this.$Message.error(`【${row.goodsName}】活动库存不能超过卡池库存（${stock}）`);
-            return;
-          }
-        }
-        this.form.startTime = this.form.rangeTime[0];
-        this.form.endTime = this.form.rangeTime[1];
-        const start = this.$filters.unixToDate(this.form.startTime / 1000);
-        const end = this.$filters.unixToDate(this.form.endTime / 1000);
+defineOptions({ name: "addPoinsGoods" });
 
-        this.submitLoading = true;
-        params = params.map((j) => {
-          j.startTime = start;
-          j.endTime = end;
-          return j;
-        });
-        addPointsGoods(params).then((res) => {
-          this.submitLoading = false;
-          if (res.success) {
-            this.$Message.success("积分商品创建成功");
-            this.closeCurrentPage();
-          }
-        });
-      });
+const router = useRouter();
+const appStore = useAppStore();
+
+const formRef = ref(null);
+const skuSelectRef = ref(null);
+
+const form = reactive({
+  rangeTime: null,
+  promotionGoodsList: [],
+});
+const showTable = ref(true);
+const promotionGoodsList = ref([]);
+const categoryList = ref([]);
+const submitLoading = ref(false);
+const selectedGoods = ref([]);
+const formRule = {
+  rangeTime: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!value || !Array.isArray(value) || value.length < 2 || !value[0] || !value[1]) {
+          callback(new Error("请选择活动时间"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "change",
     },
-    closeCurrentPage() {
-      this.$store.commit("removeTag", "add-points-goods");
-      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
-      this.$router.go(-1);
-    },
-    changeCategory(categoryId, index) {
-      const item = this.categoryList.find((c) => c.id === categoryId);
-      this.promotionGoodsList[index].pointsGoodsCategoryName = item ? item.name : "";
-    },
-    changeSelect(e) {
-      this.selectedGoods = e;
-    },
-    delSelectGoods() {
-      if (this.selectedGoods.length <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选商品吗?",
-        onOk: () => {
-          let ids = [];
-          this.selectedGoods.forEach(function (e) {
-            ids.push(e.skuId);
-          });
-          this.promotionGoodsList = this.promotionGoodsList.filter((item) => {
-            return !ids.includes(item.skuId);
-          });
-        },
-      });
-    },
-    delGoods(index) {
-      this.promotionGoodsList.splice(index, 1);
-    },
-    openSkuList() {
-      this.$refs.skuSelect.open("goods");
-      let data = JSON.parse(JSON.stringify(this.promotionGoodsList));
-      data.forEach((e) => {
-        e.id = e.skuId;
-      });
-      this.$refs.skuSelect.goodsData = data;
-    },
-    selectedGoodsData(item) {
-      let list = [];
-      item.forEach((e) => {
-        const obj = {
-          settlementPrice: e.settlementPrice || e.price,
-          pointsGoodsCategoryId: e.pointsGoodsCategoryId || 0,
-          pointsGoodsCategoryName: e.pointsGoodsCategoryName || "",
-          activeStock: e.activeStock || 1,
-          points: e.points || 1,
-          skuId: e.id,
-          goodsId: e.goodsId,
-          originalPrice: e.price || 0,
-          thumbnail: e.thumbnail || "",
-          goodsName: e.goodsName || "",
-          quantity: e.quantity || "",
-          storeName: e.storeName || "",
-          price: e.price || "",
-          goodsType: e.goodsType,
-        };
-        list.push(obj);
-      });
-      this.promotionGoodsList = list;
-    },
+  ],
+};
+const options = {
+  disabledDate(date) {
+    return date && date.valueOf() < Date.now() - 86400000;
   },
 };
+
+onMounted(async () => {
+  await getCategory();
+});
+
+async function getCategory() {
+  let res = await getPointsGoodsCategoryList();
+  categoryList.value = res.result.records;
+}
+
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    let params = promotionGoodsList.value;
+    if (!params || params.length === 0) {
+      Modal.warning({ title: "提示", content: "请选择指定商品" });
+      return;
+    }
+    for (const row of params) {
+      const stock = Number(row.quantity) || 0;
+      if (isECoupon(row.goodsType) && Number(row.activeStock) > stock) {
+        Message.error(`【${row.goodsName}】活动库存不能超过卡池库存（${stock}）`);
+        return;
+      }
+    }
+    form.startTime = form.rangeTime[0];
+    form.endTime = form.rangeTime[1];
+    const start = unixToDate(form.startTime / 1000);
+    const end = unixToDate(form.endTime / 1000);
+
+    submitLoading.value = true;
+    params = params.map((j) => {
+      j.startTime = start;
+      j.endTime = end;
+      return j;
+    });
+    addPointsGoods(params).then((res) => {
+      submitLoading.value = false;
+      if (res.success) {
+        Message.success("积分商品创建成功");
+        closeCurrentPage();
+      }
+    });
+  });
+}
+
+function closeCurrentPage() {
+  appStore.removeTag("add-points-goods");
+  localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
+  router.go(-1);
+}
+
+function changeCategory(categoryId, index) {
+  const item = categoryList.value.find((c) => c.id === categoryId);
+  promotionGoodsList.value[index].pointsGoodsCategoryName = item ? item.name : "";
+}
+
+function changeSelect(e) {
+  selectedGoods.value = e;
+}
+
+function delSelectGoods() {
+  if (selectedGoods.value.length <= 0) {
+    Message.warning("您还未选择要删除的数据");
+    return;
+  }
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除所选商品吗?",
+    onOk: () => {
+      let ids = [];
+      selectedGoods.value.forEach(function (e) {
+        ids.push(e.skuId);
+      });
+      promotionGoodsList.value = promotionGoodsList.value.filter((item) => {
+        return !ids.includes(item.skuId);
+      });
+    },
+  });
+}
+
+function delGoods(index) {
+  promotionGoodsList.value.splice(index, 1);
+}
+
+function openSkuList() {
+  skuSelectRef.value.open("goods");
+  let data = JSON.parse(JSON.stringify(promotionGoodsList.value));
+  data.forEach((e) => {
+    e.id = e.skuId;
+  });
+  skuSelectRef.value.goodsData = data;
+}
+
+function selectedGoodsData(item) {
+  let list = [];
+  item.forEach((e) => {
+    const obj = {
+      settlementPrice: e.settlementPrice || e.price,
+      pointsGoodsCategoryId: e.pointsGoodsCategoryId || 0,
+      pointsGoodsCategoryName: e.pointsGoodsCategoryName || "",
+      activeStock: e.activeStock || 1,
+      points: e.points || 1,
+      skuId: e.id,
+      goodsId: e.goodsId,
+      originalPrice: e.price || 0,
+      thumbnail: e.thumbnail || "",
+      goodsName: e.goodsName || "",
+      quantity: e.quantity || "",
+      storeName: e.storeName || "",
+      price: e.price || "",
+      goodsType: e.goodsType,
+    };
+    list.push(obj);
+  });
+  promotionGoodsList.value = list;
+}
 </script>
 
 <style lang="scss" scoped>

@@ -6,13 +6,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { Loading } from "@element-plus/icons-vue";
 
-export default {
-  name: "circleLoading",
-  components: { Loading },
-};
+defineOptions({ name: "circleLoading" });
 </script>
 
 <style lang="scss" scoped>

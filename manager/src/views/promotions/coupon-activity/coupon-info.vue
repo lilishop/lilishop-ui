@@ -74,41 +74,45 @@
   </div>
 </template>
 
-<script>
-import { getCouponActivity } from "@/api/promotion";
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { getCouponActivity as apiGetCouponActivity } from "@/api/promotion";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "coupon-activity-info",
-  data() {
-    return {
-      id: this.$route.query.id,
-      couponActivity: {},
-      couponData: [],
-      memberData: [],
-    };
-  },
-  mounted() {
-    this.getCouponActivity();
-  },
-  methods: {
-    couponTypeText(v) {
-      if (v === "DISCOUNT") return "打折";
-      if (v === "PRICE") return "减免现金";
-      return "未知";
-    },
-    getCouponActivity() {
-      getCouponActivity(this.id).then((res) => {
-        this.couponActivity = res.result;
-        this.couponData = this.couponActivity.couponActivityItems;
-        this.memberData = JSON.parse(this.couponActivity.activityScopeInfo);
-      });
-    },
-    back() {
-      this.$store.commit("removeTag", "coupon-activity");
-      this.$router.go(-1);
-    },
-  },
-};
+defineOptions({ name: "coupon-activity-info" });
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const id = route.query.id;
+const couponActivity = ref({});
+const couponData = ref([]);
+const memberData = ref([]);
+
+onMounted(() => {
+  getCouponActivity();
+});
+
+function couponTypeText(v) {
+  if (v === "DISCOUNT") return "打折";
+  if (v === "PRICE") return "减免现金";
+  return "未知";
+}
+
+function getCouponActivity() {
+  apiGetCouponActivity(id).then((res) => {
+    couponActivity.value = res.result;
+    couponData.value = couponActivity.value.couponActivityItems;
+    memberData.value = JSON.parse(couponActivity.value.activityScopeInfo);
+  });
+}
+
+function back() {
+  appStore.removeTag("coupon-activity");
+  router.go(-1);
+}
 </script>
 
 <style lang="scss" scoped>

@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         class="search-form"
         @keyup.enter="handleSearch"
@@ -173,144 +173,147 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { auditDistributionCash, getDistributionCash } from "@/api/distribution";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "distributionCash",
-  data() {
-    return {
-      tabStatus: "",
-      applyCount: 0,
-      loading: true,
-      drawerVisible: false,
-      drawerTitle: "",
-      result: "VIA_AUDITING",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      handleStatus: "edit",
-      form: {
-        sn: "",
-        distributionId: "",
-        distributionName: "",
-        price: "",
-        name: "",
-        settlementBankAccountName: "",
-        settlementBankAccountNum: "",
-      },
-      submitLoading: false,
-      data: [],
-      total: 0,
-    };
-  },
-  computed: {
-    applyCountLabel() {
-      return this.applyCount > 0 ? `待处理(${this.applyCount})` : "待处理";
-    },
-  },
-  methods: {
-    init() {
-      this.getDataList();
-      this.loadApplyCount();
-    },
-    loadApplyCount() {
-      getDistributionCash({
-        distributionCashStatus: "APPLY",
-        pageSize: 1,
-        pageNumber: 1,
-      }).then((res) => {
-        if (res.success) {
-          this.applyCount = res.result.total || 0;
-        }
-      });
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      const params = { ...this.searchForm };
-      if (this.tabStatus) {
-        params.distributionCashStatus = this.tabStatus;
-      }
-      getDistributionCash(params).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    handleTabChange(name) {
-      this.tabStatus = name;
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSubmit() {
-      let result = this.result == "VIA_AUDITING" ? "通过" : "拒绝";
-      this.$Modal.confirm({
-        title: "确认审核",
-        content: "您确认要审核" + result + "么?",
-        loading: true,
-        onOk: () => {
-          auditDistributionCash(this.form.id, { result: this.result }).then((res) => {
-            if (res.success) {
-              this.$Modal.remove();
-              this.$Message.success("审核成功");
-              this.drawerVisible = false;
-              this.getDataList();
-              this.loadApplyCount();
-            } else {
-              this.$Modal.remove();
-            }
-          });
-        },
-      });
-    },
-    edit(v) {
-      this.drawerTitle = "审核";
-      this.handleStatus = "edit";
-      this.result = "VIA_AUDITING";
-      const data = {};
-      for (let attr in v) {
-        data[attr] = v[attr] === null ? "" : v[attr];
-      }
-      this.form = data;
-      this.drawerVisible = true;
-    },
-    view(v) {
-      this.drawerTitle = "查看";
-      this.handleStatus = "view";
-      const data = {};
-      for (let attr in v) {
-        data[attr] = v[attr] === null ? "" : v[attr];
-      }
-      this.form = data;
-      this.drawerVisible = true;
-    },
-  },
-  mounted() {
-    // 处理路由参数，自动跳转到指定标签页
-    const tabStatus = this.$route.query.tabStatus;
-    if (tabStatus) {
-      this.tabStatus = tabStatus;
+defineOptions({ name: "distributionCash" });
+
+const route = useRoute();
+
+// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
+const searchFormRef = ref(null);
+const table = ref(null);
+
+const tabStatus = ref("");
+const applyCount = ref(0);
+const loading = ref(true);
+const drawerVisible = ref(false);
+const drawerTitle = ref("");
+const result = ref("VIA_AUDITING");
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const handleStatus = ref("edit");
+const form = ref({
+  sn: "",
+  distributionId: "",
+  distributionName: "",
+  price: "",
+  name: "",
+  settlementBankAccountName: "",
+  settlementBankAccountNum: "",
+});
+const submitLoading = ref(false);
+const data = ref([]);
+const total = ref(0);
+
+const applyCountLabel = computed(() => {
+  return applyCount.value > 0 ? `待处理(${applyCount.value})` : "待处理";
+});
+
+function init() {
+  getDataList();
+  loadApplyCount();
+}
+function loadApplyCount() {
+  getDistributionCash({
+    distributionCashStatus: "APPLY",
+    pageSize: 1,
+    pageNumber: 1,
+  }).then((res) => {
+    if (res.success) {
+      applyCount.value = res.result.total || 0;
     }
-    this.init();
-  },
-};
+  });
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  const params = { ...searchForm.value };
+  if (tabStatus.value) {
+    params.distributionCashStatus = tabStatus.value;
+  }
+  getDistributionCash(params).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function handleTabChange(name) {
+  tabStatus.value = name;
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleSubmit() {
+  let resultText = result.value == "VIA_AUDITING" ? "通过" : "拒绝";
+  Modal.confirm({
+    title: "确认审核",
+    content: "您确认要审核" + resultText + "么?",
+    loading: true,
+    onOk: () => {
+      auditDistributionCash(form.value.id, { result: result.value }).then((res) => {
+        if (res.success) {
+          Modal.remove();
+          Message.success("审核成功");
+          drawerVisible.value = false;
+          getDataList();
+          loadApplyCount();
+        } else {
+          Modal.remove();
+        }
+      });
+    },
+  });
+}
+function edit(v) {
+  drawerTitle.value = "审核";
+  handleStatus.value = "edit";
+  result.value = "VIA_AUDITING";
+  const formData = {};
+  for (let attr in v) {
+    formData[attr] = v[attr] === null ? "" : v[attr];
+  }
+  form.value = formData;
+  drawerVisible.value = true;
+}
+function view(v) {
+  drawerTitle.value = "查看";
+  handleStatus.value = "view";
+  const formData = {};
+  for (let attr in v) {
+    formData[attr] = v[attr] === null ? "" : v[attr];
+  }
+  form.value = formData;
+  drawerVisible.value = true;
+}
+
+onMounted(() => {
+  // 处理路由参数，自动跳转到指定标签页
+  const queryTabStatus = route.query.tabStatus;
+  if (queryTabStatus) {
+    tabStatus.value = queryTabStatus;
+  }
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .ops a {

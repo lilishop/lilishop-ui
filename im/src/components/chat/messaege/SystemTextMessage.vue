@@ -3,18 +3,14 @@
     <div class="content">{{ content }}</div>
   </div>
 </template>
-<script>
+<script setup>
 import { formatTime as sendTime } from '@/utils/functions'
 
-export default {
-  name: 'SystemTextMessage',
-  props: {
-    content: String,
-  },
-  methods: {
-    sendTime,
-  },
-}
+defineOptions({ name: 'SystemTextMessage' })
+
+defineProps({
+  content: String,
+})
 </script>
 <style lang="less" scoped>
 .system-text-message {

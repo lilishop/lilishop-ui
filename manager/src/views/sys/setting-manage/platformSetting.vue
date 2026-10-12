@@ -129,435 +129,446 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
 import { getParams, editParams } from "@/api/platform.js";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import { regular } from "@/utils";
 
-export default {
-  name: "setting-manage",
-  components: {
-    uploadPicInput,
-  },
-  data() {
-    return {
-      tabName: "base",
-      loading: false,
-      saveLoading: false,
-      base: {
-        siteName: "",
-        icp: "",
-        logo: "",
-        sellerLogo: "",
-      },
-      point: {
-        register: "",
-        login: "",
-        money: "",
-      },
-      order: {
-        autoCancel: "",
-        autoReceive: "",
-        autoComplete: "",
-      },
-      goods: {
-        goodsCheck: "OPEN",
-        smallPictureWidth: "",
-        smallPictureHeight: "",
-        abbreviationPictureWidth: "",
-        abbreviationPictureHeight: "",
-        originalPictureWidth: "",
-        originalPictureHeight: "",
-      },
-      baseValidate: {
-        siteName: [{ required: true, message: "不能为空", trigger: "blur" }],
-        icp: [{ required: true, message: "不能为空", trigger: "blur" }],
-        logo: [{ required: true, message: "不能为空", trigger: "blur" }],
-        sellerLogo: [{ required: true, message: "不能为空", trigger: "blur" }],
-      },
-      pointValidate: {
-        register: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        login: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        money: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-      },
-      orderValidate: {
-        autoCancel: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        autoReceive: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        autoComplete: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-      },
-      goodsValidate: {
-        smallPictureWidth: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        smallPictureHeight: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        abbreviationPictureWidth: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        abbreviationPictureHeight: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        originalPictureWidth: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-        originalPictureHeight: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!regular.integer.test(value)) {
-                callback(new Error("请输入正整数，且不为零！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "blur",
-          },
-        ],
-      },
-    };
-  },
-  methods: {
-    init() {
-      this.initBase();
-      this.initPoint();
-      this.initOrder();
-      this.initGoods();
-      this.initWechat();
-      this.initQQ();
-      this.initWeibo();
-      this.initAlipay();
-    },
-    initBase() {
-      this.loading = true;
-      getParams("base").then((res) => {
-        if (res.success) {
-          this.loading = false;
-          if (res.result) {
-            this.base = res.result;
-          }
-        }
-      });
-    },
-    initPoint() {
-      this.loading = true;
-      getParams("point").then((res) => {
-        if (res.success) {
-          this.loading = false;
-          if (res.result) {
-            this.point = res.result;
-          }
-        }
-      });
-    },
-    initOrder() {
-      this.loading = true;
-      getParams("order").then((res) => {
-        if (res.success) {
-          this.loading = false;
-          if (res.result) {
-            this.order = res.result;
-          }
-        }
-      });
-    },
-    initGoods() {
-      this.loading = true;
-      getParams("goods").then((res) => {
-        if (res.success) {
-          this.loading = false;
-          if (res.result) {
-            this.goods = res.result;
-          }
-        }
-      });
-    },
-    initWeibo() {
-      this.loading = true;
-      getParams("weibo").then((res) => {
-        if (res.success) {
-          this.loading = false;
-          if (res.result) {
-            this.weibo = res.result;
-          }
-        }
-      });
-    },
-    initWechat() {
-      this.loading = true;
-      getParams("wechat").then((res) => {
-        if (res.success) {
-          this.loading = false;
-          if (res.result) {
-            this.wechat = res.result;
-          }
-        }
-      });
-    },
-    initQQ() {
-      this.loading = true;
-      getParams("qq").then((res) => {
-        if (res.success) {
-          this.loading = false;
-          if (res.result) {
-            this.qq = res.result;
-          }
-        }
-      });
-    },
-    initAlipay() {
-      this.loading = true;
-      getParams("alipay").then((res) => {
-        if (res.success) {
-          this.loading = false;
-          if (res.result) {
-            this.alipay = res.result;
-          }
-        }
-      });
-    },
-    saveBase() {
-      this.$refs.baseForm.validate((valid) => {
-        if (valid) {
-          this.saveLoading = true;
-          this.base.id = "base";
-          editParams(this.base, "base").then((res) => {
-            this.saveLoading = false;
-            if (res.success) {
-              ElMessage.success("保存成功");
-            }
-          });
-        }
-      });
-    },
-    savePoint() {
-      this.$refs.pointForm.validate((valid) => {
-        if (valid) {
-          this.saveLoading = true;
-          this.point.id = "point";
-          editParams(this.point, "point").then((res) => {
-            this.saveLoading = false;
-            if (res.success) {
-              ElMessage.success("保存成功");
-            }
-          });
-        }
-      });
-    },
-    saveOrder() {
-      this.$refs.orderForm.validate((valid) => {
-        if (valid) {
-          this.saveLoading = true;
-          this.order.id = "order";
-          editParams(this.order, "order").then((res) => {
-            this.saveLoading = false;
-            if (res.success) {
-              ElMessage.success("保存成功");
-            }
-          });
-        }
-      });
-    },
-    saveGoods() {
-      this.$refs.goodsForm.validate((valid) => {
-        if (valid) {
-          this.saveLoading = true;
-          this.goods.id = "goods";
-          editParams(this.goods, "goods").then((res) => {
-            this.saveLoading = false;
-            if (res.success) {
-              ElMessage.success("保存成功");
-            }
-          });
-        }
-      });
-    },
-    saveWechat() {
-      this.$refs.wechatForm.validate((valid) => {
-        if (valid) {
-          this.saveLoading = true;
-          this.wechat.id = "wechat";
-          editParams(this.wechat, "wechat").then((res) => {
-            this.saveLoading = false;
-            if (res.success) {
-              ElMessage.success("保存成功");
-            }
-          });
-        }
-      });
-    },
-    saveQQ() {
-      this.$refs.qqForm.validate((valid) => {
-        if (valid) {
-          this.saveLoading = true;
-          this.qq.id = "qq";
-          editParams(this.qq, "qq").then((res) => {
-            this.saveLoading = false;
-            if (res.success) {
-              ElMessage.success("保存成功");
-            }
-          });
-        }
-      });
-    },
-    saveWeibo() {
-      this.$refs.wechatForm.validate((valid) => {
-        if (valid) {
-          this.saveLoading = true;
-          this.weibo.id = "weibo";
-          editParams(this.weibo, "weibo").then((res) => {
-            this.saveLoading = false;
-            if (res.success) {
-              ElMessage.success("保存成功");
-            }
-          });
-        }
-      });
-    },
-    saveAlipay() {
-      this.$refs.alipayForm.validate((valid) => {
-        if (valid) {
-          this.saveLoading = true;
-          this.alipay.id = "alipay";
-          editParams(this.alipay, "alipay").then((res) => {
-            this.saveLoading = false;
-            if (res.success) {
-              ElMessage.success("保存成功");
-            }
-          });
-        }
-      });
-    },
-  },
-  mounted() {
-    const name = this.$route.query.name;
-    if (name) {
-      this.tabName = name;
-    }
-    this.init();
-  },
+defineOptions({ name: "setting-manage" });
+
+const route = useRoute();
+
+const tabName = ref("base");
+const loading = ref(false);
+const saveLoading = ref(false);
+const base = ref({
+  siteName: "",
+  icp: "",
+  logo: "",
+  sellerLogo: "",
+});
+const point = ref({
+  register: "",
+  login: "",
+  money: "",
+});
+const order = ref({
+  autoCancel: "",
+  autoReceive: "",
+  autoComplete: "",
+});
+const goods = ref({
+  goodsCheck: "OPEN",
+  smallPictureWidth: "",
+  smallPictureHeight: "",
+  abbreviationPictureWidth: "",
+  abbreviationPictureHeight: "",
+  originalPictureWidth: "",
+  originalPictureHeight: "",
+});
+// 历史遗留：wechat/qq/weibo/alipay 未在 data 中声明，直接挂 this，且模板中无对应表单项
+let wechat;
+let qq;
+let weibo;
+let alipay;
+const baseValidate = {
+  siteName: [{ required: true, message: "不能为空", trigger: "blur" }],
+  icp: [{ required: true, message: "不能为空", trigger: "blur" }],
+  logo: [{ required: true, message: "不能为空", trigger: "blur" }],
+  sellerLogo: [{ required: true, message: "不能为空", trigger: "blur" }],
 };
+const pointValidate = {
+  register: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  login: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  money: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+};
+const orderValidate = {
+  autoCancel: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  autoReceive: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  autoComplete: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+};
+const goodsValidate = {
+  smallPictureWidth: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  smallPictureHeight: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  abbreviationPictureWidth: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  abbreviationPictureHeight: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  originalPictureWidth: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+  originalPictureHeight: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!regular.integer.test(value)) {
+          callback(new Error("请输入正整数，且不为零！"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+};
+
+const baseForm = ref(null);
+const pointForm = ref(null);
+const orderForm = ref(null);
+const goodsForm = ref(null);
+// 历史遗留：以下表单 ref 在模板中不存在，对应 save 方法也从未被模板调用
+const wechatForm = ref(null);
+const qqForm = ref(null);
+const alipayForm = ref(null);
+
+function init() {
+  initBase();
+  initPoint();
+  initOrder();
+  initGoods();
+  initWechat();
+  initQQ();
+  initWeibo();
+  initAlipay();
+}
+function initBase() {
+  loading.value = true;
+  getParams("base").then((res) => {
+    if (res.success) {
+      loading.value = false;
+      if (res.result) {
+        base.value = res.result;
+      }
+    }
+  });
+}
+function initPoint() {
+  loading.value = true;
+  getParams("point").then((res) => {
+    if (res.success) {
+      loading.value = false;
+      if (res.result) {
+        point.value = res.result;
+      }
+    }
+  });
+}
+function initOrder() {
+  loading.value = true;
+  getParams("order").then((res) => {
+    if (res.success) {
+      loading.value = false;
+      if (res.result) {
+        order.value = res.result;
+      }
+    }
+  });
+}
+function initGoods() {
+  loading.value = true;
+  getParams("goods").then((res) => {
+    if (res.success) {
+      loading.value = false;
+      if (res.result) {
+        goods.value = res.result;
+      }
+    }
+  });
+}
+function initWeibo() {
+  loading.value = true;
+  getParams("weibo").then((res) => {
+    if (res.success) {
+      loading.value = false;
+      if (res.result) {
+        weibo = res.result;
+      }
+    }
+  });
+}
+function initWechat() {
+  loading.value = true;
+  getParams("wechat").then((res) => {
+    if (res.success) {
+      loading.value = false;
+      if (res.result) {
+        wechat = res.result;
+      }
+    }
+  });
+}
+function initQQ() {
+  loading.value = true;
+  getParams("qq").then((res) => {
+    if (res.success) {
+      loading.value = false;
+      if (res.result) {
+        qq = res.result;
+      }
+    }
+  });
+}
+function initAlipay() {
+  loading.value = true;
+  getParams("alipay").then((res) => {
+    if (res.success) {
+      loading.value = false;
+      if (res.result) {
+        alipay = res.result;
+      }
+    }
+  });
+}
+function saveBase() {
+  baseForm.value.validate((valid) => {
+    if (valid) {
+      saveLoading.value = true;
+      base.value.id = "base";
+      editParams(base.value, "base").then((res) => {
+        saveLoading.value = false;
+        if (res.success) {
+          ElMessage.success("保存成功");
+        }
+      });
+    }
+  });
+}
+function savePoint() {
+  pointForm.value.validate((valid) => {
+    if (valid) {
+      saveLoading.value = true;
+      point.value.id = "point";
+      editParams(point.value, "point").then((res) => {
+        saveLoading.value = false;
+        if (res.success) {
+          ElMessage.success("保存成功");
+        }
+      });
+    }
+  });
+}
+function saveOrder() {
+  orderForm.value.validate((valid) => {
+    if (valid) {
+      saveLoading.value = true;
+      order.value.id = "order";
+      editParams(order.value, "order").then((res) => {
+        saveLoading.value = false;
+        if (res.success) {
+          ElMessage.success("保存成功");
+        }
+      });
+    }
+  });
+}
+function saveGoods() {
+  goodsForm.value.validate((valid) => {
+    if (valid) {
+      saveLoading.value = true;
+      goods.value.id = "goods";
+      editParams(goods.value, "goods").then((res) => {
+        saveLoading.value = false;
+        if (res.success) {
+          ElMessage.success("保存成功");
+        }
+      });
+    }
+  });
+}
+function saveWechat() {
+  wechatForm.value.validate((valid) => {
+    if (valid) {
+      saveLoading.value = true;
+      wechat.id = "wechat";
+      editParams(wechat, "wechat").then((res) => {
+        saveLoading.value = false;
+        if (res.success) {
+          ElMessage.success("保存成功");
+        }
+      });
+    }
+  });
+}
+function saveQQ() {
+  qqForm.value.validate((valid) => {
+    if (valid) {
+      saveLoading.value = true;
+      qq.id = "qq";
+      editParams(qq, "qq").then((res) => {
+        saveLoading.value = false;
+        if (res.success) {
+          ElMessage.success("保存成功");
+        }
+      });
+    }
+  });
+}
+function saveWeibo() {
+  // 历史遗留 bug：此处校验的是 wechatForm 而非 weiboForm，原样保留
+  wechatForm.value.validate((valid) => {
+    if (valid) {
+      saveLoading.value = true;
+      weibo.id = "weibo";
+      editParams(weibo, "weibo").then((res) => {
+        saveLoading.value = false;
+        if (res.success) {
+          ElMessage.success("保存成功");
+        }
+      });
+    }
+  });
+}
+function saveAlipay() {
+  alipayForm.value.validate((valid) => {
+    if (valid) {
+      saveLoading.value = true;
+      alipay.id = "alipay";
+      editParams(alipay, "alipay").then((res) => {
+        saveLoading.value = false;
+        if (res.success) {
+          ElMessage.success("保存成功");
+        }
+      });
+    }
+  });
+}
+
+onMounted(() => {
+  const name = route.query.name;
+  if (name) {
+    tabName.value = name;
+  }
+  init();
+});
 </script>

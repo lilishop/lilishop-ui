@@ -69,95 +69,100 @@
     </el-container>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, ref } from 'vue'
 import { ServeSendVote } from '@/api/chat'
+import { ElNotification } from '@/utils/message'
+import { useDialogueStore } from '@/stores/dialogue'
 
-export default {
+defineOptions({
   name: 'MeEditorVote',
-  props: {
-    group_id: {
-      type: [String, Number],
-      default: 0,
-    },
-  },
-  data() {
-    return {
-      loading: false,
-      mode: 0,
-      title: '',
-      options: [
-        {
-          value: '',
-        },
-        {
-          value: '',
-        },
-        {
-          value: '',
-        },
-      ],
-    }
-  },
-  computed: {
-    isCheck() {
-      if (this.title == '') return true
+})
 
-      return this.options.some(option => option.value == '')
-    },
+const props = defineProps({
+  group_id: {
+    type: [String, Number],
+    default: 0,
   },
-  methods: {
-    submit() {
-      let items = []
-      const { receiver_id } = this.$store.state.dialogue
-      this.options.forEach(option => {
-        items.push(option.value)
-      })
+})
 
-      this.loading = true
+const emit = defineEmits(['close'])
 
-      ServeSendVote({
-        receiver_id,
-        mode: this.mode,
-        title: this.title,
-        options: items,
-      })
-        .then(res => {
-          if (res.code == 200) {
-            this.$emit('close')
-            this.$notify({
-              title: '友情提示',
-              message: '发起投票成功!',
-              type: 'success',
-            })
-          } else {
-            this.$notify({
-              title: '友情提示',
-              message: res.message,
-              type: 'warning',
-            })
-          }
+const dialogueStore = useDialogueStore()
+
+const loading = ref(false)
+const mode = ref(0)
+const title = ref('')
+const options = ref([
+  {
+    value: '',
+  },
+  {
+    value: '',
+  },
+  {
+    value: '',
+  },
+])
+
+const isCheck = computed(() => {
+  if (title.value == '') return true
+
+  return options.value.some(option => option.value == '')
+})
+
+function submit() {
+  let items = []
+  const { receiver_id } = dialogueStore
+  options.value.forEach(option => {
+    items.push(option.value)
+  })
+
+  loading.value = true
+
+  ServeSendVote({
+    receiver_id,
+    mode: mode.value,
+    title: title.value,
+    options: items,
+  })
+    .then(res => {
+      if (res.code == 200) {
+        emit('close')
+        ElNotification({
+          title: '友情提示',
+          message: '发起投票成功!',
+          type: 'success',
         })
-        .catch(() => {
-          this.loading = false
+      } else {
+        ElNotification({
+          title: '友情提示',
+          message: res.message,
+          type: 'warning',
         })
-    },
-    addOption() {
-      if (this.options.length >= 6) {
-        return false
       }
+    })
+    .catch(() => {
+      loading.value = false
+    })
+}
 
-      this.options.push({
-        value: '',
-      })
-    },
-    removeOption(index) {
-      if (this.options.length <= 2) {
-        return false
-      }
+function addOption() {
+  if (options.value.length >= 6) {
+    return false
+  }
 
-      this.options.splice(index, 1)
-    },
-  },
+  options.value.push({
+    value: '',
+  })
+}
+
+function removeOption(index) {
+  if (options.value.length <= 2) {
+    return false
+  }
+
+  options.value.splice(index, 1)
 }
 </script>
 <style lang="less" scoped>

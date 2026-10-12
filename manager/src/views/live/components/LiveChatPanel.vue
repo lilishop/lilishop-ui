@@ -30,136 +30,155 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onBeforeUnmount, ref, toRef, watch } from "vue";
 import Cookies from "js-cookie";
-import { toRef } from "vue";
 import { useChat } from "../composables/useChat";
 import { resolveImConfigFromDetail } from "../composables/useLiveSetting";
 
-export default {
+defineOptions({
   name: "LiveChatPanel",
-  props: {
-    liveId: {
-      type: String,
-      required: true,
-    },
-    liveDetail: {
-      type: Object,
-      default: () => ({}),
-    },
-    active: {
-      type: Boolean,
-      default: true,
-    },
+});
+
+const props = defineProps({
+  liveId: {
+    type: String,
+    required: true,
   },
-  setup(props) {
-    let userInfo = {};
-    try {
-      userInfo = JSON.parse(Cookies.get("userInfoManager") || "{}");
-    } catch {
-      userInfo = {};
+  liveDetail: {
+    type: Object,
+    default: () => ({}),
+  },
+  active: {
+    type: Boolean,
+    default: true,
+  },
+});
+
+let userInfo = {};
+try {
+  userInfo = JSON.parse(Cookies.get("userInfoManager") || "{}");
+} catch {
+  userInfo = {};
+}
+
+const {
+  messageList,
+  chatListRef,
+  bottomAnchorRef,
+  unreadCount,
+  isLoadingHistory,
+  initError,
+  initTencentIm,
+  scrollToBottomAndClearUnread,
+  onScroll,
+  setGroupID,
+  cleanup,
+} = useChat(toRef(props, "liveId"), userInfo, toRef(props, "liveDetail"));
+
+const initializing = ref(false);
+const chatInited = ref(false);
+
+/** 腾讯云 IM 群组：优先后端字段，否则用直播间 ID（与旧版中控台一致） */
+const imGroupId = computed(() => {
+  return props.liveDetail?.imGroupId || props.liveDetail?.groupId || props.liveId || "";
+});
+const imSdkAppId = computed(() => {
+  return resolveImConfigFromDetail(props.liveDetail).sdkAppId;
+});
+const canInitChat = computed(() => {
+  const { sdkAppId, secretKey, userSig } = resolveImConfigFromDetail(props.liveDetail);
+  return !!(imGroupId.value && sdkAppId && (userSig || secretKey));
+});
+
+watch(
+  canInitChat,
+  (ready) => {
+    if (!ready) return;
+    setGroupID(imGroupId.value);
+    if (props.active) {
+      bootstrapChat();
     }
+  },
+  { immediate: true }
+);
 
-    return useChat(toRef(props, "liveId"), userInfo, toRef(props, "liveDetail"));
-  },
-  data() {
-    return {
-      initializing: false,
-      chatInited: false,
-    };
-  },
-  computed: {
-    /** 腾讯云 IM 群组：优先后端字段，否则用直播间 ID（与旧版中控台一致） */
-    imGroupId() {
-      return this.liveDetail?.imGroupId || this.liveDetail?.groupId || this.liveId || "";
-    },
-    imSdkAppId() {
-      return resolveImConfigFromDetail(this.liveDetail).sdkAppId;
-    },
-    canInitChat() {
-      const { sdkAppId, secretKey, userSig } = resolveImConfigFromDetail(this.liveDetail);
-      return !!(this.imGroupId && sdkAppId && (userSig || secretKey));
-    },
-  },
-  watch: {
-    canInitChat: {
-      immediate: true,
-      handler(ready) {
-        if (!ready) return;
-        this.setGroupID(this.imGroupId);
-        if (this.active) {
-          this.bootstrapChat();
-        }
-      },
-    },
-    imGroupId(id) {
-      if (!id) return;
-      this.setGroupID(id);
-    },
-    active(val) {
-      if (val && this.canInitChat && !this.chatInited) {
-        this.bootstrapChat();
-      }
-    },
-    liveId() {
-      this.chatInited = false;
-      this.cleanup();
-      if (this.active && this.canInitChat) {
-        this.bootstrapChat();
-      }
-    },
-    liveDetail: {
-      deep: true,
-      handler(detail, oldDetail) {
-        const nextConfig = resolveImConfigFromDetail(detail);
-        const prevConfig = resolveImConfigFromDetail(oldDetail);
-        if (
-          nextConfig.sdkAppId &&
-          (nextConfig.sdkAppId !== prevConfig.sdkAppId ||
-            nextConfig.secretKey !== prevConfig.secretKey ||
-            nextConfig.userSig !== prevConfig.userSig)
-        ) {
-          this.chatInited = false;
-          this.cleanup();
-          if (this.active && this.canInitChat) {
-            this.bootstrapChat();
-          }
-        }
-      },
-    },
-  },
-  beforeUnmount() {
-    this.cleanup();
-  },
-  methods: {
-    async bootstrapChat() {
-      if (!this.liveId || this.chatInited || this.initializing || !this.canInitChat) {
-        return;
-      }
+watch(imGroupId, (id) => {
+  if (!id) return;
+  setGroupID(id);
+});
 
-      const groupId = this.imGroupId;
-      if (!groupId) {
-        this.initError = "缺少直播间 ID，无法初始化聊天";
-        return;
-      }
-      this.setGroupID(groupId);
+watch(
+  () => props.active,
+  (val) => {
+    if (val && canInitChat.value && !chatInited.value) {
+      bootstrapChat();
+    }
+  }
+);
 
-      this.initializing = true;
-      try {
-        await this.initTencentIm();
-        if (!this.initError) {
-          this.chatInited = true;
-        }
-      } catch (error) {
-        console.error("初始化直播聊天失败:", error);
-        this.initError = "聊天初始化失败，请刷新重试";
-        this.chatInited = false;
-      } finally {
-        this.initializing = false;
+watch(
+  () => props.liveId,
+  () => {
+    chatInited.value = false;
+    cleanup();
+    if (props.active && canInitChat.value) {
+      bootstrapChat();
+    }
+  }
+);
+
+watch(
+  () => props.liveDetail,
+  (detail, oldDetail) => {
+    const nextConfig = resolveImConfigFromDetail(detail);
+    const prevConfig = resolveImConfigFromDetail(oldDetail);
+    if (
+      nextConfig.sdkAppId &&
+      (nextConfig.sdkAppId !== prevConfig.sdkAppId ||
+        nextConfig.secretKey !== prevConfig.secretKey ||
+        nextConfig.userSig !== prevConfig.userSig)
+    ) {
+      chatInited.value = false;
+      cleanup();
+      if (props.active && canInitChat.value) {
+        bootstrapChat();
       }
-    },
+    }
   },
-};
+  { deep: true }
+);
+
+onBeforeUnmount(() => {
+  cleanup();
+});
+
+async function bootstrapChat() {
+  if (!props.liveId || chatInited.value || initializing.value || !canInitChat.value) {
+    return;
+  }
+
+  const groupId = imGroupId.value;
+  if (!groupId) {
+    initError.value = "缺少直播间 ID，无法初始化聊天";
+    return;
+  }
+  setGroupID(groupId);
+
+  initializing.value = true;
+  try {
+    await initTencentIm();
+    if (!initError.value) {
+      chatInited.value = true;
+    }
+  } catch (error) {
+    console.error("初始化直播聊天失败:", error);
+    initError.value = "聊天初始化失败，请刷新重试";
+    chatInited.value = false;
+  } finally {
+    initializing.value = false;
+  }
+}
 </script>
 
 <style lang="scss" scoped>

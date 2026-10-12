@@ -129,138 +129,135 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from "vue";
 import * as API_Statistics from "@/api/statistics";
 import affixTime from "@/components/affix-time";
 import { QuestionFilled } from "@element-plus/icons-vue";
 
-export default {
-  components: { affixTime, QuestionFilled },
-  data() {
-    return {
-      params: {
-        searchType: "LAST_SEVEN",
-        year: "",
-        month: "",
-        storeId: "",
-      },
-      overview: {},
-      sourceList: [],
-      composition: {},
-      metricDefs: [
-        {
-          key: "income",
-          label: "营业收入",
-          isCount: false,
-          tip: "营业收入：订单扣除退款折扣后金额（不含储值充值）",
-        },
-        {
-          key: "turnover",
-          label: "营业额",
-          isCount: false,
-          tip: "营业额：营业额=营业收入+优惠金额，订单扣除退款折扣前金额（不含储值充值）",
-        },
-        {
-          key: "discount",
-          label: "优惠金额",
-          isCount: false,
-          tip: "优惠金额：订单的优惠金额（扣除退款，不含储值充值）",
-        },
-        {
-          key: "incomeNoStoreValue",
-          label: "营业收入不含充值",
-          isCount: false,
-          tip: "营业收入不含储值金额：订单扣除退款折扣后金额（不含储值充值）",
-        },
-        {
-          key: "payOrderNum",
-          label: "支付订单数",
-          isCount: true,
-          tip: "支付订单数：按客户支付完成时间统计的成功付款的订单数（不含退款、储值充值）",
-        },
-        {
-          key: "recharge",
-          label: "新增充值金额",
-          isCount: false,
-          tip: "新增充值金额：按客户支付完成时间统计的客户储值充值本金金额",
-        },
-        {
-          key: "rechargeUse",
-          label: "使用充值金额",
-          isCount: false,
-          tip: "使用储值支付本金金额：统计时间范围内，支付和退款成功的订单中，使用储值支付且扣除退款的金额",
-        },
-      ],
-    };
+const params = ref({
+  searchType: "LAST_SEVEN",
+  year: "",
+  month: "",
+  storeId: "",
+});
+const overview = ref({});
+const sourceList = ref([]);
+const composition = ref({});
+const metricDefs = ref([
+  {
+    key: "income",
+    label: "营业收入",
+    isCount: false,
+    tip: "营业收入：订单扣除退款折扣后金额（不含储值充值）",
   },
-  computed: {
-    metricList() {
-      return this.metricDefs.map((def) => ({
-        ...def,
-        metric: this.overview[def.key] || {},
-      }));
-    },
+  {
+    key: "turnover",
+    label: "营业额",
+    isCount: false,
+    tip: "营业额：营业额=营业收入+优惠金额，订单扣除退款折扣前金额（不含储值充值）",
   },
-  watch: {
-    params: {
-      handler() {
-        this.loadData();
-      },
-      deep: true,
-      immediate: true,
-    },
+  {
+    key: "discount",
+    label: "优惠金额",
+    isCount: false,
+    tip: "优惠金额：订单的优惠金额（扣除退款，不含储值充值）",
   },
-  methods: {
-    clickBreadcrumb(item) {
-      this.params = {
-        searchType: item.searchType || "",
-        year: item.year || "",
-        month: item.month || "",
-        storeId: item.storeId || "",
-      };
-    },
-    metricCurrent(metric) {
-      if (!metric || metric.current == null) return 0;
-      return Number(metric.current) || 0;
-    },
-    formatCount(metric) {
-      return Math.round(this.metricCurrent(metric));
-    },
-    rateText(metric) {
-      if (!metric || !metric.rate) return "0%";
-      return metric.rate;
-    },
-    rateClass(metric) {
-      const trend = metric && metric.trend;
-      if (trend === "UP") return "up";
-      if (trend === "DOWN") return "down";
-      return "flat";
-    },
-    formatPercent(val) {
-      if (val == null || val === "") return "0%";
-      const num = Number(val);
-      if (Number.isNaN(num)) return val;
-      return `${num}%`;
-    },
-    async loadData() {
-      const query = { ...this.params };
-      const [overviewRes, sourceRes, compositionRes] = await Promise.all([
-        API_Statistics.getBusinessOverview(query),
-        API_Statistics.getBusinessSource(query),
-        API_Statistics.getBusinessComposition(query),
-      ]);
-      if (overviewRes && overviewRes.success) {
-        this.overview = overviewRes.result || {};
-      }
-      if (sourceRes && sourceRes.success) {
-        this.sourceList = sourceRes.result || [];
-      }
-      if (compositionRes && compositionRes.success) {
-        this.composition = compositionRes.result || {};
-      }
-    },
+  {
+    key: "incomeNoStoreValue",
+    label: "营业收入不含充值",
+    isCount: false,
+    tip: "营业收入不含储值金额：订单扣除退款折扣后金额（不含储值充值）",
   },
-};
+  {
+    key: "payOrderNum",
+    label: "支付订单数",
+    isCount: true,
+    tip: "支付订单数：按客户支付完成时间统计的成功付款的订单数（不含退款、储值充值）",
+  },
+  {
+    key: "recharge",
+    label: "新增充值金额",
+    isCount: false,
+    tip: "新增充值金额：按客户支付完成时间统计的客户储值充值本金金额",
+  },
+  {
+    key: "rechargeUse",
+    label: "使用充值金额",
+    isCount: false,
+    tip: "使用储值支付本金金额：统计时间范围内，支付和退款成功的订单中，使用储值支付且扣除退款的金额",
+  },
+]);
+
+const metricList = computed(() => {
+  return metricDefs.value.map((def) => ({
+    ...def,
+    metric: overview.value[def.key] || {},
+  }));
+});
+
+watch(
+  params,
+  () => {
+    loadData();
+  },
+  { deep: true, immediate: true }
+);
+
+function clickBreadcrumb(item) {
+  params.value = {
+    searchType: item.searchType || "",
+    year: item.year || "",
+    month: item.month || "",
+    storeId: item.storeId || "",
+  };
+}
+
+function metricCurrent(metric) {
+  if (!metric || metric.current == null) return 0;
+  return Number(metric.current) || 0;
+}
+
+function formatCount(metric) {
+  return Math.round(metricCurrent(metric));
+}
+
+function rateText(metric) {
+  if (!metric || !metric.rate) return "0%";
+  return metric.rate;
+}
+
+function rateClass(metric) {
+  const trend = metric && metric.trend;
+  if (trend === "UP") return "up";
+  if (trend === "DOWN") return "down";
+  return "flat";
+}
+
+function formatPercent(val) {
+  if (val == null || val === "") return "0%";
+  const num = Number(val);
+  if (Number.isNaN(num)) return val;
+  return `${num}%`;
+}
+
+async function loadData() {
+  const query = { ...params.value };
+  const [overviewRes, sourceRes, compositionRes] = await Promise.all([
+    API_Statistics.getBusinessOverview(query),
+    API_Statistics.getBusinessSource(query),
+    API_Statistics.getBusinessComposition(query),
+  ]);
+  if (overviewRes && overviewRes.success) {
+    overview.value = overviewRes.result || {};
+  }
+  if (sourceRes && sourceRes.success) {
+    sourceList.value = sourceRes.result || [];
+  }
+  if (compositionRes && compositionRes.success) {
+    composition.value = compositionRes.result || {};
+  }
+}
 </script>
 
 <style scoped lang="scss">

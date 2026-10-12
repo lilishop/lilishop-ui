@@ -55,7 +55,7 @@
     </el-card>
 
     <el-dialog v-model="modalVisible" :title="modalTitle" width="500px" :close-on-click-modal="false">
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="售后原因" prop="reason">
           <el-input v-model="form.reason" maxlength="20" clearable style="width: 100%" />
         </el-form-item>
@@ -67,116 +67,113 @@
     </el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Order from "@/api/order";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-export default {
-  data() {
-    return {
-      activeTab: "RETURN_MONEY",
-      modalVisible: false,
-      modalTitle: "",
-      loading: true,
-      submitLoading: false,
-      form: { reason: "" },
-      formValidate: {
-        reason: [{ required: true, message: "请输入售后原因", trigger: "blur" }],
-      },
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        serviceType: "RETURN_MONEY",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    onTabClick(tab) {
-      this.handleClickType(tab.paneName);
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleClickType(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.searchForm.serviceType = v;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      API_Order.getAfterSaleReasonPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    add() {
-      this.form.reason = "";
-      this.modalVisible = true;
-      this.modalTitle = "添加售后原因";
-    },
-    edit(v) {
-      this.form.reason = v.reason;
-      this.form.id = v.id;
-      this.modalVisible = true;
-      this.modalTitle = "修改售后原因";
-    },
-    handleSubmit() {
-      this.form.serviceType = this.searchForm.serviceType;
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalTitle == "添加售后原因") {
-            delete this.form.id;
-            API_Order.addAfterSaleReason(this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                ElMessage.success("添加成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          } else {
-            API_Order.editAfterSaleReason(this.form.id, this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                ElMessage.success("修改成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          }
-        }
-      });
-    },
-    remove(v) {
-      ElMessageBox.confirm("确认要删除此售后原因?", "确认删除", { type: "warning" }).then(() => {
-        API_Order.delAfterSaleReason(v.id).then((res) => {
+const activeTab = ref("RETURN_MONEY");
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const loading = ref(true);
+const submitLoading = ref(false);
+const form = reactive({ reason: "" });
+const formValidate = reactive({
+  reason: [{ required: true, message: "请输入售后原因", trigger: "blur" }],
+});
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  serviceType: "RETURN_MONEY",
+});
+const data = ref([]);
+const total = ref(0);
+
+const formRef = ref(null);
+
+function onTabClick(tab) {
+  handleClickType(tab.paneName);
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+function handleClickType(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  searchForm.serviceType = v;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  API_Order.getAfterSaleReasonPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function add() {
+  form.reason = "";
+  modalVisible.value = true;
+  modalTitle.value = "添加售后原因";
+}
+function edit(v) {
+  form.reason = v.reason;
+  form.id = v.id;
+  modalVisible.value = true;
+  modalTitle.value = "修改售后原因";
+}
+function handleSubmit() {
+  form.serviceType = searchForm.serviceType;
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      if (modalTitle.value == "添加售后原因") {
+        delete form.id;
+        API_Order.addAfterSaleReason(form).then((res) => {
+          submitLoading.value = false;
           if (res.success) {
-            ElMessage.success("售后原因已删除");
-            this.getDataList();
+            ElMessage.success("添加成功");
+            getDataList();
+            modalVisible.value = false;
           }
         });
-      }).catch(() => {});
-    },
-  },
-  mounted() {
-    this.getDataList();
-  },
-};
+      } else {
+        API_Order.editAfterSaleReason(form.id, form).then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            ElMessage.success("修改成功");
+            getDataList();
+            modalVisible.value = false;
+          }
+        });
+      }
+    }
+  });
+}
+function remove(v) {
+  ElMessageBox.confirm("确认要删除此售后原因?", "确认删除", { type: "warning" }).then(() => {
+    API_Order.delAfterSaleReason(v.id).then((res) => {
+      if (res.success) {
+        ElMessage.success("售后原因已删除");
+        getDataList();
+      }
+    });
+  }).catch(() => {});
+}
+
+onMounted(() => {
+  getDataList();
+});
 </script>
 <style scoped>
 .link-text {

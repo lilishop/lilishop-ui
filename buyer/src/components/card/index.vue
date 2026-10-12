@@ -26,57 +26,62 @@
   </el-card>
 </template>
 
-<script>
-export default {
-  name: "index",
-  props: {
-    _Tabs: {
-      type: null,
-      default: "",
-    },
-    _Title: {
-      type: null,
-      default: "卡片头部",
-    },
-    _More: {
-      type: null,
-      default: false,
-    },
-    _Size: {
-      type: Number,
-      default: 16,
-    },
-    _Src: {
-      type: null,
-      default: null,
-    },
-    _ActiveTab: {
-      type: Number,
-      default: 0,
-    },
+<script setup>
+import { ref, watch } from "vue";
+import { useRouter } from "vue-router";
+
+defineOptions({ name: "index" });
+
+const props = defineProps({
+  _Tabs: {
+    type: null,
+    default: "",
   },
-  data() {
-    return {
-      isActive: this._ActiveTab,
-    };
+  _Title: {
+    type: null,
+    default: "卡片头部",
   },
-  watch: {
-    _ActiveTab(val) {
-      this.isActive = val;
-    },
+  _More: {
+    type: null,
+    default: false,
   },
-  methods: {
-    callBack() {
-      if (this._Src) {
-        this.$router.push({ path: this._Src });
-      }
-    },
-    tabsChange(index) {
-      this.isActive = index;
-      this.$emit("_Change", index);
-    },
+  _Size: {
+    type: Number,
+    default: 16,
   },
-};
+  _Src: {
+    type: null,
+    default: null,
+  },
+  _ActiveTab: {
+    type: Number,
+    default: 0,
+  },
+});
+
+const emit = defineEmits(["_Change"]);
+
+const router = useRouter();
+
+const isActive = ref(props._ActiveTab);
+
+watch(
+  () => props._ActiveTab,
+  (val) => {
+    isActive.value = val;
+  }
+);
+
+function callBack() {
+  if (props._Src) {
+    router.push({ path: props._Src });
+  }
+}
+
+function tabsChange(index) {
+  isActive.value = index;
+  emit("_Change", index);
+}
 </script>
 
 <style scoped lang="scss">

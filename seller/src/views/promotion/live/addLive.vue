@@ -5,7 +5,7 @@
         为了方便在创建直播间时从选择商品，请尽量提前提审直播商品
       </el-alert>
 
-      <el-form ref="liveForm" :model="liveForm" :rules="liveRulesForm" label-width="120px">
+      <el-form ref="liveFormRef" :model="liveForm" :rules="liveRulesForm" label-width="120px">
         <el-form-item label="直播标题" prop="name">
           <el-input :disabled="liveStatus != 'NEW'" v-model="liveForm.name" style="width: 460px" />
           <div class="tips">直播间名字，最短3个汉字，最长17个汉字，1个汉字相当于2个字符</div>
@@ -122,168 +122,179 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { uploadFile } from "@/libs/axios";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import { addLive, addLiveGoods, editLive, getLiveInfo, delRoomLiveGoods } from "@/api/promotion";
 import liveGoods from "./liveGoods";
+import { Message } from "@/utils/message";
+import { getStore } from "@/libs/storage";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  components: { liveGoods, uploadPicThumb },
-  data() {
-    return {
-      spinShow: false,
-      liveGoodsVisible: false,
-      imageVisible: false,
-      imageSrc: "",
-      action: uploadFile,
-      accessToken: {},
-      liveStatus: "NEW",
-      liveRulesForm: {
-        name: [
-          { required: true, message: "请输入直播标题", trigger: "blur" },
-          { max: 17, min: 3, message: "直播间名字最短3个汉字，最长17个汉字" },
-        ],
-        anchorName: [
-          { required: true, message: "请输入主播昵称", trigger: "blur" },
-          { max: 15, min: 2, message: "主播昵称最短2个汉字，最长15个汉字" },
-        ],
-        anchorWechat: [{ required: true, message: "请输入主播微信号", trigger: "blur" }],
-        startTime: [{ required: true, message: "请正确输入开始时间以及结束时间" }],
-        feedsImg: [{ required: true, message: "分享卡片封面不能为空", trigger: "blur" }],
-        coverImg: [{ required: true, message: "直播间背景墙不能为空", trigger: "blur" }],
-        shareImg: [{ required: true, message: "直播间分享图不能为空", trigger: "blur" }],
-      },
-      liveForm: {
-        name: "",
-        anchorName: "",
-        anchorWechat: "",
-        feedsImg: "",
-        coverImg: "",
-        shareImg: "",
-        startTime: "",
-      },
-      times: [],
-      liveData: [],
-    };
-  },
-  mounted() {
-    if (this.$route.query.id) {
-      this.getLiveDetail();
-    }
-    this.accessToken = { accessToken: this.getStore("accessToken") };
-  },
-  methods: {
-    disabledDate(date) {
-      return date && date.valueOf() < Date.now() - 86400000;
-    },
-    async deleteGoods(val, index) {
-      this.spinShow = true;
-      const res = await delRoomLiveGoods(this.liveForm.roomId, val.liveGoodsId);
-      if (res.success) {
-        this.$Message.success("删除成功!");
-        this.liveData.splice(index, 1);
-      }
-      this.spinShow = false;
-    },
-    async getLiveDetail() {
-      const result = await getLiveInfo(this.$route.query.id);
-      if (result.success) {
-        const data = result.result;
-        for (const key in data) {
-          this.liveForm[key] = data[key];
-        }
-        this.liveData = data.commodityList;
-        this.times = [
-          this.$filters.unixToDate(data.startTime, "yyyy-MM-dd hh:mm"),
-          this.$filters.unixToDate(data.endTime, "yyyy-MM-dd hh:mm"),
-        ];
-        this.liveStatus = data.status;
-      }
-    },
-    onMove(code, dir) {
-      const moveComm = (curIndex, nextIndex) => {
-        const arr = this.liveData;
-        arr[curIndex] = arr.splice(nextIndex, 1, arr[curIndex])[0];
-        return arr;
-      };
-      this.liveData.some((val, index) => {
-        if (val.id === code) {
-          if (dir === 1 && index === 0) {
-            this.$Message.warning("已在顶部！");
-          } else if (dir === 0 && index === this.liveData.length - 1) {
-            this.$Message.warning("已在底部！");
-          } else {
-            const nextIndex = dir === 1 ? index - 1 : index + 1;
-            this.liveData = moveComm(index, nextIndex);
-          }
-          return true;
-        }
-        return false;
-      });
-    },
-    callBackData(way) {
-      this.liveGoodsVisible = false;
-      this.spinShow = true;
-      addLiveGoods({
-        roomId: this.$route.query.roomId,
-        liveGoodsId: way.liveGoodsId,
-        goodsId: way.goodsId,
-      }).then((res) => {
-        if (res.success) {
-          this.liveData.push(way);
-        }
-        this.spinShow = false;
-      });
-    },
-    tipsDateError() {
-      this.$Message.error(
-        "直播开播时间需要在当前时间的10分钟后并且,开始时间不能在6个月后,直播计划结束时间（开播时间和结束时间间隔不得短于30分钟，不得超过24小时）"
-      );
-    },
-    handleChangeTime(daterange) {
-      if (!daterange || daterange.length !== 2) return;
-      const siteTime = new Date().getTime() / 1000;
-      const selectTime = new Date(daterange[0]).getTime() / 1000;
-      const endTime = new Date(daterange[1]).getTime() / 1000;
-      if (selectTime <= siteTime + 15 * 60) {
-        this.tipsDateError();
-        return;
-      }
-      if (selectTime + 30 * 60 >= endTime || selectTime + 24 * 60 * 60 <= endTime) {
-        this.tipsDateError();
-        return;
-      }
-      this.liveForm.startTime = selectTime;
-      this.liveForm.endTime = endTime;
-    },
-    createLives() {
-      this.$refs.liveForm.validate((valid) => {
-        if (!valid) return;
-        this.spinShow = true;
-        if (this.$route.query.id) {
-          this.liveForm.commodityList = JSON.stringify(this.liveForm.commodityList);
-          delete this.liveForm.updateTime;
-          editLive(this.liveForm).then((res) => {
-            if (res.success) {
-              this.$Message.success("修改成功!");
-              this.$router.push({ path: "/promotion/live" });
-            }
-            this.spinShow = false;
-          });
-        } else {
-          addLive(this.liveForm).then((res) => {
-            if (res.success) {
-              this.$Message.success("添加成功!");
-              this.$router.push({ path: "/live" });
-            }
-            this.spinShow = false;
-          });
-        }
-      });
-    },
-  },
+const route = useRoute();
+const router = useRouter();
+
+const spinShow = ref(false);
+const liveGoodsVisible = ref(false);
+const imageVisible = ref(false);
+const imageSrc = ref("");
+const action = uploadFile;
+const accessToken = ref({});
+const liveStatus = ref("NEW");
+const liveRulesForm = {
+  name: [
+    { required: true, message: "请输入直播标题", trigger: "blur" },
+    { max: 17, min: 3, message: "直播间名字最短3个汉字，最长17个汉字" },
+  ],
+  anchorName: [
+    { required: true, message: "请输入主播昵称", trigger: "blur" },
+    { max: 15, min: 2, message: "主播昵称最短2个汉字，最长15个汉字" },
+  ],
+  anchorWechat: [{ required: true, message: "请输入主播微信号", trigger: "blur" }],
+  startTime: [{ required: true, message: "请正确输入开始时间以及结束时间" }],
+  feedsImg: [{ required: true, message: "分享卡片封面不能为空", trigger: "blur" }],
+  coverImg: [{ required: true, message: "直播间背景墙不能为空", trigger: "blur" }],
+  shareImg: [{ required: true, message: "直播间分享图不能为空", trigger: "blur" }],
 };
+const liveForm = reactive({
+  name: "",
+  anchorName: "",
+  anchorWechat: "",
+  feedsImg: "",
+  coverImg: "",
+  shareImg: "",
+  startTime: "",
+});
+const times = ref([]);
+const liveData = ref([]);
+
+// liveFormRef：模板 ref 改名避免与 liveForm 变量互相覆盖
+const liveFormRef = ref(null);
+
+onMounted(() => {
+  if (route.query.id) {
+    getLiveDetail();
+  }
+  accessToken.value = { accessToken: getStore("accessToken") };
+});
+
+function disabledDate(date) {
+  return date && date.valueOf() < Date.now() - 86400000;
+}
+
+async function deleteGoods(val, index) {
+  spinShow.value = true;
+  const res = await delRoomLiveGoods(liveForm.roomId, val.liveGoodsId);
+  if (res.success) {
+    Message.success("删除成功!");
+    liveData.value.splice(index, 1);
+  }
+  spinShow.value = false;
+}
+
+async function getLiveDetail() {
+  const result = await getLiveInfo(route.query.id);
+  if (result.success) {
+    const data = result.result;
+    for (const key in data) {
+      liveForm[key] = data[key];
+    }
+    liveData.value = data.commodityList;
+    times.value = [
+      unixToDate(data.startTime, "yyyy-MM-dd hh:mm"),
+      unixToDate(data.endTime, "yyyy-MM-dd hh:mm"),
+    ];
+    liveStatus.value = data.status;
+  }
+}
+
+function onMove(code, dir) {
+  const moveComm = (curIndex, nextIndex) => {
+    const arr = liveData.value;
+    arr[curIndex] = arr.splice(nextIndex, 1, arr[curIndex])[0];
+    return arr;
+  };
+  liveData.value.some((val, index) => {
+    if (val.id === code) {
+      if (dir === 1 && index === 0) {
+        Message.warning("已在顶部！");
+      } else if (dir === 0 && index === liveData.value.length - 1) {
+        Message.warning("已在底部！");
+      } else {
+        const nextIndex = dir === 1 ? index - 1 : index + 1;
+        liveData.value = moveComm(index, nextIndex);
+      }
+      return true;
+    }
+    return false;
+  });
+}
+
+function callBackData(way) {
+  liveGoodsVisible.value = false;
+  spinShow.value = true;
+  addLiveGoods({
+    roomId: route.query.roomId,
+    liveGoodsId: way.liveGoodsId,
+    goodsId: way.goodsId,
+  }).then((res) => {
+    if (res.success) {
+      liveData.value.push(way);
+    }
+    spinShow.value = false;
+  });
+}
+
+function tipsDateError() {
+  Message.error(
+    "直播开播时间需要在当前时间的10分钟后并且,开始时间不能在6个月后,直播计划结束时间（开播时间和结束时间间隔不得短于30分钟，不得超过24小时）"
+  );
+}
+
+function handleChangeTime(daterange) {
+  if (!daterange || daterange.length !== 2) return;
+  const siteTime = new Date().getTime() / 1000;
+  const selectTime = new Date(daterange[0]).getTime() / 1000;
+  const endTime = new Date(daterange[1]).getTime() / 1000;
+  if (selectTime <= siteTime + 15 * 60) {
+    tipsDateError();
+    return;
+  }
+  if (selectTime + 30 * 60 >= endTime || selectTime + 24 * 60 * 60 <= endTime) {
+    tipsDateError();
+    return;
+  }
+  liveForm.startTime = selectTime;
+  liveForm.endTime = endTime;
+}
+
+function createLives() {
+  liveFormRef.value.validate((valid) => {
+    if (!valid) return;
+    spinShow.value = true;
+    if (route.query.id) {
+      liveForm.commodityList = JSON.stringify(liveForm.commodityList);
+      delete liveForm.updateTime;
+      editLive(liveForm).then((res) => {
+        if (res.success) {
+          Message.success("修改成功!");
+          router.push({ path: "/promotion/live" });
+        }
+        spinShow.value = false;
+      });
+    } else {
+      addLive(liveForm).then((res) => {
+        if (res.success) {
+          Message.success("添加成功!");
+          router.push({ path: "/live" });
+        }
+        spinShow.value = false;
+      });
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -68,7 +68,7 @@
       </div>
 
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         :data="data"
         class="mt_10"
@@ -208,7 +208,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import {
   batchUpdateGoodsSkuVirtualSales,
   getGoodsSkuData,
@@ -225,223 +226,222 @@ const VIRTUAL_SALES_FIELDS = [
   "salesVolume",
 ];
 
-export default {
-  name: "goodsVirtualSales",
-  data() {
-    return {
-      loading: true,
-      editModalVisible: false,
-      modalSubmitting: false,
-      modalMode: "single",
-      currentSku: null,
-      currentIndex: -1,
-      selectedRows: [],
-      editForm: {
-        virtualSales: 0,
-      },
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-        goodsName: "",
-        goodsId: "",
-        sn: "",
-        storeName: "",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleReset() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-        goodsName: "",
-        goodsId: "",
-        sn: "",
-        storeName: "",
-      };
-      this.getDataList();
-    },
-    changeSort({ prop, order }) {
-      if (!order) {
-        this.searchForm.sort = "create_time";
-        this.searchForm.order = "desc";
-      } else {
-        this.searchForm.sort = prop;
-        this.searchForm.order = order === "ascending" ? "asc" : "desc";
-      }
-      this.getDataList();
-    },
-    handleSelectionChange(selection) {
-      this.selectedRows = selection;
-    },
-    getDataList() {
-      this.loading = true;
-      getGoodsSkuData(this.searchForm)
-        .then((res) => {
-          if (res && res.success && res.result) {
-            this.data = (res.result.records || []).map((item) => ({
-              ...item,
-              virtualSalesInput: this.getVirtualSalesValue(item),
-              saving: false,
-            }));
-            this.total = res.result.total || 0;
-            this.selectedRows = [];
-          } else {
-            this.data = [];
-            this.total = 0;
-            this.selectedRows = [];
-            ElMessage.error((res && res.message) || "加载规格列表失败");
-          }
-        })
-        .catch(() => {
-          this.data = [];
-          this.total = 0;
-          this.selectedRows = [];
-          ElMessage.error("加载规格列表失败");
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    getVirtualSalesValue(row) {
-      const field = VIRTUAL_SALES_FIELDS.find(
-        (item) => row[item] !== undefined && row[item] !== null && row[item] !== ""
-      );
-      return field ? Number(row[field]) || 0 : 0;
-    },
-    openVirtualSalesModal(row, index) {
-      this.modalMode = "single";
-      this.currentSku = { ...row };
-      this.currentIndex = index;
-      this.editForm.virtualSales = this.getVirtualSalesValue(row);
-      this.editModalVisible = true;
-    },
-    openBatchVirtualSalesModal() {
-      if (!this.selectedRows.length) {
-        ElMessage.warning("请先选择要设置的商品规格");
-        return;
-      }
-      this.modalMode = "batch";
-      this.currentSku = null;
-      this.currentIndex = -1;
-      this.editForm.virtualSales = 0;
-      this.editModalVisible = true;
-    },
-    handleCancelVirtualSales() {
-      if (this.modalSubmitting) return;
-      this.resetVirtualSalesModal();
-    },
-    resetVirtualSalesModal() {
-      this.editModalVisible = false;
-      this.modalMode = "single";
-      this.currentSku = null;
-      this.currentIndex = -1;
-      this.editForm.virtualSales = 0;
-    },
-    handleSubmitVirtualSales() {
-      const virtualSales = Number(this.editForm.virtualSales);
-      if (!Number.isInteger(virtualSales) || virtualSales < 0) {
-        ElMessage.warning("请输入大于等于 0 的整数虚拟销量");
-        return;
-      }
-      if (this.modalMode === "batch") {
-        this.handleBatchSubmitVirtualSales(virtualSales);
-        return;
-      }
-      if (!this.currentSku || this.currentIndex < 0) return;
+defineOptions({ name: "goodsVirtualSales" });
 
-      const currentIndex = this.currentIndex;
-      const currentSkuId = this.currentSku.id;
-      this.modalSubmitting = true;
-      if (this.data[currentIndex]) {
-        this.data[currentIndex].saving = true;
+// 模板 ref（避免与同名数据字段冲突而改名）
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const loading = ref(true);
+const editModalVisible = ref(false);
+const modalSubmitting = ref(false);
+const modalMode = ref("single");
+const currentSku = ref(null);
+const currentIndex = ref(-1);
+const selectedRows = ref([]);
+const editForm = reactive({
+  virtualSales: 0,
+});
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "create_time",
+  order: "desc",
+  goodsName: "",
+  goodsId: "",
+  sn: "",
+  storeName: "",
+});
+const data = ref([]);
+const total = ref(0);
+
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleReset() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 20,
+    sort: "create_time",
+    order: "desc",
+    goodsName: "",
+    goodsId: "",
+    sn: "",
+    storeName: "",
+  };
+  getDataList();
+}
+function changeSort({ prop, order }) {
+  if (!order) {
+    searchForm.value.sort = "create_time";
+    searchForm.value.order = "desc";
+  } else {
+    searchForm.value.sort = prop;
+    searchForm.value.order = order === "ascending" ? "asc" : "desc";
+  }
+  getDataList();
+}
+function handleSelectionChange(selection) {
+  selectedRows.value = selection;
+}
+function getDataList() {
+  loading.value = true;
+  getGoodsSkuData(searchForm.value)
+    .then((res) => {
+      if (res && res.success && res.result) {
+        data.value = (res.result.records || []).map((item) => ({
+          ...item,
+          virtualSalesInput: getVirtualSalesValue(item),
+          saving: false,
+        }));
+        total.value = res.result.total || 0;
+        selectedRows.value = [];
+      } else {
+        data.value = [];
+        total.value = 0;
+        selectedRows.value = [];
+        ElMessage.error((res && res.message) || "加载规格列表失败");
       }
-      updateGoodsSkuVirtualSales(currentSkuId, { virtualSales })
-        .then((res) => {
-          if (res && res.success) {
-            if (this.data[currentIndex]) {
-              this.data[currentIndex].virtualSales = virtualSales;
-              this.data[currentIndex].virtualSalesInput = virtualSales;
-            }
-            ElMessage.success("虚拟销量设置成功");
-            this.resetVirtualSalesModal();
-          } else {
-            ElMessage.error((res && res.message) || "规格虚拟销量设置失败");
-          }
-        })
-        .catch(() => {
-          ElMessage.error("规格虚拟销量设置失败");
-        })
-        .finally(() => {
-          if (this.data[currentIndex]) {
-            this.data[currentIndex].saving = false;
-          }
-          this.modalSubmitting = false;
-        });
-    },
-    handleBatchSubmitVirtualSales(virtualSales) {
-      const skuIds = this.selectedRows.map((item) => item.id).filter(Boolean);
-      if (!skuIds.length) {
-        ElMessage.warning("请先选择要设置的商品规格");
-        return;
+    })
+    .catch(() => {
+      data.value = [];
+      total.value = 0;
+      selectedRows.value = [];
+      ElMessage.error("加载规格列表失败");
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function getVirtualSalesValue(row) {
+  const field = VIRTUAL_SALES_FIELDS.find(
+    (item) => row[item] !== undefined && row[item] !== null && row[item] !== ""
+  );
+  return field ? Number(row[field]) || 0 : 0;
+}
+function openVirtualSalesModal(row, index) {
+  modalMode.value = "single";
+  currentSku.value = { ...row };
+  currentIndex.value = index;
+  editForm.virtualSales = getVirtualSalesValue(row);
+  editModalVisible.value = true;
+}
+function openBatchVirtualSalesModal() {
+  if (!selectedRows.value.length) {
+    ElMessage.warning("请先选择要设置的商品规格");
+    return;
+  }
+  modalMode.value = "batch";
+  currentSku.value = null;
+  currentIndex.value = -1;
+  editForm.virtualSales = 0;
+  editModalVisible.value = true;
+}
+function handleCancelVirtualSales() {
+  if (modalSubmitting.value) return;
+  resetVirtualSalesModal();
+}
+function resetVirtualSalesModal() {
+  editModalVisible.value = false;
+  modalMode.value = "single";
+  currentSku.value = null;
+  currentIndex.value = -1;
+  editForm.virtualSales = 0;
+}
+function handleSubmitVirtualSales() {
+  const virtualSales = Number(editForm.virtualSales);
+  if (!Number.isInteger(virtualSales) || virtualSales < 0) {
+    ElMessage.warning("请输入大于等于 0 的整数虚拟销量");
+    return;
+  }
+  if (modalMode.value === "batch") {
+    handleBatchSubmitVirtualSales(virtualSales);
+    return;
+  }
+  if (!currentSku.value || currentIndex.value < 0) return;
+
+  const curIndex = currentIndex.value;
+  const currentSkuId = currentSku.value.id;
+  modalSubmitting.value = true;
+  if (data.value[curIndex]) {
+    data.value[curIndex].saving = true;
+  }
+  updateGoodsSkuVirtualSales(currentSkuId, { virtualSales })
+    .then((res) => {
+      if (res && res.success) {
+        if (data.value[curIndex]) {
+          data.value[curIndex].virtualSales = virtualSales;
+          data.value[curIndex].virtualSalesInput = virtualSales;
+        }
+        ElMessage.success("虚拟销量设置成功");
+        resetVirtualSalesModal();
+      } else {
+        ElMessage.error((res && res.message) || "规格虚拟销量设置失败");
       }
-      this.modalSubmitting = true;
-      batchUpdateGoodsSkuVirtualSales({ skuIds, virtualSales })
-        .then((res) => {
-          if (res && res.success) {
-            this.data = this.data.map((item) => {
-              if (!skuIds.includes(item.id)) return item;
-              return {
-                ...item,
-                virtualSales,
-                virtualSalesInput: virtualSales,
-              };
-            });
-            this.selectedRows = [];
-            this.$refs.table?.clearSelection();
-            ElMessage.success("虚拟销量设置成功");
-            this.resetVirtualSalesModal();
-          } else {
-            ElMessage.error((res && res.message) || "虚拟销量设置失败");
-          }
-        })
-        .catch(() => {
-          ElMessage.error("虚拟销量设置失败");
-        })
-        .finally(() => {
-          this.modalSubmitting = false;
+    })
+    .catch(() => {
+      ElMessage.error("规格虚拟销量设置失败");
+    })
+    .finally(() => {
+      if (data.value[curIndex]) {
+        data.value[curIndex].saving = false;
+      }
+      modalSubmitting.value = false;
+    });
+}
+function handleBatchSubmitVirtualSales(virtualSales) {
+  const skuIds = selectedRows.value.map((item) => item.id).filter(Boolean);
+  if (!skuIds.length) {
+    ElMessage.warning("请先选择要设置的商品规格");
+    return;
+  }
+  modalSubmitting.value = true;
+  batchUpdateGoodsSkuVirtualSales({ skuIds, virtualSales })
+    .then((res) => {
+      if (res && res.success) {
+        data.value = data.value.map((item) => {
+          if (!skuIds.includes(item.id)) return item;
+          return {
+            ...item,
+            virtualSales,
+            virtualSalesInput: virtualSales,
+          };
         });
-    },
-    getTotalSales(row) {
-      return (Number(row.buyCount) || 0) + (Number(row.virtualSalesInput) || 0);
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+        selectedRows.value = [];
+        tableRef.value?.clearSelection();
+        ElMessage.success("虚拟销量设置成功");
+        resetVirtualSalesModal();
+      } else {
+        ElMessage.error((res && res.message) || "虚拟销量设置失败");
+      }
+    })
+    .catch(() => {
+      ElMessage.error("虚拟销量设置失败");
+    })
+    .finally(() => {
+      modalSubmitting.value = false;
+    });
+}
+function getTotalSales(row) {
+  return (Number(row.buyCount) || 0) + (Number(row.virtualSalesInput) || 0);
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -40,122 +40,118 @@
     </el-card>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, ref, watch } from "vue";
 import affixTime from "@/views/lili-components/affix-time";
 import * as API_Member from "@/api/member";
 
-export default {
-  components: { affixTime },
+const uvs = ref(0);
+const pvs = ref(0);
+// G2 图表实例（原 data 中初始化为 ""）
+const orderChart = ref("");
+const params = ref({
+  searchType: "LAST_SEVEN",
+  year: "",
+  month: "",
+});
+const data = ref([]);
 
-  data() {
-    return {
-      uvs: 0,
-      pvs: 0,
-      orderChart: "",
-      params: {
-        searchType: "LAST_SEVEN",
-        year: "",
-        month: "",
-      },
-      data: [],
-    };
+watch(
+  params,
+  () => {
+    uvs.value = 0;
+    pvs.value = 0;
+    init();
   },
-  watch: {
-    params: {
-      handler() {
-        this.uvs = 0;
-        this.pvs = 0;
-        this.init();
-      },
-      deep: true,
+  { deep: true }
+);
+
+function initChart() {
+  const uv = [];
+  const pv = [];
+
+  data.value.forEach((item) => {
+    uv.push({
+      date: item.date,
+      uvNum: item.uvNum,
+      title: "访客数UV",
+      pv: item.uvNum,
+    });
+    pv.push({
+      date: item.date,
+      pvNum: item.pvNum,
+      pv: item.pvNum,
+      title: "浏览量PV",
+    });
+  });
+
+  const chartData = [...uv, ...pv];
+
+  orderChart.value.data(chartData);
+  orderChart.value.scale({
+    activeQuantity: {
+      range: [0, 1],
+      nice: true,
     },
-  },
-  methods: {
-    initChart() {
-      const uv = [];
-      const pv = [];
+  });
+  orderChart.value.tooltip({
+    showCrosshairs: true,
+    shared: true,
+  });
 
-      this.data.forEach((item) => {
-        uv.push({
-          date: item.date,
-          uvNum: item.uvNum,
-          title: "访客数UV",
-          pv: item.uvNum,
+  orderChart.value
+    .line()
+    .position("date*pv")
+    .color("title")
+    .label("pv")
+    .shape("smooth");
+
+  orderChart.value
+    .point()
+    .position("date*pv")
+    .color("title")
+    .label("pv")
+    .shape("circle")
+    .style({
+      stroke: "#fff",
+      lineWidth: 1,
+    });
+  orderChart.value.area().position("date*pv").color("title").shape("smooth");
+
+  orderChart.value.render();
+}
+
+function clickBreadcrumb(item) {
+  params.value = JSON.parse(JSON.stringify(item));
+}
+
+function init() {
+  orderChart.value ? orderChart.value.clear() : "";
+  API_Member.getStatisticsList(params.value).then(async (res) => {
+    if (res.result) {
+      data.value = res.result;
+      res.result.forEach((item) => {
+        uvs.value += item.uvNum;
+        pvs.value += item.pvNum;
+      });
+
+      if (!orderChart.value) {
+        const { Chart } = await import("@antv/g2");
+        orderChart.value = new Chart({
+          container: "orderChart",
+          autoFit: true,
+          height: 500,
+          padding: [70, 70, 70, 70],
         });
-        pv.push({
-          date: item.date,
-          pvNum: item.pvNum,
-          pv: item.pvNum,
-          title: "浏览量PV",
-        });
-      });
+      }
+      initChart();
+    }
+  });
+}
 
-      const chartData = [...uv, ...pv];
-
-      this.orderChart.data(chartData);
-      this.orderChart.scale({
-        activeQuantity: {
-          range: [0, 1],
-          nice: true,
-        },
-      });
-      this.orderChart.tooltip({
-        showCrosshairs: true,
-        shared: true,
-      });
-
-      this.orderChart
-        .line()
-        .position("date*pv")
-        .color("title")
-        .label("pv")
-        .shape("smooth");
-
-      this.orderChart
-        .point()
-        .position("date*pv")
-        .color("title")
-        .label("pv")
-        .shape("circle")
-        .style({
-          stroke: "#fff",
-          lineWidth: 1,
-        });
-      this.orderChart.area().position("date*pv").color("title").shape("smooth");
-
-      this.orderChart.render();
-    },
-    clickBreadcrumb(item) {
-      this.params = JSON.parse(JSON.stringify(item));
-    },
-    init() {
-      this.orderChart ? this.orderChart.clear() : "";
-      API_Member.getStatisticsList(this.params).then(async (res) => {
-        if (res.result) {
-          this.data = res.result;
-          res.result.forEach((item) => {
-            this.uvs += item.uvNum;
-            this.pvs += item.pvNum;
-          });
-
-          if (!this.orderChart) {
-            const { Chart } = await import("@antv/g2");
-            this.orderChart = new Chart({
-              container: "orderChart",
-              autoFit: true,
-              height: 500,
-              padding: [70, 70, 70, 70],
-            });
-          }
-          this.initChart();
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+onMounted(() => {
+  init();
+});
 </script>
 <style scoped lang="scss">
 .table {

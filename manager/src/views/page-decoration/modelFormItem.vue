@@ -250,7 +250,7 @@
       </template>
     </el-dialog>
     <!-- 选择商品。链接 -->
-    <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
+    <liliDialog ref="liliDialogRef" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
@@ -258,13 +258,14 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, nextTick } from "vue";
 import ModelCarousel from "./modelList/carousel.vue";
 import ModelCarousel1 from "./modelList/carousel1.vue";
 import ModelCarousel2 from "./modelList/carousel2.vue";
@@ -283,98 +284,82 @@ import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
 import oneRowThreeColumns from "./modelList/oneRowThreeColumns.vue";
 import seckillOnlyAlbum from "./modelList/seckill-only-album.vue";
 import discountAdvertBg from "@/assets/nav/decorate.png";
-export default {
-  name: "modelFormItem",
-  props: ["element", "select", "index", "data"],
-  components: {
-    ModelCarousel,
-    ModelCarousel1,
-    ModelCarousel2,
-    Recommend,
-    NewGoodsSort,
-    FirstPageAdvert,
-    NotEnough,
-    Seckill,
-    goodsType,
-    ossManage,
-    oneRowThreeColumns,
-    "seckill-only-album":seckillOnlyAlbum,
-    onlyGoodsModel,
-    mixModel,
-    forYour
-  },
-  data() {
-    return {
-      discountAdvertBg,
-      showModal: false, // modal显隐
-      selected: {}, // 弹窗编辑草稿
-      editTarget: null, // 确认后写回的原数据
-      picModelFlag: false, // 图片选择器
-    };
-  },
-  methods: {
-    cloneItem(item) {
-      return JSON.parse(JSON.stringify(item || {}));
-    },
-    // 编辑模块
-    handleSelectModel(item) {
-      this.editTarget = item;
-      this.selected = this.cloneItem(item);
-      this.showModal = true;
-    },
-    // 删除模块
-    handleModelDelete() {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "<p>确定删除当前模块吗？</p>",
-        onOk: () => {
-          this.$nextTick(() => {
-            this.data.list.splice(this.index, 1);
-          });
-        },
-      });
-    },
-    handleSelectLink(item, index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-    },
-    // 确定选择链接
-    selectedLink(val) {
-      this.selected.url = this.$filters.formatLinkType(val);
-      this.selected.type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
-    },
+import { Modal } from "@/utils/message";
+import { formatLinkType } from "@/utils/filters";
 
-    handleSelectImg() {
-      // 选择图片
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
+defineOptions({ name: "modelFormItem" });
+
+const props = defineProps(["element", "select", "index", "data"]);
+
+const showModal = ref(false); // modal显隐
+const selected = ref({}); // 弹窗编辑草稿
+const editTarget = ref(null); // 确认后写回的原数据
+const picModelFlag = ref(false); // 图片选择器
+
+// 模板 ref，与 import 同名会互相覆盖，故加 Ref 后缀
+const liliDialogRef = ref(null);
+const ossManageRef = ref(null);
+
+function cloneItem(item) {
+  return JSON.parse(JSON.stringify(item || {}));
+}
+// 编辑模块
+function handleSelectModel(item) {
+  editTarget.value = item;
+  selected.value = cloneItem(item);
+  showModal.value = true;
+}
+// 删除模块
+function handleModelDelete() {
+  Modal.confirm({
+    title: "提示",
+    content: "<p>确定删除当前模块吗？</p>",
+    onOk: () => {
+      nextTick(() => {
+        props.data.list.splice(props.index, 1);
       });
     },
-    // 回显图片
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url) return;
-      this.selected.img = val.url;
-    },
-    handleCancelModal() {
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal = false;
-    },
-    handleConfirmModal() {
-      if (this.editTarget) {
-        Object.assign(this.editTarget, this.cloneItem(this.selected));
-      }
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal = false;
-    },
-  },
-};
+  });
+}
+function handleSelectLink(item, index) {
+  // 调起选择链接弹窗
+  liliDialogRef.value.open("link");
+}
+// 确定选择链接
+function selectedLink(val) {
+  selected.value.url = formatLinkType(val);
+  selected.value.type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+}
+
+function handleSelectImg() {
+  // 选择图片
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+// 回显图片
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url) return;
+  selected.value.img = val.url;
+}
+function handleCancelModal() {
+  editTarget.value = null;
+  selected.value = {};
+  showModal.value = false;
+}
+function handleConfirmModal() {
+  if (editTarget.value) {
+    Object.assign(editTarget.value, cloneItem(selected.value));
+  }
+  editTarget.value = null;
+  selected.value = {};
+  showModal.value = false;
+}
 </script>
 <style lang="scss" scoped>
 @import "./modelList/setup-box.scss";

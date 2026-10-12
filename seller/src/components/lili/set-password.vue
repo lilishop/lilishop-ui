@@ -29,99 +29,105 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "setPassword",
-  props: {
-    modelValue: String,
-    value: String,
-    size: String,
-    placeholder: {
-      type: String,
-      default: "请输入密码，长度为6-20个字符",
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-    readonly: {
-      type: Boolean,
-      default: false,
-    },
-    maxlength: {
-      type: Number,
-      default: 20,
-    },
+<script setup>
+import { ref, watch } from "vue";
+
+defineOptions({ name: "setPassword" });
+
+const props = defineProps({
+  modelValue: String,
+  value: String,
+  size: String,
+  placeholder: {
+    type: String,
+    default: "请输入密码，长度为6-20个字符",
   },
-  emits: ["update:modelValue", "input", "on-change"],
-  data() {
-    return {
-      currentValue: this.modelValue ?? this.value ?? "",
-      tipStyle: "password-tip-none",
-      strengthValue: 0,
-      progressStatus: "",
-      strength: "无",
-      grade: 0,
-    };
+  disabled: {
+    type: Boolean,
+    default: false,
   },
-  watch: {
-    modelValue(val) {
-      this.setCurrentValue(val);
-    },
-    value(val) {
-      this.setCurrentValue(val);
-    },
+  readonly: {
+    type: Boolean,
+    default: false,
   },
-  methods: {
-    checkStrengthValue(v) {
-      let grade = 0;
-      if (/\d/.test(v)) grade++;
-      if (/[a-z]/.test(v)) grade++;
-      if (/[A-Z]/.test(v)) grade++;
-      if (/\W/.test(v)) grade++;
-      if (v.length >= 10) grade++;
-      this.grade = grade;
-      return grade;
-    },
-    strengthChange() {
-      if (!this.currentValue) {
-        this.tipStyle = "password-tip-none";
-        this.strength = "无";
-        this.strengthValue = 0;
-        return;
-      }
-      const grade = this.checkStrengthValue(this.currentValue);
-      if (grade <= 1) {
-        this.progressStatus = "exception";
-        this.tipStyle = "password-tip-weak";
-        this.strength = "弱";
-        this.strengthValue = 33;
-      } else if (grade >= 2 && grade <= 4) {
-        this.progressStatus = "";
-        this.tipStyle = "password-tip-middle";
-        this.strength = "中";
-        this.strengthValue = 66;
-      } else {
-        this.progressStatus = "success";
-        this.tipStyle = "password-tip-strong";
-        this.strength = "强";
-        this.strengthValue = 100;
-      }
-    },
-    handleChange() {
-      this.strengthChange();
-      this.$emit("update:modelValue", this.currentValue);
-      this.$emit("input", this.currentValue);
-      this.$emit("on-change", this.currentValue, this.grade, this.strength);
-    },
-    setCurrentValue(value) {
-      if (value === this.currentValue) return;
-      this.currentValue = value ?? "";
-      this.strengthChange();
-      this.$emit("on-change", this.currentValue, this.grade, this.strength);
-    },
+  maxlength: {
+    type: Number,
+    default: 20,
   },
-};
+});
+const emit = defineEmits(["update:modelValue", "input", "on-change"]);
+
+const currentValue = ref(props.modelValue ?? props.value ?? "");
+const tipStyle = ref("password-tip-none");
+const strengthValue = ref(0);
+const progressStatus = ref("");
+const strength = ref("无");
+const grade = ref(0);
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    setCurrentValue(val);
+  }
+);
+watch(
+  () => props.value,
+  (val) => {
+    setCurrentValue(val);
+  }
+);
+
+function checkStrengthValue(v) {
+  // 局部变量原名 grade 与顶层 ref 同名，改名避免遮蔽
+  let g = 0;
+  if (/\d/.test(v)) g++;
+  if (/[a-z]/.test(v)) g++;
+  if (/[A-Z]/.test(v)) g++;
+  if (/\W/.test(v)) g++;
+  if (v.length >= 10) g++;
+  grade.value = g;
+  return g;
+}
+
+function strengthChange() {
+  if (!currentValue.value) {
+    tipStyle.value = "password-tip-none";
+    strength.value = "无";
+    strengthValue.value = 0;
+    return;
+  }
+  const grade = checkStrengthValue(currentValue.value);
+  if (grade <= 1) {
+    progressStatus.value = "exception";
+    tipStyle.value = "password-tip-weak";
+    strength.value = "弱";
+    strengthValue.value = 33;
+  } else if (grade >= 2 && grade <= 4) {
+    progressStatus.value = "";
+    tipStyle.value = "password-tip-middle";
+    strength.value = "中";
+    strengthValue.value = 66;
+  } else {
+    progressStatus.value = "success";
+    tipStyle.value = "password-tip-strong";
+    strength.value = "强";
+    strengthValue.value = 100;
+  }
+}
+
+function handleChange() {
+  strengthChange();
+  emit("update:modelValue", currentValue.value);
+  emit("input", currentValue.value);
+  emit("on-change", currentValue.value, grade.value, strength.value);
+}
+
+function setCurrentValue(value) {
+  if (value === currentValue.value) return;
+  currentValue.value = value ?? "";
+  strengthChange();
+  emit("on-change", currentValue.value, grade.value, strength.value);
+}
 </script>
 
 <style lang="scss" scoped>

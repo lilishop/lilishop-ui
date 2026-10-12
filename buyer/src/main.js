@@ -1,10 +1,10 @@
 import { createApp } from "vue";
+import { createPinia } from "pinia";
 import "core-js/stable";
 import "./assets/styles/global-layout.scss";
 import "./assets/styles/theme.less";
 import App from "./App.vue";
 import { router } from "./router/index";
-import store from "@/vuex/store";
 import { setupElementPlus } from "@/plugins/element";
 import { setupLegacyMessage } from "@/utils/message";
 import { registerGlobalComponents } from "@/components/global.js";
@@ -30,7 +30,7 @@ setupLegacyMessage(app);
 registerGlobalComponents(app);
 
 app.use(router);
-app.use(store);
+app.use(createPinia());
 
 app.config.globalProperties.$filters = filters;
 app.config.globalProperties.Cookies = storage;

@@ -44,8 +44,9 @@
     </el-row>
   </div>
 </template>
-<script>
-import { markRaw } from "vue";
+<script setup>
+import { markRaw, ref } from "vue";
+import { useRoute } from "vue-router";
 import {
   House,
   ShoppingCart,
@@ -60,52 +61,52 @@ import {
   Link,
 } from "@element-plus/icons-vue";
 
-export default {
-  data() {
-    return {
-      linkList: [
-        { title: "首页", icon: markRaw(House), ___type: "home" },
-        { title: "购物车", icon: markRaw(ShoppingCart), ___type: "cart" },
-        { title: "收藏商品", icon: markRaw(Star), ___type: "collection" },
-        { title: "我的订单", icon: markRaw(Document), ___type: "order" },
-        { title: "个人中心", icon: markRaw(User), ___type: "user" },
-        { title: "拼团频道", icon: markRaw(Promotion), ___type: "group" },
-        { title: "秒杀频道", icon: markRaw(Promotion), ___type: "seckill" },
-        { title: "领券中心", icon: markRaw(PriceTag), ___type: "coupon" },
-        { title: "签到", icon: markRaw(Sunny), ___type: "sign" },
-        { title: "砍价", icon: markRaw(Share), ___type: "kanjia" },
-        { title: "积分商城", icon: markRaw(ShoppingBag), ___type: "point" },
-      ],
-      linkItem: {
-        title: "外部链接",
-        icon: markRaw(Link),
-        ___type: "link",
-        url: "",
-      },
-      linkVisible: false,
-      linkPopoverVisible: false,
-      selectedIndex: 9999999,
-    };
-  },
-  methods: {
-    showLinkItem(item) {
-      return (
-        (item.title !== "拼团频道" && item.title !== "签到") ||
-        this.$route.name !== "renovation"
-      );
-    },
-    handleLink(val, index) {
-      val = { ...val, ___type: "other" };
-      this.selectedIndex = index;
-      if (index === this.linkList.length) {
-        this.linkPopoverVisible = true;
-      } else {
-        this.linkPopoverVisible = false;
-      }
-      this.$emit("selected", [val]);
-    },
-  },
-};
+const emit = defineEmits(["selected"]);
+
+const route = useRoute();
+
+const linkList = ref([
+  { title: "首页", icon: markRaw(House), ___type: "home" },
+  { title: "购物车", icon: markRaw(ShoppingCart), ___type: "cart" },
+  { title: "收藏商品", icon: markRaw(Star), ___type: "collection" },
+  { title: "我的订单", icon: markRaw(Document), ___type: "order" },
+  { title: "个人中心", icon: markRaw(User), ___type: "user" },
+  { title: "拼团频道", icon: markRaw(Promotion), ___type: "group" },
+  { title: "秒杀频道", icon: markRaw(Promotion), ___type: "seckill" },
+  { title: "领券中心", icon: markRaw(PriceTag), ___type: "coupon" },
+  { title: "签到", icon: markRaw(Sunny), ___type: "sign" },
+  { title: "砍价", icon: markRaw(Share), ___type: "kanjia" },
+  { title: "积分商城", icon: markRaw(ShoppingBag), ___type: "point" },
+]);
+const linkItem = ref({
+  title: "外部链接",
+  icon: markRaw(Link),
+  ___type: "link",
+  url: "",
+});
+const linkVisible = ref(false);
+const linkPopoverVisible = ref(false);
+const selectedIndex = ref(9999999);
+
+function showLinkItem(item) {
+  return (
+    (item.title !== "拼团频道" && item.title !== "签到") ||
+    route.name !== "renovation"
+  );
+}
+function handleLink(val, index) {
+  val = { ...val, ___type: "other" };
+  selectedIndex.value = index;
+  if (index === linkList.value.length) {
+    linkPopoverVisible.value = true;
+  } else {
+    linkPopoverVisible.value = false;
+  }
+  emit("selected", [val]);
+}
+
+// 无 defineExpose：grep seller/src 全量确认无外部 ref/$refs/$parent 访问本组件成员
+// （link-dialog.vue 的 $refs["lili-component"][0].type 写入指向首个 tab 的 goods-dialog，与本组件无关）
 </script>
 <style lang="scss" scoped>
 @import "../style.scss";

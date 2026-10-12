@@ -9,7 +9,7 @@
       </el-steps>
     </div>
     <!-- 第一步 选择分类 -->
-    <first-step ref='first' v-show="activestep === 0" @change="getFirstData"></first-step>
+    <first-step ref='firstRef' v-show="activestep === 0" @change="getFirstData"></first-step>
     <!-- 第二步 商品详细信息 -->
     <second-step ref='second' :firstData="firstData" v-if="activestep === 1"></second-step>
     <!-- 第三步 发布完成 -->
@@ -18,43 +18,41 @@
     
   </div>
 </template>
-<script>
-import firstStep from  './goodsOperationFirst'
-import secondStep from  './goodsOperationSec'
-import thirdStep from  './goodsOperationThird'
-export default {
-  name: "addGoods",
-  components: {
-    firstStep,
-    secondStep,
-    thirdStep
-  },
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
+import firstStep from './goodsOperationFirst'
+import secondStep from './goodsOperationSec'
+import thirdStep from './goodsOperationThird'
 
-  data() {
-    return {
-      /** 当前激活步骤*/
-      activestep: 0,
-      firstData: {}, // 第一步传递的数据
-    };
-  },
-  methods: {
-    // 选择商品分类回调
-    getFirstData (item) {
-      this.firstData = item;
-      this.activestep = 1;
-    }
-  },
-  mounted() {
-    // 编辑商品、模板、复制商品
-    if (this.$route.query.id || this.$route.query.draftId || this.$route.query.copyId) {
-      this.activestep = 1;
-    } else {
-      this.activestep = 0
-      this.$refs.first.selectGoodsType = true;
-    }
-    
+defineOptions({ name: "addGoods" });
+
+const route = useRoute();
+
+const firstRef = ref(null);
+
+/** 当前激活步骤*/
+const activestep = ref(0);
+const firstData = ref({}); // 第一步传递的数据
+
+// 子组件 goodsOperationSec 通过 $parent.activestep-- 回退一步
+defineExpose({ activestep });
+
+// 选择商品分类回调
+function getFirstData (item) {
+  firstData.value = item;
+  activestep.value = 1;
+}
+
+onMounted(() => {
+  // 编辑商品、模板、复制商品
+  if (route.query.id || route.query.draftId || route.query.copyId) {
+    activestep.value = 1;
+  } else {
+    activestep.value = 0
+    firstRef.value.selectGoodsType = true;
   }
-};
+});
 </script>
 <style lang="scss" scoped>
 @import "./addGoods.scss";

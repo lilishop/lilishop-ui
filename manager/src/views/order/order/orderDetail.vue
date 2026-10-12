@@ -357,7 +357,7 @@
     </div>
 
     <el-dialog v-model="modal" title="修改金额" width="530px">
-      <el-form ref="modifyPriceForm" :model="modifyPriceForm" label-width="70px" :rules="modifyPriceValidate" @submit.prevent>
+      <el-form ref="modifyPriceFormRef" :model="modifyPriceForm" label-width="70px" :rules="modifyPriceValidate" @submit.prevent>
         <el-form-item label="订单金额" prop="price">
           <el-input-number v-model="modifyPriceForm.price" :min="0" :max="999999" style="width: 120px" />
           <span class="ml_10">元</span>
@@ -370,7 +370,7 @@
     </el-dialog>
 
     <el-dialog v-model="orderCancelModal" title="订单取消" width="530px">
-      <el-form ref="orderCancelForm" :model="orderCancelForm" label-width="100px" :rules="orderCancelValidate">
+      <el-form ref="orderCancelFormRef" :model="orderCancelForm" label-width="100px" :rules="orderCancelValidate">
         <el-form-item label="取消原因" prop="reason">
           <el-input v-model="orderCancelForm.reason" type="textarea" :rows="3" placeholder="请输入取消原因" />
         </el-form-item>
@@ -382,7 +382,7 @@
     </el-dialog>
 
     <el-dialog v-model="addressModal" title="修改收件信息" width="530px">
-      <el-form ref="addressForm" :model="addressForm" label-width="100px" :rules="addressRule">
+      <el-form ref="addressFormRef" :model="addressForm" label-width="100px" :rules="addressRule">
         <el-form-item label="收件人" prop="consigneeName">
           <el-input v-model="addressForm.consigneeName" maxlength="20" />
         </el-form-item>
@@ -518,7 +518,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import * as API_Order from "@/api/order";
 import { platformRefund, noShowRefund, getAppointmentOrderDetail } from "@/api/appointment";
 import * as RegExp from "@/libs/RegExp.js";
@@ -529,457 +531,456 @@ import { printElement } from "@/utils/print";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, clientTypeWay } from "@/utils/filters";
 import { formatCardKeyStatus } from "@/constants/cardKey";
-export default {
-  name: "orderList",
-  components: {
 
-    multipleMap,
-    "vue-qr": vueQr,
+defineOptions({ name: "orderList" });
+
+const route = useRoute();
+const router = useRouter();
+
+// 模板 ref（与表单 data 同名的改为 xxxRef，避免互相覆盖）
+const modifyPriceFormRef = ref(null);
+const orderCancelFormRef = ref(null);
+const addressFormRef = ref(null);
+const map = ref(null);
+
+const typeList = ref([]);
+const showPrices = ref(false);
+const printHiddenFlag = ref(false);//隐藏信息
+const loading = ref(false); //加载表格
+
+const addr = ref(""); //地区
+let regionId = ""; // 原代码未在 data 声明直接挂 this 的历史遗留字段
+
+
+const orderLogInfo = ref([]); //订单日志数据
+const orderLogModal = ref(false); //弹出调整价格框
+const checkedLogistics = ref([]); //选中的物流公司集合
+const allowOperation = ref({}); //订单可才做选项
+const sn = ref(""); //订单编号
+const orderInfo = ref({
+  order: {
+    priceDetailDTO: {},
   },
-  computed: {
-    /** 电子卡券订单：无物流区，卡密来自 orderItems[].cardKeys */
-    isECouponOrder() {
-      const t = this.orderInfo?.order?.orderType;
-      return t === "E_COUPON" || this.$route.query.orderType === "E_COUPON";
+});
+const appointmentExt = ref({});
+const modal = ref(false); //弹出调整价格框
+const searchForm = reactive({
+  pageNumber: 1, // 当前页数
+  pageSize: 100, // 页面大小
+  orderSn: "", //订单sn
+});
+//调整价格表单
+const modifyPriceForm = reactive({
+  price: 0,
+});
+//订单取消表单
+const orderCancelForm = reactive({
+  reason: "",
+});
+//弹出订单取消框
+const orderCancelModal = ref(false);
+//订单发货
+const orderDeliveryForm = reactive({
+  logisticsNo: "", //发货单号
+  logisticsId: "", //物流公司
+});
+//验证要调整的订单金额
+const modifyPriceValidate = {
+  reason: [
+    { required: true, message: "请输入大于0小于99999的合法金额" },
+    {
+      pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
+      message: "请输入大于0小于9999的合法金额",
+      trigger: "change",
     },
-    isVirtualOrder() {
-      const t = this.orderInfo?.order?.orderType;
-      return t === "VIRTUAL" || this.$route.query.orderType === "VIRTUAL";
-    },
-    isNonPhysicalOrder() {
-      return this.isVirtualOrder || this.isECouponOrder || this.isAppointmentOrder;
-    },
-    isAppointmentOrder() {
-      const t = this.orderInfo?.order?.orderType;
-      return t === "APPOINTMENT" || this.$route.query.orderType === "APPOINTMENT";
-    },
-    appointmentSlotText() {
-      const v = this.appointmentExt || {};
-      if (!v.slotDate) return "";
-      const date = String(v.slotDate).slice(0, 10);
-      const slot = v.slotStartTime && v.slotEndTime ? `${v.slotStartTime}-${v.slotEndTime}` : "";
-      return [date, slot].filter(Boolean).join(" ");
-    },
-    appointmentFormGroups() {
-      return this.parseFormAnswerGroups(this.appointmentExt?.formAnswerJson);
-    },
-    canPlatformRefund() {
-      const order = this.orderInfo?.order;
-      return order && order.payStatus === "PAID" && order.orderStatus !== "CANCELLED";
-    },
-    canNoShowRefund() {
-      return this.canPlatformRefund;
-    },
-    ecouponCardKeyDelivered() {
-      return (this.data || []).some((item) => item.cardKeyDelivered);
-    },
-    ecouponCardKeyRows() {
-      const rows = [];
-      (this.data || []).forEach((item) => {
-        (item.cardKeys || []).forEach((ck) => {
-          rows.push({ ...ck });
-        });
-      });
-      return rows;
-    },
-  },
-  data () {
-    return {
-      typeList: [],
-      showPrices: false,
-      printHiddenFlag: false,//隐藏信息
-      loading: false, //加载表格
-
-      addr: "", //地区
-
-
-      orderLogInfo: [], //订单日志数据
-      orderLogModal: false, //弹出调整价格框
-      checkedLogistics: [], //选中的物流公司集合
-      allowOperation: {}, //订单可才做选项
-      sn: "", //订单编号
-      orderInfo: {
-        order: {
-          priceDetailDTO: {},
-        },
-      },
-      appointmentExt: {},
-      modal: false, //弹出调整价格框
-      searchForm: {
-        pageNumber: 1, // 当前页数
-        pageSize: 100, // 页面大小
-        orderSn: "", //订单sn
-      },
-      //调整价格表单
-      modifyPriceForm: {
-        price: 0,
-      },
-      //订单取消表单
-      orderCancelForm: {
-        reason: "",
-      },
-      //弹出订单取消框
-      orderCancelModal: false,
-      //订单发货
-      orderDeliveryForm: {
-        logisticsNo: "", //发货单号
-        logisticsId: "", //物流公司
-      },
-      //验证要调整的订单金额
-      modifyPriceValidate: {
-        reason: [
-          { required: true, message: "请输入大于0小于99999的合法金额" },
-          {
-            pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
-            message: "请输入大于0小于9999的合法金额",
-            trigger: "change",
-          },
-        ],
-      },
-
-      //验证取消订单原因
-      orderCancelValidate: {
-        reason: [{ required: true, message: "取消原因不能为空", trigger: "blur" }],
-      },
-      addressModal: false, //弹出修改收件信息框
-      printModal: false,
-      platformRefundModal: false,
-      noShowRefundModal: false,
-      refundLoading: false,
-      platformRefundForm: {
-        refundType: "UNSERVED",
-        refundAmount: 0,
-        reason: "",
-      },
-      noShowRefundForm: {
-        refundAmount: 0,
-        reason: "",
-      },
-      //收件地址表单
-      addressForm: {
-        consigneeName: "",
-        consigneeMobile: "",
-        consigneeDetail: "",
-        consigneeAddressPath: "",
-        consigneeAddressIdPath: "",
-      },
-      orderDeliverFormValidate: {
-        logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
-        logisticsId: [{ required: true, message: "请选择物流公司", trigger: "blur" }],
-      },
-      addressRule: {
-        consigneeName: [
-          { required: true, message: "收货人姓名不能为空", trigger: "blur" },
-        ],
-        consigneeMobile: [
-          { required: true, message: "联系方式不能为空", trigger: "blur" },
-          {
-            pattern: RegExp.mobile,
-            trigger: "blur",
-            message: "请输入正确的手机号",
-          },
-        ],
-        consigneeDetail: [
-          { required: true, message: "详细地址不能为空", trigger: "blur" },
-        ],
-      },
-
-      data: [], // 表单数据
-    };
-  },
-  watch: {
-    $route (to, from) {
-      this.$router.go(0);
-    },
-  },
-  methods: {
-    unitPrice,
-    clientTypeWay,
-    formatCardKeyStatus,
-    copyCardKey(row) {
-      const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          ElMessage.success("已复制到剪贴板");
-        });
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        ElMessage.success("已复制到剪贴板");
-      }
-    },
-    getPromotionText(row) {
-      let resultText = "";
-      if (row && row.promotionType) {
-        const type = row.promotionType.split(",");
-        if (type.indexOf("PINTUAN") != -1) resultText += "拼团 ";
-        if (type.indexOf("SECKILL") != -1) resultText += "秒杀 ";
-        if (type.indexOf("COUPON") != -1) resultText += "优惠券 ";
-        if (type.indexOf("FULL_DISCOUNT") != -1) resultText += "满减 ";
-        if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
-      }
-      return resultText === "" ? "未参与" : resultText;
-    },
-    gotoHomes () {
-      return false
-    },
-
-    //确认收款
-    confirmPrice () {
-      ElMessageBox.confirm(
-        "您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看",
-        "提示",
-        { type: "warning" }
-      ).then(() => {
-        API_Order.orderPay(this.sn).then((res) => {
-          if (res.success) {
-            ElMessage.success("收款成功");
-            this.getDataList();
-          }
-        });
-      }).catch(() => {});
-    },
-    getOrderPrice () {
-      if (this.showPrices) {
-        this.showPrices = false
-      } else if (!this.showPrices) {
-        this.showPrices = true
-      }
-    },
-    getContentPrice () {
-      for (let i = 0; i < this.typeList.length; i++) {
-        for (let j = i + 1; j < this.typeList.length; j++) {
-          if (this.typeList[i].promotionId === this.typeList[j].promotionId) {
-            this.typeList[i].discountPrice = this.typeList[i].discountPrice + this.typeList[j].discountPrice
-            this.typeList.splice(j, 1)
-          }
-        }
-      }
-      if (this.typeList.length >= 3) {
-        this.getContentPrice()
-      }
-    },
-    // 获取订单详情
-    getDataList () {
-      this.loading = true;
-      API_Order.orderDetail(this.sn).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.orderInfo = res.result;
-          this.allowOperation = res.result.allowOperationVO;
-          this.data = res.result.orderItems;
-          this.typeList = JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail));
-          this.getContentPrice()
-          this.getOrderPrice()
-          if (this.isAppointmentOrder) {
-            this.loadAppointmentExt();
-          }
-        }
-      });
-    },
-    loadAppointmentExt() {
-      getAppointmentOrderDetail(this.sn)
-        .then((res) => {
-          if (res.success) {
-            this.appointmentExt = res.result || {};
-          }
-        })
-        .catch(() => {
-          this.appointmentExt = {};
-        });
-    },
-    parseFormAnswerGroups(formAnswerJson) {
-      if (!formAnswerJson) return [];
-      let data = formAnswerJson;
-      if (typeof data === "string") {
-        try {
-          data = JSON.parse(data);
-        } catch (e) {
-          return [];
-        }
-      }
-      const fields = Array.isArray(data?.fields) ? data.fields : [];
-      const answers = Array.isArray(data?.answers) ? data.answers : [];
-      return answers
-        .map((group) => {
-          const map = group && typeof group === "object" && !Array.isArray(group) ? group : {};
-          const source = fields.length
-            ? fields
-            : Object.keys(map).map((key) => ({ fieldKey: key, fieldLabel: key }));
-          return source
-            .map((field) => ({
-              fieldKey: field.fieldKey,
-              fieldLabel: field.fieldLabel || field.fieldKey,
-              value: map[field.fieldKey] ?? "",
-            }))
-            .filter((row) => row.value !== "" && row.value != null);
-        })
-        .filter((rows) => rows.length);
-    },
-    modifyPrice () {
-      //默认要修改的金额为订单总金额
-      this.modifyPriceForm.price = this.orderInfo.order.flowPrice;
-      this.modal = true;
-    },
-    //修改订单金额提交
-    modifyPriceSubmit () {
-      this.$refs.modifyPriceForm.validate((valid) => {
-        if (valid) {
-          API_Order.updateOrderPrice(this.sn, this.modifyPriceForm).then((res) => {
-            if (res.success) {
-              ElMessage.success("修改订单金额成功");
-              this.modal = false;
-              this.getDataList();
-            }
-          });
-        }
-      });
-    },
-    // 选中的地址
-    selectedRegion (val) {
-      if(val.type === 'select'){
-        const paths = val.data.map(item => item.name).join(',')
-        const ids = val.data.map(item => item.id).join(',')
-        this.addr = paths;
-        this.regionId = ids;
-      }
-      else{
-        this.addr = val.data.addr;
-        this.regionId = val.data.addrId;
-      }
-
-    },
-    //订单取消
-    orderCancel () {
-      this.orderCancelModal = true;
-    },
-    //订单取消提交
-    orderCancelSubmit () {
-      this.$refs.orderCancelForm.validate((valid) => {
-        if (valid) {
-          API_Order.orderCancel(this.sn, this.orderCancelForm).then((res) => {
-            if (res.success) {
-              ElMessage.success("取消成功");
-              this.getDataList();
-            }
-            this.orderCancelModal = false;
-          });
-        }
-      });
-    },
-    openPlatformRefund() {
-      this.platformRefundForm = {
-        refundType: "UNSERVED",
-        refundAmount: this.orderInfo?.order?.flowPrice || 0,
-        reason: "",
-      };
-      this.platformRefundModal = true;
-    },
-    submitPlatformRefund() {
-      if (!this.platformRefundForm.reason) {
-        ElMessage.warning("请填写退款原因");
-        return;
-      }
-      this.refundLoading = true;
-      platformRefund(this.sn, this.platformRefundForm)
-        .then((res) => {
-          if (res.success) {
-            ElMessage.success("退款成功");
-            this.platformRefundModal = false;
-            this.getDataList();
-          }
-        })
-        .finally(() => {
-          this.refundLoading = false;
-        });
-    },
-    openNoShowRefund() {
-      this.noShowRefundForm = {
-        refundAmount: this.orderInfo?.order?.flowPrice || 0,
-        reason: "",
-      };
-      this.noShowRefundModal = true;
-    },
-    submitNoShowRefund() {
-      if (!this.noShowRefundForm.reason) {
-        ElMessage.warning("请填写退款原因");
-        return;
-      }
-      this.refundLoading = true;
-      noShowRefund(this.sn, this.noShowRefundForm)
-        .then((res) => {
-          if (res.success) {
-            ElMessage.success("退款成功");
-            this.noShowRefundModal = false;
-            this.getDataList();
-          }
-        })
-        .finally(() => {
-          this.refundLoading = false;
-        });
-    },
-    //订单日志
-    orderLog () {
-      this.orderLogModal = true;
-    },
-    //订单日志取消
-    handelCancel () {
-      this.orderLogModal = false;
-    },
-    //打印发货单
-    printOrder () {
-      this.printModal = true;
-    },
-    printHiddenInfo () {
-      this.printHiddenFlag = !this.printHiddenFlag;
-    },
-    printCancel () {
-      // this.printHiddenFlag = false;
-    },
-    handlePrintInvoice () {
-      printElement("printInfo", "发货单");
-    },
-    //弹出修改收货地址框
-    editAddress () {
-      this.addressModal = true;
-      this.addr = this.orderInfo.order.consigneeAddressPath;
-      this.regionId = this.orderInfo.order.consigneeAddressIdPath;
-      this.addressForm.consigneeName = this.orderInfo.order.consigneeName;
-      this.addressForm.consigneeMobile = this.orderInfo.order.consigneeMobile;
-      this.addressForm.consigneeDetail = this.orderInfo.order.consigneeDetail;
-      this.addressForm.consigneeAddressPath = this.orderInfo.order.consigneeAddressPath;
-      this.addressForm.consigneeAddressIdPath = this.orderInfo.order.consigneeAddressIdPath;
-    },
-    //修改收货地址
-    editAddressSubmit () {
-      if (this.regionId == "") {
-        ElMessage.error("请选择地址");
-        return;
-      }
-      this.addressForm.consigneeAddressPath = this.addr;
-      this.addressForm.consigneeAddressIdPath = this.regionId;
-      this.$refs.addressForm.validate((valid) => {
-        if (valid) {
-          API_Order.editOrderConsignee(this.sn, this.addressForm).then((res) => {
-            if (res.success) {
-              ElMessage.success("收货地址修改成功");
-              this.addressModal = false;
-              this.getDataList();
-            }
-          });
-        }
-      });
-    },
-  },
-  mounted () {
-    this.sn = this.$route.query.sn;
-    this.getDataList();
-  },
+  ],
 };
+
+//验证取消订单原因
+const orderCancelValidate = {
+  reason: [{ required: true, message: "取消原因不能为空", trigger: "blur" }],
+};
+const addressModal = ref(false); //弹出修改收件信息框
+const printModal = ref(false);
+const platformRefundModal = ref(false);
+const noShowRefundModal = ref(false);
+const refundLoading = ref(false);
+const platformRefundForm = ref({
+  refundType: "UNSERVED",
+  refundAmount: 0,
+  reason: "",
+});
+const noShowRefundForm = ref({
+  refundAmount: 0,
+  reason: "",
+});
+//收件地址表单
+const addressForm = reactive({
+  consigneeName: "",
+  consigneeMobile: "",
+  consigneeDetail: "",
+  consigneeAddressPath: "",
+  consigneeAddressIdPath: "",
+});
+const orderDeliverFormValidate = {
+  logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
+  logisticsId: [{ required: true, message: "请选择物流公司", trigger: "blur" }],
+};
+const addressRule = {
+  consigneeName: [
+    { required: true, message: "收货人姓名不能为空", trigger: "blur" },
+  ],
+  consigneeMobile: [
+    { required: true, message: "联系方式不能为空", trigger: "blur" },
+    {
+      pattern: RegExp.mobile,
+      trigger: "blur",
+      message: "请输入正确的手机号",
+    },
+  ],
+  consigneeDetail: [
+    { required: true, message: "详细地址不能为空", trigger: "blur" },
+  ],
+};
+
+const data = ref([]); // 表单数据
+
+/** 电子卡券订单：无物流区，卡密来自 orderItems[].cardKeys */
+const isECouponOrder = computed(() => {
+  const t = orderInfo.value?.order?.orderType;
+  return t === "E_COUPON" || route.query.orderType === "E_COUPON";
+});
+const isVirtualOrder = computed(() => {
+  const t = orderInfo.value?.order?.orderType;
+  return t === "VIRTUAL" || route.query.orderType === "VIRTUAL";
+});
+const isNonPhysicalOrder = computed(() => {
+  return isVirtualOrder.value || isECouponOrder.value || isAppointmentOrder.value;
+});
+const isAppointmentOrder = computed(() => {
+  const t = orderInfo.value?.order?.orderType;
+  return t === "APPOINTMENT" || route.query.orderType === "APPOINTMENT";
+});
+const appointmentSlotText = computed(() => {
+  const v = appointmentExt.value || {};
+  if (!v.slotDate) return "";
+  const date = String(v.slotDate).slice(0, 10);
+  const slot = v.slotStartTime && v.slotEndTime ? `${v.slotStartTime}-${v.slotEndTime}` : "";
+  return [date, slot].filter(Boolean).join(" ");
+});
+const appointmentFormGroups = computed(() => {
+  return parseFormAnswerGroups(appointmentExt.value?.formAnswerJson);
+});
+const canPlatformRefund = computed(() => {
+  const order = orderInfo.value?.order;
+  return order && order.payStatus === "PAID" && order.orderStatus !== "CANCELLED";
+});
+const canNoShowRefund = computed(() => {
+  return canPlatformRefund.value;
+});
+const ecouponCardKeyDelivered = computed(() => {
+  return (data.value || []).some((item) => item.cardKeyDelivered);
+});
+const ecouponCardKeyRows = computed(() => {
+  const rows = [];
+  (data.value || []).forEach((item) => {
+    (item.cardKeys || []).forEach((ck) => {
+      rows.push({ ...ck });
+    });
+  });
+  return rows;
+});
+
+watch(
+  () => route.query,
+  (to, from) => {
+    router.go(0);
+  }
+);
+
+onMounted(() => {
+  sn.value = route.query.sn;
+  getDataList();
+});
+
+function copyCardKey(row) {
+  const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      ElMessage.success("已复制到剪贴板");
+    });
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    ElMessage.success("已复制到剪贴板");
+  }
+}
+function getPromotionText(row) {
+  let resultText = "";
+  if (row && row.promotionType) {
+    const type = row.promotionType.split(",");
+    if (type.indexOf("PINTUAN") != -1) resultText += "拼团 ";
+    if (type.indexOf("SECKILL") != -1) resultText += "秒杀 ";
+    if (type.indexOf("COUPON") != -1) resultText += "优惠券 ";
+    if (type.indexOf("FULL_DISCOUNT") != -1) resultText += "满减 ";
+    if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
+  }
+  return resultText === "" ? "未参与" : resultText;
+}
+function gotoHomes () {
+  return false
+}
+
+//确认收款
+function confirmPrice () {
+  ElMessageBox.confirm(
+    "您确定要收款吗？线下收款涉及库存变更，需异步进行，等待约一分钟刷新列表查看",
+    "提示",
+    { type: "warning" }
+  ).then(() => {
+    API_Order.orderPay(sn.value).then((res) => {
+      if (res.success) {
+        ElMessage.success("收款成功");
+        getDataList();
+      }
+    });
+  }).catch(() => {});
+}
+function getOrderPrice () {
+  if (showPrices.value) {
+    showPrices.value = false
+  } else if (!showPrices.value) {
+    showPrices.value = true
+  }
+}
+function getContentPrice () {
+  for (let i = 0; i < typeList.value.length; i++) {
+    for (let j = i + 1; j < typeList.value.length; j++) {
+      if (typeList.value[i].promotionId === typeList.value[j].promotionId) {
+        typeList.value[i].discountPrice = typeList.value[i].discountPrice + typeList.value[j].discountPrice
+        typeList.value.splice(j, 1)
+      }
+    }
+  }
+  if (typeList.value.length >= 3) {
+    getContentPrice()
+  }
+}
+// 获取订单详情
+function getDataList () {
+  loading.value = true;
+  API_Order.orderDetail(sn.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      orderInfo.value = res.result;
+      allowOperation.value = res.result.allowOperationVO;
+      data.value = res.result.orderItems;
+      typeList.value = JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail));
+      getContentPrice()
+      getOrderPrice()
+      if (isAppointmentOrder.value) {
+        loadAppointmentExt();
+      }
+    }
+  });
+}
+function loadAppointmentExt() {
+  getAppointmentOrderDetail(sn.value)
+    .then((res) => {
+      if (res.success) {
+        appointmentExt.value = res.result || {};
+      }
+    })
+    .catch(() => {
+      appointmentExt.value = {};
+    });
+}
+function parseFormAnswerGroups(formAnswerJson) {
+  if (!formAnswerJson) return [];
+  let data = formAnswerJson;
+  if (typeof data === "string") {
+    try {
+      data = JSON.parse(data);
+    } catch (e) {
+      return [];
+    }
+  }
+  const fields = Array.isArray(data?.fields) ? data.fields : [];
+  const answers = Array.isArray(data?.answers) ? data.answers : [];
+  return answers
+    .map((group) => {
+      const map = group && typeof group === "object" && !Array.isArray(group) ? group : {};
+      const source = fields.length
+        ? fields
+        : Object.keys(map).map((key) => ({ fieldKey: key, fieldLabel: key }));
+      return source
+        .map((field) => ({
+          fieldKey: field.fieldKey,
+          fieldLabel: field.fieldLabel || field.fieldKey,
+          value: map[field.fieldKey] ?? "",
+        }))
+        .filter((row) => row.value !== "" && row.value != null);
+    })
+    .filter((rows) => rows.length);
+}
+function modifyPrice () {
+  //默认要修改的金额为订单总金额
+  modifyPriceForm.price = orderInfo.value.order.flowPrice;
+  modal.value = true;
+}
+//修改订单金额提交
+function modifyPriceSubmit () {
+  modifyPriceFormRef.value.validate((valid) => {
+    if (valid) {
+      API_Order.updateOrderPrice(sn.value, modifyPriceForm).then((res) => {
+        if (res.success) {
+          ElMessage.success("修改订单金额成功");
+          modal.value = false;
+          getDataList();
+        }
+      });
+    }
+  });
+}
+// 选中的地址
+function selectedRegion (val) {
+  if(val.type === 'select'){
+    const paths = val.data.map(item => item.name).join(',')
+    const ids = val.data.map(item => item.id).join(',')
+    addr.value = paths;
+    regionId = ids;
+  }
+  else{
+    addr.value = val.data.addr;
+    regionId = val.data.addrId;
+  }
+
+}
+//订单取消
+function orderCancel () {
+  orderCancelModal.value = true;
+}
+//订单取消提交
+function orderCancelSubmit () {
+  orderCancelFormRef.value.validate((valid) => {
+    if (valid) {
+      API_Order.orderCancel(sn.value, orderCancelForm).then((res) => {
+        if (res.success) {
+          ElMessage.success("取消成功");
+          getDataList();
+        }
+        orderCancelModal.value = false;
+      });
+    }
+  });
+}
+function openPlatformRefund() {
+  platformRefundForm.value = {
+    refundType: "UNSERVED",
+    refundAmount: orderInfo.value?.order?.flowPrice || 0,
+    reason: "",
+  };
+  platformRefundModal.value = true;
+}
+function submitPlatformRefund() {
+  if (!platformRefundForm.value.reason) {
+    ElMessage.warning("请填写退款原因");
+    return;
+  }
+  refundLoading.value = true;
+  platformRefund(sn.value, platformRefundForm.value)
+    .then((res) => {
+      if (res.success) {
+        ElMessage.success("退款成功");
+        platformRefundModal.value = false;
+        getDataList();
+      }
+    })
+    .finally(() => {
+      refundLoading.value = false;
+    });
+}
+function openNoShowRefund() {
+  noShowRefundForm.value = {
+    refundAmount: orderInfo.value?.order?.flowPrice || 0,
+    reason: "",
+  };
+  noShowRefundModal.value = true;
+}
+function submitNoShowRefund() {
+  if (!noShowRefundForm.value.reason) {
+    ElMessage.warning("请填写退款原因");
+    return;
+  }
+  refundLoading.value = true;
+  noShowRefund(sn.value, noShowRefundForm.value)
+    .then((res) => {
+      if (res.success) {
+        ElMessage.success("退款成功");
+        noShowRefundModal.value = false;
+        getDataList();
+      }
+    })
+    .finally(() => {
+      refundLoading.value = false;
+    });
+}
+//订单日志
+function orderLog () {
+  orderLogModal.value = true;
+}
+//订单日志取消
+function handelCancel () {
+  orderLogModal.value = false;
+}
+//打印发货单
+function printOrder () {
+  printModal.value = true;
+}
+function printHiddenInfo () {
+  printHiddenFlag.value = !printHiddenFlag.value;
+}
+function printCancel () {
+  // printHiddenFlag.value = false;
+}
+function handlePrintInvoice () {
+  printElement("printInfo", "发货单");
+}
+//弹出修改收货地址框
+function editAddress () {
+  addressModal.value = true;
+  addr.value = orderInfo.value.order.consigneeAddressPath;
+  regionId = orderInfo.value.order.consigneeAddressIdPath;
+  addressForm.consigneeName = orderInfo.value.order.consigneeName;
+  addressForm.consigneeMobile = orderInfo.value.order.consigneeMobile;
+  addressForm.consigneeDetail = orderInfo.value.order.consigneeDetail;
+  addressForm.consigneeAddressPath = orderInfo.value.order.consigneeAddressPath;
+  addressForm.consigneeAddressIdPath = orderInfo.value.order.consigneeAddressIdPath;
+}
+//修改收货地址
+function editAddressSubmit () {
+  if (regionId == "") {
+    ElMessage.error("请选择地址");
+    return;
+  }
+  addressForm.consigneeAddressPath = addr.value;
+  addressForm.consigneeAddressIdPath = regionId;
+  addressFormRef.value.validate((valid) => {
+    if (valid) {
+      API_Order.editOrderConsignee(sn.value, addressForm).then((res) => {
+        if (res.success) {
+          ElMessage.success("收货地址修改成功");
+          addressModal.value = false;
+          getDataList();
+        }
+      });
+    }
+  });
+}
 </script>
 <style lang="scss">
 .lineH30 {

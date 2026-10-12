@@ -48,48 +48,45 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { getDamageReportPage } from "@/api/procurement";
 import { DAMAGE_STATUS, damageStatusText, damageStatusTag, formatMoney } from "../constants";
 
-export default {
-  name: "manager-damage-report-list",
-  data() {
-    return {
-      DAMAGE_STATUS,
-      loading: false,
-      data: [],
-      total: 0,
-      searchForm: { pageNumber: 1, pageSize: 10, storeId: "", status: "" },
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    damageStatusText,
-    damageStatusTag,
-    formatMoney,
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getDamageReportPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    goDetail(row) {
-      this.$router.push({ name: "manager-damage-report-detail", query: { id: row.id } });
-    },
-  },
-};
+defineOptions({ name: "manager-damage-report-list" });
+
+const router = useRouter();
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const searchForm = reactive({ pageNumber: 1, pageSize: 10, storeId: "", status: "" });
+
+onMounted(() => {
+  getDataList();
+});
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function getDataList() {
+  loading.value = true;
+  getDamageReportPage(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function goDetail(row) {
+  router.push({ name: "manager-damage-report-detail", query: { id: row.id } });
+}
 </script>

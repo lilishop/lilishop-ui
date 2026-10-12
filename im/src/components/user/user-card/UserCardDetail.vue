@@ -9,7 +9,7 @@
         <div class="user-header">
           <div class="avatar">
             <div class="avatar-box">
-              <img :src="detail.avatar" :onerror="$store.state.defaultAvatar" />
+              <img :src="detail.avatar" :onerror="appStore.defaultAvatar" />
             </div>
           </div>
           <div class="nickname">
@@ -121,136 +121,141 @@
     </el-container>
   </div>
 </template>
-<script>
+<script setup>
 // import { ServeSearchUser } from "@/api/user";
+import { reactive, ref } from "vue";
 import { ServeCreateContact, ServeEditContactRemark } from "@/api/contacts";
 import { toTalk } from "@/utils/talk";
 import { defaultUserBanner } from "@/assets/images";
+import { ElMessage } from "@/utils/message";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "UserCardDetail",
-  props: {
-    user_id: {
-      type: Number,
-      default: 0,
-    },
+defineOptions({ name: "UserCardDetail" });
+
+const props = defineProps({
+  user_id: {
+    type: Number,
+    default: 0,
   },
-  data() {
-    return {
-      detail: {
-        mobile: "",
-        nickname: "",
-        avatar: "",
-        motto: "",
-        friend_status: 0,
-        friend_apply: 0,
-        nickname_remark: "",
-        bag: defaultUserBanner,
-        gender: 0,
-      },
+});
 
-      // 好友备注表单
-      editRemark: {
-        isShow: false,
-        text: "",
-      },
+const emit = defineEmits(["close", "changeRemark"]);
 
-      // 好友申请表单
-      apply: {
-        isShow: false,
-        text: "",
-      },
+const appStore = useAppStore();
 
-      contacts: false,
-    };
-  },
-  created() {
-    // this.loadUserDetail();
-  },
-  methods: {
-    formatGender(value) {
-      const arr = ["未知", "男", "女"];
-      return arr[value] || "未知";
-    },
-    formatMobile(value) {
-      if (!value) return "";
-      return (
-        value.substr(0, 3) + " " + value.substr(3, 4) + " " + value.substr(7, 4)
-      );
-    },
-    close() {
-      if (this.contacts) return false;
+const detail = reactive({
+  mobile: "",
+  nickname: "",
+  avatar: "",
+  motto: "",
+  friend_status: 0,
+  friend_apply: 0,
+  nickname_remark: "",
+  bag: defaultUserBanner,
+  gender: 0,
+});
 
-      this.$emit("close");
-    },
+// 好友备注表单
+const editRemark = reactive({
+  isShow: false,
+  text: "",
+});
 
-    // 点击编辑备注信息
-    clickEditRemark() {
-      this.editRemark.isShow = true;
-      this.editRemark.text = this.detail.nickname_remark;
-    },
+// 好友申请表单
+const apply = reactive({
+  isShow: false,
+  text: "",
+});
 
-    // 获取用户信息
-    // loadUserDetail() {
-    //   ServeSearchUser({
-    //     user_id: this.user_id,
-    //   }).then((res) => {
-    //     if (res.code == 200) {
-    //       this.detail.user_id = res.data.id;
-    //       Object.assign(this.detail, res.data);
-    //     }
-    //   });
-    // },
+const contacts = ref(false);
 
-    // 发送添加好友申请
-    sendApply() {
-      if (this.apply.text == "") return;
-      ServeCreateContact({
-        friend_id: this.detail.user_id,
-        remark: this.apply.text,
-      }).then((res) => {
-        if (res.code == 200) {
-          this.apply.isShow = false;
-          this.apply.text = "";
-          this.detail.friend_apply = 1;
-        } else {
-          this.$message.error("发送好友申请失败,请稍后再试...");
-        }
-      });
-    },
+// created() {
+//   loadUserDetail();
+// }
 
-    // 编辑好友备注信息
-    editRemarkSubmit() {
-      let data = {
-        friend_id: this.detail.user_id,
-        remarks: this.editRemark.text,
-      };
+const formatGender = (value) => {
+  const arr = ["未知", "男", "女"];
+  return arr[value] || "未知";
+};
 
-      if (data.remarks == this.detail.nickname_remark) {
-        this.editRemark.isShow = false;
-        return;
-      }
+const formatMobile = (value) => {
+  if (!value) return "";
+  return (
+    value.substr(0, 3) + " " + value.substr(3, 4) + " " + value.substr(7, 4)
+  );
+};
 
-      ServeEditContactRemark(data).then((res) => {
-        if (res.code == 200) {
-          this.editRemark.isShow = false;
-          this.detail.nickname_remark = data.remarks;
-          this.$emit("changeRemark", data);
-        }
-      });
-    },
+const close = () => {
+  if (contacts.value) return false;
 
-    // 隐藏申请表单
-    closeApply() {
-      this.apply.isShow = false;
-    },
+  emit("close");
+};
 
-    // 发送好友消息
-    sendMessage() {
-      this.close();
-      toTalk(1, this.user_id);
-    },
-  },
+// 点击编辑备注信息
+const clickEditRemark = () => {
+  editRemark.isShow = true;
+  editRemark.text = detail.nickname_remark;
+};
+
+// 获取用户信息
+// const loadUserDetail = () => {
+//   ServeSearchUser({
+//     user_id: props.user_id,
+//   }).then((res) => {
+//     if (res.code == 200) {
+//       detail.user_id = res.data.id;
+//       Object.assign(detail, res.data);
+//     }
+//   });
+// };
+
+// 发送添加好友申请
+const sendApply = () => {
+  if (apply.text == "") return;
+  ServeCreateContact({
+    friend_id: detail.user_id,
+    remark: apply.text,
+  }).then((res) => {
+    if (res.code == 200) {
+      apply.isShow = false;
+      apply.text = "";
+      detail.friend_apply = 1;
+    } else {
+      ElMessage.error("发送好友申请失败,请稍后再试...");
+    }
+  });
+};
+
+// 编辑好友备注信息
+const editRemarkSubmit = () => {
+  let data = {
+    friend_id: detail.user_id,
+    remarks: editRemark.text,
+  };
+
+  if (data.remarks == detail.nickname_remark) {
+    editRemark.isShow = false;
+    return;
+  }
+
+  ServeEditContactRemark(data).then((res) => {
+    if (res.code == 200) {
+      editRemark.isShow = false;
+      detail.nickname_remark = data.remarks;
+      emit("changeRemark", data);
+    }
+  });
+};
+
+// 隐藏申请表单
+const closeApply = () => {
+  apply.isShow = false;
+};
+
+// 发送好友消息
+const sendMessage = () => {
+  close();
+  toTalk(1, props.user_id);
 };
 </script>
 <style lang="less" scoped>

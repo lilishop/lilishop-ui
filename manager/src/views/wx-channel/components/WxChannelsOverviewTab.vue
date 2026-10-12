@@ -74,66 +74,64 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { getWxChannelsOverviewSummary } from "@/api/index";
 
-export default {
-  name: "WxChannelsOverviewTab",
-  data() {
-    return {
-      loading: false,
-      selectDate: null,
-      searchForm: {
-        startTime: null,
-        endTime: null,
-      },
-      summary: {
-        totalSales: 0,
-        liveSales: 0,
-        windowSales: 0,
-        totalRefund: 0,
-        liveRefund: 0,
-        windowRefund: 0,
-      },
-    };
-  },
-  mounted() {
-    this.loadSummary();
-  },
-  methods: {
-    selectDateRange(v) {
-      if (!v || v.length !== 2) {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
-        return;
+defineOptions({ name: "WxChannelsOverviewTab" });
+
+const loading = ref(false);
+const selectDate = ref(null);
+const searchForm = reactive({
+  startTime: null,
+  endTime: null,
+});
+const summary = reactive({
+  totalSales: 0,
+  liveSales: 0,
+  windowSales: 0,
+  totalRefund: 0,
+  liveRefund: 0,
+  windowRefund: 0,
+});
+
+onMounted(() => {
+  loadSummary();
+});
+
+function selectDateRange(v) {
+  if (!v || v.length !== 2) {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+    return;
+  }
+  const [startStr, endStr] = v;
+  const start = startStr ? new Date(`${startStr}T00:00:00`).getTime() : null;
+  const end = endStr ? new Date(`${endStr}T23:59:59`).getTime() : null;
+  searchForm.startTime = Number.isFinite(start) ? start : null;
+  searchForm.endTime = Number.isFinite(end) ? end : null;
+}
+
+function handleSearch() {
+  loadSummary();
+}
+
+function loadSummary() {
+  loading.value = true;
+  const params = { ...searchForm };
+  Object.keys(params).forEach((k) => {
+    if (params[k] === null || params[k] === "" || params[k] === undefined) delete params[k];
+  });
+  getWxChannelsOverviewSummary(params)
+    .then((res) => {
+      if (res && res.success) {
+        Object.assign(summary, res.result || {});
       }
-      const [startStr, endStr] = v;
-      const start = startStr ? new Date(`${startStr}T00:00:00`).getTime() : null;
-      const end = endStr ? new Date(`${endStr}T23:59:59`).getTime() : null;
-      this.searchForm.startTime = Number.isFinite(start) ? start : null;
-      this.searchForm.endTime = Number.isFinite(end) ? end : null;
-    },
-    handleSearch() {
-      this.loadSummary();
-    },
-    loadSummary() {
-      this.loading = true;
-      const params = { ...this.searchForm };
-      Object.keys(params).forEach((k) => {
-        if (params[k] === null || params[k] === "" || params[k] === undefined) delete params[k];
-      });
-      getWxChannelsOverviewSummary(params)
-        .then((res) => {
-          if (res && res.success) {
-            this.summary = { ...this.summary, ...(res.result || {}) };
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
 </script>
 
 <style scoped lang="scss">

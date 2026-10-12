@@ -80,92 +80,97 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
+import { formatLinkType } from "@/utils/filters";
 
-export default {
-  name: "onlyGoodsList",
-  props: {
-    data: {
-      type: Object,
-      default: {},
-    },
-  },
-  data() {
-    return {
-      current: 0,
-      showModal: false,
-      draftList: [],
-    };
-  },
-  mounted(){
+defineOptions({ name: "onlyGoodsList" });
 
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
   },
-  methods: {
-    cloneList(list) {
-      return JSON.parse(JSON.stringify(list || []));
-    },
-    // 删除商品
-    delGoods(val, i) {
-      this.draftList.splice(i, 1);
-    },
-    // 添加当前选项卡中的商品
-    addCurrentGoods() {
-      this.$refs.liliDialog.open("goods");
-    },
-    // 编辑模块
-    handleSelectModel() {
-      this.draftList = this.cloneList(this.data.options.list);
-      this.showModal = true;
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      if (!val?.length || !this.draftList) return;
-      val.forEach((item) => {
-        if (this.isGoodsInDraftList(item)) return;
-        this.draftList.push({
-          img: item.thumbnail,
-          price: item.price,
-          title: item.goodsName,
-          desc: "",
-          skuId: item.id,
-          goodsId: item.goodsId,
-          url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
-        });
-      });
-    },
-    isGoodsInDraftList(goods) {
-      const targetUrl = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
-      return this.draftList.some(
-        (draft) =>
-          (draft.skuId && String(draft.skuId) === String(goods.id)) ||
-          (draft.url && draft.url === targetUrl)
-      );
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      if (!this.draftList?.length) return;
-      const item = this.draftList[this.current];
-      item.url = this.$filters.formatLinkType(val);
-      item.type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
-    },
-    handleSelectLink(index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-      this.current = index;
-    },
-    handleCancelModal() {
-      this.draftList = [];
-      this.showModal = false;
-    },
-    handleConfirmModal() {
-      const saved = this.cloneList(this.draftList);
-      this.data.options.list.splice(0, this.data.options.list.length, ...saved);
-      this.draftList = [];
-      this.showModal = false;
-    },
-  },
-};
+});
+
+const current = ref(0);
+const showModal = ref(false);
+const draftList = ref([]);
+
+const liliDialog = ref(null);
+
+function cloneList(list) {
+  return JSON.parse(JSON.stringify(list || []));
+}
+
+// 删除商品
+function delGoods(val, i) {
+  draftList.value.splice(i, 1);
+}
+
+// 添加当前选项卡中的商品
+function addCurrentGoods() {
+  liliDialog.value.open("goods");
+}
+
+// 编辑模块
+function handleSelectModel() {
+  draftList.value = cloneList(props.data.options.list);
+  showModal.value = true;
+}
+
+// 选择商品回调
+function selectedGoodsData(val) {
+  if (!val?.length || !draftList.value) return;
+  val.forEach((item) => {
+    if (isGoodsInDraftList(item)) return;
+    draftList.value.push({
+      img: item.thumbnail,
+      price: item.price,
+      title: item.goodsName,
+      desc: "",
+      skuId: item.id,
+      goodsId: item.goodsId,
+      url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
+    });
+  });
+}
+
+function isGoodsInDraftList(goods) {
+  const targetUrl = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
+  return draftList.value.some(
+    (draft) =>
+      (draft.skuId && String(draft.skuId) === String(goods.id)) ||
+      (draft.url && draft.url === targetUrl)
+  );
+}
+
+// 选择链接回调
+function selectedLink(val) {
+  if (!draftList.value?.length) return;
+  const item = draftList.value[current.value];
+  item.url = formatLinkType(val);
+  item.type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+}
+
+function handleSelectLink(index) {
+  // 调起选择链接弹窗
+  liliDialog.value.open("link");
+  current.value = index;
+}
+
+function handleCancelModal() {
+  draftList.value = [];
+  showModal.value = false;
+}
+
+function handleConfirmModal() {
+  const saved = cloneList(draftList.value);
+  props.data.options.list.splice(0, props.data.options.list.length, ...saved);
+  draftList.value = [];
+  showModal.value = false;
+}
 </script>
 
 <style scoped lang="scss">

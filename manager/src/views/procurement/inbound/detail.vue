@@ -27,36 +27,37 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getProcurementInboundDetail, getProcurementInboundItems } from "@/api/procurement";
 import { formatMoney } from "../constants";
 
-export default {
-  name: "manager-procurement-inbound-detail",
-  data() {
-    return { detail: {}, items: [] };
-  },
-  computed: {
-    totalInboundQuantity() {
-      return (this.items || []).reduce(
-        (sum, item) => sum + (Number(item.inboundQuantity) || 0),
-        0
-      );
-    },
-  },
-  mounted() {
-    const id = this.$route.query.id;
-    if (id) {
-      getProcurementInboundDetail(id).then((res) => {
-        if (res.success) this.detail = res.result || {};
-      });
-      getProcurementInboundItems(id).then((res) => {
-        if (res.success) this.items = res.result || [];
-      });
-    }
-  },
-  methods: { formatMoney },
-};
+defineOptions({ name: "manager-procurement-inbound-detail" });
+
+const route = useRoute();
+
+const detail = ref({});
+const items = ref([]);
+
+const totalInboundQuantity = computed(() => {
+  return (items.value || []).reduce(
+    (sum, item) => sum + (Number(item.inboundQuantity) || 0),
+    0
+  );
+});
+
+onMounted(() => {
+  const id = route.query.id;
+  if (id) {
+    getProcurementInboundDetail(id).then((res) => {
+      if (res.success) detail.value = res.result || {};
+    });
+    getProcurementInboundItems(id).then((res) => {
+      if (res.success) items.value = res.result || [];
+    });
+  }
+});
 </script>
 
 <style scoped>

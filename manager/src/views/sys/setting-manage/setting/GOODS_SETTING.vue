@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+    <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
       <el-form-item label="商品审核" prop="goodsCheck">
         <el-radio-group v-model="formValidate.goodsCheck">
           <el-radio-button value="true">开启</el-radio-button>
@@ -58,76 +58,78 @@
     </el-form>
   </div>
 </template>
-<script>
+<script setup>
+import { reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
-export default {
-  props: ["res", "type"],
-  data() {
-    return {
-      formValidate: {
-        goodsCheck: 1,
-        smallPictureHeight: "0",
-        smallPictureWidth: "0",
-        abbreviationPictureWidth: "0",
-        abbreviationPictureHeight: "0",
-        originalPictureWidth: "0",
-        originalPictureHeight: "0",
+
+const props = defineProps(["res", "type"]);
+
+// 表单数据（init 中整体替换）
+const formValidate = ref({
+  goodsCheck: 1,
+  smallPictureHeight: "0",
+  smallPictureWidth: "0",
+  abbreviationPictureWidth: "0",
+  abbreviationPictureHeight: "0",
+  originalPictureWidth: "0",
+  originalPictureHeight: "0",
+});
+// 校验规则（只做属性合并）
+const ruleValidate = reactive({});
+const result = ref("");
+
+// 模板 ref 与 data 变量 formValidate 同名会互相覆盖，改名 formValidateRef
+const formValidateRef = ref(null);
+// 动态 ref 映射表（模板中以字符串名称调用 submit）
+const refsMap = { formValidate: formValidateRef };
+
+function submit(name) {
+  refsMap[name].value.validate((valid) => {
+    if (valid) {
+      setupSetting();
+    } else {
+      ElMessage.error("请正确填写内容!");
+    }
+  });
+}
+function setupSetting() {
+  setSetting(props.type, formValidate.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+function init() {
+  result.value = JSON.parse(props.res);
+  Object.keys(result.value).map((item) => {
+    result.value[item] += "";
+  });
+  formValidate.value = { ...result.value };
+  Object.keys(formValidate.value).forEach((item) => {
+    ruleValidate[item] = [
+      {
+        required: true,
+        message: "请填写必填项",
+        trigger: "blur",
       },
-      ruleValidate: {},
-      result: "",
-    };
-  },
-  created() {
-    this.init();
-  },
-  methods: {
-    submit(name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.setupSetting();
-        } else {
-          ElMessage.error("请正确填写内容!");
-        }
-      });
-    },
-    setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    init() {
-      this.result = JSON.parse(this.res);
-      Object.keys(this.result).map((item) => {
-        this.result[item] += "";
-      });
-      this.formValidate = { ...this.result };
-      Object.keys(this.formValidate).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-          {
-            validator: (rule, value, callback) => {
-              if (value < 0) {
-                callback(new Error("不能输入负数！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "change",
-          },
-        ];
-      });
-    },
-  },
-};
+      {
+        validator: (rule, value, callback) => {
+          if (value < 0) {
+            callback(new Error("不能输入负数！"));
+          } else {
+            callback();
+          }
+        },
+        trigger: "change",
+      },
+    ];
+  });
+}
+
+init();
 </script>
 
 <style lang="scss" scoped>

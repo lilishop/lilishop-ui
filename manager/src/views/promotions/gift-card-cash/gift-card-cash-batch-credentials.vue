@@ -25,7 +25,7 @@
           >
             {{ t.label }}</span>
         </div>
-        <el-form ref="searchForm" :model="searchForm" inline class="search-form mb_10 gcc-filter-form">
+        <el-form ref="searchFormRef" :model="searchForm" inline class="search-form mb_10 gcc-filter-form">
           <el-form-item label="卡号" prop="cardNo" label-width="60px">
             <el-input
               v-model="searchForm.cardNo"
@@ -160,8 +160,16 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getGiftCardCashCredentialPage } from "@/api/promotion";
+import { unitPrice } from "@/utils/filters";
+import { useAppStore } from "@/stores/app";
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
 
 const STATUS_LABEL = {
   UNISSUED: "未兑换",
@@ -183,283 +191,286 @@ const ISSUE_STATUS_LABEL = {
   SUCCESS: "发卡成功",
 };
 
-export default {
-  name: "GiftCardCashBatchCredentials",
-  data() {
-    return {
-      activityId: "",
-      createBatchId: "",
-      issueBatchId: "",
-      giftCardName: "",
-      batchRemark: "",
-      lifecycleTab: "all",
-      statusTabList: [
-        { key: "all", label: "全部", status: "" },
-        { key: "unredeemed", label: "未兑换", status: "UNISSUED" },
-        { key: "unactivated", label: "未激活", status: "UNACTIVATED" },
-        { key: "activated", label: "已激活", status: "BOUND" },
-        { key: "cancelled", label: "已销卡", status: "VOIDED" },
-        { key: "expired", label: "已过期", status: "EXPIRED" },
-      ],
-      redeemDateRange: [],
-      activateDateRange: [],
-      loading: false,
-      total: 0,
-      data: [],
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        cardNo: "",
-        redeemMemberField: "nickName",
-        redeemMemberKeyword: "",
-        activateMemberField: "nickName",
-        activateMemberKeyword: "",
-      },
-    };
-  },
-  computed: {
-    isIssueBatchMode() {
-      return !!this.issueBatchId;
-    },
-    hasBatchId() {
-      return !!(this.createBatchId || this.issueBatchId);
-    },
-    batchTypeLabel() {
-      return this.isIssueBatchMode ? "发卡批次" : "制卡批次";
-    },
-    batchSourceLabel() {
-      return this.isIssueBatchMode ? "发卡记录" : "制卡记录";
-    },
-    batchIdDisplay() {
-      return this.isIssueBatchMode ? this.issueBatchId : this.createBatchId;
-    },
-  },
-  mounted() {
-    this.initFromRoute();
-    if (this.activityId && this.hasBatchId) {
-      this.loadList();
+defineOptions({ name: "GiftCardCashBatchCredentials" });
+
+const activityId = ref("");
+const createBatchId = ref("");
+const issueBatchId = ref("");
+const giftCardName = ref("");
+const batchRemark = ref("");
+const lifecycleTab = ref("all");
+const statusTabList = ref([
+  { key: "all", label: "全部", status: "" },
+  { key: "unredeemed", label: "未兑换", status: "UNISSUED" },
+  { key: "unactivated", label: "未激活", status: "UNACTIVATED" },
+  { key: "activated", label: "已激活", status: "BOUND" },
+  { key: "cancelled", label: "已销卡", status: "VOIDED" },
+  { key: "expired", label: "已过期", status: "EXPIRED" },
+]);
+const redeemDateRange = ref([]);
+const activateDateRange = ref([]);
+const loading = ref(false);
+const total = ref(0);
+const data = ref([]);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  cardNo: "",
+  redeemMemberField: "nickName",
+  redeemMemberKeyword: "",
+  activateMemberField: "nickName",
+  activateMemberKeyword: "",
+});
+const searchFormRef = ref(null);
+
+const isIssueBatchMode = computed(() => {
+  return !!issueBatchId.value;
+});
+const hasBatchId = computed(() => {
+  return !!(createBatchId.value || issueBatchId.value);
+});
+const batchTypeLabel = computed(() => {
+  return isIssueBatchMode.value ? "发卡批次" : "制卡批次";
+});
+const batchSourceLabel = computed(() => {
+  return isIssueBatchMode.value ? "发卡记录" : "制卡记录";
+});
+const batchIdDisplay = computed(() => {
+  return isIssueBatchMode.value ? issueBatchId.value : createBatchId.value;
+});
+
+onMounted(() => {
+  initFromRoute();
+  if (activityId.value && hasBatchId.value) {
+    loadList();
+  }
+});
+
+watch(
+  () => route.query.createBatchId,
+  () => {
+    onRouteQueryChange();
+  }
+);
+watch(
+  () => route.query.issueBatchId,
+  () => {
+    onRouteQueryChange();
+  }
+);
+watch(
+  () => route.query.activityId,
+  () => {
+    onRouteQueryChange();
+  }
+);
+
+function formatPrice(value) {
+  if (value === null || value === undefined || value === "") {
+    return "—";
+  }
+  return unitPrice(value, "￥");
+}
+function formatStatus(status) {
+  return STATUS_LABEL[status] || status || "—";
+}
+function formatIssueStatus(status) {
+  return ISSUE_STATUS_LABEL[status] || status || "—";
+}
+function formatIssueBatchId(row) {
+  const id = row.issueBatchId ?? issueBatchId.value;
+  return id != null && id !== "" ? String(id) : "—";
+}
+function formatActivationTime(row) {
+  const t = row.activationTime || row.activateTime || row.bindTime;
+  return t != null && t !== "" ? String(t) : "—";
+}
+function onRouteQueryChange() {
+  initFromRoute();
+  if (activityId.value && hasBatchId.value) {
+    searchForm.pageNumber = 1;
+    loadList();
+  }
+}
+function initFromRoute() {
+  const q = route.query || {};
+  activityId.value = (q.activityId && String(q.activityId)) || "";
+  createBatchId.value = (q.createBatchId && String(q.createBatchId)) || "";
+  issueBatchId.value = (q.issueBatchId && String(q.issueBatchId)) || "";
+  giftCardName.value = (q.giftCardName && String(q.giftCardName)) || "";
+  batchRemark.value = (q.batchRemark && String(q.batchRemark)) || "";
+}
+function closePage() {
+  appStore.removeTag("gift-card-cash-batch-credentials");
+  localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
+  router.go(-1);
+}
+function formatMemberText(name, mobile) {
+  const n = name != null && name !== "" ? String(name) : "";
+  const m = mobile != null && mobile !== "" ? String(mobile) : "";
+  if (n && m) {
+    return `${n} / ${m}`;
+  }
+  return n || m || "—";
+}
+function formatIssueMember(row) {
+  return formatMemberText(
+    row.issueMemberNickName ||
+      row.issueMemberName ||
+      row.exchangeMemberNickName ||
+      row.exchangeMemberName ||
+      row.memberNickName,
+    row.issueMemberMobile || row.exchangeMemberMobile || row.memberMobile
+  );
+}
+function formatActivationMember(row) {
+  return formatMemberText(
+    row.activationMemberNickName ||
+      row.activationMemberName ||
+      row.activateMemberNickName ||
+      row.activateMemberName,
+    row.activationMemberMobile || row.activateMemberMobile
+  );
+}
+function onLifecycleTab(key) {
+  if (lifecycleTab.value === key) {
+    return;
+  }
+  lifecycleTab.value = key;
+  searchForm.pageNumber = 1;
+  loadList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  loadList();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  loadList();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  loadList();
+}
+function formatDayStart(d) {
+  if (!d) {
+    return "";
+  }
+  const x = d instanceof Date ? d : new Date(d);
+  if (Number.isNaN(x.getTime())) {
+    return "";
+  }
+  const y = x.getFullYear();
+  const m = String(x.getMonth() + 1).padStart(2, "0");
+  const day = String(x.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day} 00:00:00`;
+}
+function formatDayEnd(d) {
+  if (!d) {
+    return "";
+  }
+  const x = d instanceof Date ? d : new Date(d);
+  if (Number.isNaN(x.getTime())) {
+    return "";
+  }
+  const y = x.getFullYear();
+  const m = String(x.getMonth() + 1).padStart(2, "0");
+  const day = String(x.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day} 23:59:59`;
+}
+function appendMemberSearch(params, kind, field, keyword) {
+  const kw = (keyword || "").trim();
+  if (!kw) {
+    return;
+  }
+  if (kind === "exchange") {
+    if (field === "mobile") {
+      params.exchangeMemberMobile = kw;
+    } else {
+      params.exchangeMemberNickName = kw;
     }
-  },
-  watch: {
-    "$route.query.createBatchId"() {
-      this.onRouteQueryChange();
-    },
-    "$route.query.issueBatchId"() {
-      this.onRouteQueryChange();
-    },
-    "$route.query.activityId"() {
-      this.onRouteQueryChange();
-    },
-  },
-  methods: {
-    formatPrice(value) {
-      if (value === null || value === undefined || value === "") {
-        return "—";
+  } else if (field === "mobile") {
+    params.activationMemberMobile = kw;
+  } else {
+    params.activationMemberNickName = kw;
+  }
+}
+function appendDateRange(params, kind, range) {
+  if (!range || !range[0] || !range[1]) {
+    return;
+  }
+  const start = formatDayStart(range[0]);
+  const end = formatDayEnd(range[1]);
+  if (kind === "exchange") {
+    if (start) {
+      params.exchangeTimeStart = start;
+    }
+    if (end) {
+      params.exchangeTimeEnd = end;
+    }
+  } else {
+    if (start) {
+      params.activationTimeStart = start;
+    }
+    if (end) {
+      params.activationTimeEnd = end;
+    }
+  }
+}
+function loadList() {
+  if (!activityId.value || !hasBatchId.value) {
+    return;
+  }
+  loading.value = true;
+  const params = {
+    activityId: activityId.value,
+    pageNumber: searchForm.pageNumber,
+    pageSize: searchForm.pageSize,
+    sort: searchForm.sort,
+    order: searchForm.order,
+  };
+  if (isIssueBatchMode.value) {
+    params.issueBatchId = issueBatchId.value;
+  } else {
+    params.createBatchId = createBatchId.value;
+  }
+  const tabCfg = statusTabList.value.find((t) => t.key === lifecycleTab.value);
+  if (tabCfg && tabCfg.status) {
+    params.status = tabCfg.status;
+  }
+  const cardNo = (searchForm.cardNo || "").trim();
+  if (cardNo) {
+    params.cardNo = cardNo;
+  }
+  appendMemberSearch(
+    params,
+    "exchange",
+    searchForm.redeemMemberField,
+    searchForm.redeemMemberKeyword
+  );
+  appendMemberSearch(
+    params,
+    "activation",
+    searchForm.activateMemberField,
+    searchForm.activateMemberKeyword
+  );
+  appendDateRange(params, "exchange", redeemDateRange.value);
+  appendDateRange(params, "activation", activateDateRange.value);
+  getGiftCardCashCredentialPage(params)
+    .then((res) => {
+      loading.value = false;
+      if (res.success && res.result) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
       }
-      return this.$filters.unitPrice(value, "￥");
-    },
-    formatStatus(status) {
-      return STATUS_LABEL[status] || status || "—";
-    },
-    formatIssueStatus(status) {
-      return ISSUE_STATUS_LABEL[status] || status || "—";
-    },
-    formatIssueBatchId(row) {
-      const id = row.issueBatchId ?? this.issueBatchId;
-      return id != null && id !== "" ? String(id) : "—";
-    },
-    formatActivationTime(row) {
-      const t = row.activationTime || row.activateTime || row.bindTime;
-      return t != null && t !== "" ? String(t) : "—";
-    },
-    onRouteQueryChange() {
-      this.initFromRoute();
-      if (this.activityId && this.hasBatchId) {
-        this.searchForm.pageNumber = 1;
-        this.loadList();
-      }
-    },
-    initFromRoute() {
-      const q = this.$route.query || {};
-      this.activityId = (q.activityId && String(q.activityId)) || "";
-      this.createBatchId = (q.createBatchId && String(q.createBatchId)) || "";
-      this.issueBatchId = (q.issueBatchId && String(q.issueBatchId)) || "";
-      this.giftCardName = (q.giftCardName && String(q.giftCardName)) || "";
-      this.batchRemark = (q.batchRemark && String(q.batchRemark)) || "";
-    },
-    closePage() {
-      this.$store.commit("removeTag", "gift-card-cash-batch-credentials");
-      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
-      this.$router.go(-1);
-    },
-    formatMemberText(name, mobile) {
-      const n = name != null && name !== "" ? String(name) : "";
-      const m = mobile != null && mobile !== "" ? String(mobile) : "";
-      if (n && m) {
-        return `${n} / ${m}`;
-      }
-      return n || m || "—";
-    },
-    formatIssueMember(row) {
-      return this.formatMemberText(
-        row.issueMemberNickName ||
-          row.issueMemberName ||
-          row.exchangeMemberNickName ||
-          row.exchangeMemberName ||
-          row.memberNickName,
-        row.issueMemberMobile || row.exchangeMemberMobile || row.memberMobile
-      );
-    },
-    formatActivationMember(row) {
-      return this.formatMemberText(
-        row.activationMemberNickName ||
-          row.activationMemberName ||
-          row.activateMemberNickName ||
-          row.activateMemberName,
-        row.activationMemberMobile || row.activateMemberMobile
-      );
-    },
-    onLifecycleTab(key) {
-      if (this.lifecycleTab === key) {
-        return;
-      }
-      this.lifecycleTab = key;
-      this.searchForm.pageNumber = 1;
-      this.loadList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.loadList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.loadList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.loadList();
-    },
-    formatDayStart(d) {
-      if (!d) {
-        return "";
-      }
-      const x = d instanceof Date ? d : new Date(d);
-      if (Number.isNaN(x.getTime())) {
-        return "";
-      }
-      const y = x.getFullYear();
-      const m = String(x.getMonth() + 1).padStart(2, "0");
-      const day = String(x.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day} 00:00:00`;
-    },
-    formatDayEnd(d) {
-      if (!d) {
-        return "";
-      }
-      const x = d instanceof Date ? d : new Date(d);
-      if (Number.isNaN(x.getTime())) {
-        return "";
-      }
-      const y = x.getFullYear();
-      const m = String(x.getMonth() + 1).padStart(2, "0");
-      const day = String(x.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day} 23:59:59`;
-    },
-    appendMemberSearch(params, kind, field, keyword) {
-      const kw = (keyword || "").trim();
-      if (!kw) {
-        return;
-      }
-      if (kind === "exchange") {
-        if (field === "mobile") {
-          params.exchangeMemberMobile = kw;
-        } else {
-          params.exchangeMemberNickName = kw;
-        }
-      } else if (field === "mobile") {
-        params.activationMemberMobile = kw;
-      } else {
-        params.activationMemberNickName = kw;
-      }
-    },
-    appendDateRange(params, kind, range) {
-      if (!range || !range[0] || !range[1]) {
-        return;
-      }
-      const start = this.formatDayStart(range[0]);
-      const end = this.formatDayEnd(range[1]);
-      if (kind === "exchange") {
-        if (start) {
-          params.exchangeTimeStart = start;
-        }
-        if (end) {
-          params.exchangeTimeEnd = end;
-        }
-      } else {
-        if (start) {
-          params.activationTimeStart = start;
-        }
-        if (end) {
-          params.activationTimeEnd = end;
-        }
-      }
-    },
-    loadList() {
-      if (!this.activityId || !this.hasBatchId) {
-        return;
-      }
-      this.loading = true;
-      const params = {
-        activityId: this.activityId,
-        pageNumber: this.searchForm.pageNumber,
-        pageSize: this.searchForm.pageSize,
-        sort: this.searchForm.sort,
-        order: this.searchForm.order,
-      };
-      if (this.isIssueBatchMode) {
-        params.issueBatchId = this.issueBatchId;
-      } else {
-        params.createBatchId = this.createBatchId;
-      }
-      const tabCfg = this.statusTabList.find((t) => t.key === this.lifecycleTab);
-      if (tabCfg && tabCfg.status) {
-        params.status = tabCfg.status;
-      }
-      const cardNo = (this.searchForm.cardNo || "").trim();
-      if (cardNo) {
-        params.cardNo = cardNo;
-      }
-      this.appendMemberSearch(
-        params,
-        "exchange",
-        this.searchForm.redeemMemberField,
-        this.searchForm.redeemMemberKeyword
-      );
-      this.appendMemberSearch(
-        params,
-        "activation",
-        this.searchForm.activateMemberField,
-        this.searchForm.activateMemberKeyword
-      );
-      this.appendDateRange(params, "exchange", this.redeemDateRange);
-      this.appendDateRange(params, "activation", this.activateDateRange);
-      getGiftCardCashCredentialPage(params)
-        .then((res) => {
-          this.loading = false;
-          if (res.success && res.result) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
 </script>
 
 <style scoped>

@@ -247,267 +247,261 @@
     </el-card>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, ref, watch } from "vue";
 import * as API_Goods from "@/api/goods";
 import orderRow from "./order/orderDetail";
 import refundRow from "./order/refundOrder";
 import affixTime from "@/views/lili-components/affix-time";
 
-export default {
-  components: { orderRow, refundRow, affixTime },
+const orderOrRefund = ref("order"); // order | refund
+const total = ref(0); // 总数
+// 订单状态
+const orderStatusList = ref({
+  UNDELIVERED: "待发货",
+  UNPAID: "未付款",
+  PAID: "已付款",
+  DELIVERED: "已发货",
+  CANCELLED: "已关闭",
+  COMPLETED: "已完成",
+  TAKE: "已完成",
+});
 
-  data() {
-    return {
-      orderOrRefund: "order", // order | refund
-      total: 0, // 总数
-      // 订单状态
-      orderStatusList: {
-        UNDELIVERED: "待发货",
-        UNPAID: "未付款",
-        PAID: "已付款",
-        DELIVERED: "已发货",
-        CANCELLED: "已关闭",
-        COMPLETED: "已完成",
-        TAKE: "已完成",
-      },
+const serviceTypeList = ref({
+  // 服务类型
+  CANCEL: "取消",
+  RETURN_GOODS: "退货",
+  EXCHANGE_GOODS: "换货",
+  RETURN_MONEY: "退款",
+});
+const serviceStatusList = ref({
+  // 服务状态
+  APPLY: "申请售后",
+  PASS: "通过售后",
+  REFUSE: "拒绝售后",
+  BUYER_RETURN: "买家退货，待卖家收货",
+  SELLER_RE_DELIVERY: "商家换货/补发",
+  SELLER_CONFIRM: "卖家确认收货",
+  SELLER_TERMINATION: "卖家终止售后",
+  BUYER_CONFIRM: "买家确认收货",
+  BUYER_CANCEL: "买家取消售后",
+  WAIT_REFUND: "等待平台退款",
+  COMPLETE: "完成售后",
+});
+//
 
-      serviceTypeList: {
-        // 服务类型
-        CANCEL: "取消",
-        RETURN_GOODS: "退货",
-        EXCHANGE_GOODS: "换货",
-        RETURN_MONEY: "退款",
-      },
-      serviceStatusList: {
-        // 服务状态
-        APPLY: "申请售后",
-        PASS: "通过售后",
-        REFUSE: "拒绝售后",
-        BUYER_RETURN: "买家退货，待卖家收货",
-        SELLER_RE_DELIVERY: "商家换货/补发",
-        SELLER_CONFIRM: "卖家确认收货",
-        SELLER_TERMINATION: "卖家终止售后",
-        BUYER_CONFIRM: "买家确认收货",
-        BUYER_CANCEL: "买家取消售后",
-        WAIT_REFUND: "等待平台退款",
-        COMPLETE: "完成售后",
-      },
-      //
+const data = ref([]);
 
-      data: [],
-
-      // 交易概况
-      transactionList: [
-        {
-          label: "转换",
-          value: "",
-        },
-        {
-          label: "订单",
-          value: "",
-        },
-        {
-          label: "退单",
-          value: "",
-        },
-      ],
-
-      chartList: [], // 绘制订单图表数据
-      orderChart: "", //订单图表
-
-      overViewList: {}, // 绘制订单统计概览
-      overViewChart: "", //订单订单统计概览图标
-
-      // 时间
-      dateList: [
-        {
-          title: "今天",
-          selected: false,
-          value: "TODAY",
-        },
-        {
-          title: "昨天",
-          selected: false,
-          value: "YESTERDAY",
-        },
-        {
-          title: "过去7天",
-          selected: true,
-          value: "LAST_SEVEN",
-        },
-        {
-          title: "过去30天",
-          selected: false,
-          value: "LAST_THIRTY",
-        },
-      ],
-      // 订单传参
-      orderParams: {
-        searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        year: "",
-        shopId: "",
-        memberId: "",
-      },
-      // 订单概念
-      overViewParams: {
-        month: "",
-        searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: "",
-        year: "",
-      },
-      defaultParams: {
-        month: "",
-        searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-        storeId: "",
-        year: "",
-      },
-      // 退单订单
-      refundParams: {
-        pageNumber: 1,
-        pageSize: 20,
-        searchType: "LAST_SEVEN",
-        storeId: "",
-        year: "",
-      },
-      showRecords:false,
-
-      //
-      //
-    };
+// 交易概况
+const transactionList = ref([
+  {
+    label: "转换",
+    value: "",
   },
-  watch: {
-    refundParams: {
-      handler(val) {
-        this.getOrderList();
-      },
-      deep: true,
-      immediate: true,
-    },
-    orderOrRefund() {
-      this.showRecords = false;
-      this.refundParams.pageNumber = 1;
-      this.getOrderList();
-    },
-    orderParams: {
-      handler() {
-        this.initOrderChartList();
-      },
-      deep: true,
-    },
-    overViewParams: {
-      handler() {
-        this.initOrderOverViewList();
-      },
-      deep: true,
-    },
+  {
+    label: "订单",
+    value: "",
   },
-  methods: {
-    // 订单图
-    initOrderChart() {
-      // 默认已经加载 legend-filter 交互
-      let data = this.chartList;
+  {
+    label: "退单",
+    value: "",
+  },
+]);
 
-      data.forEach((item) => {
-        item.createTime = item.createTime.split(" ")[0];
-        item.title = "交易额";
+const chartList = ref([]); // 绘制订单图表数据
+// G2 图表实例（原 data 中初始化为 ""）
+const orderChart = ref(""); //订单图表
+
+const overViewList = ref({}); // 绘制订单统计概览
+const overViewChart = ref(""); //订单订单统计概览图标
+
+// 时间
+const dateList = ref([
+  {
+    title: "今天",
+    selected: false,
+    value: "TODAY",
+  },
+  {
+    title: "昨天",
+    selected: false,
+    value: "YESTERDAY",
+  },
+  {
+    title: "过去7天",
+    selected: true,
+    value: "LAST_SEVEN",
+  },
+  {
+    title: "过去30天",
+    selected: false,
+    value: "LAST_THIRTY",
+  },
+]);
+// 订单传参
+const orderParams = ref({
+  searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
+  year: "",
+  shopId: "",
+  memberId: "",
+});
+// 订单概念
+const overViewParams = ref({
+  month: "",
+  searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
+  storeId: "",
+  year: "",
+});
+const defaultParams = ref({
+  month: "",
+  searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
+  storeId: "",
+  year: "",
+});
+// 退单订单
+const refundParams = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  searchType: "LAST_SEVEN",
+  storeId: "",
+  year: "",
+});
+const showRecords = ref(false);
+
+//
+//
+
+watch(
+  refundParams,
+  (val) => {
+    getOrderList();
+  },
+  { deep: true, immediate: true }
+);
+watch(orderOrRefund, () => {
+  showRecords.value = false;
+  refundParams.value.pageNumber = 1;
+  getOrderList();
+});
+watch(
+  orderParams,
+  () => {
+    initOrderChartList();
+  },
+  { deep: true }
+);
+watch(
+  overViewParams,
+  () => {
+    initOrderOverViewList();
+  },
+  { deep: true }
+);
+
+// 订单图
+function initOrderChart() {
+  // 默认已经加载 legend-filter 交互
+  let data = chartList.value;
+
+  data.forEach((item) => {
+    item.createTime = item.createTime.split(" ")[0];
+    item.title = "交易额";
+  });
+  orderChart.value.data(data);
+
+  orderChart.value.tooltip({
+    showCrosshairs: true,
+    shared: true,
+  });
+
+  orderChart.value
+    .line()
+    .position("createTime*price")
+    .label("price")
+    .color("title")
+    .shape("smooth");
+
+  orderChart.value
+    .point()
+    .position("createTime*price")
+    .label("price")
+    .color("title")
+    .shape("circle")
+    .style({
+      stroke: "#fff",
+      lineWidth: 1,
+    });
+  orderChart.value.area().position("createTime*price").color("title").shape("smooth");
+
+  orderChart.value.render();
+}
+
+function clickBreadcrumb(item, index) {
+  let callback = JSON.parse(JSON.stringify(item));
+  console.log("callback", callback);
+  orderParams.value = callback;
+
+  overViewParams.value = callback;
+  refundParams.value = callback;
+  refundParams.value.pageNumber = 1;
+  refundParams.value.pageSize = 20;
+}
+
+// 实例化订单概览
+async function initOrderOverViewList() {
+  const res = await API_Goods.getOrderOverView(overViewParams.value);
+  if (res.success) {
+    overViewList.value = res.result;
+  }
+}
+// 实例化订单图表
+async function initOrderChartList(name) {
+  orderChart.value ? orderChart.value.clear() : "";
+  const res = await API_Goods.getOrderChart(orderParams.value);
+  if (res.success) {
+    chartList.value = res.result;
+
+    if (!orderChart.value) {
+      const { Chart } = await import("@antv/g2");
+      orderChart.value = new Chart({
+        container: "orderChart",
+        autoFit: true,
+        height: 500,
+        padding: [70, 70, 70, 70],
       });
-      this.orderChart.data(data);
+    }
 
-      this.orderChart.tooltip({
-        showCrosshairs: true,
-        shared: true,
-      });
+    initOrderChart(); //订单表
+  }
+}
+// 统计相关订单统计
+async function getOrderList() {
+  let res;
+  if (orderOrRefund.value === "order") {
+    // 订单
+    res = await API_Goods.statisticsOrderList(refundParams.value);
+  } else {
+    // 退单
+    res = await API_Goods.statisticsOrderRefundList(refundParams.value);
+  }
+  if (res.success) {
+    showRecords.value = true;
+    data.value = res.result.records;
+    total.value = res.result.total;
+  }
+}
 
-      this.orderChart
-        .line()
-        .position("createTime*price")
-        .label("price")
-        .color("title")
-        .shape("smooth");
+// 实例化初始值
+function initBaseParams() {
+  let data = new Date();
+  getOrderList();
+  orderParams.value.year = data.getFullYear();
+  overViewParams.value.year = data.getFullYear();
+}
 
-      this.orderChart
-        .point()
-        .position("createTime*price")
-        .label("price")
-        .color("title")
-        .shape("circle")
-        .style({
-          stroke: "#fff",
-          lineWidth: 1,
-        });
-         this.orderChart.area().position("createTime*price").color("title").shape("smooth");
-
-      this.orderChart.render();
-    },
-
-    clickBreadcrumb(item, index) {
-      let callback = JSON.parse(JSON.stringify(item));
-      console.log("callback",callback)
-      this.orderParams = callback;
-
-      this.overViewParams = callback;
-      this.refundParams = callback;
-      this.refundParams.pageNumber = 1
-      this.refundParams.pageSize = 20
-    },
-
-    // 实例化订单概览
-    async initOrderOverViewList() {
-      const res = await API_Goods.getOrderOverView(this.overViewParams);
-      if (res.success) {
-        this.overViewList = res.result;
-      }
-    },
-    // 实例化订单图表
-    async initOrderChartList(name) {
-      this.orderChart ? this.orderChart.clear() : ''
-      const res = await API_Goods.getOrderChart(this.orderParams);
-      if (res.success) {
-        this.chartList = res.result;
-
-        if (!this.orderChart) {
-          const { Chart } = await import("@antv/g2");
-          this.orderChart = new Chart({
-            container: "orderChart",
-            autoFit: true,
-            height: 500,
-            padding: [70, 70, 70, 70],
-          });
-        }
-
-        this.initOrderChart(); //订单表
-      }
-    },
-    // 统计相关订单统计
-    async getOrderList() {
-      let res;
-      if (this.orderOrRefund === "order") {
-        // 订单
-        res = await API_Goods.statisticsOrderList(this.refundParams);
-      } else {
-        // 退单
-        res = await API_Goods.statisticsOrderRefundList(this.refundParams);
-      }
-      if (res.success) {
-        this.showRecords = true;
-        this.data = res.result.records;
-        this.total = res.result.total;
-      }
-    },
-
-    // 实例化初始值
-    initBaseParams() {
-      let data = new Date();
-      this.getOrderList();
-      this.orderParams.year = data.getFullYear();
-      this.overViewParams.year = data.getFullYear();
-    },
-  },
-
-  mounted() {
-    this.initBaseParams();
-  },
-};
+onMounted(() => {
+  initBaseParams();
+});
 </script>
 <style scoped lang="scss">
 .active {

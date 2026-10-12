@@ -44,89 +44,91 @@
     <BaseFooter></BaseFooter>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import { Iphone } from '@element-plus/icons-vue';
 import vueQr from 'vue-qr';
 import { payCallback, pay } from '@/api/pay.js';
-export default {
-  components: { vueQr, Iphone },
-  data () {
-    return {
-      qrcode: '',
-      params: this.$route.query,
-      interval: null,
-      num: 0,
-      payLoading: false,
-      payError: '',
-    };
-  },
-  computed: {
-    payWayName () {
-      return this.params.paymentMethod === 'ALIPAY' ? '支付宝' : '微信';
-    },
-  },
-  methods: {
-    formatPayError (rawMessage) {
-      const message = (rawMessage || '').trim();
-      if (!message || message === '支付业务异常，请稍后重试') {
-        return `${this.payWayName}支付暂不可用，请稍后重试或选择其他支付方式`;
+
+const route = useRoute();
+const router = useRouter();
+
+const qrcode = ref('');
+const params = ref(route.query);
+const num = ref(0);
+const payLoading = ref(false);
+const payError = ref('');
+let interval = null;
+
+const payWayName = computed(() => {
+  return params.value.paymentMethod === 'ALIPAY' ? '支付宝' : '微信';
+});
+
+function formatPayError (rawMessage) {
+  const message = (rawMessage || '').trim();
+  if (!message || message === '支付业务异常，请稍后重试') {
+    return `${payWayName.value}支付暂不可用，请稍后重试或选择其他支付方式`;
+  }
+  return message;
+}
+
+function clearPayPoll () {
+  if (interval) {
+    clearInterval(interval);
+    interval = null;
+  }
+}
+
+function handlePay () {
+  clearPayPoll();
+  const params = route.query;
+  payLoading.value = true;
+  payError.value = '';
+  qrcode.value = '';
+  pay(params, { skipMessage: true })
+    .then((res) => {
+      payLoading.value = false;
+      if (res.success && res.result) {
+        qrcode.value = res.result;
+        num.value = 0;
+        interval = setInterval(callback, 5000);
+        return;
       }
-      return message;
-    },
-    clearPayPoll () {
-      if (this.interval) {
-        clearInterval(this.interval);
-        this.interval = null;
-      }
-    },
-    handlePay () {
-      this.clearPayPoll();
-      const params = this.$route.query;
-      this.payLoading = true;
-      this.payError = '';
-      this.qrcode = '';
-      pay(params, { skipMessage: true })
-        .then((res) => {
-          this.payLoading = false;
-          if (res.success && res.result) {
-            this.qrcode = res.result;
-            this.num = 0;
-            this.interval = setInterval(this.callback, 5000);
-            return;
-          }
-          this.payError = this.formatPayError(res.message);
-          Message.error(this.payError);
-        })
-        .catch((err) => {
-          this.payLoading = false;
-          this.payError = this.formatPayError(err?.message || err?.data?.message);
-          Message.error(this.payError);
-        });
-    },
-    callback () {
-      this.num++;
-      if (this.num >= 7) {
-        this.clearPayPoll();
-      }
-      const params = JSON.parse(JSON.stringify(this.$route.query));
-      delete params.paymentMethod;
-      delete params.paymentClient;
-      payCallback(params).then((res) => {
-        if (res.result) {
-          this.clearPayPoll();
-          this.$router.push({ path: '/payDone', query: { orderType: this.$route.query.orderType } });
-        }
-      });
-    },
-  },
-  mounted () {
-    this.handlePay();
-  },
-  beforeUnmount () {
-    this.clearPayPoll();
-  },
-};
+      payError.value = formatPayError(res.message);
+      Message.error(payError.value);
+    })
+    .catch((err) => {
+      payLoading.value = false;
+      payError.value = formatPayError(err?.message || err?.data?.message);
+      Message.error(payError.value);
+    });
+}
+
+function callback () {
+  num.value++;
+  if (num.value >= 7) {
+    clearPayPoll();
+  }
+  const params = JSON.parse(JSON.stringify(route.query));
+  delete params.paymentMethod;
+  delete params.paymentClient;
+  payCallback(params).then((res) => {
+    if (res.result) {
+      clearPayPoll();
+      router.push({ path: '/payDone', query: { orderType: route.query.orderType } });
+    }
+  });
+}
+
+onMounted(() => {
+  handlePay();
+});
+
+onBeforeUnmount(() => {
+  clearPayPoll();
+});
 </script>
 <style scoped lang="scss">
 .head-left {

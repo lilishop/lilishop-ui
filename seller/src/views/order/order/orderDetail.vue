@@ -406,7 +406,7 @@
     </div>
 
     <el-dialog v-model="modal" title="修改金额" width="530px">
-      <el-form ref="modifyPriceForm" :model="modifyPriceForm" label-width="100px" :rules="modifyPriceValidate" @submit.prevent>
+      <el-form ref="modifyPriceFormRef" :model="modifyPriceForm" label-width="100px" :rules="modifyPriceValidate" @submit.prevent>
         <el-form-item label="订单金额" prop="orderPrice">
           <el-input-number v-model="modifyPriceForm.orderPrice" :min="0.01" :max="99999" style="width: 100%" />
         </el-form-item>
@@ -418,7 +418,7 @@
     </el-dialog>
 
     <el-dialog v-model="sellerRemarkModal" title="编辑备注" width="530px">
-      <el-form ref="modifyRemarkForm" :model="modifyRemarkForm" label-width="100px">
+      <el-form ref="modifyRemarkFormRef" :model="modifyRemarkForm" label-width="100px">
         <el-form-item label="订单备注" prop="sellerRemark">
           <el-input v-model="modifyRemarkForm.sellerRemark" maxlength="20" show-word-limit />
         </el-form-item>
@@ -430,7 +430,7 @@
     </el-dialog>
 
     <el-dialog v-model="addressModal" title="修改收件信息" width="530px">
-      <el-form ref="addressForm" :model="addressForm" label-width="100px" :rules="addressRule">
+      <el-form ref="addressFormRef" :model="addressForm" label-width="100px" :rules="addressRule">
         <el-form-item label="收件人" prop="consigneeName">
           <el-input v-model="addressForm.consigneeName" maxlength="20" />
         </el-form-item>
@@ -774,7 +774,7 @@
 
     <el-dialog v-model="faceSheetModal" title="打印电子面单" width="500px">
       <el-form
-        ref="faceSheetForm"
+        ref="faceSheetFormRef"
         :model="faceSheetForm"
         :rules="faceSheetFormValidate"
         label-width="90px"
@@ -812,7 +812,7 @@
           已核销 {{ appointmentVerification.verifiedCount }}/{{ appointmentVerification.totalCount }}，
           请继续输入剩余核销码直至全部完成。
         </el-alert>
-        <el-form ref="appointmentTakeForm" :model="appointmentTakeForm" label-width="100px" :rules="appointmentTakeValidate">
+        <el-form ref="appointmentTakeFormRef" :model="appointmentTakeForm" label-width="100px" :rules="appointmentTakeValidate">
           <el-form-item label="服务人员" prop="staffId">
             <el-select
               v-model="appointmentTakeForm.staffId"
@@ -852,7 +852,7 @@
           </el-table-column>
         </el-table>
       </template>
-      <el-form v-else ref="orderTakeForm" :model="orderTakeForm" label-width="100px" :rules="orderTakeValidate">
+      <el-form v-else ref="orderTakeFormRef" :model="orderTakeForm" label-width="100px" :rules="orderTakeValidate">
         <el-form-item label="核销码" prop="qrCode">
           <el-input v-model="orderTakeForm.qrCode" placeholder="请输入核销码" maxlength="10" clearable />
         </el-form-item>
@@ -873,7 +873,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import * as API_Order from "@/api/order";
 import * as API_Logistics from "@/api/logistics";
 import * as RegExp from "@/libs/RegExp.js";
@@ -902,843 +904,847 @@ import {
   verifyAppointmentCode,
 } from "@/api/appointment";
 import { WORK_ORDER_STATUS_LABEL, parseFormAnswerGroups } from "@/constants/appointment";
-export default {
-  name: "orderDetail",
-  components: {
-    multipleMap,
-    "vue-qr": vueQr,
-  },
-  data () {
-    return {
-      typeList: [],
-      showPrices: false,
-      printHiddenFlag: false,
-      loading: false,
-      logisticsType: "KUAIDINIAO",
-      someJSONdata: "",
-      faceSheetForm: {
-        logisticsId: "",
-      },
-      faceSheetFormValidate: {
-        logisticsId: [{ required: true, message: "请选择物流公司" }],
-      },
-      logisticsModal: false,
-      faceSheetModal: false,
-      logisticsInfo: {
-        shipper: "",
-      },
-      packageTraceList: [],
-      sellerRemarkModal: false,
-      addr: "",
-      regionId: "",
+import { Message } from "@/utils/message";
 
-      orderLogModal: false,
-      checkedLogistics: [], //选中的物流公司集合
-      allowOperation: {}, //订单可才做选项
-      sn: "", //订单编号
-      orderInfo: {
-        order: {
-          priceDetailDTO: {},
-        },
-      },
-      modal: false,
-      //调整价格表单
-      modifyPriceForm: {
-        orderPrice: 0,
-      },
-      modifyRemarkForm: {
-        sellerRemark: "",
-      },
-      fulfillModal: false,
-      fulfillSubmitting: false,
-      autoOpenFulfill: true,
-      fulfillForm: {
-        fulfillmentMode: "WHOLE",
-        logisticsNo: "",
-        logisticsId: "",
-        deliveryRemark: "",
-        selectedOrderItemIds: [],
-        deliveryNumMap: {},
-      },
-      orderPackages: [],
-      //验证要调整的订单金额
-      modifyPriceValidate: {
-        orderPrice: [
-          { required: true, message: "请输入大于等于0或小于99999的合法金额" },
-          {
-            pattern: /^\d+(\.(([1-9])|(0[1-9])|([\d^0]\d)))?$/,
-            message: "请输入大于0小于9999的合法金额",
-            trigger: "change",
-          },
-        ],
-      },
+defineOptions({ name: "orderDetail" });
 
-      addressModal: false,
-      printModal: false,
-      orderTakeModal: false,
-      orderTakeForm: {
-        qrCode: "",
-      },
-      appointmentVerification: {
-        codes: [],
-        totalCount: 0,
-        verifiedCount: 0,
-        workOrderStatus: "",
-        workOrderVisible: false,
-      },
-      enabledStaffList: [],
-      appointmentTakeForm: {
-        staffId: "",
-        code: "",
-      },
-      appointmentVerifyLoading: false,
-      appointmentTakeValidate: {
-        staffId: [{ required: true, message: "请选择服务人员", trigger: "change" }],
-        code: [{ required: true, message: "核销码不能为空", trigger: "blur" }],
-      },
-      orderTakeValidate: {
-        qrCode: [{ required: true, message: "订单核销码不能为空", trigger: "blur" }],
-      },
-      //收件地址表单
-      addressForm: {
-        consigneeName: "",
-        consigneeMobile: "",
-        consigneeDetail: "",
-        consigneeAddressPath: "",
-        consigneeAddressIdPath: "",
-      },
-      fulfillRules: {
-        logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
-        logisticsId: [{ required: true, message: "请选择物流公司", trigger: "change" }],
-      },
-      addressRule: {
-        consigneeName: [
-          { required: true, message: "收货人姓名不能为空", trigger: "blur" },
-        ],
-        consigneeMobile: [
-          { required: true, message: "联系方式不能为空", trigger: "blur" },
-          {
-            pattern: RegExp.mobile,
-            trigger: "blur",
-            message: "请输入正确的手机号",
-          },
-        ],
-        consigneeDetail: [
-          { required: true, message: "详细地址不能为空", trigger: "blur" },
-        ],
-      },
+const route = useRoute();
+const router = useRouter();
 
-      data: [], // 表单数据
-    };
-  },
-  computed: {
-    /** 电子卡券订单：隐藏物流/发货/售后，展示 orderItems[].cardKeys（FR-S-04 / FR-S-05） */
-    isECouponOrder() {
-      const t = this.orderInfo?.order?.orderType;
-      return t === "E_COUPON" || this.$route.query.orderType === "E_COUPON";
-    },
-    isVirtualOrder() {
-      const t = this.orderInfo?.order?.orderType;
-      return t === "VIRTUAL" || this.$route.query.orderType === "VIRTUAL";
-    },
-    isNonPhysicalOrder() {
-      return this.isVirtualOrder || this.isECouponOrder || this.isAppointmentOrder;
-    },
-    /** 实物订单才展示收货、配送、运费和发货记录 */
-    showDelivery() {
-      return !this.isNonPhysicalOrder;
-    },
-    /** 实物订单始终展示发票；卡密、预约、虚拟仅在买家索取发票时展示 */
-    showInvoice() {
-      const order = this.orderInfo && this.orderInfo.order;
-      if (!order) return false;
-      if (order.needReceipt == true) return true;
-      return this.showDelivery;
-    },
-    isAppointmentOrder() {
-      const t = this.orderInfo?.order?.orderType;
-      // 详情未回时用路由 query 兜底
-      return t === "APPOINTMENT" || this.$route.query.orderType === "APPOINTMENT";
-    },
-    appointmentWorkOrderStatusText() {
-      return WORK_ORDER_STATUS_LABEL[this.appointmentVerification.workOrderStatus]
-        || this.appointmentVerification.workOrderStatus
-        || "—";
-    },
-    appointmentSlotText() {
-      const v = this.appointmentVerification || {};
-      if (!v.slotDate) return "";
-      const date = String(v.slotDate).slice(0, 10);
-      const slot = v.slotStartTime && v.slotEndTime ? `${v.slotStartTime}-${v.slotEndTime}` : "";
-      return [date, slot].filter(Boolean).join(" ");
-    },
-    appointmentFormGroups() {
-      return parseFormAnswerGroups(this.appointmentVerification?.formAnswerJson);
-    },
-    hasCardKeySection() {
-      return orderHasCardKeySection({
-        orderItems: this.data,
-        isECouponOrder: this.isECouponOrder,
-      });
-    },
-    cardKeyFulfillLines() {
-      return collectCardKeyFulfillLines(this.data);
-    },
-    ecouponCardKeyRows() {
-      return flattenOrderCardKeys(this.data, true);
-    },
-    canShip() {
-      return canShowShipButton(this.allowOperation, this.orderInfo?.order);
-    },
-    showFulfillModeSelector() {
-      const status = this.orderInfo?.order?.orderStatus;
-      if (status === "PARTS_DELIVERED") return false;
-      const op = this.allowOperation || {};
-      return [op.fulfillWhole, op.fulfillSplit, op.fulfillNoDelivery].filter(Boolean).length > 1;
-    },
-    deliverableOrderItems() {
-      return (this.data || []).filter((item) => {
-        if (!this.getOrderItemId(item)) return false;
-        return this.getRemainingDeliveryNum(item) > 0;
-      });
-    },
-    canOrderTake() {
-      if (this.isAppointmentOrder) {
-        const order = this.orderInfo?.order;
-        if (!order || order.orderStatus !== "TAKE") return false;
-        return (this.appointmentVerification.verifiedCount || 0)
-          < (this.appointmentVerification.totalCount || 0);
-      }
-      if (this.allowOperation.take) return true;
-      const order = this.orderInfo?.order;
-      if (!order) return false;
-      const isVirtual =
-        this.$route.query.orderType === "VIRTUAL" ||
-        order.orderType === "VIRTUAL";
-      return isVirtual && order.orderStatus === "TAKE";
-    },
-  },
-  watch: {
-    $route (to, from) {
-      this.$router.go(0);
-    },
-  },
-  methods: {
-    formatCardKeyStatus,
-    cardKeyFulfillAlertType,
-    resolveCardKeyFulfillMessage,
-    lineCardKeyRows(line) {
-      return line.cardKeys || [];
-    },
-    copyCardKey(row) {
-      const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          this.$Message.success("已复制到剪贴板");
-        });
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        this.$Message.success("已复制到剪贴板");
-      }
-    },
-    getPromotionText(row) {
-      let resultText = "";
-      if (row && row.promotionType) {
-        const type = row.promotionType.split(",");
-        if (type.indexOf("PINTUAN") != -1) resultText += "拼团 ";
-        if (type.indexOf("SECKILL") != -1) resultText += "秒杀 ";
-        if (type.indexOf("COUPON") != -1) resultText += "优惠券 ";
-        if (type.indexOf("FULL_DISCOUNT") != -1) resultText += "满减 ";
-        if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
-      }
-      return resultText === "" ? "未参与" : resultText;
-    },
-    gotoHomes () {
-      return false
-    },
-    getOrderItemId(item) {
-      return item && (item.id || item.orderItemId || item.sn);
-    },
-    getLogisticsId(item) {
-      return item && (item.logisticsId || item.id);
-    },
-    getLogisticsName(item) {
-      return item && (item.logisticsName || item.name || item.logisticsCompany || item.logisticsId || item.id);
-    },
-    parseOrderItemSpecs(specs) {
-      if (!specs) return {};
-      try {
-        return JSON.parse(specs);
-      } catch (e) {
-        return {};
-      }
-    },
-    getShippedPackageNum(item) {
-      if (item != null && item.deliverNumber != null && item.deliverNumber !== "") {
-        const direct = Number(item.deliverNumber);
-        if (Number.isFinite(direct)) return direct;
-      }
-      const orderItemId = this.getOrderItemId(item);
-      if (!orderItemId || !this.orderPackages.length) return 0;
-      let total = 0;
-      this.orderPackages.forEach((pkg) => {
-        (pkg.orderPackageItemList || []).forEach((pkgItem) => {
-          if (this.isPackageItemMatch(item, pkgItem)) {
-            total += Number(pkgItem.deliverNumber ?? pkgItem.num ?? 0);
-          }
-        });
-      });
-      return total;
-    },
-    isPackageItemMatch(orderItem, pkgItem) {
-      const orderKeys = [
-        this.getOrderItemId(orderItem),
-        orderItem?.sn,
-        orderItem?.id,
-        orderItem?.orderItemId,
-      ]
-        .filter(Boolean)
-        .map(String);
-      const pkgKeys = [
-        pkgItem.orderItemSn,
-        pkgItem.orderItemId,
-        pkgItem.orderItemsId,
-        pkgItem.id,
-        pkgItem.sn,
-      ]
-        .filter(Boolean)
-        .map(String);
-      return pkgKeys.some((key) => orderKeys.includes(key));
-    },
-    getRemainingDeliveryNum(item) {
-      if (item != null && item.remainDeliverNumber != null && item.remainDeliverNumber !== "") {
-        const remain = Number(item.remainDeliverNumber);
-        if (Number.isFinite(remain)) return Math.max(remain, 0);
-      }
-      const total = Number(item && item.num) || 0;
-      return Math.max(total - this.getShippedPackageNum(item), 0);
-    },
-    isNoDeliveryPackage,
-    getFulfillmentModeLabel,
-    initFulfillNumMap() {
-      const map = {};
-      this.deliverableOrderItems.forEach((item) => {
-        const id = this.getOrderItemId(item);
-        if (id) {
-          map[id] = this.getRemainingDeliveryNum(item);
-        }
-      });
-      this.fulfillForm.deliveryNumMap = map;
-    },
-    refreshFulfillAfterSubmit() {
-      this.fulfillModal = false;
-      this.loading = true;
-      return Promise.all([
-        API_Order.getOrderDetail(this.sn).then((res) => {
-          if (res.success) {
-            this.orderInfo = res.result;
-            this.allowOperation = res.result.allowOperationVO;
-            this.data = res.result.orderItems;
-            this.typeList = res.result.order.priceDetailDTO.discountPriceDetail
-              ? JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail))
-              : [];
-            this.getContentPrice();
-            this.getOrderPrice();
-          }
-        }),
-        this.getOrderPackages(),
-      ]).finally(() => {
-        this.loading = false;
-        this.resetFulfillForm(false);
-        this.initFulfillNumMap();
-        this.$nextTick(() => {
-          this.$refs.fulfillTable?.clearSelection();
-          this.$refs.fulfillFormRef?.clearValidate();
-        });
-      });
-    },
-    handleFulfillNumChange(row, value) {
-      const id = this.getOrderItemId(row);
-      if (!id) return;
-      const num = Number(value);
-      if (!Number.isFinite(num) || num < 1) return;
-      if (!this.fulfillForm.selectedOrderItemIds.includes(id)) {
-        this.fulfillForm.selectedOrderItemIds = [...this.fulfillForm.selectedOrderItemIds, id];
-        this.$nextTick(() => {
-          this.$refs.fulfillTable?.toggleRowSelection(row, true);
-        });
-      }
-    },
-    isPartDeliveryRowSelectable(row) {
-      return this.getRemainingDeliveryNum(row) > 0;
-    },
-    handleFulfillSelectionChange(selection) {
-      const selectedIds = [];
-      selection.forEach((item) => {
-        const id = this.getOrderItemId(item);
-        if (!id) return;
-        selectedIds.push(id);
-        if (this.fulfillForm.deliveryNumMap[id] == null) {
-          this.fulfillForm.deliveryNumMap[id] = this.getRemainingDeliveryNum(item);
-        }
-      });
-      this.fulfillForm.selectedOrderItemIds = selectedIds;
-    },
-    buildFulfillItems() {
-      return this.fulfillForm.selectedOrderItemIds
-        .map((orderItemId) => ({
-          orderItemId,
-          deliveryNum: Number(this.fulfillForm.deliveryNumMap[orderItemId]),
-        }))
-        .filter((item) => item.orderItemId && item.deliveryNum > 0);
-    },
-    resetFulfillForm(clearMode = true) {
-      const mode = clearMode
-        ? resolveDefaultFulfillmentMode(
-            this.allowOperation,
-            this.orderInfo?.order?.orderStatus
-          ) || "WHOLE"
-        : this.fulfillForm.fulfillmentMode;
-      this.fulfillForm = {
-        fulfillmentMode: mode,
-        logisticsNo: "",
-        logisticsId: "",
-        deliveryRemark: "",
-        selectedOrderItemIds: [],
-        deliveryNumMap: {},
-      };
-      this.$nextTick(() => {
-        this.$refs.fulfillFormRef?.clearValidate();
-        this.$refs.fulfillTable?.clearSelection();
-      });
-    },
-    openFulfill(presetMode) {
-      this.resetFulfillForm(true);
-      if (presetMode === "SPLIT" || this.$route.query.fulfillMode === "SPLIT") {
-        this.fulfillForm.fulfillmentMode = "SPLIT";
-      } else {
-        const mode = resolveDefaultFulfillmentMode(
-          this.allowOperation,
-          this.orderInfo?.order?.orderStatus
-        );
-        if (mode) this.fulfillForm.fulfillmentMode = mode;
-      }
-      this.fulfillModal = true;
-      this.getCheckedLogistics();
-      this.getOrderPackages();
-    },
-    buildFulfillPayload() {
-      const mode = this.fulfillForm.fulfillmentMode;
-      const payload = { fulfillmentMode: mode };
-      if (mode === "WHOLE" || mode === "SPLIT") {
-        payload.logisticsId = this.fulfillForm.logisticsId;
-        payload.logisticsNo = this.fulfillForm.logisticsNo;
-      }
-      if (mode === "NO_DELIVERY") {
-        const remark = (this.fulfillForm.deliveryRemark || "").trim();
-        if (remark) payload.deliveryRemark = remark;
-      }
-      if (mode === "SPLIT") {
-        payload.items = this.buildFulfillItems();
-      }
-      return payload;
-    },
-    submitFulfill() {
-      const mode = this.fulfillForm.fulfillmentMode;
-      const payload = this.buildFulfillPayload();
-      const validateMsg = validateFulfillForm(mode, payload);
-      if (validateMsg) {
-        this.$Message.error(validateMsg);
-        return;
-      }
-      if (mode !== "NO_DELIVERY") {
-        this.$refs.fulfillFormRef.validate((valid) => {
-          if (!valid) return;
-          this.doSubmitFulfill(payload);
-        });
-      } else {
-        this.doSubmitFulfill(payload);
-      }
-    },
-    doSubmitFulfill(payload) {
-      this.fulfillSubmitting = true;
-      API_Order.orderFulfill(this.sn, payload)
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("发货成功");
-            this.refreshFulfillAfterSubmit();
-          } else if (res.code === 1003) {
-            this.$Message.warning(res.message || "访问过于频繁，请稍后再试");
-          }
-        })
-        .finally(() => {
-          this.fulfillSubmitting = false;
-        });
-    },
-    getCheckedLogistics() {
-      API_Order.getLogisticsChecked().then((res) => {
-        if (res.success) {
-          this.checkedLogistics = Array.isArray(res.result) ? res.result : [];
-        }
-      });
-    },
-    getOrderPackages() {
-      return API_Order.getPackage(this.sn).then((res) => {
-        if (res.success) {
-          this.orderPackages = Array.isArray(res.result) ? res.result : [];
-        }
-        this.initFulfillNumMap();
-      });
-    },
+// 模板 ref（与表单 data 同名的改为 xxxRef，避免互相覆盖）
+const modifyPriceFormRef = ref(null);
+const modifyRemarkFormRef = ref(null);
+const addressFormRef = ref(null);
+const faceSheetFormRef = ref(null);
+const appointmentTakeFormRef = ref(null);
+const orderTakeFormRef = ref(null);
+const fulfillFormRef = ref(null);
+const fulfillTable = ref(null);
+const map = ref(null);
 
-    // 获取订单详情
-    getDataDetail () {
-      this.loading = true;
-      API_Order.getOrderDetail(this.sn).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.orderInfo = res.result;
-          this.allowOperation = res.result.allowOperationVO;
-          this.data = res.result.orderItems || [];
-          const discountDetail = res.result.order.priceDetailDTO?.discountPriceDetail;
-          this.typeList = discountDetail
-            ? JSON.parse(JSON.stringify(discountDetail))
-            : [];
-          this.getContentPrice();
-          this.getOrderPrice();
-          if (this.isAppointmentOrder) {
-            this.loadAppointmentVerification();
-          }
-          if (
-            this.autoOpenFulfill &&
-            this.canShip &&
-            (this.$route.query.openFulfill || this.$route.query.fulfillMode)
-          ) {
-            this.autoOpenFulfill = false;
-            this.$nextTick(() => this.openFulfill(this.$route.query.fulfillMode));
-          }
-        }
-      });
-    },
-    modifyPrice () {
-      this.modifyPriceForm.orderPrice = this.orderInfo.order.flowPrice;
-      this.modal = true;
-    },
-    modifyPriceSubmit () {
-      this.$refs.modifyPriceForm.validate((valid) => {
-        if (valid) {
-          API_Order.modifyOrderPrice(this.sn, this.modifyPriceForm).then((res) => {
-            if (res.success) {
-              this.$Message.success("修改订单金额成功");
-              this.modal = false;
-              this.getDataDetail();
-            }
-          });
-        }
-      });
-    },
-    modifyRemark () {
-      this.modifyRemarkForm.sellerRemark = this.orderInfo.order.sellerRemark || "";
-      this.sellerRemarkModal = true;
-    },
-    modifyRemarkSubmit () {
-      this.$refs.modifyRemarkForm.validate((valid) => {
-        if (valid) {
-          API_Order.modifyOrderRemark(this.sn, this.modifyRemarkForm).then((res) => {
-            if (res.success) {
-              this.$Message.success("编辑订单备注成功");
-              this.sellerRemarkModal = false;
-              this.getDataDetail();
-            }
-          });
-        }
-      });
-    },
-    checkLogistics () {
-      this.logisticsModal = true;
-      if (this.orderPackages.length > 0) {
-        this.logisticsList();
-      } else {
-        this.logistics();
-      }
-    },
-    logisticsList () {
-      API_Order.getPackage(this.sn).then((res) => {
-        if (res.success && res.result != null) {
-          this.packageTraceList = res.result;
-        }
-      });
-    },
-    logistics () {
-      API_Order.getTraces(this.sn).then((res) => {
-        if (res.success && res.result != null) {
-          this.logisticsInfo = res.result;
-        }
-      });
-    },
-    toPrint () {
-      API_Logistics.getCheckedOn().then((res) => {
-        if (res.success) {
-          this.checkedLogistics = res.result;
-          this.faceSheetModal = true;
-        }
-      });
-    },
-    sfPrint () {
-      API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then((res) => {
-        if (res.success) {
-          const headers = {
-            "X-Auth-token": res.result.token,
-          };
-          API_Logistics.getShunFengFaceSheet(res.result.url, headers).then((sheetRes) => {
-            const blob = new Blob([sheetRes], {
-              type: "application/pdf;charset=utf-8",
-            });
-            if ("download" in document.createElement("a")) {
-              const link = document.createElement("a");
-              link.download = `${this.orderInfo.order.sn}.pdf`;
-              link.style.display = "none";
-              link.href = URL.createObjectURL(blob);
-              document.body.appendChild(link);
-              link.click();
-              URL.revokeObjectURL(link.href);
-              document.body.removeChild(link);
-            } else {
-              navigator.msSaveBlob(blob, `${this.orderInfo.order.sn}.pdf`);
-            }
-          });
-        }
-      });
-    },
-    toPrints (printWindow) {
-      this.faceSheetModal = false;
-      if (!this.someJSONdata) {
-        printWindow && printWindow.close();
-        return;
-      }
-      const win = printWindow || window.open("", "_blank");
-      if (!win) {
-        this.$Message.error("无法打开打印窗口，请允许浏览器弹窗");
-        return;
-      }
-      win.document.write(this.someJSONdata);
-      win.document.close();
-      win.focus();
-      this.$Message.success("电子面单发货成功");
-      this.getDataDetail();
-      this.getOrderPackages();
-    },
-    submitFaceSheet () {
-      this.$refs.faceSheetForm.validate((valid) => {
-        if (valid) {
-          const printWindow = window.open("", "_blank");
-          API_Order.getOrderFaceSheet(this.sn, this.faceSheetForm).then((res) => {
-            if (res.success && res.result.printTemplate) {
-              this.someJSONdata = res.result.printTemplate;
-              this.toPrints(printWindow);
-            } else {
-              printWindow && printWindow.close();
-              this.$Message.error("电子面单发货失败！");
-            }
-          }).catch(() => {
-            printWindow && printWindow.close();
-            this.$Message.error("电子面单发货失败！");
-          });
-        }
-      });
-    },
-    getLogisticsSetting () {
-      API_Logistics.getLogisticsSetting().then((res) => {
-        if (res.success) {
-          this.logisticsType = res.result;
-        }
-      });
-    },
-    getOrderPrice () {
-      if (this.showPrices) {
-        this.showPrices = false
-      } else if (!this.showPrices) {
-        this.showPrices = true
-      }
-    },
-    getContentPrice () {
-      for (let i = 0; i < this.typeList.length; i++) {
-        for (let j = i + 1; j < this.typeList.length; j++) {
-          if (this.typeList[i].promotionId === this.typeList[j].promotionId) {
-            this.typeList[i].discountPrice = this.typeList[i].discountPrice + this.typeList[j].discountPrice
-            this.typeList.splice(j, 1)
-          }
-        }
-      }
-      if (this.typeList.length >= 3) {
-        this.getContentPrice();
-      }
-    },
-    selectedRegion (val) {
-      if (val.type === "select") {
-        const paths = val.data.map((item) => item.name).join(",");
-        const ids = val.data.map((item) => item.id).join(",");
-        this.addr = paths;
-        this.regionId = ids;
-        this.addressForm.consigneeAddressPath = paths;
-        this.addressForm.consigneeAddressIdPath = ids;
-      } else {
-        this.addr = val.data.addr;
-        this.regionId = val.data.addrId;
-        this.addressForm.consigneeAddressPath = val.data.addr;
-        this.addressForm.consigneeAddressIdPath = val.data.addrId;
-      }
-    },
-    //订单日志
-    orderLog () {
-      this.orderLogModal = true;
-    },
-    //订单日志取消
-    handelCancel () {
-      this.orderLogModal = false;
-    },
-    loadAppointmentVerification() {
-      getAppointmentVerificationByOrderSn(this.sn)
-        .then((res) => {
-          if (res.success && res.result) {
-            this.appointmentVerification = res.result;
-          }
-        })
-        .catch(() => {});
-    },
-    loadEnabledStaff() {
-      getEnabledServiceStaff()
-        .then((res) => {
-          if (res.success) {
-            this.enabledStaffList = res.result || [];
-          }
-        })
-        .catch(() => {});
-    },
-    orderTake() {
-      if (this.isAppointmentOrder) {
-        this.appointmentTakeForm = { staffId: "", code: "" };
-        this.loadEnabledStaff();
-        this.loadAppointmentVerification();
-        this.orderTakeModal = true;
-        this.$nextTick(() => {
-          this.$refs.appointmentTakeForm?.clearValidate();
-        });
-        return;
-      }
-      this.orderTakeForm.qrCode = this.orderInfo.order.verificationCode || "";
-      this.orderTakeModal = true;
-      this.$nextTick(() => {
-        this.$refs.orderTakeForm?.clearValidate();
-      });
-    },
-    appointmentVerifySubmit() {
-      this.$refs.appointmentTakeForm.validate((valid) => {
-        if (!valid) return;
-        this.appointmentVerifyLoading = true;
-        verifyAppointmentCode({
-          code: this.appointmentTakeForm.code,
-          staffId: this.appointmentTakeForm.staffId,
-        })
-          .then((res) => {
-            if (!res.success) return;
-            const result = res.result || {};
-            this.appointmentTakeForm.code = "";
-            this.loadAppointmentVerification();
-            if (result.allVerified) {
-              if (result.orderCompleted) {
-                this.$Message.success("全部核销完成，订单已完成");
-                this.orderTakeModal = false;
-                this.getDataDetail();
-              } else {
-                this.$Message.success("全部核销完成，请在工单中结束服务");
-                this.orderTakeModal = false;
-                this.getDataDetail();
-              }
-            } else {
-              this.$Message.success(`核销成功（${result.verifiedCount}/${result.totalCount}）`);
-            }
-          })
-          .finally(() => {
-            this.appointmentVerifyLoading = false;
-          });
-      });
-    },
-    orderTakeSubmit() {
-      this.$refs.orderTakeForm.validate((valid) => {
-        if (!valid) return;
-        API_Order.orderTake(this.sn, this.orderTakeForm.qrCode).then((res) => {
-          if (res.success) {
-            this.$Message.success("订单核销成功");
-            this.orderTakeModal = false;
-            this.getDataDetail();
-          }
-        });
-      });
-    },
-    //打印发货单
-    printOrder () {
-      this.printModal = true;
-    },
-    printHiddenInfo () {
-      this.printHiddenFlag = !this.printHiddenFlag;
-    },
-    printCancel () {
-      // this.printHiddenFlag = false;
-    },
-    handlePrintInvoice() {
-      printElement("printInfo", "发货单");
-    },
-    //弹出修改收货地址框
-    editAddress () {
-      this.addressModal = true;
-      this.addr = this.orderInfo.order.consigneeAddressPath;
-      this.regionId = this.orderInfo.order.consigneeAddressIdPath;
-      this.addressForm.consigneeName = this.orderInfo.order.consigneeName;
-      this.addressForm.consigneeMobile = this.orderInfo.order.consigneeMobile;
-      this.addressForm.consigneeDetail = this.orderInfo.order.consigneeDetail;
-      this.addressForm.consigneeAddressPath = this.orderInfo.order.consigneeAddressPath;
-      this.addressForm.consigneeAddressIdPath = this.orderInfo.order.consigneeAddressIdPath;
-    },
-    //修改收货地址
-    editAddressSubmit () {
-      if (this.regionId == "") {
-        this.$Message.error("请选择地址");
-        return;
-      }
-      this.addressForm.consigneeAddressPath = this.addr;
-      this.addressForm.consigneeAddressIdPath = this.regionId;
-      this.$refs.addressForm.validate((valid) => {
-        if (valid) {
-          API_Order.editOrderConsignee(this.sn, this.addressForm).then((res) => {
-            if (res.success) {
-              this.$Message.success("收货地址修改成功");
-              this.addressModal = false;
-              this.getDataDetail();
-            }
-          });
-        }
-      });
-    },
-  },
-  mounted () {
-    this.sn = this.$route.query.sn;
-    this.getDataDetail();
-    this.getLogisticsSetting();
-    this.getOrderPackages();
-  },
-  beforeRouteLeave (to, from, next) {
-    if (to.name === "orderList" || to.name === "virtualOrderList") {
-      to.meta.keepAlive = true;
-    }
-    next();
-  },
+const typeList = ref([]);
+const showPrices = ref(false);
+const printHiddenFlag = ref(false);
+const loading = ref(false);
+const logisticsType = ref("KUAIDINIAO");
+const someJSONdata = ref("");
+const faceSheetForm = reactive({
+  logisticsId: "",
+});
+const faceSheetFormValidate = {
+  logisticsId: [{ required: true, message: "请选择物流公司" }],
 };
+const logisticsModal = ref(false);
+const faceSheetModal = ref(false);
+const logisticsInfo = ref({
+  shipper: "",
+});
+const packageTraceList = ref([]);
+const sellerRemarkModal = ref(false);
+const addr = ref("");
+const regionId = ref("");
+
+const orderLogModal = ref(false);
+const checkedLogistics = ref([]); //选中的物流公司集合
+const allowOperation = ref({}); //订单可才做选项
+const sn = ref(""); //订单编号
+const orderInfo = ref({
+  order: {
+    priceDetailDTO: {},
+  },
+});
+const modal = ref(false);
+//调整价格表单
+const modifyPriceForm = reactive({
+  orderPrice: 0,
+});
+const modifyRemarkForm = reactive({
+  sellerRemark: "",
+});
+const fulfillModal = ref(false);
+const fulfillSubmitting = ref(false);
+const autoOpenFulfill = ref(true);
+const fulfillForm = ref({
+  fulfillmentMode: "WHOLE",
+  logisticsNo: "",
+  logisticsId: "",
+  deliveryRemark: "",
+  selectedOrderItemIds: [],
+  deliveryNumMap: {},
+});
+const orderPackages = ref([]);
+//验证要调整的订单金额
+const modifyPriceValidate = {
+  orderPrice: [
+    { required: true, message: "请输入大于等于0或小于99999的合法金额" },
+    {
+      pattern: /^\d+(\.(([1-9])|(0[1-9])|([\d^0]\d)))?$/,
+      message: "请输入大于0小于9999的合法金额",
+      trigger: "change",
+    },
+  ],
+};
+
+const addressModal = ref(false);
+const printModal = ref(false);
+const orderTakeModal = ref(false);
+const orderTakeForm = reactive({
+  qrCode: "",
+});
+const appointmentVerification = ref({
+  codes: [],
+  totalCount: 0,
+  verifiedCount: 0,
+  workOrderStatus: "",
+  workOrderVisible: false,
+});
+const enabledStaffList = ref([]);
+const appointmentTakeForm = ref({
+  staffId: "",
+  code: "",
+});
+const appointmentVerifyLoading = ref(false);
+const appointmentTakeValidate = {
+  staffId: [{ required: true, message: "请选择服务人员", trigger: "change" }],
+  code: [{ required: true, message: "核销码不能为空", trigger: "blur" }],
+};
+const orderTakeValidate = {
+  qrCode: [{ required: true, message: "订单核销码不能为空", trigger: "blur" }],
+};
+//收件地址表单
+const addressForm = reactive({
+  consigneeName: "",
+  consigneeMobile: "",
+  consigneeDetail: "",
+  consigneeAddressPath: "",
+  consigneeAddressIdPath: "",
+});
+const fulfillRules = {
+  logisticsNo: [{ required: true, message: "发货单号不能为空", trigger: "change" }],
+  logisticsId: [{ required: true, message: "请选择物流公司", trigger: "change" }],
+};
+const addressRule = {
+  consigneeName: [
+    { required: true, message: "收货人姓名不能为空", trigger: "blur" },
+  ],
+  consigneeMobile: [
+    { required: true, message: "联系方式不能为空", trigger: "blur" },
+    {
+      pattern: RegExp.mobile,
+      trigger: "blur",
+      message: "请输入正确的手机号",
+    },
+  ],
+  consigneeDetail: [
+    { required: true, message: "详细地址不能为空", trigger: "blur" },
+  ],
+};
+
+const data = ref([]); // 表单数据
+
+/** 电子卡券订单：隐藏物流/发货/售后，展示 orderItems[].cardKeys（FR-S-04 / FR-S-05） */
+const isECouponOrder = computed(() => {
+  const t = orderInfo.value?.order?.orderType;
+  return t === "E_COUPON" || route.query.orderType === "E_COUPON";
+});
+const isVirtualOrder = computed(() => {
+  const t = orderInfo.value?.order?.orderType;
+  return t === "VIRTUAL" || route.query.orderType === "VIRTUAL";
+});
+const isAppointmentOrder = computed(() => {
+  const t = orderInfo.value?.order?.orderType;
+  // 详情未回时用路由 query 兜底
+  return t === "APPOINTMENT" || route.query.orderType === "APPOINTMENT";
+});
+const isNonPhysicalOrder = computed(() => {
+  return isVirtualOrder.value || isECouponOrder.value || isAppointmentOrder.value;
+});
+/** 实物订单才展示收货、配送、运费和发货记录 */
+const showDelivery = computed(() => {
+  return !isNonPhysicalOrder.value;
+});
+/** 实物订单始终展示发票；卡密、预约、虚拟仅在买家索取发票时展示 */
+const showInvoice = computed(() => {
+  const order = orderInfo.value && orderInfo.value.order;
+  if (!order) return false;
+  if (order.needReceipt == true) return true;
+  return showDelivery.value;
+});
+const appointmentWorkOrderStatusText = computed(() => {
+  return WORK_ORDER_STATUS_LABEL[appointmentVerification.value.workOrderStatus]
+    || appointmentVerification.value.workOrderStatus
+    || "—";
+});
+const appointmentSlotText = computed(() => {
+  const v = appointmentVerification.value || {};
+  if (!v.slotDate) return "";
+  const date = String(v.slotDate).slice(0, 10);
+  const slot = v.slotStartTime && v.slotEndTime ? `${v.slotStartTime}-${v.slotEndTime}` : "";
+  return [date, slot].filter(Boolean).join(" ");
+});
+const appointmentFormGroups = computed(() => {
+  return parseFormAnswerGroups(appointmentVerification.value?.formAnswerJson);
+});
+const hasCardKeySection = computed(() => {
+  return orderHasCardKeySection({
+    orderItems: data.value,
+    isECouponOrder: isECouponOrder.value,
+  });
+});
+const cardKeyFulfillLines = computed(() => {
+  return collectCardKeyFulfillLines(data.value);
+});
+const ecouponCardKeyRows = computed(() => {
+  return flattenOrderCardKeys(data.value, true);
+});
+const canShip = computed(() => {
+  return canShowShipButton(allowOperation.value, orderInfo.value?.order);
+});
+const showFulfillModeSelector = computed(() => {
+  const status = orderInfo.value?.order?.orderStatus;
+  if (status === "PARTS_DELIVERED") return false;
+  const op = allowOperation.value || {};
+  return [op.fulfillWhole, op.fulfillSplit, op.fulfillNoDelivery].filter(Boolean).length > 1;
+});
+const deliverableOrderItems = computed(() => {
+  return (data.value || []).filter((item) => {
+    if (!getOrderItemId(item)) return false;
+    return getRemainingDeliveryNum(item) > 0;
+  });
+});
+const canOrderTake = computed(() => {
+  if (isAppointmentOrder.value) {
+    const order = orderInfo.value?.order;
+    if (!order || order.orderStatus !== "TAKE") return false;
+    return (appointmentVerification.value.verifiedCount || 0)
+      < (appointmentVerification.value.totalCount || 0);
+  }
+  if (allowOperation.value.take) return true;
+  const order = orderInfo.value?.order;
+  if (!order) return false;
+  const isVirtual =
+    route.query.orderType === "VIRTUAL" ||
+    order.orderType === "VIRTUAL";
+  return isVirtual && order.orderStatus === "TAKE";
+});
+
+watch(
+  () => route.query,
+  (to, from) => {
+    router.go(0);
+  }
+);
+
+onMounted(() => {
+  sn.value = route.query.sn;
+  getDataDetail();
+  getLogisticsSetting();
+  getOrderPackages();
+});
+
+onBeforeRouteLeave((to, from, next) => {
+  if (to.name === "orderList" || to.name === "virtualOrderList") {
+    to.meta.keepAlive = true;
+  }
+  next();
+});
+
+function lineCardKeyRows(line) {
+  return line.cardKeys || [];
+}
+function copyCardKey(row) {
+  const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      Message.success("已复制到剪贴板");
+    });
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    Message.success("已复制到剪贴板");
+  }
+}
+function getPromotionText(row) {
+  let resultText = "";
+  if (row && row.promotionType) {
+    const type = row.promotionType.split(",");
+    if (type.indexOf("PINTUAN") != -1) resultText += "拼团 ";
+    if (type.indexOf("SECKILL") != -1) resultText += "秒杀 ";
+    if (type.indexOf("COUPON") != -1) resultText += "优惠券 ";
+    if (type.indexOf("FULL_DISCOUNT") != -1) resultText += "满减 ";
+    if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
+  }
+  return resultText === "" ? "未参与" : resultText;
+}
+function gotoHomes () {
+  return false
+}
+function getOrderItemId(item) {
+  return item && (item.id || item.orderItemId || item.sn);
+}
+function getLogisticsId(item) {
+  return item && (item.logisticsId || item.id);
+}
+function getLogisticsName(item) {
+  return item && (item.logisticsName || item.name || item.logisticsCompany || item.logisticsId || item.id);
+}
+function parseOrderItemSpecs(specs) {
+  if (!specs) return {};
+  try {
+    return JSON.parse(specs);
+  } catch (e) {
+    return {};
+  }
+}
+function getShippedPackageNum(item) {
+  if (item != null && item.deliverNumber != null && item.deliverNumber !== "") {
+    const direct = Number(item.deliverNumber);
+    if (Number.isFinite(direct)) return direct;
+  }
+  const orderItemId = getOrderItemId(item);
+  if (!orderItemId || !orderPackages.value.length) return 0;
+  let total = 0;
+  orderPackages.value.forEach((pkg) => {
+    (pkg.orderPackageItemList || []).forEach((pkgItem) => {
+      if (isPackageItemMatch(item, pkgItem)) {
+        total += Number(pkgItem.deliverNumber ?? pkgItem.num ?? 0);
+      }
+    });
+  });
+  return total;
+}
+function isPackageItemMatch(orderItem, pkgItem) {
+  const orderKeys = [
+    getOrderItemId(orderItem),
+    orderItem?.sn,
+    orderItem?.id,
+    orderItem?.orderItemId,
+  ]
+    .filter(Boolean)
+    .map(String);
+  const pkgKeys = [
+    pkgItem.orderItemSn,
+    pkgItem.orderItemId,
+    pkgItem.orderItemsId,
+    pkgItem.id,
+    pkgItem.sn,
+  ]
+    .filter(Boolean)
+    .map(String);
+  return pkgKeys.some((key) => orderKeys.includes(key));
+}
+function getRemainingDeliveryNum(item) {
+  if (item != null && item.remainDeliverNumber != null && item.remainDeliverNumber !== "") {
+    const remain = Number(item.remainDeliverNumber);
+    if (Number.isFinite(remain)) return Math.max(remain, 0);
+  }
+  const total = Number(item && item.num) || 0;
+  return Math.max(total - getShippedPackageNum(item), 0);
+}
+function initFulfillNumMap() {
+  const deliveryMap = {};
+  deliverableOrderItems.value.forEach((item) => {
+    const id = getOrderItemId(item);
+    if (id) {
+      deliveryMap[id] = getRemainingDeliveryNum(item);
+    }
+  });
+  fulfillForm.value.deliveryNumMap = deliveryMap;
+}
+function refreshFulfillAfterSubmit() {
+  fulfillModal.value = false;
+  loading.value = true;
+  return Promise.all([
+    API_Order.getOrderDetail(sn.value).then((res) => {
+      if (res.success) {
+        orderInfo.value = res.result;
+        allowOperation.value = res.result.allowOperationVO;
+        data.value = res.result.orderItems;
+        typeList.value = res.result.order.priceDetailDTO.discountPriceDetail
+          ? JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail))
+          : [];
+        getContentPrice();
+        getOrderPrice();
+      }
+    }),
+    getOrderPackages(),
+  ]).finally(() => {
+    loading.value = false;
+    resetFulfillForm(false);
+    initFulfillNumMap();
+    nextTick(() => {
+      fulfillTable.value?.clearSelection();
+      fulfillFormRef.value?.clearValidate();
+    });
+  });
+}
+function handleFulfillNumChange(row, value) {
+  const id = getOrderItemId(row);
+  if (!id) return;
+  const num = Number(value);
+  if (!Number.isFinite(num) || num < 1) return;
+  if (!fulfillForm.value.selectedOrderItemIds.includes(id)) {
+    fulfillForm.value.selectedOrderItemIds = [...fulfillForm.value.selectedOrderItemIds, id];
+    nextTick(() => {
+      fulfillTable.value?.toggleRowSelection(row, true);
+    });
+  }
+}
+function isPartDeliveryRowSelectable(row) {
+  return getRemainingDeliveryNum(row) > 0;
+}
+function handleFulfillSelectionChange(selection) {
+  const selectedIds = [];
+  selection.forEach((item) => {
+    const id = getOrderItemId(item);
+    if (!id) return;
+    selectedIds.push(id);
+    if (fulfillForm.value.deliveryNumMap[id] == null) {
+      fulfillForm.value.deliveryNumMap[id] = getRemainingDeliveryNum(item);
+    }
+  });
+  fulfillForm.value.selectedOrderItemIds = selectedIds;
+}
+function buildFulfillItems() {
+  return fulfillForm.value.selectedOrderItemIds
+    .map((orderItemId) => ({
+      orderItemId,
+      deliveryNum: Number(fulfillForm.value.deliveryNumMap[orderItemId]),
+    }))
+    .filter((item) => item.orderItemId && item.deliveryNum > 0);
+}
+function resetFulfillForm(clearMode = true) {
+  const mode = clearMode
+    ? resolveDefaultFulfillmentMode(
+        allowOperation.value,
+        orderInfo.value?.order?.orderStatus
+      ) || "WHOLE"
+    : fulfillForm.value.fulfillmentMode;
+  fulfillForm.value = {
+    fulfillmentMode: mode,
+    logisticsNo: "",
+    logisticsId: "",
+    deliveryRemark: "",
+    selectedOrderItemIds: [],
+    deliveryNumMap: {},
+  };
+  nextTick(() => {
+    fulfillFormRef.value?.clearValidate();
+    fulfillTable.value?.clearSelection();
+  });
+}
+function openFulfill(presetMode) {
+  resetFulfillForm(true);
+  if (presetMode === "SPLIT" || route.query.fulfillMode === "SPLIT") {
+    fulfillForm.value.fulfillmentMode = "SPLIT";
+  } else {
+    const mode = resolveDefaultFulfillmentMode(
+      allowOperation.value,
+      orderInfo.value?.order?.orderStatus
+    );
+    if (mode) fulfillForm.value.fulfillmentMode = mode;
+  }
+  fulfillModal.value = true;
+  getCheckedLogistics();
+  getOrderPackages();
+}
+function buildFulfillPayload() {
+  const mode = fulfillForm.value.fulfillmentMode;
+  const payload = { fulfillmentMode: mode };
+  if (mode === "WHOLE" || mode === "SPLIT") {
+    payload.logisticsId = fulfillForm.value.logisticsId;
+    payload.logisticsNo = fulfillForm.value.logisticsNo;
+  }
+  if (mode === "NO_DELIVERY") {
+    const remark = (fulfillForm.value.deliveryRemark || "").trim();
+    if (remark) payload.deliveryRemark = remark;
+  }
+  if (mode === "SPLIT") {
+    payload.items = buildFulfillItems();
+  }
+  return payload;
+}
+function submitFulfill() {
+  const mode = fulfillForm.value.fulfillmentMode;
+  const payload = buildFulfillPayload();
+  const validateMsg = validateFulfillForm(mode, payload);
+  if (validateMsg) {
+    Message.error(validateMsg);
+    return;
+  }
+  if (mode !== "NO_DELIVERY") {
+    fulfillFormRef.value.validate((valid) => {
+      if (!valid) return;
+      doSubmitFulfill(payload);
+    });
+  } else {
+    doSubmitFulfill(payload);
+  }
+}
+function doSubmitFulfill(payload) {
+  fulfillSubmitting.value = true;
+  API_Order.orderFulfill(sn.value, payload)
+    .then((res) => {
+      if (res.success) {
+        Message.success("发货成功");
+        refreshFulfillAfterSubmit();
+      } else if (res.code === 1003) {
+        Message.warning(res.message || "访问过于频繁，请稍后再试");
+      }
+    })
+    .finally(() => {
+      fulfillSubmitting.value = false;
+    });
+}
+function getCheckedLogistics() {
+  API_Order.getLogisticsChecked().then((res) => {
+    if (res.success) {
+      checkedLogistics.value = Array.isArray(res.result) ? res.result : [];
+    }
+  });
+}
+function getOrderPackages() {
+  return API_Order.getPackage(sn.value).then((res) => {
+    if (res.success) {
+      orderPackages.value = Array.isArray(res.result) ? res.result : [];
+    }
+    initFulfillNumMap();
+  });
+}
+
+// 获取订单详情
+function getDataDetail () {
+  loading.value = true;
+  API_Order.getOrderDetail(sn.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      orderInfo.value = res.result;
+      allowOperation.value = res.result.allowOperationVO;
+      data.value = res.result.orderItems || [];
+      const discountDetail = res.result.order.priceDetailDTO?.discountPriceDetail;
+      typeList.value = discountDetail
+        ? JSON.parse(JSON.stringify(discountDetail))
+        : [];
+      getContentPrice();
+      getOrderPrice();
+      if (isAppointmentOrder.value) {
+        loadAppointmentVerification();
+      }
+      if (
+        autoOpenFulfill.value &&
+        canShip.value &&
+        (route.query.openFulfill || route.query.fulfillMode)
+      ) {
+        autoOpenFulfill.value = false;
+        nextTick(() => openFulfill(route.query.fulfillMode));
+      }
+    }
+  });
+}
+function modifyPrice () {
+  modifyPriceForm.orderPrice = orderInfo.value.order.flowPrice;
+  modal.value = true;
+}
+function modifyPriceSubmit () {
+  modifyPriceFormRef.value.validate((valid) => {
+    if (valid) {
+      API_Order.modifyOrderPrice(sn.value, modifyPriceForm).then((res) => {
+        if (res.success) {
+          Message.success("修改订单金额成功");
+          modal.value = false;
+          getDataDetail();
+        }
+      });
+    }
+  });
+}
+function modifyRemark () {
+  modifyRemarkForm.sellerRemark = orderInfo.value.order.sellerRemark || "";
+  sellerRemarkModal.value = true;
+}
+function modifyRemarkSubmit () {
+  modifyRemarkFormRef.value.validate((valid) => {
+    if (valid) {
+      API_Order.modifyOrderRemark(sn.value, modifyRemarkForm).then((res) => {
+        if (res.success) {
+          Message.success("编辑订单备注成功");
+          sellerRemarkModal.value = false;
+          getDataDetail();
+        }
+      });
+    }
+  });
+}
+function checkLogistics () {
+  logisticsModal.value = true;
+  if (orderPackages.value.length > 0) {
+    logisticsList();
+  } else {
+    logistics();
+  }
+}
+function logisticsList () {
+  API_Order.getPackage(sn.value).then((res) => {
+    if (res.success && res.result != null) {
+      packageTraceList.value = res.result;
+    }
+  });
+}
+function logistics () {
+  API_Order.getTraces(sn.value).then((res) => {
+    if (res.success && res.result != null) {
+      logisticsInfo.value = res.result;
+    }
+  });
+}
+function toPrint () {
+  API_Logistics.getCheckedOn().then((res) => {
+    if (res.success) {
+      checkedLogistics.value = res.result;
+      faceSheetModal.value = true;
+    }
+  });
+}
+function sfPrint () {
+  API_Order.getOrderFaceSheet(sn.value, faceSheetForm).then((res) => {
+    if (res.success) {
+      const headers = {
+        "X-Auth-token": res.result.token,
+      };
+      API_Logistics.getShunFengFaceSheet(res.result.url, headers).then((sheetRes) => {
+        const blob = new Blob([sheetRes], {
+          type: "application/pdf;charset=utf-8",
+        });
+        if ("download" in document.createElement("a")) {
+          const link = document.createElement("a");
+          link.download = `${orderInfo.value.order.sn}.pdf`;
+          link.style.display = "none";
+          link.href = URL.createObjectURL(blob);
+          document.body.appendChild(link);
+          link.click();
+          URL.revokeObjectURL(link.href);
+          document.body.removeChild(link);
+        } else {
+          navigator.msSaveBlob(blob, `${orderInfo.value.order.sn}.pdf`);
+        }
+      });
+    }
+  });
+}
+function toPrints (printWindow) {
+  faceSheetModal.value = false;
+  if (!someJSONdata.value) {
+    printWindow && printWindow.close();
+    return;
+  }
+  const win = printWindow || window.open("", "_blank");
+  if (!win) {
+    Message.error("无法打开打印窗口，请允许浏览器弹窗");
+    return;
+  }
+  win.document.write(someJSONdata.value);
+  win.document.close();
+  win.focus();
+  Message.success("电子面单发货成功");
+  getDataDetail();
+  getOrderPackages();
+}
+function submitFaceSheet () {
+  faceSheetFormRef.value.validate((valid) => {
+    if (valid) {
+      const printWindow = window.open("", "_blank");
+      API_Order.getOrderFaceSheet(sn.value, faceSheetForm).then((res) => {
+        if (res.success && res.result.printTemplate) {
+          someJSONdata.value = res.result.printTemplate;
+          toPrints(printWindow);
+        } else {
+          printWindow && printWindow.close();
+          Message.error("电子面单发货失败！");
+        }
+      }).catch(() => {
+        printWindow && printWindow.close();
+        Message.error("电子面单发货失败！");
+      });
+    }
+  });
+}
+function getLogisticsSetting () {
+  API_Logistics.getLogisticsSetting().then((res) => {
+    if (res.success) {
+      logisticsType.value = res.result;
+    }
+  });
+}
+function getOrderPrice () {
+  if (showPrices.value) {
+    showPrices.value = false
+  } else if (!showPrices.value) {
+    showPrices.value = true
+  }
+}
+function getContentPrice () {
+  for (let i = 0; i < typeList.value.length; i++) {
+    for (let j = i + 1; j < typeList.value.length; j++) {
+      if (typeList.value[i].promotionId === typeList.value[j].promotionId) {
+        typeList.value[i].discountPrice = typeList.value[i].discountPrice + typeList.value[j].discountPrice
+        typeList.value.splice(j, 1)
+      }
+    }
+  }
+  if (typeList.value.length >= 3) {
+    getContentPrice();
+  }
+}
+function selectedRegion (val) {
+  if (val.type === "select") {
+    const paths = val.data.map((item) => item.name).join(",");
+    const ids = val.data.map((item) => item.id).join(",");
+    addr.value = paths;
+    regionId.value = ids;
+    addressForm.consigneeAddressPath = paths;
+    addressForm.consigneeAddressIdPath = ids;
+  } else {
+    addr.value = val.data.addr;
+    regionId.value = val.data.addrId;
+    addressForm.consigneeAddressPath = val.data.addr;
+    addressForm.consigneeAddressIdPath = val.data.addrId;
+  }
+}
+//订单日志
+function orderLog () {
+  orderLogModal.value = true;
+}
+//订单日志取消
+function handelCancel () {
+  orderLogModal.value = false;
+}
+function loadAppointmentVerification() {
+  getAppointmentVerificationByOrderSn(sn.value)
+    .then((res) => {
+      if (res.success && res.result) {
+        appointmentVerification.value = res.result;
+      }
+    })
+    .catch(() => {});
+}
+function loadEnabledStaff() {
+  getEnabledServiceStaff()
+    .then((res) => {
+      if (res.success) {
+        enabledStaffList.value = res.result || [];
+      }
+    })
+    .catch(() => {});
+}
+function orderTake() {
+  if (isAppointmentOrder.value) {
+    appointmentTakeForm.value = { staffId: "", code: "" };
+    loadEnabledStaff();
+    loadAppointmentVerification();
+    orderTakeModal.value = true;
+    nextTick(() => {
+      appointmentTakeFormRef.value?.clearValidate();
+    });
+    return;
+  }
+  orderTakeForm.qrCode = orderInfo.value.order.verificationCode || "";
+  orderTakeModal.value = true;
+  nextTick(() => {
+    orderTakeFormRef.value?.clearValidate();
+  });
+}
+function appointmentVerifySubmit() {
+  appointmentTakeFormRef.value.validate((valid) => {
+    if (!valid) return;
+    appointmentVerifyLoading.value = true;
+    verifyAppointmentCode({
+      code: appointmentTakeForm.value.code,
+      staffId: appointmentTakeForm.value.staffId,
+    })
+      .then((res) => {
+        if (!res.success) return;
+        const result = res.result || {};
+        appointmentTakeForm.value.code = "";
+        loadAppointmentVerification();
+        if (result.allVerified) {
+          if (result.orderCompleted) {
+            Message.success("全部核销完成，订单已完成");
+            orderTakeModal.value = false;
+            getDataDetail();
+          } else {
+            Message.success("全部核销完成，请在工单中结束服务");
+            orderTakeModal.value = false;
+            getDataDetail();
+          }
+        } else {
+          Message.success(`核销成功（${result.verifiedCount}/${result.totalCount}）`);
+        }
+      })
+      .finally(() => {
+        appointmentVerifyLoading.value = false;
+      });
+  });
+}
+function orderTakeSubmit() {
+  orderTakeFormRef.value.validate((valid) => {
+    if (!valid) return;
+    API_Order.orderTake(sn.value, orderTakeForm.qrCode).then((res) => {
+      if (res.success) {
+        Message.success("订单核销成功");
+        orderTakeModal.value = false;
+        getDataDetail();
+      }
+    });
+  });
+}
+//打印发货单
+function printOrder () {
+  printModal.value = true;
+}
+function printHiddenInfo () {
+  printHiddenFlag.value = !printHiddenFlag.value;
+}
+function printCancel () {
+  // printHiddenFlag.value = false;
+}
+function handlePrintInvoice() {
+  printElement("printInfo", "发货单");
+}
+//弹出修改收货地址框
+function editAddress () {
+  addressModal.value = true;
+  addr.value = orderInfo.value.order.consigneeAddressPath;
+  regionId.value = orderInfo.value.order.consigneeAddressIdPath;
+  addressForm.consigneeName = orderInfo.value.order.consigneeName;
+  addressForm.consigneeMobile = orderInfo.value.order.consigneeMobile;
+  addressForm.consigneeDetail = orderInfo.value.order.consigneeDetail;
+  addressForm.consigneeAddressPath = orderInfo.value.order.consigneeAddressPath;
+  addressForm.consigneeAddressIdPath = orderInfo.value.order.consigneeAddressIdPath;
+}
+//修改收货地址
+function editAddressSubmit () {
+  if (regionId.value == "") {
+    Message.error("请选择地址");
+    return;
+  }
+  addressForm.consigneeAddressPath = addr.value;
+  addressForm.consigneeAddressIdPath = regionId.value;
+  addressFormRef.value.validate((valid) => {
+    if (valid) {
+      API_Order.editOrderConsignee(sn.value, addressForm).then((res) => {
+        if (res.success) {
+          Message.success("收货地址修改成功");
+          addressModal.value = false;
+          getDataDetail();
+        }
+      });
+    }
+  });
+}
 </script>
 <style lang="scss">
 .lineH30 {

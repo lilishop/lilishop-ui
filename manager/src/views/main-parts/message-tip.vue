@@ -40,42 +40,42 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue";
+import { useRouter } from "vue-router";
 import { ArrowDown } from "@element-plus/icons-vue";
 
-export default {
-  name: "messageTip",
-  components: { ArrowDown },
-  props: {
-    res: {
-      type: Object,
-      default: () => ({}),
-    },
+defineOptions({ name: "messageTip" });
+
+const props = defineProps({
+  res: {
+    type: Object,
+    default: () => ({}),
   },
-  computed: {
-    value() {
-      let count = 0;
-      const r = this.res || {};
-      Object.keys(r).forEach((k) => {
-        if (r[k]) count += r[k];
-      });
-      return count;
-    },
-  },
-  methods: {
-    navigateTo(name) {
-      if (name === "manager-appointment-work-orders") {
-        this.$router.push({ name, query: { serviceStatus: "OPEN" } });
-        return;
-      }
-      if (name === "manager-procurement-order-list") {
-        this.$router.push({ name, query: { status: "SUBMITTED" } });
-        return;
-      }
-      this.$router.push({ name });
-    },
-  },
-};
+});
+
+const router = useRouter();
+
+const value = computed(() => {
+  let count = 0;
+  const r = props.res || {};
+  Object.keys(r).forEach((k) => {
+    if (r[k]) count += r[k];
+  });
+  return count;
+});
+
+function navigateTo(name) {
+  if (name === "manager-appointment-work-orders") {
+    router.push({ name, query: { serviceStatus: "OPEN" } });
+    return;
+  }
+  if (name === "manager-procurement-order-list") {
+    router.push({ name, query: { status: "SUBMITTED" } });
+    return;
+  }
+  router.push({ name });
+}
 </script>
 
 <style scoped>
@@ -109,4 +109,3 @@ export default {
   transform: translateY(-50%) translateX(50%);
 }
 </style>
-

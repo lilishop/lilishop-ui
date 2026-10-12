@@ -10,29 +10,24 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      isShow: false,
-    }
-  },
-  created() {
-    if (this.getNum() <= 2) {
-      setTimeout(() => {
-        this.isShow = true
-      }, 1000 * 60 * 2)
-    }
-  },
-  methods: {
-    getNum() {
-      return parseInt(sessionStorage.getItem('ABS_BOX')) || 0
-    },
-    close() {
-      sessionStorage.setItem('ABS_BOX', this.getNum() + 1)
-      this.isShow = false
-    },
-  },
+<script setup>
+import { ref } from "vue";
+
+const isShow = ref(false);
+
+const getNum = () => {
+  return parseInt(sessionStorage.getItem("ABS_BOX")) || 0;
+};
+
+const close = () => {
+  sessionStorage.setItem("ABS_BOX", getNum() + 1);
+  isShow.value = false;
+};
+
+if (getNum() <= 2) {
+  setTimeout(() => {
+    isShow.value = true;
+  }, 1000 * 60 * 2);
 }
 </script>
 <style lang="less" scoped>

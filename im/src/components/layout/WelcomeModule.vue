@@ -6,15 +6,7 @@
   </div>
 </template>
 
-<script>
-export default {
-  components: {},
-  data () {
-    return {}
-  },
-  created () { },
-  methods: {},
-}
+<script setup>
 </script>
 <style lang="less" scoped>
 .welcome-box {

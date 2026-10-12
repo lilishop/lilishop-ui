@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -100,107 +100,109 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getPintuanList, updatePintuanStatus } from "@/api/promotion";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "pintuan",
-  data() {
-    return {
-      selectDate: [],
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        promotionName: "",
-        promotionStatus: "",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
-        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
+defineOptions({ name: "pintuan" });
+
+const router = useRouter();
+
+const searchFormRef = ref(null);
+
+const selectDate = ref([]);
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  promotionName: "",
+  promotionStatus: "",
+});
+const data = ref([]);
+const total = ref(0);
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.startTime = new Date(selectDate.value[0]).getTime();
+    searchForm.endTime = new Date(selectDate.value[1]).getTime();
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  getPintuanList(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-      getPintuanList(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    view(v) {
-      this.$router.push({ name: "pintuan-goods", query: { id: v.id } });
-    },
-    close(v) {
-      this.$Modal.confirm({
-        title: "确认关闭",
-        content: "您确认要关闭此拼团活动?",
-        loading: true,
-        onOk: () => {
-          updatePintuanStatus(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function view(v) {
+  router.push({ name: "pintuan-goods", query: { id: v.id } });
+}
+function close(v) {
+  Modal.confirm({
+    title: "确认关闭",
+    content: "您确认要关闭此拼团活动?",
+    loading: true,
+    onOk: () => {
+      updatePintuanStatus(v.id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
       });
     },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

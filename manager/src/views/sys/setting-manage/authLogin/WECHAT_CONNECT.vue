@@ -21,7 +21,7 @@
             <div class="pay-list">
               <el-form
                 style="width: 100%"
-                ref="formValidate"
+                ref="formValidateRef"
                 :model="formValidate"
                 :rules="ruleValidate"
                 label-width="100px"
@@ -41,7 +41,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
@@ -53,54 +54,51 @@ const DEFAULT_WECHAT_CONNECT_ITEMS = [
   { clientType: "WECHAT_MP", appId: "", appSecret: "" },
 ];
 
-export default {
-  data() {
-    return {
-      ruleValidate: {},
-      way: {
-        APP: "APP",
-        H5: "手机网页（微商城）",
-        WECHAT_MP: "微信小程序",
-        PC: "WEB网页",
-      },
-      formValidate: {},
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    setupSetting() {
-      setSetting(this.type, {
-        wechatConnectSettingItems: this.formValidate,
-      }).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-          } else {
-          ElMessage.error("保存失败!");
-          }
-      });
-    },
-    init() {
-      const setting = JSON.parse(this.res || "{}");
-      const items = setting.wechatConnectSettingItems;
-      this.formValidate =
-        Array.isArray(items) && items.length ? items : DEFAULT_WECHAT_CONNECT_ITEMS;
-      this.ruleValidate = {
-        appId: [{ required: true, message: "请填写必填项", trigger: "blur" }],
-        appSecret: [{ required: true, message: "请填写必填项", trigger: "blur" }],
-      };
-    },
-  },
-};
+const props = defineProps(["res", "type"]);
+
+const ruleValidate = ref({});
+const way = reactive({
+  APP: "APP",
+  H5: "手机网页（微商城）",
+  WECHAT_MP: "微信小程序",
+  PC: "WEB网页",
+});
+const formValidate = ref({});
+
+const formValidateRef = ref(null);
+
+function submit(name) {
+  handleSubmit({ $refs: { [name]: formValidateRef.value } }, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+
+function setupSetting() {
+  setSetting(props.type, {
+    wechatConnectSettingItems: formValidate.value,
+  }).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+      } else {
+      ElMessage.error("保存失败!");
+      }
+  });
+}
+
+function init() {
+  const setting = JSON.parse(props.res || "{}");
+  const items = setting.wechatConnectSettingItems;
+  formValidate.value =
+    Array.isArray(items) && items.length ? items : DEFAULT_WECHAT_CONNECT_ITEMS;
+  ruleValidate.value = {
+    appId: [{ required: true, message: "请填写必填项", trigger: "blur" }],
+    appSecret: [{ required: true, message: "请填写必填项", trigger: "blur" }],
+  };
+}
+
+init();
 </script>
 
 <style lang="scss" scoped>

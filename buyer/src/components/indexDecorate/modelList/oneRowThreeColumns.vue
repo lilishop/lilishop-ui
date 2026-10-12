@@ -11,22 +11,15 @@
     </div>
 </template>
 
-<script>
-export default {
-  name: "oneRowThreeColumns",
-  props: {
-    data: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  data () {
-    return {
+<script setup>
+defineOptions({ name: "oneRowThreeColumns" });
 
-    };
-  },
-  methods: {}
-}
+defineProps({
+  data: {
+    type: Object,
+    default: () => ({})
+  }
+});
 </script>
 
 <style scoped lang="scss">

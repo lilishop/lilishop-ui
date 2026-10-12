@@ -37,7 +37,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { getCurrentInstance, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
@@ -50,70 +51,66 @@ const DEFAULT_PAYMENT_SUPPORT_ITEMS = [
   { client: "WECHAT_MP", supports: [] },
 ];
 
-export default {
-  data() {
-    return {
-      ruleValidate: {},
-      way: {
-        APP: "移动应用端",
-        H5: "移动端",
-        WECHAT_MP: "小程序端",
-        PC: "PC端",
-      },
-      formValidate: [],
-      payWay: {
-        ALIPAY: "支付宝支付",
-        WECHAT: "微信支付",
-        WALLET: "余额支付",
-      },
-      supportForm: "",
-      checkSupport: {},
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    handleChangePayType(val) {
-      ElMessageBox.confirm("您是否修改此项？", "修改支付设置", { type: "warning" }).then(() => {
-        this.setupSetting();
-      }).catch(() => {
-        this.formValidate = JSON.parse(JSON.stringify(this.checkSupport));
-      });
-    },
-    setupSetting() {
-      setSetting(this.type, { paymentSupportItems: this.formValidate }).then((res) => {
-        if (res.success) {
-          this.checkSupport = JSON.parse(JSON.stringify(this.formValidate));
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    init() {
-      const setting = JSON.parse(this.res || "{}");
-      const items = setting.paymentSupportItems;
-      this.formValidate =
-        Array.isArray(items) && items.length ? items : DEFAULT_PAYMENT_SUPPORT_ITEMS;
-      this.checkSupport = JSON.parse(JSON.stringify(this.formValidate));
+const props = defineProps(["res", "type"]);
 
-      getPaymentSupportForm().then((res) => {
-        if (res.success && res.result) {
-          this.supportForm = res.result;
-        }
-      });
-    },
-  },
+// validate.js 未去 vm 化，handleSubmit 仍需组件实例读取 $refs
+const { proxy } = getCurrentInstance();
+
+const ruleValidate = ref({});
+const way = {
+  APP: "移动应用端",
+  H5: "移动端",
+  WECHAT_MP: "小程序端",
+  PC: "PC端",
 };
+const formValidate = ref([]);
+const payWay = {
+  ALIPAY: "支付宝支付",
+  WECHAT: "微信支付",
+  WALLET: "余额支付",
+};
+const supportForm = ref("");
+const checkSupport = ref({});
+
+function submit(name) {
+  handleSubmit(proxy, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+function handleChangePayType(val) {
+  ElMessageBox.confirm("您是否修改此项？", "修改支付设置", { type: "warning" }).then(() => {
+    setupSetting();
+  }).catch(() => {
+    formValidate.value = JSON.parse(JSON.stringify(checkSupport.value));
+  });
+}
+function setupSetting() {
+  setSetting(props.type, { paymentSupportItems: formValidate.value }).then((res) => {
+    if (res.success) {
+      checkSupport.value = JSON.parse(JSON.stringify(formValidate.value));
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+function init() {
+  const setting = JSON.parse(props.res || "{}");
+  const items = setting.paymentSupportItems;
+  formValidate.value =
+    Array.isArray(items) && items.length ? items : DEFAULT_PAYMENT_SUPPORT_ITEMS;
+  checkSupport.value = JSON.parse(JSON.stringify(formValidate.value));
+
+  getPaymentSupportForm().then((res) => {
+    if (res.success && res.result) {
+      supportForm.value = res.result;
+    }
+  });
+}
+
+init();
 </script>
 
 <style lang="scss" scoped>

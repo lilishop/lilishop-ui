@@ -123,116 +123,118 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { formatLinkType } from "@/utils/filters";
 
-export default {
-  name: "goods",
+defineOptions({ name: "goods" });
 
-  props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
   },
-  data() {
-    return {
-      tabIndex:0,
-      current: 0,
-      showModal: false,
-      selected: {}, // 已选数据
-      picModelFlag: false,
-      tabCurrentlyIndex: 0, // 选项卡索引
-    };
-  },
-  mounted(){
-    this.tabIndex = this.data.options.labels[0].___index
-  },
-  methods: {
-    /**
-     * 算出最大的index 然后索引叠加
-     */
-    handleTabsAdd() {
-      let findAllIndex = this.data.options.labels.map((item) => {
-        return item.___index;
-      });
-      let max = Math.max.apply(null, findAllIndex);
+});
 
-      this.data.options.labels.push({
-        label: "标签" + (max + 1),
-        ___index: max + 1,
-      });
-    },
-    // 删除标签
-    handleContextMenuDelete(item,index) {
-      // 删除标签下关联的商品
-      this.data.options.list.forEach((lab,currently)=>{
-        if(lab.___index == item.___index){
-           this.data.options.list.splice(currently,1)
-        }
-      })
-      // 删除当前标签
-      this.data.options.labels.splice(index,1)
-    },
-    // 删除商品
-    delGoods(val) {
-      this.data.options.list.forEach((item, i) => {
-        if (
-          item.title == val.title &&
-          item.___index == this.tabCurrentlyIndex
-        ) {
-          this.data.options.list.splice(i, 1);
-        }
-      });
-    },
-    // 切换选项卡
-    handleClickTab(name) {
-      console.log(name)
-      this.tabCurrentlyIndex = name;
-    },
-    // 添加当前选项卡中的商品
-    addCurrentGoods() {
+const liliDialog = ref(null);
 
-      this.$refs.liliDialog.clearGoodsSelected();
-      this.$refs.liliDialog.open("goods");
-    },
-    // 编辑模块
-    handleSelectModel(item) {
-      console.log(item);
-      this.selected = item;
-      this.showModal = true;
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      if (val.length) {
-        val.forEach((item) => {
-          const pushGoodsDetail = {
-            img: item.thumbnail,
-            price: item.price,
-            title: item.goodsName,
-            desc: "",
-            url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
-            ___index: this.tabCurrentlyIndex,
-          };
-          this.data.options.list.push(pushGoodsDetail);
-        });
-      }
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      this.selected[this.current].url =
-        this.$filters.formatLinkType(val);
-      this.selected[this.current].type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
+const tabIndex = ref(0);
+const current = ref(0);
+const showModal = ref(false);
+const selected = ref({}); // 已选数据
+const picModelFlag = ref(false);
+const tabCurrentlyIndex = ref(0); // 选项卡索引
 
-      console.log(this.selected[this.current]);
-    },
-    handleSelectLink(index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-      this.current = index;
-    },
-  },
-};
+onMounted(() => {
+  tabIndex.value = props.data.options.labels[0].___index;
+});
+
+/**
+ * 算出最大的index 然后索引叠加
+ */
+function handleTabsAdd() {
+  let findAllIndex = props.data.options.labels.map((item) => {
+    return item.___index;
+  });
+  let max = Math.max.apply(null, findAllIndex);
+
+  props.data.options.labels.push({
+    label: "标签" + (max + 1),
+    ___index: max + 1,
+  });
+}
+
+// 删除标签
+function handleContextMenuDelete(item, index) {
+  // 删除标签下关联的商品
+  props.data.options.list.forEach((lab, currently) => {
+    if (lab.___index == item.___index) {
+      props.data.options.list.splice(currently, 1);
+    }
+  });
+  // 删除当前标签
+  props.data.options.labels.splice(index, 1);
+}
+
+// 删除商品
+function delGoods(val) {
+  props.data.options.list.forEach((item, i) => {
+    if (item.title == val.title && item.___index == tabCurrentlyIndex.value) {
+      props.data.options.list.splice(i, 1);
+    }
+  });
+}
+
+// 切换选项卡
+function handleClickTab(name) {
+  console.log(name);
+  tabCurrentlyIndex.value = name;
+}
+
+// 添加当前选项卡中的商品
+function addCurrentGoods() {
+  liliDialog.value.clearGoodsSelected();
+  liliDialog.value.open("goods");
+}
+
+// 编辑模块
+function handleSelectModel(item) {
+  console.log(item);
+  selected.value = item;
+  showModal.value = true;
+}
+
+// 选择商品回调
+function selectedGoodsData(val) {
+  if (val.length) {
+    val.forEach((item) => {
+      const pushGoodsDetail = {
+        img: item.thumbnail,
+        price: item.price,
+        title: item.goodsName,
+        desc: "",
+        url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
+        ___index: tabCurrentlyIndex.value,
+      };
+      props.data.options.list.push(pushGoodsDetail);
+    });
+  }
+}
+
+// 选择链接回调
+function selectedLink(val) {
+  selected.value[current.value].url = formatLinkType(val);
+  selected.value[current.value].type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+
+  console.log(selected.value[current.value]);
+}
+
+function handleSelectLink(index) {
+  // 调起选择链接弹窗
+  liliDialog.value.open("link");
+  current.value = index;
+}
 </script>
 
 <style scoped lang="scss">

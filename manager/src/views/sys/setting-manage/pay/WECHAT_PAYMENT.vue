@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <el-form
-      ref="formValidate"
+      ref="formValidateRef"
       label-width="150px"
       label-position="right"
       :model="formValidate"
@@ -35,6 +35,7 @@
         <el-input v-model="formValidate.apiclientKey" :rows="6" maxlength="2500" show-word-limit type="textarea" placeholder="Enter something..." />
       </el-form-item>
       <el-form-item label="加签方式" prop="publicType">
+        <!-- 历史遗留：handlePublicTypeChange 从未定义，原样保留 -->
         <el-radio-group v-model="formValidate.publicType" @change="handlePublicTypeChange">
           <el-radio-button value="CERT">平台证书</el-radio-button>
           <el-radio-button value="KEY">微信支付公钥</el-radio-button>
@@ -57,58 +58,59 @@
     </el-form>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 
-export default {
-  data() {
-    return {
-      ruleValidate: {}, // 验证规则
-      formValidate: {}, // 表单数据
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    // 保存设置
-    setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    // 实例化数据
-    init() {
-      const setting = JSON.parse(this.res || "{}");
-      this.formValidate = { ...setting };
-      Object.keys(this.formValidate).forEach((item) => {
-        if (item.indexOf("pId") < 0) {
-          this.ruleValidate[item] = [
-            {
-              required: true,
-              message: "请填写必填项",
-              trigger: "blur",
-            },
-          ];
-        }
-      });
+const props = defineProps(["res", "type"]);
+
+const ruleValidate = reactive({}); // 验证规则
+const formValidate = ref({}); // 表单数据
+
+// 模板 ref 与 data 同名会互相覆盖，改名 formValidateRef
+const formValidateRef = ref(null);
+
+function submit(name) {
+  // handleSubmit 依赖 vm.$refs，传入表单 ref 映射保持原有行为
+  handleSubmit({ $refs: { [name]: formValidateRef.value } }, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+
+// 保存设置
+function setupSetting() {
+  setSetting(props.type, formValidate.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
     }
-  },
-};
+  });
+}
+
+// 实例化数据
+function init() {
+  const setting = JSON.parse(props.res || "{}");
+  formValidate.value = { ...setting };
+  Object.keys(formValidate.value).forEach((item) => {
+    if (item.indexOf("pId") < 0) {
+      ruleValidate[item] = [
+        {
+          required: true,
+          message: "请填写必填项",
+          trigger: "blur",
+        },
+      ];
+    }
+  });
+}
+
+// created
+init();
 </script>
 
 <style lang="scss" scoped>

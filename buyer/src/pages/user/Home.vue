@@ -55,7 +55,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onBeforeUnmount, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import {
   Bell,
   ChatDotRound,
@@ -78,6 +80,12 @@ import {
 import menuList from "./menu";
 import Storage from "@/plugins/storage.js";
 import { refreshUnreadMessage } from "@/utils/unreadMessage";
+import { useAppStore } from "@/stores/app";
+
+defineOptions({ name: "Home" });
+
+const router = useRouter();
+const appStore = useAppStore();
 
 const MENU_ICONS = {
   Bell,
@@ -99,44 +107,35 @@ const MENU_ICONS = {
   Warning,
 };
 
-export default {
-  components: { House, User },
-  name: "Home",
-  data() {
-    return {
-      menuList,
-    };
-  },
-  computed: {
-    userInfo() {
-      if (Storage.getItem("userInfo")) {
-        return JSON.parse(Storage.getItem("userInfo"));
-      }
-      return {};
-    },
-    unreadMsg() {
-      return Number(this.$store.state.unreadMsg) || 0;
-    },
-    unreadLabel() {
-      return this.unreadMsg > 99 ? "99+" : String(this.unreadMsg);
-    },
-  },
-  mounted() {
-    document.body.classList.add("buyer-user-center");
-    refreshUnreadMessage();
-  },
-  beforeUnmount() {
-    document.body.classList.remove("buyer-user-center");
-  },
-  methods: {
-    menuIcon(name) {
-      return MENU_ICONS[name] || Goods;
-    },
-    onSelect(name) {
-      this.$router.push({ name });
-    },
-  },
-};
+const userInfo = computed(() => {
+  if (Storage.getItem("userInfo")) {
+    return JSON.parse(Storage.getItem("userInfo"));
+  }
+  return {};
+});
+
+const unreadMsg = computed(() => appStore.unreadMsg);
+
+const unreadLabel = computed(() => {
+  return unreadMsg.value > 99 ? "99+" : String(unreadMsg.value);
+});
+
+function menuIcon(name) {
+  return MENU_ICONS[name] || Goods;
+}
+
+function onSelect(name) {
+  router.push({ name });
+}
+
+onMounted(() => {
+  document.body.classList.add("buyer-user-center");
+  refreshUnreadMessage();
+});
+
+onBeforeUnmount(() => {
+  document.body.classList.remove("buyer-user-center");
+});
 </script>
 
 <style scoped lang="scss">

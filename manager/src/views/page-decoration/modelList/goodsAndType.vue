@@ -127,137 +127,132 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { formatLinkType } from "@/utils/filters";
 
-export default {
-  name: "goods",
+defineOptions({ name: "goods" });
 
-  props: {
-    data: {
-      type: Object,
-      default: {},
-    },
+const props = defineProps({
+  data: {
+    type: Object,
+    default: {},
   },
-  data() {
-    return {
-      tabIndex: 0,
-      current: 0,
-      showModal: false,
-      draftOptions: null,
-      tabCurrentlyIndex: 0, // 选项卡索引
-    };
-  },
-  mounted(){
-    this.tabIndex = this.data.options.labels[0].___index
-  },
-  methods: {
-    cloneOptions(options) {
-      return JSON.parse(JSON.stringify(options || {}));
-    },
-    /**
-     * 算出最大的index 然后索引叠加
-     */
-    handleTabsAdd() {
-      if (!this.draftOptions) return;
-      const findAllIndex = this.draftOptions.labels.map((item) => item.___index);
-      const max = Math.max.apply(null, findAllIndex);
+});
 
-      this.draftOptions.labels.push({
-        label: "标签" + (max + 1),
-        ___index: max + 1,
-      });
-    },
-    // 删除标签
-    handleContextMenuDelete(item, index) {
-      if (!this.draftOptions) return;
-      this.draftOptions.list = this.draftOptions.list.filter(
-        (lab) => lab.___index != item.___index
-      );
-      this.draftOptions.labels.splice(index, 1);
-    },
-    // 删除商品
-    delGoods(val) {
-      if (!this.draftOptions) return;
-      this.draftOptions.list.forEach((item, i) => {
-        if (
-          item.title == val.title &&
-          item.___index == this.tabCurrentlyIndex
-        ) {
-          this.draftOptions.list.splice(i, 1);
-        }
-      });
-    },
-    // 切换选项卡
-    handleClickTab(name) {
-      this.tabCurrentlyIndex = name.paneName ?? name;
-    },
-    // 添加当前选项卡中的商品
-    addCurrentGoods() {
-      this.$refs.liliDialog.clearGoodsSelected();
-      this.$refs.liliDialog.open("goods");
-    },
-    // 编辑模块
-    handleSelectModel() {
-      this.draftOptions = this.cloneOptions({
-        title: this.data.options.title,
-        labels: this.data.options.labels,
-        list: this.data.options.list,
-      });
-      this.tabCurrentlyIndex = this.draftOptions.labels[0]?.___index ?? 0;
-      this.tabIndex = String(this.tabCurrentlyIndex);
-      this.showModal = true;
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      if (!val?.length || !this.draftOptions) return;
-      val.forEach((item) => {
-        this.draftOptions.list.push({
-          img: item.thumbnail,
-          price: item.price,
-          title: item.goodsName,
-          desc: "",
-          url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
-          ___index: this.tabCurrentlyIndex,
-        });
-      });
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      if (!this.draftOptions?.list?.length) return;
-      const item = this.draftOptions.list[this.current];
-      if (!item) return;
-      item.url = this.$filters.formatLinkType(val);
-      item.type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
-    },
-    handleSelectLink(index) {
-      this.$refs.liliDialog.open("link");
-      this.current = index;
-    },
-    handleCancelModal() {
-      this.draftOptions = null;
-      this.showModal = false;
-    },
-    handleConfirmModal() {
-      if (this.draftOptions) {
-        const saved = this.cloneOptions(this.draftOptions);
-        this.data.options.title = saved.title;
-        this.data.options.labels.splice(
-          0,
-          this.data.options.labels.length,
-          ...saved.labels
-        );
-        this.data.options.list.splice(
-          0,
-          this.data.options.list.length,
-          ...saved.list
-        );
-      }
-      this.draftOptions = null;
-      this.showModal = false;
-    },
-  },
-};
+const tabIndex = ref(0);
+const current = ref(0);
+const showModal = ref(false);
+const draftOptions = ref(null);
+const tabCurrentlyIndex = ref(0); // 选项卡索引
+
+const liliDialog = ref(null);
+
+onMounted(() => {
+  tabIndex.value = props.data.options.labels[0].___index;
+});
+
+function cloneOptions(options) {
+  return JSON.parse(JSON.stringify(options || {}));
+}
+/**
+ * 算出最大的index 然后索引叠加
+ */
+function handleTabsAdd() {
+  if (!draftOptions.value) return;
+  const findAllIndex = draftOptions.value.labels.map((item) => item.___index);
+  const max = Math.max.apply(null, findAllIndex);
+
+  draftOptions.value.labels.push({
+    label: "标签" + (max + 1),
+    ___index: max + 1,
+  });
+}
+// 删除标签
+function handleContextMenuDelete(item, index) {
+  if (!draftOptions.value) return;
+  draftOptions.value.list = draftOptions.value.list.filter(
+    (lab) => lab.___index != item.___index
+  );
+  draftOptions.value.labels.splice(index, 1);
+}
+// 删除商品
+function delGoods(val) {
+  if (!draftOptions.value) return;
+  draftOptions.value.list.forEach((item, i) => {
+    if (item.title == val.title && item.___index == tabCurrentlyIndex.value) {
+      draftOptions.value.list.splice(i, 1);
+    }
+  });
+}
+// 切换选项卡
+function handleClickTab(name) {
+  tabCurrentlyIndex.value = name.paneName ?? name;
+}
+// 添加当前选项卡中的商品
+function addCurrentGoods() {
+  liliDialog.value.clearGoodsSelected();
+  liliDialog.value.open("goods");
+}
+// 编辑模块
+function handleSelectModel() {
+  draftOptions.value = cloneOptions({
+    title: props.data.options.title,
+    labels: props.data.options.labels,
+    list: props.data.options.list,
+  });
+  tabCurrentlyIndex.value = draftOptions.value.labels[0]?.___index ?? 0;
+  tabIndex.value = String(tabCurrentlyIndex.value);
+  showModal.value = true;
+}
+// 选择商品回调
+function selectedGoodsData(val) {
+  if (!val?.length || !draftOptions.value) return;
+  val.forEach((item) => {
+    draftOptions.value.list.push({
+      img: item.thumbnail,
+      price: item.price,
+      title: item.goodsName,
+      desc: "",
+      url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
+      ___index: tabCurrentlyIndex.value,
+    });
+  });
+}
+// 选择链接回调
+function selectedLink(val) {
+  if (!draftOptions.value?.list?.length) return;
+  const item = draftOptions.value.list[current.value];
+  if (!item) return;
+  item.url = formatLinkType(val);
+  item.type = val.___type === "other" && val.url === "" ? "link" : "other";
+}
+function handleSelectLink(index) {
+  liliDialog.value.open("link");
+  current.value = index;
+}
+function handleCancelModal() {
+  draftOptions.value = null;
+  showModal.value = false;
+}
+function handleConfirmModal() {
+  if (draftOptions.value) {
+    const saved = cloneOptions(draftOptions.value);
+    props.data.options.title = saved.title;
+    props.data.options.labels.splice(
+      0,
+      props.data.options.labels.length,
+      ...saved.labels
+    );
+    props.data.options.list.splice(
+      0,
+      props.data.options.list.length,
+      ...saved.list
+    );
+  }
+  draftOptions.value = null;
+  showModal.value = false;
+}
 </script>
 
 <style scoped lang="scss">

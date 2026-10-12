@@ -32,7 +32,7 @@
         </vuedraggable>
         <div class="upload-box">
           <el-upload
-            ref="upload"
+            ref="uploadRef"
             :action="uploadFileUrl"
             :headers="accessToken"
             :show-file-list="false"
@@ -64,7 +64,7 @@
       @closed="resetOssSelection"
     >
       <OssManage
-        ref="ossManage"
+        ref="ossManageRef"
         :is-component="true"
         :initialize="showOssManager"
         :hide-select-footer="true"
@@ -84,123 +84,120 @@
     </el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { nextTick, onMounted, ref } from "vue";
 import { Delete, Plus, ZoomIn } from "@element-plus/icons-vue";
 import vuedraggable from "vuedraggable";
 import { uploadFile } from "@/libs/axios";
+import { getStore } from "@/libs/storage";
+import { Message } from "@/utils/message";
 import OssManage from "@/views/sys/oss-manage/ossManage.vue";
 
-export default {
-  name: "upload-image",
-  components: {
-    OssManage,
-    vuedraggable,
-    Delete,
-    Plus,
-    ZoomIn,
-  },
-  data() {
-    return {
-      show: false,
-      uploadFileUrl: uploadFile,
-      accessToken: {},
-      showOssManager: false,
-      images: [],
-      selectedImage: [],
-      viewImage: false,
-      previewUrl: "",
-    };
-  },
-  mounted() {
-    this.accessToken = {
-      accessToken: this.getStore("accessToken"),
-    };
-  },
-  methods: {
-    draggableItemKey(item) {
-      return item?.url || item;
-    },
-    handleClickUploadImage() {
-      this.show = true;
-    },
-    handleView(url) {
-      this.previewUrl = url;
-      this.viewImage = true;
-    },
-    callback() {
-      const formatImages = this.images.map((item) => item.url);
-      this.$emit("callback", formatImages);
-      this.show = false;
-    },
-    handleRemoveGoodsPicture(__index) {
-      this.images.splice(__index, 1);
-    },
-    handleBeforeUpload(file) {
-      const okType = ["image/jpeg", "image/png", "image/jpg"].includes(file.type);
-      if (!okType) {
-        this.$Message.warning("文件 " + file.name + " 的格式不正确，请选择 jpg/jpeg/png");
-        return false;
-      }
-      if (file.size / 1024 / 1024 > 10) {
-        this.$Message.warning("图片大小不能超过10MB");
-        return false;
-      }
-      return true;
-    },
-    handleSuccessGoodsPicture(res) {
-      const url = res?.result ?? res?.data?.result;
-      if (url) {
-        this.images.push({ url });
-      } else {
-        this.$Message.error(res?.message || "上传失败");
-      }
-    },
-    handleUploadError(err) {
-      this.$Message.error(err?.message || String(err));
-    },
-    confirmUrls() {
-      this.applySelectedImages();
-      this.showOssManager = false;
-    },
-    cancelOssImport() {
-      this.selectedImage = [];
-      this.showOssManager = false;
-    },
-    resetOssSelection() {
-      this.selectedImage = [];
-    },
-    handleOssSelected(list) {
-      this.selectedImage = Array.isArray(list) ? list : [];
-    },
-    parseOssSelectionUrl(item) {
-      if (!item) {
-        return "";
-      }
-      if (typeof item === "string") {
-        const index = item.indexOf(",");
-        return index >= 0 ? item.slice(index + 1) : item;
-      }
-      return item.url || "";
-    },
-    applySelectedImages() {
-      (this.selectedImage || []).forEach((item) => {
-        const url = this.parseOssSelectionUrl(item);
-        if (url) {
-          this.images.push({ url });
-        }
-      });
-    },
-    importOSS() {
-      this.selectedImage = [];
-      this.showOssManager = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-  },
-};
+defineOptions({ name: "upload-image" });
+
+const emit = defineEmits(["callback"]);
+
+const show = ref(false);
+const uploadFileUrl = uploadFile;
+const accessToken = ref({});
+const showOssManager = ref(false);
+const images = ref([]);
+const selectedImage = ref([]);
+const viewImage = ref(false);
+const previewUrl = ref("");
+
+// 模板 ref：upload/ossManage 原名与顶层变量无冲突，但统一改名避免与后续变量互相覆盖
+const uploadRef = ref(null);
+const ossManageRef = ref(null);
+
+onMounted(() => {
+  accessToken.value = {
+    accessToken: getStore("accessToken"),
+  };
+});
+
+function draggableItemKey(item) {
+  return item?.url || item;
+}
+function handleClickUploadImage() {
+  show.value = true;
+}
+function handleView(url) {
+  previewUrl.value = url;
+  viewImage.value = true;
+}
+function callback() {
+  const formatImages = images.value.map((item) => item.url);
+  emit("callback", formatImages);
+  show.value = false;
+}
+function handleRemoveGoodsPicture(__index) {
+  images.value.splice(__index, 1);
+}
+function handleBeforeUpload(file) {
+  const okType = ["image/jpeg", "image/png", "image/jpg"].includes(file.type);
+  if (!okType) {
+    Message.warning("文件 " + file.name + " 的格式不正确，请选择 jpg/jpeg/png");
+    return false;
+  }
+  if (file.size / 1024 / 1024 > 10) {
+    Message.warning("图片大小不能超过10MB");
+    return false;
+  }
+  return true;
+}
+function handleSuccessGoodsPicture(res) {
+  const url = res?.result ?? res?.data?.result;
+  if (url) {
+    images.value.push({ url });
+  } else {
+    Message.error(res?.message || "上传失败");
+  }
+}
+function handleUploadError(err) {
+  Message.error(err?.message || String(err));
+}
+function confirmUrls() {
+  applySelectedImages();
+  showOssManager.value = false;
+}
+function cancelOssImport() {
+  selectedImage.value = [];
+  showOssManager.value = false;
+}
+function resetOssSelection() {
+  selectedImage.value = [];
+}
+function handleOssSelected(list) {
+  selectedImage.value = Array.isArray(list) ? list : [];
+}
+function parseOssSelectionUrl(item) {
+  if (!item) {
+    return "";
+  }
+  if (typeof item === "string") {
+    const index = item.indexOf(",");
+    return index >= 0 ? item.slice(index + 1) : item;
+  }
+  return item.url || "";
+}
+function applySelectedImages() {
+  (selectedImage.value || []).forEach((item) => {
+    const url = parseOssSelectionUrl(item);
+    if (url) {
+      images.value.push({ url });
+    }
+  });
+}
+function importOSS() {
+  selectedImage.value = [];
+  showOssManager.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
 </script>
 
 <style scoped lang="scss">

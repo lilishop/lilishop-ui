@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -87,7 +87,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="品牌名称" prop="name">
           <el-input v-model="form.name" clearable style="width: 100%" />
         </el-form-item>
@@ -110,7 +110,7 @@
 
     <el-dialog v-model="picModelFlag" width="1200px" :show-close="true">
       <ossManage
-        ref="ossManage"
+        ref="ossManageRef"
         :is-component="true"
         :initialize="picModelFlag"
         @callback="callbackSelected"
@@ -146,13 +146,14 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, nextTick, onMounted, getCurrentInstance } from "vue";
 import {
   getManagerBrandPage,
   addBrand,
   updateBrand,
   disableBrand,
-  delBrand,
+  delBrand as delBrandApi,
   getCategoryTree,
   getBrandCategoryListData,
   saveBrandCategory,
@@ -162,222 +163,234 @@ import { regular } from "@/utils";
 import { ElMessage, ElMessageBox } from "element-plus";
 import defaultPic from "@/assets/default.png";
 
-export default {
-  name: "brand",
-  components: {
-    ossManage,
-  },
-  data() {
-    return {
-      defaultPic,
-      loading: true,
-      modalType: 0,
-      modalVisible: false,
-      modalTitle: "",
-      picModelFlag: false,
-      categoryModalVisible: false,
-      categoryModalTitle: "关联分类",
-      categoryTreeLoading: false,
-      categoryTreeData: [],
-      categoryTreeKey: 0,
-      categorySubmitLoading: false,
-      currentBrandId: "",
-      selectedCategoryIds: [],
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-      },
-      form: {
-        name: "",
-        logo: "",
-        deleteFlag: "",
-      },
-      formValidate: {
-        name: [regular.REQUIRED, regular.VARCHAR20],
-        logo: [regular.REQUIRED, regular.URL200],
-      },
-      submitLoading: false,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    openLogoPicker() {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      this.form.logo = val.url;
-    },
-    buildCategoryTreeNodes(list) {
-      if (!Array.isArray(list) || list.length === 0) return [];
-      return list.map((item) => ({
-        id: item.id,
-        title: item.name,
-        children: this.buildCategoryTreeNodes(item.children || []),
-      }));
-    },
-    async openCategoryModal(row) {
-      this.currentBrandId = row.id;
-      this.categoryModalTitle = "关联分类 - " + (row.name || "");
-      this.categoryModalVisible = true;
-      this.categoryTreeLoading = true;
-      this.categoryTreeKey += 1;
-      this.categoryTreeData = [];
-      this.selectedCategoryIds = [];
-      try {
-        const [treeRes, bindRes] = await Promise.all([
-          getCategoryTree(),
-          getBrandCategoryListData(row.id),
-        ]);
-        const selectedIds = Array.isArray(bindRes?.result)
-          ? bindRes.result
-              .map((x) => (typeof x === "string" ? x : x && x.id))
-              .filter(Boolean)
-          : [];
-        this.selectedCategoryIds = selectedIds;
-        this.categoryTreeData =
-          treeRes && treeRes.success
-            ? this.buildCategoryTreeNodes(treeRes.result || [])
-            : [];
-      } finally {
-        this.categoryTreeLoading = false;
+defineOptions({ name: "brand" });
+
+const { proxy } = getCurrentInstance();
+
+const loading = ref(true);
+const modalType = ref(0);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const picModelFlag = ref(false);
+const categoryModalVisible = ref(false);
+const categoryModalTitle = ref("关联分类");
+const categoryTreeLoading = ref(false);
+const categoryTreeData = ref([]);
+const categoryTreeKey = ref(0);
+const categorySubmitLoading = ref(false);
+const currentBrandId = ref("");
+const selectedCategoryIds = ref([]);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "create_time",
+  order: "desc",
+});
+const form = ref({
+  name: "",
+  logo: "",
+  deleteFlag: "",
+});
+const formValidate = reactive({
+  name: [regular.REQUIRED, regular.VARCHAR20],
+  logo: [regular.REQUIRED, regular.URL200],
+});
+const submitLoading = ref(false);
+const data = ref([]);
+const total = ref(0);
+
+const searchFormRef = ref(null);
+const formRef = ref(null);
+const ossManageRef = ref(null);
+
+function openLogoPicker() {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  form.value.logo = val.url;
+}
+
+function buildCategoryTreeNodes(list) {
+  if (!Array.isArray(list) || list.length === 0) return [];
+  return list.map((item) => ({
+    id: item.id,
+    title: item.name,
+    children: buildCategoryTreeNodes(item.children || []),
+  }));
+}
+
+async function openCategoryModal(row) {
+  currentBrandId.value = row.id;
+  categoryModalTitle.value = "关联分类 - " + (row.name || "");
+  categoryModalVisible.value = true;
+  categoryTreeLoading.value = true;
+  categoryTreeKey.value += 1;
+  categoryTreeData.value = [];
+  selectedCategoryIds.value = [];
+  try {
+    const [treeRes, bindRes] = await Promise.all([
+      getCategoryTree(),
+      getBrandCategoryListData(row.id),
+    ]);
+    const selectedIds = Array.isArray(bindRes?.result)
+      ? bindRes.result
+          .map((x) => (typeof x === "string" ? x : x && x.id))
+          .filter(Boolean)
+      : [];
+    selectedCategoryIds.value = selectedIds;
+    categoryTreeData.value =
+      treeRes && treeRes.success
+        ? buildCategoryTreeNodes(treeRes.result || [])
+        : [];
+  } finally {
+    categoryTreeLoading.value = false;
+  }
+}
+
+function onCategoryTreeCheckChange(_data, checkedInfo) {
+  selectedCategoryIds.value = checkedInfo?.checkedKeys || [];
+}
+
+function submitBrandCategory() {
+  if (!currentBrandId.value) return;
+  categorySubmitLoading.value = true;
+  saveBrandCategory(
+    currentBrandId.value,
+    (selectedCategoryIds.value || []).map((id) => String(id))
+  )
+    .then((res) => {
+      categorySubmitLoading.value = false;
+      if (res && res.success) {
+        ElMessage.success("操作成功");
+        categoryModalVisible.value = false;
       }
-    },
-    onCategoryTreeCheckChange(_data, checkedInfo) {
-      this.selectedCategoryIds = checkedInfo?.checkedKeys || [];
-    },
-    submitBrandCategory() {
-      if (!this.currentBrandId) return;
-      this.categorySubmitLoading = true;
-      saveBrandCategory(
-        this.currentBrandId,
-        (this.selectedCategoryIds || []).map((id) => String(id))
-      )
-        .then((res) => {
-          this.categorySubmitLoading = false;
-          if (res && res.success) {
-            ElMessage.success("操作成功");
-            this.categoryModalVisible = false;
-          }
-        })
-        .catch(() => {
-          this.categorySubmitLoading = false;
-        });
-    },
-    handleStatusSwitchChange(row, checked) {
-      const disable = !checked;
-      ElMessageBox.confirm(
-        "您确认要" + (disable ? "禁用" : "启用") + "品牌 " + row.name + " ?",
-        disable ? "确认禁用" : "确认启用",
-        { type: "warning" }
-      ).then(() => {
-        return disableBrand(row.id, { disable }).then((res) => {
+    })
+    .catch(() => {
+      categorySubmitLoading.value = false;
+    });
+}
+
+function handleStatusSwitchChange(row, checked) {
+  const disable = !checked;
+  ElMessageBox.confirm(
+    "您确认要" + (disable ? "禁用" : "启用") + "品牌 " + row.name + " ?",
+    disable ? "确认禁用" : "确认启用",
+    { type: "warning" }
+  ).then(() => {
+    return disableBrand(row.id, { disable }).then((res) => {
+      if (res.success) {
+        ElMessage.success("操作成功");
+      }
+      getDataList();
+    });
+  }).catch(() => {
+    nextTick(() => proxy.$forceUpdate());
+  });
+}
+
+function delBrand(row) {
+  ElMessageBox.confirm("您确认要删除 " + row.name + " ?", "确认删除", { type: "warning" }).then(() => {
+    return delBrandApi(row.id).then((res) => {
+      if (res.success) {
+        ElMessage.success("品牌删除成功!");
+        getDataList();
+      }
+    });
+  }).catch(() => {});
+}
+
+function init() {
+  getDataList();
+}
+
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+
+function changePageSize(v) {
+  searchForm.pageSize = v;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function getDataList() {
+  loading.value = true;
+  getManagerBrandPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      if (modalType.value === 0) {
+        delete form.value.id;
+        addBrand(form.value).then((res) => {
+          submitLoading.value = false;
           if (res.success) {
             ElMessage.success("操作成功");
+            getDataList();
+            modalVisible.value = false;
           }
-          this.getDataList();
         });
-      }).catch(() => {
-        this.$nextTick(() => this.$forceUpdate());
-      });
-    },
-    delBrand(row) {
-      ElMessageBox.confirm("您确认要删除 " + row.name + " ?", "确认删除", { type: "warning" }).then(() => {
-        return delBrand(row.id).then((res) => {
+      } else {
+        updateBrand(form.value).then((res) => {
+          submitLoading.value = false;
           if (res.success) {
-            ElMessage.success("品牌删除成功!");
-            this.getDataList();
+            ElMessage.success("操作成功");
+            getDataList();
+            modalVisible.value = false;
           }
         });
-      }).catch(() => {});
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getManagerBrandPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalType === 0) {
-            delete this.form.id;
-            addBrand(this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                ElMessage.success("操作成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          } else {
-            updateBrand(this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                ElMessage.success("操作成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          }
-        }
-      });
-    },
-    add() {
-      this.modalType = 0;
-      this.modalTitle = "添加";
-      this.$refs.form?.resetFields();
-      delete this.form.id;
-      this.modalVisible = true;
-    },
-    edit(v) {
-      this.modalType = 1;
-      this.modalTitle = "编辑";
-      this.$refs.form?.resetFields();
-      for (const attr in v) {
-        if (v[attr] === null) {
-          v[attr] = "";
-        }
       }
-      const str = JSON.stringify(v);
-      const data = JSON.parse(str);
-      this.form = data;
-      this.modalVisible = true;
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    }
+  });
+}
+
+function add() {
+  modalType.value = 0;
+  modalTitle.value = "添加";
+  formRef.value?.resetFields();
+  delete form.value.id;
+  modalVisible.value = true;
+}
+
+function edit(v) {
+  modalType.value = 1;
+  modalTitle.value = "编辑";
+  formRef.value?.resetFields();
+  for (const attr in v) {
+    if (v[attr] === null) {
+      v[attr] = "";
+    }
+  }
+  const str = JSON.stringify(v);
+  const data = JSON.parse(str);
+  form.value = data;
+  modalVisible.value = true;
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

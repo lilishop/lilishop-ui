@@ -54,84 +54,89 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getRequest, postRequestWithNoForm, deleteRequest } from "@/libs/axios";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { countFormFields } from "@/constants/systemForm";
 
-export default {
-  name: "appointmentSystemFormList",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      searchForm: {
-        formName: "",
-        status: "",
-        pageNumber: 1,
-        pageSize: 10,
-      },
-    };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    fieldCount: countFormFields,
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.loadData();
-    },
-    handleReset() {
-      this.searchForm.formName = "";
-      this.searchForm.status = "";
-      this.searchForm.pageNumber = 1;
-      this.loadData();
-    },
-    loadData() {
-      this.loading = true;
-      getRequest("/appointment/system-forms", this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result?.records || [];
-            this.total = res.result?.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    goDesigner(id) {
-      this.$router.push({
-        name: "appointment-system-form-designer",
-        query: id ? { id } : {},
-      });
-    },
-    toggleStatus(row, enabled) {
-      const status = enabled ? "ENABLED" : "DISABLED";
-      postRequestWithNoForm("/appointment/system-forms", {
-        id: row.id,
-        formName: row.formName,
-        formSchema: row.formSchema || "[]",
-        status,
-      }).then((res) => {
-        if (res.success) {
-          row.status = status;
-          ElMessage.success(enabled ? "已启用" : "已停用");
-        }
-      });
-    },
-    handleDelete(row) {
-      ElMessageBox.confirm("确认删除该表单？", "提示", { type: "warning" }).then(() => {
-        deleteRequest(`/appointment/system-forms/${row.id}`).then((res) => {
-          if (res.success) {
-            ElMessage.success("已删除");
-            this.loadData();
-          }
-        });
-      });
-    },
-  },
-};
+defineOptions({ name: "appointmentSystemFormList" });
+
+const router = useRouter();
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const searchForm = reactive({
+  formName: "",
+  status: "",
+  pageNumber: 1,
+  pageSize: 10,
+});
+
+const fieldCount = countFormFields;
+
+onMounted(() => {
+  loadData();
+});
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  loadData();
+}
+
+function handleReset() {
+  searchForm.formName = "";
+  searchForm.status = "";
+  searchForm.pageNumber = 1;
+  loadData();
+}
+
+function loadData() {
+  loading.value = true;
+  getRequest("/appointment/system-forms", searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result?.records || [];
+        total.value = res.result?.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function goDesigner(id) {
+  router.push({
+    name: "appointment-system-form-designer",
+    query: id ? { id } : {},
+  });
+}
+
+function toggleStatus(row, enabled) {
+  const status = enabled ? "ENABLED" : "DISABLED";
+  postRequestWithNoForm("/appointment/system-forms", {
+    id: row.id,
+    formName: row.formName,
+    formSchema: row.formSchema || "[]",
+    status,
+  }).then((res) => {
+    if (res.success) {
+      row.status = status;
+      ElMessage.success(enabled ? "已启用" : "已停用");
+    }
+  });
+}
+
+function handleDelete(row) {
+  ElMessageBox.confirm("确认删除该表单？", "提示", { type: "warning" }).then(() => {
+    deleteRequest(`/appointment/system-forms/${row.id}`).then((res) => {
+      if (res.success) {
+        ElMessage.success("已删除");
+        loadData();
+      }
+    });
+  });
+}
 </script>

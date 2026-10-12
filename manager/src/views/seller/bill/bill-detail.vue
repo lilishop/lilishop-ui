@@ -292,235 +292,235 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import * as filters from "@/utils/filters";
 import * as API_Shop from "@/api/shops";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "bill-detail",
-  data() {
-    return {
-      activeTab: "order",
-      loading: false,
-      billData: [
-        {
-          billPrice: 0,
-          orderPrice: 0,
-          siteCouponCommission: 0,
-          pointSettlementPrice: 0,
-          kanjiaSettlementPrice: 0,
-          giftCardSubsidy: 0,
-          distributionCommission: 0,
-          commissionPrice: 0,
-          refundPrice: 0,
-          siteCouponRefundCommission: 0,
-          pointRefundSettlementPrice: 0,
-          kanjiaRefundSettlementPrice: 0,
-          giftCardRefundSubsidy: 0,
-          distributionRefundCommission: 0,
-          refundCommissionPrice: 0,
-        },
-      ],
-      data: [
-        { name: "计算中", value: 0 },
-        { name: "计算中", value: 0 },
-        { name: "计算中", value: 0 },
-        { name: "计算中", value: 0 },
-        { name: "计算中", value: 0 },
-        { name: "计算中", value: 0 },
-        { name: "计算中", value: 0 },
-        { name: "计算中", value: 0 },
-        { name: "计算中", value: 0 },
-      ],
-      id: "",
-      bill: {},
-      orderData: [],
-      orderParam: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "id",
-        order: "desc",
-        startDate: null,
-        endDate: null,
-      },
-      orderTotal: 0,
-      refundTotal: 0,
-      billStatusList: [
-        { status: "OUT", value: "已出账", title: "生成账单" },
-        { status: "CHECK", value: "已对账", title: "商家对账" },
-        { status: "PAY", value: "已付款", title: "平台付款" },
-        { status: "COMPLETE", value: "已完成", title: "结算完成" },
-      ],
-      billStatusStep: [],
-    };
+defineOptions({ name: "bill-detail" });
+
+const route = useRoute();
+
+const activeTab = ref("order");
+const loading = ref(false);
+const billData = ref([
+  {
+    billPrice: 0,
+    orderPrice: 0,
+    siteCouponCommission: 0,
+    pointSettlementPrice: 0,
+    kanjiaSettlementPrice: 0,
+    giftCardSubsidy: 0,
+    distributionCommission: 0,
+    commissionPrice: 0,
+    refundPrice: 0,
+    siteCouponRefundCommission: 0,
+    pointRefundSettlementPrice: 0,
+    kanjiaRefundSettlementPrice: 0,
+    giftCardRefundSubsidy: 0,
+    distributionRefundCommission: 0,
+    refundCommissionPrice: 0,
   },
-  methods: {
-    formatPrice(value) {
-      return this.$filters.unitPrice(value, "￥");
-    },
-    negate(value) {
-      return 0 - value;
-    },
-    isPayFlow(row) {
-      return row.flowType === "PAY";
-    },
-    orderSubsidyTotal(row) {
-      return (
-        row.pointSettlementPrice + row.kanjiaSettlementPrice + row.siteCouponCommission
-      );
-    },
-    orderSubsidyDisplay(row) {
-      if (row.pointSettlementPrice == 0) {
-        return "-";
-      }
-      return this.orderSubsidyTotal(row);
-    },
-    orderCommissionDisplay(row) {
-      return row.commissionPrice == 0 ? "-" : row.commissionPrice;
-    },
-    orderDistributionRebateDisplay(row) {
-      return row.distributionRebate == 0 ? "-" : row.distributionRebate;
-    },
-    orderExpenseTotal(row) {
-      return row.commissionPrice + row.distributionRebate;
-    },
-    getBillStatusStep() {
-      this.billStatusStep = [];
-      let current = "";
-      let myCur = false;
-      let myIdx = 0;
-      this.billStatusList.map((item, index) => {
-        if (item.status === this.bill.billStatus) {
-          myCur = true;
-          myIdx = index;
-          current = "";
-        } else if (!myCur) {
-          current = "";
-        } else if (myIdx + 1 === index) {
-          current = "current";
-        } else {
-          current = "future";
-        }
-        this.billStatusStep.push({ ...item, className: current });
-      });
-      if (this.bill.billStatus === "COMPLETE") {
-        this.billStatusStep[this.billStatusStep.length - 1].className = "current";
-      }
-    },
-    orderChangePage(v) {
-      this.orderParam.pageNumber = v;
-      this.getOrder();
-    },
-    orderChangePageSize(v) {
-      this.orderParam.pageNumber = 1;
-      this.orderParam.pageSize = v;
-      this.getOrder();
-    },
-    pass() {
-      this.$Modal.confirm({
-        title: "结算单付款",
-        content: "确定结算单已付款?",
-        loading: true,
-        onOk: () => {
-          API_Shop.pay(this.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success(res.message);
-              this.init();
-            }
-          });
-        },
-      });
-    },
-    download() {
-      API_Shop.downloadBill(this.id)
-        .then((res) => {
-          const blob = new Blob([res], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          });
-          if ("download" in document.createElement("a")) {
-            const link = document.createElement("a");
-            link.download = "结算单-" + this.id + ".xlsx";
-            link.style.display = "none";
-            link.href = URL.createObjectURL(blob);
-            document.body.appendChild(link);
-            link.click();
-            URL.revokeObjectURL(link.href);
-            document.body.removeChild(link);
-          } else {
-            navigator.msSaveBlob(blob, "结算单-" + this.id + ".xlsx");
-          }
-        });
-    },
-    init() {
-      this.id = this.$route.query.id;
-      this.getDetail();
-    },
-    getDetail() {
-      API_Shop.getBuyBillDetail(this.id).then((res) => {
+]);
+const data = ref([
+  { name: "计算中", value: 0 },
+  { name: "计算中", value: 0 },
+  { name: "计算中", value: 0 },
+  { name: "计算中", value: 0 },
+  { name: "计算中", value: 0 },
+  { name: "计算中", value: 0 },
+  { name: "计算中", value: 0 },
+  { name: "计算中", value: 0 },
+  { name: "计算中", value: 0 },
+]);
+const id = ref("");
+const bill = ref({});
+const orderData = ref([]);
+const orderParam = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "id",
+  order: "desc",
+  startDate: null,
+  endDate: null,
+});
+const orderTotal = ref(0);
+const refundTotal = ref(0);
+const billStatusList = ref([
+  { status: "OUT", value: "已出账", title: "生成账单" },
+  { status: "CHECK", value: "已对账", title: "商家对账" },
+  { status: "PAY", value: "已付款", title: "平台付款" },
+  { status: "COMPLETE", value: "已完成", title: "结算完成" },
+]);
+const billStatusStep = ref([]);
+
+function formatPrice(value) {
+  return filters.unitPrice(value, "￥");
+}
+function negate(value) {
+  return 0 - value;
+}
+function isPayFlow(row) {
+  return row.flowType === "PAY";
+}
+function orderSubsidyTotal(row) {
+  return (
+    row.pointSettlementPrice + row.kanjiaSettlementPrice + row.siteCouponCommission
+  );
+}
+function orderSubsidyDisplay(row) {
+  if (row.pointSettlementPrice == 0) {
+    return "-";
+  }
+  return orderSubsidyTotal(row);
+}
+function orderCommissionDisplay(row) {
+  return row.commissionPrice == 0 ? "-" : row.commissionPrice;
+}
+function orderDistributionRebateDisplay(row) {
+  return row.distributionRebate == 0 ? "-" : row.distributionRebate;
+}
+function orderExpenseTotal(row) {
+  return row.commissionPrice + row.distributionRebate;
+}
+function getBillStatusStep() {
+  billStatusStep.value = [];
+  let current = "";
+  let myCur = false;
+  let myIdx = 0;
+  billStatusList.value.map((item, index) => {
+    if (item.status === bill.value.billStatus) {
+      myCur = true;
+      myIdx = index;
+      current = "";
+    } else if (!myCur) {
+      current = "";
+    } else if (myIdx + 1 === index) {
+      current = "current";
+    } else {
+      current = "future";
+    }
+    billStatusStep.value.push({ ...item, className: current });
+  });
+  if (bill.value.billStatus === "COMPLETE") {
+    billStatusStep.value[billStatusStep.value.length - 1].className = "current";
+  }
+}
+function orderChangePage(v) {
+  orderParam.pageNumber = v;
+  getOrder();
+}
+function orderChangePageSize(v) {
+  orderParam.pageNumber = 1;
+  orderParam.pageSize = v;
+  getOrder();
+}
+function pass() {
+  Modal.confirm({
+    title: "结算单付款",
+    content: "确定结算单已付款?",
+    loading: true,
+    onOk: () => {
+      API_Shop.pay(id.value).then((res) => {
+        Modal.remove();
         if (res.success) {
-          this.bill = res.result;
-          this.initTable();
-          this.orderParam.startDate = this.bill.startTime;
-          this.orderParam.endDate = this.bill.endTime;
-          this.getOrder();
-          this.getBillStatusStep();
+          Message.success(res.message);
+          init();
         }
       });
     },
-    initTable() {
-      const bill = this.bill;
-      const money = (val) => (val === null || val === undefined || val === "" ? 0 : val);
-
-      this.data[0].name = "结算单状态";
-      this.data[0].value = filters.unixSellerBillStatus(bill.billStatus);
-      this.data[1].name = "结算单号";
-      this.data[1].value = bill.sn;
-      this.data[2].name = "店铺名称";
-      this.data[2].value = bill.storeName;
-      this.data[3].name = "起止日期";
-      this.data[3].value = bill.startTime + "~" + bill.endTime;
-      this.data[4].name = "银行开户名";
-      this.data[4].value = bill.bankAccountName;
-      this.data[5].name = "银行账号";
-      this.data[5].value = bill.bankAccountNumber;
-      this.data[6].name = "开户行支行名称";
-      this.data[6].value = bill.bankName;
-      this.data[7].name = "支行联行号";
-      this.data[7].value = bill.bankCode;
-      this.data[8].name = "支付时间";
-      this.data[8].value = bill.payTime === null ? "未付款" : bill.payTime;
-
-      this.billData[0].billPrice = money(this.bill.billPrice);
-      this.billData[0].orderPrice = money(this.bill.orderPrice);
-      this.billData[0].siteCouponCommission = money(this.bill.siteCouponCommission);
-      this.billData[0].pointSettlementPrice = money(this.bill.pointSettlementPrice);
-      this.billData[0].kanjiaSettlementPrice = money(this.bill.kanjiaSettlementPrice);
-      this.billData[0].giftCardSubsidy = money(this.bill.giftCardSubsidy);
-      this.billData[0].distributionCommission = money(this.bill.distributionCommission);
-      this.billData[0].commissionPrice = money(this.bill.commissionPrice);
-      this.billData[0].refundPrice = money(this.bill.refundPrice);
-      this.billData[0].siteCouponRefundCommission = money(this.bill.siteCouponRefundCommission);
-      this.billData[0].pointRefundSettlementPrice = money(this.bill.pointRefundSettlementPrice);
-      this.billData[0].kanjiaRefundSettlementPrice = money(this.bill.kanjiaRefundSettlementPrice);
-      this.billData[0].giftCardRefundSubsidy = money(this.bill.giftCardRefundSubsidy);
-      this.billData[0].distributionRefundCommission = money(this.bill.distributionRefundCommission);
-      this.billData[0].refundCommissionPrice = money(this.bill.refundCommissionPrice);
-    },
-    getOrder() {
-      API_Shop.getStoreFlow(this.id, this.orderParam).then((res) => {
-        if (res.result) {
-          this.orderData = res.result.records;
-          this.orderTotal = res.result.total;
-        }
+  });
+}
+function download() {
+  API_Shop.downloadBill(id.value)
+    .then((res) => {
+      const blob = new Blob([res], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      this.orderTotal = this.orderData.length;
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+      if ("download" in document.createElement("a")) {
+        const link = document.createElement("a");
+        link.download = "结算单-" + id.value + ".xlsx";
+        link.style.display = "none";
+        link.href = URL.createObjectURL(blob);
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        document.body.removeChild(link);
+      } else {
+        navigator.msSaveBlob(blob, "结算单-" + id.value + ".xlsx");
+      }
+    });
+}
+function init() {
+  id.value = route.query.id;
+  getDetail();
+}
+function getDetail() {
+  API_Shop.getBuyBillDetail(id.value).then((res) => {
+    if (res.success) {
+      bill.value = res.result;
+      initTable();
+      orderParam.startDate = bill.value.startTime;
+      orderParam.endDate = bill.value.endTime;
+      getOrder();
+      getBillStatusStep();
+    }
+  });
+}
+function initTable() {
+  const billValue = bill.value;
+  const money = (val) => (val === null || val === undefined || val === "" ? 0 : val);
+
+  data.value[0].name = "结算单状态";
+  data.value[0].value = filters.unixSellerBillStatus(billValue.billStatus);
+  data.value[1].name = "结算单号";
+  data.value[1].value = billValue.sn;
+  data.value[2].name = "店铺名称";
+  data.value[2].value = billValue.storeName;
+  data.value[3].name = "起止日期";
+  data.value[3].value = billValue.startTime + "~" + billValue.endTime;
+  data.value[4].name = "银行开户名";
+  data.value[4].value = billValue.bankAccountName;
+  data.value[5].name = "银行账号";
+  data.value[5].value = billValue.bankAccountNumber;
+  data.value[6].name = "开户行支行名称";
+  data.value[6].value = billValue.bankName;
+  data.value[7].name = "支行联行号";
+  data.value[7].value = billValue.bankCode;
+  data.value[8].name = "支付时间";
+  data.value[8].value = billValue.payTime === null ? "未付款" : billValue.payTime;
+
+  billData.value[0].billPrice = money(billValue.billPrice);
+  billData.value[0].orderPrice = money(billValue.orderPrice);
+  billData.value[0].siteCouponCommission = money(billValue.siteCouponCommission);
+  billData.value[0].pointSettlementPrice = money(billValue.pointSettlementPrice);
+  billData.value[0].kanjiaSettlementPrice = money(billValue.kanjiaSettlementPrice);
+  billData.value[0].giftCardSubsidy = money(billValue.giftCardSubsidy);
+  billData.value[0].distributionCommission = money(billValue.distributionCommission);
+  billData.value[0].commissionPrice = money(billValue.commissionPrice);
+  billData.value[0].refundPrice = money(billValue.refundPrice);
+  billData.value[0].siteCouponRefundCommission = money(billValue.siteCouponRefundCommission);
+  billData.value[0].pointRefundSettlementPrice = money(billValue.pointRefundSettlementPrice);
+  billData.value[0].kanjiaRefundSettlementPrice = money(billValue.kanjiaRefundSettlementPrice);
+  billData.value[0].giftCardRefundSubsidy = money(billValue.giftCardRefundSubsidy);
+  billData.value[0].distributionRefundCommission = money(billValue.distributionRefundCommission);
+  billData.value[0].refundCommissionPrice = money(billValue.refundCommissionPrice);
+}
+function getOrder() {
+  API_Shop.getStoreFlow(id.value, orderParam).then((res) => {
+    if (res.result) {
+      orderData.value = res.result.records;
+      orderTotal.value = res.result.total;
+    }
+  });
+  orderTotal.value = orderData.value.length;
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style scoped lang="scss">

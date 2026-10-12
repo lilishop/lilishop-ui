@@ -68,7 +68,7 @@
           </div>
         </el-col>
         <el-col :md="15" :lg="13" :xl="9" style="margin-left: 10px">
-          <el-form ref="form" :model="form" label-width="110px" :rules="formValidate">
+          <el-form ref="formRef" :model="form" label-width="110px" :rules="formValidate">
             <el-form-item label="类型" prop="type">
               <div v-show="form.level == 0">
                 <el-icon :size="16" style="margin-right: 5px"><Menu /></el-icon>
@@ -140,7 +140,7 @@
       :close-on-click-modal="false"
       class="menu-manage-dialog"
     >
-      <el-form ref="formAdd" :model="formAdd" label-width="100px" :rules="formValidate">
+      <el-form ref="formAddRef" :model="formAdd" label-width="100px" :rules="formValidate">
         <div v-if="showParent">
           <el-form-item label="上级节点：">{{ parentTitle }}</el-form-item>
         </div>
@@ -186,7 +186,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Menu, List, ArrowDown } from "@element-plus/icons-vue";
 import {
@@ -197,340 +198,337 @@ import {
   searchStorePermission,
 } from "@/api/index";
 import util from "@/libs/util.js";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "store-menu-manage",
-  components: {
-    Menu,
-    List,
-    ArrowDown,
-  },
-  data() {
-    return {
-      loading: true,
-      strict: true,
-      maxHeight: "500px",
-      expandLevel: 1,
-      menuModalVisible: false,
-      selectList: [],
-      selectCount: 0,
-      showParent: false,
-      searchKey: "",
-      parentTitle: "",
-      editTitle: "",
-      modalTitle: "",
-      expandedKeys: [],
-      currentNodeKey: null,
-      treeKey: 0,
-      treeProps: {
-        label: "title",
-        children: "children",
-      },
-      form: {
-        id: "",
-        title: "",
-        name: "",
-        path: "",
-        frontRoute: "",
-        parentId: "",
-        sortOrder: 0,
-        level: 0,
-        permission: "",
-      },
-      formAdd: {},
-      formValidate: {
-        title: [{ required: true, message: "菜单名称名称不能为空", trigger: "blur" }],
-        name: [{ required: true, message: "路由名称不能为空", trigger: "blur" }],
-        path: [{ required: true, message: "路由地址不能为空", trigger: "blur" }],
-        frontRoute: [{ required: true, message: "文件地址不能为空", trigger: "blur" }],
-        sortOrder: [
-          {
-            required: true,
-            type: "number",
-            message: "排序值不能为空",
-            trigger: "blur",
-          },
-        ],
-      },
-      submitLoading: false,
-      data: [],
-    };
-  },
-  methods: {
-    init() {
-      this.getAllList();
+defineOptions({ name: "store-menu-manage" });
+
+const appStore = useAppStore();
+
+const loading = ref(true);
+const strict = ref(true);
+const maxHeight = ref("500px");
+const expandLevel = ref(1);
+const menuModalVisible = ref(false);
+const selectList = ref([]);
+const selectCount = ref(0);
+const showParent = ref(false);
+const searchKey = ref("");
+const parentTitle = ref("");
+const editTitle = ref("");
+const modalTitle = ref("");
+const expandedKeys = ref([]);
+const currentNodeKey = ref(null);
+const treeKey = ref(0);
+const treeProps = reactive({
+  label: "title",
+  children: "children",
+});
+const form = ref({
+  id: "",
+  title: "",
+  name: "",
+  path: "",
+  frontRoute: "",
+  parentId: "",
+  sortOrder: 0,
+  level: 0,
+  permission: "",
+});
+const formAdd = ref({});
+const formValidate = reactive({
+  title: [{ required: true, message: "菜单名称名称不能为空", trigger: "blur" }],
+  name: [{ required: true, message: "路由名称不能为空", trigger: "blur" }],
+  path: [{ required: true, message: "路由地址不能为空", trigger: "blur" }],
+  frontRoute: [{ required: true, message: "文件地址不能为空", trigger: "blur" }],
+  sortOrder: [
+    {
+      required: true,
+      type: "number",
+      message: "排序值不能为空",
+      trigger: "blur",
     },
-    collectExpandedKeys(nodes, keys = []) {
-      if (!nodes) return keys;
-      nodes.forEach((node) => {
-        if (node.expand === true) {
-          keys.push(node.id);
-        }
-        if (node.children && node.children.length > 0) {
-          this.collectExpandedKeys(node.children, keys);
+  ],
+});
+const submitLoading = ref(false);
+const data = ref([]);
+
+const treeRef = ref(null);
+const formRef = ref(null);
+const formAddRef = ref(null);
+
+function init() {
+  getAllList();
+}
+function collectExpandedKeys(nodes, keys = []) {
+  if (!nodes) return keys;
+  nodes.forEach((node) => {
+    if (node.expand === true) {
+      keys.push(node.id);
+    }
+    if (node.children && node.children.length > 0) {
+      collectExpandedKeys(node.children, keys);
+    }
+  });
+  return keys;
+}
+function handleDropdown(name) {
+  if (name == "expandOne") {
+    expandLevel.value = 1;
+    getAllList();
+  } else if (name == "expandTwo") {
+    expandLevel.value = 2;
+    getAllList();
+  } else if (name == "expandThree") {
+    expandLevel.value = 3;
+    getAllList();
+  }
+  if (name == "expandAll") {
+    expandLevel.value = 4;
+    getAllList();
+  } else if (name == "refresh") {
+    getAllList();
+  }
+}
+function getAllList() {
+  loading.value = true;
+  getStoreAllPermissionList().then((res) => {
+    loading.value = false;
+    if (res.success) {
+      const level = expandLevel.value;
+      res.result.forEach(function (e) {
+        if (level == 1) {
+          if (e.level == 0) {
+            e.expand = false;
+          }
+          if (e.children && e.children.length > 0) {
+            e.children.forEach(function (c) {
+              if (c.level == 1) {
+                c.expand = false;
+              }
+              if (c.children && c.children.length > 0) {
+                c.children.forEach(function (b) {
+                  if (b.level == 2) {
+                    b.expand = false;
+                  }
+                });
+              }
+            });
+          }
+        } else if (level == 2) {
+          if (e.level == 0) {
+            e.expand = true;
+          }
+          if (e.children && e.children.length > 0) {
+            e.children.forEach(function (c) {
+              if (c.level == 1) {
+                c.expand = false;
+              }
+              if (c.children && c.children.length > 0) {
+                c.children.forEach(function (b) {
+                  if (b.level == 2) {
+                    b.expand = false;
+                  }
+                });
+              }
+            });
+          }
+        } else if (level == 3) {
+          if (e.level == 0) {
+            e.expand = true;
+          }
+          if (e.children && e.children.length > 0) {
+            e.children.forEach(function (c) {
+              if (c.level == 1) {
+                c.expand = true;
+              }
+              if (c.children && c.children.length > 0) {
+                c.children.forEach(function (b) {
+                  if (b.level == 2) {
+                    b.expand = false;
+                  }
+                });
+              }
+            });
+          }
+        } else if (level == 4) {
+          if (e.level == 0) {
+            e.expand = true;
+          }
+          if (e.children && e.children.length > 0) {
+            e.children.forEach(function (c) {
+              if (c.level == 1) {
+                c.expand = true;
+              }
+              if (c.children && c.children.length > 0) {
+                c.children.forEach(function (b) {
+                  if (b.level == 2) {
+                    b.expand = true;
+                  }
+                });
+              }
+            });
+          }
         }
       });
-      return keys;
-    },
-    handleDropdown(name) {
-      if (name == "expandOne") {
-        this.expandLevel = 1;
-        this.getAllList();
-      } else if (name == "expandTwo") {
-        this.expandLevel = 2;
-        this.getAllList();
-      } else if (name == "expandThree") {
-        this.expandLevel = 3;
-        this.getAllList();
+      data.value = res.result;
+      expandedKeys.value = collectExpandedKeys(res.result);
+      treeKey.value += 1;
+    }
+  });
+}
+function onNodeClick(nodeData) {
+  if (nodeData) {
+    const menu = JSON.parse(JSON.stringify(nodeData));
+    form.value = menu;
+    editTitle.value = menu.title;
+    currentNodeKey.value = menu.id;
+  } else {
+    cancelEdit();
+  }
+}
+function onCheckChange(_data, { checkedNodes }) {
+  selectList.value = checkedNodes;
+  selectCount.value = checkedNodes.length;
+}
+function search() {
+  if (searchKey.value) {
+    loading.value = true;
+    searchStorePermission({ title: searchKey.value }).then((res) => {
+      loading.value = false;
+      if (res.success) {
+        data.value = res.result;
+        expandedKeys.value = [];
+        treeKey.value += 1;
       }
-      if (name == "expandAll") {
-        this.expandLevel = 4;
-        this.getAllList();
-      } else if (name == "refresh") {
-        this.getAllList();
+    });
+  } else {
+    getAllList();
+  }
+}
+function cancelEdit() {
+  treeRef.value?.setCurrentKey(null);
+  currentNodeKey.value = null;
+  formRef.value.resetFields();
+  form.value.id = "";
+  editTitle.value = "";
+}
+function handleReset() {
+  formRef.value.resetFields();
+  form.value.frontRoute = "";
+}
+function submitEdit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      if (!form.value.id) {
+        ElMessage.warning("请先点击选择要修改的菜单节点");
+        return;
       }
-    },
-    getAllList() {
-      this.loading = true;
-      getStoreAllPermissionList().then((res) => {
-        this.loading = false;
+      submitLoading.value = true;
+      if (form.value.sortOrder == null) {
+        form.value.sortOrder = 0;
+      }
+      delete form.value.icon;
+      delete form.value.frontComponent;
+      delete form.value.buttonType;
+      delete form.value.updateTime;
+      delete form.value.selected;
+      delete form.value.description;
+      delete form.value.children;
+
+      editStorePermission(form.value).then((res) => {
+        submitLoading.value = false;
         if (res.success) {
-          const expandLevel = this.expandLevel;
-          res.result.forEach(function (e) {
-            if (expandLevel == 1) {
-              if (e.level == 0) {
-                e.expand = false;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = false;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 2) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = false;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 3) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = true;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = false;
-                      }
-                    });
-                  }
-                });
-              }
-            } else if (expandLevel == 4) {
-              if (e.level == 0) {
-                e.expand = true;
-              }
-              if (e.children && e.children.length > 0) {
-                e.children.forEach(function (c) {
-                  if (c.level == 1) {
-                    c.expand = true;
-                  }
-                  if (c.children && c.children.length > 0) {
-                    c.children.forEach(function (b) {
-                      if (b.level == 2) {
-                        b.expand = true;
-                      }
-                    });
-                  }
-                });
-              }
-            }
-          });
-          this.data = res.result;
-          this.expandedKeys = this.collectExpandedKeys(res.result);
-          this.treeKey += 1;
+          ElMessage.success("编辑成功");
+          appStore.setAdded(false);
+          util.initRouter();
+          init();
+          menuModalVisible.value = false;
         }
       });
-    },
-    onNodeClick(data) {
-      if (data) {
-        const menu = JSON.parse(JSON.stringify(data));
-        this.form = menu;
-        this.editTitle = menu.title;
-        this.currentNodeKey = menu.id;
-      } else {
-        this.cancelEdit();
-      }
-    },
-    onCheckChange(_data, { checkedNodes }) {
-      this.selectList = checkedNodes;
-      this.selectCount = checkedNodes.length;
-    },
-    search() {
-      if (this.searchKey) {
-        this.loading = true;
-        searchStorePermission({ title: this.searchKey }).then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result;
-            this.expandedKeys = [];
-            this.treeKey += 1;
-          }
-        });
-      } else {
-        this.getAllList();
-      }
-    },
-    cancelEdit() {
-      this.$refs.treeRef?.setCurrentKey(null);
-      this.currentNodeKey = null;
-      this.$refs.form.resetFields();
-      this.form.id = "";
-      this.editTitle = "";
-    },
-    handleReset() {
-      this.$refs.form.resetFields();
-      this.form.frontRoute = "";
-    },
-    submitEdit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          if (!this.form.id) {
-            ElMessage.warning("请先点击选择要修改的菜单节点");
-            return;
-          }
-          this.submitLoading = true;
-          if (this.form.sortOrder == null) {
-            this.form.sortOrder = 0;
-          }
-          delete this.form.icon;
-          delete this.form.frontComponent;
-          delete this.form.buttonType;
-          delete this.form.updateTime;
-          delete this.form.selected;
-          delete this.form.description;
-          delete this.form.children;
+    }
+  });
+}
+function submitAdd() {
+  formAddRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
 
-          editStorePermission(this.form).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              ElMessage.success("编辑成功");
-              this.$store.commit("setAdded", false);
-              util.initRouter(this);
-              this.init();
-              this.menuModalVisible = false;
-            }
-          });
+      addStorePermission(formAdd.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          ElMessage.success("添加成功");
+          appStore.setAdded(false);
+          util.initRouter();
+          init();
+          menuModalVisible.value = false;
         }
       });
-    },
-    submitAdd() {
-      this.$refs.formAdd.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
+    }
+  });
+}
+function addMenu() {
+  if (!form.value.id) {
+    ElMessage.warning("请先点击选择一个菜单权限节点");
+    return;
+  }
+  parentTitle.value = form.value.title;
+  modalTitle.value = "添加子节点";
+  showParent.value = true;
+  if (form.value.level == 2) {
+    ElMessageBox.alert("仅支持2级菜单目录", "抱歉，不能添加啦", { type: "warning" });
+    return;
+  }
+  formAdd.value = {
+    parentId: form.value.id,
+    level: Number(form.value.level) + 1,
+    sortOrder: 0,
+    permission: "",
+  };
+  if (form.value.level == 0) {
+    formAdd.value.path = "/";
+    formAdd.value.frontRoute = "Main";
+  }
+  menuModalVisible.value = true;
+}
+function addRootMenu() {
+  modalTitle.value = "添加顶级菜单";
+  showParent.value = false;
+  formAdd.value = {
+    level: 0,
+    sortOrder: 0,
+  };
+  menuModalVisible.value = true;
+}
+function delAll() {
+  if (selectCount.value <= 0) {
+    ElMessage.warning("您还未勾选要删除的数据");
+    return;
+  }
+  ElMessageBox.confirm("您确认要删除所选的 " + selectCount.value + " 条数据?", "确认删除", { type: "warning" }).then(() => {
+      let ids = "";
+      selectList.value.forEach(function (e) {
+        ids += e.id + ",";
+      });
+      ids = ids.substring(0, ids.length - 1);
+      deleteStorePermission(ids).then((res) => {
+        if (res.success) {
+          ElMessage.success("删除成功");
+          appStore.setAdded(false);
+          util.initRouter();
+          selectList.value = [];
+          selectCount.value = 0;
+          cancelEdit();
+          init();
+        }
+      });
+  }).catch(() => {});
+}
 
-          addStorePermission(this.formAdd).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              ElMessage.success("添加成功");
-              this.$store.commit("setAdded", false);
-              util.initRouter(this);
-              this.init();
-              this.menuModalVisible = false;
-            }
-          });
-        }
-      });
-    },
-    addMenu() {
-      if (!this.form.id) {
-        ElMessage.warning("请先点击选择一个菜单权限节点");
-        return;
-      }
-      this.parentTitle = this.form.title;
-      this.modalTitle = "添加子节点";
-      this.showParent = true;
-      if (this.form.level == 2) {
-        ElMessageBox.alert("仅支持2级菜单目录", "抱歉，不能添加啦", { type: "warning" });
-        return;
-      }
-      this.formAdd = {
-        parentId: this.form.id,
-        level: Number(this.form.level) + 1,
-        sortOrder: 0,
-        permission: "",
-      };
-      if (this.form.level == 0) {
-        this.formAdd.path = "/";
-        this.formAdd.frontRoute = "Main";
-      }
-      this.menuModalVisible = true;
-    },
-    addRootMenu() {
-      this.modalTitle = "添加顶级菜单";
-      this.showParent = false;
-      this.formAdd = {
-        level: 0,
-        sortOrder: 0,
-      };
-      this.menuModalVisible = true;
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        ElMessage.warning("您还未勾选要删除的数据");
-        return;
-      }
-      ElMessageBox.confirm("您确认要删除所选的 " + this.selectCount + " 条数据?", "确认删除", { type: "warning" }).then(() => {
-          let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
-          ids = ids.substring(0, ids.length - 1);
-          deleteStorePermission(ids).then((res) => {
-            if (res.success) {
-              ElMessage.success("删除成功");
-              this.$store.commit("setAdded", false);
-              util.initRouter(this);
-              this.selectList = [];
-              this.selectCount = 0;
-              this.cancelEdit();
-              this.init();
-            }
-          });
-      }).catch(() => {});
-    },
-  },
-  mounted() {
-    const height = document.documentElement.clientHeight;
-    this.maxHeight = Number(height - 287) + "px";
-    this.init();
-  },
-};
+onMounted(() => {
+  const height = document.documentElement.clientHeight;
+  maxHeight.value = Number(height - 287) + "px";
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

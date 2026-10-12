@@ -75,167 +75,167 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref, watch } from "vue";
 import { Camera, Delete, View } from "@element-plus/icons-vue";
 import { uploadFile } from "@/api/index";
+import { getStore } from "@/libs/storage";
+import { Message } from "@/utils/message";
 import vuedraggable from "vuedraggable";
 
-export default {
-  name: "uploadPicThumb",
-  components: {
-    vuedraggable,
-    Camera,
-    Delete,
-    View,
+defineOptions({ name: "uploadPicThumb" });
+
+const props = defineProps({
+  modelValue: { type: null },
+  value: { type: null },
+  draggable: {
+    type: Boolean,
+    default: true,
   },
-  props: {
-    modelValue: { type: null },
-    value: { type: null },
-    draggable: {
-      type: Boolean,
-      default: true,
-    },
-    multiple: {
-      type: Boolean,
-      default: true,
-    },
-    limit: {
-      type: Number,
-      default: 10,
-    },
+  multiple: {
+    type: Boolean,
+    default: true,
   },
-  emits: ["update:modelValue", "input", "on-change", "uploadchange"],
-  data() {
-    return {
-      accessToken: {},
-      uploadFileUrl: uploadFile,
-      uploadList: [],
-      viewImage: false,
-      imgUrl: "",
-    };
+  limit: {
+    type: Number,
+    default: 10,
   },
-  computed: {
-    bindValue() {
-      return this.modelValue !== undefined ? this.modelValue : this.value;
-    },
-  },
-  methods: {
-    draggableItemKey(item) {
-      return item.url || item.uid || item.name;
-    },
-    onEnd() {
-      this.returnValue();
-    },
-    init() {
-      this.setData(this.bindValue, true);
-      this.accessToken = {
-        accessToken: this.getStore("accessToken"),
-      };
-    },
-    handleView(imgUrl) {
-      this.imgUrl = imgUrl;
-      this.viewImage = true;
-    },
-    handleRemove(file) {
-      this.uploadList = this.uploadList.filter((i) => i.url !== file.url);
-      this.returnValue();
-    },
-    handleSuccess(res, file) {
-      if (res.success) {
-        file.url = res.result;
-        if (!this.multiple && this.uploadList.length > 0) {
-          this.uploadList.splice(0, 1);
-        }
-        this.uploadList.push(file);
-        this.returnValue();
-      } else {
-        this.$Message.error(res.message);
-      }
-    },
-    handleError(error) {
-      this.$Message.error(error.toString());
-    },
-    handleBeforeUpload(file) {
-      const okType = ["image/jpeg", "image/png", "image/gif", "image/jpg"].includes(file.type);
-      if (!okType) {
-        this.$Message.warning("请选择 .jpg .jpeg .png .gif 格式图片");
-        return false;
-      }
-      if (file.size / 1024 > 1024) {
-        this.$Message.warning("所选文件大小过大，不能超过 1M");
-        return false;
-      }
-      if (this.multiple && this.uploadList.length >= this.limit) {
-        this.$Message.warning("最多只能上传" + this.limit + "张图片");
-        return false;
-      }
-      return true;
-    },
-    emitValue(val) {
-      this.$emit("update:modelValue", val);
-      this.$emit("input", val);
-      this.$emit("on-change", val);
-    },
-    returnValue() {
-      if (!this.uploadList || this.uploadList.length < 1) {
-        const empty = this.multiple ? [] : "";
-        this.emitValue(empty);
-        return;
-      }
-      if (!this.multiple) {
-        this.emitValue(this.uploadList[0].url);
-      } else {
-        this.emitValue(this.uploadList.map((e) => e.url));
-      }
-    },
-    setData(v, init) {
-      if (typeof v == "string") {
-        if (this.multiple) {
-          this.$Message.warning("多张上传仅支持数组数据类型");
-          return;
-        }
-        if (!v) {
-          return;
-        }
-        this.uploadList = [{ url: v, status: "finished" }];
-        this.$emit("uploadchange", v);
-        this.emitValue(v);
-      } else if (typeof v == "object" && v) {
-        if (!this.multiple) {
-          this.$Message.warning("单张上传仅支持字符串数据类型");
-          return;
-        }
-        this.uploadList = [];
-        const list = v.length > this.limit ? v.slice(0, this.limit) : v;
-        if (v.length > this.limit) {
-          this.$Message.warning("最多只能上传" + this.limit + "张图片");
-        }
-        list.forEach((e) => {
-          this.uploadList.push({
-            status: "finished",
-            ...(typeof e === "string" ? { url: e } : e),
-          });
-        });
-        if (init) {
-          this.emitValue(list);
-        } else {
-          this.$emit("on-change", list);
-        }
-      }
-    },
-  },
-  watch: {
-    modelValue(val) {
-      this.setData(val);
-    },
-    value(val) {
-      this.setData(val);
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+});
+const emit = defineEmits(["update:modelValue", "input", "on-change", "uploadchange"]);
+
+const accessToken = ref({});
+const uploadFileUrl = uploadFile;
+const uploadList = ref([]);
+const viewImage = ref(false);
+const imgUrl = ref("");
+
+// el-upload 模板 ref
+const upload = ref(null);
+
+const bindValue = computed(() => {
+  return props.modelValue !== undefined ? props.modelValue : props.value;
+});
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    setData(val);
+  }
+);
+watch(
+  () => props.value,
+  (val) => {
+    setData(val);
+  }
+);
+
+function draggableItemKey(item) {
+  return item.url || item.uid || item.name;
+}
+function onEnd() {
+  returnValue();
+}
+function init() {
+  setData(bindValue.value, true);
+  accessToken.value = {
+    accessToken: getStore("accessToken"),
+  };
+}
+function handleView(url) {
+  imgUrl.value = url;
+  viewImage.value = true;
+}
+function handleRemove(file) {
+  uploadList.value = uploadList.value.filter((i) => i.url !== file.url);
+  returnValue();
+}
+function handleSuccess(res, file) {
+  if (res.success) {
+    file.url = res.result;
+    if (!props.multiple && uploadList.value.length > 0) {
+      uploadList.value.splice(0, 1);
+    }
+    uploadList.value.push(file);
+    returnValue();
+  } else {
+    Message.error(res.message);
+  }
+}
+function handleError(error) {
+  Message.error(error.toString());
+}
+function handleBeforeUpload(file) {
+  const okType = ["image/jpeg", "image/png", "image/gif", "image/jpg"].includes(file.type);
+  if (!okType) {
+    Message.warning("请选择 .jpg .jpeg .png .gif 格式图片");
+    return false;
+  }
+  if (file.size / 1024 > 1024) {
+    Message.warning("所选文件大小过大，不能超过 1M");
+    return false;
+  }
+  if (props.multiple && uploadList.value.length >= props.limit) {
+    Message.warning("最多只能上传" + props.limit + "张图片");
+    return false;
+  }
+  return true;
+}
+function emitValue(val) {
+  emit("update:modelValue", val);
+  emit("input", val);
+  emit("on-change", val);
+}
+function returnValue() {
+  if (!uploadList.value || uploadList.value.length < 1) {
+    const empty = props.multiple ? [] : "";
+    emitValue(empty);
+    return;
+  }
+  if (!props.multiple) {
+    emitValue(uploadList.value[0].url);
+  } else {
+    emitValue(uploadList.value.map((e) => e.url));
+  }
+}
+function setData(v, init) {
+  if (typeof v == "string") {
+    if (props.multiple) {
+      Message.warning("多张上传仅支持数组数据类型");
+      return;
+    }
+    if (!v) {
+      return;
+    }
+    uploadList.value = [{ url: v, status: "finished" }];
+    emit("uploadchange", v);
+    emitValue(v);
+  } else if (typeof v == "object" && v) {
+    if (!props.multiple) {
+      Message.warning("单张上传仅支持字符串数据类型");
+      return;
+    }
+    uploadList.value = [];
+    const list = v.length > props.limit ? v.slice(0, props.limit) : v;
+    if (v.length > props.limit) {
+      Message.warning("最多只能上传" + props.limit + "张图片");
+    }
+    list.forEach((e) => {
+      uploadList.value.push({
+        status: "finished",
+        ...(typeof e === "string" ? { url: e } : e),
+      });
+    });
+    if (init) {
+      emitValue(list);
+    } else {
+      emit("on-change", list);
+    }
+  }
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

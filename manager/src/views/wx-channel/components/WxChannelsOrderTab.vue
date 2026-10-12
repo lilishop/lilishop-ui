@@ -70,88 +70,84 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { getWxChannelsOrderPage } from "@/api/index";
 
-export default {
-  name: "WxChannelsOrderTab",
-  data() {
-    return {
-      sceneList: [
-        { label: "直播", value: "LIVE" },
-        { label: "橱窗", value: "WINDOW" },
-      ],
-      loading: false,
-      total: 0,
-      data: [],
-      selectDate: null,
-      searchForm: {
-        channelOrderSn: "",
-        memberNickName: "",
-        goodsName: "",
-        status: "",
-        scene: "",
-        startTime: null,
-        endTime: null,
-        pageNumber: 1,
-        pageSize: 20,
-      },
-    };
-  },
-  mounted() {
-    this.loadPage();
-  },
-  methods: {
-    sceneLabel(val) {
-      const map = { LIVE: "直播", WINDOW: "橱窗" };
-      return map[val] || val || "-";
-    },
-    sceneTagType(val) {
-      const map = { LIVE: "warning", WINDOW: "" };
-      return map[val] || "info";
-    },
-    selectDateRange(v) {
-      if (!v || v.length !== 2) {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
-        return;
+defineOptions({ name: "WxChannelsOrderTab" });
+
+const sceneList = ref([
+  { label: "直播", value: "LIVE" },
+  { label: "橱窗", value: "WINDOW" },
+]);
+const loading = ref(false);
+const total = ref(0);
+const data = ref([]);
+const selectDate = ref(null);
+const searchForm = reactive({
+  channelOrderSn: "",
+  memberNickName: "",
+  goodsName: "",
+  status: "",
+  scene: "",
+  startTime: null,
+  endTime: null,
+  pageNumber: 1,
+  pageSize: 20,
+});
+
+onMounted(() => {
+  loadPage();
+});
+
+function sceneLabel(val) {
+  const map = { LIVE: "直播", WINDOW: "橱窗" };
+  return map[val] || val || "-";
+}
+function sceneTagType(val) {
+  const map = { LIVE: "warning", WINDOW: "" };
+  return map[val] || "info";
+}
+function selectDateRange(v) {
+  if (!v || v.length !== 2) {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+    return;
+  }
+  const start = v[0] ? new Date(`${v[0]}T00:00:00`).getTime() : null;
+  const end = v[1] ? new Date(`${v[1]}T23:59:59`).getTime() : null;
+  searchForm.startTime = Number.isFinite(start) ? start : null;
+  searchForm.endTime = Number.isFinite(end) ? end : null;
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  loadPage();
+}
+function changePage(pageNumber) {
+  searchForm.pageNumber = pageNumber;
+  loadPage();
+}
+function changePageSize(pageSize) {
+  searchForm.pageSize = pageSize;
+  searchForm.pageNumber = 1;
+  loadPage();
+}
+function loadPage() {
+  loading.value = true;
+  const params = { ...searchForm };
+  Object.keys(params).forEach((k) => {
+    if (params[k] === null || params[k] === "" || params[k] === undefined) delete params[k];
+  });
+  getWxChannelsOrderPage(params)
+    .then((res) => {
+      if (res && res.success) {
+        const page = res.result || {};
+        data.value = Array.isArray(page.records) ? page.records : [];
+        total.value = Number(page.total || 0);
       }
-      const start = v[0] ? new Date(`${v[0]}T00:00:00`).getTime() : null;
-      const end = v[1] ? new Date(`${v[1]}T23:59:59`).getTime() : null;
-      this.searchForm.startTime = Number.isFinite(start) ? start : null;
-      this.searchForm.endTime = Number.isFinite(end) ? end : null;
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.loadPage();
-    },
-    changePage(pageNumber) {
-      this.searchForm.pageNumber = pageNumber;
-      this.loadPage();
-    },
-    changePageSize(pageSize) {
-      this.searchForm.pageSize = pageSize;
-      this.searchForm.pageNumber = 1;
-      this.loadPage();
-    },
-    loadPage() {
-      this.loading = true;
-      const params = { ...this.searchForm };
-      Object.keys(params).forEach((k) => {
-        if (params[k] === null || params[k] === "" || params[k] === undefined) delete params[k];
-      });
-      getWxChannelsOrderPage(params)
-        .then((res) => {
-          if (res && res.success) {
-            const page = res.result || {};
-            this.data = Array.isArray(page.records) ? page.records : [];
-            this.total = Number(page.total || 0);
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
 </script>

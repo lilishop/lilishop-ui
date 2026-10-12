@@ -56,136 +56,143 @@
     </el-card>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+import { Message, Modal } from "@/utils/message";
 import * as API_Other from "@/api/other.js";
-export default {
-  data() {
-    return {
-      loading: false,
-      pageTypes: [
-        { type: "INDEX", title: "首页" },
-        { type: "SPECIAL", title: "专题" },
-      ],
-      params: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        pageType: "INDEX",
-        pageClientType: "H5",
-      },
-      total: 0,
-      list: [],
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    handleTabChange(val) {
-      if (val == "ALERT") {
-        this.$router.push({
-          path: "/floorList/main",
-          query: { pagetype: val },
-        });
-        return;
-      }
-      if (val == "OPEN_SCREEN_ANIMATION") {
-        this.$router.push({
-          path: "/floorList/main",
-          query: { pagetype: val },
-        });
-        return;
-      }
-      this.params.pageNumber = 1;
-      this.params.pageType = val;
-      this.init();
-    },
 
-    changePageNum(val) {
-      this.params.pageNumber = val;
-      this.init();
-    },
-    beforeRelease(row) {
-      if (row.pageShow) {
-        this.$Message.warning(
-          this.total === 1
-            ? "当前为唯一页面，无法关闭"
-            : "请直接开启其他页面，当前页面会自动关闭"
-        );
-        return false;
+const router = useRouter();
+
+const loading = ref(false);
+const pageTypes = ref([
+  { type: "INDEX", title: "首页" },
+  { type: "SPECIAL", title: "专题" },
+]);
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  pageType: "INDEX",
+  pageClientType: "H5",
+});
+const total = ref(0);
+const list = ref([]);
+
+onMounted(() => {
+  init();
+});
+
+function handleTabChange(val) {
+  if (val == "ALERT") {
+    router.push({
+      path: "/floorList/main",
+      query: { pagetype: val },
+    });
+    return;
+  }
+  if (val == "OPEN_SCREEN_ANIMATION") {
+    router.push({
+      path: "/floorList/main",
+      query: { pagetype: val },
+    });
+    return;
+  }
+  params.pageNumber = 1;
+  params.pageType = val;
+  init();
+}
+
+function changePageNum(val) {
+  params.pageNumber = val;
+  init();
+}
+
+function beforeRelease(row) {
+  if (row.pageShow) {
+    Message.warning(
+      total.value === 1
+        ? "当前为唯一页面，无法关闭"
+        : "请直接开启其他页面，当前页面会自动关闭"
+    );
+    return false;
+  }
+  return new Promise((resolve, reject) => {
+    API_Other.releasePageHome(row.id).then((res) => {
+      if (res && res.success) {
+        Message.success("发布成功");
+        resolve(true);
+        init();
+      } else {
+        reject(new Error("release failed"));
       }
-      return new Promise((resolve, reject) => {
-        API_Other.releasePageHome(row.id).then((res) => {
-          if (res && res.success) {
-            this.$Message.success("发布成功");
-            resolve(true);
-            this.init();
-          } else {
-            reject(new Error("release failed"));
-          }
-        }).catch(() => {
-          reject(new Error("release failed"));
-        });
-      });
+    }).catch(() => {
+      reject(new Error("release failed"));
+    });
+  });
+}
+
+function init() {
+  loading.value = true;
+  API_Other.getHomeList(params).then((res) => {
+    loading.value = false;
+    if (!res.result) return false;
+    res.result.records.forEach((item) => {
+      if (item.pageShow == "OPEN") {
+        item.pageShow = true;
+      } else {
+        item.pageShow = false;
+      }
+    });
+    list.value = res.result.records;
+    total.value = res.result.total;
+  });
+}
+
+function handleEdit(val) {
+  router.push({
+    path: "/floorList/main",
+    query: {
+      id: val.id,
+      name: val.name,
+      type: val.pageShow,
+      pagetype: params.pageType,
     },
-    init() {
-      this.loading = true;
-      API_Other.getHomeList(this.params).then((res) => {
-        this.loading = false;
-        if (!res.result) return false;
-        res.result.records.forEach((item) => {
-          if (item.pageShow == "OPEN") {
-            item.pageShow = true;
-          } else {
-            item.pageShow = false;
-          }
-        });
-        this.list = res.result.records;
-        this.total = res.result.total;
-      });
-    },
-    handleEdit(val) {
-      this.$router.push({
-        path: "/floorList/main",
-        query: {
-          id: val.id,
-          name: val.name,
-          type: val.pageShow,
-          pagetype: this.params.pageType,
-        },
-      });
-    },
-    handleAdd() {
-      this.$router.push({
-        path: "/floorList/main",
-        query: { pagetype: this.params.pageType },
-      });
-    },
-    changePageSize(v) {
-      this.params.pageNumber = 1;
-      this.params.pageSize = v;
-      this.init();
-    },
-    confirmDel(row) {
-      this.$Modal.confirm({
-        title: "提示",
-        content: "删除此模板？",
-        onOk: () => this.handleDel(row),
-      });
-    },
-    handleDel(val) {
-      this.loading = true;
-      API_Other.removePageHome(val.id).then((res) => {
-        this.loading = false;
-        if (res.result) {
-          this.init();
-          this.$Message.success("删除成功");
-        }
-      });
-    },
-  },
-};
+  });
+}
+
+function handleAdd() {
+  router.push({
+    path: "/floorList/main",
+    query: { pagetype: params.pageType },
+  });
+}
+
+function changePageSize(v) {
+  params.pageNumber = 1;
+  params.pageSize = v;
+  init();
+}
+
+function confirmDel(row) {
+  Modal.confirm({
+    title: "提示",
+    content: "删除此模板？",
+    onOk: () => handleDel(row),
+  });
+}
+
+function handleDel(val) {
+  loading.value = true;
+  API_Other.removePageHome(val.id).then((res) => {
+    loading.value = false;
+    if (res.result) {
+      init();
+      Message.success("删除成功");
+    }
+  });
+}
 </script>
 <style scoped lang="scss">
 .page-type-tabs {

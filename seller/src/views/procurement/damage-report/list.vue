@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="80px">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="80px">
         <el-form-item label="创建时间">
           <el-date-picker
             v-model="dateRange"
@@ -86,7 +86,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
 import { ElMessageBox } from "element-plus";
 import {
   getDamageReportPage,
@@ -103,193 +104,204 @@ import {
   damageStatusTag,
   formatMoney,
 } from "../constants";
+import { Message, Modal } from "@/utils/message";
+import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "procurement-damage-report-list",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      dateRange: [],
-      currentStatus: "ALL",
-      statusCountData: {},
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        status: "",
-      },
-    };
-  },
-  computed: {
-    statusTabs() {
-      const tabs = [{ title: "全部", value: "ALL" }];
-      Object.keys(DAMAGE_STATUS).forEach((key) => {
-        const count = this.statusCountData[key];
-        const label = DAMAGE_STATUS[key];
-        tabs.push({
-          title: count ? `${label}（${count}）` : label,
-          value: key,
-        });
-      });
-      return tabs;
-    },
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    damageStatusText,
-    damageStatusTag,
-    formatMoney,
-    init() {
-      this.getStatusCount();
-      this.getDataList();
-    },
-    buildSearchParams(includeStatus = true) {
-      const params = { ...this.searchForm };
-      if (!includeStatus) {
-        delete params.status;
+defineOptions({ name: "procurement-damage-report-list" });
+
+// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const dateRange = ref([]);
+const currentStatus = ref("ALL");
+const statusCountData = ref({});
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  status: "",
+});
+
+const statusTabs = computed(() => {
+  const tabs = [{ title: "全部", value: "ALL" }];
+  Object.keys(DAMAGE_STATUS).forEach((key) => {
+    const count = statusCountData.value[key];
+    const label = DAMAGE_STATUS[key];
+    tabs.push({
+      title: count ? `${label}（${count}）` : label,
+      value: key,
+    });
+  });
+  return tabs;
+});
+
+onMounted(() => {
+  init();
+});
+
+function init() {
+  getStatusCount();
+  getDataList();
+}
+
+function buildSearchParams(includeStatus = true) {
+  const params = { ...searchForm.value };
+  if (!includeStatus) {
+    delete params.status;
+  }
+  if (dateRange.value && dateRange.value.length === 2) {
+    params.startDate = dateRange.value[0];
+    params.endDate = dateRange.value[1];
+  }
+  return params;
+}
+
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getStatusCount();
+  getDataList();
+}
+
+function resetSearch() {
+  searchForm.value = { pageNumber: 1, pageSize: 10, status: "" };
+  dateRange.value = [];
+  currentStatus.value = "ALL";
+  getStatusCount();
+  getDataList();
+}
+
+function onStatusTabClick(tab) {
+  statusClick(tab.paneName);
+}
+
+function statusClick(name) {
+  if (name === "ALL" || name === "" || name === undefined) {
+    searchForm.value.status = "";
+    currentStatus.value = "ALL";
+  } else {
+    searchForm.value.status = name;
+    currentStatus.value = name;
+  }
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+
+function getStatusCount() {
+  getDamageReportStatusCount(buildSearchParams(false)).then((res) => {
+    if (res.success) {
+      statusCountData.value = res.result || {};
+    }
+  });
+}
+
+function getDataList() {
+  loading.value = true;
+  getDamageReportPage(buildSearchParams(true))
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
       }
-      if (this.dateRange && this.dateRange.length === 2) {
-        params.startDate = this.dateRange[0];
-        params.endDate = this.dateRange[1];
-      }
-      return params;
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getStatusCount();
-      this.getDataList();
-    },
-    resetSearch() {
-      this.searchForm = { pageNumber: 1, pageSize: 10, status: "" };
-      this.dateRange = [];
-      this.currentStatus = "ALL";
-      this.getStatusCount();
-      this.getDataList();
-    },
-    onStatusTabClick(tab) {
-      this.statusClick(tab.paneName);
-    },
-    statusClick(name) {
-      if (name === "ALL" || name === "" || name === undefined) {
-        this.searchForm.status = "";
-        this.currentStatus = "ALL";
-      } else {
-        this.searchForm.status = name;
-        this.currentStatus = name;
-      }
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getStatusCount() {
-      getDamageReportStatusCount(this.buildSearchParams(false)).then((res) => {
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function refreshList() {
+  getStatusCount();
+  getDataList();
+}
+
+function goCreate() {
+  customRouterPush({ name: "procurement-damage-report-operation" });
+}
+
+function goDetail(row) {
+  customRouterPush({
+    name: "procurement-damage-report-operation",
+    query: { id: row.id, readonly: 1 },
+  });
+}
+
+function handleSubmit(row) {
+  Modal.confirm({
+    title: "提交报损单",
+    content: "确认提交该报损单？",
+    onOk: () => {
+      submitDamageReport(row.id).then((res) => {
         if (res.success) {
-          this.statusCountData = res.result || {};
+          Message.success("提交成功");
+          refreshList();
         }
       });
     },
-    getDataList() {
-      this.loading = true;
-      getDamageReportPage(this.buildSearchParams(true))
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    refreshList() {
-      this.getStatusCount();
-      this.getDataList();
-    },
-    goCreate() {
-      this.$filters.customRouterPush({ name: "procurement-damage-report-operation" });
-    },
-    goDetail(row) {
-      this.$filters.customRouterPush({
-        name: "procurement-damage-report-operation",
-        query: { id: row.id, readonly: 1 },
+  });
+}
+
+function handleApprove(row) {
+  Modal.confirm({
+    title: "审核通过",
+    content: "确认通过该报损单？",
+    onOk: () => {
+      approveDamageReport(row.id).then((res) => {
+        if (res.success) {
+          Message.success("审核通过");
+          refreshList();
+        }
       });
     },
-    handleSubmit(row) {
-      this.$Modal.confirm({
-        title: "提交报损单",
-        content: "确认提交该报损单？",
-        onOk: () => {
-          submitDamageReport(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("提交成功");
-              this.refreshList();
-            }
-          });
-        },
+  });
+}
+
+function handleReject(row) {
+  ElMessageBox.prompt("请输入驳回原因", "驳回报损单", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    inputPlaceholder: "驳回原因",
+  })
+    .then(({ value }) => {
+      rejectDamageReport(row.id, value || "驳回").then((res) => {
+        if (res.success) {
+          Message.success("已驳回");
+          refreshList();
+        }
+      });
+    })
+    .catch(() => {});
+}
+
+function handleCancel(row) {
+  Modal.confirm({
+    title: "作废报损单",
+    content: "确认作废该报损单？",
+    onOk: () => {
+      cancelDamageReport(row.id).then((res) => {
+        if (res.success) {
+          Message.success("已作废");
+          refreshList();
+        }
       });
     },
-    handleApprove(row) {
-      this.$Modal.confirm({
-        title: "审核通过",
-        content: "确认通过该报损单？",
-        onOk: () => {
-          approveDamageReport(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("审核通过");
-              this.refreshList();
-            }
-          });
-        },
+  });
+}
+
+function handleComplete(row) {
+  Modal.confirm({
+    title: "完成报损",
+    content: "完成后将扣减库存，是否继续？",
+    onOk: () => {
+      completeDamageReport(row.id).then((res) => {
+        if (res.success) {
+          Message.success("报损完成，库存已扣减");
+          refreshList();
+        }
       });
     },
-    handleReject(row) {
-      ElMessageBox.prompt("请输入驳回原因", "驳回报损单", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        inputPlaceholder: "驳回原因",
-      })
-        .then(({ value }) => {
-          rejectDamageReport(row.id, value || "驳回").then((res) => {
-            if (res.success) {
-              this.$Message.success("已驳回");
-              this.refreshList();
-            }
-          });
-        })
-        .catch(() => {});
-    },
-    handleCancel(row) {
-      this.$Modal.confirm({
-        title: "作废报损单",
-        content: "确认作废该报损单？",
-        onOk: () => {
-          cancelDamageReport(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("已作废");
-              this.refreshList();
-            }
-          });
-        },
-      });
-    },
-    handleComplete(row) {
-      this.$Modal.confirm({
-        title: "完成报损",
-        content: "完成后将扣减库存，是否继续？",
-        onOk: () => {
-          completeDamageReport(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("报损完成，库存已扣减");
-              this.refreshList();
-            }
-          });
-        },
-      });
-    },
-  },
-};
+  });
+}
 </script>
 
 <style scoped>

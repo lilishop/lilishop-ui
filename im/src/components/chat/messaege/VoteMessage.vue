@@ -59,127 +59,128 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from "vue";
 import { ServeConfirmVoteHandle } from "@/api/chat";
+import { useUserStore } from "@/stores/user";
 
-export default {
-  name: "VoteMessage",
-  props: {
-    vote: {
-      type: Object,
-      required: true,
-    },
-    record_id: {
-      type: Number,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      answer_mode: 0,
-      title: "啊谁叫你打开你卡沙发那,那就是看、卡收纳是你",
-      radio_value: "",
-      options: [],
-      is_vote: false,
-      answer_num: 0,
-      answered_num: 0,
-      refresh: false,
-    };
-  },
-  computed: {
-    isUserVote() {
-      return this.options.some((iten) => {
-        return iten.is_checked;
-      });
-    },
-  },
-  created() {
-    let user_id = this.$store.state.user.id;
-    let { detail, statistics, vote_users } = this.vote;
+defineOptions({ name: "VoteMessage" });
 
-    this.answer_mode = detail.answer_mode;
-    this.answer_num = detail.answer_num;
-    this.answered_num = detail.answered_num;
+const props = defineProps({
+  vote: {
+    type: Object,
+    required: true,
+  },
+  record_id: {
+    type: Number,
+    required: true,
+  },
+});
 
-    detail.answer_option.forEach((item) => {
-      this.options.push({
-        value: item.key,
-        text: item.value,
-        is_checked: false,
-        num: 0,
-        progress: "00.0",
-      });
+const userStore = useUserStore();
+
+const answer_mode = ref(0);
+const title = ref("啊谁叫你打开你卡沙发那,那就是看、卡收纳是你");
+const radio_value = ref("");
+const options = ref([]);
+const is_vote = ref(false);
+const answer_num = ref(0);
+const answered_num = ref(0);
+const refresh = ref(false);
+
+const isUserVote = computed(() => {
+  return options.value.some((iten) => {
+    return iten.is_checked;
+  });
+});
+
+function loadRefresh() {
+  refresh.value = true;
+
+  setTimeout(() => {
+    refresh.value = false;
+  }, 500);
+}
+
+function updateStatistics(data) {
+  let count = data.count;
+  options.value.forEach((option) => {
+    option.num = data.options[option.value];
+
+    if (count > 0) {
+      option.progress = (data.options[option.value] / count) * 100;
+    }
+  });
+}
+
+function toSelect(option, index) {
+  if (answer_mode.value == 0) {
+    options.value.forEach((option) => {
+      option.is_checked = false;
     });
+  }
 
-    this.is_vote = vote_users.some((value) => {
-      return value == user_id;
+  options.value[index].is_checked = !option.is_checked;
+}
+
+function toSelect2(option) {
+  if (answer_mode.value == 0) {
+    options.value.forEach((item) => {
+      if (option.value == item.value) {
+        item.is_checked = option.is_checked;
+      } else {
+        item.is_checked = false;
+      }
     });
+  }
+}
 
-    this.updateStatistics(statistics);
-  },
-  methods: {
-    loadRefresh() {
-      this.refresh = true;
+function toVote() {
+  if (isUserVote.value == false) {
+    return false;
+  }
 
-      setTimeout(() => {
-        this.refresh = false;
-      }, 500);
-    },
-    updateStatistics(data) {
-      let count = data.count;
-      this.options.forEach((option) => {
-        option.num = data.options[option.value];
+  let items = [];
+  options.value.forEach((item) => {
+    if (item.is_checked) {
+      items.push(item.value);
+    }
+  });
 
-        if (count > 0) {
-          option.progress = (data.options[option.value] / count) * 100;
-        }
-      });
-    },
+  ServeConfirmVoteHandle({
+    record_id: props.record_id,
+    options: items.join(","),
+  }).then((res) => {
+    if (res.code == 200) {
+      is_vote.value = true;
+      updateStatistics(res.data);
+    }
+  });
+}
 
-    toSelect(option, index) {
-      if (this.answer_mode == 0) {
-        this.options.forEach((option) => {
-          option.is_checked = false;
-        });
-      }
+// 原 created() 生命周期逻辑
+let user_id = userStore.id;
+let { detail, statistics, vote_users } = props.vote;
 
-      this.options[index].is_checked = !option.is_checked;
-    },
-    toSelect2(option) {
-      if (this.answer_mode == 0) {
-        this.options.forEach((item) => {
-          if (option.value == item.value) {
-            item.is_checked = option.is_checked;
-          } else {
-            item.is_checked = false;
-          }
-        });
-      }
-    },
-    toVote() {
-      if (this.isUserVote == false) {
-        return false;
-      }
+answer_mode.value = detail.answer_mode;
+answer_num.value = detail.answer_num;
+answered_num.value = detail.answered_num;
 
-      let items = [];
-      this.options.forEach((item) => {
-        if (item.is_checked) {
-          items.push(item.value);
-        }
-      });
+detail.answer_option.forEach((item) => {
+  options.value.push({
+    value: item.key,
+    text: item.value,
+    is_checked: false,
+    num: 0,
+    progress: "00.0",
+  });
+});
 
-      ServeConfirmVoteHandle({
-        record_id: this.record_id,
-        options: items.join(","),
-      }).then((res) => {
-        if (res.code == 200) {
-          this.is_vote = true;
-          this.updateStatistics(res.data);
-        }
-      });
-    },
-  },
-};
+is_vote.value = vote_users.some((value) => {
+  return value == user_id;
+});
+
+updateStatistics(statistics);
 </script>
 <style lang="less" scoped>
 .vote-message {

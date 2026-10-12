@@ -2,10 +2,32 @@
 
 ## 已完成（P1–P3 骨架）
 
-- 依赖升级：`vue@3`、`vue-router@4`、`vuex@4`、`vue-i18n@9`、`element-plus`
-- 入口：`src/main.js`（`createApp`）
+- 依赖升级：`vue@3`、`vue-router@4`、`vue-i18n@9`、`element-plus`、`pinia@4`
+- 入口：`src/main.js`（`createApp` + `createPinia`）
 - 路由、动态路由、全局 `$Message` / `$Modal` / `$Notice`、`$filters`、`priceColorScheme`、`vue-qr@5`
 - TinyMCE：移除已弃用 `template` 插件
+
+## 组合式 API 迁移（2026-10 完成）
+
+全部 280 个 `.vue` 组件已从 Options API 转换为 `<script setup>`，并完成 vuex → pinia：
+
+- **状态管理**：`src/stores/` 下 4 个 store（app/user/setting/dict）。app store 合并了原 vuex 根 state（`openStyleStore/openStoreId/notices`）+ 原 app 模块；mutation 全部转为同名 action，两个例外：`pageOpenedList` mutation 改名 `updateOpenedList`（避免与 state 同名）；`clearOtherTags` 改收路由 name 字符串（不再传组件实例 vm）。原 `src/store/` 已删除，package.json 不再依赖 vuex。
+- **util.js 去 vm 化**：`src/libs/util.js` 的 `openNewPage(name, argu, query)` / `initRouter()` / `initMenuData(data)` 已去掉 vm 首参，内部直接用 `useAppStore()`。
+- **defineExpose 清单**（被外部通过 ref 访问的组件，改其内部成员时注意保持暴露面）：
+  - `components/lili-dialog/index.vue`：`open` / `singleGoods` / `clearGoodsSelected` / `goodsData` / `goodsFlag` / `flag` / `close`
+  - `components/lili-dialog/goods-dialog.vue`：`type`
+  - `components/verify/index.vue`：`show` / `init`
+  - `components/lili/config-drawer.vue`：`open` / `close`
+  - `components/lili/department-tree-choose.vue`：`setData` / `clearSelect`
+  - `components/map/multiple-map.vue`：`open`
+  - `components/editor/index.vue`（Tinymce）：`getEditor` / `setContent` / `getContent`
+  - `sys/oss-manage/ossManage.vue`：`selectImage` / `fileType` / `changeFileType`
+  - `components/hotzone/index.vue`：`open` / `close`；`hotzone/components/Hotzone.vue`：`zones` / `addItem` / `eraseItem` / `isOverRange` / `overRange` / `changeItem`（被自定义指令经 `binding.instance` / `$parent` 访问）；`hotzone/components/Zone.vue`：`showModalFn` / `delItem` / `handlehideZone` / `changeInfo`
+  - `page-decoration/modelForm.vue`：`navList` / `topAdvert`
+  - `promotions/coupon/coupon.vue`：`check` / `getSelection` / `clearSelectAll`
+  - `live/components/LivePurchaseRecords.vue`：`refresh`
+- **i18n**：script 内 `this.$t` 统一改为 `i18n.global.t`（`@/locale`），模板 `$t` 不变。
+- **修复的编译级问题**：`page-decoration/wap/index.vue` 的 `function package()` 改名 `packageModel`（保留字）。
 
 ## P5 批量修复（Table / 过滤器）
 

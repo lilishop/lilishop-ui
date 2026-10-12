@@ -34,44 +34,40 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
 
-export default {
-  name: "finance-refund-log",
-  data() {
-    return {
-      loading: false,
-      searchForm: { pageNumber: 1, pageSize: 20, orderSn: "" },
-      data: [],
-      total: 0,
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      API_Finance.refundLogPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    handleExport() {
-      const { pageNumber, pageSize, ...rest } = this.searchForm;
-      API_Finance.exportRefundFlow(rest).then((blob) => {
-        downloadBlob(blob, "退款流水.xlsx");
-      });
-    },
-  },
-};
+defineOptions({ name: "finance-refund-log" });
+
+const loading = ref(false);
+const searchForm = reactive({ pageNumber: 1, pageSize: 20, orderSn: "" });
+const data = ref([]);
+const total = ref(0);
+
+onMounted(() => {
+  getDataList();
+});
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  API_Finance.refundLogPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function handleExport() {
+  const { pageNumber, pageSize, ...rest } = searchForm;
+  API_Finance.exportRefundFlow(rest).then((blob) => {
+    downloadBlob(blob, "退款流水.xlsx");
+  });
+}
 </script>

@@ -109,9 +109,9 @@
       </el-form>
       </div>
 
-      <div ref="tableWrap" class="goods-table-wrap">
+      <div ref="tableWrapRef" class="goods-table-wrap">
         <el-table
-          ref="goodsTable"
+          ref="goodsTableRef"
           v-loading="loading"
           :data="goodsData"
           border
@@ -194,7 +194,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import * as API_Goods from "@/api/goods";
 
 const defaultFilterForm = () => ({
@@ -212,270 +213,273 @@ const defaultFilterForm = () => ({
   stockMax: "",
 });
 
-export default {
-  emits: ["selected"],
-  props: {
-    selectedWay: {
-      type: Array,
-      default: () => [],
-    },
+const props = defineProps({
+  selectedWay: {
+    type: Array,
+    default: () => [],
   },
-  data() {
-    return {
-      type: "multiple",
-      selectedList: [],
-      platformCategoryList: [],
-      shopCategoryList: [],
-      brandList: [],
-      platformCategoryProps: {
-        value: "id",
-        label: "name",
-        children: "children",
-        checkStrictly: true,
-        emitPath: false,
-      },
-      shopCategoryProps: {
-        value: "value",
-        label: "label",
-        children: "children",
-        checkStrictly: true,
-        emitPath: false,
-      },
-      filterForm: defaultFilterForm(),
-      total: 0,
-      goodsParams: {
-        pageNumber: 1,
-        pageSize: 20,
-        order: "desc",
-        marketEnable: "UPPER",
-        authFlag: "PASS",
-        sort: "createTime",
-      },
-      goodsData: [],
-      loading: false,
-      tableHeight: 400,
-      syncingSelection: false,
-    };
-  },
-  watch: {
-    selectedWay: {
-      handler(val) {
-        this.selectedList = Array.isArray(val) ? val.slice() : [];
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
-  mounted() {
-    this.init();
-    this.$nextTick(this.calcTableHeight);
-    window.addEventListener("resize", this.calcTableHeight);
-  },
-  beforeUnmount() {
-    window.removeEventListener("resize", this.calcTableHeight);
-  },
-  methods: {
-    calcTableHeight() {
-      this.$nextTick(() => {
-        const wrap = this.$refs.tableWrap;
-        if (wrap) {
-          this.tableHeight = Math.max(wrap.clientHeight, 320);
-        }
-      });
-    },
-    onSearchGoods() {
-      this.goodsParams.pageNumber = 1;
-      this.getQueryGoodsList();
-    },
-    resetFilter() {
-      this.filterForm = defaultFilterForm();
-      this.onSearchGoods();
-    },
-    changePageSize(v) {
-      this.goodsParams.pageNumber = v;
-      this.getQueryGoodsList();
-    },
-    buildQueryParams() {
-      const params = {
-        ...this.goodsParams,
-        goodsName: this.filterForm.goodsName || undefined,
-        goodsId: this.filterForm.goodsId || undefined,
-        goodsType: this.filterForm.goodsType || undefined,
-        brandId: this.filterForm.brandId || undefined,
-        storeCategoryPath: this.filterForm.storeCategoryPath || undefined,
-        categoryPath: this.filterForm.categoryPath || undefined,
-        geQuantity: undefined,
-        leQuantity: undefined,
-        geBuyCount: undefined,
-        leBuyCount: undefined,
-        price: undefined,
-      };
+});
+const emit = defineEmits(["selected"]);
 
-      const { priceMin, priceMax, salesMin, salesMax, stockMin, stockMax } = this.filterForm;
-      if (priceMin !== "" && priceMax !== "") {
-        params.price = `${priceMin}_${priceMax}`;
-      } else if (priceMin !== "") {
-        params.price = String(priceMin);
-      } else if (priceMax !== "") {
-        params.price = `0_${priceMax}`;
-      }
-
-      if (stockMin !== "" && stockMin != null) params.geQuantity = Number(stockMin);
-      if (stockMax !== "" && stockMax != null) params.leQuantity = Number(stockMax);
-      if (salesMin !== "" && salesMin != null) params.geBuyCount = Number(salesMin);
-      if (salesMax !== "" && salesMax != null) params.leBuyCount = Number(salesMax);
-
-      return params;
-    },
-    getQueryGoodsList() {
-      this.loading = true;
-      API_Goods.getGoodsSkuData(this.buildQueryParams())
-        .then((res) => {
-          this.initGoods(res);
-        })
-        .finally(() => {
-          this.loading = false;
-          this.calcTableHeight();
-        });
-    },
-    initGoods(res) {
-      const records = res?.result?.records || [];
-      this.total = res?.result?.total || 0;
-      const selectedIds = new Set(
-        (this.selectedList || [])
-          .map((e) => e.id || e.skuId)
-          .filter((id) => id != null)
-          .map(String)
-      );
-      records.forEach((item) => {
-        item.___type = "goods";
-        item.selected = selectedIds.has(String(item.id));
-      });
-      this.goodsData = records;
-      this.syncTableSelection();
-    },
-    syncTableSelection() {
-      this.$nextTick(() => {
-        const table = this.$refs.goodsTable;
-        if (!table) return;
-        if (this.type === "multiple") {
-          // clearSelection/toggleRowSelection 都会触发 selection-change，
-          // 同步期间忽略，避免把已选状态清掉
-          this.syncingSelection = true;
-          table.clearSelection();
-          this.goodsData.forEach((row) => {
-            if (row.selected) {
-              table.toggleRowSelection(row, true);
-            }
-          });
-          this.$nextTick(() => {
-            this.syncingSelection = false;
-          });
-          return;
-        }
-        const selected = this.goodsData.find((item) => item.selected);
-        table.setCurrentRow(selected || null);
-      });
-    },
-    emitSelected(list) {
-      this.selectedList = list;
-      this.$emit("selected", this.selectedList);
-    },
-    handleRowClick(row) {
-      if (this.type === "multiple") return;
-      this.goodsData.forEach((item) => {
-        item.selected = false;
-      });
-      row.selected = true;
-      this.emitSelected([row]);
-      this.$refs.goodsTable?.setCurrentRow(row);
-    },
-    handleSelectionChange(selection) {
-      if (this.type !== "multiple" || this.syncingSelection) return;
-      const selectedIds = new Set(selection.map((item) => String(item.id)));
-      this.goodsData.forEach((item) => {
-        item.selected = selectedIds.has(String(item.id));
-      });
-      const currentPageIds = new Set(this.goodsData.map((item) => String(item.id)));
-      const otherPages = this.selectedList.filter((item) => {
-        const id = item.id || item.skuId;
-        return id != null && !currentPageIds.has(String(id));
-      });
-      this.emitSelected([...otherPages, ...selection]);
-    },
-    formatShopCategory(list) {
-      return (list || []).map((item) => ({
-        value: item.id,
-        label: item.labelName,
-        children:
-          item.children && item.children.length ? this.formatShopCategory(item.children) : undefined,
-      }));
-    },
-    goodsTypeText(value) {
-      if (value === "PHYSICAL_GOODS") return "实物商品";
-      if (value === "VIRTUAL_GOODS") return "虚拟商品";
-      if (value === "E_COUPON") return "电子卡券";
-      return "-";
-    },
-    brandText(brandId) {
-      if (!brandId) return "-";
-      const brand = this.brandList.find((item) => String(item.id) === String(brandId));
-      return brand?.name || "-";
-    },
-    findTreeNodeLabel(tree, targetId, valueKey, labelKey) {
-      for (const node of tree || []) {
-        if (String(node[valueKey]) === String(targetId)) {
-          return node[labelKey];
-        }
-        const childLabel = this.findTreeNodeLabel(node.children, targetId, valueKey, labelKey);
-        if (childLabel) return childLabel;
-      }
-      return "";
-    },
-    categoryPathText(path, tree, valueKey, labelKey) {
-      if (!path) return "-";
-      const ids = String(path).split(",").filter(Boolean);
-      if (!ids.length) return "-";
-      const labels = ids
-        .map((id) => this.findTreeNodeLabel(tree, id, valueKey, labelKey))
-        .filter(Boolean);
-      return labels.length ? labels.join(" / ") : "-";
-    },
-    storeCategoryText(path) {
-      return this.categoryPathText(path, this.shopCategoryList, "value", "label");
-    },
-    platformCategoryText(path) {
-      if (!path) return "-";
-      const ids = String(path).split(",").filter(Boolean);
-      if (!ids.length) return "-";
-      const targetId = ids.length >= 3 ? ids[2] : ids[ids.length - 1];
-      const label = this.findTreeNodeLabel(this.platformCategoryList, targetId, "id", "name");
-      return label || "-";
-    },
-    init() {
-      this.getQueryGoodsList();
-      API_Goods.getCategoryTree()
-        .then((res) => {
-          if (res?.success) {
-            this.platformCategoryList = res.result || [];
-          }
-        })
-        .catch(() => {});
-      API_Goods.getShopGoodsLabelListSeller()
-        .then((res) => {
-          if (res?.success) {
-            this.shopCategoryList = this.formatShopCategory(res.result || []);
-          }
-        })
-        .catch(() => {});
-      API_Goods.getBrandListData()
-        .then((res) => {
-          this.brandList = Array.isArray(res) ? res : res?.result || [];
-        })
-        .catch(() => {});
-    },
-  },
+const type = ref("multiple");
+const selectedList = ref([]);
+const platformCategoryList = ref([]);
+const shopCategoryList = ref([]);
+const brandList = ref([]);
+// 静态配置对象，仅模板读取、从不修改，无需响应式
+const platformCategoryProps = {
+  value: "id",
+  label: "name",
+  children: "children",
+  checkStrictly: true,
+  emitPath: false,
 };
+const shopCategoryProps = {
+  value: "value",
+  label: "label",
+  children: "children",
+  checkStrictly: true,
+  emitPath: false,
+};
+const filterForm = ref(defaultFilterForm());
+const total = ref(0);
+const goodsParams = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  order: "desc",
+  marketEnable: "UPPER",
+  authFlag: "PASS",
+  sort: "createTime",
+});
+const goodsData = ref([]);
+const loading = ref(false);
+const tableHeight = ref(400);
+const syncingSelection = ref(false);
+
+// 模板 ref：原名 tableWrap/goodsTable，统一改名 xxxRef 避免与变量同名互相覆盖
+const tableWrapRef = ref(null);
+const goodsTableRef = ref(null);
+
+watch(
+  () => props.selectedWay,
+  (val) => {
+    selectedList.value = Array.isArray(val) ? val.slice() : [];
+  },
+  { deep: true, immediate: true }
+);
+
+function calcTableHeight() {
+  nextTick(() => {
+    const wrap = tableWrapRef.value;
+    if (wrap) {
+      tableHeight.value = Math.max(wrap.clientHeight, 320);
+    }
+  });
+}
+function onSearchGoods() {
+  goodsParams.pageNumber = 1;
+  getQueryGoodsList();
+}
+function resetFilter() {
+  filterForm.value = defaultFilterForm();
+  onSearchGoods();
+}
+function changePageSize(v) {
+  goodsParams.pageNumber = v;
+  getQueryGoodsList();
+}
+function buildQueryParams() {
+  const params = {
+    ...goodsParams,
+    goodsName: filterForm.value.goodsName || undefined,
+    goodsId: filterForm.value.goodsId || undefined,
+    goodsType: filterForm.value.goodsType || undefined,
+    brandId: filterForm.value.brandId || undefined,
+    storeCategoryPath: filterForm.value.storeCategoryPath || undefined,
+    categoryPath: filterForm.value.categoryPath || undefined,
+    geQuantity: undefined,
+    leQuantity: undefined,
+    geBuyCount: undefined,
+    leBuyCount: undefined,
+    price: undefined,
+  };
+
+  const { priceMin, priceMax, salesMin, salesMax, stockMin, stockMax } = filterForm.value;
+  if (priceMin !== "" && priceMax !== "") {
+    params.price = `${priceMin}_${priceMax}`;
+  } else if (priceMin !== "") {
+    params.price = String(priceMin);
+  } else if (priceMax !== "") {
+    params.price = `0_${priceMax}`;
+  }
+
+  if (stockMin !== "" && stockMin != null) params.geQuantity = Number(stockMin);
+  if (stockMax !== "" && stockMax != null) params.leQuantity = Number(stockMax);
+  if (salesMin !== "" && salesMin != null) params.geBuyCount = Number(salesMin);
+  if (salesMax !== "" && salesMax != null) params.leBuyCount = Number(salesMax);
+
+  return params;
+}
+function getQueryGoodsList() {
+  loading.value = true;
+  API_Goods.getGoodsSkuData(buildQueryParams())
+    .then((res) => {
+      initGoods(res);
+    })
+    .finally(() => {
+      loading.value = false;
+      calcTableHeight();
+    });
+}
+function initGoods(res) {
+  const records = res?.result?.records || [];
+  total.value = res?.result?.total || 0;
+  const selectedIds = new Set(
+    (selectedList.value || [])
+      .map((e) => e.id || e.skuId)
+      .filter((id) => id != null)
+      .map(String)
+  );
+  records.forEach((item) => {
+    item.___type = "goods";
+    item.selected = selectedIds.has(String(item.id));
+  });
+  goodsData.value = records;
+  syncTableSelection();
+}
+function syncTableSelection() {
+  nextTick(() => {
+    const table = goodsTableRef.value;
+    if (!table) return;
+    if (type.value === "multiple") {
+      // clearSelection/toggleRowSelection 都会触发 selection-change，
+      // 同步期间忽略，避免把已选状态清掉
+      syncingSelection.value = true;
+      table.clearSelection();
+      goodsData.value.forEach((row) => {
+        if (row.selected) {
+          table.toggleRowSelection(row, true);
+        }
+      });
+      nextTick(() => {
+        syncingSelection.value = false;
+      });
+      return;
+    }
+    const selected = goodsData.value.find((item) => item.selected);
+    table.setCurrentRow(selected || null);
+  });
+}
+function emitSelected(list) {
+  selectedList.value = list;
+  emit("selected", selectedList.value);
+}
+function handleRowClick(row) {
+  if (type.value === "multiple") return;
+  goodsData.value.forEach((item) => {
+    item.selected = false;
+  });
+  row.selected = true;
+  emitSelected([row]);
+  goodsTableRef.value?.setCurrentRow(row);
+}
+function handleSelectionChange(selection) {
+  if (type.value !== "multiple" || syncingSelection.value) return;
+  const selectedIds = new Set(selection.map((item) => String(item.id)));
+  goodsData.value.forEach((item) => {
+    item.selected = selectedIds.has(String(item.id));
+  });
+  const currentPageIds = new Set(goodsData.value.map((item) => String(item.id)));
+  const otherPages = selectedList.value.filter((item) => {
+    const id = item.id || item.skuId;
+    return id != null && !currentPageIds.has(String(id));
+  });
+  emitSelected([...otherPages, ...selection]);
+}
+function formatShopCategory(list) {
+  return (list || []).map((item) => ({
+    value: item.id,
+    label: item.labelName,
+    children:
+      item.children && item.children.length ? formatShopCategory(item.children) : undefined,
+  }));
+}
+function goodsTypeText(value) {
+  if (value === "PHYSICAL_GOODS") return "实物商品";
+  if (value === "VIRTUAL_GOODS") return "虚拟商品";
+  if (value === "E_COUPON") return "电子卡券";
+  return "-";
+}
+function brandText(brandId) {
+  if (!brandId) return "-";
+  const brand = brandList.value.find((item) => String(item.id) === String(brandId));
+  return brand?.name || "-";
+}
+function findTreeNodeLabel(tree, targetId, valueKey, labelKey) {
+  for (const node of tree || []) {
+    if (String(node[valueKey]) === String(targetId)) {
+      return node[labelKey];
+    }
+    const childLabel = findTreeNodeLabel(node.children, targetId, valueKey, labelKey);
+    if (childLabel) return childLabel;
+  }
+  return "";
+}
+function categoryPathText(path, tree, valueKey, labelKey) {
+  if (!path) return "-";
+  const ids = String(path).split(",").filter(Boolean);
+  if (!ids.length) return "-";
+  const labels = ids
+    .map((id) => findTreeNodeLabel(tree, id, valueKey, labelKey))
+    .filter(Boolean);
+  return labels.length ? labels.join(" / ") : "-";
+}
+function storeCategoryText(path) {
+  return categoryPathText(path, shopCategoryList.value, "value", "label");
+}
+function platformCategoryText(path) {
+  if (!path) return "-";
+  const ids = String(path).split(",").filter(Boolean);
+  if (!ids.length) return "-";
+  const targetId = ids.length >= 3 ? ids[2] : ids[ids.length - 1];
+  const label = findTreeNodeLabel(platformCategoryList.value, targetId, "id", "name");
+  return label || "-";
+}
+function init() {
+  getQueryGoodsList();
+  API_Goods.getCategoryTree()
+    .then((res) => {
+      if (res?.success) {
+        platformCategoryList.value = res.result || [];
+      }
+    })
+    .catch(() => {});
+  API_Goods.getShopGoodsLabelListSeller()
+    .then((res) => {
+      if (res?.success) {
+        shopCategoryList.value = formatShopCategory(res.result || []);
+      }
+    })
+    .catch(() => {});
+  API_Goods.getBrandListData()
+    .then((res) => {
+      brandList.value = Array.isArray(res) ? res : res?.result || [];
+    })
+    .catch(() => {});
+}
+
+onMounted(() => {
+  init();
+  nextTick(calcTableHeight);
+  window.addEventListener("resize", calcTableHeight);
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", calcTableHeight);
+});
+
+// 父组件（lili-dialog/index.vue 的 $refs.goodsDialog、link-dialog.vue 的 $refs["lili-component"]）
+// 通过实例写入 type 切换单选/多选；expose 的 ref 外部读写等价于原 data 字段
+defineExpose({ type });
 </script>
 <style scoped lang="scss">
 @import "./style.scss";

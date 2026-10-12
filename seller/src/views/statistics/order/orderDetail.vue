@@ -81,36 +81,34 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      orderStatusList: {
-        // 订单状态
-        UNDELIVERED: "待发货",
-        UNPAID: "未付款",
-        PAID: "已付款",
-        DELIVERED: "已发货",
-        CANCELLED: "已关闭",
-        COMPLETED: "已完成",
-        TAKE: "已完成",
-      },
-    };
-  },
-  props: ["res"],
-  methods: {
-    handleClickGoods(goodsId) {
-      if (!goodsId) {
-        this.$Message.warning("商品信息不存在");
-        return;
-      }
-      this.$filters.customRouterPush({
-        name: "goods-operation-edit",
-        query: { id: goodsId },
-      });
-    },
-  },
-};
+<script setup>
+import { ref } from "vue";
+import { Message } from "@/utils/message";
+import { customRouterPush } from "@/utils/filters";
+
+defineProps(["res"]);
+
+const orderStatusList = ref({
+  // 订单状态
+  UNDELIVERED: "待发货",
+  UNPAID: "未付款",
+  PAID: "已付款",
+  DELIVERED: "已发货",
+  CANCELLED: "已关闭",
+  COMPLETED: "已完成",
+  TAKE: "已完成",
+});
+
+function handleClickGoods(goodsId) {
+  if (!goodsId) {
+    Message.warning("商品信息不存在");
+    return;
+  }
+  customRouterPush({
+    name: "goods-operation-edit",
+    query: { id: goodsId },
+  });
+}
 </script>
 <style lang="scss" scoped>
 .shop {

@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -164,7 +164,7 @@
       </div>
 
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         :data="data"
         class="mt_10"
@@ -257,7 +257,7 @@
     </el-card>
 
     <el-dialog v-model="modalVisible" title="下架操作" width="500px" :close-on-click-modal="false">
-      <el-form ref="underForm" :model="underForm" label-width="100px">
+      <el-form ref="underFormRef" :model="underForm" label-width="100px">
         <el-form-item label="下架原因" prop="reason">
           <el-input v-model="underForm.reason" clearable />
         </el-form-item>
@@ -270,7 +270,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import {
   getCategoryTree,
   getGoodsListData,
@@ -280,411 +282,415 @@ import {
   upGoods,
   lowGoods,
 } from "@/api/goods";
-export default {
-  name: "goods",
-  data() {
-    return {
-      id: "", //要操作的id
-      loading: true, // 表单加载状态
-      modalVisible: false, // 添加或编辑显示
-      createRange: [],
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "create_time", // 默认排序字段
-        order: "desc", // 默认排序方式
-        storeCategoryPath: "",
-        categoryPath: "",
-        skuName: "",
-        skuSn: "",
-        stockStatus: "",
-        stockMin: "",
-        stockMax: "",
-        priceMin: "",
-        priceMax: "",
-      },
-      platformCategoryList: [],
-      shopCategoryList: [],
-      platformCategoryProps: {
-        value: "id",
-        label: "name",
-        children: "children",
-        checkStrictly: true,
-        emitPath: false,
-      },
-      shopCategoryProps: {
-        value: "value",
-        label: "label",
-        children: "children",
-        checkStrictly: true,
-        emitPath: false,
-      },
-      underForm: {
-        // 下架原因
-        reason: "",
-      },
-      submitLoading: false, // 添加或编辑提交状态
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
-      currentStatus: "ALL",
-      goodsNumerData: {},
-      selectedRows: [], // 选中的行数据
-      selectAll: false, // 全选状态
-    };
-  },
-  computed: {
-    goodsStatusWithCount() {
-      return [
-        {title: '全部', value: 'ALL'},
-        {title: `出售中${this.goodsNumerData.upperGoodsNum ? '(' + this.goodsNumerData.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
-        {title: `仓库中${this.goodsNumerData.downGoodsNum ? '(' + this.goodsNumerData.downGoodsNum + ')' : ''}`, value: 'DOWN'},
-        {title: `待审核${this.goodsNumerData.auditGoodsNum ? '(' + this.goodsNumerData.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
-        {title: `审核未通过${this.goodsNumerData.refuseGoodsNum ? '(' + this.goodsNumerData.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
-      ];
-    }
-  },
-  methods: {
-    clearTableSelection() {
-      this.$refs.table?.clearSelection?.();
-    },
-    onStatusTabClick(tab) {
-      this.goodsStatusClick(tab.paneName);
-    },
-    goodsTypeText(v) {
-      if (v === "PHYSICAL_GOODS") return "实物商品";
-      if (v === "VIRTUAL_GOODS") return "虚拟商品";
-      if (v === "E_COUPON") return "电子卡券"; // 卡密商品
-      if (v === "APPOINTMENT_GOODS") return "预约商品";
-      return v || "—";
-    },
-    findTreeNodeLabel(tree, targetId, valueKey, labelKey) {
-      for (const node of tree || []) {
-        if (String(node[valueKey]) === String(targetId)) {
-          return node[labelKey];
-        }
-        const childLabel = this.findTreeNodeLabel(node.children, targetId, valueKey, labelKey);
-        if (childLabel) return childLabel;
-      }
-      return "";
-    },
-    platformCategoryText(path) {
-      if (!path) return "—";
-      const ids = String(path).split(",").filter(Boolean);
-      if (!ids.length) return "—";
-      const labels = ids
-        .map((id) => this.findTreeNodeLabel(this.platformCategoryList, id, "id", "name"))
-        .filter(Boolean);
-      return labels.length ? labels.join(" / ") : "—";
-    },
-    /** 跳转卡池管理；单 SKU 商品默认取第一个 SKU（card-key-pool 需 skuId） */
-    async goCardKeyPool(row) {
-      let skuId = row.skuId;
-      if (!skuId) {
-        try {
-          const res = await getQueryGoodsIdGoodsList(row.id);
-          if (res.success && res.result?.length) {
-            skuId = res.result[0].id;
-          } else {
-            this.$message.warning("该商品暂无 SKU，请先完善商品规格");
-            return;
-          }
-        } catch {
-          this.$message.error("获取商品规格失败");
-          return;
-        }
-      }
-      this.$router.push({
-        path: "/card-key-pool",
-        query: {
-          skuId,
-          goodsId: row.id,
-          goodsName: row.goodsName,
-        },
-      });
-    },
-    marketEnableText(v) {
-      if (v === "DOWN") return "下架";
-      if (v === "UPPER") return "上架";
-      return "";
-    },
-    authFlagText(v) {
-      if (v === "TOBEAUDITED") return "待审核";
-      if (v === "PASS") return "通过";
-      if (v === "REFUSE") return "拒绝";
-      return "";
-    },
-    // 初始化数据
-    init() {
-      this.loadFilterOptions();
-      this.getDataList();
-      this.getNumberData();
-    },
-    loadFilterOptions() {
-      getShopGoodsLabelListSeller()
-        .then((res) => {
-          if (res?.success) {
-            this.shopCategoryList = this.formatShopCategory(res.result || []);
-          }
-        })
-        .catch(() => {});
-      getCategoryTree()
-        .then((res) => {
-          if (res?.success) {
-            this.platformCategoryList = res.result || [];
-          }
-        })
-        .catch(() => {});
-    },
-    onStockStatusChange(value) {
-      if (value !== "IN_STOCK") {
-        this.searchForm.stockMin = "";
-        this.searchForm.stockMax = "";
-      }
-    },
-    buildSearchParams(includeGoodsStatus = true) {
-      const { stockStatus, stockMin, stockMax, priceMin, priceMax, ...rest } = this.searchForm;
-      const params = { ...rest };
+import { Message, Modal } from "@/utils/message";
+import { customRouterPush } from "@/utils/filters";
 
-      if (!includeGoodsStatus) {
-        delete params.goodsStatus;
-      }
+defineOptions({ name: "goods" });
 
-      if (this.createRange && this.createRange.length === 2) {
-        params.startDate = this.createRange[0];
-        params.endDate = this.createRange[1];
-      }
+const route = useRoute();
+const router = useRouter();
 
-      if (stockStatus === "IN_STOCK") {
-        params.geQuantity = stockMin !== "" && stockMin != null ? Number(stockMin) : 1;
-        if (stockMax !== "" && stockMax != null) {
-          params.leQuantity = Number(stockMax);
-        }
-      } else if (stockStatus === "OUT_OF_STOCK") {
-        params.geQuantity = 0;
-        params.leQuantity = 0;
-      } else {
-        if (stockMin !== "" && stockMin != null) params.geQuantity = Number(stockMin);
-        if (stockMax !== "" && stockMax != null) params.leQuantity = Number(stockMax);
-      }
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+const underFormRef = ref(null);
 
-      if (priceMin !== "" && priceMax !== "") {
-        params.price = `${priceMin}_${priceMax}`;
-      } else if (priceMin !== "") {
-        params.price = String(priceMin);
-      } else if (priceMax !== "") {
-        params.price = `0_${priceMax}`;
-      }
-
-      return params;
-    },
-    formatShopCategory(list) {
-      return (list || []).map((item) => ({
-        value: item.id,
-        label: item.labelName,
-        children:
-          item.children && item.children.length
-            ? this.formatShopCategory(item.children)
-            : undefined,
-      }));
-    },
-    // 分页 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    // 分页 改变页数
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    // 搜索
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-      this.getNumberData();
-    },
-    // 获取数据
-    getDataList() {
-      this.loading = true;
-      getGoodsListData(this.buildSearchParams()).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    getNumberData() {
-      getGoodsNumerData(this.buildSearchParams(false)).then((res) => {
-        if (res.success) {
-          this.goodsNumerData = res.result;
-        }
-      })
-    },
-    // 编辑
-    edit(v) {
-      this.id = v.id;
-      if (v.underMessage) {
-        this.underForm.reason = v.underMessage;
-      } else {
-        this.underForm.reason = "";
-      }
-      this.modalVisible = true;
-    },
-    // 下架
-    lower() {
-      let params = {
-        goodsId: this.id,
-        reason:this.underForm.reason
-      };
-      lowGoods(params).then((res) => {
-        this.$Modal.remove();
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.modalVisible = false;
-          this.getDataList();
-          this.getNumberData(); // 添加这行
-        }
-      });
-    },
-    // 上架
-    upper(v) {
-      this.$Modal.confirm({
-        title: "确认上架",
-        content: "您确认要上架 " + v.goodsName + " ?",
-        loading: true,
-        onOk: () => {
-           let params = {
-            goodsId: v.id
-          };
-          upGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("上架成功");
-              this.getDataList();
-              this.getNumberData(); // 添加这行
-            }
-          });
-        },
-      });
-    },
-
-    // 编辑商品
-    editGoods(v) {
-      this.$filters.customRouterPush({
-        name: "goods-operation-edit",
-        query: { id: v.id },
-      });
-    },
-
-    // 复制商品
-    copyGoods(v) {
-      this.$filters.customRouterPush({
-        name: "goods-operation",
-        query: { copyId: v.id },
-      });
-    },
-
-    // 商品状态筛选
-    goodsStatusClick(name) {
-      if (name === "ALL" || name === "" || name === undefined || name === null) {
-        delete this.searchForm.goodsStatus;
-        this.currentStatus = "ALL";
-      } else {
-        this.searchForm.goodsStatus = name;
-        this.currentStatus = name;
-      }
-      this.selectedRows = [];
-      this.clearTableSelection();
-      this.getDataList();
-    },
-
-    onSelectionChange(selection) {
-      this.selectedRows = selection;
-    },
-
-    // 批量上架
-    batchUpper() {
-      if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要上架的商品');
-        return;
-      }
-
-      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      this.$Modal.confirm({
-        title: '确认批量上架',
-        content: `您确认要上架以下商品吗？\n${goodsNames}`,
-        loading: true,
-        onOk: () => {
-          // 提取所有选中商品的ID
-          const goodsIds = this.selectedRows.map(item => item.id);
-          const params = {
-            goodsId: goodsIds // 传递ID数组
-          };
-
-          upGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success('批量上架成功');
-              this.selectedRows = [];
-              this.selectAll = false;
-              this.getDataList();
-              this.getNumberData();
-            }
-          }).catch(() => {
-            this.$Modal.remove();
-          });
-        }
-      });
-    },
-
-    // 批量下架
-    batchLower() {
-      if (this.selectedRows.length === 0) {
-        this.$Message.warning('请先选择要下架的商品');
-        return;
-      }
-
-      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      this.$Modal.confirm({
-        title: '确认批量下架',
-        content: `您确认要下架以下商品吗？\n${goodsNames}`,
-        loading: true,
-        onOk: () => {
-          // 提取所有选中商品的ID
-          const goodsIds = this.selectedRows.map(item => item.id);
-          const params = {
-            goodsId: goodsIds, // 传递ID数组
-            reason: '批量下架操作' // 可以设置默认下架原因
-          };
-
-          lowGoods(params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success('批量下架成功');
-              this.selectedRows = [];
-              this.selectAll = false;
-              this.getDataList();
-              this.getNumberData();
-            }
-          }).catch(() => {
-            this.$Modal.remove();
-          });
-        }
-      });
-    },
-  },
-  mounted() {
-    const goodsStatus = this.$route.query.goodsStatus;
-    if (goodsStatus) {
-      this.currentStatus = goodsStatus;
-      this.searchForm.goodsStatus = goodsStatus;
-    }
-    this.init();
-  },
+const id = ref(""); //要操作的id
+const loading = ref(true); // 表单加载状态
+const modalVisible = ref(false); // 添加或编辑显示
+const createRange = ref([]);
+const searchForm = ref({
+  // 搜索框初始化对象
+  pageNumber: 1, // 当前页数
+  pageSize: 20, // 页面大小
+  sort: "create_time", // 默认排序字段
+  order: "desc", // 默认排序方式
+  storeCategoryPath: "",
+  categoryPath: "",
+  skuName: "",
+  skuSn: "",
+  stockStatus: "",
+  stockMin: "",
+  stockMax: "",
+  priceMin: "",
+  priceMax: "",
+});
+const platformCategoryList = ref([]);
+const shopCategoryList = ref([]);
+const platformCategoryProps = {
+  value: "id",
+  label: "name",
+  children: "children",
+  checkStrictly: true,
+  emitPath: false,
 };
+const shopCategoryProps = {
+  value: "value",
+  label: "label",
+  children: "children",
+  checkStrictly: true,
+  emitPath: false,
+};
+const underForm = ref({
+  // 下架原因
+  reason: "",
+});
+const submitLoading = ref(false); // 添加或编辑提交状态
+const data = ref([]); // 表单数据
+const total = ref(0); // 表单数据总数
+const currentStatus = ref("ALL");
+const goodsNumerData = ref({});
+const selectedRows = ref([]); // 选中的行数据
+const selectAll = ref(false); // 全选状态
+
+const goodsStatusWithCount = computed(() => {
+  return [
+    {title: '全部', value: 'ALL'},
+    {title: `出售中${goodsNumerData.value.upperGoodsNum ? '(' + goodsNumerData.value.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
+    {title: `仓库中${goodsNumerData.value.downGoodsNum ? '(' + goodsNumerData.value.downGoodsNum + ')' : ''}`, value: 'DOWN'},
+    {title: `待审核${goodsNumerData.value.auditGoodsNum ? '(' + goodsNumerData.value.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
+    {title: `审核未通过${goodsNumerData.value.refuseGoodsNum ? '(' + goodsNumerData.value.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
+  ];
+});
+
+function clearTableSelection() {
+  tableRef.value?.clearSelection?.();
+}
+function onStatusTabClick(tab) {
+  goodsStatusClick(tab.paneName);
+}
+function goodsTypeText(v) {
+  if (v === "PHYSICAL_GOODS") return "实物商品";
+  if (v === "VIRTUAL_GOODS") return "虚拟商品";
+  if (v === "E_COUPON") return "电子卡券"; // 卡密商品
+  if (v === "APPOINTMENT_GOODS") return "预约商品";
+  return v || "—";
+}
+function findTreeNodeLabel(tree, targetId, valueKey, labelKey) {
+  for (const node of tree || []) {
+    if (String(node[valueKey]) === String(targetId)) {
+      return node[labelKey];
+    }
+    const childLabel = findTreeNodeLabel(node.children, targetId, valueKey, labelKey);
+    if (childLabel) return childLabel;
+  }
+  return "";
+}
+function platformCategoryText(path) {
+  if (!path) return "—";
+  const ids = String(path).split(",").filter(Boolean);
+  if (!ids.length) return "—";
+  const labels = ids
+    .map((id) => findTreeNodeLabel(platformCategoryList.value, id, "id", "name"))
+    .filter(Boolean);
+  return labels.length ? labels.join(" / ") : "—";
+}
+/** 跳转卡池管理；单 SKU 商品默认取第一个 SKU（card-key-pool 需 skuId） */
+async function goCardKeyPool(row) {
+  let skuId = row.skuId;
+  if (!skuId) {
+    try {
+      const res = await getQueryGoodsIdGoodsList(row.id);
+      if (res.success && res.result?.length) {
+        skuId = res.result[0].id;
+      } else {
+        Message.warning("该商品暂无 SKU，请先完善商品规格");
+        return;
+      }
+    } catch {
+      Message.error("获取商品规格失败");
+      return;
+    }
+  }
+  router.push({
+    path: "/card-key-pool",
+    query: {
+      skuId,
+      goodsId: row.id,
+      goodsName: row.goodsName,
+    },
+  });
+}
+function marketEnableText(v) {
+  if (v === "DOWN") return "下架";
+  if (v === "UPPER") return "上架";
+  return "";
+}
+function authFlagText(v) {
+  if (v === "TOBEAUDITED") return "待审核";
+  if (v === "PASS") return "通过";
+  if (v === "REFUSE") return "拒绝";
+  return "";
+}
+// 初始化数据
+function init() {
+  loadFilterOptions();
+  getDataList();
+  getNumberData();
+}
+function loadFilterOptions() {
+  getShopGoodsLabelListSeller()
+    .then((res) => {
+      if (res?.success) {
+        shopCategoryList.value = formatShopCategory(res.result || []);
+      }
+    })
+    .catch(() => {});
+  getCategoryTree()
+    .then((res) => {
+      if (res?.success) {
+        platformCategoryList.value = res.result || [];
+      }
+    })
+    .catch(() => {});
+}
+function onStockStatusChange(value) {
+  if (value !== "IN_STOCK") {
+    searchForm.value.stockMin = "";
+    searchForm.value.stockMax = "";
+  }
+}
+function buildSearchParams(includeGoodsStatus = true) {
+  const { stockStatus, stockMin, stockMax, priceMin, priceMax, ...rest } = searchForm.value;
+  const params = { ...rest };
+
+  if (!includeGoodsStatus) {
+    delete params.goodsStatus;
+  }
+
+  if (createRange.value && createRange.value.length === 2) {
+    params.startDate = createRange.value[0];
+    params.endDate = createRange.value[1];
+  }
+
+  if (stockStatus === "IN_STOCK") {
+    params.geQuantity = stockMin !== "" && stockMin != null ? Number(stockMin) : 1;
+    if (stockMax !== "" && stockMax != null) {
+      params.leQuantity = Number(stockMax);
+    }
+  } else if (stockStatus === "OUT_OF_STOCK") {
+    params.geQuantity = 0;
+    params.leQuantity = 0;
+  } else {
+    if (stockMin !== "" && stockMin != null) params.geQuantity = Number(stockMin);
+    if (stockMax !== "" && stockMax != null) params.leQuantity = Number(stockMax);
+  }
+
+  if (priceMin !== "" && priceMax !== "") {
+    params.price = `${priceMin}_${priceMax}`;
+  } else if (priceMin !== "") {
+    params.price = String(priceMin);
+  } else if (priceMax !== "") {
+    params.price = `0_${priceMax}`;
+  }
+
+  return params;
+}
+function formatShopCategory(list) {
+  return (list || []).map((item) => ({
+    value: item.id,
+    label: item.labelName,
+    children:
+      item.children && item.children.length
+        ? formatShopCategory(item.children)
+        : undefined,
+  }));
+}
+// 分页 改变页码
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+// 分页 改变页数
+function changePageSize(v) {
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+// 搜索
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getDataList();
+  getNumberData();
+}
+// 获取数据
+function getDataList() {
+  loading.value = true;
+  getGoodsListData(buildSearchParams()).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function getNumberData() {
+  getGoodsNumerData(buildSearchParams(false)).then((res) => {
+    if (res.success) {
+      goodsNumerData.value = res.result;
+    }
+  })
+}
+// 编辑
+function edit(v) {
+  id.value = v.id;
+  if (v.underMessage) {
+    underForm.value.reason = v.underMessage;
+  } else {
+    underForm.value.reason = "";
+  }
+  modalVisible.value = true;
+}
+// 下架
+function lower() {
+  let params = {
+    goodsId: id.value,
+    reason: underForm.value.reason
+  };
+  lowGoods(params).then((res) => {
+    Modal.remove();
+    if (res.success) {
+      Message.success("操作成功");
+      modalVisible.value = false;
+      getDataList();
+      getNumberData(); // 添加这行
+    }
+  });
+}
+// 上架
+function upper(v) {
+  Modal.confirm({
+    title: "确认上架",
+    content: "您确认要上架 " + v.goodsName + " ?",
+    loading: true,
+    onOk: () => {
+       let params = {
+        goodsId: v.id
+      };
+      upGoods(params).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("上架成功");
+          getDataList();
+          getNumberData(); // 添加这行
+        }
+      });
+    },
+  });
+}
+
+// 编辑商品
+function editGoods(v) {
+  customRouterPush({
+    name: "goods-operation-edit",
+    query: { id: v.id },
+  });
+}
+
+// 复制商品
+function copyGoods(v) {
+  customRouterPush({
+    name: "goods-operation",
+    query: { copyId: v.id },
+  });
+}
+
+// 商品状态筛选
+function goodsStatusClick(name) {
+  if (name === "ALL" || name === "" || name === undefined || name === null) {
+    delete searchForm.value.goodsStatus;
+    currentStatus.value = "ALL";
+  } else {
+    searchForm.value.goodsStatus = name;
+    currentStatus.value = name;
+  }
+  selectedRows.value = [];
+  clearTableSelection();
+  getDataList();
+}
+
+function onSelectionChange(selection) {
+  selectedRows.value = selection;
+}
+
+// 批量上架
+function batchUpper() {
+  if (selectedRows.value.length === 0) {
+    Message.warning('请先选择要上架的商品');
+    return;
+  }
+
+  const goodsNames = selectedRows.value.map(item => item.goodsName).join('、');
+  Modal.confirm({
+    title: '确认批量上架',
+    content: `您确认要上架以下商品吗？\n${goodsNames}`,
+    loading: true,
+    onOk: () => {
+      // 提取所有选中商品的ID
+      const goodsIds = selectedRows.value.map(item => item.id);
+      const params = {
+        goodsId: goodsIds // 传递ID数组
+      };
+
+      upGoods(params).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success('批量上架成功');
+          selectedRows.value = [];
+          selectAll.value = false;
+          getDataList();
+          getNumberData();
+        }
+      }).catch(() => {
+        Modal.remove();
+      });
+    }
+  });
+}
+
+// 批量下架
+function batchLower() {
+  if (selectedRows.value.length === 0) {
+    Message.warning('请先选择要下架的商品');
+    return;
+  }
+
+  const goodsNames = selectedRows.value.map(item => item.goodsName).join('、');
+  Modal.confirm({
+    title: '确认批量下架',
+    content: `您确认要下架以下商品吗？\n${goodsNames}`,
+    loading: true,
+    onOk: () => {
+      // 提取所有选中商品的ID
+      const goodsIds = selectedRows.value.map(item => item.id);
+      const params = {
+        goodsId: goodsIds, // 传递ID数组
+        reason: '批量下架操作' // 可以设置默认下架原因
+      };
+
+      lowGoods(params).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success('批量下架成功');
+          selectedRows.value = [];
+          selectAll.value = false;
+          getDataList();
+          getNumberData();
+        }
+      }).catch(() => {
+        Modal.remove();
+      });
+    }
+  });
+}
+
+onMounted(() => {
+  const goodsStatus = route.query.goodsStatus;
+  if (goodsStatus) {
+    currentStatus.value = goodsStatus;
+    searchForm.value.goodsStatus = goodsStatus;
+  }
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .search-form-row {

@@ -50,59 +50,57 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { getOnSiteSettings, saveOnSiteSettings } from "@/api/appointment";
+import { Message } from "@/utils/message";
 import ServiceAreaFence from "./components/ServiceAreaFence.vue";
 
-export default {
-  name: "appointmentOnSiteSettings",
-  components: { ServiceAreaFence },
-  data() {
-    return {
-      activeTab: "flow",
-      loading: false,
-      saving: false,
-      form: {
-        userBooking: true,
-        acceptOrder: true,
-        onSiteCheckin: true,
-        serviceEvidence: false,
-        endService: true,
-        serviceAreaEnabled: false,
-        serviceAreaGeo: "",
-      },
-    };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    loadData() {
-      this.loading = true;
-      getOnSiteSettings()
-        .then((res) => {
-          if (res.success && res.result) {
-            this.form = { ...this.form, ...res.result };
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    handleSave() {
-      this.saving = true;
-      saveOnSiteSettings(this.form)
-        .then((res) => {
-          if (res.success) {
-            this.$message.success("保存成功");
-          }
-        })
-        .finally(() => {
-          this.saving = false;
-        });
-    },
-  },
-};
+defineOptions({ name: "appointmentOnSiteSettings" });
+
+const activeTab = ref("flow");
+const loading = ref(false);
+const saving = ref(false);
+const form = ref({
+  userBooking: true,
+  acceptOrder: true,
+  onSiteCheckin: true,
+  serviceEvidence: false,
+  endService: true,
+  serviceAreaEnabled: false,
+  serviceAreaGeo: "",
+});
+
+onMounted(() => {
+  loadData();
+});
+
+function loadData() {
+  loading.value = true;
+  getOnSiteSettings()
+    .then((res) => {
+      if (res.success && res.result) {
+        form.value = { ...form.value, ...res.result };
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function handleSave() {
+  saving.value = true;
+  saveOnSiteSettings(form.value)
+    .then((res) => {
+      if (res.success) {
+        // 原代码为 this.$message（小写），全局只注册了 $Message，按作者意图修正
+        Message.success("保存成功");
+      }
+    })
+    .finally(() => {
+      saving.value = false;
+    });
+}
 </script>
 
 <style scoped>

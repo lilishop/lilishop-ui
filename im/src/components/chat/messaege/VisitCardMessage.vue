@@ -20,27 +20,27 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  name: 'VisitCardMessage',
-  data() {
-    return {
-      userId: 0,
-      friendId: 0,
-      avatar:
-        'http://im-serve0.gzydong.club/static/image/sys-head/2019012107542668696.jpg',
-      sign:
-        '这个社会，是赢家通吃，输者一无所有，社会，永远都是只以成败论英雄。',
-      nickname:
-        '氨基酸纳氨基酸纳氨基酸纳氨基酸纳氨基酸纳氨基酸纳氨基酸纳氨基酸纳',
-    }
-  },
-  created() {},
-  methods: {
-    openVisitCard(user_id) {
-      this.$emit('openVisitCard', user_id)
-    },
-  },
+<script setup>
+import { ref } from "vue";
+
+defineOptions({ name: 'VisitCardMessage' });
+
+const emit = defineEmits(['openVisitCard']);
+
+const userId = ref(0);
+const friendId = ref(0);
+const avatar = ref(
+  'http://im-serve0.gzydong.club/static/image/sys-head/2019012107542668696.jpg'
+);
+const sign = ref(
+  '这个社会，是赢家通吃，输者一无所有，社会，永远都是只以成败论英雄。'
+);
+const nickname = ref(
+  '氨基酸纳氨基酸纳氨基酸纳氨基酸纳氨基酸纳氨基酸纳氨基酸纳氨基酸纳'
+);
+
+function openVisitCard(user_id) {
+  emit('openVisitCard', user_id)
 }
 </script>
 <style lang="less" scoped>

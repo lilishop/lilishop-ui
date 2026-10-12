@@ -30,54 +30,57 @@
     </el-container>
   </div>
 </template>
-<script>
-export default {
-  name: 'MeEditorImageView',
-  emits: ['close', 'update:show', 'confirm'],
-  props: {
-    show: Boolean,
-    file: File,
-  },
-  watch: {
-    file(file) {
-      this.loadFile(file)
-    },
-  },
-  data() {
-    return {
-      src: '',
-      fileSize: '',
-      fileName: '',
-      loading: false,
-    }
-  },
-  methods: {
-    closeBox() {
-      if (this.loading) {
-        return false
-      }
+<script setup>
+import { ref, watch } from 'vue'
 
-      this.$emit('update:show', false)
-      this.$emit('close', false)
-    },
-    loadFile(file) {
-      let reader = new FileReader()
-      this.fileSize = Math.ceil(file.size / 1024)
-      this.fileName = file.name
-      reader.onload = () => {
-        this.src = reader.result
-      }
+defineOptions({ name: 'MeEditorImageView' })
 
-      reader.readAsDataURL(file)
-    },
+const emit = defineEmits(['close', 'update:show', 'confirm'])
+const props = defineProps({
+  show: Boolean,
+  file: File,
+})
 
-    // 确认按钮事件
-    uploadImage() {
-      this.loading = true
-      this.$emit('confirm')
-    },
-  },
+const src = ref('')
+const fileSize = ref('')
+const fileName = ref('')
+const loading = ref(false)
+
+watch(
+  () => props.file,
+  (file) => {
+    loadFile(file)
+  }
+)
+
+function closeBox() {
+  if (loading.value) {
+    return false
+  }
+
+  emit('update:show', false)
+  emit('close', false)
 }
+
+function loadFile(file) {
+  let reader = new FileReader()
+  fileSize.value = Math.ceil(file.size / 1024)
+  fileName.value = file.name
+  reader.onload = () => {
+    src.value = reader.result
+  }
+
+  reader.readAsDataURL(file)
+}
+
+// 确认按钮事件
+function uploadImage() {
+  loading.value = true
+  emit('confirm')
+}
+
+// 父组件通过 $refs.imageViewer 访问 loading / closeBox
+defineExpose({ loading, closeBox })
 </script>
 <style lang="less" scoped>
 .lum-dialog-box {

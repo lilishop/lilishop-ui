@@ -33,14 +33,14 @@
     >
       <el-row :gutter="16">
         <el-col :span="16">
-          <el-form ref="form" :model="form.article" label-width="100px">
+          <el-form ref="formRef" :model="form.article" label-width="100px">
             <el-form-item label="文章标题" prop="title">
               <el-input v-model="form.article.title" clearable style="width: 40%" />
             </el-form-item>
             <el-form-item class="form-item-view-el" label="文章内容" prop="content">
               <editor
                 v-if="modalVisible"
-                ref="editor"
+                ref="editorRef"
                 open-xss
                 v-model="form.article.content"
               />
@@ -64,140 +64,146 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import { getArticleCategory, updatePrivacy, getPrivacy } from "@/api/pages";
-import tinymec from "@/components/editor/index.vue";
+import editor from "@/components/editor/index.vue";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "privacy",
-  components: {
-    editor: tinymec,
+defineOptions({ name: "privacy" });
+
+defineProps({
+  selected: {
+    type: Boolean,
+    default: false,
   },
-  props: {
-    selected: {
-      type: Boolean,
-      default: false,
-    },
+});
+
+const loading = ref(false);
+const modalVisible = ref(false);
+const treeDataDefault = ref([]);
+const list = ref([]);
+const treeValue = ref("");
+const treeData = ref([]);
+const submitLoading = ref(false);
+const modalTitle = ref("");
+const currindex = ref("");
+const form = reactive({
+  type: "",
+  article: {
+    openStatus: false,
+    title: "",
+    categoryId: "",
+    sort: 1,
+    content: "",
+    type: "",
   },
-  data() {
-    return {
-      loading: false,
-      modalVisible: false,
-      treeDataDefault: [],
-      list: [],
-      treeValue: "",
-      treeData: [],
-      submitLoading: false,
-      modalTitle: "",
-      currindex: "",
-      form: {
-        type: "",
-        article: {
-          openStatus: false,
-          title: "",
-          categoryId: "",
-          sort: 1,
-          content: "",
-          type: "",
-        },
-        id: "",
-      },
-      data: [
-        { name: "店铺入驻协议", type: "STORE_REGISTER" },
-        { name: "用户协议", type: "USER_AGREEMENT" },
-        { name: "证照信息", type: "LICENSE_INFORMATION" },
-        { name: "关于我们", type: "ABOUT" },
-        { name: "隐私策略", type: "PRIVACY_POLICY" },
-      ],
-    };
-  },
-  methods: {
-    init() {
-      this.getAllList(0);
-    },
-    handleCheckChange(data) {
-      let value = "";
-      let title = "";
-      this.list = [];
-      data.forEach((item) => {
-        value += `${item.value},`;
-        title += `${item.title},`;
+  id: "",
+});
+const data = ref([
+  { name: "店铺入驻协议", type: "STORE_REGISTER" },
+  { name: "用户协议", type: "USER_AGREEMENT" },
+  { name: "证照信息", type: "LICENSE_INFORMATION" },
+  { name: "关于我们", type: "ABOUT" },
+  { name: "隐私策略", type: "PRIVACY_POLICY" },
+]);
+
+// 原代码未在 data 中声明，直接在 edit() 中挂载到 this 上
+let modalType = 0;
+
+const formRef = ref(null);
+const editorRef = ref(null);
+
+function init() {
+  getAllList(0);
+}
+
+function handleCheckChange(data) {
+  let value = "";
+  let title = "";
+  list.value = [];
+  data.forEach((item) => {
+    value += `${item.value},`;
+    title += `${item.title},`;
+  });
+  value = value.substring(0, value.length - 1);
+  title = title.substring(0, title.length - 1);
+  list.value.push({ value, title });
+  form.article.categoryId = value;
+}
+
+function getAllList(parent_id) {
+  loading.value = true;
+  getArticleCategory(parent_id).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      treeData.value = getTree(res.result);
+      treeDataDefault.value = getTree(res.result);
+      treeData.value.unshift({
+        title: "全部",
+        level: 0,
+        children: [],
+        id: "0",
+        categoryId: 0,
       });
-      value = value.substring(0, value.length - 1);
-      title = title.substring(0, title.length - 1);
-      this.list.push({ value, title });
-      this.form.article.categoryId = value;
-    },
-    getAllList(parent_id) {
-      this.loading = true;
-      getArticleCategory(parent_id).then((res) => {
-        this.loading = false;
+    }
+  });
+}
+
+function getTree(tree = []) {
+  const arr = [];
+  if (!!tree && tree.length !== 0) {
+    tree.forEach((item) => {
+      const obj = {};
+      obj.title = item.articleCategoryName;
+      obj.value = item.id;
+      obj.attr = item.articleCategoryName;
+      obj.children = getTree(item.children);
+      arr.push(obj);
+    });
+  }
+  return arr;
+}
+
+function edit(data) {
+  modalType = 1;
+  modalTitle.value = "编辑协议";
+  form.article = { content: "" };
+  formRef.value?.resetFields();
+  loading.value = true;
+  getPrivacy(data.type).then((res) => {
+    loading.value = false;
+    modalVisible.value = true;
+    form.article.categoryId = res.result.categoryId;
+    form.id = res.result.id;
+    form.article.content = res.result.content;
+    form.article.title = res.result.title;
+    form.article.sort = res.result.sort;
+    form.article.openStatus = res.result.openStatus;
+    form.article.type = res.result.type;
+    form.type = res.result.type;
+  });
+  loading.value = false;
+}
+
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      updatePrivacy(form.id, form.type, form.article).then((res) => {
+        submitLoading.value = false;
         if (res.success) {
-          this.treeData = this.getTree(res.result);
-          this.treeDataDefault = this.getTree(res.result);
-          this.treeData.unshift({
-            title: "全部",
-            level: 0,
-            children: [],
-            id: "0",
-            categoryId: 0,
-          });
+          Message.success("操作成功");
+          modalVisible.value = false;
         }
       });
-    },
-    getTree(tree = []) {
-      const arr = [];
-      if (!!tree && tree.length !== 0) {
-        tree.forEach((item) => {
-          const obj = {};
-          obj.title = item.articleCategoryName;
-          obj.value = item.id;
-          obj.attr = item.articleCategoryName;
-          obj.children = this.getTree(item.children);
-          arr.push(obj);
-        });
-      }
-      return arr;
-    },
-    edit(data) {
-      this.modalType = 1;
-      this.modalTitle = "编辑协议";
-      this.form.article = { content: "" };
-      this.$refs.form?.resetFields();
-      this.loading = true;
-      getPrivacy(data.type).then((res) => {
-        this.loading = false;
-        this.modalVisible = true;
-        this.form.article.categoryId = res.result.categoryId;
-        this.form.id = res.result.id;
-        this.form.article.content = res.result.content;
-        this.form.article.title = res.result.title;
-        this.form.article.sort = res.result.sort;
-        this.form.article.openStatus = res.result.openStatus;
-        this.form.article.type = res.result.type;
-        this.form.type = res.result.type;
-      });
-      this.loading = false;
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          updatePrivacy(this.form.id, this.form.type, this.form.article).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.modalVisible = false;
-            }
-          });
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

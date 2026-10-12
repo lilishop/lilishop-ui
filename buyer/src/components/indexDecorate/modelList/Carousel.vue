@@ -82,151 +82,153 @@
   </div>
 </template>
 
-<script>
-
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Modal } from "@/utils/message";
 import storage from "@/plugins/storage";
 import config from "@/config";
 import defaultAvatar from "@/assets/images/default.png";
 import { getIconUrl } from "@/assets/iconfont/iconMap";
-export default {
-  name: "modelCarousel",
-  props: ["data"],
-  computed: {
-    carouselList() {
-      return this.data?.options?.list || [];
-    },
-    displaySlides() {
-      return this.carouselList.filter((item) => item && item.img);
-    },
+
+defineOptions({ name: "modelCarousel" });
+
+const props = defineProps(["data"]);
+
+const router = useRouter();
+
+const carouselList = computed(() => {
+  return props.data?.options?.list || [];
+});
+
+const displaySlides = computed(() => {
+  return carouselList.value.filter((item) => item && item.img);
+});
+
+const userInfo = ref({}); // 用户信息
+const entranceList = ref([
+  {
+    icon: "collage",
+    label: "宝贝收藏",
+    path: "/home/Favorites"
   },
-  data() {
-    return {
-      config,
-      defaultAvatar,
-      userInfo: {}, // 用户信息
-      entranceList: [
-        {
-          icon: "collage",
-          label: "宝贝收藏",
-          path: "/home/Favorites"
-        },
-        {
-          icon: "shop",
-          label: "收藏店铺",
-          path: "/home/Favorites?type=STORE"
-        },
-        {
-          icon: "carts",
-          label: "购物车",
-          path: "/cart"
-        },
-        {
-          icon: "story",
-          label: "我的足迹",
-          path: "/home/MyTracks"
-        },
-      ],
-      appendList: [
-        {
-          icon: "support",
-          label: "帮助中心",
-          path: "/article"
-        },
-        {
-          icon: "feedback",
-          label: "我的评论",
-          path: "/home/CommentList"
-        },
-        {
-          icon: "notice",
-          label: "收货地址",
-          path: "/home/MyAddress"
-        },
-        {
-          icon: "notification",
-          label: "我的消息",
-          path: "/home/MsgList"
-        },
-      ],
-      recentList: [
-        {
-          value: "0",
-          label: "购物车"
-        },
-        {
-          value: "0",
-          label: "待收货"
-        },
-        {
-          value: "0",
-          label: "待发货"
-        },
-        {
-          value: "0",
-          label: "待付款"
-        },
-      ],
-    };
+  {
+    icon: "shop",
+    label: "收藏店铺",
+    path: "/home/Favorites?type=STORE"
   },
-  methods: {
-    getIconUrl,
-    carouselItemKey(item, index) {
-      return item?.img || item?.url || `slide-${index}`;
-    },
-    resolveRoute(pathStr) {
-      if (!pathStr) return { path: "/" };
-      const [path, search] = pathStr.split("?");
-      if (!search) return { path };
-      return {
-        path,
-        query: Object.fromEntries(new URLSearchParams(search)),
-      };
-    },
-    isMemberRoute(location) {
-      const path = location.path && location.path.charAt(0) === "/" ? location.path : `/${location.path || ""}`;
-      return path === "/home" || path.startsWith("/home/") || path === "/cart";
-    },
-    normalizeLocation(location) {
-      if (!location.path || location.path.charAt(0) === "/") return location;
-      return { ...location, path: `/${location.path}` };
-    },
-    promptLoginThenNavigate(location) {
-      Modal.confirm({
-        title: "温馨提示",
-        content: "请登录后执行此操作",
-        okText: "立即登录",
-        cancelText: "取消",
-        onOk: () => {
-          this.$router.push({
-            path: "/login",
-            query: {
-              rePath: location.path,
-              query: JSON.stringify(location.query || {}),
-            },
-          });
+  {
+    icon: "carts",
+    label: "购物车",
+    path: "/cart"
+  },
+  {
+    icon: "story",
+    label: "我的足迹",
+    path: "/home/MyTracks"
+  },
+]);
+const appendList = ref([
+  {
+    icon: "support",
+    label: "帮助中心",
+    path: "/article"
+  },
+  {
+    icon: "feedback",
+    label: "我的评论",
+    path: "/home/CommentList"
+  },
+  {
+    icon: "notice",
+    label: "收货地址",
+    path: "/home/MyAddress"
+  },
+  {
+    icon: "notification",
+    label: "我的消息",
+    path: "/home/MsgList"
+  },
+]);
+const recentList = ref([
+  {
+    value: "0",
+    label: "购物车"
+  },
+  {
+    value: "0",
+    label: "待收货"
+  },
+  {
+    value: "0",
+    label: "待发货"
+  },
+  {
+    value: "0",
+    label: "待付款"
+  },
+]);
+
+function carouselItemKey(item, index) {
+  return item?.img || item?.url || `slide-${index}`;
+}
+
+function resolveRoute(pathStr) {
+  if (!pathStr) return { path: "/" };
+  const [path, search] = pathStr.split("?");
+  if (!search) return { path };
+  return {
+    path,
+    query: Object.fromEntries(new URLSearchParams(search)),
+  };
+}
+
+function isMemberRoute(location) {
+  const path = location.path && location.path.charAt(0) === "/" ? location.path : `/${location.path || ""}`;
+  return path === "/home" || path.startsWith("/home/") || path === "/cart";
+}
+
+function normalizeLocation(location) {
+  if (!location.path || location.path.charAt(0) === "/") return location;
+  return { ...location, path: `/${location.path}` };
+}
+
+function promptLoginThenNavigate(location) {
+  Modal.confirm({
+    title: "温馨提示",
+    content: "请登录后执行此操作",
+    okText: "立即登录",
+    cancelText: "取消",
+    onOk: () => {
+      router.push({
+        path: "/login",
+        query: {
+          rePath: location.path,
+          query: JSON.stringify(location.query || {}),
         },
       });
     },
-    goLogin() {
-      this.$router.push("/login");
-    },
-    // 快捷跳转中心
-    entryControl(val) {
-      const location = this.normalizeLocation(this.resolveRoute(val.path));
-      if (this.isMemberRoute(location) && !storage.getItem("userInfo")) {
-        this.promptLoginThenNavigate(location);
-        return;
-      }
-      this.$router.push(location);
-    },
-  },
-  mounted() {
-    if (storage.getItem("userInfo"))
-      this.userInfo = JSON.parse(storage.getItem("userInfo"));
+  });
+}
 
-  },
-};
+function goLogin() {
+  router.push("/login");
+}
+
+// 快捷跳转中心
+function entryControl(val) {
+  const location = normalizeLocation(resolveRoute(val.path));
+  if (isMemberRoute(location) && !storage.getItem("userInfo")) {
+    promptLoginThenNavigate(location);
+    return;
+  }
+  router.push(location);
+}
+
+onMounted(() => {
+  if (storage.getItem("userInfo"))
+    userInfo.value = JSON.parse(storage.getItem("userInfo"));
+});
 </script>
 
 <style scoped lang="scss">

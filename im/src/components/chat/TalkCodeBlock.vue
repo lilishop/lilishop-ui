@@ -42,171 +42,175 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, watch } from "vue";
 import { PrismEditor } from "vue-prism-editor";
 import "vue-prism-editor/dist/prismeditor.min.css";
 import "prismjs/themes/prism-okaidia.css";
-export default {
-  name: "TalkCodeBlock",
-  components: {
-    PrismEditor,
-  },
-  props: {
-    loadCode: {
-      type: String,
-      default: "",
-    },
-    loadLang: {
-      type: String,
-      default: "",
-    },
-    editMode: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      language: "",
-      code: "",
-      options: [
-        {
-          value: "css",
-          label: "css",
-        },
-        {
-          value: "less",
-          label: "less",
-        },
-        {
-          value: "javascript",
-          label: "javascript",
-        },
-        {
-          value: "json",
-          label: "json",
-        },
-        {
-          value: "bash",
-          label: "bash",
-        },
-        {
-          value: "c",
-          label: "c",
-        },
-        {
-          value: "cil",
-          label: "cil",
-        },
-        {
-          value: "docker",
-          label: "docker",
-        },
-        {
-          value: "git",
-          label: "git",
-        },
-        {
-          value: "go",
-          label: "go",
-        },
-        {
-          value: "java",
-          label: "java",
-        },
-        {
-          value: "lua",
-          label: "lua",
-        },
-        {
-          value: "nginx",
-          label: "nginx",
-        },
-        {
-          value: "objectivec",
-          label: "objectivec",
-        },
-        {
-          value: "php",
-          label: "php",
-        },
-        {
-          value: "python",
-          label: "python",
-        },
-        {
-          value: "ruby",
-          label: "ruby",
-        },
-        {
-          value: "rust",
-          label: "rust",
-        },
-        {
-          value: "sql",
-          label: "sql",
-        },
-        {
-          value: "swift",
-          label: "swift",
-        },
-        {
-          value: "vim",
-          label: "vim",
-        },
-        {
-          value: "visual-basic",
-          label: "visual-basic",
-        },
-        {
-          value: "shell",
-          label: "shell",
-        },
-      ],
-      isFullScreen: false,
-    };
-  },
-  watch: {
-    loadCode(value) {
-      this.code = value;
-    },
-    loadLang(value) {
-      this.language = value;
-    },
-  },
-  created() {
-    this.code = this.loadCode;
-    this.language = this.loadLang;
-  },
-  methods: {
-    submit() {
-      if (!this.code) {
-        this.$message.error("代码块不能为空...");
-        return false;
-      }
+import { ElMessage } from "@/utils/message";
 
-      if (this.language == "") {
-        this.$message.error("请选择语言");
-        return false;
-      }
+defineOptions({ name: "TalkCodeBlock" });
 
-      if (this.code.length > 10000) {
-        this.$message.error("代码字数不能超过10000字！！！");
-        return false;
-      }
-      this.$emit("confirm", {
-        language: this.language,
-        code: this.code,
-      });
-    },
-    close() {
-      this.$emit("close");
-    },
-    codeChanged(code) {
-      this.code = code;
-    },
+const props = defineProps({
+  loadCode: {
+    type: String,
+    default: "",
   },
-};
+  loadLang: {
+    type: String,
+    default: "",
+  },
+  editMode: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(["confirm", "close"]);
+
+const language = ref("");
+const code = ref("");
+const options = ref([
+  {
+    value: "css",
+    label: "css",
+  },
+  {
+    value: "less",
+    label: "less",
+  },
+  {
+    value: "javascript",
+    label: "javascript",
+  },
+  {
+    value: "json",
+    label: "json",
+  },
+  {
+    value: "bash",
+    label: "bash",
+  },
+  {
+    value: "c",
+    label: "c",
+  },
+  {
+    value: "cil",
+    label: "cil",
+  },
+  {
+    value: "docker",
+    label: "docker",
+  },
+  {
+    value: "git",
+    label: "git",
+  },
+  {
+    value: "go",
+    label: "go",
+  },
+  {
+    value: "java",
+    label: "java",
+  },
+  {
+    value: "lua",
+    label: "lua",
+  },
+  {
+    value: "nginx",
+    label: "nginx",
+  },
+  {
+    value: "objectivec",
+    label: "objectivec",
+  },
+  {
+    value: "php",
+    label: "php",
+  },
+  {
+    value: "python",
+    label: "python",
+  },
+  {
+    value: "ruby",
+    label: "ruby",
+  },
+  {
+    value: "rust",
+    label: "rust",
+  },
+  {
+    value: "sql",
+    label: "sql",
+  },
+  {
+    value: "swift",
+    label: "swift",
+  },
+  {
+    value: "vim",
+    label: "vim",
+  },
+  {
+    value: "visual-basic",
+    label: "visual-basic",
+  },
+  {
+    value: "shell",
+    label: "shell",
+  },
+]);
+const isFullScreen = ref(false);
+
+watch(
+  () => props.loadCode,
+  (value) => {
+    code.value = value;
+  }
+);
+watch(
+  () => props.loadLang,
+  (value) => {
+    language.value = value;
+  }
+);
+
+// created
+code.value = props.loadCode;
+language.value = props.loadLang;
+
+function submit() {
+  if (!code.value) {
+    ElMessage.error("代码块不能为空...");
+    return false;
+  }
+
+  if (language.value == "") {
+    ElMessage.error("请选择语言");
+    return false;
+  }
+
+  if (code.value.length > 10000) {
+    ElMessage.error("代码字数不能超过10000字！！！");
+    return false;
+  }
+  emit("confirm", {
+    language: language.value,
+    code: code.value,
+  });
+}
+
+function close() {
+  emit("close");
+}
+
+function codeChanged(val) {
+  code.value = val;
+}
 </script>
 <style lang="less" scoped>
 .container {

@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="90px"
@@ -78,7 +78,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Member from "@/api/member";
 
 const RULE_OPTIONS = [
@@ -95,79 +96,76 @@ const RULE_OPTIONS = [
   { value: "SHARE_BUY", label: "分享购买" },
 ];
 
-export default {
-  name: "memberGradeExperienceLog",
-  data() {
-    return {
-      loading: false,
-      total: 0,
-      data: [],
-      ruleOptions: RULE_OPTIONS,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        memberMobile: "",
-        ruleKey: "",
-      },
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    formatExperienceValue(row) {
-      const v = row.value ?? row.variableExperience ?? row.experience ?? row.variableValue;
-      return v == null ? "-" : v;
-    },
-    formatMaxValue(row) {
-      const v = row.maxValue ?? row.maxExperience ?? row.limitValue;
-      return v == null ? "-" : v;
-    },
-    findRuleName(ruleKey) {
-      const hit = this.ruleOptions.find((item) => item.value === ruleKey);
-      return hit ? hit.label : "";
-    },
-    init() {
-      this.getData();
-    },
-    buildParams() {
-      const params = {
-        pageNumber: this.searchForm.pageNumber,
-        pageSize: this.searchForm.pageSize,
-      };
-      if (this.searchForm.memberMobile) params.mobile = this.searchForm.memberMobile;
-      if (this.searchForm.ruleKey) params.ruleKey = this.searchForm.ruleKey;
-      return params;
-    },
-    getData() {
-      this.loading = true;
-      API_Member.getMemberExperienceByPage(this.buildParams())
-        .then((res) => {
-          if (res && res.success && res.result) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          } else {
-            this.data = [];
-            this.total = 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getData();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getData();
-    },
-  },
-};
+defineOptions({ name: "memberGradeExperienceLog" });
+
+const searchFormRef = ref(null);
+
+const loading = ref(false);
+const total = ref(0);
+const data = ref([]);
+const ruleOptions = RULE_OPTIONS;
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  memberMobile: "",
+  ruleKey: "",
+});
+
+onMounted(() => {
+  init();
+});
+
+function formatExperienceValue(row) {
+  const v = row.value ?? row.variableExperience ?? row.experience ?? row.variableValue;
+  return v == null ? "-" : v;
+}
+function formatMaxValue(row) {
+  const v = row.maxValue ?? row.maxExperience ?? row.limitValue;
+  return v == null ? "-" : v;
+}
+function findRuleName(ruleKey) {
+  const hit = ruleOptions.find((item) => item.value === ruleKey);
+  return hit ? hit.label : "";
+}
+function init() {
+  getData();
+}
+function buildParams() {
+  const params = {
+    pageNumber: searchForm.pageNumber,
+    pageSize: searchForm.pageSize,
+  };
+  if (searchForm.memberMobile) params.mobile = searchForm.memberMobile;
+  if (searchForm.ruleKey) params.ruleKey = searchForm.ruleKey;
+  return params;
+}
+function getData() {
+  loading.value = true;
+  API_Member.getMemberExperienceByPage(buildParams())
+    .then((res) => {
+      if (res && res.success && res.result) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      } else {
+        data.value = [];
+        total.value = 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getData();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getData();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getData();
+}
 </script>

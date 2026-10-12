@@ -376,307 +376,304 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import { View } from "@element-plus/icons-vue";
 import { authGoods, getBrandListData, getGoodsDetail } from "@/api/goods";
 import { ElMessage } from "element-plus";
 
-export default {
-  name: "goodsDetail",
-  components: { View },
-  data() {
-    return {
-      loading: false,
-      goods: {},
-      brandList: [],
-      previewGoodsPicture: "",
-      goodsPictureVisible: false,
-      wholesaleData: [],
-      skuData: [],
-      activeTab: "basic",
-      slotCapacityVisible: false,
-      currentSlotCapacities: [],
-      goodsAuditForm: {
-        auth_flag: 1,
-      },
-      auditModalVisible: false,
-      auditSubmitLoading: false,
-    };
-  },
-  computed: {
-    isAppointmentGoods() {
-      return this.goods.goodsType === "APPOINTMENT_GOODS";
-    },
-    needsLogistics() {
-      return this.goods.goodsType === "PHYSICAL_GOODS";
-    },
-    salesModelDisplayText() {
-      const type = this.goods.goodsType;
-      const model = this.goods.salesModel;
-      if (type === "APPOINTMENT_GOODS") return "预约型";
-      if (type === "E_COUPON") return "电子卡券";
-      if (type === "VIRTUAL_GOODS") return "虚拟型";
-      if (model === "WHOLESALE") return "批发型";
-      if (model === "RETAIL") return "零售型";
-      return model || "—";
-    },
-    sectionTabs() {
-      const tabs = [
-        { name: "basic", label: "基础信息" },
-        { name: "media", label: "图文信息" },
-      ];
-      if (this.isAppointmentGoods) {
-        tabs.push({ name: "appointment", label: "预约规则" });
-      }
-      tabs.push(
-        { name: "price", label: "价格库存" },
-        { name: "other", label: "其他信息" },
-      );
-      return tabs;
-    },
-    categoryText() {
-      const names = this.goods.categoryName;
-      if (!names || !names.length) return "—";
-      return names.join(" > ");
-    },
-    /** 兼容扁平列表与历史嵌套分组两种 params 结构 */
-    displayGoodsParams() {
-      let list = this.goods.goodsParamsDTOList;
-      if ((!Array.isArray(list) || !list.length) && this.goods.params) {
-        list = this.parseParamsJson(this.goods.params);
-      }
-      if (!Array.isArray(list) || !list.length) return [];
-      const flat = [];
-      list.forEach((item) => {
-        if (Array.isArray(item?.goodsParamsItemDTOList) && item.goodsParamsItemDTOList.length) {
-          item.goodsParamsItemDTOList.forEach((child) => {
-            if (child?.paramName) flat.push(child);
-          });
-        } else if (item?.paramName) {
-          flat.push(item);
-        }
+defineOptions({ name: "goodsDetail" });
+
+const route = useRoute();
+
+const loading = ref(false);
+const goods = ref({});
+const brandList = ref([]);
+const previewGoodsPicture = ref("");
+const goodsPictureVisible = ref(false);
+const wholesaleData = ref([]);
+const skuData = ref([]);
+const activeTab = ref("basic");
+const slotCapacityVisible = ref(false);
+const currentSlotCapacities = ref([]);
+const goodsAuditForm = reactive({
+  auth_flag: 1,
+});
+const auditModalVisible = ref(false);
+const auditSubmitLoading = ref(false);
+
+const isAppointmentGoods = computed(() => {
+  return goods.value.goodsType === "APPOINTMENT_GOODS";
+});
+const needsLogistics = computed(() => {
+  return goods.value.goodsType === "PHYSICAL_GOODS";
+});
+const salesModelDisplayText = computed(() => {
+  const type = goods.value.goodsType;
+  const model = goods.value.salesModel;
+  if (type === "APPOINTMENT_GOODS") return "预约型";
+  if (type === "E_COUPON") return "电子卡券";
+  if (type === "VIRTUAL_GOODS") return "虚拟型";
+  if (model === "WHOLESALE") return "批发型";
+  if (model === "RETAIL") return "零售型";
+  return model || "—";
+});
+const sectionTabs = computed(() => {
+  const tabs = [
+    { name: "basic", label: "基础信息" },
+    { name: "media", label: "图文信息" },
+  ];
+  if (isAppointmentGoods.value) {
+    tabs.push({ name: "appointment", label: "预约规则" });
+  }
+  tabs.push(
+    { name: "price", label: "价格库存" },
+    { name: "other", label: "其他信息" },
+  );
+  return tabs;
+});
+const categoryText = computed(() => {
+  const names = goods.value.categoryName;
+  if (!names || !names.length) return "—";
+  return names.join(" > ");
+});
+/** 兼容扁平列表与历史嵌套分组两种 params 结构 */
+const displayGoodsParams = computed(() => {
+  let list = goods.value.goodsParamsDTOList;
+  if ((!Array.isArray(list) || !list.length) && goods.value.params) {
+    list = parseParamsJson(goods.value.params);
+  }
+  if (!Array.isArray(list) || !list.length) return [];
+  const flat = [];
+  list.forEach((item) => {
+    if (Array.isArray(item?.goodsParamsItemDTOList) && item.goodsParamsItemDTOList.length) {
+      item.goodsParamsItemDTOList.forEach((child) => {
+        if (child?.paramName) flat.push(child);
       });
-      return flat;
-    },
-    appointmentSettings() {
-      return this.goods.appointmentSettings || null;
-    },
-    appointmentSlotTemplate() {
-      return this.goods.appointmentSlotTemplate || null;
-    },
-    appointmentSlots() {
-      return this.appointmentSlotTemplate?.slots || [];
-    },
-    bookableDateText() {
-      const s = this.appointmentSettings;
-      if (!s) return "—";
-      if (s.bookableDateMode === "CUSTOM") {
-        const parts = [];
-        if (s.bookableCustomStartDate && s.bookableCustomEndDate) {
-          parts.push(`${s.bookableCustomStartDate} ~ ${s.bookableCustomEndDate}`);
-        }
-        const weekdays = this.formatWeekdays(s.bookableWeekdays);
-        if (weekdays) parts.push(weekdays);
-        return parts.length ? parts.join("；") : "自定义";
+    } else if (item?.paramName) {
+      flat.push(item);
+    }
+  });
+  return flat;
+});
+const appointmentSettings = computed(() => {
+  return goods.value.appointmentSettings || null;
+});
+const appointmentSlotTemplate = computed(() => {
+  return goods.value.appointmentSlotTemplate || null;
+});
+const appointmentSlots = computed(() => {
+  return appointmentSlotTemplate.value?.slots || [];
+});
+const bookableDateText = computed(() => {
+  const s = appointmentSettings.value;
+  if (!s) return "—";
+  if (s.bookableDateMode === "CUSTOM") {
+    const parts = [];
+    if (s.bookableCustomStartDate && s.bookableCustomEndDate) {
+      parts.push(`${s.bookableCustomStartDate} ~ ${s.bookableCustomEndDate}`);
+    }
+    const weekdays = formatWeekdays(s.bookableWeekdays);
+    if (weekdays) parts.push(weekdays);
+    return parts.length ? parts.join("；") : "自定义";
+  }
+  if (s.bookableDateMode === "EVERY_DAY") return "每天";
+  return "—";
+});
+const bookableDaysText = computed(() => {
+  const s = appointmentSettings.value;
+  if (!s || s.bookableDays == null) return "—";
+  return `对用户展示 ${s.bookableDays} 天内的可预约日期`;
+});
+const advanceBookingText = computed(() => {
+  const s = appointmentSettings.value;
+  if (!s) return "—";
+  if (s.advanceMode === "NONE") return "无需提前预约";
+  if (s.advanceMode === "REQUIRE_HOURS" && s.advanceHours != null) {
+    return `需提前 ${s.advanceHours} 小时进行预约`;
+  }
+  return "—";
+});
+const cancelRuleText = computed(() => {
+  const s = appointmentSettings.value;
+  if (!s) return "—";
+  if (s.cancelMode === "NOT_ALLOWED") return "不允许取消";
+  if (s.cancelMode === "ALLOW_BEFORE_HOURS" && s.cancelAheadHours != null) {
+    return `服务开始 ${s.cancelAheadHours} 小时之前，允许取消并自动退款`;
+  }
+  return "—";
+});
+const formSubmitText = computed(() => {
+  const s = appointmentSettings.value;
+  if (!s) return "—";
+  if (s.formSubmitMode === "PER_APPOINTMENT") return "每个预约提交一次";
+  if (s.formSubmitMode === "PER_ORDER") return "每单提交一次";
+  return "—";
+});
+
+onMounted(() => {
+  loadBrandList();
+  initGoods(route.query.id);
+});
+
+function sectionNo(name) {
+  const index = sectionTabs.value.findIndex((tab) => tab.name === name);
+  return index >= 0 ? index + 1 : "";
+}
+function parseParamsJson(paramsJson) {
+  if (!paramsJson) return [];
+  try {
+    const array = JSON.parse(paramsJson);
+    if (!Array.isArray(array)) return [];
+    const items = [];
+    array.forEach((element) => {
+      if (Array.isArray(element?.goodsParamsItemDTOList)) {
+        items.push(...element.goodsParamsItemDTOList);
+      } else if (element?.paramName) {
+        items.push(element);
       }
-      if (s.bookableDateMode === "EVERY_DAY") return "每天";
-      return "—";
-    },
-    bookableDaysText() {
-      const s = this.appointmentSettings;
-      if (!s || s.bookableDays == null) return "—";
-      return `对用户展示 ${s.bookableDays} 天内的可预约日期`;
-    },
-    advanceBookingText() {
-      const s = this.appointmentSettings;
-      if (!s) return "—";
-      if (s.advanceMode === "NONE") return "无需提前预约";
-      if (s.advanceMode === "REQUIRE_HOURS" && s.advanceHours != null) {
-        return `需提前 ${s.advanceHours} 小时进行预约`;
-      }
-      return "—";
-    },
-    cancelRuleText() {
-      const s = this.appointmentSettings;
-      if (!s) return "—";
-      if (s.cancelMode === "NOT_ALLOWED") return "不允许取消";
-      if (s.cancelMode === "ALLOW_BEFORE_HOURS" && s.cancelAheadHours != null) {
-        return `服务开始 ${s.cancelAheadHours} 小时之前，允许取消并自动退款`;
-      }
-      return "—";
-    },
-    formSubmitText() {
-      const s = this.appointmentSettings;
-      if (!s) return "—";
-      if (s.formSubmitMode === "PER_APPOINTMENT") return "每个预约提交一次";
-      if (s.formSubmitMode === "PER_ORDER") return "每单提交一次";
-      return "—";
-    },
-  },
-  mounted() {
-    this.loadBrandList();
-    this.initGoods(this.$route.query.id);
-  },
-  methods: {
-    sectionNo(name) {
-      const index = this.sectionTabs.findIndex((tab) => tab.name === name);
-      return index >= 0 ? index + 1 : "";
-    },
-    parseParamsJson(paramsJson) {
-      if (!paramsJson) return [];
-      try {
-        const array = JSON.parse(paramsJson);
-        if (!Array.isArray(array)) return [];
-        const items = [];
-        array.forEach((element) => {
-          if (Array.isArray(element?.goodsParamsItemDTOList)) {
-            items.push(...element.goodsParamsItemDTOList);
-          } else if (element?.paramName) {
-            items.push(element);
-          }
-        });
-        return items;
-      } catch {
-        return [];
-      }
-    },
-    jumpToTab(name) {
-      this.activeTab = name;
-      this.$nextTick(() => {
-        const el = document.getElementById(`goods-section-${name}`);
-        el?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    },
-    loadBrandList() {
-      getBrandListData().then((res) => {
-        this.brandList = Array.isArray(res) ? res : res?.result || [];
-      });
-    },
-    initGoods(id) {
-      if (!id) return;
-      this.loading = true;
-      getGoodsDetail(id)
-        .then((res) => {
-          if (!res?.success) return;
-          this.goods = res.result || {};
-          this.skuData = (res.result?.skuList || []).map((sku) => ({
-            id: sku.id,
-            specs: sku.simpleSpecs || sku.goodsName,
-            sn: sku.sn,
-            weight: sku.weight,
-            price: sku.price,
-            image: sku.goodsGalleryList,
-            quantity: sku.quantity,
-            slotCapacities: sku.slotCapacities,
-          }));
-          this.wholesaleData = res.result?.wholesaleList || [];
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    brandText(brandId) {
-      if (!brandId || brandId === "0") return "—";
-      const brand = this.brandList.find((item) => String(item.id) === String(brandId));
-      return brand?.name || brandId;
-    },
-    goodsTypeText(v) {
-      if (v === "PHYSICAL_GOODS") return "实物商品";
-      if (v === "VIRTUAL_GOODS") return "虚拟商品";
-      if (v === "E_COUPON") return "电子卡券";
-      if (v === "APPOINTMENT_GOODS") return "预约商品";
-      return v || "—";
-    },
-    normalizeSlotCapacities(caps) {
-      if (!Array.isArray(caps) || !caps.length) return [];
-      return caps.map((item) => ({
-        startTime: item.startTime || "",
-        endTime: item.endTime || "",
-        capacity: item.slotCapacity ?? item.capacity ?? 0,
+    });
+    return items;
+  } catch {
+    return [];
+  }
+}
+function jumpToTab(name) {
+  activeTab.value = name;
+  nextTick(() => {
+    const el = document.getElementById(`goods-section-${name}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+function loadBrandList() {
+  getBrandListData().then((res) => {
+    brandList.value = Array.isArray(res) ? res : res?.result || [];
+  });
+}
+function initGoods(id) {
+  if (!id) return;
+  loading.value = true;
+  getGoodsDetail(id)
+    .then((res) => {
+      if (!res?.success) return;
+      goods.value = res.result || {};
+      skuData.value = (res.result?.skuList || []).map((sku) => ({
+        id: sku.id,
+        specs: sku.simpleSpecs || sku.goodsName,
+        sn: sku.sn,
+        weight: sku.weight,
+        price: sku.price,
+        image: sku.goodsGalleryList,
+        quantity: sku.quantity,
+        slotCapacities: sku.slotCapacities,
       }));
-    },
-    hasSlotCapacities(row) {
-      return this.slotCapacityCount(row) > 0;
-    },
-    slotCapacityCount(row) {
-      return this.normalizeSlotCapacities(row?.slotCapacities).length;
-    },
-    openSlotCapacityDialog(row) {
-      this.currentSlotCapacities = this.normalizeSlotCapacities(row?.slotCapacities);
-      this.slotCapacityVisible = true;
-    },
-    formatSlotCapacity(capacity) {
-      const value = Number(capacity);
-      if (!value) return "不限制";
-      return String(value);
-    },
-    marketEnableText(v) {
-      if (v === "UPPER") return "上架";
-      if (v === "DOWN") return "下架";
-      return "—";
-    },
-    authFlagText(v) {
-      if (v === "TOBEAUDITED") return "待审核";
-      if (v === "PASS") return "通过";
-      if (v === "REFUSE") return "拒绝";
-      return v || "—";
-    },
-    authFlagTagType(v) {
-      if (v === "PASS") return "success";
-      if (v === "TOBEAUDITED") return "warning";
-      if (v === "REFUSE") return "danger";
-      return "info";
-    },
-    formatServiceModes(modes) {
-      if (!modes || !modes.length) return "—";
-      const map = {
-        IN_STORE: "到店服务",
-        ON_SITE: "上门服务",
-      };
-      return modes.map((m) => map[m] || m).join("、");
-    },
-    formatWeekdays(weekdays) {
-      if (!Array.isArray(weekdays) || !weekdays.length) return "";
-      const map = {
-        1: "周一",
-        2: "周二",
-        3: "周三",
-        4: "周四",
-        5: "周五",
-        6: "周六",
-        7: "周日",
-      };
-      return weekdays.map((d) => map[d] || d).join("、");
-    },
-    handleViewGoodsPicture(url) {
-      this.previewGoodsPicture = url;
-      this.goodsPictureVisible = true;
-    },
-    openAuditModal() {
-      this.goodsAuditForm.auth_flag = 1;
-      this.auditSubmitLoading = false;
-      this.auditModalVisible = true;
-    },
-    submitAudit() {
-      if (!this.goods.id) return;
-      this.auditSubmitLoading = true;
-      const formData = new FormData();
-      formData.append("goodsIds", this.goods.id);
-      formData.append("authFlag", this.goodsAuditForm.auth_flag === 1 ? "PASS" : "REFUSE");
-      authGoods(formData)
-        .then((res) => {
-          if (res.success) {
-            ElMessage.success("审核成功");
-            this.auditModalVisible = false;
-            this.initGoods(this.goods.id);
-          }
-        })
-        .finally(() => {
-          this.auditSubmitLoading = false;
-        });
-    },
-  },
-};
+      wholesaleData.value = res.result?.wholesaleList || [];
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function brandText(brandId) {
+  if (!brandId || brandId === "0") return "—";
+  const brand = brandList.value.find((item) => String(item.id) === String(brandId));
+  return brand?.name || brandId;
+}
+function goodsTypeText(v) {
+  if (v === "PHYSICAL_GOODS") return "实物商品";
+  if (v === "VIRTUAL_GOODS") return "虚拟商品";
+  if (v === "E_COUPON") return "电子卡券";
+  if (v === "APPOINTMENT_GOODS") return "预约商品";
+  return v || "—";
+}
+function normalizeSlotCapacities(caps) {
+  if (!Array.isArray(caps) || !caps.length) return [];
+  return caps.map((item) => ({
+    startTime: item.startTime || "",
+    endTime: item.endTime || "",
+    capacity: item.slotCapacity ?? item.capacity ?? 0,
+  }));
+}
+function hasSlotCapacities(row) {
+  return slotCapacityCount(row) > 0;
+}
+function slotCapacityCount(row) {
+  return normalizeSlotCapacities(row?.slotCapacities).length;
+}
+function openSlotCapacityDialog(row) {
+  currentSlotCapacities.value = normalizeSlotCapacities(row?.slotCapacities);
+  slotCapacityVisible.value = true;
+}
+function formatSlotCapacity(capacity) {
+  const value = Number(capacity);
+  if (!value) return "不限制";
+  return String(value);
+}
+function marketEnableText(v) {
+  if (v === "UPPER") return "上架";
+  if (v === "DOWN") return "下架";
+  return "—";
+}
+function authFlagText(v) {
+  if (v === "TOBEAUDITED") return "待审核";
+  if (v === "PASS") return "通过";
+  if (v === "REFUSE") return "拒绝";
+  return v || "—";
+}
+function authFlagTagType(v) {
+  if (v === "PASS") return "success";
+  if (v === "TOBEAUDITED") return "warning";
+  if (v === "REFUSE") return "danger";
+  return "info";
+}
+function formatServiceModes(modes) {
+  if (!modes || !modes.length) return "—";
+  const map = {
+    IN_STORE: "到店服务",
+    ON_SITE: "上门服务",
+  };
+  return modes.map((m) => map[m] || m).join("、");
+}
+function formatWeekdays(weekdays) {
+  if (!Array.isArray(weekdays) || !weekdays.length) return "";
+  const map = {
+    1: "周一",
+    2: "周二",
+    3: "周三",
+    4: "周四",
+    5: "周五",
+    6: "周六",
+    7: "周日",
+  };
+  return weekdays.map((d) => map[d] || d).join("、");
+}
+function handleViewGoodsPicture(url) {
+  previewGoodsPicture.value = url;
+  goodsPictureVisible.value = true;
+}
+function openAuditModal() {
+  goodsAuditForm.auth_flag = 1;
+  auditSubmitLoading.value = false;
+  auditModalVisible.value = true;
+}
+function submitAudit() {
+  if (!goods.value.id) return;
+  auditSubmitLoading.value = true;
+  const formData = new FormData();
+  formData.append("goodsIds", goods.value.id);
+  formData.append("authFlag", goodsAuditForm.auth_flag === 1 ? "PASS" : "REFUSE");
+  authGoods(formData)
+    .then((res) => {
+      if (res.success) {
+        ElMessage.success("审核成功");
+        auditModalVisible.value = false;
+        initGoods(goods.value.id);
+      }
+    })
+    .finally(() => {
+      auditSubmitLoading.value = false;
+    });
+}
 </script>
 
 <style lang="scss" scoped>

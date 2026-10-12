@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+    <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
       <el-form-item label="平台 " prop="endPoint">
         <el-radio-group v-model="formValidate.type">
           <el-radio-button value="KDNIAO">快递鸟</el-radio-button>
@@ -47,61 +47,59 @@
     </el-form>
   </div>
 </template>
-<script>
+<script setup>
+import { reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "./validate";
-export default {
-  data() {
-    return {
-      ruleValidate: {},
-      result: "",
-      formValidate: {
-        type: "",
-        kdniaoEbusinessID: "",
-        kdniaoAppKey: "",
-        requestType: "",
-        kuaidi100Customer: "",
-        kuaidi100Key: "",
+
+const props = defineProps(["res", "type"]);
+
+const ruleValidate = reactive({});
+const result = ref("");
+const formValidate = ref({
+  type: "",
+  kdniaoEbusinessID: "",
+  kdniaoAppKey: "",
+  requestType: "",
+  kuaidi100Customer: "",
+  kuaidi100Key: "",
+});
+// 模板 ref 与 data 字段 formValidate 同名会互相覆盖，改名 formValidateRef
+const formValidateRef = ref(null);
+
+function submit(name) {
+  // validate.js 的 handleSubmit 依赖 that.$refs[name] 结构，构造兼容对象传入
+  handleSubmit({ $refs: { [name]: formValidateRef.value } }, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+function setupSetting() {
+  setSetting(props.type, formValidate.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+function init() {
+  result.value = JSON.parse(props.res);
+  formValidate.value = { ...result.value };
+  Object.keys(formValidate.value).forEach((item) => {
+    ruleValidate[item] = [
+      {
+        required: true,
+        message: "请填写必填项",
+        trigger: "blur",
       },
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    init() {
-      this.result = JSON.parse(this.res);
-      this.formValidate = { ...this.result };
-      Object.keys(this.formValidate).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-        ];
-      });
-    },
-  },
-};
+    ];
+  });
+}
+
+init();
 </script>
 
 <style lang="scss" scoped>

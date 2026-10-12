@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -73,7 +73,7 @@
       </div>
 
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         :data="data"
         class="mt_10"
@@ -145,8 +145,15 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import * as API_Order from "@/api/order";
+import { customRouterPush } from "@/utils/filters";
+
+defineOptions({ name: "returnMoneyOrder" });
+
+const route = useRoute();
 
 const createDefaultSearchForm = () => ({
   pageNumber: 1,
@@ -163,166 +170,163 @@ const createDefaultSearchForm = () => ({
   keywords: "",
 });
 
-export default {
-  name: "returnMoneyOrder",
-  data() {
-    return {
-      loading: true,
-      searchForm: createDefaultSearchForm(),
-      selectDate: null,
-      data: [],
-      total: 0,
-      currentStatus: "",
-      afterSaleNumData: {},
-    };
-  },
-  computed: {
-    serviceStatusWithCount() {
-      return [
-        { title: "全部", value: "" },
-        {
-          title: `申请售后${this.afterSaleNumData.applyNum ? "(" + this.afterSaleNumData.applyNum + ")" : ""}`,
-          value: "APPLY",
-        },
-        {
-          title: `通过售后${this.afterSaleNumData.passNum ? "(" + this.afterSaleNumData.passNum + ")" : ""}`,
-          value: "PASS",
-        },
-        {
-          title: `拒绝售后${this.afterSaleNumData.refuseNum ? "(" + this.afterSaleNumData.refuseNum + ")" : ""}`,
-          value: "REFUSE",
-        },
-        {
-          title: `完成售后${this.afterSaleNumData.completeNum ? "(" + this.afterSaleNumData.completeNum + ")" : ""}`,
-          value: "COMPLETE",
-        },
-        {
-          title: `卖家终止售后${this.afterSaleNumData.sellerTerminationNum ? "(" + this.afterSaleNumData.sellerTerminationNum + ")" : ""}`,
-          value: "SELLER_TERMINATION",
-        },
-        {
-          title: `买家取消售后${this.afterSaleNumData.buyerCancelNum ? "(" + this.afterSaleNumData.buyerCancelNum + ")" : ""}`,
-          value: "BUYER_CANCEL",
-        },
-        {
-          title: `等待平台退款${this.afterSaleNumData.waitRefundNum ? "(" + this.afterSaleNumData.waitRefundNum + ")" : ""}`,
-          value: "WAIT_REFUND",
-        },
-      ];
+const loading = ref(true);
+// searchForm 会被整体替换（handleReset），使用 ref
+const searchForm = ref(createDefaultSearchForm());
+const selectDate = ref(null);
+const data = ref([]);
+const total = ref(0);
+const currentStatus = ref("");
+const afterSaleNumData = ref({});
+
+// searchFormRef / tableRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const serviceStatusWithCount = computed(() => {
+  return [
+    { title: "全部", value: "" },
+    {
+      title: `申请售后${afterSaleNumData.value.applyNum ? "(" + afterSaleNumData.value.applyNum + ")" : ""}`,
+      value: "APPLY",
     },
-  },
-  methods: {
-    serviceStatusText(status) {
-      const map = {
-        APPLY: "申请中",
-        PASS: "通过售后",
-        REFUSE: "拒绝售后",
-        BUYER_RETURN: "买家退货，待卖家收货",
-        SELLER_CONFIRM: "卖家确认收货",
-        SELLER_TERMINATION: "卖家终止售后",
-        BUYER_CANCEL: "买家取消售后",
-        COMPLETE: "完成售后",
-        WAIT_REFUND: "待平台退款",
-      };
-      return map[status] || status || "-";
+    {
+      title: `通过售后${afterSaleNumData.value.passNum ? "(" + afterSaleNumData.value.passNum + ")" : ""}`,
+      value: "PASS",
     },
-    serviceStatusTagType(status) {
-      const map = {
-        APPLY: "primary",
-        PASS: "info",
-        REFUSE: "warning",
-        BUYER_RETURN: "warning",
-        SELLER_CONFIRM: "",
-        SELLER_TERMINATION: "success",
-        BUYER_CANCEL: "danger",
-        COMPLETE: "success",
-        WAIT_REFUND: "primary",
-      };
-      return map[status] || "info";
+    {
+      title: `拒绝售后${afterSaleNumData.value.refuseNum ? "(" + afterSaleNumData.value.refuseNum + ")" : ""}`,
+      value: "REFUSE",
     },
-    init() {
-      this.getDataList();
-      this.getAfterSaleNumData();
+    {
+      title: `完成售后${afterSaleNumData.value.completeNum ? "(" + afterSaleNumData.value.completeNum + ")" : ""}`,
+      value: "COMPLETE",
     },
-    changePage() {
-      this.getDataList();
+    {
+      title: `卖家终止售后${afterSaleNumData.value.sellerTerminationNum ? "(" + afterSaleNumData.value.sellerTerminationNum + ")" : ""}`,
+      value: "SELLER_TERMINATION",
     },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
+    {
+      title: `买家取消售后${afterSaleNumData.value.buyerCancelNum ? "(" + afterSaleNumData.value.buyerCancelNum + ")" : ""}`,
+      value: "BUYER_CANCEL",
     },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-      this.getAfterSaleNumData();
+    {
+      title: `等待平台退款${afterSaleNumData.value.waitRefundNum ? "(" + afterSaleNumData.value.waitRefundNum + ")" : ""}`,
+      value: "WAIT_REFUND",
     },
-    handleReset() {
-      this.searchForm = createDefaultSearchForm();
-      this.selectDate = null;
-      this.currentStatus = "";
-      this.getDataList();
-      this.getAfterSaleNumData();
-    },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
+  ];
+});
+
+onMounted(() => {
+  const status = route.query.serviceStatus;
+  if (status) {
+    currentStatus.value = status;
+    searchForm.value.serviceStatus = status;
+  }
+  init();
+});
+
+function serviceStatusText(status) {
+  const map = {
+    APPLY: "申请中",
+    PASS: "通过售后",
+    REFUSE: "拒绝售后",
+    BUYER_RETURN: "买家退货，待卖家收货",
+    SELLER_CONFIRM: "卖家确认收货",
+    SELLER_TERMINATION: "卖家终止售后",
+    BUYER_CANCEL: "买家取消售后",
+    COMPLETE: "完成售后",
+    WAIT_REFUND: "待平台退款",
+  };
+  return map[status] || status || "-";
+}
+function serviceStatusTagType(status) {
+  const map = {
+    APPLY: "primary",
+    PASS: "info",
+    REFUSE: "warning",
+    BUYER_RETURN: "warning",
+    SELLER_CONFIRM: "",
+    SELLER_TERMINATION: "success",
+    BUYER_CANCEL: "danger",
+    COMPLETE: "success",
+    WAIT_REFUND: "primary",
+  };
+  return map[status] || "info";
+}
+function init() {
+  getDataList();
+  getAfterSaleNumData();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getDataList();
+  getAfterSaleNumData();
+}
+function handleReset() {
+  searchForm.value = createDefaultSearchForm();
+  selectDate.value = null;
+  currentStatus.value = "";
+  getDataList();
+  getAfterSaleNumData();
+}
+function selectDateRange(v) {
+  if (v) {
+    searchForm.value.startDate = v[0];
+    searchForm.value.endDate = v[1];
+  } else {
+    searchForm.value.startDate = "";
+    searchForm.value.endDate = "";
+  }
+}
+function getDataList() {
+  loading.value = true;
+  API_Order.getAfterSaleOrderPage(searchForm.value)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-    },
-    getDataList() {
-      this.loading = true;
-      API_Order.getAfterSaleOrderPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    getAfterSaleNumData() {
-      const { serviceStatus, ...searchParams } = this.searchForm;
-      API_Order.getAfterSaleNumVO(searchParams).then((res) => {
-        if (res.success) {
-          this.afterSaleNumData = res.result;
-        }
-      });
-    },
-    detail(v) {
-      this.$filters.customRouterPush({
-        name: "return-goods-order-detail",
-        query: { sn: v.sn },
-      });
-    },
-    onStatusTabClick(tab) {
-      this.serviceStatusClick(tab.paneName);
-    },
-    serviceStatusClick(item) {
-      this.currentStatus = item;
-      if (item === "" || item === undefined) {
-        delete this.searchForm.serviceStatus;
-      } else {
-        this.searchForm.serviceStatus = item;
-      }
-      this.getDataList();
-      this.getAfterSaleNumData();
-    },
-  },
-  mounted() {
-    const status = this.$route.query.serviceStatus;
-    if (status) {
-      this.currentStatus = status;
-      this.searchForm.serviceStatus = status;
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function getAfterSaleNumData() {
+  const { serviceStatus, ...searchParams } = searchForm.value;
+  API_Order.getAfterSaleNumVO(searchParams).then((res) => {
+    if (res.success) {
+      afterSaleNumData.value = res.result;
     }
-    this.init();
-  },
-};
+  });
+}
+function detail(v) {
+  customRouterPush({
+    name: "return-goods-order-detail",
+    query: { sn: v.sn },
+  });
+}
+function onStatusTabClick(tab) {
+  serviceStatusClick(tab.paneName);
+}
+function serviceStatusClick(item) {
+  currentStatus.value = item;
+  if (item === "" || item === undefined) {
+    delete searchForm.value.serviceStatus;
+  } else {
+    searchForm.value.serviceStatus = item;
+  }
+  getDataList();
+  getAfterSaleNumData();
+}
 </script>
 
 <style lang="scss" scoped>

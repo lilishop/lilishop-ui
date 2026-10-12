@@ -12,8 +12,11 @@
 <script>
 export default {
   title: "五列单行图片模块",
-  props: ["res"],
 };
+</script>
+
+<script setup>
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

@@ -12,7 +12,7 @@
       </div>
     </div>
     <el-dialog v-model="modalVisible" :title="modalTitle" width="500px" :close-on-click-modal="false">
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="accessKeyId" prop="addressName">
           <el-input v-model="form.accessKeyId" clearable style="width: 100%" />
         </el-form-item>
@@ -30,56 +30,58 @@
     </el-dialog>
   </el-card>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { getSetting, setSetting } from "@/api/index.js";
 import template from "./template";
-export default {
-  name: "smsSettingManage",
-  components: {
-    template,
-  },
 
-  data() {
-    return {
-      submitLoading: false,
-      template,
-      selected: "",
-      settingData: "",
-      modalTitle: "设置",
-      modalVisible: false,
-      form: {},
-    };
-  },
-  methods: {
-    init() {
-      settingInfo("SMS_SETTING");
-    },
-    saveSetting() {
-      setSetting("SMS_SETTING", this.form).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-        this.modalVisible = false;
-      });
-    },
-    settingInfo(v) {
-      alert();
-      this.selected = v;
-      getSetting(v).then((res) => {
-        if (res.result) {
-          this.modalVisible = true;
-          this.form = res;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({
+  name: "smsSettingManage",
+});
+
+// 模板 ref，原名 form，与 data 的 form 同名冲突，改为 formRef
+const formRef = ref(null);
+
+const submitLoading = ref(false);
+// data 中原有的 template 字段即上方 import 的模块本身，顶层导入已可直接访问，不再重复声明
+const selected = ref("");
+const settingData = ref("");
+const modalTitle = ref("设置");
+const modalVisible = ref(false);
+const form = ref({});
+
+function init() {
+  // 原 Options API 中此处未加 this，运行时会抛 ReferenceError（历史遗留 bug）；
+  // 转换为 script setup 后同名顶层函数可直接解析，代码按原样保留
+  settingInfo("SMS_SETTING");
+}
+
+function saveSetting() {
+  setSetting("SMS_SETTING", form.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+    modalVisible.value = false;
+  });
+}
+
+function settingInfo(v) {
+  alert();
+  selected.value = v;
+  getSetting(v).then((res) => {
+    if (res.result) {
+      modalVisible.value = true;
+      form.value = res;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss">
 .sms-setting-card {

@@ -9,7 +9,7 @@
         >审核</el-button
       >
       <el-form
-        ref="shopForm"
+        ref="shopFormRef"
         :model="shopForm"
         label-width="130px"
         label-position="right"
@@ -358,7 +358,7 @@
         @callback="callbackSelected"
         :isComponent="true"
         :initialize="picModelFlag"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
 
@@ -373,7 +373,7 @@
         v-if="memberModalFlag"
         :selectedMember="true"
         @callback="callbackMember"
-        ref="memberLayout"
+        ref="memberLayoutRef"
       />
     </el-dialog>
 
@@ -398,425 +398,426 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import memberLayout from "@/views/member/list/index";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { getCategoryTree } from "@/api/goods";
 import { shopDetail, shopAdd, shopEdit, getShopByMemberId, shopAudit } from "@/api/shops";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import multipleMap from "@/components/map/multiple-map";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "shop-operation",
-  components: {
-    uploadPicInput,
-    ossManage,
-    memberLayout,
-    multipleMap,
-  },
+defineOptions({ name: "shop-operation" });
 
-  data() {
-    return {
-      shopId: this.$route.query.shopId, // 店铺id
-      isRead: false, // 是否只读，只有在店铺通过审核才可修改
-      selectedFormBtnName: "", // 点击图片绑定form
-      loading: false,
-      auditModel: false,
-      auditModalLoading: false,
-      picModelFlag: false, // 图片选择器
-      address: "", // 地址
-      returnAddress: "", // 退货地址
-      memberModalFlag: false, // 商家账号
-      settlementShow: false, // 是否展示结算日输入框
-      addSettlementConfirmBtn: false, // 添加结算日确认按钮
-      addSettlementBtn: true, // 添加结算日按钮
-      day: 1, //结算日
-      tabName: "base", // tab栏name值
-      tabNameList: ["base", "entry", "category", "settlement"], // tab栏name值数组
-      shopValidate: {
-        // 表单验证规则
-        memberName: [{ required: true, message: "会员不能为空" }],
-        storeAddressPath: [{ required: true, message: "店铺地址不能为空" }],
-        storeName: [{ required: true, message: "店铺名称不能为空" }],
-        companyAddress: [{ required: true, message: "公司地址不能为空" }],
-        storeAddressDetail: [{ required: true, message: "店铺详细地址不能为空" }],
-        storeDesc: [{ required: true, message: "店铺简介不能为空" }],
-        storeCenter: [{ required: true, message: "店铺未定位" }],
-        companyName: [{ required: true, message: "公司名称不能为空" }],
-        companyPhone: [{ required: true, message: "公司电话不能为空" }],
-        employeeNum: [
-          {
-            required: true,
-            type: "number",
-            message: "员工总数不能为空",
-            trigger: "blur",
-          },
-        ],
-        companyAddressIdPath: [{ required: true, message: "请选择公司地址" }],
-        registeredCapital: [
-          {
-            required: true,
-            type: "number",
-            message: "注册资金不能为空",
-            trigger: "blur",
-          },
-        ],
-        linkName: [{ required: true, message: "联系人姓名不能为空" }],
-        linkPhone: [
-          { required: true, message: "联系人手机号不能为空" },
-          {
-            type: "string",
-            pattern: /^1[3|4|5|6|7|8][0-9]{9}$/,
-            message: "手机号格式出错",
-            trigger: "blur",
-          },
-        ],
-        companyEmail: [
-          { required: true, message: "邮箱不能为空" },
-          { type: "email", message: "邮箱格式错误" },
-        ],
-        licenseNum: [{ required: true, message: "营业执照号不能为空" }],
-        scope: [{ required: true, message: "法定经营范围不能为空" }],
-        licencePhoto: [{ required: true, message: "营业执照电子版不能为空" }],
-        legalName: [{ required: true, message: "法人姓名不能为空" }],
-        legalId: [{ required: true, message: "法人证件号不能为空" }],
-        settlementBankAccountName: [{ required: true, message: "银行开户名不能为空" }],
-        settlementBankAccountNum: [{ required: true, message: "银行账号不能为空" }],
-        settlementBankBranchName: [{ required: true, message: "银行支行名称不能为空" }],
-        settlementBankJointName: [{ required: true, message: "支行联行号不能为空" }],
+const route = useRoute();
+const router = useRouter();
 
-        salesConsigneeMobile: [
-          {
-            type: "string",
-            pattern: /^1[3|4|5|6|7|8][0-9]{9}$/,
-            message: "手机号格式出错",
-            trigger: "blur",
-          },
-        ],
-      },
-      indeterminate: true, // 复选框全选样式
-      checkAll: false, // 全选
-      checkAllGroup: [], // 全选数组
-      submitLoading: false, // 添加或编辑提交状态
-      settlementCycle: [], // 结算日
-      shopForm: {
-        // 店铺数据
-        storeAddressPath: "",
+const shopFormRef = ref(null);
+const ossManageRef = ref(null);
+const memberLayoutRef = ref(null);
+const map = ref(null);
 
-        settlementCycle: "",
-        selfOperated: "false",
-        memberName: "",
-        companyName: "",
-        addressPath: "",
-        addressIdPath: "",
-        companyAddressPath: "",
-        companyAddressIdPath: "",
-        companyAddress: "",
-        companyEmail: "",
-        employeeNum: 1,
-        registeredCapital: 1,
-        linkName: "",
-        linkPhone: "",
-        licenseNum: "",
-        scope: "",
-        licencePhoto: "",
-        legalName: "",
-        legalId: "",
-        legalPhoto: ["", ""],
-        companyPhone: "",
-        settlementBankAccountName: "",
-        settlementBankAccountNum: "",
-        settlementBankBranchName: "",
-        settlementBankJointName: "",
-        businesses: "",
-        storeName: "",
-        storeLogo: "",
-        storeDesc: "",
-        ddCode: "",
-      },
-      categories: [], // 分类
-
-      infoResult: {}, // 店铺详情
-      picIndex: "", // 存储身份证图片下标，方便赋值
-      currentAddress: "", //当前选中的地址
-    };
-  },
-  methods: {
-    // 选择地址
-    handleClickAddress(val) {
-      this.currentAddress = val;
-      this.$refs.map.open();
+const shopId = ref(route.query.shopId); // 店铺id
+const isRead = ref(false); // 是否只读，只有在店铺通过审核才可修改
+const selectedFormBtnName = ref(""); // 点击图片绑定form
+const loading = ref(false);
+const auditModel = ref(false);
+const auditModalLoading = ref(false);
+const picModelFlag = ref(false); // 图片选择器
+const address = ref(""); // 地址
+const returnAddress = ref(""); // 退货地址
+const memberModalFlag = ref(false); // 商家账号
+const settlementShow = ref(false); // 是否展示结算日输入框
+const addSettlementConfirmBtn = ref(false); // 添加结算日确认按钮
+const addSettlementBtn = ref(true); // 添加结算日按钮
+const day = ref(1); //结算日
+const tabName = ref("base"); // tab栏name值
+const tabNameList = ref(["base", "entry", "category", "settlement"]); // tab栏name值数组
+const shopValidate = reactive({
+  // 表单验证规则
+  memberName: [{ required: true, message: "会员不能为空" }],
+  storeAddressPath: [{ required: true, message: "店铺地址不能为空" }],
+  storeName: [{ required: true, message: "店铺名称不能为空" }],
+  companyAddress: [{ required: true, message: "公司地址不能为空" }],
+  storeAddressDetail: [{ required: true, message: "店铺详细地址不能为空" }],
+  storeDesc: [{ required: true, message: "店铺简介不能为空" }],
+  storeCenter: [{ required: true, message: "店铺未定位" }],
+  companyName: [{ required: true, message: "公司名称不能为空" }],
+  companyPhone: [{ required: true, message: "公司电话不能为空" }],
+  employeeNum: [
+    {
+      required: true,
+      type: "number",
+      message: "员工总数不能为空",
+      trigger: "blur",
     },
-    // 选择会员的回调
-    callbackMember(val) {
-      if (val) {
-        //选择会员后需要检验此会员是否开过店铺
-        getShopByMemberId(val.id).then((res) => {
+  ],
+  companyAddressIdPath: [{ required: true, message: "请选择公司地址" }],
+  registeredCapital: [
+    {
+      required: true,
+      type: "number",
+      message: "注册资金不能为空",
+      trigger: "blur",
+    },
+  ],
+  linkName: [{ required: true, message: "联系人姓名不能为空" }],
+  linkPhone: [
+    { required: true, message: "联系人手机号不能为空" },
+    {
+      type: "string",
+      pattern: /^1[3|4|5|6|7|8][0-9]{9}$/,
+      message: "手机号格式出错",
+      trigger: "blur",
+    },
+  ],
+  companyEmail: [
+    { required: true, message: "邮箱不能为空" },
+    { type: "email", message: "邮箱格式错误" },
+  ],
+  licenseNum: [{ required: true, message: "营业执照号不能为空" }],
+  scope: [{ required: true, message: "法定经营范围不能为空" }],
+  licencePhoto: [{ required: true, message: "营业执照电子版不能为空" }],
+  legalName: [{ required: true, message: "法人姓名不能为空" }],
+  legalId: [{ required: true, message: "法人证件号不能为空" }],
+  settlementBankAccountName: [{ required: true, message: "银行开户名不能为空" }],
+  settlementBankAccountNum: [{ required: true, message: "银行账号不能为空" }],
+  settlementBankBranchName: [{ required: true, message: "银行支行名称不能为空" }],
+  settlementBankJointName: [{ required: true, message: "支行联行号不能为空" }],
+
+  salesConsigneeMobile: [
+    {
+      type: "string",
+      pattern: /^1[3|4|5|6|7|8][0-9]{9}$/,
+      message: "手机号格式出错",
+      trigger: "blur",
+    },
+  ],
+});
+const indeterminate = ref(true); // 复选框全选样式
+const checkAll = ref(false); // 全选
+const checkAllGroup = ref([]); // 全选数组
+const submitLoading = ref(false); // 添加或编辑提交状态
+const settlementCycle = ref([]); // 结算日
+const shopForm = ref({
+  // 店铺数据
+  storeAddressPath: "",
+
+  settlementCycle: "",
+  selfOperated: "false",
+  memberName: "",
+  companyName: "",
+  addressPath: "",
+  addressIdPath: "",
+  companyAddressPath: "",
+  companyAddressIdPath: "",
+  companyAddress: "",
+  companyEmail: "",
+  employeeNum: 1,
+  registeredCapital: 1,
+  linkName: "",
+  linkPhone: "",
+  licenseNum: "",
+  scope: "",
+  licencePhoto: "",
+  legalName: "",
+  legalId: "",
+  legalPhoto: ["", ""],
+  companyPhone: "",
+  settlementBankAccountName: "",
+  settlementBankAccountNum: "",
+  settlementBankBranchName: "",
+  settlementBankJointName: "",
+  businesses: "",
+  storeName: "",
+  storeLogo: "",
+  storeDesc: "",
+  ddCode: "",
+});
+const categories = ref([]); // 分类
+
+const infoResult = ref({}); // 店铺详情
+const picIndex = ref(""); // 存储身份证图片下标，方便赋值
+const currentAddress = ref(""); //当前选中的地址
+
+// 历史遗留：regionClick 中未在 data 声明、直接挂到 this 上的字段
+let showRegion = false;
+let regionId = "";
+
+// 选择地址
+function handleClickAddress(val) {
+  currentAddress.value = val;
+  map.value.open();
+}
+// 选择会员的回调
+function callbackMember(val) {
+  if (val) {
+    //选择会员后需要检验此会员是否开过店铺
+    getShopByMemberId(val.id).then((res) => {
+      if (res.success) {
+        if (res.result != null) {
+          Message.error("当前会员已经拥有店铺");
+        } else {
+          shopForm.value.memberId = val.id;
+          shopForm.value.memberName = val.username;
+        }
+        memberModalFlag.value = false;
+      }
+    });
+  }
+}
+
+//选择会员
+function selectMember() {
+  memberModalFlag.value = true;
+}
+
+//修改地址
+function regionClick() {
+  showRegion = true;
+  regionId = "";
+}
+//删除所选择的结算日
+function removesettlementCycle(name) {
+  settlementCycle.value = settlementCycle.value.filter((i) => i !== name);
+}
+//确认添加方法
+function addsettlementCycle() {
+  settlementShow.value = true;
+  addSettlementConfirmBtn.value = true;
+  addSettlementBtn.value = false;
+}
+//添加结算日
+function addsettlementCycleConfirm() {
+  if (!day.value) {
+    Message.warning("请输入正确的结算日，1-31的整数");
+    return;
+  }
+  if (settlementCycle.value.includes(day.value)) {
+    Message.warning("已有该结算日，不能重复输入");
+    return;
+  }
+  settlementCycle.value.push(day.value);
+  addSettlementConfirmBtn.value = false;
+  addSettlementBtn.value = true;
+  settlementShow.value = false;
+  day.value = 1;
+}
+// 选择公司地址
+function selectedRegion(val) {
+  shopForm.value.companyAddressIdPath = val[0].toString();
+  shopForm.value.companyAddressPath = val[1].toString().replace(/\s/g, "");
+}
+// 选择退货收件地址
+function selectedConsigneeRegion(val) {
+  shopForm.value.salesConsigneeAddressId = val[0].toString();
+  shopForm.value.salesConsigneeAddressPath = val[1].toString().replace(/\s/g, "");
+}
+// 选择图片modal
+function handleCLickImg(val, index) {
+  picModelFlag.value = true;
+  selectedFormBtnName.value = val;
+  picIndex.value = index;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+// 图片回显
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (picIndex.value === 0 || picIndex.value === 1) {
+    shopForm.value[selectedFormBtnName.value][picIndex.value] = val.url;
+  } else {
+    shopForm.value[selectedFormBtnName.value] = val.url;
+  }
+  picIndex.value = "";
+}
+// 初始化数据
+function init() {
+  getCategories();
+  if (shopId.value) {
+    getShopDetail();
+  }
+}
+function next() {
+  // 下一步
+  let index = tabNameList.value.indexOf(tabName.value) + 1;
+  tabName.value = tabNameList.value[index];
+}
+function prev() {
+  // 上一步
+  let index = tabNameList.value.indexOf(tabName.value) - 1;
+  tabName.value = tabNameList.value[index];
+}
+// 获取店铺详情
+function getShopDetail() {
+  shopDetail(shopId.value).then((res) => {
+    if (res.success) {
+      infoResult.value = res.result;
+      shopForm.value = res.result;
+      shopForm.value.selfOperated
+        ? (shopForm.value.selfOperated = "true")
+        : (shopForm.value.selfOperated = "false");
+
+      checkAllGroup.value = shopForm.value.goodsManagementCategory.split(",");
+      if (shopForm.value.settlementCycle) {
+        settlementCycle.value = shopForm.value.settlementCycle.split(",");
+      }
+      shopForm.value.legalPhoto = shopForm.value.legalPhoto.split(",");
+
+      address.value = shopForm.value.companyAddressIdPath;
+      returnAddress.value = shopForm.value.salesConsigneeAddressId;
+    }
+  });
+}
+// 保存
+function save() {
+  shopFormRef.value.validate((valid) => {
+    //校验结算日是否已经确认完成
+    if (settlementShow.value) {
+      Message.error("请确认当前所填结算日信息");
+      return;
+    }
+    //校验经营类目
+    if (checkAllGroup.value == "") {
+      Message.error("请选择店铺经营类目");
+      tabName.value = "category";
+      return;
+    }
+    if (valid) {
+      const params = JSON.parse(JSON.stringify(shopForm.value));
+      //处理经营类目，结算日
+      params.goodsManagementCategory = checkAllGroup.value;
+      params.settlementCycle = settlementCycle.value;
+      if (shopId.value) {
+        delete params.memberId;
+        shopEdit(shopId.value, filterFun(params)).then((res) => {
           if (res.success) {
-            if (res.result != null) {
-              this.$Message.error("当前会员已经拥有店铺");
-            } else {
-              this.shopForm.memberId = val.id;
-              this.shopForm.memberName = val.username;
-            }
-            this.memberModalFlag = false;
+            Message.success("编辑成功");
+            router.push({ name: "shopList" });
           }
         });
-      }
-    },
-
-    //选择会员
-    selectMember() {
-      this.memberModalFlag = true;
-    },
-
-    //修改地址
-    regionClick() {
-      this.showRegion = true;
-      this.regionId = "";
-    },
-    //删除所选择的结算日
-    removesettlementCycle(name) {
-      this.settlementCycle = this.settlementCycle.filter((i) => i !== name);
-    },
-    //确认添加方法
-    addsettlementCycle() {
-      this.settlementShow = true;
-      this.addSettlementConfirmBtn = true;
-      this.addSettlementBtn = false;
-    },
-    //添加结算日
-    addsettlementCycleConfirm() {
-      if (!this.day) {
-        this.$Message.warning("请输入正确的结算日，1-31的整数");
-        return;
-      }
-      if (this.settlementCycle.includes(this.day)) {
-        this.$Message.warning("已有该结算日，不能重复输入");
-        return;
-      }
-      this.settlementCycle.push(this.day);
-      this.addSettlementConfirmBtn = false;
-      this.addSettlementBtn = true;
-      this.settlementShow = false;
-      this.day = 1;
-    },
-    // 选择公司地址
-    selectedRegion(val) {
-      this.shopForm.companyAddressIdPath = val[0].toString();
-      this.shopForm.companyAddressPath = val[1].toString().replace(/\s/g, "");
-    },
-    // 选择退货收件地址
-    selectedConsigneeRegion(val) {
-      this.shopForm.salesConsigneeAddressId = val[0].toString();
-      this.shopForm.salesConsigneeAddressPath = val[1].toString().replace(/\s/g, "");
-    },
-    // 选择图片modal
-    handleCLickImg(val, index) {
-      this.picModelFlag = true;
-      this.selectedFormBtnName = val;
-      this.picIndex = index;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    // 图片回显
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (this.picIndex === 0 || this.picIndex === 1) {
-        this.shopForm[this.selectedFormBtnName][this.picIndex] = val.url;
       } else {
-        this.shopForm[this.selectedFormBtnName] = val.url;
-      }
-      this.picIndex = "";
-    },
-    // 初始化数据
-    init() {
-      this.getCategories();
-      if (this.shopId) {
-        this.getShopDetail();
-      }
-    },
-    next() {
-      // 下一步
-      let index = this.tabNameList.indexOf(this.tabName) + 1;
-      this.tabName = this.tabNameList[index];
-    },
-    prev() {
-      // 上一步
-      let index = this.tabNameList.indexOf(this.tabName) - 1;
-      this.tabName = this.tabNameList[index];
-    },
-    // 获取店铺详情
-    getShopDetail() {
-      shopDetail(this.shopId).then((res) => {
-        if (res.success) {
-          this.infoResult = res.result;
-          this.shopForm = res.result;
-          this.shopForm.selfOperated
-            ? (this.shopForm.selfOperated = "true")
-            : (this.shopForm.selfOperated = "false");
-
-          this.checkAllGroup = this.shopForm.goodsManagementCategory.split(",");
-          if (this.shopForm.settlementCycle) {
-            this.settlementCycle = this.shopForm.settlementCycle.split(",");
-          }
-          this.shopForm.legalPhoto = this.shopForm.legalPhoto.split(",");
-
-          this.address = this.shopForm.companyAddressIdPath;
-          this.returnAddress = this.shopForm.salesConsigneeAddressId;
-        }
-      });
-    },
-    // 保存
-    save() {
-      this.$refs.shopForm.validate((valid) => {
-        //校验结算日是否已经确认完成
-        if (this.settlementShow) {
-          this.$Message.error("请确认当前所填结算日信息");
+        //添加店铺单独需要检验的参数
+        if (params.memberName == "") {
+          Message.error("请选择开店的会员");
           return;
         }
-        //校验经营类目
-        if (this.checkAllGroup == "") {
-          this.$Message.error("请选择店铺经营类目");
-          this.tabName = "category";
-          return;
-        }
-        if (valid) {
-          const params = JSON.parse(JSON.stringify(this.shopForm));
-          //处理经营类目，结算日
-          params.goodsManagementCategory = this.checkAllGroup;
-          params.settlementCycle = this.settlementCycle;
-          if (this.shopId) {
-            delete params.memberId;
-            shopEdit(this.shopId, this.filterFun(params)).then((res) => {
-              if (res.success) {
-                this.$Message.success("编辑成功");
-                this.$router.push({ name: "shopList" });
-              }
-            });
-          } else {
-            //添加店铺单独需要检验的参数
-            if (params.memberName == "") {
-              this.$Message.error("请选择开店的会员");
-              return;
-            }
-            shopAdd(this.filterFun(params)).then((resp) => {
-              if (resp.success) {
-                this.$Message.success("添加成功");
-                this.shopForm = {};
-                this.$router.push({ name: "shopList" });
-              }
-            });
-          }
-        }
-      });
-    },
-    // 筛选值为空的参数
-    filterFun(params) {
-      Object.entries(params).map((value) => {
-        if (!value[1] || value[1] === "" || value[1] === "null") {
-          delete params[value[0]];
-        }
-      });
-      return params;
-    },
-    // 点击定位获取店铺地址
-    getAddress(val) {
-      if (val.type === "select") {
-        const paths = val.data.map((item) => item.name).join(",");
-
-        const ids = val.data.map((item) => item.id).join(",");
-
-        if (this.currentAddress === "storeAddressPath") {
-          this.shopForm.storeAddressPath = paths;
-          this.shopForm.storeAddressIdPath = ids;
-
-          this.shopForm.center = val.data[val.data.length - 1].center;
-        } else if (this.currentAddress === "salesConsigneeAddressPath") {
-          this.shopForm.salesConsigneeAddressPath = paths;
-          this.shopForm.salesConsigneeAddressId = ids;
-        } else if (this.currentAddress === "companyAddressPath") {
-          this.shopForm.companyAddressPath = paths;
-          this.shopForm.companyAddressIdPath = ids;
-        }
-      } else {
-        if (this.currentAddress === "storeAddressPath") {
-          this.shopForm.storeCenter = val.data.position.lng + "," + val.data.position.lat;
-          this.shopForm.storeAddressPath = val.data.addr;
-          this.shopForm.storeAddressIdPath = val.data.addrId;
-        } else if (this.currentAddress === "salesConsigneeAddressPath") {
-          this.shopForm.salesConsigneeAddressPath = val.data.addr;
-          this.shopForm.salesConsigneeAddressId = val.data.addrId;
-        } else if (this.currentAddress === "companyAddressPath") {
-          this.shopForm.companyAddressPath = val.data.addr;
-          this.shopForm.companyAddressIdPath = val.data.addrId;
-        }
-      }
-    },
-    // 全部选中
-    handleCheckAll(checked) {
-      this.indeterminate = false;
-      if (checked) {
-        const checkAllDate = [];
-        this.categories.forEach((i) => checkAllDate.push(String(i.id)));
-        this.checkAllGroup = checkAllDate;
-      } else {
-        this.checkAllGroup = [];
-      }
-    },
-    // 经营类目的选择
-    checkAllGroupChange(data) {
-      if (data.length === this.categories.length) {
-        this.indeterminate = false;
-        this.checkAll = true;
-      } else if (data.length > 0) {
-        this.indeterminate = true;
-        this.checkAll = false;
-      } else {
-        this.indeterminate = false;
-        this.checkAll = false;
-      }
-    },
-    // 获取所有分类
-    getCategories() {
-      getCategoryTree().then((res) => {
-        if (res.success) {
-          this.categories = res.result;
-        }
-      });
-    },
-    auditHandler() {
-      this.auditModel = true;
-    },
-    // 审核店铺
-    audit(operation) {
-      let id = this.$route.query.shopId;
-      if (operation === "PASS") {
-        shopAudit(id, 0).then((res) => {
-          this.auditModel = false;
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.$router.push({ name: "shopAuth" });
-          }
-        });
-      } else {
-        shopAudit(id, 1).then((res) => {
-          this.auditModel = false;
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.$router.push({ name: "shopAuth" });
+        shopAdd(filterFun(params)).then((resp) => {
+          if (resp.success) {
+            Message.success("添加成功");
+            shopForm.value = {};
+            router.push({ name: "shopList" });
           }
         });
       }
-    },
-  },
-  created() {
-    this.init();
-  },
-};
+    }
+  });
+}
+// 筛选值为空的参数
+function filterFun(params) {
+  Object.entries(params).map((value) => {
+    if (!value[1] || value[1] === "" || value[1] === "null") {
+      delete params[value[0]];
+    }
+  });
+  return params;
+}
+// 点击定位获取店铺地址
+function getAddress(val) {
+  if (val.type === "select") {
+    const paths = val.data.map((item) => item.name).join(",");
+
+    const ids = val.data.map((item) => item.id).join(",");
+
+    if (currentAddress.value === "storeAddressPath") {
+      shopForm.value.storeAddressPath = paths;
+      shopForm.value.storeAddressIdPath = ids;
+
+      shopForm.value.center = val.data[val.data.length - 1].center;
+    } else if (currentAddress.value === "salesConsigneeAddressPath") {
+      shopForm.value.salesConsigneeAddressPath = paths;
+      shopForm.value.salesConsigneeAddressId = ids;
+    } else if (currentAddress.value === "companyAddressPath") {
+      shopForm.value.companyAddressPath = paths;
+      shopForm.value.companyAddressIdPath = ids;
+    }
+  } else {
+    if (currentAddress.value === "storeAddressPath") {
+      shopForm.value.storeCenter = val.data.position.lng + "," + val.data.position.lat;
+      shopForm.value.storeAddressPath = val.data.addr;
+      shopForm.value.storeAddressIdPath = val.data.addrId;
+    } else if (currentAddress.value === "salesConsigneeAddressPath") {
+      shopForm.value.salesConsigneeAddressPath = val.data.addr;
+      shopForm.value.salesConsigneeAddressId = val.data.addrId;
+    } else if (currentAddress.value === "companyAddressPath") {
+      shopForm.value.companyAddressPath = val.data.addr;
+      shopForm.value.companyAddressIdPath = val.data.addrId;
+    }
+  }
+}
+// 全部选中
+function handleCheckAll(checked) {
+  indeterminate.value = false;
+  if (checked) {
+    const checkAllDate = [];
+    categories.value.forEach((i) => checkAllDate.push(String(i.id)));
+    checkAllGroup.value = checkAllDate;
+  } else {
+    checkAllGroup.value = [];
+  }
+}
+// 经营类目的选择
+function checkAllGroupChange(data) {
+  if (data.length === categories.value.length) {
+    indeterminate.value = false;
+    checkAll.value = true;
+  } else if (data.length > 0) {
+    indeterminate.value = true;
+    checkAll.value = false;
+  } else {
+    indeterminate.value = false;
+    checkAll.value = false;
+  }
+}
+// 获取所有分类
+function getCategories() {
+  getCategoryTree().then((res) => {
+    if (res.success) {
+      categories.value = res.result;
+    }
+  });
+}
+function auditHandler() {
+  auditModel.value = true;
+}
+// 审核店铺
+function audit(operation) {
+  let id = route.query.shopId;
+  if (operation === "PASS") {
+    shopAudit(id, 0).then((res) => {
+      auditModel.value = false;
+      if (res.success) {
+        Message.success("操作成功");
+        router.push({ name: "shopAuth" });
+      }
+    });
+  } else {
+    shopAudit(id, 1).then((res) => {
+      auditModel.value = false;
+      if (res.success) {
+        Message.success("操作成功");
+        router.push({ name: "shopAuth" });
+      }
+    });
+  }
+}
+
+init();
 </script>
 <style lang="scss" scoped>
 .selectedMember {

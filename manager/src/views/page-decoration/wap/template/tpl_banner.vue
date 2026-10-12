@@ -9,11 +9,10 @@
     </el-carousel>
   </div>
 </template>
-<script>
-export default {
-  title: "导航栏",
-  props: ["res"],
-};
+<script setup>
+defineOptions({ title: "导航栏" });
+
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

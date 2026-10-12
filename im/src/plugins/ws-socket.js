@@ -1,6 +1,6 @@
 import { ElNotification, ElMessageBox } from "element-plus";
 let wsSignIn; // ws 是否是掉线状态
-import store from "@/store";
+import { useDialogueStore } from "@/stores/dialogue";
 class WsSocket {
   /**
    * Websocket 连接
@@ -81,7 +81,7 @@ class WsSocket {
      * 重连成功后关闭掉线提示，新增重连提示
      */
     if (wsSignIn) {
-      store.commit('SET_WS_STATUS',true);
+      useDialogueStore().SET_WS_STATUS(true);
       wsSignIn.close();
 
       ElNotification({
@@ -106,7 +106,7 @@ class WsSocket {
     connect.onclose = this.onClose.bind(this);
     this.connect = connect;
     
-    store.commit('SET_WS_STATUS',false);
+    useDialogueStore().SET_WS_STATUS(false);
   }
 
   /**
@@ -160,7 +160,7 @@ class WsSocket {
       duration: 0,
     });
     // 掉线更改消息状态
-    store.commit('SET_WS_STATUS',true);
+    useDialogueStore().SET_WS_STATUS(true);
     let reconnect = this.config.reconnect;
     if (reconnect.lockReconnect || reconnect.number == 0) {
       return;

@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -57,7 +57,7 @@
       </div>
 
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         border
         :data="data"
@@ -133,154 +133,173 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { getShopListData, disableShop, enableBrand, shopAudit } from "@/api/shops";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "shop",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-      },
-      selectDate: null,
-      data: [],
-      total: 0,
-      selectedShop: false,
-    };
-  },
-  methods: {
-    storeDisableText(v) {
-      const map = {
-        OPEN: "开启中",
-        CLOSED: "已关闭",
-        APPLY: "申请中",
-        APPLYING: "审核中",
-        REFUSED: "审核拒绝",
-      };
-      return map[v] || v || "-";
-    },
-    callback(val) {
-      this.$emit("callback", val);
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
+defineOptions({ name: "shop" });
+
+const emit = defineEmits(["callback"]);
+
+const router = useRouter();
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+});
+const selectDate = ref(null);
+const data = ref([]);
+const total = ref(0);
+const selectedShop = ref(false);
+
+// 模板 ref（原 ref="searchForm" / ref="table"，script 内未使用，仅改名避免与 data 同名覆盖）
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+function storeDisableText(v) {
+  const map = {
+    OPEN: "开启中",
+    CLOSED: "已关闭",
+    APPLY: "申请中",
+    APPLYING: "审核中",
+    REFUSED: "审核拒绝",
+  };
+  return map[v] || v || "-";
+}
+
+function callback(val) {
+  emit("callback", val);
+}
+
+function init() {
+  getDataList();
+}
+
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function selectDateRange(v) {
+  if (v && v.length === 2) {
+    searchForm.startDate = v[0];
+    searchForm.endDate = v[1];
+  } else {
+    searchForm.startDate = "";
+    searchForm.endDate = "";
+  }
+}
+
+function getDataList() {
+  loading.value = true;
+  getShopListData(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-    },
-    getDataList() {
-      this.loading = true;
-      getShopListData(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    add() {
-      this.$router.push({ path: "/shop-operation" });
-    },
-    edit(v) {
-      this.$router.push({ path: "/shop-operation", query: { shopId: v.id } });
-    },
-    disable(v) {
-      this.$Modal.confirm({
-        title: "确认关闭",
-        content: "您确认要关闭店铺 " + v.storeName + " ?",
-        loading: true,
-        onOk: () => {
-          disableShop(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function add() {
+  router.push({ path: "/shop-operation" });
+}
+
+function edit(v) {
+  router.push({ path: "/shop-operation", query: { shopId: v.id } });
+}
+
+function disable(v) {
+  Modal.confirm({
+    title: "确认关闭",
+    content: "您确认要关闭店铺 " + v.storeName + " ?",
+    loading: true,
+    onOk: () => {
+      disableShop(v.id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
       });
     },
-    detail(row) {
-      this.$router.push({ name: "shop-detail", query: { id: row.id } });
-    },
-    audit(v) {
-      this.$Modal.confirm({
-        title: "审核店铺",
-        content: "您确认要审核通过店铺 " + v.storeName + " ?",
-        okText: "通过",
-        cancelText: "驳回",
-        loading: true,
-        onOk: () => {
-          shopAudit(v.id, 0).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-        onCancel: () => {
-          shopAudit(v.id, 1).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
+  });
+}
+
+function detail(row) {
+  router.push({ name: "shop-detail", query: { id: row.id } });
+}
+
+function audit(v) {
+  Modal.confirm({
+    title: "审核店铺",
+    content: "您确认要审核通过店铺 " + v.storeName + " ?",
+    okText: "通过",
+    cancelText: "驳回",
+    loading: true,
+    onOk: () => {
+      shopAudit(v.id, 0).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
       });
     },
-    enable(v) {
-      this.$Modal.confirm({
-        title: "确认开启",
-        content: "您确认要开启店铺 " + v.storeName + " ?",
-        loading: true,
-        onOk: () => {
-          enableBrand(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
+    onCancel: () => {
+      shopAudit(v.id, 1).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
       });
     },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+function enable(v) {
+  Modal.confirm({
+    title: "确认开启",
+    content: "您确认要开启店铺 " + v.storeName + " ?",
+    loading: true,
+    onOk: () => {
+      enableBrand(v.id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
+      });
+    },
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style scoped>

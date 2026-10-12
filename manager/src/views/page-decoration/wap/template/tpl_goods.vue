@@ -39,59 +39,53 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, reactive, watch } from "vue";
 import { CircleClose } from "@element-plus/icons-vue";
-export default {
-  components: { CircleClose },
-  data() {
-    return {
-      selected: {
-        index: 0,
-        val: "",
-      },
-    };
+
+const props = defineProps(["res"]);
+
+const selected = reactive({
+  index: 0,
+  val: "",
+});
+
+const goodsBlock = computed(() => props.res?.list?.[0] || null);
+
+watch(
+  goodsBlock,
+  (val) => {
+    if (!val) {
+      return;
+    }
+    const firstGoods = (val.listWay || []).find(Boolean);
+    if (firstGoods) {
+      selected.val = firstGoods.type;
+    } else if (val.titleWay?.[0]?.title) {
+      selected.val = val.titleWay[0].title;
+    }
   },
-  props: ["res"],
-  computed: {
-    goodsBlock() {
-      return this.res?.list?.[0] || null;
-    },
-  },
-  watch: {
-    goodsBlock: {
-      handler(val) {
-        if (!val) {
-          return;
-        }
-        const firstGoods = (val.listWay || []).find(Boolean);
-        if (firstGoods) {
-          this.selected.val = firstGoods.type;
-        } else if (val.titleWay?.[0]?.title) {
-          this.selected.val = val.titleWay[0].title;
-        }
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    isGoodsVisible(item) {
-      if (!item) {
-        return false;
-      }
-      if (item.___index != undefined) {
-        return this.selected.index == item.___index;
-      }
-      return this.selected.val == item.type;
-    },
-    closeGoods(val, index) {
-      this.goodsBlock.listWay.splice(index, 1);
-    },
-    handleClickTitle(val, index) {
-      this.selected.index = index;
-      this.selected.val = val.title;
-    },
-  },
-};
+  { immediate: true }
+);
+
+function isGoodsVisible(item) {
+  if (!item) {
+    return false;
+  }
+  if (item.___index != undefined) {
+    return selected.index == item.___index;
+  }
+  return selected.val == item.type;
+}
+
+function closeGoods(val, index) {
+  goodsBlock.value.listWay.splice(index, 1);
+}
+
+function handleClickTitle(val, index) {
+  selected.index = index;
+  selected.val = val.title;
+}
 </script>
 <style lang="scss" scoped>
 .layout {

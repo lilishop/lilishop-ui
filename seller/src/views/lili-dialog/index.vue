@@ -12,7 +12,7 @@
   >
     <goodsDialog
       v-if="goodsVisible"
-      ref="goodsDialog"
+      ref="goodsDialogRef"
       :selectedWay="goodsData"
       @selected="
         (val) => {
@@ -51,86 +51,96 @@
     </template>
   </el-dialog>
 </template>
-<script>
+<script setup>
+import { computed, ref } from "vue";
 import goodsDialog from "./goods-dialog";
 import linkDialog from "./link-dialog";
-export default {
-  components: {
-    goodsDialog,
-    linkDialog,
+
+const emit = defineEmits(["closeFlag", "selectedGoodsData", "selectedLink"]);
+
+const goodsVisible = ref(false);
+const linkVisible = ref(false);
+const goodsFlag = ref(false);
+const goodsData = ref([]);
+const linkData = ref("");
+
+// 模板 ref：原 ref="goodsDialog" 与 import 的组件同名，改名避免互相覆盖
+const goodsDialogRef = ref(null);
+
+const flag = computed({
+  get() {
+    return goodsVisible.value || linkVisible.value;
   },
-  emits: ["closeFlag", "selectedGoodsData", "selectedLink"],
-  data() {
-    return {
-      goodsVisible: false,
-      linkVisible: false,
-      goodsFlag: false,
-      goodsData: [],
-      linkData: "",
-    };
-  },
-  computed: {
-    flag: {
-      get() {
-        return this.goodsVisible || this.linkVisible;
-      },
-      set(val) {
-        if (val) {
-          if (this.goodsFlag) {
-            this.goodsVisible = true;
-          } else {
-            this.linkVisible = true;
-          }
-        } else {
-          this.goodsVisible = false;
-          this.linkVisible = false;
-        }
-      },
-    },
-  },
-  methods: {
-    clearGoodsSelected() {
-      this.goodsData = [];
-    },
-    clickClose() {
-      this.goodsVisible = false;
-      this.linkVisible = false;
-      this.goodsFlag = false;
-      this.$emit("closeFlag", false);
-    },
-    singleGoods() {
-      const timer = setInterval(() => {
-        if (this.$refs.goodsDialog) {
-          this.$refs.goodsDialog.type = "single";
-          clearInterval(timer);
-        }
-      }, 100);
-    },
-    clickOK() {
-      if (this.goodsVisible) {
-        this.$emit("selectedGoodsData", this.goodsData);
-      } else if (this.linkVisible) {
-        this.$emit("selectedLink", this.linkData);
-      }
-      this.clickClose();
-    },
-    open(type, mutiple) {
-      if (type == "goods") {
-        this.goodsFlag = true;
-        this.goodsVisible = true;
-        if (mutiple) {
-          this.singleGoods();
-        }
+  set(val) {
+    if (val) {
+      if (goodsFlag.value) {
+        goodsVisible.value = true;
       } else {
-        this.goodsFlag = false;
-        this.linkVisible = true;
+        linkVisible.value = true;
       }
-    },
-    close() {
-      this.clickClose();
-    },
+    } else {
+      goodsVisible.value = false;
+      linkVisible.value = false;
+    }
   },
-};
+});
+
+function clearGoodsSelected() {
+  goodsData.value = [];
+}
+function clickClose() {
+  goodsVisible.value = false;
+  linkVisible.value = false;
+  goodsFlag.value = false;
+  emit("closeFlag", false);
+}
+function singleGoods() {
+  const timer = setInterval(() => {
+    if (goodsDialogRef.value) {
+      goodsDialogRef.value.type = "single";
+      clearInterval(timer);
+    }
+  }, 100);
+}
+function clickOK() {
+  if (goodsVisible.value) {
+    emit("selectedGoodsData", goodsData.value);
+  } else if (linkVisible.value) {
+    emit("selectedLink", linkData.value);
+  }
+  clickClose();
+}
+function open(type, mutiple) {
+  if (type == "goods") {
+    goodsFlag.value = true;
+    goodsVisible.value = true;
+    if (mutiple) {
+      singleGoods();
+    }
+  } else {
+    goodsFlag.value = false;
+    linkVisible.value = true;
+  }
+}
+function close() {
+  clickClose();
+}
+
+// 外部通过 ref 访问的成员（grep seller/src 全量确认）：
+// - open：所有调用方打开弹窗（goods/link）
+// - singleGoods：shop/modelList/forYour.vue、mixModel.vue 直接调用
+// - clearGoodsSelected：shop/wap/decorate.vue、modelList/goodsAndType.vue 调用
+// - goodsData：促销/采购/装修多处回写已选商品
+// - goodsFlag：shop/wap/decorate.vue 直接写入
+// - flag（可写 computed）：shop/wap/decorate.vue 写入触发弹层开关
+defineExpose({
+  open,
+  singleGoods,
+  clearGoodsSelected,
+  goodsData,
+  goodsFlag,
+  flag,
+});
 </script>
 <style scoped lang="scss">
 .lili-goods-drawer {

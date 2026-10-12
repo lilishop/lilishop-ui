@@ -1,7 +1,7 @@
 <template>
   <div class="new-pintuan">
     <el-card>
-      <el-form ref="form" :model="form" label-width="130px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="130px" :rules="formValidate">
         <el-form-item label="活动名称" prop="promotionName">
           <div class="form-field-block">
             <el-input
@@ -80,115 +80,118 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { savePintuan, editPintuan, getPintuanDetail } from "@/api/promotion";
+import { Message } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  data() {
-    return {
-      id: this.$route.query.id,
-      form: {
-        promotionName: "",
-        promotionTitle: "",
-        pintuanRule: "",
-        requiredNum: "",
-        fictitious: 0,
-        limitNum: "",
-        startTime: "",
-        endTime: "",
-        rangeTime: [],
-      },
-      formValidate: {
-        promotionName: [{ required: true, message: "活动名称不能为空", trigger: "blur" }],
-        requiredNum: [
-          { required: true, message: "成团人数不能为空", trigger: "blur" },
-          {
-            pattern: /^([2-9]|10)?$/,
-            message: "成团人数不合法",
-            trigger: "blur",
-          },
-        ],
-        limitNum: [
-          { required: true, message: "限购数量不能为空", trigger: "blur" },
-          {
-            pattern: /^(0|[1-9]\d?|100)$/,
-            message: "限购数量不合法",
-            trigger: "blur",
-          },
-        ],
-        rangeTime: [{ required: true, message: "请选择活动时间", trigger: "change" }],
-      },
-      submitLoading: false,
-      options: {
-        disabledDate(date) {
-          return date && date.valueOf() < Date.now() - 86400000;
-        },
-      },
-    };
+const route = useRoute();
+const router = useRouter();
+
+const id = ref(route.query.id);
+const form = ref({
+  promotionName: "",
+  promotionTitle: "",
+  pintuanRule: "",
+  requiredNum: "",
+  fictitious: 0,
+  limitNum: "",
+  startTime: "",
+  endTime: "",
+  rangeTime: [],
+});
+const formValidate = ref({
+  promotionName: [{ required: true, message: "活动名称不能为空", trigger: "blur" }],
+  requiredNum: [
+    { required: true, message: "成团人数不能为空", trigger: "blur" },
+    {
+      pattern: /^([2-9]|10)?$/,
+      message: "成团人数不合法",
+      trigger: "blur",
+    },
+  ],
+  limitNum: [
+    { required: true, message: "限购数量不能为空", trigger: "blur" },
+    {
+      pattern: /^(0|[1-9]\d?|100)$/,
+      message: "限购数量不合法",
+      trigger: "blur",
+    },
+  ],
+  rangeTime: [{ required: true, message: "请选择活动时间", trigger: "change" }],
+});
+const submitLoading = ref(false);
+const options = ref({
+  disabledDate(date) {
+    return date && date.valueOf() < Date.now() - 86400000;
   },
-  mounted() {
-    if (this.id) {
-      this.getDetail();
+});
+
+const formRef = ref(null);
+
+onMounted(() => {
+  if (id.value) {
+    getDetail();
+  }
+});
+
+function closeCurrentPage() {
+  router.back();
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+    const params = JSON.parse(JSON.stringify(form.value));
+    params.fictitious = !!params.fictitious;
+    params.startTime = unixToDate(form.value.rangeTime[0] / 1000);
+    params.endTime = unixToDate(form.value.rangeTime[1] / 1000);
+
+    if (!params.startTime || !params.endTime) {
+      Message.error("活动时间不能为空");
+      submitLoading.value = false;
+      return;
     }
-  },
-  methods: {
-    closeCurrentPage() {
-      this.$router.back();
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        const params = JSON.parse(JSON.stringify(this.form));
-        params.fictitious = !!params.fictitious;
-        params.startTime = this.$filters.unixToDate(this.form.rangeTime[0] / 1000);
-        params.endTime = this.$filters.unixToDate(this.form.rangeTime[1] / 1000);
+    if (new Date(params.startTime).getTime() < Date.now()) {
+      Message.error("拼团活动开始时间不能小于当前时间");
+      submitLoading.value = false;
+      return;
+    }
 
-        if (!params.startTime || !params.endTime) {
-          this.$Message.error("活动时间不能为空");
-          this.submitLoading = false;
-          return;
-        }
-        if (new Date(params.startTime).getTime() < Date.now()) {
-          this.$Message.error("拼团活动开始时间不能小于当前时间");
-          this.submitLoading = false;
-          return;
-        }
-
-        delete params.rangeTime;
-        if (!this.id) {
-          delete params.id;
-          savePintuan(params).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("拼团活动添加成功");
-              this.closeCurrentPage();
-            }
-          });
-        } else {
-          if (params.promotionGoodsList === "") delete params.promotionGoodsList;
-          editPintuan(params).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("编辑成功");
-              this.closeCurrentPage();
-            }
-          });
-        }
-      });
-    },
-    getDetail() {
-      getPintuanDetail(this.id).then((res) => {
+    delete params.rangeTime;
+    if (!id.value) {
+      delete params.id;
+      savePintuan(params).then((res) => {
+        submitLoading.value = false;
         if (res.success) {
-          const data = res.result;
-          data.rangeTime = [new Date(data.startTime), new Date(data.endTime)];
-          this.form = data;
-          this.form.fictitious = data.fictitious ? 1 : 0;
+          Message.success("拼团活动添加成功");
+          closeCurrentPage();
         }
       });
-    },
-  },
-};
+    } else {
+      if (params.promotionGoodsList === "") delete params.promotionGoodsList;
+      editPintuan(params).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("编辑成功");
+          closeCurrentPage();
+        }
+      });
+    }
+  });
+}
+function getDetail() {
+  getPintuanDetail(id.value).then((res) => {
+    if (res.success) {
+      const data = res.result;
+      data.rangeTime = [new Date(data.startTime), new Date(data.endTime)];
+      form.value = data;
+      form.value.fictitious = data.fictitious ? 1 : 0;
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

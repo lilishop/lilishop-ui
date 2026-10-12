@@ -38,98 +38,103 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
 import { Delete } from '@element-plus/icons-vue';
 import { tracksList, clearTracks, clearTracksById } from "@/api/member";
-export default {
-  components: { Delete },
-  name: "MyTrack",
-  data() {
-    return {
-      list: [], // 我的足迹，商品列表
-      spinShow: false, // 控制loading是否加载
-      params: {
-        pageNumber: 1,
-        pageSize: 20,
-        order: "desc",
-        sort: "updateTime",
-      },
-      total: 0,
-    };
-  },
-  mounted() {
-    this.getList();
-  },
-  methods: {
-    goodsDetail(skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
-      });
-      window.open(routeUrl.href, "_blank");
-    },
-    // 跳转店铺首页
-    shopPage(id) {
-      this.$router.push({
-        path: "/merchant",
-        query: { id: id },
-      });
-    },
-    clearAll() {
-      // 清除全部足迹
-      Modal.confirm({
-        title: "删除",
-        content: "<p>确定要删除全部足迹吗？</p>",
-        onOk: () => {
-          clearTracks().then((res) => {
-            if (res.success) {
-              Message.success("删除成功");
-              this.getList();
-            }
-          });
-        },
-        onCancel: () => {},
-      });
-    },
-    clearById(id) {
-      // 清除全部足迹
-      clearTracksById(id).then((res) => {
+
+defineOptions({ name: "MyTrack" });
+
+const router = useRouter();
+
+const list = ref([]); // 我的足迹，商品列表
+const spinShow = ref(false); // 控制loading是否加载
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  order: "desc",
+  sort: "updateTime",
+});
+const total = ref(0);
+
+function goodsDetail(skuId, goodsId) {
+  // 跳转商品详情
+  let routeUrl = router.resolve({
+    path: "/goodsDetail",
+    query: { skuId, goodsId },
+  });
+  window.open(routeUrl.href, "_blank");
+}
+
+// 跳转店铺首页
+function shopPage(id) {
+  router.push({
+    path: "/merchant",
+    query: { id: id },
+  });
+}
+
+function clearAll() {
+  // 清除全部足迹
+  Modal.confirm({
+    title: "删除",
+    content: "<p>确定要删除全部足迹吗？</p>",
+    onOk: () => {
+      clearTracks().then((res) => {
         if (res.success) {
           Message.success("删除成功");
-          this.getList();
+          getList();
         }
       });
     },
-    changePageNum(val) {
-      // 修改页码
-      this.params.pageNumber = val;
-      this.getList();
-    },
-    changePageSize(val) {
-      // 修改页数
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList();
-    },
-    getList() {
-      // 获取足迹列表
-      this.spinShow = true;
-      tracksList(this.params).then((res) => {
-        this.spinShow = false;
-        if (res.success && res.result.records.length) {
-          this.list = res.result.records.filter(item =>{
-            return item != null
-          });
-          this.total = res.result.total
-        } else {
-          this.list = [];
-        }
+    onCancel: () => {},
+  });
+}
+
+function clearById(id) {
+  // 清除全部足迹
+  clearTracksById(id).then((res) => {
+    if (res.success) {
+      Message.success("删除成功");
+      getList();
+    }
+  });
+}
+
+function changePageNum(val) {
+  // 修改页码
+  params.pageNumber = val;
+  getList();
+}
+
+function changePageSize(val) {
+  // 修改页数
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList();
+}
+
+function getList() {
+  // 获取足迹列表
+  spinShow.value = true;
+  tracksList(params).then((res) => {
+    spinShow.value = false;
+    if (res.success && res.result.records.length) {
+      list.value = res.result.records.filter(item =>{
+        return item != null
       });
-    },
-  },
-};
+      total.value = res.result.total
+    } else {
+      list.value = [];
+    }
+  });
+}
+
+onMounted(() => {
+  getList();
+});
 </script>
 <style scoped lang="scss">
 .wrapper {

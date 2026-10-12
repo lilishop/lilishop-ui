@@ -86,171 +86,177 @@
         @callback="callbackSelected"
         :isComponent="true"
         :initialize="picModelFlag"
-        ref="ossManage"
+        ref="ossManageRef"
       />
       <template #footer />
     </el-dialog>
   </li>
 </template>
 
-<script>
-import changeSize from "../directives/changeSize";
-import dragItem from "../directives/dragItem";
+<script setup>
+import { ref, reactive, watch, nextTick, onMounted } from "vue";
+import vChangeSize from "../directives/changeSize";
+import vDragItem from "../directives/dragItem";
 import ossManage from "@/views/sys/oss-manage/ossManage";
+import { formatLinkType } from "@/utils/filters";
 
-export default {
-  name: "Zone",
-  components: {
-    ossManage,
-  },
+defineOptions({ name: "Zone" });
 
-  data() {
-    return {
-      zoneTop: "",
-      zoneLeft: "",
-      zoneWidth: "",
-      zoneHeight: "",
-      hideZone: false,
-      tooSmall: false,
-      showModal: false,
-      picModelFlag: false,
-      currentIndex: 0,
-      currentShowIndex: -1,
-      zoneForm: {
-        img: "",
-        link: "",
-        type: "",
-      },
-    };
-  },
-  props: ["index", "setting"],
-  mounted() {
-    this.setZoneInfo(this.setting);
-  },
-  methods: {
-    setZoneInfo(val) {
-      this.zoneTop = this.getZoneStyle(val.topPer);
-      this.zoneLeft = this.getZoneStyle(val.leftPer);
-      this.zoneWidth = this.getZoneStyle(val.widthPer);
-      this.zoneHeight = this.getZoneStyle(val.heightPer);
-      this.tooSmall = val.widthPer < 0.01 && val.heightPer < 0.01;
-      this.zoneForm.link = val.link;
-      this.settingZone(val);
-    },
-    handlehideZone(isHide = true) {
-      if (this.hideZone === isHide) {
-        return;
-      }
+const props = defineProps(["index", "setting"]);
+const emit = defineEmits(["changeInfo", "delItem"]);
 
-      this.hideZone = isHide;
-    },
-    changeInfo(info = {}) {
-      const { index } = this;
+const zoneTop = ref("");
+const zoneLeft = ref("");
+const zoneWidth = ref("");
+const zoneHeight = ref("");
+const hideZone = ref(false);
+const tooSmall = ref(false);
+const showModal = ref(false);
+const picModelFlag = ref(false);
+const currentIndex = ref(0);
+const currentShowIndex = ref(-1);
+const zoneForm = reactive({
+  img: "",
+  link: "",
+  type: "",
+});
 
-      this.$emit("changeInfo", {
-        info,
-        index,
-        zoneInfo: this.zoneForm,
-      });
-    },
-    showModalFn(index) {
-      this.showModal = true;
-      this.currentIndex = index;
-    },
-    // 选择图片
-    handleSelectImg() {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    // 选择图片回调
-    callbackSelected(item) {
-      this.picModelFlag = false;
-      this.zoneForm.img = item.url;
-    },
+// 未在原 data 中声明、直接挂载在 this 上的遗留字段（仅赋值，未被读取）
+let selectedNav;
 
-    // 调起选择链接弹窗
-    handleSelectLink(item, index) {
-      if (item) this.selectedNav = item;
-      this.$refs.liliDialog.open("link");
-    },
-    // 已选链接
-    selectedLink(val) {
-      this.zoneForm.link = this.$filters.formatLinkType(val);
-      this.settingZone(val);
-      this.changeInfo(this.zoneForm);
-    },
-    settingZone(val) {
-      this.zoneForm.type = val.___type || val.type;
-      this.zoneForm.title = val.title;
-      if(val.pageType == "special"){
-          this.zoneForm.id = val.id;
-          this.zoneForm.pageType = val.pageType
-          this.zoneForm.type = val.pageType
-          this.zoneForm.title = val.name
-        }
-      switch (val.___type) {
-        case "goods":
-          this.zoneForm.id = val.id;
-          this.zoneForm.goodsId = val.goodsId;
-          this.zoneForm.goodsName = val.goodsName;
-          break;
-        case "category":
-          this.zoneForm.id = val.allId;
-          this.zoneForm.name = val.name;
-          break;
-        case "shops":
-          this.zoneForm.id = val.id;
-          this.zoneForm.storeName = val.storeName;
-          break;
-        case "pages":
-          this.zoneForm.id = val.id;
-          this.zoneForm.___path = val.___path;
-          this.zoneForm.title = val.title;
-          break;
-        case "marketing":
-          this.zoneForm.id = val.id;
-          this.zoneForm.goodsId = val.goodsId;
-          this.zoneForm.goodsName = val.goodsName;
-          break;
-        default:
-          break;
-      }
-    },
-    saveZone() {
-      this.showModal = false;
-      this.changeInfo(this.zoneForm);
-    },
-    cancelZone() {
-      this.showModal = false;
-    },
-    delZone() {
-      this.delItem(this.currentIndex);
-    },
-    delItem(index) {
-      this.$emit("delItem", index);
-    },
-    getZoneStyle(val) {
-      return `${(val || 0) * 100}%`;
-    },
-  },
+const liliDialog = ref(null);
+// 模板 ref 与 import 组件同名会互相覆盖，故改名 ossManageRef
+const ossManageRef = ref(null);
 
-  watch: {
-    setting: {
-      handler: function (val) {
-        this.setZoneInfo(val);
-      },
-      deep: true,
-    },
+onMounted(() => {
+  setZoneInfo(props.setting);
+});
+
+function setZoneInfo(val) {
+  zoneTop.value = getZoneStyle(val.topPer);
+  zoneLeft.value = getZoneStyle(val.leftPer);
+  zoneWidth.value = getZoneStyle(val.widthPer);
+  zoneHeight.value = getZoneStyle(val.heightPer);
+  tooSmall.value = val.widthPer < 0.01 && val.heightPer < 0.01;
+  zoneForm.link = val.link;
+  settingZone(val);
+}
+function handlehideZone(isHide = true) {
+  if (hideZone.value === isHide) {
+    return;
+  }
+
+  hideZone.value = isHide;
+}
+function changeInfo(info = {}) {
+  const index = props.index;
+
+  emit("changeInfo", {
+    info,
+    index,
+    zoneInfo: zoneForm,
+  });
+}
+function showModalFn(index) {
+  showModal.value = true;
+  currentIndex.value = index;
+}
+// 选择图片
+function handleSelectImg() {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+// 选择图片回调
+function callbackSelected(item) {
+  picModelFlag.value = false;
+  zoneForm.img = item.url;
+}
+
+// 调起选择链接弹窗
+function handleSelectLink(item, index) {
+  if (item) selectedNav = item;
+  liliDialog.value.open("link");
+}
+// 已选链接
+function selectedLink(val) {
+  zoneForm.link = formatLinkType(val);
+  settingZone(val);
+  changeInfo(zoneForm);
+}
+function settingZone(val) {
+  zoneForm.type = val.___type || val.type;
+  zoneForm.title = val.title;
+  if(val.pageType == "special"){
+      zoneForm.id = val.id;
+      zoneForm.pageType = val.pageType
+      zoneForm.type = val.pageType
+      zoneForm.title = val.name
+    }
+  switch (val.___type) {
+    case "goods":
+      zoneForm.id = val.id;
+      zoneForm.goodsId = val.goodsId;
+      zoneForm.goodsName = val.goodsName;
+      break;
+    case "category":
+      zoneForm.id = val.allId;
+      zoneForm.name = val.name;
+      break;
+    case "shops":
+      zoneForm.id = val.id;
+      zoneForm.storeName = val.storeName;
+      break;
+    case "pages":
+      zoneForm.id = val.id;
+      zoneForm.___path = val.___path;
+      zoneForm.title = val.title;
+      break;
+    case "marketing":
+      zoneForm.id = val.id;
+      zoneForm.goodsId = val.goodsId;
+      zoneForm.goodsName = val.goodsName;
+      break;
+    default:
+      break;
+  }
+}
+function saveZone() {
+  showModal.value = false;
+  changeInfo(zoneForm);
+}
+function cancelZone() {
+  showModal.value = false;
+}
+function delZone() {
+  delItem(currentIndex.value);
+}
+function delItem(index) {
+  emit("delItem", index);
+}
+function getZoneStyle(val) {
+  return `${(val || 0) * 100}%`;
+}
+
+watch(
+  () => props.setting,
+  (val) => {
+    setZoneInfo(val);
   },
-  directives: {
-    changeSize,
-    dragItem,
-  },
-};
+  { deep: true }
+);
+
+// 外部访问：父组件 Hotzone.vue 通过 $refs 调用 showModalFn/delItem；
+// 自定义指令 changeSize/dragItem 通过 binding.instance 调用 handlehideZone/changeInfo
+defineExpose({
+  showModalFn,
+  delItem,
+  handlehideZone,
+  changeInfo,
+});
 </script>
 
 <style scoped lang="scss">

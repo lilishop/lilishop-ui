@@ -33,49 +33,43 @@
     </el-card>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import * as API_Goods from "@/api/goods";
 import affixTime from "@/views/lili-components/affix-time";
 
-export default {
-  components: {
-    affixTime,
-  },
-  data() {
-    return {
-      params: {
-        searchType: "LAST_SEVEN",
-        year: "",
-        month: "",
-        shopId: "",
-        type: "NUM",
-      },
-      data: [],
-    };
-  },
-  methods: {
-    handleClickType(tab) {
-      this.params.type = tab.paneName;
-      this.getData();
-    },
-    clickBreadcrumb(item) {
-      const type = this.params.type;
-      this.params = { ...item };
-      this.params.type = type;
-      this.getData();
-    },
-    getData() {
-      Promise.all([API_Goods.goodsStatistics(this.params)]).then((res) => {
-        if (res[0].result) {
-          this.data = res[0].result;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.getData();
-  },
-};
+const params = ref({
+  searchType: "LAST_SEVEN",
+  year: "",
+  month: "",
+  shopId: "",
+  type: "NUM",
+});
+const data = ref([]);
+
+onMounted(() => {
+  getData();
+});
+
+function handleClickType(tab) {
+  params.value.type = tab.paneName;
+  getData();
+}
+
+function clickBreadcrumb(item) {
+  const type = params.value.type;
+  params.value = { ...item };
+  params.value.type = type;
+  getData();
+}
+
+function getData() {
+  Promise.all([API_Goods.goodsStatistics(params.value)]).then((res) => {
+    if (res[0].result) {
+      data.value = res[0].result;
+    }
+  });
+}
 </script>
 <style scoped lang="scss">
 .page-col {

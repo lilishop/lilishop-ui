@@ -163,7 +163,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from "vue";
 import * as API_Statistics from "@/api/statistics";
 import {
   getDistributionOverviewV2,
@@ -173,151 +174,142 @@ import {
 import affixTime from "@/components/affix-time";
 import { QuestionFilled } from "@element-plus/icons-vue";
 
-export default {
-  components: { affixTime, QuestionFilled },
-  data() {
-    return {
-      activeTab: "overview",
-      params: {
-        searchType: "LAST_SEVEN",
-        year: "",
-        month: "",
-        storeId: "",
-      },
-      overview: {},
-      overviewV2: {},
-      distributorRank: [],
-      goodsRank: [],
-      behaviorData: [],
-      behaviorTotal: 0,
-      behaviorLoading: false,
-      behaviorPage: { pageNumber: 1, pageSize: 20 },
-      goodsData: [],
-      goodsTotal: 0,
-      goodsLoading: false,
-      goodsPage: { pageNumber: 1, pageSize: 20 },
-      metricDefs: [
-        { key: "distributorNum", label: "分销员数", tip: "已通过审核的分销员数量" },
-        { key: "applyNum", label: "待审核分销员", tip: "申请中待审核的分销员数量" },
-        { key: "distributionOrderNum", label: "分销订单数", tip: "周期内分销订单笔数" },
-        { key: "distributionOrderAmount", label: "分销订单金额", isMoney: true, tip: "周期内分销订单佣金合计" },
-        { key: "settledCommission", label: "已结算佣金", isMoney: true, tip: "周期内已完成结算的佣金" },
-        { key: "pendingCommission", label: "待结算佣金", isMoney: true, tip: "周期内待结算的佣金" },
-        { key: "cashAmount", label: "提现金额", isMoney: true, tip: "周期内分销员提现金额" },
-      ],
-      todayMetricDefs: [
-        { key: "todayNewDistributorCount", label: "今日新增分销员" },
-        { key: "todayNewSubDistributorCount", label: "今日新增下级分销员" },
-        { key: "todaySalesAmount", label: "今日分销员销售额", isMoney: true },
-        { key: "todayPaidCustomerCount", label: "今日成交客户数" },
-        { key: "todayCommissionAmount", label: "今日支出佣金", isMoney: true },
-      ],
-      totalMetricDefs: [
-        { key: "totalDistributorCount", label: "累计分销员数" },
-        { key: "totalSubDistributorCount", label: "累计下级分销员数" },
-        { key: "totalSalesAmount", label: "累计分销员销售额", isMoney: true },
-        { key: "totalPaidCustomerCount", label: "累计成交客户数" },
-        { key: "totalShareVisitorCount", label: "商品分享引流" },
-        { key: "totalCommissionAmount", label: "累计支出佣金", isMoney: true },
-      ],
-    };
+const activeTab = ref("overview");
+const params = ref({
+  searchType: "LAST_SEVEN",
+  year: "",
+  month: "",
+  storeId: "",
+});
+const overview = ref({});
+const overviewV2 = ref({});
+const distributorRank = ref([]);
+const goodsRank = ref([]);
+const behaviorData = ref([]);
+const behaviorTotal = ref(0);
+const behaviorLoading = ref(false);
+const behaviorPage = ref({ pageNumber: 1, pageSize: 20 });
+const goodsData = ref([]);
+const goodsTotal = ref(0);
+const goodsLoading = ref(false);
+const goodsPage = ref({ pageNumber: 1, pageSize: 20 });
+const metricDefs = ref([
+  { key: "distributorNum", label: "分销员数", tip: "已通过审核的分销员数量" },
+  { key: "applyNum", label: "待审核分销员", tip: "申请中待审核的分销员数量" },
+  { key: "distributionOrderNum", label: "分销订单数", tip: "周期内分销订单笔数" },
+  { key: "distributionOrderAmount", label: "分销订单金额", isMoney: true, tip: "周期内分销订单佣金合计" },
+  { key: "settledCommission", label: "已结算佣金", isMoney: true, tip: "周期内已完成结算的佣金" },
+  { key: "pendingCommission", label: "待结算佣金", isMoney: true, tip: "周期内待结算的佣金" },
+  { key: "cashAmount", label: "提现金额", isMoney: true, tip: "周期内分销员提现金额" },
+]);
+const todayMetricDefs = ref([
+  { key: "todayNewDistributorCount", label: "今日新增分销员" },
+  { key: "todayNewSubDistributorCount", label: "今日新增下级分销员" },
+  { key: "todaySalesAmount", label: "今日分销员销售额", isMoney: true },
+  { key: "todayPaidCustomerCount", label: "今日成交客户数" },
+  { key: "todayCommissionAmount", label: "今日支出佣金", isMoney: true },
+]);
+const totalMetricDefs = ref([
+  { key: "totalDistributorCount", label: "累计分销员数" },
+  { key: "totalSubDistributorCount", label: "累计下级分销员数" },
+  { key: "totalSalesAmount", label: "累计分销员销售额", isMoney: true },
+  { key: "totalPaidCustomerCount", label: "累计成交客户数" },
+  { key: "totalShareVisitorCount", label: "商品分享引流" },
+  { key: "totalCommissionAmount", label: "累计支出佣金", isMoney: true },
+]);
+
+watch(
+  params,
+  () => {
+    loadOverviewData();
+    if (activeTab.value === "behavior") {
+      loadBehavior();
+    } else if (activeTab.value === "goods") {
+      loadGoods();
+    }
   },
-  watch: {
-    params: {
-      handler() {
-        this.loadOverviewData();
-        if (this.activeTab === "behavior") {
-          this.loadBehavior();
-        } else if (this.activeTab === "goods") {
-          this.loadGoods();
-        }
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
-  methods: {
-    clickBreadcrumb(item) {
-      this.params = {
-        searchType: item.searchType || "",
-        year: item.year || "",
-        month: item.month || "",
-        storeId: item.storeId || "",
-      };
-    },
-    onTabChange(name) {
-      if (name === "behavior") {
-        this.loadBehavior();
-      } else if (name === "goods") {
-        this.loadGoods();
-      }
-    },
-    formatNumber(val) {
-      if (val == null || val === "") return 0;
-      const num = Number(val);
-      return Number.isNaN(num) ? 0 : Math.round(num);
-    },
-    formatRate(val) {
-      if (val == null || val === "") return "-";
-      return `${(Number(val) * 100).toFixed(2)}%`;
-    },
-    async loadOverviewData() {
-      const query = { ...this.params };
-      const [overviewRes, distributorRes, goodsRes, overviewV2Res] = await Promise.all([
-        API_Statistics.getDistributionOverview(query),
-        API_Statistics.getDistributionRankDistributor(query),
-        API_Statistics.getDistributionRankGoods(query),
-        getDistributionOverviewV2(),
-      ]);
-      if (overviewRes && overviewRes.success) {
-        this.overview = overviewRes.result || {};
-      }
-      if (distributorRes && distributorRes.success) {
-        this.distributorRank = distributorRes.result || [];
-      }
-      if (goodsRes && goodsRes.success) {
-        this.goodsRank = goodsRes.result || [];
-      }
-      if (overviewV2Res && overviewV2Res.success) {
-        this.overviewV2 = overviewV2Res.result || {};
-      }
-    },
-    loadBehavior() {
-      this.behaviorLoading = true;
-      getDistributionBehaviorV2({
-        pageNumber: this.behaviorPage.pageNumber,
-        pageSize: this.behaviorPage.pageSize,
-      }).then((res) => {
-        this.behaviorLoading = false;
-        if (res.success) {
-          this.behaviorData = res.result.records || [];
-          this.behaviorTotal = res.result.total || 0;
-        }
-      });
-    },
-    onBehaviorSizeChange() {
-      this.behaviorPage.pageNumber = 1;
-      this.loadBehavior();
-    },
-    loadGoods() {
-      this.goodsLoading = true;
-      getDistributionGoodsV2({
-        pageNumber: this.goodsPage.pageNumber,
-        pageSize: this.goodsPage.pageSize,
-      }).then((res) => {
-        this.goodsLoading = false;
-        if (res.success) {
-          this.goodsData = res.result.records || [];
-          this.goodsTotal = res.result.total || 0;
-        }
-      });
-    },
-    onGoodsSizeChange() {
-      this.goodsPage.pageNumber = 1;
-      this.loadGoods();
-    },
-  },
-};
+  { deep: true, immediate: true }
+);
+
+function clickBreadcrumb(item) {
+  params.value = {
+    searchType: item.searchType || "",
+    year: item.year || "",
+    month: item.month || "",
+    storeId: item.storeId || "",
+  };
+}
+function onTabChange(name) {
+  if (name === "behavior") {
+    loadBehavior();
+  } else if (name === "goods") {
+    loadGoods();
+  }
+}
+function formatNumber(val) {
+  if (val == null || val === "") return 0;
+  const num = Number(val);
+  return Number.isNaN(num) ? 0 : Math.round(num);
+}
+function formatRate(val) {
+  if (val == null || val === "") return "-";
+  return `${(Number(val) * 100).toFixed(2)}%`;
+}
+async function loadOverviewData() {
+  const query = { ...params.value };
+  const [overviewRes, distributorRes, goodsRes, overviewV2Res] = await Promise.all([
+    API_Statistics.getDistributionOverview(query),
+    API_Statistics.getDistributionRankDistributor(query),
+    API_Statistics.getDistributionRankGoods(query),
+    getDistributionOverviewV2(),
+  ]);
+  if (overviewRes && overviewRes.success) {
+    overview.value = overviewRes.result || {};
+  }
+  if (distributorRes && distributorRes.success) {
+    distributorRank.value = distributorRes.result || [];
+  }
+  if (goodsRes && goodsRes.success) {
+    goodsRank.value = goodsRes.result || [];
+  }
+  if (overviewV2Res && overviewV2Res.success) {
+    overviewV2.value = overviewV2Res.result || {};
+  }
+}
+function loadBehavior() {
+  behaviorLoading.value = true;
+  getDistributionBehaviorV2({
+    pageNumber: behaviorPage.value.pageNumber,
+    pageSize: behaviorPage.value.pageSize,
+  }).then((res) => {
+    behaviorLoading.value = false;
+    if (res.success) {
+      behaviorData.value = res.result.records || [];
+      behaviorTotal.value = res.result.total || 0;
+    }
+  });
+}
+function onBehaviorSizeChange() {
+  behaviorPage.value.pageNumber = 1;
+  loadBehavior();
+}
+function loadGoods() {
+  goodsLoading.value = true;
+  getDistributionGoodsV2({
+    pageNumber: goodsPage.value.pageNumber,
+    pageSize: goodsPage.value.pageSize,
+  }).then((res) => {
+    goodsLoading.value = false;
+    if (res.success) {
+      goodsData.value = res.result.records || [];
+      goodsTotal.value = res.result.total || 0;
+    }
+  });
+}
+function onGoodsSizeChange() {
+  goodsPage.value.pageNumber = 1;
+  loadGoods();
+}
 </script>
 
 <style scoped lang="scss">

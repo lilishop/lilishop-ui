@@ -9,7 +9,8 @@
 | 框架 | vue | ^3.5.35 |
 | 编译 | @vue/compiler-sfc | ^3.5.35 |
 | 路由 | vue-router | ^4.6.4 |
-| 状态 | vuex | ^4.1.0 |
+| 状态 | pinia | ^4.0.3（四端已全部从 vuex 迁移完成） |
+| 组件写法 | `<script setup>` | 四端 597 个组件已全部完成 Options API → 组合式 API 迁移；各端 eslint 已启用 `vue/component-api-style: ['warn', ['script-setup']]` 防止回退 |
 | UI | element-plus | ^2.14.1 |
 | 图标 | @element-plus/icons-vue | ^2.3.2 |
 | 请求 | axios | ^1.7.9 |

@@ -10,7 +10,7 @@
             :key="index"
             :index="index"
             :setting="zone"
-            :ref="`zone${index}`"
+            :ref="(el) => setZoneRef(el, index)"
             @delItem="removeItem($event)"
             @changeInfo="changeInfo($event)"
           ></zone>
@@ -62,158 +62,185 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, getCurrentInstance } from "vue";
 import Zone from "./Zone";
-import addItem from "../directives/addItem";
+import vAddItem from "../directives/addItem";
 
-export default {
-  name: "HotZone",
-  data() {
-    return {
-      zones: [],
-    };
+defineOptions({ name: "HotZone" });
+
+const props = defineProps({
+  image: {
+    type: String,
+    required: true,
   },
-  props: {
-    image: {
-      type: String,
-      required: true,
-    },
-    zonesInit: {
-      type: Array,
-      default: () => [],
-    },
-    max: {
-      type: Number,
-    },
+  zonesInit: {
+    type: Array,
+    default: () => [],
   },
-  mounted() {
-    this.zones = this.zonesInit.concat();
+  max: {
+    type: Number,
   },
-  methods: {
-    async addHotzone() {
-      let perInfo = {
-        topPer: 0.15,
-        leftPer: 0.3,
-        widthPer: 0.2,
-        heightPer: 0.2,
-        img: "",
-        link: "",
-        type: "",
-        title: "",
-      };
-      let images = await this.getImageSize(this.image);
-      if (images) {
-        if (images.height >= 1000) {
-          perInfo.heightPer = this.convertNumberToDecimal(images.height) / (images.height / 1000);
-        } else {
-          perInfo.heightPer = this.convertNumberToDecimal(images.height);
-        }
-        perInfo.widthPer = this.convertNumberToDecimal(images.width) / 2;
-      }
-      this.addItem(perInfo);
-    },
-    convertNumberToDecimal(num) {
-      if (num >= 10000) {
-        return num / 100000;
-      } else if (num >= 1000) {
-        return num / 10000;
-      } else if (num >= 100) {
-        return num / 1000;
-      } else if (num >= 10) {
-        return num / 100;
-      }
-    },
-    getImageSize(url) {
-      return new Promise(function (resolve, reject) {
-        let image = new Image();
-        image.onload = function () {
-          resolve({
-            width: image.width,
-            height: image.height,
-          });
-        };
-        image.onerror = function () {
-          reject(new Error("error"));
-        };
-        image.src = url;
+});
+const emit = defineEmits([
+  "choose",
+  "erase",
+  "overRange",
+  "remove",
+  "add",
+  "change",
+]);
+
+const zones = ref([]);
+const zoneRefs = ref([]);
+const instance = getCurrentInstance();
+
+onMounted(() => {
+  zones.value = props.zonesInit.concat();
+});
+
+// v-for 内的动态 ref：按 index 收集 Zone 组件实例
+function setZoneRef(el, index) {
+  if (el) zoneRefs.value[index] = el;
+}
+
+async function addHotzone() {
+  let perInfo = {
+    topPer: 0.15,
+    leftPer: 0.3,
+    widthPer: 0.2,
+    heightPer: 0.2,
+    img: "",
+    link: "",
+    type: "",
+    title: "",
+  };
+  let images = await getImageSize(props.image);
+  if (images) {
+    if (images.height >= 1000) {
+      perInfo.heightPer = convertNumberToDecimal(images.height) / (images.height / 1000);
+    } else {
+      perInfo.heightPer = convertNumberToDecimal(images.height);
+    }
+    perInfo.widthPer = convertNumberToDecimal(images.width) / 2;
+  }
+  addItem(perInfo);
+}
+
+function convertNumberToDecimal(num) {
+  if (num >= 10000) {
+    return num / 100000;
+  } else if (num >= 1000) {
+    return num / 10000;
+  } else if (num >= 100) {
+    return num / 1000;
+  } else if (num >= 10) {
+    return num / 100;
+  }
+}
+
+function getImageSize(url) {
+  return new Promise(function (resolve, reject) {
+    let image = new Image();
+    image.onload = function () {
+      resolve({
+        width: image.width,
+        height: image.height,
       });
-    },
-    editZone(index) {
-      this.$refs[`zone${index}`][0].showModalFn(index);
-    },
-    delZone(index) {
-      this.$refs[`zone${index}`][0].delItem(index);
-    },
-    showZoneText(zone) {
-      switch (zone.type) {
-        case "goods":
-          return `商品：${zone.goodsName}`;
-        case "category":
-          return `分类：${zone.name}`;
-        case "shops":
-          return `店铺：${zone.storeName}`;
-        case "pages":
-          return `文章：${zone.title}`;
-        case "marketing":
-          return `促销活动商品：${zone.goodsName}`;
-        case "other":
-          return `${zone.title}`;
-        default:
-          return "请选择跳转链接";
-      }
-    },
-    changeInfo(res) {
-      let { info, index, zoneInfo } = res;
-      info = { ...zoneInfo, ...info };
-      // 改变热区并发送change通知
-      Object.assign(this.zones[index], info);
-      this.hasChange("changeInfo");
-      this.$forceUpdate();
-    },
-    addItem(setting) {
-      this.zones.push(setting);
-      this.$emit("choose");
-      // this.hasChange()  不应该发送通知，mouseup判定成功才应该发
-      // this.$emit('add', setting)
-    },
-    eraseItem(index = this.zones.length - 1) {
-      this.zones.splice(index, 1);
-      this.$emit("erase", index);
-    },
-    isOverRange() {
-      let { max, zones } = this;
+    };
+    image.onerror = function () {
+      reject(new Error("error"));
+    };
+    image.src = url;
+  });
+}
 
-      return max && zones.length > max;
-    },
-    overRange() {
-      const index = this.zones.length - 1;
+function editZone(index) {
+  zoneRefs.value[index].showModalFn(index);
+}
 
-      this.zones.splice(index, 1);
-      this.$emit("overRange", index);
-    },
-    removeItem(index = this.zones.length - 1) {
-      this.zones.splice(index, 1);
-      this.hasChange("removeItem");
-      this.$emit("remove", index);
-    },
-    changeItem(info, isAdd) {
-      const index = this.zones.length - 1;
-      // 改变热区并发送change通知
-      Object.assign(this.zones[index], info);
-      this.hasChange("changeItem");
-      isAdd && this.$emit("add", this.zones[index]);
-    },
-    hasChange(from) {
-      this.$emit("change", this.zones);
-    },
-  },
-  directives: {
-    addItem,
-  },
-  components: {
-    Zone,
-  },
-};
+function delZone(index) {
+  zoneRefs.value[index].delItem(index);
+}
+
+function showZoneText(zone) {
+  switch (zone.type) {
+    case "goods":
+      return `商品：${zone.goodsName}`;
+    case "category":
+      return `分类：${zone.name}`;
+    case "shops":
+      return `店铺：${zone.storeName}`;
+    case "pages":
+      return `文章：${zone.title}`;
+    case "marketing":
+      return `促销活动商品：${zone.goodsName}`;
+    case "other":
+      return `${zone.title}`;
+    default:
+      return "请选择跳转链接";
+  }
+}
+
+function changeInfo(res) {
+  let { info, index, zoneInfo } = res;
+  info = { ...zoneInfo, ...info };
+  // 改变热区并发送change通知
+  Object.assign(zones.value[index], info);
+  hasChange("changeInfo");
+  instance.proxy.$forceUpdate();
+}
+
+function addItem(setting) {
+  zones.value.push(setting);
+  emit("choose");
+  // this.hasChange()  不应该发送通知，mouseup判定成功才应该发
+  // this.$emit('add', setting)
+}
+
+function eraseItem(index = zones.value.length - 1) {
+  zones.value.splice(index, 1);
+  emit("erase", index);
+}
+
+function isOverRange() {
+  return props.max && zones.value.length > props.max;
+}
+
+function overRange() {
+  const index = zones.value.length - 1;
+
+  zones.value.splice(index, 1);
+  emit("overRange", index);
+}
+
+function removeItem(index = zones.value.length - 1) {
+  zones.value.splice(index, 1);
+  hasChange("removeItem");
+  emit("remove", index);
+}
+
+function changeItem(info, isAdd) {
+  const index = zones.value.length - 1;
+  // 改变热区并发送change通知
+  Object.assign(zones.value[index], info);
+  hasChange("changeItem");
+  isAdd && emit("add", zones.value[index]);
+}
+
+function hasChange(from) {
+  emit("change", zones.value);
+}
+
+// v-add-item 指令通过 binding.instance 调用以下方法/读取 zones
+defineExpose({
+  zones,
+  addItem,
+  eraseItem,
+  isOverRange,
+  overRange,
+  changeItem,
+});
 </script>
 
 <style scoped lang="scss">

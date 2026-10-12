@@ -2,7 +2,7 @@
   <el-card>
     <div style="margin-top: 0">
       <div class="sign-name">{{ id ? "修改签名" : "新增签名" }}</div>
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="签名" prop="signName">
           <el-input
             v-model="form.signName"
@@ -60,95 +60,96 @@
   </el-card>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import * as API_Setting from "@/api/setting.js";
 import uploadPicThumb from "@/components/lili/upload-pic-thumb";
 
-export default {
-  name: "smsSign",
-  components: {
-    uploadPicThumb,
-  },
-  data() {
-    return {
-      id: 0,
-      form: {
-        signName: "",
-        businessLicense: "",
-        license: "",
-        signSource: "",
-        remark: "",
-      },
-      loading: false,
-      formValidate: {
-        signName: [{ required: true, message: "签名名称不能为空", trigger: "blur" }],
-        remark: [{ required: true, message: "申请说明不能为空", trigger: "blur" }],
-        businessLicense: [{ required: true, message: " ", trigger: "blur" }],
-      },
-      submitLoading: false,
-    };
-  },
-  methods: {
-    init() {
-      this.id = this.$route.query.id;
-      if (this.id != undefined) {
-        this.getSmsSignDetail();
+defineOptions({ name: "smsSign" });
+
+const route = useRoute();
+const router = useRouter();
+
+const id = ref(0);
+const form = ref({
+  signName: "",
+  businessLicense: "",
+  license: "",
+  signSource: "",
+  remark: "",
+});
+const loading = ref(false);
+const formValidate = reactive({
+  signName: [{ required: true, message: "签名名称不能为空", trigger: "blur" }],
+  remark: [{ required: true, message: "申请说明不能为空", trigger: "blur" }],
+  businessLicense: [{ required: true, message: " ", trigger: "blur" }],
+});
+const submitLoading = ref(false);
+
+const formRef = ref(null);
+
+function init() {
+  id.value = route.query.id;
+  if (id.value != undefined) {
+    getSmsSignDetail();
+  }
+}
+
+function addSignSubmit() {
+  if (form.value.businessLicense == "" || form.value.license == "") {
+    ElMessage.error("请完善证件信息");
+    return;
+  }
+  if (form.value.signSource === "" || form.value.signSource === null || form.value.signSource === undefined) {
+    ElMessage.error("请选择签名来源");
+    return;
+  }
+  formRef.value.validate((valid) => {
+    if (valid) {
+      loading.value = true;
+      if (id.value == undefined) {
+        API_Setting.addSmsSign(form.value)
+          .then((res) => {
+            loading.value = false;
+            if (res.success) {
+              ElMessage.success("添加成功");
+              router.back();
+            }
+          })
+          .catch(() => {
+            loading.value = false;
+          });
+      } else {
+        API_Setting.editSmsSign(form.value)
+          .then((res) => {
+            loading.value = false;
+            if (res.success) {
+              ElMessage.success("修改成功");
+              router.back();
+            }
+          })
+          .catch(() => {
+            loading.value = false;
+          });
       }
-    },
-    addSignSubmit() {
-      if (this.form.businessLicense == "" || this.form.license == "") {
-        ElMessage.error("请完善证件信息");
-        return;
-      }
-      if (this.form.signSource === "" || this.form.signSource === null || this.form.signSource === undefined) {
-        ElMessage.error("请选择签名来源");
-        return;
-      }
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.loading = true;
-          if (this.id == undefined) {
-            API_Setting.addSmsSign(this.form)
-              .then((res) => {
-                this.loading = false;
-                if (res.success) {
-                  ElMessage.success("添加成功");
-                  this.$router.back();
-                }
-              })
-              .catch(() => {
-                this.loading = false;
-              });
-          } else {
-            API_Setting.editSmsSign(this.form)
-              .then((res) => {
-                this.loading = false;
-                if (res.success) {
-                  ElMessage.success("修改成功");
-                  this.$router.back();
-                }
-              })
-              .catch(() => {
-                this.loading = false;
-              });
-          }
-        }
-      });
-    },
-    getSmsSignDetail() {
-      API_Setting.smsSignDetail(this.id).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.form = res.result;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    }
+  });
+}
+
+function getSmsSignDetail() {
+  API_Setting.smsSignDetail(id.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      form.value = res.result;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

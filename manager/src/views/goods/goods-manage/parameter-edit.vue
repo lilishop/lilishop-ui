@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="参数名称" prop="paramName">
           <el-input v-model="form.paramName" clearable style="width: 520px" />
         </el-form-item>
@@ -92,7 +92,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import {
   getCategoryTree,
   getGoodsParamsDetail,
@@ -101,6 +103,11 @@ import {
 } from "@/api/goods";
 import { regular } from "@/utils";
 import { ElMessage } from "element-plus";
+
+defineOptions({ name: "parameterEdit" });
+
+const route = useRoute();
+const router = useRouter();
 
 const getOptionText = (value) => {
   if (value && typeof value === "object") return value.value;
@@ -213,228 +220,228 @@ const buildFormState = (source, parameterId) => {
   return formState;
 };
 
-export default {
-  name: "parameterEdit",
-  data() {
-    return {
-      submitLoading: false,
-      modalType: 0,
-      categoryModalVisible: false,
-      categoryModalTitle: "关联分类",
-      categoryTreeLoading: false,
-      categoryTreeData: [],
-      categoryTreeSource: [],
-      categoryIdNameMap: {},
-      categoryTreeKey: 0,
-      selectedCategoryIds: [],
-      form: {
-        paramName: "",
-        options: [{ value: "" }],
-        required: 0,
-        isIndex: 0,
-        sort: 0,
-        categoryIds: [],
-      },
-      formValidate: {
-        paramName: [regular.REQUIRED, regular.VARCHAR5],
-        options: [{ required: true, validator: validateOptions, trigger: "change" }],
-        required: [{ required: true, validator: validateRadioRequired("请选择是否必填"), trigger: "change" }],
-        isIndex: [{ required: true, validator: validateRadioRequired("请选择是否索引"), trigger: "change" }],
-        sort: [regular.REQUIRED, regular.INTEGER],
-        categoryIds: [
-          {
-            type: "array",
-            required: true,
-            min: 1,
-            message: "请选择关联分类",
-            trigger: "change",
-          },
-        ],
-      },
-    };
-  },
-  computed: {
-    id() {
-      return this.$route.query && this.$route.query.id ? String(this.$route.query.id) : "";
+const formRef = ref(null);
+const categoryTree = ref(null);
+
+const submitLoading = ref(false);
+const modalType = ref(0);
+const categoryModalVisible = ref(false);
+const categoryModalTitle = ref("关联分类");
+const categoryTreeLoading = ref(false);
+const categoryTreeData = ref([]);
+const categoryTreeSource = ref([]);
+const categoryIdNameMap = ref({});
+const categoryTreeKey = ref(0);
+const selectedCategoryIds = ref([]);
+const form = ref({
+  paramName: "",
+  options: [{ value: "" }],
+  required: 0,
+  isIndex: 0,
+  sort: 0,
+  categoryIds: [],
+});
+const formValidate = reactive({
+  paramName: [regular.REQUIRED, regular.VARCHAR5],
+  options: [{ required: true, validator: validateOptions, trigger: "change" }],
+  required: [{ required: true, validator: validateRadioRequired("请选择是否必填"), trigger: "change" }],
+  isIndex: [{ required: true, validator: validateRadioRequired("请选择是否索引"), trigger: "change" }],
+  sort: [regular.REQUIRED, regular.INTEGER],
+  categoryIds: [
+    {
+      type: "array",
+      required: true,
+      min: 1,
+      message: "请选择关联分类",
+      trigger: "change",
     },
-    selectedCategoryNamesText() {
-      if (!Array.isArray(this.categoryTreeSource) || this.categoryTreeSource.length === 0) return "";
-      const selectedSet = new Set(toStringArray(this.selectedCategoryIds));
-      const isSelected = (node) => {
-        if (!node) return false;
-        const nodeId = node.id !== undefined && node.id !== null ? String(node.id) : "";
-        if (nodeId && selectedSet.has(nodeId)) return true;
-        const children = Array.isArray(node.children) ? node.children : [];
-        if (children.length === 0) return false;
-        return children.every(isSelected);
-      };
-      const collect = (node, out) => {
-        if (!node) return;
-        if (isSelected(node)) {
-          if (node.name) out.push(node.name);
-          return;
-        }
-        const children = Array.isArray(node.children) ? node.children : [];
-        children.forEach((c) => collect(c, out));
-      };
-      const names = [];
-      this.categoryTreeSource.forEach((n) => collect(n, names));
-      return names.join("，");
-    },
-  },
-  watch: {
-    "form.required"(val) {
-      const n = normalize01(val, 0);
-      if (val !== n) this.form.required = n;
-    },
-    "form.isIndex"(val) {
-      const n = normalize01(val, 0);
-      if (val !== n) this.form.isIndex = n;
-    },
-  },
-  methods: {
-    back() {
-      this.$router.push({ name: "goods-parameter" });
-    },
-    syncCategoryIds(ids) {
-      const categoryIds = toStringArray(ids);
-      this.selectedCategoryIds = categoryIds;
-      if (!this.form) this.form = {};
-      this.form.categoryIds = categoryIds;
-    },
-    touchOptionsValidate() {
-      this.$nextTick(() => {
-        const form = this.$refs.form;
-        if (form && typeof form.validateField === "function") {
-          // validateField rejects on failure; catch to avoid dev-server [object Object] overlay
-          form.validateField("options", () => {});
-        }
-      });
-    },
-    addOptionRow() {
-      if (!Array.isArray(this.form.options)) this.form.options = [];
-      this.form.options.push({ value: "" });
-    },
-    removeOptionRow(index) {
-      if (!Array.isArray(this.form.options)) this.form.options = [];
-      this.form.options.splice(index, 1);
-      this.touchOptionsValidate();
-    },
-    buildCategoryTreeNodes(list) {
-      if (!Array.isArray(list) || list.length === 0) return [];
-      return list.map((item) => ({
-        id: item.id,
-        title: item.name,
-        children: this.buildCategoryTreeNodes(item.children || []),
-      }));
-    },
-    async loadDetail(parameterId) {
-      if (!parameterId) return;
-      const res = await getGoodsParamsDetail(parameterId).catch(() => null);
-      if (!(res && res.success && res.result)) return;
-      const dto = res.result;
-      this.form = buildFormState(dto, parameterId);
-      this.selectedCategoryIds = [...this.form.categoryIds];
-    },
-    async openCategoryModal() {
-      this.categoryModalVisible = true;
-      this.categoryTreeLoading = true;
-      this.categoryTreeKey += 1;
+  ],
+});
+
+const id = computed(() =>
+  route.query && route.query.id ? String(route.query.id) : ""
+);
+const selectedCategoryNamesText = computed(() => {
+  if (!Array.isArray(categoryTreeSource.value) || categoryTreeSource.value.length === 0) return "";
+  const selectedSet = new Set(toStringArray(selectedCategoryIds.value));
+  const isSelected = (node) => {
+    if (!node) return false;
+    const nodeId = node.id !== undefined && node.id !== null ? String(node.id) : "";
+    if (nodeId && selectedSet.has(nodeId)) return true;
+    const children = Array.isArray(node.children) ? node.children : [];
+    if (children.length === 0) return false;
+    return children.every(isSelected);
+  };
+  const collect = (node, out) => {
+    if (!node) return;
+    if (isSelected(node)) {
+      if (node.name) out.push(node.name);
+      return;
+    }
+    const children = Array.isArray(node.children) ? node.children : [];
+    children.forEach((c) => collect(c, out));
+  };
+  const names = [];
+  categoryTreeSource.value.forEach((n) => collect(n, names));
+  return names.join("，");
+});
+
+watch(
+  () => form.value.required,
+  (val) => {
+    const n = normalize01(val, 0);
+    if (val !== n) form.value.required = n;
+  }
+);
+watch(
+  () => form.value.isIndex,
+  (val) => {
+    const n = normalize01(val, 0);
+    if (val !== n) form.value.isIndex = n;
+  }
+);
+
+function back() {
+  router.push({ name: "goods-parameter" });
+}
+function syncCategoryIds(ids) {
+  const categoryIds = toStringArray(ids);
+  selectedCategoryIds.value = categoryIds;
+  if (!form.value) form.value = {};
+  form.value.categoryIds = categoryIds;
+}
+function touchOptionsValidate() {
+  nextTick(() => {
+    const formEl = formRef.value;
+    if (formEl && typeof formEl.validateField === "function") {
+      // validateField rejects on failure; catch to avoid dev-server [object Object] overlay
+      formEl.validateField("options", () => {});
+    }
+  });
+}
+function addOptionRow() {
+  if (!Array.isArray(form.value.options)) form.value.options = [];
+  form.value.options.push({ value: "" });
+}
+function removeOptionRow(index) {
+  if (!Array.isArray(form.value.options)) form.value.options = [];
+  form.value.options.splice(index, 1);
+  touchOptionsValidate();
+}
+function buildCategoryTreeNodes(list) {
+  if (!Array.isArray(list) || list.length === 0) return [];
+  return list.map((item) => ({
+    id: item.id,
+    title: item.name,
+    children: buildCategoryTreeNodes(item.children || []),
+  }));
+}
+async function loadDetail(parameterId) {
+  if (!parameterId) return;
+  const res = await getGoodsParamsDetail(parameterId).catch(() => null);
+  if (!(res && res.success && res.result)) return;
+  const dto = res.result;
+  form.value = buildFormState(dto, parameterId);
+  selectedCategoryIds.value = [...form.value.categoryIds];
+}
+async function openCategoryModal() {
+  categoryModalVisible.value = true;
+  categoryTreeLoading.value = true;
+  categoryTreeKey.value += 1;
+  try {
+    if (!Array.isArray(categoryTreeSource.value) || categoryTreeSource.value.length === 0) {
+      const treeRes = await getCategoryTree();
+      categoryTreeSource.value = treeRes && treeRes.success ? treeRes.result || [] : [];
+      const map = {};
+      buildCategoryIdNameMap(categoryTreeSource.value, map);
+      categoryIdNameMap.value = map;
+    }
+    categoryTreeData.value = buildCategoryTreeNodes(categoryTreeSource.value || []);
+  } finally {
+    categoryTreeLoading.value = false;
+  }
+}
+function onCategoryTreeCheckChange(_data, checkedInfo) {
+  syncCategoryIds(checkedInfo?.checkedKeys || []);
+  nextTick(() => {
+    const formEl = formRef.value;
+    if (formEl && typeof formEl.validateField === "function") {
+      formEl.validateField("categoryIds", () => {});
+    }
+  });
+}
+function initForm() {
+  if (id.value) {
+    modalType.value = 1;
+    const cached = window.sessionStorage.getItem(cacheKey(id.value));
+    if (cached) {
       try {
-        if (!Array.isArray(this.categoryTreeSource) || this.categoryTreeSource.length === 0) {
-          const treeRes = await getCategoryTree();
-          this.categoryTreeSource = treeRes && treeRes.success ? treeRes.result || [] : [];
-          const map = {};
-          buildCategoryIdNameMap(this.categoryTreeSource, map);
-          this.categoryIdNameMap = map;
-        }
-        this.categoryTreeData = this.buildCategoryTreeNodes(this.categoryTreeSource || []);
-      } finally {
-        this.categoryTreeLoading = false;
+        const row = JSON.parse(cached);
+        form.value = buildFormState(row, row.id);
+        selectedCategoryIds.value = [...form.value.categoryIds];
+      } catch (e) {
+        modalType.value = 0;
       }
-    },
-    onCategoryTreeCheckChange(_data, checkedInfo) {
-      this.syncCategoryIds(checkedInfo?.checkedKeys || []);
-      this.$nextTick(() => {
-        const form = this.$refs.form;
-        if (form && typeof form.validateField === "function") {
-          form.validateField("categoryIds", () => {});
-        }
-      });
-    },
-    initForm() {
-      if (this.id) {
-        this.modalType = 1;
-        const cached = window.sessionStorage.getItem(cacheKey(this.id));
-        if (cached) {
-          try {
-            const row = JSON.parse(cached);
-            this.form = buildFormState(row, row.id);
-            this.selectedCategoryIds = [...this.form.categoryIds];
-          } catch (e) {
-            this.modalType = 0;
-          }
-        }
-        this.loadDetail(String(this.id));
-      } else {
-        this.modalType = 0;
-        if (!Array.isArray(this.form.options) || this.form.options.length === 0) {
-          this.form.options = [{ value: "" }];
-        }
-        this.syncCategoryIds([]);
-      }
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        const options = normalizeOptions(this.form.options);
-        const categoryIds = toStringArray(this.form.categoryIds);
-        const payload = {
-          ...this.form,
-          options: options.join(","),
-          required: Number(this.form.required),
-          isIndex: Number(this.form.isIndex),
-          sort: Number(this.form.sort || 0),
-          categoryParameterList: categoryIds.map((categoryId) => ({ categoryId })),
-        };
-        if (this.modalType === 0) {
-          delete payload.id;
-          insertGoodsParams(buildSpringFormPayload(payload))
-            .then((res) => {
-              if (!(res && res.success)) return;
-              ElMessage.success("操作成功");
-              this.back();
-            })
-            .finally(() => {
-              this.submitLoading = false;
-            });
-        } else {
-          updateGoodsParams(buildSpringFormPayload(payload))
-            .then((res) => {
-              if (!(res && res.success)) return;
-              ElMessage.success("操作成功");
-              this.back();
-            })
-            .finally(() => {
-              this.submitLoading = false;
-            });
-        }
-      });
-    },
-  },
-  mounted() {
-    getCategoryTree().then((res) => {
-      if (res && res.success) {
-        this.categoryTreeSource = res.result || [];
-        const map = {};
-        buildCategoryIdNameMap(this.categoryTreeSource, map);
-        this.categoryIdNameMap = map;
-      }
-    });
-    this.initForm();
-  },
-};
+    }
+    loadDetail(String(id.value));
+  } else {
+    modalType.value = 0;
+    if (!Array.isArray(form.value.options) || form.value.options.length === 0) {
+      form.value.options = [{ value: "" }];
+    }
+    syncCategoryIds([]);
+  }
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+    const options = normalizeOptions(form.value.options);
+    const categoryIds = toStringArray(form.value.categoryIds);
+    const payload = {
+      ...form.value,
+      options: options.join(","),
+      required: Number(form.value.required),
+      isIndex: Number(form.value.isIndex),
+      sort: Number(form.value.sort || 0),
+      categoryParameterList: categoryIds.map((categoryId) => ({ categoryId })),
+    };
+    if (modalType.value === 0) {
+      delete payload.id;
+      insertGoodsParams(buildSpringFormPayload(payload))
+        .then((res) => {
+          if (!(res && res.success)) return;
+          ElMessage.success("操作成功");
+          back();
+        })
+        .finally(() => {
+          submitLoading.value = false;
+        });
+    } else {
+      updateGoodsParams(buildSpringFormPayload(payload))
+        .then((res) => {
+          if (!(res && res.success)) return;
+          ElMessage.success("操作成功");
+          back();
+        })
+        .finally(() => {
+          submitLoading.value = false;
+        });
+    }
+  });
+}
+
+onMounted(() => {
+  getCategoryTree().then((res) => {
+    if (res && res.success) {
+      categoryTreeSource.value = res.result || [];
+      const map = {};
+      buildCategoryIdNameMap(categoryTreeSource.value, map);
+      categoryIdNameMap.value = map;
+    }
+  });
+  initForm();
+});
 </script>
 
 <style lang="scss">

@@ -17,48 +17,44 @@
     <talk-forward-record ref="forwardRecordsRef" />
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import TalkForwardRecord from '@/components/chat/TalkForwardRecord'
-export default {
-  name: 'ForwardMessage',
-  components: {
-    TalkForwardRecord,
-  },
-  props: {
-    forward: {
-      type: Object,
-      required: true,
-    },
-    record_id: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-  },
-  data() {
-    return {
-      title: '',
-      records: [],
-      num: 0,
-    }
-  },
-  methods: {
-    catForwardRecords() {
-      this.$refs.forwardRecordsRef.open(this.record_id)
-    },
-    getForwardTitle(list) {
-      let arr = [...new Set(list.map(v => v.nickname))]
-      return arr.join('、') + '的会话记录'
-    },
-  },
-  created() {
-    let forward = this.forward
 
-    this.num = forward.num
-    this.records = forward.list
-    this.title = this.getForwardTitle(this.records)
+defineOptions({ name: 'ForwardMessage' })
+
+const props = defineProps({
+  forward: {
+    type: Object,
+    required: true,
   },
+  record_id: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+})
+
+const forwardRecordsRef = ref(null)
+
+const title = ref('')
+const records = ref([])
+const num = ref(0)
+
+function catForwardRecords() {
+  forwardRecordsRef.value.open(props.record_id)
 }
+
+function getForwardTitle(list) {
+  let arr = [...new Set(list.map(v => v.nickname))]
+  return arr.join('、') + '的会话记录'
+}
+
+let forward = props.forward
+
+num.value = forward.num
+records.value = forward.list
+title.value = getForwardTitle(records.value)
 </script>
 <style lang="less" scoped>
 /* 会话记录消息 */

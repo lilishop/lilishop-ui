@@ -2,7 +2,7 @@
 
 ## 技术栈
 
-- Vue 3 + Vue Router 4 + Vuex 4
+- Vue 3 + Vue Router 4 + Pinia（vuex 已移除，见下文"组合式 API 迁移"）
 - Element Plus（替代 view-design / iView）
 - 保留 `$Message` / `$Modal` / `$Notice` 兼容层（`src/utils/message.js`）
 
@@ -28,6 +28,18 @@ yarn build
    - `vue-piczoom` → `el-image` 预览
    - `mv-count-down` → 内置倒计时
    - 秒杀轮播 → 横向滚动列表
+
+## 组合式 API 迁移（2026-10 完成）
+
+全部 95 个 `.vue` 组件已从 Options API 转换为 `<script setup>`，同时完成 vuex → pinia：
+
+- **状态管理**：`src/stores/app.js`（`useAppStore`：navList / cartNum / unreadMsg / logoImg / siteName / hotWordsList / category + 对应 setXxx actions）。原 `src/vuex/` 已删除，package.json 不再依赖 vuex。
+- **路由守卫**：`beforeRouteEnter` 无组合式等价物，5 个页面（`GoodsList` / `GoodsDetail` / `PointGoodsDetail` / `Cart` / `ShoppingCart`）保留普通 `<script>` 块存放 `export default { name, beforeRouteEnter }`——这是官方支持的合并写法，统计 Options API 残留时需排除。
+- **defineExpose**：以下组件的方法/状态被父组件通过模板 ref 调用，已显式暴露：`verify`（init / close）、`multiple-map`（open）、`addressManage`（show / hide）、`invoiceModal`（invoiceAvailable）。新增此类父子调用时必须加 `defineExpose`。
+- **模板 ref 与响应式变量同名会互相覆盖**：同名时模板 ref 统一改名 `xxxRef`（如 `formRef` / `verifyRef`）。
+- **mixin 已消除**：原 `components/mixes/talkIm.vue` 的 IM 客服逻辑已内联进 `Merchant.vue` 和 `goodsDetail/StoreSide.vue`，文件已删除。
+- **全局属性照旧**：模板中的 `$filters.*` / `linkTo` / `connectCs` / `$inputMaxLength` 是 `main.js` 注册的全局属性，`<script setup>` 下模板可直接使用；script 内使用 `$filters` 函数需从 `@/plugins/filters.js` 具名导入，`this.Cookies` 等同 `storage`（`@/plugins/storage`）。
+- **其余三端（seller / manager / im）仍为 Options API + vuex**，迁移时参照本端模式。
 
 ## 批量脚本
 

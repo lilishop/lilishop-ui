@@ -41,148 +41,163 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "tagsPageOpened",
-  props: {
-    pageTagsList: Array,
-    beforePush: {
-      type: Function,
-      default: () => true,
-    },
+<script setup>
+import { ref, computed, watch, onBeforeUnmount } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useAppStore } from "@/stores/app";
+
+defineOptions({ name: "tagsPageOpened" });
+
+const props = defineProps({
+  pageTagsList: Array,
+  beforePush: {
+    type: Function,
+    default: () => true,
   },
-  data() {
-    return {
-      currentPageName: this.$route.name,
-      tagBodyLeft: 0,
-      visible: false,
-      contextMenuLeft: 0,
-      contextMenuTop: 0,
-      actionList: {
-        others: "关闭其他",
-        clearAll: "关闭所有",
-      },
-    };
-  },
-  computed: {
-    tagsList() {
-      return this.$store.state.app.storeOpenedList;
-    },
-  },
-  methods: {
-    isActive(item) {
-      return item.children
-        ? item.children[0].name === this.currentPageName
-        : item.name === this.currentPageName;
-    },
-    tagType(item) {
-      return this.isActive(item) ? "primary" : "info";
-    },
-    itemTitle(item) {
-      if (typeof item.title === "object") {
-        return item.title;
-      }
-      return item.title;
-    },
-    closePage(event, name) {
-      let storeOpenedList = this.$store.state.app.storeOpenedList;
-      let lastPageObj = storeOpenedList[0];
-      if (this.currentPageName === name) {
-        const len = storeOpenedList.length;
-        for (let i = 1; i < len; i++) {
-          if (storeOpenedList[i].name === name) {
-            lastPageObj =
-              i < len - 1 ? storeOpenedList[i + 1] : storeOpenedList[i - 1];
-            break;
-          }
-        }
-      } else if (event && event.target) {
-        const tagWidth = event.target.parentNode?.offsetWidth || 0;
-        this.tagBodyLeft = Math.min(this.tagBodyLeft + tagWidth, 0);
-      }
-      this.$store.commit("removeTag", name);
-      this.$store.commit("closePage", name);
-      storeOpenedList = this.$store.state.app.storeOpenedList;
-      localStorage.storeOpenedList = JSON.stringify(storeOpenedList);
-      if (this.currentPageName === name) {
-        this.linkTo(lastPageObj);
-      }
-    },
-    linkTo(item) {
-      if (this.$route.name === item.name) return;
-      const routerObj = { name: item.name };
-      if (item.argu) routerObj.params = item.argu;
-      if (item.query) routerObj.query = item.query;
-      if (this.beforePush(item)) {
-        this.$router.push(routerObj);
-      }
-    },
-    handlescroll(e) {
-      const type = e.type;
-      let delta = 0;
-      if (type === "DOMMouseScroll" || type === "mousewheel") {
-        delta = e.wheelDelta ? e.wheelDelta : -(e.detail || 0) * 40;
-      }
-      let left = 0;
-      if (delta > 0) {
-        left = Math.min(0, this.tagBodyLeft + delta);
-      } else if (
-        this.$refs.scrollCon.offsetWidth - 100 <
-        this.$refs.scrollBody.offsetWidth
-      ) {
-        if (
-          this.tagBodyLeft <
-          -(this.$refs.scrollBody.offsetWidth - this.$refs.scrollCon.offsetWidth + 100)
-        ) {
-          left = this.tagBodyLeft;
-        } else {
-          left = Math.max(
-            this.tagBodyLeft + delta,
-            this.$refs.scrollCon.offsetWidth -
-              this.$refs.scrollBody.offsetWidth -
-              100
-          );
-        }
-      } else {
-        this.tagBodyLeft = 0;
-      }
-      this.tagBodyLeft = left;
-    },
-    handleTagsOption(type) {
-      if (type === "clearAll") {
-        this.$store.commit("clearAllTags");
-        this.$router.push({ name: "home_index" });
-      } else {
-        this.$store.commit("clearOtherTags", this);
-      }
-      this.tagBodyLeft = 0;
-    },
-    contextMenu(item, e) {
-      this.visible = true;
-      const offsetLeft = this.$el.getBoundingClientRect().left;
-      this.contextMenuLeft = e.clientX - offsetLeft + 10;
-      this.contextMenuTop = e.clientY - 64;
-    },
-    closeMenu() {
-      this.visible = false;
-    },
-  },
-  watch: {
-    $route(to) {
-      this.currentPageName = to.name;
-    },
-    visible(value) {
-      if (value) {
-        document.body.addEventListener("click", this.closeMenu);
-      } else {
-        document.body.removeEventListener("click", this.closeMenu);
-      }
-    },
-  },
-  beforeUnmount() {
-    document.body.removeEventListener("click", this.closeMenu);
-  },
+});
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const currentPageName = ref(route.name);
+const tagBodyLeft = ref(0);
+const visible = ref(false);
+const contextMenuLeft = ref(0);
+const contextMenuTop = ref(0);
+const actionList = {
+  others: "关闭其他",
+  clearAll: "关闭所有",
 };
+
+const scrollCon = ref(null);
+const scrollBody = ref(null);
+
+const tagsList = computed(() => appStore.storeOpenedList);
+
+const isActive = (item) => {
+  return item.children
+    ? item.children[0].name === currentPageName.value
+    : item.name === currentPageName.value;
+};
+
+const tagType = (item) => {
+  return isActive(item) ? "primary" : "info";
+};
+
+const itemTitle = (item) => {
+  if (typeof item.title === "object") {
+    return item.title;
+  }
+  return item.title;
+};
+
+const closePage = (event, name) => {
+  let storeOpenedList = appStore.storeOpenedList;
+  let lastPageObj = storeOpenedList[0];
+  if (currentPageName.value === name) {
+    const len = storeOpenedList.length;
+    for (let i = 1; i < len; i++) {
+      if (storeOpenedList[i].name === name) {
+        lastPageObj =
+          i < len - 1 ? storeOpenedList[i + 1] : storeOpenedList[i - 1];
+        break;
+      }
+    }
+  } else if (event && event.target) {
+    const tagWidth = event.target.parentNode?.offsetWidth || 0;
+    tagBodyLeft.value = Math.min(tagBodyLeft.value + tagWidth, 0);
+  }
+  appStore.removeTag(name);
+  appStore.closePage(name);
+  storeOpenedList = appStore.storeOpenedList;
+  localStorage.storeOpenedList = JSON.stringify(storeOpenedList);
+  if (currentPageName.value === name) {
+    linkTo(lastPageObj);
+  }
+};
+
+const linkTo = (item) => {
+  if (route.name === item.name) return;
+  const routerObj = { name: item.name };
+  if (item.argu) routerObj.params = item.argu;
+  if (item.query) routerObj.query = item.query;
+  if (props.beforePush(item)) {
+    router.push(routerObj);
+  }
+};
+
+const handlescroll = (e) => {
+  const type = e.type;
+  let delta = 0;
+  if (type === "DOMMouseScroll" || type === "mousewheel") {
+    delta = e.wheelDelta ? e.wheelDelta : -(e.detail || 0) * 40;
+  }
+  let left = 0;
+  if (delta > 0) {
+    left = Math.min(0, tagBodyLeft.value + delta);
+  } else if (
+    scrollCon.value.offsetWidth - 100 <
+    scrollBody.value.offsetWidth
+  ) {
+    if (
+      tagBodyLeft.value <
+      -(scrollBody.value.offsetWidth - scrollCon.value.offsetWidth + 100)
+    ) {
+      left = tagBodyLeft.value;
+    } else {
+      left = Math.max(
+        tagBodyLeft.value + delta,
+        scrollCon.value.offsetWidth -
+          scrollBody.value.offsetWidth -
+          100
+      );
+    }
+  } else {
+    tagBodyLeft.value = 0;
+  }
+  tagBodyLeft.value = left;
+};
+
+const handleTagsOption = (type) => {
+  if (type === "clearAll") {
+    appStore.clearAllTags();
+    router.push({ name: "home_index" });
+  } else {
+    appStore.clearOtherTags(route.name);
+  }
+  tagBodyLeft.value = 0;
+};
+
+const contextMenu = (item, e) => {
+  visible.value = true;
+  const offsetLeft = scrollCon.value.getBoundingClientRect().left;
+  contextMenuLeft.value = e.clientX - offsetLeft + 10;
+  contextMenuTop.value = e.clientY - 64;
+};
+
+const closeMenu = () => {
+  visible.value = false;
+};
+
+watch(
+  () => route.name,
+  (name) => {
+    currentPageName.value = name;
+  }
+);
+
+watch(visible, (value) => {
+  if (value) {
+    document.body.addEventListener("click", closeMenu);
+  } else {
+    document.body.removeEventListener("click", closeMenu);
+  }
+});
+
+onBeforeUnmount(() => {
+  document.body.removeEventListener("click", closeMenu);
+});
 </script>
 
 <style lang="scss">

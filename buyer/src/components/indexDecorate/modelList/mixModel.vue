@@ -11,29 +11,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import left from './mixs/mix-goods'
 import right from './mixs/mix-brand'
-export default {
-  name: "mixModel",
-  data() {
-    return {}
-  },
-  props: {
-    data: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  components: {
-    left,
-    right
-  },
-  mounted() {
 
-  },
-  methods: {}
-}
+defineOptions({ name: "mixModel" });
+
+defineProps({
+  data: {
+    type: Object,
+    default: () => ({})
+  }
+})
 </script>
 
 <style scoped lang="scss">

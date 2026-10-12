@@ -1,5 +1,5 @@
 <template>
-  <div class="login" @click="$refs.verify.show = false">
+  <div class="login" @click="hideVerify">
     <div class="login-brand">
       <div class="brand-inner">
         <p class="brand-name">LILISHOP</p>
@@ -24,7 +24,7 @@
         </div>
 
         <el-form
-          ref="usernameLoginForm"
+          ref="usernameLoginFormRef"
           :model="form"
           :rules="rules"
           class="form"
@@ -70,7 +70,7 @@
         </el-button>
 
         <verify
-          ref="verify"
+          ref="verifyRef"
           class="verify-con"
           verifyType="LOGIN"
           @change="verifyChange"
@@ -81,7 +81,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { User, Lock } from "@element-plus/icons-vue";
 import { login, userInfo } from "@/api/index";
 import Cookies from "js-cookie";
@@ -89,82 +91,79 @@ import Header from "@/views/main-parts/header";
 import Footer from "@/views/main-parts/footer";
 import util from "@/libs/util.js";
 import verify from "@/components/verify";
+import { setStore } from "@/libs/storage";
+import { md5 } from "@/utils/md5.js";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  components: {
-    Header,
-    Footer,
-    verify,
-    User,
-    Lock,
-  },
-  data() {
-    return {
-      year: new Date().getFullYear(),
-      loading: false,
-      form: {
-        username: "",
-        password: "",
-        mobile: "",
-        code: "",
-      },
-      rules: {
-        username: [
-          { required: true, message: "账号不能为空", trigger: "blur" },
-        ],
-        password: [
-          { required: true, message: "密码不能为空", trigger: "blur" },
-        ],
-      },
-    };
-  },
-  methods: {
-    afterLogin(res) {
-      const accessToken = res.result.accessToken;
-      const refreshToken = res.result.refreshToken;
-      this.setStore("accessToken", accessToken);
-      this.setStore("refreshToken", refreshToken);
-      userInfo().then((res) => {
-        if (res.success) {
-          Cookies.set("userInfoManager", JSON.stringify(res.result));
-          this.$store.commit("setAvatarPath", res.result.avatar);
-          util.initRouter(this);
-          this.$store.commit("setOpenedList");
-          this.$store.commit("initCachePage");
-          this.$router.push({ name: "home_index" });
-        } else {
-          this.loading = false;
-        }
-      });
-    },
-    submitLogin() {
-      this.$refs.usernameLoginForm.validate((valid) => {
-        if (valid) {
-          this.$refs.verify.init();
-        }
-      });
-    },
-    verifyChange(con) {
-      if (!con.status) return;
-      this.loading = true;
-      const fd = new FormData();
-      fd.append("username", this.form.username);
-      fd.append("password", this.md5(this.form.password));
-      login(fd)
-        .then((res) => {
-          if (res && res.success) {
-            this.afterLogin(res);
-          } else {
-            this.loading = false;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-      this.$refs.verify.show = false;
-    },
-  },
+const router = useRouter();
+const appStore = useAppStore();
+
+const year = ref(new Date().getFullYear());
+const loading = ref(false);
+const form = reactive({
+  username: "",
+  password: "",
+  mobile: "",
+  code: "",
+});
+const rules = {
+  username: [{ required: true, message: "账号不能为空", trigger: "blur" }],
+  password: [{ required: true, message: "密码不能为空", trigger: "blur" }],
 };
+
+const usernameLoginFormRef = ref(null);
+const verifyRef = ref(null);
+
+function hideVerify() {
+  verifyRef.value.show = false;
+}
+
+function afterLogin(res) {
+  const accessToken = res.result.accessToken;
+  const refreshToken = res.result.refreshToken;
+  setStore("accessToken", accessToken);
+  setStore("refreshToken", refreshToken);
+  userInfo().then((res) => {
+    if (res.success) {
+      Cookies.set("userInfoManager", JSON.stringify(res.result));
+      appStore.setAvatarPath(res.result.avatar);
+      util.initRouter();
+      appStore.setOpenedList();
+      appStore.initCachePage();
+      router.push({ name: "home_index" });
+    } else {
+      loading.value = false;
+    }
+  });
+}
+
+function submitLogin() {
+  usernameLoginFormRef.value.validate((valid) => {
+    if (valid) {
+      verifyRef.value.init();
+    }
+  });
+}
+
+function verifyChange(con) {
+  if (!con.status) return;
+  loading.value = true;
+  const fd = new FormData();
+  fd.append("username", form.username);
+  fd.append("password", md5(form.password));
+  login(fd)
+    .then((res) => {
+      if (res && res.success) {
+        afterLogin(res);
+      } else {
+        loading.value = false;
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+  verifyRef.value.show = false;
+}
 </script>
 
 <style lang="scss" scoped>

@@ -16,7 +16,9 @@
   </el-tabs>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import {
   ServeGetStoreDetail,
   ServeGetFootPrint,
@@ -29,255 +31,258 @@ import StoreDetail from "@/components/chat/panel/template/storeDetail.vue";
 import FootPrint from "@/components/chat/panel/template/footPrint.vue";
 import GoodsLink from "@/components/chat/panel/template/goodsLink.vue";
 import SocketInstance from "@/im-server/socket-instance";
-import { mapState, mapGetters } from "vuex";
+import { useTalkStore } from "@/stores/talk";
+import { useDialogueStore } from "@/stores/dialogue";
 import { getToken } from "@/utils/auth";
-import { isBuyerImMode } from "@/utils/im-mode";
+// 与 computed 属性同名，改用别名导入
+import { isBuyerImMode as isBuyerImModeFn } from "@/utils/im-mode";
 
 const SIDE_REQUEST_OPTIONS = { skipAuthDialog: true };
 
-export default {
-  components: {
-    StoreDetail,
-    FootPrint,
-    GoodsLink,
+const props = defineProps({
+  toUser: {
+    type: Object,
+    default: null,
   },
-  props: {
-    toUser: {
-      type: Object,
-      default: null,
-    },
-    id: {
-      type: String,
-      default: "",
-    },
-    goodsParams: {
-      type: Object,
-      default: null,
-    },
+  id: {
+    type: String,
+    default: "",
   },
-  computed: {
-    ...mapGetters(["talkItems"]),
-    ...mapState({
-      index_name: (state) => state.dialogue.index_name,
-    }),
-    isBuyerImMode() {
-      return isBuyerImMode(this.$route);
-    },
+  goodsParams: {
+    type: Object,
+    default: null,
   },
-  watch: {
-    toUser() {
-      this.syncStoreFlagCache();
-      this.resetSidePanelData();
-      if (this.toUser.storeFlag) {
-        this.getStoreDetail();
-      }
-      this.getFootPrint();
-      if (this.goodsParams && this.toUser.storeFlag) {
-        this.getGoodsDetail();
-      }
-    },
-  },
-  data() {
-    return {
-      activeName: "history",
-      storeInfo: {},
-      memberInfo: {},
-      footPrintParams: {
-        pageSize: 20,
-        pageNumber: 1,
-        memberId: "",
-        storeId: "",
-      },
-      goodsDetail: {},
-      footPrintList: [],
-      orderPrintList: [],
-    };
-  },
-  mounted() {
-    this.syncStoreFlagCache();
-    if (this.toUser.storeFlag) {
-      this.getStoreDetail();
+});
+
+const talkStore = useTalkStore();
+const dialogueStore = useDialogueStore();
+const route = useRoute();
+
+const activeName = ref("history");
+const storeInfo = ref({});
+const memberInfo = ref({});
+const footPrintParams = reactive({
+  pageSize: 20,
+  pageNumber: 1,
+  memberId: "",
+  storeId: "",
+});
+const goodsDetail = ref({});
+const footPrintList = ref([]);
+const orderPrintList = ref([]);
+
+const talkItems = computed(() => talkStore.talkItems);
+const index_name = computed(() => dialogueStore.index_name);
+const isBuyerImMode = computed(() => isBuyerImModeFn(route));
+
+watch(
+  () => props.toUser,
+  () => {
+    syncStoreFlagCache();
+    resetSidePanelData();
+    if (props.toUser.storeFlag) {
+      getStoreDetail();
     }
-    this.getFootPrint();
-    if (this.goodsParams && this.toUser.storeFlag) {
-      this.getGoodsDetail();
+    getFootPrint();
+    if (props.goodsParams && props.toUser.storeFlag) {
+      getGoodsDetail();
     }
-  },
-  methods: {
-    syncStoreFlagCache() {
-      localStorage.setItem(
-        "storeFlag",
-        this.isBuyerImMode ? "true" : "false"
-      );
-    },
-    resetSidePanelData() {
-      this.footPrintList = [];
-      this.orderPrintList = [];
-      this.footPrintParams.pageNumber = 1;
-    },
-    getStoreDetail() {
-      ServeGetStoreDetail(this.toUser.userId, SIDE_REQUEST_OPTIONS)
-        .then((res) => {
-          if (res.success) {
-            this.storeInfo = res.result;
-          }
-        })
-        .catch(() => {});
-    },
-    loadMoreFootPrint() {
-      this.footPrintParams.pageNumber++;
-      this.getFootPrint();
-    },
-    handleClick() {},
-    getGoodsDetail() {
-      if (!this.toUser.storeFlag) {
-        return;
+  }
+);
+
+onMounted(() => {
+  syncStoreFlagCache();
+  if (props.toUser.storeFlag) {
+    getStoreDetail();
+  }
+  getFootPrint();
+  if (props.goodsParams && props.toUser.storeFlag) {
+    getGoodsDetail();
+  }
+});
+
+function syncStoreFlagCache() {
+  localStorage.setItem(
+    "storeFlag",
+    isBuyerImMode.value ? "true" : "false"
+  );
+}
+
+function resetSidePanelData() {
+  footPrintList.value = [];
+  orderPrintList.value = [];
+  footPrintParams.pageNumber = 1;
+}
+
+function getStoreDetail() {
+  ServeGetStoreDetail(props.toUser.userId, SIDE_REQUEST_OPTIONS)
+    .then((res) => {
+      if (res.success) {
+        storeInfo.value = res.result;
       }
-      if (!this.goodsParams || !this.goodsParams.goodsId) {
-        return;
+    })
+    .catch(() => {});
+}
+
+function loadMoreFootPrint() {
+  footPrintParams.pageNumber++;
+  getFootPrint();
+}
+
+function handleClick() {}
+
+function getGoodsDetail() {
+  if (!props.toUser.storeFlag) {
+    return;
+  }
+  if (!props.goodsParams || !props.goodsParams.goodsId) {
+    return;
+  }
+  ServeGetGoodsDetail(props.goodsParams, SIDE_REQUEST_OPTIONS)
+    .then((res) => {
+      if (res.success) {
+        goodsDetail.value = res.result.data;
       }
-      ServeGetGoodsDetail(this.goodsParams, SIDE_REQUEST_OPTIONS)
-        .then((res) => {
-          if (res.success) {
-            this.goodsDetail = res.result.data;
-          }
-        })
-        .catch(() => {});
-    },
-    normalizeFootPrintRecords(records = []) {
-      const goodsId = this.goodsParams?.goodsId;
-      return records
-        .filter((item) => item != null)
-        .filter((item) => !goodsId || item.goodsId !== goodsId)
-        .map((item) => ({
-          ...item,
-          btnHide: localStorage.getItem(item.goodsId) ? 0 : 1,
-        }));
-    },
-    normalizeOrderRecords(records = []) {
-      return records.map((item) => ({
-        ...item,
-        btnHide: 1,
-      }));
-    },
-    getFootPrint() {
-      if (!getToken()) {
-        return;
+    })
+    .catch(() => {});
+}
+
+function normalizeFootPrintRecords(records = []) {
+  const goodsId = props.goodsParams?.goodsId;
+  return records
+    .filter((item) => item != null)
+    .filter((item) => !goodsId || item.goodsId !== goodsId)
+    .map((item) => ({
+      ...item,
+      btnHide: localStorage.getItem(item.goodsId) ? 0 : 1,
+    }));
+}
+
+function normalizeOrderRecords(records = []) {
+  return records.map((item) => ({
+    ...item,
+    btnHide: 1,
+  }));
+}
+
+function getFootPrint() {
+  if (!getToken()) {
+    return;
+  }
+  if (!props.toUser?.userId || !props.id) {
+    return;
+  }
+
+  if (isBuyerImMode.value) {
+    footPrintParams.memberId = props.id;
+    footPrintParams.storeId = props.toUser.userId;
+    fetchBuyerSideData();
+  } else {
+    footPrintParams.memberId = props.toUser.userId;
+    footPrintParams.storeId = props.id;
+    fetchStoreSideData();
+  }
+}
+
+function fetchBuyerSideData() {
+  ServeGetFootPrint(footPrintParams, SIDE_REQUEST_OPTIONS)
+    .then((res) => {
+      if (res?.result?.records) {
+        footPrintList.value.push(
+          ...normalizeFootPrintRecords(res.result.records)
+        );
       }
-      if (!this.toUser?.userId || !this.id) {
-        return;
+    })
+    .catch(() => {});
+
+  ServeGetOrderPrint(footPrintParams, SIDE_REQUEST_OPTIONS)
+    .then((res) => {
+      if (res?.code === 200 && res?.result?.records) {
+        orderPrintList.value.push(
+          ...normalizeOrderRecords(res.result.records)
+        );
       }
+    })
+    .catch(() => {});
+}
 
-      if (this.isBuyerImMode) {
-        this.footPrintParams.memberId = this.id;
-        this.footPrintParams.storeId = this.toUser.userId;
-        this.fetchBuyerSideData();
-      } else {
-        this.footPrintParams.memberId = this.toUser.userId;
-        this.footPrintParams.storeId = this.id;
-        this.fetchStoreSideData();
+function fetchStoreSideData() {
+  ServeStoreGetFootPrint(footPrintParams, SIDE_REQUEST_OPTIONS)
+    .then((res) => {
+      if (res?.result?.records) {
+        footPrintList.value.push(
+          ...normalizeFootPrintRecords(res.result.records)
+        );
       }
-    },
-    fetchBuyerSideData() {
-      ServeGetFootPrint(this.footPrintParams, SIDE_REQUEST_OPTIONS)
-        .then((res) => {
-          if (res?.result?.records) {
-            this.footPrintList.push(
-              ...this.normalizeFootPrintRecords(res.result.records)
-            );
-          }
-        })
-        .catch(() => {});
+    })
+    .catch(() => {});
 
-      ServeGetOrderPrint(this.footPrintParams, SIDE_REQUEST_OPTIONS)
-        .then((res) => {
-          if (res?.code === 200 && res?.result?.records) {
-            this.orderPrintList.push(
-              ...this.normalizeOrderRecords(res.result.records)
-            );
-          }
-        })
-        .catch(() => {});
-    },
-    fetchStoreSideData() {
-      ServeStoreGetFootPrint(this.footPrintParams, SIDE_REQUEST_OPTIONS)
-        .then((res) => {
-          if (res?.result?.records) {
-            this.footPrintList.push(
-              ...this.normalizeFootPrintRecords(res.result.records)
-            );
-          }
-        })
-        .catch(() => {});
-
-      ServeStoreGetOrderPrint(this.footPrintParams, SIDE_REQUEST_OPTIONS)
-        .then((res) => {
-          if (res?.code === 200 && res?.result?.records) {
-            this.orderPrintList.push(
-              ...this.normalizeOrderRecords(res.result.records)
-            );
-          }
-        })
-        .catch(() => {});
-    },
-
-    submitSendMessage(record, context, messageType) {
-      SocketInstance.emit("event_talk", record);
-      this.$store.commit("UPDATE_TALK_ITEM", {
-        index_name: this.index_name,
-        draft_text: "",
-      });
-      const insterChat = {
-        createTime: this.formateDateAndTimeToString(new Date()),
-        fromUser: this.id,
-        toUser: record.to,
-        isRead: false,
-        messageType: messageType,
-        text: context,
-        float: "right",
-      };
-
-      this.$store.commit("PUSH_DIALOGUE", insterChat);
-      let el = document.getElementById("lumenChatPanel");
-      let isBottom =
-        Math.ceil(el.scrollTop) + el.clientHeight >= el.scrollHeight;
-
-      if (isBottom || record.to == this.id) {
-        this.$nextTick(() => {
-          el.scrollTop = el.scrollHeight;
-        });
-      } else {
-        this.$store.commit("SET_TLAK_UNREAD_MESSAGE", {
-          content: context,
-          nickname: record.name,
-        });
+  ServeStoreGetOrderPrint(footPrintParams, SIDE_REQUEST_OPTIONS)
+    .then((res) => {
+      if (res?.code === 200 && res?.result?.records) {
+        orderPrintList.value.push(
+          ...normalizeOrderRecords(res.result.records)
+        );
       }
-    },
+    })
+    .catch(() => {});
+}
 
-    formateDateAndTimeToString(date) {
-      var hours = date.getHours();
-      var mins = date.getMinutes();
-      var secs = date.getSeconds();
-      var msecs = date.getMilliseconds();
-      if (hours < 10) hours = "0" + hours;
-      if (mins < 10) mins = "0" + mins;
-      if (secs < 10) secs = "0" + secs;
-      if (msecs < 10) secs = "0" + msecs;
-      return (
-        this.formatDateToString(date) + " " + hours + ":" + mins + ":" + secs
-      );
-    },
+function submitSendMessage(record, context, messageType) {
+  SocketInstance.emit("event_talk", record);
+  talkStore.UPDATE_TALK_ITEM({
+    index_name: index_name.value,
+    draft_text: "",
+  });
+  const insterChat = {
+    createTime: formateDateAndTimeToString(new Date()),
+    fromUser: props.id,
+    toUser: record.to,
+    isRead: false,
+    messageType: messageType,
+    text: context,
+    float: "right",
+  };
 
-    formatDateToString(date) {
-      var year = date.getFullYear();
-      var month = date.getMonth() + 1;
-      var day = date.getDate();
-      if (month < 10) month = "0" + month;
-      if (day < 10) day = "0" + day;
-      return year + "-" + month + "-" + day;
-    },
-  },
-};
+  dialogueStore.PUSH_DIALOGUE(insterChat);
+  let el = document.getElementById("lumenChatPanel");
+  let isBottom =
+    Math.ceil(el.scrollTop) + el.clientHeight >= el.scrollHeight;
+
+  if (isBottom || record.to == props.id) {
+    nextTick(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+  } else {
+    talkStore.SET_TLAK_UNREAD_MESSAGE({
+      content: context,
+      nickname: record.name,
+    });
+  }
+}
+
+function formateDateAndTimeToString(date) {
+  var hours = date.getHours();
+  var mins = date.getMinutes();
+  var secs = date.getSeconds();
+  var msecs = date.getMilliseconds();
+  if (hours < 10) hours = "0" + hours;
+  if (mins < 10) mins = "0" + mins;
+  if (secs < 10) secs = "0" + secs;
+  if (msecs < 10) secs = "0" + msecs;
+  return (
+    formatDateToString(date) + " " + hours + ":" + mins + ":" + secs
+  );
+}
+
+function formatDateToString(date) {
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  if (month < 10) month = "0" + month;
+  if (day < 10) day = "0" + day;
+  return year + "-" + month + "-" + day;
+}
 </script>
 
 <style scoped lang="less">

@@ -150,7 +150,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="templateForm" :model="templateForm" label-width="100px" :rules="templateFormValidate">
+      <el-form ref="templateFormRef" :model="templateForm" label-width="100px" :rules="templateFormValidate">
         <el-form-item label="模板名称" prop="templateName">
           <el-input v-model="templateForm.templateName" maxlength="30" clearable placeholder="请输入模板名称，不超过30字符" />
         </el-form-item>
@@ -192,7 +192,7 @@
         <div class="left-show" v-html="smsContent"></div>
         <div class="sms">效果预览</div>
         <div class="send-form">
-          <el-form ref="smsForm" :model="smsForm" label-width="100px" :rules="smsFormValidate">
+          <el-form ref="smsFormRef" :model="smsForm" label-width="100px" :rules="smsFormValidate">
             <el-form-item label="短信签名" prop="signName">
               <el-select v-model="smsForm.signName" style="width: 35%" @change="selectSmsSign">
                 <el-option
@@ -286,389 +286,391 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import * as API_Setting from "@/api/setting.js";
 import * as API_Member from "@/api/member.js";
 
-export default {
-  name: "sms",
-  data() {
-    return {
-      activeTab: "LIST",
-      loading: false,
-      customSms: false,
-      alreadyCheck: [],
-      alreadyCheckShow: [],
-      memberPage: 0,
-      members: [],
-      smsTemplateContent: "",
-      memberNum: 0,
-      smsContent: "<div class='sms'>效果预览</div>",
-      smsTemplates: [],
-      smsSigns: [],
-      sendSmsModal: false,
-      sendSmsModalTitle: "短信发送",
-      modalType: 0,
-      templateModalVisible: false,
-      templateModalTitle: "",
-      templateForm: {},
-      submitLoading: false,
-      signSearchForm: { pageNumber: 1, pageSize: 20 },
-      templateSearchForm: { pageNumber: 1, pageSize: 20 },
-      memberSearchFrom: { disabled: "OPEN" },
-      memberSearchParam: {
-        pageNumber: 1,
-        pageSize: 8,
-        disabled: "OPEN",
-      },
-      smsSearchForm: {
-        sort: "createTime",
-        order: "desc",
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      smsForm: {
-        smsName: "",
-        signName: "",
-        context: "",
-        smsRange: "1",
-        num: 0,
-        messageCode: "",
-      },
-      smsFormValidate: {
-        signName: [{ required: true, message: "请选择短信签名", trigger: "change" }],
-        messageCode: [{ required: true, message: "请选择短信模板", trigger: "change" }],
-      },
-      templateFormValidate: {
-        templateName: [{ required: true, message: "请输入短信模板名称", trigger: "blur" }],
-        templateContent: [{ required: true, message: "请输入短信模板内容", trigger: "blur" }],
-        remark: [{ required: true, message: "请输入短信模板申请说明", trigger: "blur" }],
-      },
-      smsData: [],
-      smsTotal: 0,
-      templateData: [],
-      templateTotal: 0,
-      signData: [],
-      signTotal: 0,
-      memberLoadingMore: false,
-    };
-  },
-  methods: {
-    templateStatusText(status) {
-      const map = { 0: "审核中", 1: "审核通过", 2: "审核失败" };
-      return map[status] ?? map[String(status)] ?? "-";
-    },
-    init() {
-      this.getSms();
-      this.getMemberNum();
-    },
-    getMemberNum() {
-      API_Member.getMemberNum(this.memberSearchFrom).then((res) => {
+defineOptions({ name: "sms" });
+
+const router = useRouter();
+
+const activeTab = ref("LIST");
+const loading = ref(false);
+const customSms = ref(false);
+const alreadyCheck = ref([]);
+const alreadyCheckShow = ref([]);
+const memberPage = ref(0);
+const members = ref([]);
+const smsTemplateContent = ref("");
+const memberNum = ref(0);
+const smsContent = ref("<div class='sms'>效果预览</div>");
+const smsTemplates = ref([]);
+const smsSigns = ref([]);
+const sendSmsModal = ref(false);
+const sendSmsModalTitle = ref("短信发送");
+const modalType = ref(0);
+const templateModalVisible = ref(false);
+const templateModalTitle = ref("");
+const templateForm = ref({});
+const submitLoading = ref(false);
+const signSearchForm = reactive({ pageNumber: 1, pageSize: 20 });
+const templateSearchForm = reactive({ pageNumber: 1, pageSize: 20 });
+const memberSearchFrom = reactive({ disabled: "OPEN" });
+const memberSearchParam = reactive({
+  pageNumber: 1,
+  pageSize: 8,
+  disabled: "OPEN",
+});
+const smsSearchForm = reactive({
+  sort: "createTime",
+  order: "desc",
+  pageNumber: 1,
+  pageSize: 20,
+});
+const smsForm = ref({
+  smsName: "",
+  signName: "",
+  context: "",
+  smsRange: "1",
+  num: 0,
+  messageCode: "",
+});
+const smsFormValidate = reactive({
+  signName: [{ required: true, message: "请选择短信签名", trigger: "change" }],
+  messageCode: [{ required: true, message: "请选择短信模板", trigger: "change" }],
+});
+const templateFormValidate = reactive({
+  templateName: [{ required: true, message: "请输入短信模板名称", trigger: "blur" }],
+  templateContent: [{ required: true, message: "请输入短信模板内容", trigger: "blur" }],
+  remark: [{ required: true, message: "请输入短信模板申请说明", trigger: "blur" }],
+});
+const smsData = ref([]);
+const smsTotal = ref(0);
+const templateData = ref([]);
+const templateTotal = ref(0);
+const signData = ref([]);
+const signTotal = ref(0);
+const memberLoadingMore = ref(false);
+
+const smsFormRef = ref(null);
+const templateFormRef = ref(null);
+
+function templateStatusText(status) {
+  const map = { 0: "审核中", 1: "审核通过", 2: "审核失败" };
+  return map[status] ?? map[String(status)] ?? "-";
+}
+function init() {
+  getSms();
+  getMemberNum();
+}
+function getMemberNum() {
+  API_Member.getMemberNum(memberSearchFrom).then((res) => {
+    if (res.success) {
+      memberNum.value = res.result;
+      smsForm.value.num = memberNum.value;
+    }
+  });
+}
+function alreadyCheckClose(val, index) {
+  alreadyCheck.value.splice(index, 1);
+  alreadyCheckShow.value.splice(index, 1);
+  members.value.forEach((item) => {
+    if (item.____selected && item.mobile == val.mobile) {
+      item.____selected = false;
+    }
+  });
+  smsForm.value.num--;
+  memberNum.value--;
+}
+function detail() {}
+function smsRangeChange(v) {
+  memberNum.value = 0;
+  smsForm.value.num = 0;
+  if (v == 1) {
+    alreadyCheck.value = [];
+    alreadyCheckShow.value = [];
+    customSms.value = false;
+    getMemberNum();
+  }
+  if (v == 2) {
+    customSms.value = true;
+    members.value = [];
+    memberSearchParam.pageNumber = 1;
+    getMembers();
+  }
+}
+function memberSearch() {
+  memberSearchParam.pageNumber = 1;
+  members.value = [];
+  getMembers();
+}
+function moveMember(index, item) {
+  if (!item.mobile) {
+    ElMessage.error("当前用户暂无手机号绑定");
+    return false;
+  }
+  item.____selected = true;
+  if (alreadyCheck.value.length == 0) {
+    alreadyCheck.value.push(item.mobile);
+    alreadyCheckShow.value.push(item);
+    smsForm.value.num++;
+    memberNum.value++;
+  } else {
+    const result = alreadyCheck.value.indexOf(item.mobile);
+    if (result < 0) {
+      smsForm.value.num++;
+      memberNum.value++;
+      alreadyCheck.value.push(item.mobile);
+      alreadyCheckShow.value.push(item);
+    }
+  }
+}
+function onMemberScroll({ scrollTop }) {
+  const wrap = document.querySelector(".member-scroll .el-scrollbar__wrap");
+  if (!wrap || memberLoadingMore.value) return;
+  const nearBottom = scrollTop + wrap.clientHeight >= wrap.scrollHeight - 20;
+  if (nearBottom && memberPage.value != memberSearchParam.pageNumber) {
+    memberLoadingMore.value = true;
+    memberSearchParam.pageNumber++;
+    getMembers(true);
+  }
+}
+function getMembers(append = false) {
+  API_Member.getMemberListData(memberSearchParam).then((res) => {
+    memberLoadingMore.value = false;
+    if (res.success) {
+      res.result.records.forEach((item) => {
+        item.____selected = false;
+        members.value.push(item);
+      });
+      memberPage.value = res.result.pages;
+    }
+  });
+}
+function sendBatchSmsModal() {
+  templateSearchForm.templateStatus = 1;
+  API_Setting.getSmsTemplatePage(templateSearchForm).then((res) => {
+    if (res.success) {
+      smsTemplates.value = res.result.records;
+    }
+  });
+  signSearchForm.signStatus = 1;
+  API_Setting.getSmsSignPage(signSearchForm).then((res) => {
+    if (res.success) {
+      smsSigns.value = res.result.records;
+    }
+  });
+  smsContent.value = "<div class='sms'>效果预览</div>";
+  alreadyCheck.value = [];
+  alreadyCheckShow.value = [];
+  smsTemplateContent.value = "效果预览";
+  smsForm.value = {
+    smsName: "",
+    signName: "",
+    context: "",
+    smsRange: "1",
+    num: 0,
+    messageCode: "",
+  };
+  getMemberNum();
+  sendSmsModal.value = true;
+}
+function paneChange(name) {
+  if (name == "TEMPLATE") {
+    getSmsTemplate();
+  }
+  if (name == "SIGN") {
+    getSmsSign();
+  }
+}
+function selectSmsSign(v) {
+  if (v != undefined) {
+    smsContent.value = "<div class='sms'>【" + v + "】" + " " + smsTemplateContent.value + "</div>";
+  } else {
+    smsContent.value = "<div class='sms'>效果预览" + smsTemplateContent.value + "</div>";
+  }
+}
+function selectSmsTemplate() {
+  smsTemplates.value.forEach((e) => {
+    if (smsForm.value.messageCode == e.templateCode) {
+      smsTemplateContent.value = e.templateContent;
+      smsForm.value.smsName = e.templateName;
+    }
+  });
+  if (smsForm.value.signName) {
+    smsContent.value =
+      "<div class='sms'>【" + smsForm.value.signName + "】" + smsTemplateContent.value + "</div>";
+  } else {
+    smsContent.value = "<div class='sms'>" + smsTemplateContent.value + "</div>";
+  }
+  smsForm.value.context = smsTemplateContent.value;
+}
+function deleteSmsTemplate(v) {
+  ElMessageBox.confirm("您确认要删除此短信模板？", "确认删除", { type: "warning" }).then(() => {
+      API_Setting.deleteSmsTemplatePage({ templateCode: v.templateCode }).then((res) => {
         if (res.success) {
-          this.memberNum = res.result;
-          this.smsForm.num = this.memberNum;
+          ElMessage.success("删除成功");
+          getSmsTemplate();
         }
       });
-    },
-    alreadyCheckClose(val, index) {
-      this.alreadyCheck.splice(index, 1);
-      this.alreadyCheckShow.splice(index, 1);
-      this.members.forEach((item) => {
-        if (item.____selected && item.mobile == val.mobile) {
-          item.____selected = false;
-        }
-      });
-      this.smsForm.num--;
-      this.memberNum--;
-    },
-    detail() {},
-    smsRangeChange(v) {
-      this.memberNum = 0;
-      this.smsForm.num = 0;
-      if (v == 1) {
-        this.alreadyCheck = [];
-        this.alreadyCheckShow = [];
-        this.customSms = false;
-        this.getMemberNum();
+  }).catch(() => {});
+}
+function sendSms() {
+  smsFormRef.value.validate((valid) => {
+    if (!valid) return;
+    smsForm.value.mobile = alreadyCheck.value;
+    API_Setting.sendSms(smsForm.value).then((res) => {
+      if (res.success) {
+        ElMessage.success("发送成功");
+        getSms();
+        sendSmsModal.value = false;
       }
-      if (v == 2) {
-        this.customSms = true;
-        this.members = [];
-        this.memberSearchParam.pageNumber = 1;
-        this.getMembers();
-      }
-    },
-    memberSearch() {
-      this.memberSearchParam.pageNumber = 1;
-      this.members = [];
-      this.getMembers();
-    },
-    moveMember(index, item) {
-      if (!item.mobile) {
-        ElMessage.error("当前用户暂无手机号绑定");
-        return false;
-      }
-      item.____selected = true;
-      if (this.alreadyCheck.length == 0) {
-        this.alreadyCheck.push(item.mobile);
-        this.alreadyCheckShow.push(item);
-        this.smsForm.num++;
-        this.memberNum++;
-      } else {
-        const result = this.alreadyCheck.indexOf(item.mobile);
-        if (result < 0) {
-          this.smsForm.num++;
-          this.memberNum++;
-          this.alreadyCheck.push(item.mobile);
-          this.alreadyCheckShow.push(item);
-        }
-      }
-    },
-    onMemberScroll({ scrollTop }) {
-      const wrap = document.querySelector(".member-scroll .el-scrollbar__wrap");
-      if (!wrap || this.memberLoadingMore) return;
-      const nearBottom = scrollTop + wrap.clientHeight >= wrap.scrollHeight - 20;
-      if (nearBottom && this.memberPage != this.memberSearchParam.pageNumber) {
-        this.memberLoadingMore = true;
-        this.memberSearchParam.pageNumber++;
-        this.getMembers(true);
-      }
-    },
-    getMembers(append = false) {
-      API_Member.getMemberListData(this.memberSearchParam).then((res) => {
-        this.memberLoadingMore = false;
+    });
+  });
+}
+function addSign() {
+  router.push({ name: "add-sms-sign" });
+}
+function addTemplate() {
+  templateModalVisible.value = true;
+  templateModalTitle.value = "添加短信模板";
+  templateForm.value = {};
+  modalType.value = 0;
+}
+function editTemplate(v) {
+  templateModalVisible.value = true;
+  templateModalTitle.value = "修改短信模板";
+  templateForm.value = { ...v };
+  modalType.value = 1;
+}
+function syncSign() {
+  loading.value = true;
+  API_Setting.syncSign().then((res) => {
+    loading.value = false;
+    if (res.success) {
+      ElMessage.success("同步成功");
+      getSmsSign();
+    }
+  });
+}
+function templateSubmit() {
+  templateFormRef.value.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+    const req =
+      modalType.value == 0
+        ? API_Setting.addSmsTemplatePage(templateForm.value)
+        : API_Setting.editSmsTemplatePage(templateForm.value);
+    req
+      .then((res) => {
+        submitLoading.value = false;
         if (res.success) {
-          res.result.records.forEach((item) => {
-            item.____selected = false;
-            this.members.push(item);
-          });
-          this.memberPage = res.result.pages;
+          ElMessage.success(modalType.value == 0 ? "添加成功" : "修改成功");
+          templateModalVisible.value = false;
+          getSmsTemplate();
         }
+      })
+      .catch(() => {
+        submitLoading.value = false;
       });
-    },
-    sendBatchSmsModal() {
-      this.templateSearchForm.templateStatus = 1;
-      API_Setting.getSmsTemplatePage(this.templateSearchForm).then((res) => {
+  });
+}
+function deleteSmsSign(v) {
+  ElMessageBox.confirm("您确认要删除此短信签名？", "确认删除", { type: "warning" }).then(() => {
+      API_Setting.deleteSign(v.id).then((res) => {
         if (res.success) {
-          this.smsTemplates = res.result.records;
+          ElMessage.success("删除成功");
+          getSmsSign();
         }
       });
-      this.signSearchForm.signStatus = 1;
-      API_Setting.getSmsSignPage(this.signSearchForm).then((res) => {
-        if (res.success) {
-          this.smsSigns = res.result.records;
-        }
-      });
-      this.smsContent = "<div class='sms'>效果预览</div>";
-      this.alreadyCheck = [];
-      this.alreadyCheckShow = [];
-      this.smsTemplateContent = "效果预览";
-      this.smsForm = {
-        smsName: "",
-        signName: "",
-        context: "",
-        smsRange: "1",
-        num: 0,
-        messageCode: "",
-      };
-      this.getMemberNum();
-      this.sendSmsModal = true;
-    },
-    paneChange(name) {
-      if (name == "TEMPLATE") {
-        this.getSmsTemplate();
+  }).catch(() => {});
+}
+function syncTemplate() {
+  loading.value = true;
+  API_Setting.syncTemplate().then((res) => {
+    loading.value = false;
+    if (res.success) {
+      ElMessage.success("同步成功");
+      getSmsTemplate();
+    }
+  });
+}
+function smsChangePage(v) {
+  smsSearchForm.pageNumber = v;
+  getSms();
+}
+function smsChangePageSize(v) {
+  smsSearchForm.pageNumber = 1;
+  smsSearchForm.pageSize = v;
+  getSms();
+}
+function templateChangePage(v) {
+  templateSearchForm.pageNumber = v;
+  getSmsTemplate();
+}
+function templateChangePageSize(v) {
+  templateSearchForm.pageNumber = 1;
+  templateSearchForm.pageSize = v;
+  getSmsTemplate();
+}
+function getSmsTemplate() {
+  loading.value = true;
+  API_Setting.getSmsTemplatePage(templateSearchForm)
+    .then((res) => {
+      if (res.success) {
+        templateData.value = res.result.records;
+        templateTotal.value = res.result.total;
       }
-      if (name == "SIGN") {
-        this.getSmsSign();
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function getSms() {
+  loading.value = true;
+  API_Setting.getSmsPage(smsSearchForm)
+    .then((res) => {
+      if (res.success) {
+        smsData.value = res.result.records;
+        smsTotal.value = res.result.total;
       }
-    },
-    selectSmsSign(v) {
-      if (v != undefined) {
-        this.smsContent = "<div class='sms'>【" + v + "】" + " " + this.smsTemplateContent + "</div>";
-      } else {
-        this.smsContent = "<div class='sms'>效果预览" + this.smsTemplateContent + "</div>";
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function signChangePage(v) {
+  signSearchForm.pageNumber = v;
+  getSmsSign();
+}
+function signChangePageSize(v) {
+  signSearchForm.pageNumber = 1;
+  signSearchForm.pageSize = v;
+  getSmsSign();
+}
+function editSign(v) {
+  router.push({ name: "add-sms-sign", query: { id: v.id } });
+}
+function getSmsSign() {
+  loading.value = true;
+  API_Setting.getSmsSignPage(signSearchForm)
+    .then((res) => {
+      if (res.success) {
+        signData.value = res.result.records;
+        signTotal.value = res.result.total;
       }
-    },
-    selectSmsTemplate() {
-      this.smsTemplates.forEach((e) => {
-        if (this.smsForm.messageCode == e.templateCode) {
-          this.smsTemplateContent = e.templateContent;
-          this.smsForm.smsName = e.templateName;
-        }
-      });
-      if (this.smsForm.signName) {
-        this.smsContent =
-          "<div class='sms'>【" + this.smsForm.signName + "】" + this.smsTemplateContent + "</div>";
-      } else {
-        this.smsContent = "<div class='sms'>" + this.smsTemplateContent + "</div>";
-      }
-      this.smsForm.context = this.smsTemplateContent;
-    },
-    deleteSmsTemplate(v) {
-      ElMessageBox.confirm("您确认要删除此短信模板？", "确认删除", { type: "warning" }).then(() => {
-          API_Setting.deleteSmsTemplatePage({ templateCode: v.templateCode }).then((res) => {
-            if (res.success) {
-              ElMessage.success("删除成功");
-              this.getSmsTemplate();
-            }
-          });
-      }).catch(() => {});
-    },
-    sendSms() {
-      this.$refs.smsForm.validate((valid) => {
-        if (!valid) return;
-        this.smsForm.mobile = this.alreadyCheck;
-        API_Setting.sendSms(this.smsForm).then((res) => {
-          if (res.success) {
-            ElMessage.success("发送成功");
-            this.getSms();
-            this.sendSmsModal = false;
-          }
-        });
-      });
-    },
-    addSign() {
-      this.$router.push({ name: "add-sms-sign" });
-    },
-    addTemplate() {
-      this.templateModalVisible = true;
-      this.templateModalTitle = "添加短信模板";
-      this.templateForm = {};
-      this.modalType = 0;
-    },
-    editTemplate(v) {
-      this.templateModalVisible = true;
-      this.templateModalTitle = "修改短信模板";
-      this.templateForm = { ...v };
-      this.modalType = 1;
-    },
-    syncSign() {
-      this.loading = true;
-      API_Setting.syncSign().then((res) => {
-        this.loading = false;
-        if (res.success) {
-          ElMessage.success("同步成功");
-          this.getSmsSign();
-        }
-      });
-    },
-    templateSubmit() {
-      this.$refs.templateForm.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        const req =
-          this.modalType == 0
-            ? API_Setting.addSmsTemplatePage(this.templateForm)
-            : API_Setting.editSmsTemplatePage(this.templateForm);
-        req
-          .then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              ElMessage.success(this.modalType == 0 ? "添加成功" : "修改成功");
-              this.templateModalVisible = false;
-              this.getSmsTemplate();
-            }
-          })
-          .catch(() => {
-            this.submitLoading = false;
-          });
-      });
-    },
-    deleteSmsSign(v) {
-      ElMessageBox.confirm("您确认要删除此短信签名？", "确认删除", { type: "warning" }).then(() => {
-          API_Setting.deleteSign(v.id).then((res) => {
-            if (res.success) {
-              ElMessage.success("删除成功");
-              this.getSmsSign();
-            }
-          });
-      }).catch(() => {});
-    },
-    syncTemplate() {
-      this.loading = true;
-      API_Setting.syncTemplate().then((res) => {
-        this.loading = false;
-        if (res.success) {
-          ElMessage.success("同步成功");
-          this.getSmsTemplate();
-        }
-      });
-    },
-    smsChangePage(v) {
-      this.smsSearchForm.pageNumber = v;
-      this.getSms();
-    },
-    smsChangePageSize(v) {
-      this.smsSearchForm.pageNumber = 1;
-      this.smsSearchForm.pageSize = v;
-      this.getSms();
-    },
-    templateChangePage(v) {
-      this.templateSearchForm.pageNumber = v;
-      this.getSmsTemplate();
-    },
-    templateChangePageSize(v) {
-      this.templateSearchForm.pageNumber = 1;
-      this.templateSearchForm.pageSize = v;
-      this.getSmsTemplate();
-    },
-    getSmsTemplate() {
-      this.loading = true;
-      API_Setting.getSmsTemplatePage(this.templateSearchForm)
-        .then((res) => {
-          if (res.success) {
-            this.templateData = res.result.records;
-            this.templateTotal = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    getSms() {
-      this.loading = true;
-      API_Setting.getSmsPage(this.smsSearchForm)
-        .then((res) => {
-          if (res.success) {
-            this.smsData = res.result.records;
-            this.smsTotal = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    signChangePage(v) {
-      this.signSearchForm.pageNumber = v;
-      this.getSmsSign();
-    },
-    signChangePageSize(v) {
-      this.signSearchForm.pageNumber = 1;
-      this.signSearchForm.pageSize = v;
-      this.getSmsSign();
-    },
-    editSign(v) {
-      this.$router.push({ name: "add-sms-sign", query: { id: v.id } });
-    },
-    getSmsSign() {
-      this.loading = true;
-      API_Setting.getSmsSignPage(this.signSearchForm)
-        .then((res) => {
-          if (res.success) {
-            this.signData = res.result.records;
-            this.signTotal = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss">

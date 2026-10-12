@@ -132,160 +132,162 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue';
 import { Refresh } from '@element-plus/icons-vue';
 import { goodsComment, goodsCommentNum } from '@/api/member.js';
 import StoreSide from './StoreSide.vue';
 
-export default {
-  components: { Refresh, StoreSide },
-  name: 'ShowGoodsDetail',
-  props: {
-    detail: {
-      type: Object,
-      default: null
-    }
-  },
-  data () {
-    return {
-      detailTabs: [
-        { name: 'intro', label: '商品介绍' },
-        { name: 'comment', label: '商品评价' },
-        { name: 'params', label: '商品参数' }
-      ],
-      activeDetailTab: 'intro',
-      anchorStuck: false,
-      lockScrollSpy: false,
-      scrollTimer: null,
-      commentList: [],
-      commentParams: {
-        pageNumber: 1,
-        pageSize: 10,
-        grade: '',
-        goodsId: ''
-      },
-      commentTypeNum: {},
-      commentTotal: 0
-    };
-  },
-  computed: {
-    skuDetail () {
-      return this.detail.data;
-    },
-    goodsParamsList () {
-      const list = this.detail && Array.isArray(this.detail.goodsParamsDTOList) ? this.detail.goodsParamsDTOList : [];
-      const flat = [];
+defineOptions({ name: 'ShowGoodsDetail' });
 
-      list.forEach((item) => {
-        if (!item) return;
-        if (Array.isArray(item.goodsParamsItemDTOList)) {
-          flat.push(...item.goodsParamsItemDTOList);
-        } else {
-          flat.push(item);
-        }
-      });
-
-      const cleaned = flat.filter((p) => p && (p.paramName || p.paramId));
-      const hasSort = cleaned.some((p) => p && p.sort !== undefined && p.sort !== null);
-      if (!hasSort) return cleaned;
-
-      return cleaned.slice().sort((a, b) => {
-        const sa = Number(a && a.sort) || 0;
-        const sb = Number(b && b.sort) || 0;
-        return sa - sb;
-      });
-    }
-  },
-  methods: {
-    getNavOffset () {
-      const nav = this.$refs.tabNav;
-      return (nav ? nav.offsetHeight : 52) + 8;
-    },
-    scrollToSection (name) {
-      const el = this.$refs[name];
-      if (!el) return;
-      this.activeDetailTab = name;
-      this.lockScrollSpy = true;
-      const top = el.getBoundingClientRect().top + window.pageYOffset - this.getNavOffset();
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-      const unlock = () => {
-        this.lockScrollSpy = false;
-        window.removeEventListener('scrollend', unlock);
-      };
-      window.addEventListener('scrollend', unlock);
-      window.clearTimeout(this.scrollTimer);
-      this.scrollTimer = window.setTimeout(unlock, 900);
-    },
-    handleScroll () {
-      const nav = this.$refs.tabNav;
-      if (nav) {
-        this.anchorStuck = nav.getBoundingClientRect().top <= 1;
-      }
-      if (this.lockScrollSpy) return;
-      const offset = this.getNavOffset() + 16;
-      let current = '';
-      this.detailTabs.forEach((tab) => {
-        const el = this.$refs[tab.name];
-        if (el && el.getBoundingClientRect().top <= offset) {
-          current = tab.name;
-        }
-      });
-      if (current) {
-        this.activeDetailTab = current;
-      }
-    },
-    changePageNum (val) {
-      this.commentParams.pageNumber = val;
-      this.getList();
-    },
-    changePageSize (val) {
-      this.commentParams.pageNumber = 1;
-      this.commentParams.pageSize = val;
-      this.getList();
-    },
-    getList () {
-      this.commentParams.goodsId = this.skuDetail.goodsId;
-      goodsComment(this.commentParams).then(res => {
-        if (res.success) {
-          this.commentList = res.result.records;
-          this.commentTotal = res.result.total;
-        }
-      });
-      goodsCommentNum(this.skuDetail.goodsId).then(res => {
-        if (res.success) {
-          this.commentTypeNum = res.result;
-        }
-      });
-    },
-    viewByGrade (grade) {
-      this.commentParams.grade = grade;
-      this.commentParams.pageNumber = 1;
-      this.getList();
-    },
-    previewImg (img, item) {
-      item.previewImg = img;
-      item.deg = item.deg || 0;
-    },
-    hidePreviewImg (item) {
-      item.previewImg = '';
-    },
-    rotatePreviewImg (type, item) {
-      const current = item.deg || 0;
-      item.deg = type ? current + 90 : current - 90;
-    }
-  },
-  mounted () {
-    window.addEventListener('scroll', this.handleScroll, { passive: true });
-    this.getList();
-    if (this.skuDetail.grade === null || this.skuDetail.grade === undefined) {
-      this.skuDetail.grade = 100;
-    }
-  },
-  beforeUnmount () {
-    window.removeEventListener('scroll', this.handleScroll);
-    window.clearTimeout(this.scrollTimer);
+const props = defineProps({
+  detail: {
+    type: Object,
+    default: null
   }
-};
+});
+
+const tabNav = ref(null);
+const intro = ref(null);
+const comment = ref(null);
+const params = ref(null);
+const sectionRefs = { intro, comment, params };
+
+const detailTabs = ref([
+  { name: 'intro', label: '商品介绍' },
+  { name: 'comment', label: '商品评价' },
+  { name: 'params', label: '商品参数' }
+]);
+const activeDetailTab = ref('intro');
+const anchorStuck = ref(false);
+const lockScrollSpy = ref(false);
+let scrollTimer = null;
+const commentList = ref([]);
+const commentParams = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+  grade: '',
+  goodsId: ''
+});
+const commentTypeNum = ref({});
+const commentTotal = ref(0);
+
+const skuDetail = computed(() => {
+  return props.detail.data;
+});
+const goodsParamsList = computed(() => {
+  const list = props.detail && Array.isArray(props.detail.goodsParamsDTOList) ? props.detail.goodsParamsDTOList : [];
+  const flat = [];
+
+  list.forEach((item) => {
+    if (!item) return;
+    if (Array.isArray(item.goodsParamsItemDTOList)) {
+      flat.push(...item.goodsParamsItemDTOList);
+    } else {
+      flat.push(item);
+    }
+  });
+
+  const cleaned = flat.filter((p) => p && (p.paramName || p.paramId));
+  const hasSort = cleaned.some((p) => p && p.sort !== undefined && p.sort !== null);
+  if (!hasSort) return cleaned;
+
+  return cleaned.slice().sort((a, b) => {
+    const sa = Number(a && a.sort) || 0;
+    const sb = Number(b && b.sort) || 0;
+    return sa - sb;
+  });
+});
+
+function getNavOffset () {
+  const nav = tabNav.value;
+  return (nav ? nav.offsetHeight : 52) + 8;
+}
+function scrollToSection (name) {
+  const el = sectionRefs[name] && sectionRefs[name].value;
+  if (!el) return;
+  activeDetailTab.value = name;
+  lockScrollSpy.value = true;
+  const top = el.getBoundingClientRect().top + window.pageYOffset - getNavOffset();
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  const unlock = () => {
+    lockScrollSpy.value = false;
+    window.removeEventListener('scrollend', unlock);
+  };
+  window.addEventListener('scrollend', unlock);
+  window.clearTimeout(scrollTimer);
+  scrollTimer = window.setTimeout(unlock, 900);
+}
+function handleScroll () {
+  const nav = tabNav.value;
+  if (nav) {
+    anchorStuck.value = nav.getBoundingClientRect().top <= 1;
+  }
+  if (lockScrollSpy.value) return;
+  const offset = getNavOffset() + 16;
+  let current = '';
+  detailTabs.value.forEach((tab) => {
+    const el = sectionRefs[tab.name] && sectionRefs[tab.name].value;
+    if (el && el.getBoundingClientRect().top <= offset) {
+      current = tab.name;
+    }
+  });
+  if (current) {
+    activeDetailTab.value = current;
+  }
+}
+function changePageNum (val) {
+  commentParams.pageNumber = val;
+  getList();
+}
+function changePageSize (val) {
+  commentParams.pageNumber = 1;
+  commentParams.pageSize = val;
+  getList();
+}
+function getList () {
+  commentParams.goodsId = skuDetail.value.goodsId;
+  goodsComment(commentParams).then(res => {
+    if (res.success) {
+      commentList.value = res.result.records;
+      commentTotal.value = res.result.total;
+    }
+  });
+  goodsCommentNum(skuDetail.value.goodsId).then(res => {
+    if (res.success) {
+      commentTypeNum.value = res.result;
+    }
+  });
+}
+function viewByGrade (grade) {
+  commentParams.grade = grade;
+  commentParams.pageNumber = 1;
+  getList();
+}
+function previewImg (img, item) {
+  item.previewImg = img;
+  item.deg = item.deg || 0;
+}
+function hidePreviewImg (item) {
+  item.previewImg = '';
+}
+function rotatePreviewImg (type, item) {
+  const current = item.deg || 0;
+  item.deg = type ? current + 90 : current - 90;
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  getList();
+  if (skuDetail.value.grade === null || skuDetail.value.grade === undefined) {
+    skuDetail.value.grade = 100;
+  }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll);
+  window.clearTimeout(scrollTimer);
+});
 </script>
 
 <style scoped lang="scss">

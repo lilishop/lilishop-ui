@@ -35,70 +35,75 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getSetting, setSetting } from "@/api/index";
-export default {
-  data() {
-    return {
-      templateShow: false,
-      submitLoading: false,
-      times: [],
-      form: {
-        seckillRule: "",
-      },
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    closeCurrentPage() {
-      this.$store.commit("removeTag", "manager-seckill-add");
-      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
-      this.$router.go(-1);
-    },
-    async handleSubmit() {
-      const hours = this.times
-        .filter((item) => item.check)
-        .map((item) => item.time)
-        .join(",");
-      const result = await setSetting("SECKILL_SETTING", {
-        seckillRule: this.form.seckillRule,
-        hours,
-      });
-      if (result.success) {
-        this.$Message.success("设置成功!");
-        this.init();
-      }
-    },
-    async init() {
-      const result = await getSetting("SECKILL_SETTING");
-      if (result.success) {
-        this.templateShow = true;
-        this.form.seckillRule = result.result.seckillRule;
-        this.times = [];
-        for (let i = 0; i < 24; i++) {
-          let matched = false;
-          if (result.result.hours) {
-            const way = result.result.hours.split(",");
-            way.forEach((hours) => {
-              if (hours == i) {
-                this.times.push({ time: i, check: true });
-                matched = true;
-              }
-            });
+import { Message as $Message } from "@/utils/message";
+import { useAppStore } from "@/stores/app";
+
+const router = useRouter();
+const appStore = useAppStore();
+
+const templateShow = ref(false);
+const submitLoading = ref(false);
+const times = ref([]);
+const form = reactive({
+  seckillRule: "",
+});
+
+onMounted(() => {
+  init();
+});
+
+function closeCurrentPage() {
+  appStore.removeTag("manager-seckill-add");
+  localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
+  router.go(-1);
+}
+
+async function handleSubmit() {
+  const hours = times.value
+    .filter((item) => item.check)
+    .map((item) => item.time)
+    .join(",");
+  const result = await setSetting("SECKILL_SETTING", {
+    seckillRule: form.seckillRule,
+    hours,
+  });
+  if (result.success) {
+    $Message.success("设置成功!");
+    init();
+  }
+}
+
+async function init() {
+  const result = await getSetting("SECKILL_SETTING");
+  if (result.success) {
+    templateShow.value = true;
+    form.seckillRule = result.result.seckillRule;
+    times.value = [];
+    for (let i = 0; i < 24; i++) {
+      let matched = false;
+      if (result.result.hours) {
+        const way = result.result.hours.split(",");
+        way.forEach((hours) => {
+          if (hours == i) {
+            times.value.push({ time: i, check: true });
+            matched = true;
           }
-          if (!matched) {
-            this.times.push({ time: i, check: false });
-          }
-        }
+        });
       }
-    },
-    handleClickTime(val) {
-      val.check = !val.check;
-    },
-  },
-};
+      if (!matched) {
+        times.value.push({ time: i, check: false });
+      }
+    }
+  }
+}
+
+function handleClickTime(val) {
+  val.check = !val.check;
+}
 </script>
 
 <style scoped lang="scss">

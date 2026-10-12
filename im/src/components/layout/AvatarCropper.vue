@@ -89,113 +89,113 @@
     </el-container>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive } from 'vue'
 import { VueCropper } from 'vue-cropper'
 import { ServeUploadFileStream } from '@/api/upload'
+import { ElMessage } from '@/utils/message'
 
-export default {
-  name: 'AvatarCropper',
-  components: {
-    VueCropper,
-  },
-  data() {
-    return {
-      cusPreviewsImg: '',
-      previews: {},
-      option: {
-        img: '',
-        size: 1,
-        full: false,
-        outputType: 'png',
-        canMove: true,
-        fixedBox: true,
-        original: false,
-        canMoveBox: true,
-        autoCrop: true,
-        // 只有自动截图开启 宽度高度才生效
-        autoCropWidth: 200,
-        autoCropHeight: 150,
-        centerBox: false,
-        high: true,
-      },
-      fixed: true,
-      fixedNumber: [1, 1],
+defineOptions({ name: 'AvatarCropper' })
+
+const emit = defineEmits(['close'])
+
+const cropper = ref(null)
+const fileInput = ref(null)
+
+const cusPreviewsImg = ref('')
+const previews = ref({})
+const option = reactive({
+  img: '',
+  size: 1,
+  full: false,
+  outputType: 'png',
+  canMove: true,
+  fixedBox: true,
+  original: false,
+  canMoveBox: true,
+  autoCrop: true,
+  // 只有自动截图开启 宽度高度才生效
+  autoCropWidth: 200,
+  autoCropHeight: 150,
+  centerBox: false,
+  high: true,
+})
+const fixed = ref(true)
+const fixedNumber = ref([1, 1])
+
+function clickUpload() {
+  fileInput.value.click()
+}
+function clearCrop() {
+  if (!cusPreviewsImg.value) return false
+  cropper.value.clearCrop()
+}
+function refreshCrop() {
+  if (!cusPreviewsImg.value) return false
+  cropper.value.refresh()
+}
+function rotateLeft() {
+  if (!cusPreviewsImg.value) return false
+  cropper.value.rotateLeft()
+}
+function rotateRight() {
+  if (!cusPreviewsImg.value) return false
+  cropper.value.rotateRight()
+}
+// 实时预览函数
+function realTime() {
+  cropper.value.getCropData(img => {
+    cusPreviewsImg.value = img
+  })
+}
+
+// 上传回调事件
+function uploadImg(e, num) {
+  let file = e.target.files[0]
+  if (!/\.(gif|jpg|jpeg|png|bmp|GIF|JPG|PNG)$/.test(e.target.value)) {
+    ElMessage('图片类型必须是.gif,jpeg,jpg,png,bmp中的一种')
+    return false
+  }
+
+  let reader = new FileReader()
+  reader.onload = e => {
+    let data
+    if (typeof e.target.result === 'object') {
+      // 把Array Buffer转化为blob 如果是base64不需要
+      data = window.URL.createObjectURL(new Blob([e.target.result]))
+    } else {
+      data = e.target.result
     }
-  },
-  methods: {
-    clickUpload() {
-      this.$refs.fileInput.click()
-    },
-    clearCrop() {
-      if (!this.cusPreviewsImg) return false
-      this.$refs.cropper.clearCrop()
-    },
-    refreshCrop() {
-      if (!this.cusPreviewsImg) return false
-      this.$refs.cropper.refresh()
-    },
-    rotateLeft() {
-      if (!this.cusPreviewsImg) return false
-      this.$refs.cropper.rotateLeft()
-    },
-    rotateRight() {
-      if (!this.cusPreviewsImg) return false
-      this.$refs.cropper.rotateRight()
-    },
-    // 实时预览函数
-    realTime() {
-      this.$refs.cropper.getCropData(img => {
-        this.cusPreviewsImg = img
-      })
-    },
+    if (num === 1) {
+      option.img = data
+    } else if (num === 2) {
+      // 历史遗留 bug：example2 从未定义，原样保留（此分支实际不可达，num 恒为 1）
+      // eslint-disable-next-line no-undef
+      example2.img = data
+    }
+  }
+  // 转化为base64
+  // reader.readAsDataURL(file)
+  // 转化为blob
+  reader.readAsArrayBuffer(file)
+}
 
-    // 上传回调事件
-    uploadImg(e, num) {
-      let file = e.target.files[0]
-      if (!/\.(gif|jpg|jpeg|png|bmp|GIF|JPG|PNG)$/.test(e.target.value)) {
-        this.$message('图片类型必须是.gif,jpeg,jpg,png,bmp中的一种')
-        return false
+// 上传图片到服务器
+function uploadService() {
+  if (cusPreviewsImg.value == '') return
+  ServeUploadFileStream({
+    fileStream: cusPreviewsImg.value,
+  })
+    .then(res => {
+      if (res.code == 200) {
+        emit('close', 1, res.data.avatar)
+      } else {
+        ElMessage('文件上传失败,请稍后再试...')
       }
-
-      let reader = new FileReader()
-      reader.onload = e => {
-        let data
-        if (typeof e.target.result === 'object') {
-          // 把Array Buffer转化为blob 如果是base64不需要
-          data = window.URL.createObjectURL(new Blob([e.target.result]))
-        } else {
-          data = e.target.result
-        }
-        if (num === 1) {
-          this.option.img = data
-        } else if (num === 2) {
-          this.example2.img = data
-        }
-      }
-      // 转化为base64
-      // reader.readAsDataURL(file)
-      // 转化为blob
-      reader.readAsArrayBuffer(file)
-    },
-
-    // 上传图片到服务器
-    uploadService() {
-      if (this.cusPreviewsImg == '') return
-      ServeUploadFileStream({
-        fileStream: this.cusPreviewsImg,
-      })
-        .then(res => {
-          if (res.code == 200) {
-            this.$emit('close', 1, res.data.avatar)
-          } else {
-            this.$message('文件上传失败,请稍后再试...')
-          }
-        })
-        .catch(() => {
-          this.$message('文件上传失败,请稍后再试...')
-        })
-    },
-  },
+    })
+    .catch(() => {
+      ElMessage('文件上传失败,请稍后再试...')
+    })
 }
 </script>
 

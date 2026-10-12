@@ -15,7 +15,7 @@
     <div class="article-page__main">
       <el-card class="article-detail">
           <el-form
-            ref="searchForm"
+            ref="searchFormRef"
             :model="searchForm"
             inline
             label-width="70px"
@@ -100,7 +100,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="文章标题" prop="title">
           <el-input v-model="form.title" clearable style="width: 40%" />
         </el-form-item>
@@ -144,7 +144,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, nextTick, onMounted } from "vue";
 import {
   getArticleCategory,
   saveArticle,
@@ -156,6 +157,7 @@ import {
 } from "@/api/pages";
 import tinymec from "@/components/editor/index.vue";
 import { regular } from "@/utils";
+import { Message, Modal } from "@/utils/message";
 
 const validateArticleContent = (rule, value, callback) => {
   const html = String(value || "").trim();
@@ -175,280 +177,281 @@ const validateArticleContent = (rule, value, callback) => {
   callback();
 };
 
-export default {
-  components: {
-    tinymec,
+defineProps({
+  selected: {
+    type: Boolean,
+    default: false,
   },
-  props: {
-    selected: {
-      type: Boolean,
-      default: false,
-    },
+});
+const emit = defineEmits(["callbacked"]);
+
+// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
+const searchFormRef = ref(null);
+const table = ref(null);
+// 模板 el-form 的 ref（原 ref="form"，与 data 同名会互相覆盖，改名为 formRef）
+const formRef = ref(null);
+const editor = ref(null);
+
+const selectedIndex = ref(99999);
+const loading = ref(true);
+const modalType = ref(0);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const treeDataDefault = ref([]);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  categoryId: "",
+});
+const searchTreeValue = ref("");
+const form = ref({
+  openStatus: false,
+  title: "",
+  categoryId: "",
+  sort: 1,
+  content: "",
+  id: "",
+});
+const formValidate = ref({
+  title: [{ required: true, message: "请输入文章标题", trigger: "blur" }],
+  categoryId: [{ required: true, message: "请选择文章分类", trigger: "change" }],
+  sort: [regular.REQUIRED, regular.INTEGER],
+  content: [{ required: true, validator: validateArticleContent, trigger: "change" }],
+});
+const list = ref([]);
+const treeValue = ref("");
+const treeData = ref([]);
+const submitLoading = ref(false);
+const data = ref([]);
+const total = ref(0);
+
+watch(
+  () => searchForm.value.categoryId,
+  () => {
+    handleSearch();
   },
-  data() {
-    return {
-      selectedIndex: 99999,
-      loading: true,
-      modalType: 0,
-      modalVisible: false,
-      modalTitle: "",
-      treeDataDefault: [],
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        categoryId: "",
-      },
-      searchTreeValue: "",
-      form: {
-        openStatus: false,
-        title: "",
-        categoryId: "",
-        sort: 1,
-        content: "",
-        id: "",
-      },
-      formValidate: {
-        title: [{ required: true, message: "请输入文章标题", trigger: "blur" }],
-        categoryId: [{ required: true, message: "请选择文章分类", trigger: "change" }],
-        sort: [regular.REQUIRED, regular.INTEGER],
-        content: [{ required: true, validator: validateArticleContent, trigger: "change" }],
-      },
-      list: [],
-      treeValue: "",
-      treeData: [],
-      submitLoading: false,
-      data: [],
-      total: 0,
-    };
+  { deep: true }
+);
+watch(
+  () => searchForm.value.title,
+  () => {
+    handleSearch();
   },
-  watch: {
-    "searchForm.categoryId": {
-      handler() {
-        this.handleSearch();
-      },
-      deep: true,
-    },
-    "searchForm.title": {
-      handler() {
-        this.handleSearch();
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    getDefaultForm() {
-      return {
-        openStatus: false,
-        title: "",
-        categoryId: "",
-        sort: 1,
-        content: "",
-      };
-    },
-    init() {
-      this.getDataList();
-      this.getAllList(0);
-    },
-    selectRow(row, index) {
-      this.selectedIndex = index;
-      this.$emit("callbacked", row);
-    },
-    handleCateChange(data) {
-      if (!data) return;
-      const { value, title } = data;
-      this.searchForm.categoryId =
-        value === "0" || value === 0 ? "" : value;
-      this.searchTreeValue = title;
-    },
-    changeSwitch(v) {
-      const params = { status: v.openStatus };
-      updateArticleStatus(v.id, params).then((res) => {
-        this.submitLoading = false;
-        if (res.success) {
-        }
+  { deep: true }
+);
+
+function getDefaultForm() {
+  return {
+    openStatus: false,
+    title: "",
+    categoryId: "",
+    sort: 1,
+    content: "",
+  };
+}
+function init() {
+  getDataList();
+  getAllList(0);
+}
+function selectRow(row, index) {
+  selectedIndex.value = index;
+  emit("callbacked", row);
+}
+function handleCateChange(data) {
+  if (!data) return;
+  const { value, title } = data;
+  searchForm.value.categoryId =
+    value === "0" || value === 0 ? "" : value;
+  searchTreeValue.value = title;
+}
+function changeSwitch(v) {
+  const params = { status: v.openStatus };
+  updateArticleStatus(v.id, params).then((res) => {
+    submitLoading.value = false;
+    if (res.success) {
+    }
+  });
+}
+function handleCategoryChange(value) {
+  form.value.categoryId = value;
+  const findTitle = (nodes, id) => {
+    for (const node of nodes || []) {
+      if (node.value === id) return node.title;
+      const childTitle = findTitle(node.children, id);
+      if (childTitle) return childTitle;
+    }
+    return "";
+  };
+  treeValue.value = findTitle(treeDataDefault.value, value);
+}
+function handleCheckChange(data) {
+  let value = "";
+  let title = "";
+  list.value = [];
+  data.forEach((item) => {
+    value += `${item.value},`;
+    title += `${item.title},`;
+  });
+  value = value.substring(0, value.length - 1);
+  title = title.substring(0, title.length - 1);
+  list.value.push({ value, title });
+  form.value.categoryId = value;
+  treeValue.value = title;
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getDataList();
+}
+function getAllList(parent_id) {
+  loading.value = true;
+  getArticleCategory(parent_id).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      treeData.value = getTree(res.result);
+      treeDataDefault.value = getTree(res.result);
+      treeData.value.unshift({
+        title: "全部",
+        level: 0,
+        children: [],
+        id: "0",
+        categoryId: 0,
+        value: "0",
       });
-    },
-    handleCategoryChange(value) {
-      this.form.categoryId = value;
-      const findTitle = (nodes, id) => {
-        for (const node of nodes || []) {
-          if (node.value === id) return node.title;
-          const childTitle = findTitle(node.children, id);
-          if (childTitle) return childTitle;
-        }
-        return "";
-      };
-      this.treeValue = findTitle(this.treeDataDefault, value);
-    },
-    handleCheckChange(data) {
-      let value = "";
-      let title = "";
-      this.list = [];
-      data.forEach((item) => {
-        value += `${item.value},`;
-        title += `${item.title},`;
-      });
-      value = value.substring(0, value.length - 1);
-      title = title.substring(0, title.length - 1);
-      this.list.push({ value, title });
-      this.form.categoryId = value;
-      this.treeValue = title;
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getAllList(parent_id) {
-      this.loading = true;
-      getArticleCategory(parent_id).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.treeData = this.getTree(res.result);
-          this.treeDataDefault = this.getTree(res.result);
-          this.treeData.unshift({
-            title: "全部",
-            level: 0,
-            children: [],
-            id: "0",
-            categoryId: 0,
-            value: "0",
-          });
-        }
-      });
-    },
-    getTree(tree = []) {
-      const arr = [];
-      if (!!tree && tree.length !== 0) {
-        tree.forEach((item) => {
-          const obj = {};
-          obj.title = item.articleCategoryName;
-          obj.value = item.id;
-          obj.attr = item.articleCategoryName;
-          obj.children = this.getTree(item.children);
-          arr.push(obj);
-        });
+    }
+  });
+}
+function getTree(tree = []) {
+  const arr = [];
+  if (!!tree && tree.length !== 0) {
+    tree.forEach((item) => {
+      const obj = {};
+      obj.title = item.articleCategoryName;
+      obj.value = item.id;
+      obj.attr = item.articleCategoryName;
+      obj.children = getTree(item.children);
+      arr.push(obj);
+    });
+  }
+  return arr;
+}
+function buildArticleSearchParams() {
+  const params = { ...searchForm.value };
+  const categoryId = params.categoryId;
+  if (
+    categoryId === "" ||
+    categoryId === null ||
+    categoryId === undefined ||
+    categoryId === 0 ||
+    categoryId === "0"
+  ) {
+    delete params.categoryId;
+  }
+  return params;
+}
+function getDataList(val) {
+  if (val) form.value = {};
+  loading.value = true;
+  getArticle(buildArticleSearchParams())
+    .then((res) => {
+      if (res.success) {
+        total.value = res.result.total;
+        data.value = res.result.records?.length ? res.result.records : [];
       }
-      return arr;
-    },
-    buildArticleSearchParams() {
-      const params = { ...this.searchForm };
-      const categoryId = params.categoryId;
-      if (
-        categoryId === "" ||
-        categoryId === null ||
-        categoryId === undefined ||
-        categoryId === 0 ||
-        categoryId === "0"
-      ) {
-        delete params.categoryId;
-      }
-      return params;
-    },
-    getDataList(val) {
-      if (val) this.form = {};
-      this.loading = true;
-      getArticle(this.buildArticleSearchParams())
-        .then((res) => {
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function handleSubmit() {
+  if (editor.value?.getContent) {
+    form.value.content = editor.value.getContent();
+  }
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      if (modalType.value === 0) {
+        delete form.value.id;
+        saveArticle(form.value).then((res) => {
+          submitLoading.value = false;
           if (res.success) {
-            this.total = res.result.total;
-            this.data = res.result.records?.length ? res.result.records : [];
+            Message.success("操作成功");
+            getDataList();
+            modalVisible.value = false;
           }
-        })
-        .finally(() => {
-          this.loading = false;
         });
-    },
-    handleSubmit() {
-      if (this.$refs.editor?.getContent) {
-        this.form.content = this.$refs.editor.getContent();
-      }
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalType === 0) {
-            delete this.form.id;
-            saveArticle(this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          } else {
-            updateArticle(this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
+      } else {
+        updateArticle(form.value).then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            Message.success("操作成功");
+            getDataList();
+            modalVisible.value = false;
           }
+        });
+      }
+    }
+  });
+}
+function add() {
+  modalType.value = 0;
+  modalTitle.value = "添加文章";
+  treeValue.value = "";
+  form.value = getDefaultForm();
+  modalVisible.value = true;
+  nextTick(() => {
+    formRef.value?.clearValidate?.();
+  });
+}
+function edit(data) {
+  modalType.value = 1;
+  modalTitle.value = "编辑文章";
+  treeValue.value = "";
+  form.value = getDefaultForm();
+  seeArticle(data.id).then((res) => {
+    if (res.result) {
+      modalVisible.value = true;
+      form.value.categoryId = res.result.categoryId;
+      treeValue.value = data.articleCategoryName;
+      form.value.id = data.id;
+      form.value.content = res.result.content;
+      form.value.title = res.result.title;
+      form.value.sort = res.result.sort;
+      form.value.openStatus = res.result.openStatus;
+    }
+  });
+}
+function remove(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除么?",
+    loading: true,
+    onOk: () => {
+      delArticle(v.id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
         }
       });
     },
-    add() {
-      this.modalType = 0;
-      this.modalTitle = "添加文章";
-      this.treeValue = "";
-      this.form = this.getDefaultForm();
-      this.modalVisible = true;
-      this.$nextTick(() => {
-        this.$refs.form?.clearValidate?.();
-      });
-    },
-    edit(data) {
-      this.modalType = 1;
-      this.modalTitle = "编辑文章";
-      this.treeValue = "";
-      this.form = this.getDefaultForm();
-      seeArticle(data.id).then((res) => {
-        if (res.result) {
-          this.modalVisible = true;
-          this.form.categoryId = res.result.categoryId;
-          this.treeValue = data.articleCategoryName;
-          this.form.id = data.id;
-          this.form.content = res.result.content;
-          this.form.title = res.result.title;
-          this.form.sort = res.result.sort;
-          this.form.openStatus = res.result.openStatus;
-        }
-      });
-    },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除么?",
-        loading: true,
-        onOk: () => {
-          delArticle(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

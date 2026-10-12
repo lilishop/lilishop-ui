@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="110px"
@@ -250,7 +250,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="rebindForm" :model="rebindForm" :rules="rebindRules" label-width="110px">
+      <el-form ref="rebindFormRef" :model="rebindForm" :rules="rebindRules" label-width="110px">
         <el-form-item label="客户">
           <span>{{ rebindForm.memberNickname || rebindForm.memberMobile || rebindForm.memberId }}</span>
         </el-form-item>
@@ -288,7 +288,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="unbindForm" :model="unbindForm" label-width="110px">
+      <el-form ref="unbindFormRef" :model="unbindForm" label-width="110px">
         <el-form-item label="客户">
           <span>{{ unbindForm.memberNickname || unbindForm.memberMobile || unbindForm.memberId }}</span>
         </el-form-item>
@@ -304,7 +304,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import {
   getCustomerRelationDetail,
   getCustomerRelationLogs,
@@ -315,259 +317,260 @@ import {
 import { relationEffectiveList, hasDeadlineList } from "./dataJson.js";
 import DistributionSelector from "@/components/distribution/distribution-selector.vue";
 import { QuestionFilled } from "@element-plus/icons-vue";
+import { Message } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  name: "distributionCustomerRelation",
-  components: { QuestionFilled, DistributionSelector },
-  data() {
-    return {
-      relationEffectiveList,
-      hasDeadlineList,
-      bindTimeRange: [],
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        memberMobile: "",
-        distributionMobile: "",
-        distributionId: "",
-        relationEffective: "",
-        hasDeadline: "",
-      },
-      data: [],
-      total: 0,
-      detailVisible: false,
-      detailLoading: false,
-      detail: null,
-      logVisible: false,
-      logLoading: false,
-      logList: [],
-      logTarget: null,
-      rebindVisible: false,
-      distributorSelectorVisible: false,
-      unbindVisible: false,
-      rebindLoading: false,
-      unbindLoading: false,
-      rebindForm: {
-        memberId: "",
-        memberNickname: "",
-        memberMobile: "",
-        currentDistributionId: "",
-        distributionId: "",
-        distributionNickname: "",
-        distributionMobile: "",
-        reason: "",
-      },
-      unbindForm: {
-        memberId: "",
-        memberNickname: "",
-        memberMobile: "",
-        reason: "",
-      },
-      rebindRules: {
-        distributionId: [{
-          required: true,
-          message: "请选择分销员",
-          trigger: "change",
-        }],
-      },
-    };
-  },
-  computed: {
-    selectedDistributorLabel() {
-      if (!this.rebindForm.distributionId) return "";
-      const name = this.rebindForm.distributionNickname || "-";
-      const mobile = this.rebindForm.distributionMobile || "-";
-      return `${name}（${mobile}）`;
-    },
-  },
-  mounted() {
-    this.applyRouteQuery();
-    this.getDataList();
-  },
-  watch: {
-    $route() {
-      this.applyRouteQuery();
-      this.getDataList();
-    },
-  },
-  methods: {
-    applyRouteQuery() {
-      const query = this.$route.query || {};
-      this.searchForm.distributionId = query.distributionId ? String(query.distributionId) : "";
-      this.searchForm.distributionMobile = query.distributionMobile ? String(query.distributionMobile) : "";
-    },
-    formatInvalidTime(row) {
-      return row?.invalidTime || "-";
-    },
-    formatDetailInvalidTime(detail) {
-      if (!detail || this.isRelationEffective(detail)) return "-";
-      return detail.invalidTime || "-";
-    },
-    formatDetailInvalidReason(detail) {
-      if (!detail || this.isRelationEffective(detail)) return "-";
-      return detail.invalidReason || "客户关系失效";
-    },
-    isRelationEffective(row) {
-      if (!row) return false;
-      if (row.relationEffective === true) return true;
-      if (row.relationEffective === false) return false;
-      return !["EXPIRED", "UNBOUND"].includes(row.relationStatus);
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      const params = { ...this.searchForm };
-      if (!params.memberMobile) delete params.memberMobile;
-      if (!params.distributionMobile) delete params.distributionMobile;
-      if (!params.distributionId) delete params.distributionId;
-      if (params.relationEffective === "" || params.relationEffective === null || params.relationEffective === undefined) {
-        delete params.relationEffective;
-      } else {
-        params.relationEffective = params.relationEffective === true || params.relationEffective === "true";
+defineOptions({ name: "distributionCustomerRelation" });
+
+const route = useRoute();
+
+const searchFormRef = ref(null);
+const rebindFormRef = ref(null);
+const unbindFormRef = ref(null);
+
+const bindTimeRange = ref([]);
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  memberMobile: "",
+  distributionMobile: "",
+  distributionId: "",
+  relationEffective: "",
+  hasDeadline: "",
+});
+const data = ref([]);
+const total = ref(0);
+const detailVisible = ref(false);
+const detailLoading = ref(false);
+const detail = ref(null);
+const logVisible = ref(false);
+const logLoading = ref(false);
+const logList = ref([]);
+const logTarget = ref(null);
+const rebindVisible = ref(false);
+const distributorSelectorVisible = ref(false);
+const unbindVisible = ref(false);
+const rebindLoading = ref(false);
+const unbindLoading = ref(false);
+const rebindForm = ref({
+  memberId: "",
+  memberNickname: "",
+  memberMobile: "",
+  currentDistributionId: "",
+  distributionId: "",
+  distributionNickname: "",
+  distributionMobile: "",
+  reason: "",
+});
+const unbindForm = ref({
+  memberId: "",
+  memberNickname: "",
+  memberMobile: "",
+  reason: "",
+});
+const rebindRules = reactive({
+  distributionId: [{
+    required: true,
+    message: "请选择分销员",
+    trigger: "change",
+  }],
+});
+
+const selectedDistributorLabel = computed(() => {
+  if (!rebindForm.value.distributionId) return "";
+  const name = rebindForm.value.distributionNickname || "-";
+  const mobile = rebindForm.value.distributionMobile || "-";
+  return `${name}（${mobile}）`;
+});
+
+watch(
+  () => route.query,
+  () => {
+    applyRouteQuery();
+    getDataList();
+  }
+);
+
+onMounted(() => {
+  applyRouteQuery();
+  getDataList();
+});
+
+function applyRouteQuery() {
+  const query = route.query || {};
+  searchForm.distributionId = query.distributionId ? String(query.distributionId) : "";
+  searchForm.distributionMobile = query.distributionMobile ? String(query.distributionMobile) : "";
+}
+function formatInvalidTime(row) {
+  return row?.invalidTime || "-";
+}
+function formatDetailInvalidTime(detail) {
+  if (!detail || isRelationEffective(detail)) return "-";
+  return detail.invalidTime || "-";
+}
+function formatDetailInvalidReason(detail) {
+  if (!detail || isRelationEffective(detail)) return "-";
+  return detail.invalidReason || "客户关系失效";
+}
+function isRelationEffective(row) {
+  if (!row) return false;
+  if (row.relationEffective === true) return true;
+  if (row.relationEffective === false) return false;
+  return !["EXPIRED", "UNBOUND"].includes(row.relationStatus);
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  const params = { ...searchForm };
+  if (!params.memberMobile) delete params.memberMobile;
+  if (!params.distributionMobile) delete params.distributionMobile;
+  if (!params.distributionId) delete params.distributionId;
+  if (params.relationEffective === "" || params.relationEffective === null || params.relationEffective === undefined) {
+    delete params.relationEffective;
+  } else {
+    params.relationEffective = params.relationEffective === true || params.relationEffective === "true";
+  }
+  if (params.hasDeadline === "" || params.hasDeadline === null || params.hasDeadline === undefined) {
+    delete params.hasDeadline;
+  } else {
+    params.hasDeadline = params.hasDeadline === true || params.hasDeadline === "true";
+  }
+  if (bindTimeRange.value && bindTimeRange.value[0] && bindTimeRange.value[1]) {
+    const startTime = new Date(bindTimeRange.value[0]).getTime();
+    const endTime = new Date(bindTimeRange.value[1]).getTime();
+    params.bindTimeStart = unixToDate(startTime / 1000);
+    params.bindTimeEnd = unixToDate(endTime / 1000);
+  }
+  getCustomerRelations(params).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function openDetail(row) {
+  detailVisible.value = true;
+  detailLoading.value = true;
+  detail.value = null;
+  getCustomerRelationDetail(row.id).then((res) => {
+    detailLoading.value = false;
+    if (res.success) {
+      detail.value = res.result;
+    }
+  }).catch(() => {
+    detailLoading.value = false;
+  });
+}
+function openLogs(row) {
+  logVisible.value = true;
+  logTarget.value = row;
+  logLoading.value = true;
+  logList.value = [];
+  getCustomerRelationLogs(row.id).then((res) => {
+    logLoading.value = false;
+    if (res.success) {
+      logList.value = res.result || [];
+    }
+  }).catch(() => {
+    logLoading.value = false;
+  });
+}
+function formatDistributorCell(nickname, mobile, id) {
+  if ((!nickname || nickname === "-") && !id) return "-";
+  const name = nickname && nickname !== "-" ? nickname : id;
+  if (mobile) return `${name}\n${mobile}`;
+  return name;
+}
+function openRebind(row) {
+  rebindForm.value = {
+    memberId: row.memberId,
+    memberNickname: row.memberNickname,
+    memberMobile: row.memberMobile,
+    currentDistributionId: row.distributionId || "",
+    distributionId: "",
+    distributionNickname: "",
+    distributionMobile: "",
+    reason: "",
+  };
+  rebindVisible.value = true;
+}
+function onDistributorSelected(row) {
+  rebindForm.value.distributionId = row.id;
+  rebindForm.value.distributionNickname = row.nickname;
+  rebindForm.value.distributionMobile = row.mobile;
+  nextTick(() => {
+    rebindFormRef.value?.validateField("distributionId");
+  });
+}
+function clearSelectedDistributor() {
+  rebindForm.value.distributionId = "";
+  rebindForm.value.distributionNickname = "";
+  rebindForm.value.distributionMobile = "";
+  nextTick(() => {
+    rebindFormRef.value?.validateField("distributionId");
+  });
+}
+function openUnbind(row) {
+  unbindForm.value = {
+    memberId: row.memberId,
+    memberNickname: row.memberNickname,
+    memberMobile: row.memberMobile,
+    reason: "",
+  };
+  unbindVisible.value = true;
+}
+function submitRebind() {
+  rebindFormRef.value.validate((valid) => {
+    if (!valid) return;
+    if (rebindForm.value.distributionId === rebindForm.value.currentDistributionId) {
+      Message.warning("新分销员不能与当前分销员相同");
+      return;
+    }
+    rebindLoading.value = true;
+    rebindCustomerRelation({
+      memberId: rebindForm.value.memberId,
+      distributionId: rebindForm.value.distributionId,
+      reason: rebindForm.value.reason,
+    }).then((res) => {
+      rebindLoading.value = false;
+      if (res.success) {
+        Message.success("操作成功");
+        rebindVisible.value = false;
+        getDataList();
       }
-      if (params.hasDeadline === "" || params.hasDeadline === null || params.hasDeadline === undefined) {
-        delete params.hasDeadline;
-      } else {
-        params.hasDeadline = params.hasDeadline === true || params.hasDeadline === "true";
-      }
-      if (this.bindTimeRange && this.bindTimeRange[0] && this.bindTimeRange[1]) {
-        const startTime = new Date(this.bindTimeRange[0]).getTime();
-        const endTime = new Date(this.bindTimeRange[1]).getTime();
-        params.bindTimeStart = this.$filters.unixToDate(startTime / 1000);
-        params.bindTimeEnd = this.$filters.unixToDate(endTime / 1000);
-      }
-      getCustomerRelations(params).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    openDetail(row) {
-      this.detailVisible = true;
-      this.detailLoading = true;
-      this.detail = null;
-      getCustomerRelationDetail(row.id).then((res) => {
-        this.detailLoading = false;
-        if (res.success) {
-          this.detail = res.result;
-        }
-      }).catch(() => {
-        this.detailLoading = false;
-      });
-    },
-    openLogs(row) {
-      this.logVisible = true;
-      this.logTarget = row;
-      this.logLoading = true;
-      this.logList = [];
-      getCustomerRelationLogs(row.id).then((res) => {
-        this.logLoading = false;
-        if (res.success) {
-          this.logList = res.result || [];
-        }
-      }).catch(() => {
-        this.logLoading = false;
-      });
-    },
-    formatDistributorCell(nickname, mobile, id) {
-      if ((!nickname || nickname === "-") && !id) return "-";
-      const name = nickname && nickname !== "-" ? nickname : id;
-      if (mobile) return `${name}\n${mobile}`;
-      return name;
-    },
-    openRebind(row) {
-      this.rebindForm = {
-        memberId: row.memberId,
-        memberNickname: row.memberNickname,
-        memberMobile: row.memberMobile,
-        currentDistributionId: row.distributionId || "",
-        distributionId: "",
-        distributionNickname: "",
-        distributionMobile: "",
-        reason: "",
-      };
-      this.rebindVisible = true;
-    },
-    onDistributorSelected(row) {
-      this.rebindForm.distributionId = row.id;
-      this.rebindForm.distributionNickname = row.nickname;
-      this.rebindForm.distributionMobile = row.mobile;
-      this.$nextTick(() => {
-        this.$refs.rebindForm?.validateField("distributionId");
-      });
-    },
-    clearSelectedDistributor() {
-      this.rebindForm.distributionId = "";
-      this.rebindForm.distributionNickname = "";
-      this.rebindForm.distributionMobile = "";
-      this.$nextTick(() => {
-        this.$refs.rebindForm?.validateField("distributionId");
-      });
-    },
-    openUnbind(row) {
-      this.unbindForm = {
-        memberId: row.memberId,
-        memberNickname: row.memberNickname,
-        memberMobile: row.memberMobile,
-        reason: "",
-      };
-      this.unbindVisible = true;
-    },
-    submitRebind() {
-      this.$refs.rebindForm.validate((valid) => {
-        if (!valid) return;
-        if (this.rebindForm.distributionId === this.rebindForm.currentDistributionId) {
-          this.$Message.warning("新分销员不能与当前分销员相同");
-          return;
-        }
-        this.rebindLoading = true;
-        rebindCustomerRelation({
-          memberId: this.rebindForm.memberId,
-          distributionId: this.rebindForm.distributionId,
-          reason: this.rebindForm.reason,
-        }).then((res) => {
-          this.rebindLoading = false;
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.rebindVisible = false;
-            this.getDataList();
-          }
-        }).catch(() => {
-          this.rebindLoading = false;
-        });
-      });
-    },
-    submitUnbind() {
-      this.unbindLoading = true;
-      unbindCustomerRelation({
-        memberId: this.unbindForm.memberId,
-        reason: this.unbindForm.reason,
-      }).then((res) => {
-        this.unbindLoading = false;
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.unbindVisible = false;
-          this.getDataList();
-        }
-      }).catch(() => {
-        this.unbindLoading = false;
-      });
-    },
-  },
-};
+    }).catch(() => {
+      rebindLoading.value = false;
+    });
+  });
+}
+function submitUnbind() {
+  unbindLoading.value = true;
+  unbindCustomerRelation({
+    memberId: unbindForm.value.memberId,
+    reason: unbindForm.value.reason,
+  }).then((res) => {
+    unbindLoading.value = false;
+    if (res.success) {
+      Message.success("操作成功");
+      unbindVisible.value = false;
+      getDataList();
+    }
+  }).catch(() => {
+    unbindLoading.value = false;
+  });
+}
 </script>
 
 <style scoped lang="scss">

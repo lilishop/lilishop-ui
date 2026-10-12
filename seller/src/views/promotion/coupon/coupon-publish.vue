@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form ref="form" :model="form" label-width="120px" :rules="formRule">
+      <el-form ref="formRef" :model="form" label-width="120px" :rules="formRule">
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
@@ -232,350 +232,358 @@
         </div>
       </el-form>
     </el-card>
-    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
+    <sku-select ref="skuSelectRef" @selectedGoodsData="selectedGoodsData"></sku-select>
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { saveShopCoupon, getShopCoupon, editShopCoupon } from "@/api/promotion";
 import { getGoodsCategoryAll } from "@/api/goods";
 import { regular } from "@/utils";
+import { Message, Modal } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
+import { useAppStore } from "@/stores/app";
 import skuSelect from "@/views/lili-dialog";
 
-export default {
-  name: "add-coupon",
-  components: {
-    skuSelect,
-  },
-  watch: {
-    "form.getType": {
-      handler(val) {
-        if (val == "FREE") {
-          this.rangeTimeType = 1;
-        } else {
-          this.rangeTimeType = 0;
-        }
-        if (this.rangeTimeType == 0) {
-          delete this.formRule.rangeTime;
-        }
-      },
-      deep: true,
-    },
-    $route(e) {
-      this.id = e.query.id;
-      if (this.id) {
-        this.getCoupon();
-      } else {
-        this.$refs.form.resetFields();
-      }
-    },
-  },
-  data() {
-    const checkPrice = (rule, value, callback) => {
-      if (!value && value !== 0) {
-        return callback(new Error("面额不能为空"));
-      } else if (!regular.money.test(value)) {
-        callback(new Error("请输入正整数或者两位小数"));
-      } else if (parseFloat(value) > 99999999) {
-        callback(new Error("面额设置超过上限值"));
-      } else {
-        callback();
-      }
-    };
-    const checkWeight = (rule, value, callback) => {
-      if (!value && typeof value !== "number") {
-        callback(new Error("消费门槛不能为空"));
-      } else if (!regular.money.test(value)) {
-        callback(new Error("请输入正整数或者两位小数"));
-      } else if (parseFloat(value) > 99999999) {
-        callback(new Error("消费门槛设置超过上限值"));
-      } else {
-        callback();
-      }
-    };
-    return {
-      disabled: this.$route.query.onlyView,
-      rangeTimeType: 1,
-      modalType: 0,
-      form: {
-        storeCommission: 0,
-        publishNum: 0,
-        scopeType: "ALL",
-        couponLimitNum: 1,
-        couponType: "PRICE",
-        couponName: "",
-        promotionName: "",
-        getType: "FREE",
-        promotionGoodsList: [],
-        scopeIdGoods: [],
-        rangeDayType: "",
-        effectiveDays: 1,
-      },
-      id: this.$route.query.id,
-      submitLoading: false,
-      selectedGoods: [],
-      goodsCategoryList: [],
-      formRule: {
-        promotionName: [{ required: true, message: "活动名称不能为空" }],
-        couponName: [{ required: true, message: "优惠券名称不能为空" }],
-        price: [{ required: true, message: "请输入面额" }, { validator: checkPrice }],
-        rangeTime: [{ required: true, message: "请选择优惠券有效期" }],
-        consumeThreshold: [
-          { required: true, message: "请输入消费门槛" },
-          { validator: checkWeight },
-        ],
-        couponDiscount: [
-          { required: true, message: "请输入折扣" },
-          {
-            pattern: regular.discount,
-            message: "请输入0-10的数字,可有一位小数",
-          },
-        ],
-        storeCommission: [
-          { required: true, message: "请输入店铺承担比例" },
-          { pattern: regular.rate, message: "请输入0-100的正整数" },
-        ],
-        publishNum: [
-          { required: true, message: "请输入发放数量" },
-          { pattern: regular.Integer, message: "请输入正整数" },
-        ],
-        couponLimitNum: [
-          { required: true, message: "领取限制不能为空" },
-          { pattern: regular.Integer, message: "请输入正整数" },
-        ],
-        description: [{ required: true, message: "请输入范围描述" }],
-      },
-      options: {
-        disabledDate(date) {
-          return date && date.valueOf() < Date.now() - 86400000;
-        },
-      },
-    };
-  },
-  async mounted() {
-    await this.getCagetoryList();
-    if (this.id) {
-      this.getCoupon();
-      this.modalType = 1;
-    }
-  },
-  methods: {
-    getCoupon() {
-      getShopCoupon(this.id).then((res) => {
-        let data = res.result;
-        if (!data.promotionGoodsList) data.promotionGoodsList = [];
-        this.rangeTimeType = data.rangeDayType === "DYNAMICTIME" ? 0 : 1;
-        if (data.scopeType == "PORTION_GOODS_CATEGORY") {
-          let prevCascader = data.scopeId.split(",");
-          function next(params, prev) {
-            for (let i = 0; i < params.length; i++) {
-              const item = params[i];
-              if (item.children) {
-                next(item.children, [...prev, item]);
-              } else {
-                if (prevCascader.includes(item.id)) {
-                  prevCascader = prevCascader.map((key) => {
-                    if (key === item.id) {
-                      let result = prev.map((item) => item.id);
-                      return [...result, item.id];
-                    } else {
-                      return key;
-                    }
-                  });
-                } else {
-                  i === params.length - 1 && (prev = []);
-                }
-              }
-            }
-          }
+defineOptions({ name: "add-coupon" });
 
-          next(this.goodsCategoryList, []);
-          data.scopeIdGoods = prevCascader;
-        }
-        data.rangeTime = [];
-        if (data.startTime && data.endTime) {
-          data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
-        }
-        this.form = data;
-      });
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          const params = JSON.parse(JSON.stringify(this.form));
-          params.getType != "ACTIVITY" ? delete params.effectiveDays : "";
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
 
-          if (this.rangeTimeType == 1) {
-            params.rangeDayType = "FIXEDTIME";
-            const rangeTime = this.form.rangeTime;
-            const start = rangeTime[0] instanceof Date ? rangeTime[0] : new Date(rangeTime[0]);
-            const end = rangeTime[1] instanceof Date ? rangeTime[1] : new Date(rangeTime[1]);
-            params.startTime = this.$filters.unixToDate(start.getTime() / 1000);
-            params.endTime = this.$filters.unixToDate(end.getTime() / 1000);
-            delete params.effectiveDays;
-          } else {
-            params.rangeDayType = "DYNAMICTIME";
-            delete params.rangeTime;
-          }
+const formRef = ref(null);
+const skuSelectRef = ref(null);
 
-          let scopeId = [];
+const checkPrice = (rule, value, callback) => {
+  if (!value && value !== 0) {
+    return callback(new Error("面额不能为空"));
+  } else if (!regular.money.test(value)) {
+    callback(new Error("请输入正整数或者两位小数"));
+  } else if (parseFloat(value) > 99999999) {
+    callback(new Error("面额设置超过上限值"));
+  } else {
+    callback();
+  }
+};
+const checkWeight = (rule, value, callback) => {
+  if (!value && typeof value !== "number") {
+    callback(new Error("消费门槛不能为空"));
+  } else if (!regular.money.test(value)) {
+    callback(new Error("请输入正整数或者两位小数"));
+  } else if (parseFloat(value) > 99999999) {
+    callback(new Error("消费门槛设置超过上限值"));
+  } else {
+    callback();
+  }
+};
 
-          if (
-            params.scopeType == "PORTION_GOODS" &&
-            (!params.promotionGoodsList || params.promotionGoodsList.length == 0)
-          ) {
-            this.$Modal.warning({ title: "提示", content: "请选择指定商品" });
-            return;
-          }
-
-          if (
-            params.scopeType == "PORTION_GOODS_CATEGORY" &&
-            (!params.scopeIdGoods || params.scopeIdGoods.length == 0)
-          ) {
-            this.$Modal.warning({ title: "提示", content: "请选择商品分类" });
-            return;
-          }
-
-          if (params.scopeType == "PORTION_GOODS") {
-            params.promotionGoodsList.forEach((item) => {
-              scopeId.push(item.skuId);
-            });
-            params.scopeId = scopeId.toString();
-          } else if (params.scopeType == "ALL") {
-            delete params.promotionGoodsList;
-          } else if (params.scopeType == "PORTION_GOODS_CATEGORY") {
-            scopeId = this.filterCategoryId(params.scopeIdGoods, []);
-            params.scopeId = scopeId.toString();
-            delete params.promotionGoodsList;
-          }
-          delete params.scopeIdGoods;
-
-          this.submitLoading = true;
-          if (this.modalType === 0) {
-            delete params.id;
-
-            saveShopCoupon(params).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("优惠券发送成功");
-                this.closeCurrentPage();
-              }
-            });
-          } else {
-            delete params.consumeLimit;
-            delete params.updateTime;
-
-            editShopCoupon(params).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("优惠券修改成功");
-                this.closeCurrentPage();
-              }
-            });
-          }
-        }
-      });
+const disabled = ref(route.query.onlyView);
+const rangeTimeType = ref(1);
+const modalType = ref(0);
+const form = ref({
+  storeCommission: 0,
+  publishNum: 0,
+  scopeType: "ALL",
+  couponLimitNum: 1,
+  couponType: "PRICE",
+  couponName: "",
+  promotionName: "",
+  getType: "FREE",
+  promotionGoodsList: [],
+  scopeIdGoods: [],
+  rangeDayType: "",
+  effectiveDays: 1,
+});
+const id = ref(route.query.id);
+const submitLoading = ref(false);
+const selectedGoods = ref([]);
+const goodsCategoryList = ref([]);
+const formRule = reactive({
+  promotionName: [{ required: true, message: "活动名称不能为空" }],
+  couponName: [{ required: true, message: "优惠券名称不能为空" }],
+  price: [{ required: true, message: "请输入面额" }, { validator: checkPrice }],
+  rangeTime: [{ required: true, message: "请选择优惠券有效期" }],
+  consumeThreshold: [
+    { required: true, message: "请输入消费门槛" },
+    { validator: checkWeight },
+  ],
+  couponDiscount: [
+    { required: true, message: "请输入折扣" },
+    {
+      pattern: regular.discount,
+      message: "请输入0-10的数字,可有一位小数",
     },
-    closeCurrentPage() {
-      this.$store.commit("removeTag", "add-coupon");
-      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
-      this.$router.go(-1);
-    },
-    openSkuList() {
-      this.$refs.skuSelect.open("goods");
-      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList));
-      data.forEach((e) => {
-        e.id = e.skuId;
-      });
-      this.$refs.skuSelect.goodsData = data;
-    },
-    changeSelect(e) {
-      this.selectedGoods = e;
-    },
-    delSelectGoods() {
-      if (this.selectedGoods.length <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选商品吗?",
-        onOk: () => {
-          let ids = [];
-          this.selectedGoods.forEach(function (e) {
-            ids.push(e.skuId);
-          });
-
-          this.form.promotionGoodsList = this.form.promotionGoodsList.filter((item) => {
-            return !ids.includes(item.skuId);
-          });
-        },
-      });
-    },
-    delGoods(index) {
-      this.form.promotionGoodsList.splice(index, 1);
-    },
-    selectedGoodsData(item) {
-      let list = [];
-      item.forEach((e) => {
-        list.push({
-          goodsName: e.goodsName,
-          price: e.price,
-          originalPrice: e.price,
-          quantity: e.quantity,
-          storeId: e.storeId,
-          storeName: e.storeName,
-          skuId: e.id,
-          categoryPath: e.categoryPath,
-          thumbnail: e.small,
-          goodsType: e.goodsType,
-          goodsId: e.goodsId,
-          originPrice: e.price,
-        });
-      });
-      this.form.promotionGoodsList = list;
-    },
-    async getCagetoryList() {
-      let data = await getGoodsCategoryAll();
-      this.goodsCategoryList = data.result;
-      this.goodsCategoryList = this.goodsCategoryList.map((item) => {
-        if (item.children) {
-          item.children = item.children.map((child) => {
-            if (child.children) {
-              child.children = child.children.map((son) => {
-                return {
-                  value: son.id,
-                  label: son.name,
-                };
-              });
-              return {
-                value: child.id,
-                label: child.name,
-                children: child.children,
-              };
-            } else {
-              return {
-                value: child.id,
-                label: child.name,
-              };
-            }
-          });
-        }
-        return { value: item.id, label: item.name, children: item.children };
-      });
-    },
-    filterCategoryId(list, idArr) {
-      list.forEach((e) => {
-        if (e instanceof Array) {
-          this.filterCategoryId(e, idArr);
-        } else {
-          if (!idArr.includes(e)) idArr.push(e);
-        }
-      });
-      return idArr;
-    },
+  ],
+  storeCommission: [
+    { required: true, message: "请输入店铺承担比例" },
+    { pattern: regular.rate, message: "请输入0-100的正整数" },
+  ],
+  publishNum: [
+    { required: true, message: "请输入发放数量" },
+    { pattern: regular.Integer, message: "请输入正整数" },
+  ],
+  couponLimitNum: [
+    { required: true, message: "领取限制不能为空" },
+    { pattern: regular.Integer, message: "请输入正整数" },
+  ],
+  description: [{ required: true, message: "请输入范围描述" }],
+});
+const options = {
+  disabledDate(date) {
+    return date && date.valueOf() < Date.now() - 86400000;
   },
 };
+
+watch(
+  () => form.value.getType,
+  (val) => {
+    if (val == "FREE") {
+      rangeTimeType.value = 1;
+    } else {
+      rangeTimeType.value = 0;
+    }
+    if (rangeTimeType.value == 0) {
+      delete formRule.rangeTime;
+    }
+  },
+  { deep: true }
+);
+watch(
+  () => route.query,
+  (e) => {
+    id.value = e.id;
+    if (id.value) {
+      getCoupon();
+    } else {
+      formRef.value.resetFields();
+    }
+  }
+);
+
+onMounted(async () => {
+  await getCagetoryList();
+  if (id.value) {
+    getCoupon();
+    modalType.value = 1;
+  }
+});
+
+function getCoupon() {
+  getShopCoupon(id.value).then((res) => {
+    let data = res.result;
+    if (!data.promotionGoodsList) data.promotionGoodsList = [];
+    rangeTimeType.value = data.rangeDayType === "DYNAMICTIME" ? 0 : 1;
+    if (data.scopeType == "PORTION_GOODS_CATEGORY") {
+      let prevCascader = data.scopeId.split(",");
+      function next(params, prev) {
+        for (let i = 0; i < params.length; i++) {
+          const item = params[i];
+          if (item.children) {
+            next(item.children, [...prev, item]);
+          } else {
+            if (prevCascader.includes(item.id)) {
+              prevCascader = prevCascader.map((key) => {
+                if (key === item.id) {
+                  let result = prev.map((item) => item.id);
+                  return [...result, item.id];
+                } else {
+                  return key;
+                }
+              });
+            } else {
+              i === params.length - 1 && (prev = []);
+            }
+          }
+        }
+      }
+
+      next(goodsCategoryList.value, []);
+      data.scopeIdGoods = prevCascader;
+    }
+    data.rangeTime = [];
+    if (data.startTime && data.endTime) {
+      data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
+    }
+    form.value = data;
+  });
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      const params = JSON.parse(JSON.stringify(form.value));
+      params.getType != "ACTIVITY" ? delete params.effectiveDays : "";
+
+      if (rangeTimeType.value == 1) {
+        params.rangeDayType = "FIXEDTIME";
+        const rangeTime = form.value.rangeTime;
+        const start = rangeTime[0] instanceof Date ? rangeTime[0] : new Date(rangeTime[0]);
+        const end = rangeTime[1] instanceof Date ? rangeTime[1] : new Date(rangeTime[1]);
+        params.startTime = unixToDate(start.getTime() / 1000);
+        params.endTime = unixToDate(end.getTime() / 1000);
+        delete params.effectiveDays;
+      } else {
+        params.rangeDayType = "DYNAMICTIME";
+        delete params.rangeTime;
+      }
+
+      let scopeId = [];
+
+      if (
+        params.scopeType == "PORTION_GOODS" &&
+        (!params.promotionGoodsList || params.promotionGoodsList.length == 0)
+      ) {
+        Modal.warning({ title: "提示", content: "请选择指定商品" });
+        return;
+      }
+
+      if (
+        params.scopeType == "PORTION_GOODS_CATEGORY" &&
+        (!params.scopeIdGoods || params.scopeIdGoods.length == 0)
+      ) {
+        Modal.warning({ title: "提示", content: "请选择商品分类" });
+        return;
+      }
+
+      if (params.scopeType == "PORTION_GOODS") {
+        params.promotionGoodsList.forEach((item) => {
+          scopeId.push(item.skuId);
+        });
+        params.scopeId = scopeId.toString();
+      } else if (params.scopeType == "ALL") {
+        delete params.promotionGoodsList;
+      } else if (params.scopeType == "PORTION_GOODS_CATEGORY") {
+        scopeId = filterCategoryId(params.scopeIdGoods, []);
+        params.scopeId = scopeId.toString();
+        delete params.promotionGoodsList;
+      }
+      delete params.scopeIdGoods;
+
+      submitLoading.value = true;
+      if (modalType.value === 0) {
+        delete params.id;
+
+        saveShopCoupon(params).then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            Message.success("优惠券发送成功");
+            closeCurrentPage();
+          }
+        });
+      } else {
+        delete params.consumeLimit;
+        delete params.updateTime;
+
+        editShopCoupon(params).then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            Message.success("优惠券修改成功");
+            closeCurrentPage();
+          }
+        });
+      }
+    }
+  });
+}
+function closeCurrentPage() {
+  appStore.removeTag("add-coupon");
+  localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
+  router.go(-1);
+}
+function openSkuList() {
+  skuSelectRef.value.open("goods");
+  let data = JSON.parse(JSON.stringify(form.value.promotionGoodsList));
+  data.forEach((e) => {
+    e.id = e.skuId;
+  });
+  skuSelectRef.value.goodsData = data;
+}
+function changeSelect(e) {
+  selectedGoods.value = e;
+}
+function delSelectGoods() {
+  if (selectedGoods.value.length <= 0) {
+    Message.warning("您还未选择要删除的数据");
+    return;
+  }
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除所选商品吗?",
+    onOk: () => {
+      let ids = [];
+      selectedGoods.value.forEach(function (e) {
+        ids.push(e.skuId);
+      });
+
+      form.value.promotionGoodsList = form.value.promotionGoodsList.filter((item) => {
+        return !ids.includes(item.skuId);
+      });
+    },
+  });
+}
+function delGoods(index) {
+  form.value.promotionGoodsList.splice(index, 1);
+}
+function selectedGoodsData(item) {
+  let list = [];
+  item.forEach((e) => {
+    list.push({
+      goodsName: e.goodsName,
+      price: e.price,
+      originalPrice: e.price,
+      quantity: e.quantity,
+      storeId: e.storeId,
+      storeName: e.storeName,
+      skuId: e.id,
+      categoryPath: e.categoryPath,
+      thumbnail: e.small,
+      goodsType: e.goodsType,
+      goodsId: e.goodsId,
+      originPrice: e.price,
+    });
+  });
+  form.value.promotionGoodsList = list;
+}
+async function getCagetoryList() {
+  let data = await getGoodsCategoryAll();
+  goodsCategoryList.value = data.result;
+  goodsCategoryList.value = goodsCategoryList.value.map((item) => {
+    if (item.children) {
+      item.children = item.children.map((child) => {
+        if (child.children) {
+          child.children = child.children.map((son) => {
+            return {
+              value: son.id,
+              label: son.name,
+            };
+          });
+          return {
+            value: child.id,
+            label: child.name,
+            children: child.children,
+          };
+        } else {
+          return {
+            value: child.id,
+            label: child.name,
+          };
+        }
+      });
+    }
+    return { value: item.id, label: item.name, children: item.children };
+  });
+}
+function filterCategoryId(list, idArr) {
+  list.forEach((e) => {
+    if (e instanceof Array) {
+      filterCategoryId(e, idArr);
+    } else {
+      if (!idArr.includes(e)) idArr.push(e);
+    }
+  });
+  return idArr;
+}
 </script>
 
 <style lang="scss" scoped>

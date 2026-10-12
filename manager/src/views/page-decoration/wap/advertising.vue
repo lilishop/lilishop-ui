@@ -82,90 +82,91 @@
         <liliDialog ref="liliDialog"    @selectedLink="selectedLink" :types="linkType"></liliDialog>
       </div>
       <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-         <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+         <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManageRef" />
       </el-dialog>
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive, watch, onMounted, nextTick } from "vue";
+import { useRoute } from "vue-router";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as API_Other from "@/api/other.js";
-export default {
-   components: {
-    ossManage,
-  },
-  data() {
-    return {
-      result:"",
-      picModelFlag: false, //图片选择器
-      type: "full", // 是否全屏
+import { useAppStore } from "@/stores/app";
 
-      //全屏广告
-      advertising: [
-         {
-          img:
-            "https://st-gdx.dancf.com/gaodingx/0/uxms/design/20200903-182035-5e87.png?x-oss-process=image/resize,w_932/interlace,1,image/format,webp",
-          size: "750*1624",
-        },
-      ],
-      selectedLinks: {},
-      linkType: "", // 选择类型
-    };
-  },
-   watch: {
-    advertising: {
-      handler(val) {
-        this.$store.state.openStyleStore = val;
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.openPage();
-  },
-  methods: {
-    openPage() {
-      const alertType = this.$route.query.pagetype;
-      const pageType = {
-        INDEX: "INDEX",
-        ALERT: "OPEN_SCREEN_PAGE",
-        OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
-      }[alertType ? alertType : "INDEX"];
+const route = useRoute();
+const appStore = useAppStore();
 
-      API_Other.getOpenHomeData(pageType).then((res) => {
-        this.$store.state.openStoreId = res.result.id;
-        if (res.result.pageData) {
-          this.advertising = [JSON.parse(res.result.pageData)];
-        }
-        this.result = res.result
-      });
-    },
-    // 点击链接
-    clickLink(item) {
-      this.$refs.liliDialog.open('link')
-    },
-    // 回调选择的链接
-    selectedLink(val) {
-      this.selectedLinks.url = val;
+const result = ref("");
+const picModelFlag = ref(false); //图片选择器
+const type = ref("full"); // 是否全屏
 
-      this.advertising[0].config = val;
-    },
-    // 点击选择照片
-    handleClickFile() {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    }, // 图片选择器回显
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url) return;
-      this.advertising[0].img = val.url;
+//全屏广告
+const advertising = ref([
+  {
+    img:
+      "https://st-gdx.dancf.com/gaodingx/0/uxms/design/20200903-182035-5e87.png?x-oss-process=image/resize,w_932/interlace,1,image/format,webp",
+    size: "750*1624",
+  },
+]);
+const selectedLinks = reactive({});
+const linkType = ref(""); // 选择类型
+
+const liliDialog = ref(null);
+const ossManageRef = ref(null);
+
+watch(
+  advertising,
+  (val) => {
+    appStore.openStyleStore = val;
+  },
+  { deep: true }
+);
+
+onMounted(() => {
+  openPage();
+});
+
+function openPage() {
+  const alertType = route.query.pagetype;
+  const pageType = {
+    INDEX: "INDEX",
+    ALERT: "OPEN_SCREEN_PAGE",
+    OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
+  }[alertType ? alertType : "INDEX"];
+
+  API_Other.getOpenHomeData(pageType).then((res) => {
+    appStore.openStoreId = res.result.id;
+    if (res.result.pageData) {
+      advertising.value = [JSON.parse(res.result.pageData)];
     }
-  },
-};
+    result.value = res.result
+  });
+}
+// 点击链接
+function clickLink(item) {
+  liliDialog.value.open('link')
+}
+// 回调选择的链接
+function selectedLink(val) {
+  selectedLinks.url = val;
+
+  advertising.value[0].config = val;
+}
+// 点击选择照片
+function handleClickFile() {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+} // 图片选择器回显
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url) return;
+  advertising.value[0].img = val.url;
+}
 </script>
 <style scoped lang="scss">
 @import "./style.scss";

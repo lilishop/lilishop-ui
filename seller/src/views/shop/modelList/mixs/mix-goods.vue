@@ -24,24 +24,15 @@
     </div>
 </template>
 
-<script>
-export default {
-  name: "mix-goods",
-  data() {
-    return {}
-  },
-  props: {
-    data: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  components: {},
-  mounted() {
+<script setup>
+defineOptions({ name: "mix-goods" });
 
-  },
-  methods: {}
-}
+defineProps({
+  data: {
+    type: Object,
+    default: () => ({})
+  }
+});
 </script>
 
 <style scoped lang="scss">

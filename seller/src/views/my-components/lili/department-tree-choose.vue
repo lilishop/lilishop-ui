@@ -35,114 +35,113 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import { initDepartment, searchDepartment } from "@/api/index";
 
-export default {
-  name: "departmentTreeChoose",
-  props: {
-    multiple: {
-      type: Boolean,
-      default: false,
-    },
-    clearable: {
-      type: Boolean,
-      default: true,
-    },
-    placeholder: {
-      type: String,
-      default: "点击选择部门",
-    },
+defineOptions({ name: "departmentTreeChoose" });
+
+const props = defineProps({
+  multiple: {
+    type: Boolean,
+    default: false,
   },
-  data() {
-    return {
-      depLoading: false,
-      departmentTitle: "",
-      searchKey: "",
-      dataDep: [],
-      cloneDep: [],
-      departmentId: [],
-      treeProps: {
-        label: "title",
-        children: "children",
-      },
-    };
+  clearable: {
+    type: Boolean,
+    default: true,
   },
-  methods: {
-    initDepartmentData() {
-      this.depLoading = true;
-      initDepartment()
-        .then((res) => {
-          if (res.success) {
-            this.dataDep = res.result;
-            this.cloneDep = JSON.parse(JSON.stringify(this.dataDep));
-          }
-        })
-        .finally(() => {
-          this.depLoading = false;
-        });
-    },
-    searchDep() {
-      if (this.searchKey) {
-        this.depLoading = true;
-        searchDepartment({ title: this.searchKey })
-          .then((res) => {
-            if (res.success) {
-              res.result.forEach((e) => {
-                if (e.status == -1) {
-                  e.title = "[已禁用] " + e.title;
-                  e.disabled = true;
-                }
-              });
-              this.dataDep = res.result;
-            }
-          })
-          .finally(() => {
-            this.depLoading = false;
-          });
-      } else {
-        this.dataDep = JSON.parse(JSON.stringify(this.cloneDep));
-      }
-    },
-    selectTree(node) {
-      if (!node) {
-        this.$emit("on-change", null);
-        this.departmentId = "";
-        this.departmentTitle = "";
-        return;
-      }
-      this.departmentId = node.id;
-      this.departmentTitle = node.title;
-      this.$emit("on-change", {
-        departmentId: this.departmentId,
-        departmentTitle: this.departmentTitle,
-      });
-    },
-    clearSelect() {
-      this.departmentId = [];
-      this.departmentTitle = "";
-      this.initDepartmentData();
-      if (this.multiple) {
-        this.$emit("on-change", []);
-      } else {
-        this.$emit("on-change", "");
-      }
-      this.$emit("on-clear");
-    },
-    setData(ids, title) {
-      this.departmentTitle = title;
-      if (this.multiple) {
-        this.departmentId = ids;
-      } else {
-        this.departmentId = [];
-        this.departmentId.push(ids);
-      }
-    },
+  placeholder: {
+    type: String,
+    default: "点击选择部门",
   },
-  created() {
-    this.initDepartmentData();
-  },
+});
+const emit = defineEmits(["on-change", "on-clear"]);
+
+const depLoading = ref(false);
+const departmentTitle = ref("");
+const searchKey = ref("");
+const dataDep = ref([]);
+const cloneDep = ref([]);
+const departmentId = ref([]);
+const treeProps = {
+  label: "title",
+  children: "children",
 };
+
+function initDepartmentData() {
+  depLoading.value = true;
+  initDepartment()
+    .then((res) => {
+      if (res.success) {
+        dataDep.value = res.result;
+        cloneDep.value = JSON.parse(JSON.stringify(dataDep.value));
+      }
+    })
+    .finally(() => {
+      depLoading.value = false;
+    });
+}
+function searchDep() {
+  if (searchKey.value) {
+    depLoading.value = true;
+    searchDepartment({ title: searchKey.value })
+      .then((res) => {
+        if (res.success) {
+          res.result.forEach((e) => {
+            if (e.status == -1) {
+              e.title = "[已禁用] " + e.title;
+              e.disabled = true;
+            }
+          });
+          dataDep.value = res.result;
+        }
+      })
+      .finally(() => {
+        depLoading.value = false;
+      });
+  } else {
+    dataDep.value = JSON.parse(JSON.stringify(cloneDep.value));
+  }
+}
+function selectTree(node) {
+  if (!node) {
+    emit("on-change", null);
+    departmentId.value = "";
+    departmentTitle.value = "";
+    return;
+  }
+  departmentId.value = node.id;
+  departmentTitle.value = node.title;
+  emit("on-change", {
+    departmentId: departmentId.value,
+    departmentTitle: departmentTitle.value,
+  });
+}
+function clearSelect() {
+  departmentId.value = [];
+  departmentTitle.value = "";
+  initDepartmentData();
+  if (props.multiple) {
+    emit("on-change", []);
+  } else {
+    emit("on-change", "");
+  }
+  emit("on-clear");
+}
+function setData(ids, title) {
+  departmentTitle.value = title;
+  if (props.multiple) {
+    departmentId.value = ids;
+  } else {
+    departmentId.value = [];
+    departmentId.value.push(ids);
+  }
+}
+
+initDepartmentData();
+
+// 父组件（clerkManage）通过 ref 调用 setData / clearSelect
+defineExpose({ setData, clearSelect });
 </script>
 
 <style lang="scss" scoped>

@@ -32,11 +32,12 @@
   </div>
 </template>
 
-<script>
-export default {
+<script setup>
+defineOptions({
   title: "文字图片模板",
-  props: ["res"]
-};
+});
+
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

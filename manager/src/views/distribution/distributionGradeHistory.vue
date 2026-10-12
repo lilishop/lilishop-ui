@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="110px"
@@ -101,115 +101,114 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
 import { getDistributionGradeHistoryPage, getDistributionGrades } from "@/api/distribution";
 
-export default {
-  name: "distributionGradeHistory",
-  data() {
-    return {
-      loading: false,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        memberName: "",
-        distributionMobile: "",
-        gradeId: "",
-        upgradeTimeStart: "",
-        upgradeTimeEnd: "",
-      },
-      upgradeTimeRange: [],
-      gradeOptions: [],
-      data: [],
-      total: 0,
-    };
-  },
-  mounted() {
-    this.loadGradeOptions();
-    this.getDataList();
-  },
-  methods: {
-    loadGradeOptions() {
-      getDistributionGrades()
-        .then((res) => {
-          if (!res.success) {
-            return;
-          }
-          this.gradeOptions = (res.result || [])
-            .slice()
-            .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-            .map((item) => ({
-              value: String(item.sortOrder),
-              label: item.gradeName || `等级值${item.sortOrder}`,
-            }));
-        });
-    },
-    formatGrade(name, gradeId) {
-      if (name) {
-        return name;
+defineOptions({ name: "distributionGradeHistory" });
+
+// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
+const searchFormRef = ref(null);
+
+const loading = ref(false);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  memberName: "",
+  distributionMobile: "",
+  gradeId: "",
+  upgradeTimeStart: "",
+  upgradeTimeEnd: "",
+});
+const upgradeTimeRange = ref([]);
+const gradeOptions = ref([]);
+const data = ref([]);
+const total = ref(0);
+
+onMounted(() => {
+  loadGradeOptions();
+  getDataList();
+});
+
+function loadGradeOptions() {
+  getDistributionGrades()
+    .then((res) => {
+      if (!res.success) {
+        return;
       }
-      if (gradeId) {
-        return `等级值${gradeId}`;
+      gradeOptions.value = (res.result || [])
+        .slice()
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+        .map((item) => ({
+          value: String(item.sortOrder),
+          label: item.gradeName || `等级值${item.sortOrder}`,
+        }));
+    });
+}
+function formatGrade(name, gradeId) {
+  if (name) {
+    return name;
+  }
+  if (gradeId) {
+    return `等级值${gradeId}`;
+  }
+  return "-";
+}
+function formatRate(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    return "-";
+  }
+  return `${(num * 100).toFixed(2).replace(/\.?0+$/, "") || "0"}%`;
+}
+function applyUpgradeTimeRange() {
+  if (upgradeTimeRange.value && upgradeTimeRange.value.length === 2) {
+    searchForm.value.upgradeTimeStart = `${upgradeTimeRange.value[0]} 00:00:00`;
+    searchForm.value.upgradeTimeEnd = `${upgradeTimeRange.value[1]} 23:59:59`;
+  } else {
+    searchForm.value.upgradeTimeStart = "";
+    searchForm.value.upgradeTimeEnd = "";
+  }
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleReset() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 20,
+    memberName: "",
+    distributionMobile: "",
+    gradeId: "",
+    upgradeTimeStart: "",
+    upgradeTimeEnd: "",
+  };
+  upgradeTimeRange.value = [];
+  getDataList();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  applyUpgradeTimeRange();
+  loading.value = true;
+  getDistributionGradeHistoryPage(searchForm.value)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
       }
-      return "-";
-    },
-    formatRate(value) {
-      const num = Number(value);
-      if (!Number.isFinite(num)) {
-        return "-";
-      }
-      return `${(num * 100).toFixed(2).replace(/\.?0+$/, "") || "0"}%`;
-    },
-    applyUpgradeTimeRange() {
-      if (this.upgradeTimeRange && this.upgradeTimeRange.length === 2) {
-        this.searchForm.upgradeTimeStart = `${this.upgradeTimeRange[0]} 00:00:00`;
-        this.searchForm.upgradeTimeEnd = `${this.upgradeTimeRange[1]} 23:59:59`;
-      } else {
-        this.searchForm.upgradeTimeStart = "";
-        this.searchForm.upgradeTimeEnd = "";
-      }
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleReset() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 20,
-        memberName: "",
-        distributionMobile: "",
-        gradeId: "",
-        upgradeTimeStart: "",
-        upgradeTimeEnd: "",
-      };
-      this.upgradeTimeRange = [];
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.applyUpgradeTimeRange();
-      this.loading = true;
-      getDistributionGradeHistoryPage(this.searchForm)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
 </script>
 
 <style scoped>

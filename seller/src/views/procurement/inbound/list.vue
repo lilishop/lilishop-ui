@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="80px">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="80px">
         <el-form-item label="入库单号">
           <el-input v-model="searchForm.inboundSn" placeholder="入库单号" clearable style="width: 200px" />
         </el-form-item>
@@ -48,62 +48,65 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { getProcurementInboundPage } from "@/api/procurement";
 import { formatMoney } from "../constants";
+import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "procurement-inbound-list",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        inboundSn: "",
-        sort: "createTime",
-        order: "desc",
-      },
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    formatMoney,
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    resetSearch() {
-      this.searchForm.inboundSn = "";
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getProcurementInboundPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    goCreate() {
-      this.$filters.customRouterPush({ name: "procurement-inbound-operation" });
-    },
-    goDetail(row) {
-      this.$filters.customRouterPush({
-        name: "procurement-inbound-operation",
-        query: { id: row.id, readonly: 1 },
-      });
-    },
-  },
-};
+defineOptions({ name: "procurement-inbound-list" });
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+  inboundSn: "",
+  sort: "createTime",
+  order: "desc",
+});
+
+// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+
+onMounted(() => {
+  getDataList();
+});
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function resetSearch() {
+  searchForm.inboundSn = "";
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function getDataList() {
+  loading.value = true;
+  getProcurementInboundPage(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function goCreate() {
+  customRouterPush({ name: "procurement-inbound-operation" });
+}
+
+function goDetail(row) {
+  customRouterPush({
+    name: "procurement-inbound-operation",
+    query: { id: row.id, readonly: 1 },
+  });
+}
 </script>

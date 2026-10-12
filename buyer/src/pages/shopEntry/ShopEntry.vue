@@ -56,139 +56,134 @@
     </el-dialog>
   </div>
 </template>
-<script>
-
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { agreement, applyStatus } from "@/api/shopentry";
 import firstApply from "./FirstApply";
 import secondApply from "./SecondApply";
 import thirdApply from "./ThirdApply";
-export default {
-  components: {
-    firstApply,
-    secondApply,
-    thirdApply,
-  },
-  data() {
-    return {
-      currentIndex: 0, // 当前步骤
-      showAgreement: false, // 协议显示
-      agreementCon: "", // 协议内容
-      checked: false, // 选中协议
-      firstData: {}, // 第一步数据
-      secondData: {}, // 第二步数据
-      thirdData: {}, // 第三步数据
-      storeDisable: "", // APPLY OPEN 开店中 CLOSED 关闭 REFUSED 拒绝 APPLYING 申请中，审核
-      initLoading: true,
-      agreementAccepted: false, // 是否已同意入驻协议
-    };
-  },
-  methods: {
-    confirmAgreement() {
-      this.agreementAccepted = true;
-      this.showAgreement = false;
-      sessionStorage.setItem("shopEntryAgreementAccepted", "1");
-    },
-    assignApplyData(data) {
-      const first = [
-        "companyAddressPath",
-        "companyAddress",
-        "companyAddressIdPath",
-        "companyEmail",
-        "companyName",
-        "employeeNum",
-        "companyPhone",
-        "legalId",
-        "legalName",
-        "licencePhoto",
-        "legalPhoto",
-        "licenseNum",
-        "linkName",
-        "linkPhone",
-        "registeredCapital",
-        "scope",
-      ];
-      const second = [
-        "settlementBankAccountName",
-        "settlementBankAccountNum",
-        "settlementBankBranchName",
-        "settlementBankJointName",
-      ];
-      const third = [
-        "goodsManagementCategory",
-        "storeCenter",
-        "storeDesc",
-        "storeLogo",
-        "storeName",
-        "storeAddressIdPath",
-        "storeAddressPath",
-        "storeAddressDetail",
-      ];
 
-      this.storeDisable = data.storeDisable || "";
-      Object.assign(this.firstData, Object.fromEntries(first.map((key) => [key, data[key]])));
-      Object.assign(this.secondData, Object.fromEntries(second.map((key) => [key, data[key]])));
-      Object.assign(this.thirdData, Object.fromEntries(third.map((key) => [key, data[key]])));
-    },
-    getArticle() {
-      // 入驻协议：库中无 STORE_REGISTER 文章时 result 为 null，不能直接读 content
-      agreement().then((res) => {
-        this.agreementCon = res.result?.content || "";
-      });
-    },
-    getData(status) {
-      applyStatus().then((res) => {
-        if (!res.success) {
-          return;
-        }
-        if (!res.result) {
-          if (status === "init" && !this.agreementAccepted) {
-            this.showAgreement = true;
-          }
-          return;
-        }
+const currentIndex = ref(0); // 当前步骤
+const showAgreement = ref(false); // 协议显示
+const agreementCon = ref(""); // 协议内容
+const checked = ref(false); // 选中协议
+const firstData = reactive({}); // 第一步数据
+const secondData = reactive({}); // 第二步数据
+const thirdData = reactive({}); // 第三步数据
+const storeDisable = ref(""); // APPLY OPEN 开店中 CLOSED 关闭 REFUSED 拒绝 APPLYING 申请中，审核
+const initLoading = ref(true);
+const agreementAccepted = ref(false); // 是否已同意入驻协议
 
-        this.assignApplyData(res.result);
-        if (status === "init") {
-          this.agreementAccepted = true;
-          sessionStorage.setItem("shopEntryAgreementAccepted", "1");
-          if (this.storeDisable === "APPLY") {
-            this.currentIndex = 0;
-          } else {
-            this.currentIndex = 3;
-          }
-        }
-      }).finally(() => {
-        if (status === "init") {
-          this.initLoading = false;
-        }
-      });
-    },
-    refreshApplyData() {
-      return applyStatus().then((res) => {
-        if (res.success && res.result) {
-          this.assignApplyData(res.result);
-        }
-      }).catch((err) => {
-        console.warn('获取入驻申请状态失败', err);
-      });
-    },
-    // 下一步：先拉最新申请数据，再切步骤，避免第三步挂载后再改 content 触发校验
-    async nextPage(step) {
-      if (typeof step !== "number") return;
-      if (step > 0 && step <= 3) {
-        await this.refreshApplyData();
+function confirmAgreement() {
+  agreementAccepted.value = true;
+  showAgreement.value = false;
+  sessionStorage.setItem("shopEntryAgreementAccepted", "1");
+}
+
+function assignApplyData(data) {
+  const first = [
+    "companyAddressPath",
+    "companyAddress",
+    "companyAddressIdPath",
+    "companyEmail",
+    "companyName",
+    "employeeNum",
+    "companyPhone",
+    "legalId",
+    "legalName",
+    "licencePhoto",
+    "legalPhoto",
+    "licenseNum",
+    "linkName",
+    "linkPhone",
+    "registeredCapital",
+    "scope",
+  ];
+  const second = [
+    "settlementBankAccountName",
+    "settlementBankAccountNum",
+    "settlementBankBranchName",
+    "settlementBankJointName",
+  ];
+  const third = [
+    "goodsManagementCategory",
+    "storeCenter",
+    "storeDesc",
+    "storeLogo",
+    "storeName",
+    "storeAddressIdPath",
+    "storeAddressPath",
+    "storeAddressDetail",
+  ];
+
+  storeDisable.value = data.storeDisable || "";
+  Object.assign(firstData, Object.fromEntries(first.map((key) => [key, data[key]])));
+  Object.assign(secondData, Object.fromEntries(second.map((key) => [key, data[key]])));
+  Object.assign(thirdData, Object.fromEntries(third.map((key) => [key, data[key]])));
+}
+
+function getArticle() {
+  // 入驻协议：库中无 STORE_REGISTER 文章时 result 为 null，不能直接读 content
+  agreement().then((res) => {
+    agreementCon.value = res.result?.content || "";
+  });
+}
+
+function getData(status) {
+  applyStatus().then((res) => {
+    if (!res.success) {
+      return;
+    }
+    if (!res.result) {
+      if (status === "init" && !agreementAccepted.value) {
+        showAgreement.value = true;
       }
-      this.currentIndex = step;
-    },
-  },
-  created() {
-    this.agreementAccepted = sessionStorage.getItem("shopEntryAgreementAccepted") === "1";
-  },
-  mounted() {
-    this.getData("init");
-    this.getArticle();
-  },
-};
+      return;
+    }
+
+    assignApplyData(res.result);
+    if (status === "init") {
+      agreementAccepted.value = true;
+      sessionStorage.setItem("shopEntryAgreementAccepted", "1");
+      if (storeDisable.value === "APPLY") {
+        currentIndex.value = 0;
+      } else {
+        currentIndex.value = 3;
+      }
+    }
+  }).finally(() => {
+    if (status === "init") {
+      initLoading.value = false;
+    }
+  });
+}
+
+function refreshApplyData() {
+  return applyStatus().then((res) => {
+    if (res.success && res.result) {
+      assignApplyData(res.result);
+    }
+  }).catch((err) => {
+    console.warn('获取入驻申请状态失败', err);
+  });
+}
+
+// 下一步：先拉最新申请数据，再切步骤，避免第三步挂载后再改 content 触发校验
+async function nextPage(step) {
+  if (typeof step !== "number") return;
+  if (step > 0 && step <= 3) {
+    await refreshApplyData();
+  }
+  currentIndex.value = step;
+}
+
+// 初始化（原 created 钩子逻辑）
+agreementAccepted.value = sessionStorage.getItem("shopEntryAgreementAccepted") === "1";
+
+onMounted(() => {
+  getData("init");
+  getArticle();
+});
 </script>
 <style lang="scss" scoped>
 .content {

@@ -19,125 +19,124 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from "vuex";
+<script setup>
+import { computed, onMounted, nextTick, ref } from "vue";
 import SocketInstance from "@/im-server/socket-instance";
-export default {
-  data () {
-    return {
-      btnHide: undefined,
-      hide: true
-    }
+import { useUserStore } from "@/stores/user";
+import { useDialogueStore } from "@/stores/dialogue";
+import { useTalkStore } from "@/stores/talk";
+
+const userStore = useUserStore();
+const dialogueStore = useDialogueStore();
+const talkStore = useTalkStore();
+
+const props = defineProps({
+  goodsDetail: {
+    type: Object,
+    default: null,
   },
-  computed: {
-    ...mapGetters(["talkItems"]),
-    ...mapState({
-      id: (state) => state.user.id,
-      index_name: (state) => state.dialogue.index_name,
-      toUser: (state) => state.user.toUser,
-    }),
-  },
-  mounted () {
-    console.log(this.goodsDetail)
-    this.btnHide = localStorage.getItem('btnHide')
-  },
-  methods: {
-    toGoods () {
-      alert("toGoods")
-    },
-    toMessage () {
-      alert(JSON.stringify(this.toUser))
-      alert("toMessage")
-    },
-    // 回车键发送消息回调事件
-    submitSendMessage () {
-      console.log("发送");
-      const context = this.goodsDetail
-      const record = {
-        operation_type: "MESSAGE",
-        to: this.toUser.userId,
-        from: this.id,
-        message_type: "GOODS",
-        context: context,
-        talk_id: this.toUser.id,
-      };
-      SocketInstance.emit("event_talk", record);
+});
 
-      this.$store.commit("UPDATE_TALK_ITEM", {
-        index_name: this.index_name,
-        draft_text: "",
-      });
+const btnHide = ref(undefined);
+const hide = ref(true);
+
+const talkItems = computed(() => talkStore.talkItems);
+const id = computed(() => userStore.id);
+const index_name = computed(() => dialogueStore.index_name);
+const toUser = computed(() => userStore.toUser);
+
+onMounted(() => {
+  console.log(props.goodsDetail)
+  btnHide.value = localStorage.getItem('btnHide')
+});
+
+function toGoods () {
+  alert("toGoods")
+}
+function toMessage () {
+  alert(JSON.stringify(toUser.value))
+  alert("toMessage")
+}
+// 回车键发送消息回调事件
+function submitSendMessage () {
+  console.log("发送");
+  const context = props.goodsDetail
+  const record = {
+    operation_type: "MESSAGE",
+    to: toUser.value.userId,
+    from: id.value,
+    message_type: "GOODS",
+    context: context,
+    talk_id: toUser.value.id,
+  };
+  SocketInstance.emit("event_talk", record);
+
+  talkStore.UPDATE_TALK_ITEM({
+    index_name: index_name.value,
+    draft_text: "",
+  });
 
 
-      /**
-       * 插入数据
-       */
-      const insterChat = {
-        createTime: this.formateDateAndTimeToString(new Date()),
-        fromUser: this.id,
-        toUser: record.to,
-        isRead: false,
-        messageType: "GOODS",
-        text: context,
-        float: "right",
-      };
+  /**
+   * 插入数据
+   */
+  const insterChat = {
+    createTime: formateDateAndTimeToString(new Date()),
+    fromUser: id.value,
+    toUser: record.to,
+    isRead: false,
+    messageType: "GOODS",
+    text: context,
+    float: "right",
+  };
 
-      console.log("insterChat", insterChat);
-      // console.log("插入对话记录",'')
-      // 插入对话记录
-      this.$store.commit("PUSH_DIALOGUE", insterChat);
-      // 获取聊天面板元素节点
-      let el = document.getElementById("lumenChatPanel");
-      // 判断的滚动条是否在底部
-      let isBottom =
-        Math.ceil(el.scrollTop) + el.clientHeight >= el.scrollHeight;
+  console.log("insterChat", insterChat);
+  // console.log("插入对话记录",'')
+  // 插入对话记录
+  dialogueStore.PUSH_DIALOGUE(insterChat);
+  // 获取聊天面板元素节点
+  let el = document.getElementById("lumenChatPanel");
+  // 判断的滚动条是否在底部
+  let isBottom =
+    Math.ceil(el.scrollTop) + el.clientHeight >= el.scrollHeight;
 
-      if (isBottom || record.to == this.id) {
-        this.$nextTick(() => {
-          el.scrollTop = el.scrollHeight;
-        });
-      } else {
-        this.$store.commit("SET_TLAK_UNREAD_MESSAGE", {
-          content: content,
-          nickname: record.name,
-        });
-      }
-      // 发送后隐藏按钮  0：隐藏 1：显示
-      localStorage.setItem('btnHide', 0)
-      this.hide = false
-    },
-
-    formateDateAndTimeToString (date) {
-      var hours = date.getHours();
-      var mins = date.getMinutes();
-      var secs = date.getSeconds();
-      var msecs = date.getMilliseconds();
-      if (hours < 10) hours = "0" + hours;
-      if (mins < 10) mins = "0" + mins;
-      if (secs < 10) secs = "0" + secs;
-      if (msecs < 10) secs = "0" + msecs;
-      return (
-        this.formatDateToString(date) + " " + hours + ":" + mins + ":" + secs
-      );
-    },
-
-    formatDateToString (date) {
-      var year = date.getFullYear();
-      var month = date.getMonth() + 1;
-      var day = date.getDate();
-      if (month < 10) month = "0" + month;
-      if (day < 10) day = "0" + day;
-      return year + "-" + month + "-" + day;
-    },
-  },
-  props: {
-    goodsDetail: {
-      type: Object,
-      default: null,
-    },
-  },
+  if (isBottom || record.to == id.value) {
+    nextTick(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+  } else {
+    talkStore.SET_TLAK_UNREAD_MESSAGE({
+      content: content,
+      nickname: record.name,
+    });
+  }
+  // 发送后隐藏按钮  0：隐藏 1：显示
+  localStorage.setItem('btnHide', 0)
+  hide.value = false
 }
 
+function formateDateAndTimeToString (date) {
+  var hours = date.getHours();
+  var mins = date.getMinutes();
+  var secs = date.getSeconds();
+  var msecs = date.getMilliseconds();
+  if (hours < 10) hours = "0" + hours;
+  if (mins < 10) mins = "0" + mins;
+  if (secs < 10) secs = "0" + secs;
+  if (msecs < 10) secs = "0" + msecs;
+  return (
+    formatDateToString(date) + " " + hours + ":" + mins + ":" + secs
+  );
+}
+
+function formatDateToString (date) {
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  if (month < 10) month = "0" + month;
+  if (day < 10) day = "0" + day;
+  return year + "-" + month + "-" + day;
+}
 </script>
 
 <style scoped lang="less">

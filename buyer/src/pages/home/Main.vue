@@ -44,88 +44,84 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Bell } from "@element-plus/icons-vue";
 import storage from "@/plugins/storage";
 import { getOrderList } from "@/api/order";
 import { afterSaleList, getMembersWallet, memberCouponList } from "@/api/member";
 import { refreshUnreadMessage } from "@/utils/unreadMessage";
+import { useAppStore } from "@/stores/app";
+
+defineOptions({ name: "UserCenterHome" });
+
+const router = useRouter();
+const appStore = useAppStore();
 
 function totalOf(res) {
   return res && res.success ? Number(res.result && res.result.total) || 0 : 0;
 }
 
-export default {
-  name: "UserCenterHome",
-  components: { Bell },
-  data() {
-    return {
-      displayName: "会员",
-      waitPay: 0,
-      waitShip: 0,
-      waitReceive: 0,
-      afterSale: 0,
-      couponCount: 0,
-      balance: 0,
-    };
-  },
-  computed: {
-    unreadMsg() {
-      return Number(this.$store.state.unreadMsg) || 0;
-    },
-    unreadLabel() {
-      return this.unreadMsg > 99 ? "99+" : String(this.unreadMsg);
-    },
-    orderStats() {
-      return [
-        { key: "pay", label: "待付款", count: this.waitPay, action: () => this.goOrder("WAIT_PAY") },
-        { key: "ship", label: "待发货", count: this.waitShip, action: () => this.goOrder("WAIT_SHIP") },
-        { key: "receive", label: "待收货", count: this.waitReceive, action: () => this.goOrder("WAIT_USE") },
-        { key: "after", label: "售后", count: this.afterSale, action: () => this.go("AfterSale") },
-      ];
-    },
-  },
-  mounted() {
-    this.readUser();
-    this.loadSummary();
-  },
-  methods: {
-    readUser() {
-      try {
-        const raw = storage.getItem("userInfo");
-        const user = raw ? JSON.parse(raw) : {};
-        this.displayName = user.nickName || user.username || "会员";
-      } catch {
-        this.displayName = "会员";
-      }
-    },
-    loadSummary() {
-      const page = { pageNumber: 1, pageSize: 1 };
-      Promise.all([
-        getOrderList({ ...page, tag: "WAIT_PAY" }).catch(() => null),
-        getOrderList({ ...page, tag: "WAIT_SHIP" }).catch(() => null),
-        getOrderList({ ...page, tag: "WAIT_USE" }).catch(() => null),
-        afterSaleList({ ...page, sort: "createTime", order: "desc" }).catch(() => null),
-        memberCouponList({ ...page, memberCouponStatus: "NEW" }).catch(() => null),
-        getMembersWallet().catch(() => null),
-        refreshUnreadMessage(),
-      ]).then(([pay, ship, receive, afterSale, coupon, wallet]) => {
-        this.waitPay = totalOf(pay);
-        this.waitShip = totalOf(ship);
-        this.waitReceive = totalOf(receive);
-        this.afterSale = totalOf(afterSale);
-        this.couponCount = totalOf(coupon);
-        this.balance = wallet && wallet.success ? wallet.result.memberWallet || 0 : 0;
-      });
-    },
-    go(name) {
-      this.$router.push({ name });
-    },
-    goOrder(tag) {
-      this.$router.push({ name: "MyOrder", query: { tag } });
-    },
-  },
-};
+const displayName = ref("会员");
+const waitPay = ref(0);
+const waitShip = ref(0);
+const waitReceive = ref(0);
+const afterSale = ref(0);
+const couponCount = ref(0);
+const balance = ref(0);
+
+const unreadMsg = computed(() => appStore.unreadMsg);
+const unreadLabel = computed(() => (unreadMsg.value > 99 ? "99+" : String(unreadMsg.value)));
+const orderStats = computed(() => [
+  { key: "pay", label: "待付款", count: waitPay.value, action: () => goOrder("WAIT_PAY") },
+  { key: "ship", label: "待发货", count: waitShip.value, action: () => goOrder("WAIT_SHIP") },
+  { key: "receive", label: "待收货", count: waitReceive.value, action: () => goOrder("WAIT_USE") },
+  { key: "after", label: "售后", count: afterSale.value, action: () => go("AfterSale") },
+]);
+
+function readUser() {
+  try {
+    const raw = storage.getItem("userInfo");
+    const user = raw ? JSON.parse(raw) : {};
+    displayName.value = user.nickName || user.username || "会员";
+  } catch {
+    displayName.value = "会员";
+  }
+}
+
+function loadSummary() {
+  const page = { pageNumber: 1, pageSize: 1 };
+  Promise.all([
+    getOrderList({ ...page, tag: "WAIT_PAY" }).catch(() => null),
+    getOrderList({ ...page, tag: "WAIT_SHIP" }).catch(() => null),
+    getOrderList({ ...page, tag: "WAIT_USE" }).catch(() => null),
+    afterSaleList({ ...page, sort: "createTime", order: "desc" }).catch(() => null),
+    memberCouponList({ ...page, memberCouponStatus: "NEW" }).catch(() => null),
+    getMembersWallet().catch(() => null),
+    refreshUnreadMessage(),
+  ]).then(([pay, ship, receive, afterSaleRes, coupon, wallet]) => {
+    waitPay.value = totalOf(pay);
+    waitShip.value = totalOf(ship);
+    waitReceive.value = totalOf(receive);
+    afterSale.value = totalOf(afterSaleRes);
+    couponCount.value = totalOf(coupon);
+    balance.value = wallet && wallet.success ? wallet.result.memberWallet || 0 : 0;
+  });
+}
+
+function go(name) {
+  router.push({ name });
+}
+
+function goOrder(tag) {
+  router.push({ name: "MyOrder", query: { tag } });
+}
+
+onMounted(() => {
+  readUser();
+  loadSummary();
+});
 </script>
 
 <style scoped lang="scss">

@@ -18,8 +18,17 @@
   </el-breadcrumb>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { otherRouter } from "@/router/router";
+import { useAppStore } from "@/stores/app";
+
+defineOptions({ name: "pageBreadcrumb" });
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
 
 const stripLayout = (name) => (name || "").replace(/__layout$/, "");
 
@@ -61,105 +70,101 @@ const findFirstLeaf = (group) => {
   return stripLayout(first?.name) || null;
 };
 
-export default {
-  name: "pageBreadcrumb",
-  computed: {
-    items() {
-      const route = this.$route;
-      if (!route || !route.name || route.name === "home_index") {
-        return [{ title: "首页" }];
-      }
-      return this.buildChain(stripLayout(route.name));
-    },
-  },
-  methods: {
-    go(target) {
-      if (!target || !target.name) return;
-      if (this.$route.name === target.name) return;
-      this.$router.push(target);
-    },
-    findInMenu(name) {
-      const menuList = this.$store.state.app.menuList || [];
-      for (const grp of menuList) {
-        for (const child of grp.children || []) {
-          if (stripLayout(child.name) === name) {
-            return { group: grp, child };
-          }
-        }
-      }
-      return null;
-    },
-    routerEntry(name) {
-      if (Array.isArray(otherRouter.children)) {
-        return otherRouter.children.find((c) => c.name === name);
-      }
-      return null;
-    },
-    topItem() {
-      const navList = this.$store.state.app.navList || [];
-      const menuList = this.$store.state.app.menuList || [];
-      const currNavTitle = this.$store.state.app.currNavTitle;
-      const firstName =
-        this.$route.meta && this.$route.meta.firstRouterName;
+const items = computed(() => {
+  if (!route || !route.name || route.name === "home_index") {
+    return [{ title: "首页" }];
+  }
+  return buildChain(stripLayout(route.name));
+});
 
-      let topTitle = currNavTitle;
-      if (firstName) {
-        const top = navList.find((n) => n.name === firstName);
-        if (top) topTitle = top.title;
+function go(target) {
+  if (!target || !target.name) return;
+  if (route.name === target.name) return;
+  router.push(target);
+}
+
+function findInMenu(name) {
+  const menuList = appStore.menuList || [];
+  for (const grp of menuList) {
+    for (const child of grp.children || []) {
+      if (stripLayout(child.name) === name) {
+        return { group: grp, child };
       }
-      if (!topTitle) return null;
+    }
+  }
+  return null;
+}
 
-      let target = null;
-      if (menuList && menuList.length) {
-        const leafName = findFirstLeaf(menuList[0]);
-        if (leafName) target = { name: leafName };
-      }
-      return { title: topTitle, target };
-    },
-    buildChain(name, depth = 0) {
-      if (depth > 6) return [];
+function routerEntry(name) {
+  if (Array.isArray(otherRouter.children)) {
+    return otherRouter.children.find((c) => c.name === name);
+  }
+  return null;
+}
 
-      const inMenu = this.findInMenu(name);
-      if (inMenu) {
-        const list = [];
-        const top = this.topItem();
-        if (top) list.push(top);
-        const groupLeaf = findFirstLeaf(inMenu.group);
-        list.push({
-          title: inMenu.group.title,
-          target: groupLeaf ? { name: groupLeaf } : null,
-        });
-        list.push({ title: inMenu.child.title });
-        return list;
-      }
+function topItem() {
+  const navList = appStore.navList || [];
+  const menuList = appStore.menuList || [];
+  const currNavTitle = appStore.currNavTitle;
+  const firstName = route.meta && route.meta.firstRouterName;
 
-      const parentName = PARENT_MAP[name];
-      const entry = this.routerEntry(name);
-      const selfTitle = entry?.title
-        ? entry.title
-        : (this.$route.meta && this.$route.meta.title
-            ? String(this.$route.meta.title).replace(/\s*-\s*.+$/, "")
-            : "");
+  let topTitle = currNavTitle;
+  if (firstName) {
+    const top = navList.find((n) => n.name === firstName);
+    if (top) topTitle = top.title;
+  }
+  if (!topTitle) return null;
 
-      if (parentName) {
-        const parentChain = this.buildChain(parentName, depth + 1).map(
-          (it, idx, arr) =>
-            idx === arr.length - 1
-              ? { title: it.title, target: { name: parentName } }
-              : it
-        );
-        if (selfTitle) parentChain.push({ title: selfTitle });
-        return parentChain;
-      }
+  let target = null;
+  if (menuList && menuList.length) {
+    const leafName = findFirstLeaf(menuList[0]);
+    if (leafName) target = { name: leafName };
+  }
+  return { title: topTitle, target };
+}
 
-      const list = [];
-      const top = this.topItem();
-      if (top) list.push(top);
-      if (selfTitle) list.push({ title: selfTitle });
-      return list;
-    },
-  },
-};
+function buildChain(name, depth = 0) {
+  if (depth > 6) return [];
+
+  const inMenu = findInMenu(name);
+  if (inMenu) {
+    const list = [];
+    const top = topItem();
+    if (top) list.push(top);
+    const groupLeaf = findFirstLeaf(inMenu.group);
+    list.push({
+      title: inMenu.group.title,
+      target: groupLeaf ? { name: groupLeaf } : null,
+    });
+    list.push({ title: inMenu.child.title });
+    return list;
+  }
+
+  const parentName = PARENT_MAP[name];
+  const entry = routerEntry(name);
+  const selfTitle = entry?.title
+    ? entry.title
+    : (route.meta && route.meta.title
+        ? String(route.meta.title).replace(/\s*-\s*.+$/, "")
+        : "");
+
+  if (parentName) {
+    const parentChain = buildChain(parentName, depth + 1).map(
+      (it, idx, arr) =>
+        idx === arr.length - 1
+          ? { title: it.title, target: { name: parentName } }
+          : it
+    );
+    if (selfTitle) parentChain.push({ title: selfTitle });
+    return parentChain;
+  }
+
+  const list = [];
+  const top = topItem();
+  if (top) list.push(top);
+  if (selfTitle) list.push({ title: selfTitle });
+  return list;
+}
 </script>
 
 <style lang="scss" scoped>

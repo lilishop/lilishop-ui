@@ -88,61 +88,61 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import { getMemberFeedback, getMemberFeedbackDetail } from "@/api/other";
 
-export default {
-  name: "feedback",
-  data() {
-    return {
-      loading: true,
-      form: {},
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      detailVisible: false,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getFeedback();
-    },
-    changePage() {
-      this.getFeedback();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getFeedback();
-    },
-    getFeedback() {
-      this.loading = true;
-      getMemberFeedback(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    detail(v) {
-      getMemberFeedbackDetail(v.id).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.form = res.result;
-          this.detailVisible = true;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "feedback" });
+
+// 模板 el-table / el-form 的模板 ref（对应原 $refs.table / $refs.formValidate）
+const table = ref(null);
+const formValidate = ref(null);
+
+const loading = ref(true);
+const form = ref({});
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const detailVisible = ref(false);
+const data = ref([]);
+const total = ref(0);
+
+function init() {
+  getFeedback();
+}
+function changePage() {
+  getFeedback();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getFeedback();
+}
+function getFeedback() {
+  loading.value = true;
+  getMemberFeedback(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function detail(v) {
+  getMemberFeedbackDetail(v.id).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      form.value = res.result;
+      detailVisible.value = true;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .ops a {

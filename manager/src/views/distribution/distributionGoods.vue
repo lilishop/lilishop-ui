@@ -2,7 +2,7 @@
   <div>
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -189,206 +189,206 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, computed, onMounted } from "vue";
 import { auditDistributionGoods, delDistributionGoods, getDistributionGoods } from "@/api/distribution";
 import { getBrandListData, getCategoryTree } from "@/api/goods";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "distributionGoods",
-  data() {
-    return {
-      loading: true,
-      currentAuthStatus: "ALL",
-      auditModalVisible: false,
-      auditLoading: false,
-      auditTargetIds: [],
-      auditForm: {
-        authStatus: "PASS",
-        authRemark: "",
-      },
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        goodsName: "",
-        storeName: "",
-        categoryId: "",
-        brandId: "",
-        authStatus: "",
-      },
-      categoryList: [],
-      categoryProps: {
-        value: "id",
-        label: "name",
-        children: "children",
-        checkStrictly: true,
-        emitPath: false,
-      },
-      brandList: [],
-      selectList: [],
-      selectCount: 0,
-      data: [],
-      total: 0,
-    };
-  },
-  computed: {
-    hasPendingAuditSelection() {
-      return this.selectList.some((item) => item.authStatus === "TOBEAUDITED");
-    },
-  },
-  methods: {
-    authStatusText(value) {
-      if (value === "TOBEAUDITED") return "待审核";
-      if (value === "REFUSE") return "审核未通过";
-      return "已审核";
-    },
-    authStatusTagType(value) {
-      if (value === "TOBEAUDITED") return "warning";
-      if (value === "REFUSE") return "danger";
-      return "success";
-    },
-    onAuthStatusChange(name) {
-      this.searchForm.authStatus = name === "ALL" ? "" : name;
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-      this.clearSelectAll();
-    },
-    openAudit(row) {
-      this.auditTargetIds = [row.id];
-      this.auditForm = { authStatus: "PASS", authRemark: "" };
-      this.auditModalVisible = true;
-    },
-    openBatchAudit() {
-      const pendingRows = this.selectList.filter((item) => item.authStatus === "TOBEAUDITED");
-      if (!pendingRows.length) {
-        this.$Message.warning("请选择待审核的分销商品");
-        return;
+defineOptions({ name: "distributionGoods" });
+
+// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
+const searchFormRef = ref(null);
+const table = ref(null);
+
+const loading = ref(true);
+const currentAuthStatus = ref("ALL");
+const auditModalVisible = ref(false);
+const auditLoading = ref(false);
+const auditTargetIds = ref([]);
+const auditForm = ref({
+  authStatus: "PASS",
+  authRemark: "",
+});
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  goodsName: "",
+  storeName: "",
+  categoryId: "",
+  brandId: "",
+  authStatus: "",
+});
+const categoryList = ref([]);
+const categoryProps = reactive({
+  value: "id",
+  label: "name",
+  children: "children",
+  checkStrictly: true,
+  emitPath: false,
+});
+const brandList = ref([]);
+const selectList = ref([]);
+const selectCount = ref(0);
+const data = ref([]);
+const total = ref(0);
+
+const hasPendingAuditSelection = computed(() =>
+  selectList.value.some((item) => item.authStatus === "TOBEAUDITED")
+);
+
+function authStatusText(value) {
+  if (value === "TOBEAUDITED") return "待审核";
+  if (value === "REFUSE") return "审核未通过";
+  return "已审核";
+}
+function authStatusTagType(value) {
+  if (value === "TOBEAUDITED") return "warning";
+  if (value === "REFUSE") return "danger";
+  return "success";
+}
+function onAuthStatusChange(name) {
+  searchForm.authStatus = name === "ALL" ? "" : name;
+  searchForm.pageNumber = 1;
+  getDataList();
+  clearSelectAll();
+}
+function openAudit(row) {
+  auditTargetIds.value = [row.id];
+  auditForm.value = { authStatus: "PASS", authRemark: "" };
+  auditModalVisible.value = true;
+}
+function openBatchAudit() {
+  const pendingRows = selectList.value.filter((item) => item.authStatus === "TOBEAUDITED");
+  if (!pendingRows.length) {
+    Message.warning("请选择待审核的分销商品");
+    return;
+  }
+  auditTargetIds.value = pendingRows.map((item) => item.id);
+  auditForm.value = { authStatus: "PASS", authRemark: "" };
+  auditModalVisible.value = true;
+}
+function submitAudit() {
+  if (auditForm.value.authStatus === "REFUSE" && !auditForm.value.authRemark.trim()) {
+    Message.warning("请填写驳回原因");
+    return;
+  }
+  auditLoading.value = true;
+  auditDistributionGoods({
+    ids: auditTargetIds.value,
+    authStatus: auditForm.value.authStatus,
+    authRemark: auditForm.value.authRemark.trim(),
+  })
+    .then((res) => {
+      if (res.success) {
+        Message.success("审核成功");
+        auditModalVisible.value = false;
+        clearSelectAll();
+        getDataList();
       }
-      this.auditTargetIds = pendingRows.map((item) => item.id);
-      this.auditForm = { authStatus: "PASS", authRemark: "" };
-      this.auditModalVisible = true;
-    },
-    submitAudit() {
-      if (this.auditForm.authStatus === "REFUSE" && !this.auditForm.authRemark.trim()) {
-        this.$Message.warning("请填写驳回原因");
-        return;
+    })
+    .finally(() => {
+      auditLoading.value = false;
+    });
+}
+function goodsTypeText(value) {
+  if (value === "PHYSICAL_GOODS") return "实物商品";
+  if (value === "VIRTUAL_GOODS") return "虚拟商品";
+  if (value === "E_COUPON") return "电子卡券";
+  return "-";
+}
+function init() {
+  loadFilterOptions();
+  getDataList();
+}
+function loadFilterOptions() {
+  getCategoryTree().then((res) => {
+    if (res.success) {
+      categoryList.value = res.result || [];
+    }
+  });
+  getBrandListData().then((res) => {
+    brandList.value = Array.isArray(res) ? res : res.result || [];
+  });
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+  clearSelectAll();
+}
+function changePageSize(v) {
+  searchForm.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function clearSelectAll() {
+  table.value?.clearSelection();
+}
+function changeSelect(e) {
+  selectList.value = e;
+  selectCount.value = e.length;
+}
+function getDataList() {
+  loading.value = true;
+  getDistributionGoods(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-      this.auditLoading = true;
-      auditDistributionGoods({
-        ids: this.auditTargetIds,
-        authStatus: this.auditForm.authStatus,
-        authRemark: this.auditForm.authRemark.trim(),
-      })
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("审核成功");
-            this.auditModalVisible = false;
-            this.clearSelectAll();
-            this.getDataList();
-          }
-        })
-        .finally(() => {
-          this.auditLoading = false;
-        });
-    },
-    goodsTypeText(value) {
-      if (value === "PHYSICAL_GOODS") return "实物商品";
-      if (value === "VIRTUAL_GOODS") return "虚拟商品";
-      if (value === "E_COUPON") return "电子卡券";
-      return "-";
-    },
-    init() {
-      this.loadFilterOptions();
-      this.getDataList();
-    },
-    loadFilterOptions() {
-      getCategoryTree().then((res) => {
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function remove(v) {
+  Modal.confirm({
+    title: "确认下架",
+    content: "您确认要下架么?",
+    loading: true,
+    onOk: () => {
+      delDistributionGoods(v.id).then((res) => {
+        Modal.remove();
         if (res.success) {
-          this.categoryList = res.result || [];
+          Message.success("下架成功");
+          getDataList();
         }
       });
-      getBrandListData().then((res) => {
-        this.brandList = Array.isArray(res) ? res : res.result || [];
+    },
+  });
+}
+function delAll() {
+  if (selectCount.value <= 0) {
+    Message.warning("您还未选择要下架的数据");
+    return;
+  }
+  Modal.confirm({
+    title: "确认下架",
+    content: "您确认要下架所选的 " + selectCount.value + " 条数据?",
+    loading: true,
+    onOk: () => {
+      const ids = selectList.value.map((item) => item.id);
+      delDistributionGoods(ids.toString()).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("下架成功");
+          clearSelectAll();
+          getDataList();
+        }
       });
     },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-      this.clearSelectAll();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table?.clearSelection();
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    getDataList() {
-      this.loading = true;
-      getDistributionGoods(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认下架",
-        content: "您确认要下架么?",
-        loading: true,
-        onOk: () => {
-          delDistributionGoods(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("下架成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要下架的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认下架",
-        content: "您确认要下架所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
-          const ids = this.selectList.map((item) => item.id);
-          delDistributionGoods(ids.toString()).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("下架成功");
-              this.clearSelectAll();
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

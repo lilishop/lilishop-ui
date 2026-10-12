@@ -5,7 +5,7 @@
         <span>发票信息</span>
       </p></template>
       <div class="nav-content">
-        <el-form :model="invoiceForm" ref="form" label-position="left" :rules="formRules" label-width="118px">
+        <el-form :model="invoiceForm" ref="formRef" label-position="left" :rules="formRules" label-width="118px">
           <el-form-item label="发票类型">
             <el-radio-group v-model="invoice" type="button" button-style="solid" @change="onInvoiceKindChange">
               <el-radio :label="1">电子普通发票</el-radio>
@@ -86,210 +86,209 @@
       </div></el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, nextTick, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { receiptSelect } from '@/api/cart.js';
 import { mobile, email } from '@/plugins/RegExp.js';
 
-export default {
-  name: 'invoiceModal',
-  emits: ['change'],
-  data () {
+defineOptions({ name: 'invoiceModal' });
+
+const props = defineProps(['invoiceData']);
+
+const emit = defineEmits(['change']);
+
+const route = useRoute();
+
+const invoice = ref(1); // 1 电子普通发票 2 增值税专用发票
+const invoiceAvailable = ref(false);
+const loading = ref(false);
+const invoiceForm = ref({
+  receiptTitle: '',
+  personalName: '',
+  companyName: '',
+  taxpayerId: '',
+  receiptContent: '商品明细',
+  receiptPhone: '',
+  receiptEmail: '',
+  companyAddress: '',
+  companyPhone: '',
+  bankName: '',
+  bankAccount: ''
+});
+const type = ref(1);
+
+const formRef = ref(null);
+
+const formRules = computed(() => {
+  const receiptPhoneRules = [
+    { required: true, message: '请填写收票人手机', trigger: 'blur' },
+    { pattern: mobile, message: '请填写正确的手机号码', trigger: 'blur' }
+  ];
+  // 收票人邮箱可选：仅校验格式；提示文案须与手机区分，避免误用「请填写收票人手机」
+  const receiptEmailRules = [
+    {
+      validator (rule, val, cb) {
+        const s = val != null ? String(val).trim() : '';
+        if (!s) {
+          cb();
+          return;
+        }
+        if (!email.test(s)) {
+          cb(new Error('请填写正确的收票人邮箱'));
+          return;
+        }
+        cb();
+      },
+      trigger: 'blur'
+    }
+  ];
+
+  if (invoice.value === 2) {
     return {
-      invoice: 1, // 1 电子普通发票 2 增值税专用发票
-      invoiceAvailable: false,
-      loading: false,
-      invoiceForm: {
-        receiptTitle: '',
-        personalName: '',
-        companyName: '',
-        taxpayerId: '',
-        receiptContent: '商品明细',
-        receiptPhone: '',
-        receiptEmail: '',
-        companyAddress: '',
-        companyPhone: '',
-        bankName: '',
-        bankAccount: ''
-      },
-      type: 1
+      companyName: [{ required: true, message: '请填写单位名称', trigger: 'blur' }],
+      taxpayerId: [{ required: true, message: '请填写纳税人识别号', trigger: 'blur' }],
+      companyAddress: [{ required: true, message: '请填写单位地址', trigger: 'blur' }],
+      companyPhone: [{ required: true, message: '请填写单位电话', trigger: 'blur' }],
+      bankName: [{ required: true, message: '请填写开户银行', trigger: 'blur' }],
+      bankAccount: [{ required: true, message: '请填写银行账号', trigger: 'blur' }],
+      receiptPhone: receiptPhoneRules,
+      receiptEmail: receiptEmailRules
     };
-  },
-  props: ['invoiceData'],
-  computed: {
-    formRules () {
-      const receiptPhoneRules = [
-        { required: true, message: '请填写收票人手机', trigger: 'blur' },
-        { pattern: mobile, message: '请填写正确的手机号码', trigger: 'blur' }
-      ];
-      // 收票人邮箱可选：仅校验格式；提示文案须与手机区分，避免误用「请填写收票人手机」
-      const receiptEmailRules = [
-        {
-          validator (rule, val, cb) {
-            const s = val != null ? String(val).trim() : '';
-            if (!s) {
-              cb();
-              return;
-            }
-            if (!email.test(s)) {
-              cb(new Error('请填写正确的收票人邮箱'));
-              return;
-            }
-            cb();
-          },
-          trigger: 'blur'
-        }
-      ];
-
-      if (this.invoice === 2) {
-        return {
-          companyName: [{ required: true, message: '请填写单位名称', trigger: 'blur' }],
-          taxpayerId: [{ required: true, message: '请填写纳税人识别号', trigger: 'blur' }],
-          companyAddress: [{ required: true, message: '请填写单位地址', trigger: 'blur' }],
-          companyPhone: [{ required: true, message: '请填写单位电话', trigger: 'blur' }],
-          bankName: [{ required: true, message: '请填写开户银行', trigger: 'blur' }],
-          bankAccount: [{ required: true, message: '请填写银行账号', trigger: 'blur' }],
-          receiptPhone: receiptPhoneRules,
-          receiptEmail: receiptEmailRules
-        };
-      }
-
-      const rules = {
-        receiptPhone: receiptPhoneRules,
-        receiptEmail: receiptEmailRules
-      };
-      if (this.type === 1) {
-        rules.personalName = [{ required: true, message: '请填写个人名称', trigger: 'blur' }];
-      } else {
-        rules.companyName = [{ required: true, message: '请填写单位名称', trigger: 'blur' }];
-        rules.taxpayerId = [{ required: true, message: '请填写纳税人识别号', trigger: 'blur' }];
-      }
-      return rules;
-    }
-  },
-  watch: {
-    invoiceData: {
-      handler (val) {
-        if (!val) return;
-        this.invoiceForm = { ...this.invoiceForm, ...val };
-        if (!this.invoiceForm.receiptPhone) this.invoiceForm.receiptPhone = '';
-        if (!this.invoiceForm.receiptEmail) this.invoiceForm.receiptEmail = '';
-        if (!this.invoiceForm.receiptContent) this.invoiceForm.receiptContent = '商品明细';
-        if (!this.invoiceForm.companyAddress) this.invoiceForm.companyAddress = '';
-        if (!this.invoiceForm.companyPhone) this.invoiceForm.companyPhone = '';
-        if (!this.invoiceForm.bankName) this.invoiceForm.bankName = '';
-        if (!this.invoiceForm.bankAccount) this.invoiceForm.bankAccount = '';
-        if (!this.invoiceForm.personalName) this.invoiceForm.personalName = '';
-        if (!this.invoiceForm.companyName) this.invoiceForm.companyName = '';
-
-        const rt = val.receiptType;
-        if (rt === 2 || rt === '2' || val.invoiceKind === 'VAT_SPECIAL') {
-          this.invoice = 2;
-          this.type = 2;
-        } else {
-          this.invoice = 1;
-          if (val.taxpayerId) this.type = 2;
-          else this.type = 1;
-        }
-        // 兼容后端 receiptTitle 存「个人/单位」，实际名称在 personalName/companyName；旧数据名称可能只在 receiptTitle
-        const titleAsName = (t) => (t && t !== '个人' && t !== '单位' ? t : '');
-        if (this.invoice === 2) {
-          this.invoiceForm.companyName = val.companyName || titleAsName(val.receiptTitle) || '';
-        } else if (this.type === 2) {
-          this.invoiceForm.companyName = val.companyName || titleAsName(val.receiptTitle) || '';
-          this.invoiceForm.personalName = val.personalName || '';
-        } else {
-          this.invoiceForm.personalName = val.personalName || titleAsName(val.receiptTitle) || '';
-          this.invoiceForm.companyName = val.companyName || '';
-        }
-        if (this.invoice === 1) {
-          this.invoiceForm.companyAddress = '';
-          this.invoiceForm.companyPhone = '';
-          this.invoiceForm.bankName = '';
-          this.invoiceForm.bankAccount = '';
-        }
-        if (this.invoice === 2) {
-          this.invoiceForm.personalName = '';
-        }
-      },
-      deep: true,
-      immediate: true
-    }
-  },
-  methods: {
-    onHeaderTypeChange (val) {
-      if (this.invoice === 1 && val === 1 && this.invoiceForm.personalName === '个人') {
-        this.invoiceForm.personalName = '';
-      }
-      this.$nextTick(() => {
-        if (this.$refs.form) this.$refs.form.clearValidate();
-      });
-    },
-    onInvoiceKindChange (val) {
-      this.type = val === 2 ? 2 : 1;
-      this.invoiceForm = {
-        receiptTitle: '',
-        personalName: '',
-        companyName: '',
-        taxpayerId: '',
-        receiptContent: '商品明细',
-        receiptPhone: '',
-        receiptEmail: '',
-        companyAddress: '',
-        companyPhone: '',
-        bankName: '',
-        bankAccount: ''
-      };
-      this.$nextTick(() => {
-        if (this.$refs.form) this.$refs.form.clearValidate();
-      });
-    },
-
-    async save () {
-      if (this.invoice === 2) {
-        this.invoiceForm.receiptContent = '商品明细';
-      }
-
-      return await new Promise(resolve => {
-        this.$refs.form.validate(valid => resolve(valid));
-      });
-    },
-
-    async submit () {
-      if (!await this.save()) return;
-      this.loading = true;
-      const raw = JSON.parse(JSON.stringify(this.invoiceForm));
-      if (this.invoice === 1) {
-        delete raw.companyAddress;
-        delete raw.companyPhone;
-        delete raw.bankName;
-        delete raw.bankAccount;
-        delete raw.invoiceAddress;
-        if (this.type === 1) {
-          delete raw.taxpayerId;
-        }
-      } else {
-        delete raw.personalName;
-      }
-      const isCompanyTitle = this.invoice === 2 || this.type === 2;
-      const titleName = isCompanyTitle
-        ? (raw.companyName != null ? String(raw.companyName).trim() : '')
-        : (raw.personalName != null ? String(raw.personalName).trim() : '');
-      const submit = {
-        way: this.$route.query.way,
-        ...raw,
-        receiptType: this.invoice,
-        receiptTitle: isCompanyTitle ? '单位' : '个人',
-        personalName: isCompanyTitle ? '' : titleName,
-        companyName: isCompanyTitle ? titleName : ''
-      };
-      let receipt = await receiptSelect(submit);
-      if (receipt.success) {
-        this.$emit('change', true);
-      }
-      this.loading = false;
-    }
   }
-};
+
+  const rules = {
+    receiptPhone: receiptPhoneRules,
+    receiptEmail: receiptEmailRules
+  };
+  if (type.value === 1) {
+    rules.personalName = [{ required: true, message: '请填写个人名称', trigger: 'blur' }];
+  } else {
+    rules.companyName = [{ required: true, message: '请填写单位名称', trigger: 'blur' }];
+    rules.taxpayerId = [{ required: true, message: '请填写纳税人识别号', trigger: 'blur' }];
+  }
+  return rules;
+});
+
+watch(() => props.invoiceData, (val) => {
+  if (!val) return;
+  invoiceForm.value = { ...invoiceForm.value, ...val };
+  if (!invoiceForm.value.receiptPhone) invoiceForm.value.receiptPhone = '';
+  if (!invoiceForm.value.receiptEmail) invoiceForm.value.receiptEmail = '';
+  if (!invoiceForm.value.receiptContent) invoiceForm.value.receiptContent = '商品明细';
+  if (!invoiceForm.value.companyAddress) invoiceForm.value.companyAddress = '';
+  if (!invoiceForm.value.companyPhone) invoiceForm.value.companyPhone = '';
+  if (!invoiceForm.value.bankName) invoiceForm.value.bankName = '';
+  if (!invoiceForm.value.bankAccount) invoiceForm.value.bankAccount = '';
+  if (!invoiceForm.value.personalName) invoiceForm.value.personalName = '';
+  if (!invoiceForm.value.companyName) invoiceForm.value.companyName = '';
+
+  const rt = val.receiptType;
+  if (rt === 2 || rt === '2' || val.invoiceKind === 'VAT_SPECIAL') {
+    invoice.value = 2;
+    type.value = 2;
+  } else {
+    invoice.value = 1;
+    if (val.taxpayerId) type.value = 2;
+    else type.value = 1;
+  }
+  // 兼容后端 receiptTitle 存「个人/单位」，实际名称在 personalName/companyName；旧数据名称可能只在 receiptTitle
+  const titleAsName = (t) => (t && t !== '个人' && t !== '单位' ? t : '');
+  if (invoice.value === 2) {
+    invoiceForm.value.companyName = val.companyName || titleAsName(val.receiptTitle) || '';
+  } else if (type.value === 2) {
+    invoiceForm.value.companyName = val.companyName || titleAsName(val.receiptTitle) || '';
+    invoiceForm.value.personalName = val.personalName || '';
+  } else {
+    invoiceForm.value.personalName = val.personalName || titleAsName(val.receiptTitle) || '';
+    invoiceForm.value.companyName = val.companyName || '';
+  }
+  if (invoice.value === 1) {
+    invoiceForm.value.companyAddress = '';
+    invoiceForm.value.companyPhone = '';
+    invoiceForm.value.bankName = '';
+    invoiceForm.value.bankAccount = '';
+  }
+  if (invoice.value === 2) {
+    invoiceForm.value.personalName = '';
+  }
+}, { deep: true, immediate: true });
+
+function onHeaderTypeChange (val) {
+  if (invoice.value === 1 && val === 1 && invoiceForm.value.personalName === '个人') {
+    invoiceForm.value.personalName = '';
+  }
+  nextTick(() => {
+    if (formRef.value) formRef.value.clearValidate();
+  });
+}
+
+function onInvoiceKindChange (val) {
+  type.value = val === 2 ? 2 : 1;
+  invoiceForm.value = {
+    receiptTitle: '',
+    personalName: '',
+    companyName: '',
+    taxpayerId: '',
+    receiptContent: '商品明细',
+    receiptPhone: '',
+    receiptEmail: '',
+    companyAddress: '',
+    companyPhone: '',
+    bankName: '',
+    bankAccount: ''
+  };
+  nextTick(() => {
+    if (formRef.value) formRef.value.clearValidate();
+  });
+}
+
+async function save () {
+  if (invoice.value === 2) {
+    invoiceForm.value.receiptContent = '商品明细';
+  }
+
+  return await new Promise(resolve => {
+    formRef.value.validate(valid => resolve(valid));
+  });
+}
+
+async function submit () {
+  if (!await save()) return;
+  loading.value = true;
+  const raw = JSON.parse(JSON.stringify(invoiceForm.value));
+  if (invoice.value === 1) {
+    delete raw.companyAddress;
+    delete raw.companyPhone;
+    delete raw.bankName;
+    delete raw.bankAccount;
+    delete raw.invoiceAddress;
+    if (type.value === 1) {
+      delete raw.taxpayerId;
+    }
+  } else {
+    delete raw.personalName;
+  }
+  const isCompanyTitle = invoice.value === 2 || type.value === 2;
+  const titleName = isCompanyTitle
+    ? (raw.companyName != null ? String(raw.companyName).trim() : '')
+    : (raw.personalName != null ? String(raw.personalName).trim() : '');
+  const submit = {
+    way: route.query.way,
+    ...raw,
+    receiptType: invoice.value,
+    receiptTitle: isCompanyTitle ? '单位' : '个人',
+    personalName: isCompanyTitle ? '' : titleName,
+    companyName: isCompanyTitle ? titleName : ''
+  };
+  let receipt = await receiptSelect(submit);
+  if (receipt.success) {
+    emit('change', true);
+  }
+  loading.value = false;
+}
+
+defineExpose({ invoiceAvailable });
 </script>
 <style lang="scss" scoped>
 .inv-type {

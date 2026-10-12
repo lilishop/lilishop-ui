@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <div @keyup.enter="handleSearch">
-        <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form">
+        <el-form ref="searchFormRef" :model="searchForm" inline label-width="70px" class="search-form">
           <el-form-item label="商品名称" prop="goodsName">
             <el-input v-model="searchForm.goodsName" placeholder="请输入商品名称" clearable style="width: 200px" />
           </el-form-item>
@@ -39,7 +39,7 @@
           <el-button type="primary" class="export" @click="exportStock">批量导出</el-button>
           <el-button class="export" @click="openImportStock">批量导入</el-button>
         </div>
-        <el-table ref="table" v-loading="loading" border :data="stockAllData" class="mt_10" style="width: 100%">
+        <el-table ref="tableRef" v-loading="loading" border :data="stockAllData" class="mt_10" style="width: 100%">
           <el-table-column label="商品信息" min-width="400">
             <template #default="{ row }">
               <div style="margin-top: 5px; height: 90px; display: flex">
@@ -115,139 +115,139 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import {
   getGoodsCategoryAll,
   getGoodsSkuListDataSeller,
   importStockExcel,
   queryExportStock,
 } from "@/api/goods";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "alertQuantity",
-  data() {
-    return {
-      importModal: false,
-      spinShow: false,
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-      },
-      stockAllData: [],
-      total: 0,
-      categoryList: [],
-      category: [],
-      file: null,
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-      this.deepGroup();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.categoryPath = this.category?.length ? this.category.join(",") : null;
-      this.getDataList();
-    },
-    handleReset() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-      };
-      this.category = [];
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getGoodsSkuListDataSeller(this.searchForm).then((res) => {
-        if (res.success) {
-          this.stockAllData = res.result.records;
-          this.total = res.result.total;
-        }
-        this.loading = false;
-      });
-    },
-    deepGroup() {
-      getGoodsCategoryAll().then((res) => {
-        if (res.success) {
-          this.categoryList = res.result.map((item) => ({
-            value: item.id,
-            label: item.name,
-            children: (item.children || []).map((child) => ({
-              value: child.id,
-              label: child.name,
-              children: (child.children || []).map((grandson) => ({
-                value: grandson.id,
-                label: grandson.name,
-              })),
-            })),
-          }));
-        }
-      });
-    },
-    async exportStock() {
-      let randomNumber = "";
-      for (let i = 0; i < 10; i++) {
-        randomNumber += Math.floor(Math.random() * 10);
+defineOptions({ name: "alertQuantity" });
+
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const importModal = ref(false);
+const spinShow = ref(false);
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "create_time",
+  order: "desc",
+});
+const stockAllData = ref([]);
+const total = ref(0);
+const categoryList = ref([]);
+const category = ref([]);
+const file = ref(null);
+
+function init() {
+  getDataList();
+  deepGroup();
+}
+function changePageSize(v) {
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.categoryPath = category.value?.length ? category.value.join(",") : null;
+  getDataList();
+}
+function handleReset() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 20,
+    sort: "create_time",
+    order: "desc",
+  };
+  category.value = [];
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getGoodsSkuListDataSeller(searchForm.value).then((res) => {
+    if (res.success) {
+      stockAllData.value = res.result.records;
+      total.value = res.result.total;
+    }
+    loading.value = false;
+  });
+}
+function deepGroup() {
+  getGoodsCategoryAll().then((res) => {
+    if (res.success) {
+      categoryList.value = res.result.map((item) => ({
+        value: item.id,
+        label: item.name,
+        children: (item.children || []).map((child) => ({
+          value: child.id,
+          label: child.name,
+          children: (child.children || []).map((grandson) => ({
+            value: grandson.id,
+            label: grandson.name,
+          })),
+        })),
+      }));
+    }
+  });
+}
+async function exportStock() {
+  let randomNumber = "";
+  for (let i = 0; i < 10; i++) {
+    randomNumber += Math.floor(Math.random() * 10);
+  }
+  queryExportStock(searchForm.value)
+    .then((res) => {
+      const blob = new Blob([res], { type: "application/vnd.ms-excel;charset=utf-8" });
+      if ("download" in document.createElement("a")) {
+        const link = document.createElement("a");
+        link.download = randomNumber + ".xlsx";
+        link.style.display = "none";
+        link.href = URL.createObjectURL(blob);
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        document.body.removeChild(link);
+      } else {
+        navigator.msSaveBlob(blob, randomNumber + ".xlsx");
       }
-      queryExportStock(this.searchForm)
-        .then((res) => {
-          const blob = new Blob([res], { type: "application/vnd.ms-excel;charset=utf-8" });
-          if ("download" in document.createElement("a")) {
-            const link = document.createElement("a");
-            link.download = randomNumber + ".xlsx";
-            link.style.display = "none";
-            link.href = URL.createObjectURL(blob);
-            document.body.appendChild(link);
-            link.click();
-            URL.revokeObjectURL(link.href);
-            document.body.removeChild(link);
-          } else {
-            navigator.msSaveBlob(blob, randomNumber + ".xlsx");
-          }
-        })
-        .catch((err) => console.log(err));
-    },
-    openImportStock() {
-      this.importModal = true;
-    },
-    handleUpload(file) {
-      this.file = file;
-      this.upload();
-      return false;
-    },
-    upload() {
-      const fd = new FormData();
-      fd.append("files", this.file);
-      this.spinShow = true;
-      importStockExcel(fd).then((res) => {
-        this.spinShow = false;
-        if (res.success) {
-          this.$Message.success("导入成功");
-          this.importModal = false;
-          this.getDataList();
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .catch((err) => console.log(err));
+}
+function openImportStock() {
+  importModal.value = true;
+}
+function handleUpload(f) {
+  file.value = f;
+  upload();
+  return false;
+}
+function upload() {
+  const fd = new FormData();
+  fd.append("files", file.value);
+  spinShow.value = true;
+  importStockExcel(fd).then((res) => {
+    spinShow.value = false;
+    if (res.success) {
+      Message.success("导入成功");
+      importModal.value = false;
+      getDataList();
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 @import "@/styles/table-common.scss";

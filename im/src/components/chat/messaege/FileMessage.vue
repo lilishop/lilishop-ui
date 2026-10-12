@@ -16,39 +16,36 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { formatSize, download } from '@/utils/functions'
-export default {
-  name: 'FileMessage',
-  props: {
-    file: {
-      type: Object,
-      required: true,
-    },
-    record_id: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
+
+defineOptions({ name: 'FileMessage' })
+
+const props = defineProps({
+  file: {
+    type: Object,
+    required: true,
   },
-  data() {
-    return {
-      file_id: 0,
-      ext: '',
-      fileName: '',
-      fileSize: '',
-    }
+  record_id: {
+    type: Number,
+    required: true,
+    default: 0,
   },
-  created() {
-    this.file_id = this.file.id
-    this.ext = this.file.file_suffix.toUpperCase()
-    this.fileName = this.file.original_name
-    this.fileSize = formatSize(this.file.file_size)
-  },
-  methods: {
-    download,
-  },
-}
+})
+
+const file_id = ref(0)
+const ext = ref('')
+const fileName = ref('')
+const fileSize = ref('')
+
+// 原 created 钩子
+file_id.value = props.file.id
+ext.value = props.file.file_suffix.toUpperCase()
+fileName.value = props.file.original_name
+fileSize.value = formatSize(props.file.file_size)
+
+// download 直接从 @/utils/functions 导入，模板中照用
 </script>
 <style lang="less" scoped>
 .file-message {

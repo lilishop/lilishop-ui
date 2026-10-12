@@ -40,88 +40,80 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from "vue";
 import * as API_Statistics from "@/api/statistics";
 import affixTime from "@/components/affix-time";
 import { QuestionFilled } from "@element-plus/icons-vue";
 
-export default {
-  components: { affixTime, QuestionFilled },
-  data() {
-    return {
-      params: {
-        searchType: "LAST_SEVEN",
-        year: "",
-        month: "",
-        storeId: "",
-      },
-      overview: {},
-      activityMetrics: [
-        { key: "couponActiveNum", label: "进行中优惠券" },
-        { key: "seckillActiveNum", label: "进行中秒杀" },
-        { key: "pintuanActiveNum", label: "进行中拼团" },
-        { key: "fullDiscountActiveNum", label: "进行中满减" },
-        { key: "kanjiaActiveNum", label: "进行中砍价商品" },
-        { key: "pointsGoodsActiveNum", label: "进行中积分商品" },
-      ],
-      couponMetrics: [
-        {
-          key: "couponPublishNum",
-          label: "优惠券发放量",
-          tip: "优惠券配置的累计发放数量",
-        },
-        {
-          key: "couponReceivedNum",
-          label: "优惠券领取量",
-          tip: "客户已领取的优惠券数量",
-        },
-        {
-          key: "couponUsedNum",
-          label: "优惠券核销量",
-          tip: "客户已使用的优惠券数量",
-        },
-        {
-          key: "discountAmount",
-          label: "活动优惠总额",
-          isMoney: true,
-          tip: "统计周期内订单产生的优惠金额合计",
-        },
-      ],
-    };
+const params = ref({
+  searchType: "LAST_SEVEN",
+  year: "",
+  month: "",
+  storeId: "",
+});
+const overview = ref({});
+const activityMetrics = ref([
+  { key: "couponActiveNum", label: "进行中优惠券" },
+  { key: "seckillActiveNum", label: "进行中秒杀" },
+  { key: "pintuanActiveNum", label: "进行中拼团" },
+  { key: "fullDiscountActiveNum", label: "进行中满减" },
+  { key: "kanjiaActiveNum", label: "进行中砍价商品" },
+  { key: "pointsGoodsActiveNum", label: "进行中积分商品" },
+]);
+const couponMetrics = ref([
+  {
+    key: "couponPublishNum",
+    label: "优惠券发放量",
+    tip: "优惠券配置的累计发放数量",
   },
-  watch: {
-    params: {
-      handler() {
-        this.loadData();
-      },
-      deep: true,
-      immediate: true,
-    },
+  {
+    key: "couponReceivedNum",
+    label: "优惠券领取量",
+    tip: "客户已领取的优惠券数量",
   },
-  methods: {
-    clickBreadcrumb(item) {
-      this.params = {
-        searchType: item.searchType || "",
-        year: item.year || "",
-        month: item.month || "",
-        storeId: item.storeId || "",
-        startTime: item.startTime || "",
-        endTime: item.endTime || "",
-      };
-    },
-    formatNumber(val) {
-      if (val == null || val === "") return 0;
-      const num = Number(val);
-      return Number.isNaN(num) ? 0 : Math.round(num);
-    },
-    async loadData() {
-      const res = await API_Statistics.getMarketingOverview({ ...this.params });
-      if (res && res.success) {
-        this.overview = res.result || {};
-      }
-    },
+  {
+    key: "couponUsedNum",
+    label: "优惠券核销量",
+    tip: "客户已使用的优惠券数量",
   },
-};
+  {
+    key: "discountAmount",
+    label: "活动优惠总额",
+    isMoney: true,
+    tip: "统计周期内订单产生的优惠金额合计",
+  },
+]);
+
+watch(
+  params,
+  () => {
+    loadData();
+  },
+  { deep: true, immediate: true }
+);
+
+function clickBreadcrumb(item) {
+  params.value = {
+    searchType: item.searchType || "",
+    year: item.year || "",
+    month: item.month || "",
+    storeId: item.storeId || "",
+    startTime: item.startTime || "",
+    endTime: item.endTime || "",
+  };
+}
+function formatNumber(val) {
+  if (val == null || val === "") return 0;
+  const num = Number(val);
+  return Number.isNaN(num) ? 0 : Math.round(num);
+}
+async function loadData() {
+  const res = await API_Statistics.getMarketingOverview({ ...params.value });
+  if (res && res.success) {
+    overview.value = res.result || {};
+  }
+}
 </script>
 
 <style scoped lang="scss">

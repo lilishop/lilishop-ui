@@ -58,68 +58,64 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { getWxChannelsGoodsPage } from "@/api/index";
 
-export default {
-  name: "WxChannelsGoodsTab",
-  data() {
-    return {
-      statusList: [
-        { label: "已通过", value: "APPROVED" },
-        { label: "审核中", value: "PENDING" },
-        { label: "已拒绝", value: "REJECTED" },
-      ],
-      loading: false,
-      total: 0,
-      data: [],
-      searchForm: {
-        goodsName: "",
-        status: "",
-        pageNumber: 1,
-        pageSize: 20,
-      },
-    };
-  },
-  mounted() {
-    this.loadPage();
-  },
-  methods: {
-    statusLabel(val) {
-      const map = { APPROVED: "已通过", PENDING: "审核中", REJECTED: "已拒绝" };
-      return map[val] || val || "-";
-    },
-    statusTagType(val) {
-      const map = { APPROVED: "success", PENDING: "warning", REJECTED: "danger" };
-      return map[val] || "info";
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.loadPage();
-    },
-    changePage(pageNumber) {
-      this.searchForm.pageNumber = pageNumber;
-      this.loadPage();
-    },
-    changePageSize(pageSize) {
-      this.searchForm.pageSize = pageSize;
-      this.searchForm.pageNumber = 1;
-      this.loadPage();
-    },
-    loadPage() {
-      this.loading = true;
-      getWxChannelsGoodsPage({ ...this.searchForm })
-        .then((res) => {
-          if (res && res.success) {
-            const page = res.result || {};
-            this.data = Array.isArray(page.records) ? page.records : [];
-            this.total = Number(page.total || 0);
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+defineOptions({ name: "WxChannelsGoodsTab" });
+
+const statusList = ref([
+  { label: "已通过", value: "APPROVED" },
+  { label: "审核中", value: "PENDING" },
+  { label: "已拒绝", value: "REJECTED" },
+]);
+const loading = ref(false);
+const total = ref(0);
+const data = ref([]);
+const searchForm = reactive({
+  goodsName: "",
+  status: "",
+  pageNumber: 1,
+  pageSize: 20,
+});
+
+function statusLabel(val) {
+  const map = { APPROVED: "已通过", PENDING: "审核中", REJECTED: "已拒绝" };
+  return map[val] || val || "-";
+}
+function statusTagType(val) {
+  const map = { APPROVED: "success", PENDING: "warning", REJECTED: "danger" };
+  return map[val] || "info";
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  loadPage();
+}
+function changePage(pageNumber) {
+  searchForm.pageNumber = pageNumber;
+  loadPage();
+}
+function changePageSize(pageSize) {
+  searchForm.pageSize = pageSize;
+  searchForm.pageNumber = 1;
+  loadPage();
+}
+function loadPage() {
+  loading.value = true;
+  getWxChannelsGoodsPage({ ...searchForm })
+    .then((res) => {
+      if (res && res.success) {
+        const page = res.result || {};
+        data.value = Array.isArray(page.records) ? page.records : [];
+        total.value = Number(page.total || 0);
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+onMounted(() => {
+  loadPage();
+});
 </script>

@@ -45,32 +45,31 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "SearchSuggest",
-  props: {
-    keyword: { type: String, default: "" },
-    history: { type: Array, default: () => [] },
-    hotWords: { type: Array, default: () => [] },
-    suggestions: { type: Array, default: () => [] },
-    suggesting: { type: Boolean, default: false },
-  },
-  emits: ["pick", "clear"],
-  methods: {
-    parts(text) {
-      const value = String(text || "");
-      const key = this.keyword;
-      if (!key) return [{ text: value, hit: false }];
-      const index = value.toLowerCase().indexOf(key.toLowerCase());
-      if (index < 0) return [{ text: value, hit: false }];
-      return [
-        { text: value.slice(0, index), hit: false },
-        { text: value.slice(index, index + key.length), hit: true },
-        { text: value.slice(index + key.length), hit: false },
-      ].filter((part) => part.text);
-    },
-  },
-};
+<script setup>
+defineOptions({ name: "SearchSuggest" });
+
+const props = defineProps({
+  keyword: { type: String, default: "" },
+  history: { type: Array, default: () => [] },
+  hotWords: { type: Array, default: () => [] },
+  suggestions: { type: Array, default: () => [] },
+  suggesting: { type: Boolean, default: false },
+});
+
+defineEmits(["pick", "clear"]);
+
+function parts(text) {
+  const value = String(text || "");
+  const key = props.keyword;
+  if (!key) return [{ text: value, hit: false }];
+  const index = value.toLowerCase().indexOf(key.toLowerCase());
+  if (index < 0) return [{ text: value, hit: false }];
+  return [
+    { text: value.slice(0, index), hit: false },
+    { text: value.slice(index, index + key.length), hit: true },
+    { text: value.slice(index + key.length), hit: false },
+  ].filter((part) => part.text);
+}
 </script>
 
 <style scoped lang="scss">

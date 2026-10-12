@@ -102,7 +102,7 @@
             </div>
           </div>
         </div>
-        <el-form ref="form" :model="form" label-position="left" label-width="100px" :rules="rules">
+        <el-form ref="formRef" :model="form" label-position="left" label-width="100px" :rules="rules">
           <el-form-item label="物流公司" prop="logisticsId">
             <el-select v-model="form.logisticsId" placeholder="请选择物流公司">
               <el-option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</el-option>
@@ -131,170 +131,169 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
 import {afterSaleList, cancelAfterSale} from '@/api/member.js';
 import {afterSaleDelivery, getLogisticsCompany} from '@/api/order.js';
 import {afterSaleStatusList} from '../enumeration.js'
 
-export default {
-  name: 'AfterSale',
-  data() {
-    return {
-      orderList: [], // 订单列表
-      params: { // 请求参数
-        pageNumber: 1,
-        pageSize: 20,
-        keywords: '',
-        sn: '',
-        sort: 'createTime',
-        order: 'desc'
-      },
-      // 状态数组
-      afterSaleStatusList,
-      total: 0, // 订单总数
-      spinShow: false, // 加载状态
-      companyList: [], // 物流公司列表
-      logisticsShow: false, // 物流信息modal
-      singleOrder: {}, // 单独的售后信息
-      form: { // 物流信息数据
-        afterSaleSn: '',
-        logisticsId: '',
-        logisticsNo: '',
-        mDeliverTime: ''
-      },
-      rules: { // 必填校验
-        logisticsId: [{required: true, message: '请选择物流公司'}],
-        logisticsNo: [{required: true, message: '请填写物流编号'}],
-        mDeliverTime: [{required: true, message: '请选择发货时间'}]
-      },
-      submitLoading: false, // 提交加载状态
-      changeWay: [
-        { name: '全部', status: '' },
-        { name: '申请中', status: 'APPLY' },
-        { name: '通过', status: 'PASS' },
-        { name: '完成售后', status: 'COMPLETE' },
-      ],
-      activeTab: 0,
-    };
-  },
-  mounted() {
-    this.getList();
-  },
-  methods: {
-    goDetail(sn) { // 跳转售后详情
-      this.$router.push({
-        name: 'AfterSaleDetail',
-        query: {sn}
-      })
-    },
-    cancel(sn) { // 取消售后申请
-      Modal.confirm({
-        title: '取消',
-        content: '确定取消此次售后申请吗？',
-        onOk: () => {
-          cancelAfterSale(sn).then(res => {
-            if (res.success) {
-              Message.success('取消售后申请成功')
-              this.getList()
-            }
-          })
-        },
-        onCancel: () => {
-        }
-      });
-    },
-    goodsDetail(skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
-        path: '/goodsDetail',
-        query: {skuId, goodsId}
-      });
-      window.open(routeUrl.href, '_blank');
-    },
-    // 跳转店铺首页
-    shopPage(id) {
-      this.$router.push({
-        path: '/merchant',
-        query: {id: id}
-      });
-    },
-    change(index) {
-      this.activeTab = index
-      this.params.pageNumber = 1
-      const current = this.changeWay[index]
-      if (!current || !current.status) {
-        delete this.params.serviceStatus
-      } else {
-        this.params.serviceStatus = current.status
-      }
-      this.getList()
-    },
-    getList() { // 获取售后列表
-      this.spinShow = true;
-      let params = JSON.parse(JSON.stringify(this.params))
-      afterSaleList(params).then(res => {
-        this.spinShow = false
-        if (res.success) {
-          this.orderList = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    changePageNum(val) { // 修改页码
-      this.params.pageNumber = val;
-      this.getList()
-    },
-    changePageSize(val) { // 修改页数
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList()
-    },
-    filterOrderStatus(status) { // 获取订单状态中文
-      const ob = this.afterSaleStatusList.filter(e => {
-        return e.status === status
-      });
-      return ob && ob[0] ? ob[0].name : status
-    },
-    // 获取物流公司列表
-    getCompany() {
-      getLogisticsCompany().then(res => {
-        if (res.success) {
-          this.companyList = res.result
-        }
-      })
-    },
-    // 提交物流信息
-    submitDelivery() {
-      this.$refs.form?.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        afterSaleDelivery(this.form).then(res => {
-          if (res.success) {
-            this.logisticsShow = false;
-            Message.success('提交成功');
-            this.getList();
-          }
-          this.submitLoading = false;
-        }).catch(() => {
-          this.submitLoading = false;
-        });
-      });
-    },
-    // 提交物流modal
-    openModal(row) {
-      this.singleOrder = row;
-      this.logisticsShow = true;
-      if (!this.companyList.length) {
-        this.getCompany();
-      }
-      this.$nextTick(() => {
-        this.$refs.form?.resetFields();
-        this.form.afterSaleSn = row.sn;
-      });
-    }
-  }
+defineOptions({ name: 'AfterSale' });
+
+const router = useRouter();
+
+const formRef = ref(null);
+
+const orderList = ref([]); // 订单列表
+const params = reactive({ // 请求参数
+  pageNumber: 1,
+  pageSize: 20,
+  keywords: '',
+  sn: '',
+  sort: 'createTime',
+  order: 'desc'
+});
+const total = ref(0); // 订单总数
+const spinShow = ref(false); // 加载状态
+const companyList = ref([]); // 物流公司列表
+const logisticsShow = ref(false); // 物流信息modal
+const singleOrder = ref({}); // 单独的售后信息
+const form = reactive({ // 物流信息数据
+  afterSaleSn: '',
+  logisticsId: '',
+  logisticsNo: '',
+  mDeliverTime: ''
+});
+const rules = { // 必填校验
+  logisticsId: [{required: true, message: '请选择物流公司'}],
+  logisticsNo: [{required: true, message: '请填写物流编号'}],
+  mDeliverTime: [{required: true, message: '请选择发货时间'}]
 };
+const submitLoading = ref(false); // 提交加载状态
+const changeWay = [
+  { name: '全部', status: '' },
+  { name: '申请中', status: 'APPLY' },
+  { name: '通过', status: 'PASS' },
+  { name: '完成售后', status: 'COMPLETE' },
+];
+const activeTab = ref(0);
+
+function goDetail(sn) { // 跳转售后详情
+  router.push({
+    name: 'AfterSaleDetail',
+    query: {sn}
+  })
+}
+function cancel(sn) { // 取消售后申请
+  Modal.confirm({
+    title: '取消',
+    content: '确定取消此次售后申请吗？',
+    onOk: () => {
+      cancelAfterSale(sn).then(res => {
+        if (res.success) {
+          Message.success('取消售后申请成功')
+          getList()
+        }
+      })
+    },
+    onCancel: () => {
+    }
+  });
+}
+function goodsDetail(skuId, goodsId) {
+  // 跳转商品详情
+  let routeUrl = router.resolve({
+    path: '/goodsDetail',
+    query: {skuId, goodsId}
+  });
+  window.open(routeUrl.href, '_blank');
+}
+// 跳转店铺首页
+function shopPage(id) {
+  router.push({
+    path: '/merchant',
+    query: {id: id}
+  });
+}
+function change(index) {
+  activeTab.value = index
+  params.pageNumber = 1
+  const current = changeWay[index]
+  if (!current || !current.status) {
+    delete params.serviceStatus
+  } else {
+    params.serviceStatus = current.status
+  }
+  getList()
+}
+function getList() { // 获取售后列表
+  spinShow.value = true;
+  let paramsData = JSON.parse(JSON.stringify(params))
+  afterSaleList(paramsData).then(res => {
+    spinShow.value = false
+    if (res.success) {
+      orderList.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function changePageNum(val) { // 修改页码
+  params.pageNumber = val;
+  getList()
+}
+function changePageSize(val) { // 修改页数
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList()
+}
+function filterOrderStatus(status) { // 获取订单状态中文
+  const ob = afterSaleStatusList.filter(e => {
+    return e.status === status
+  });
+  return ob && ob[0] ? ob[0].name : status
+}
+// 获取物流公司列表
+function getCompany() {
+  getLogisticsCompany().then(res => {
+    if (res.success) {
+      companyList.value = res.result
+    }
+  })
+}
+// 提交物流信息
+function submitDelivery() {
+  formRef.value?.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+    afterSaleDelivery(form).then(res => {
+      if (res.success) {
+        logisticsShow.value = false;
+        Message.success('提交成功');
+        getList();
+      }
+      submitLoading.value = false;
+    }).catch(() => {
+      submitLoading.value = false;
+    });
+  });
+}
+// 提交物流modal
+function openModal(row) {
+  singleOrder.value = row;
+  logisticsShow.value = true;
+  if (!companyList.value.length) {
+    getCompany();
+  }
+  nextTick(() => {
+    formRef.value?.resetFields();
+    form.afterSaleSn = row.sn;
+  });
+}
+
+onMounted(() => {
+  getList();
+});
 </script>
 
 <style scoped lang="scss">

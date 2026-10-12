@@ -178,10 +178,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, nextTick, onMounted } from "vue";
 import * as API_Member from "@/api/member.js";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import { ElMessage, ElMessageBox } from "element-plus";
+
+defineOptions({ name: "memberGrade" });
 
 const buildDefaultForm = () => ({
   id: "",
@@ -209,254 +212,248 @@ function syncOrderedBenefitIds(prevOrder, selected) {
   return out;
 }
 
-export default {
-  name: "memberGrade",
-  components: {
-    uploadPicInput,
-  },
-  data() {
-    return {
-      loading: true,
-      data: [],
-      addFlag: false,
-      editFlag: false,
-      submitAddLoading: false,
-      submitEditLoading: false,
-      formAdd: buildDefaultForm(),
-      formEdit: buildDefaultForm(),
-      addBenefitOrder: [],
-      editBenefitOrder: [],
-      benefitOptions: [],
-      benefitTypeOptions: [],
-      benefitOptionsLoading: false,
-      editDetailLoading: false,
-      rules: {
-        gradeName: [{ required: true, message: "请输入等级名称", trigger: "blur" }],
-        gradeImage: [{ required: true, message: "请上传等级图标", trigger: "change" }],
-        requiredExperience: [{ required: true, type: "number", message: "请输入所需经验值", trigger: "change" }],
-        gradeSort: [{ required: true, type: "number", message: "请输入等级排序", trigger: "change" }],
-        gradeState: [{ required: true, message: "请选择等级开关", trigger: "change" }],
-      },
-    };
-  },
-  methods: {
-    benefitOptionLabel(b) {
-      if (!b) return "";
-      const name = b.benefitName || String(b.id);
-      const opt = this.benefitTypeOptions.find((o) => o.value === b.benefitType);
-      const typeText = opt ? opt.description : b.benefitType || "";
-      return typeText ? `${name}（${typeText}）` : name;
-    },
-    onAddBenefitIdsChange(val) {
-      this.addBenefitOrder = syncOrderedBenefitIds(this.addBenefitOrder, val);
-    },
-    onEditBenefitIdsChange(val) {
-      this.editBenefitOrder = syncOrderedBenefitIds(this.editBenefitOrder, val);
-    },
-    loadBenefitTypes() {
-      API_Member.getMemberBenefitTypes().then((res) => {
-        if (res && res.success && Array.isArray(res.result)) {
-          this.benefitTypeOptions = res.result;
-        } else {
-          this.benefitTypeOptions = [];
-        }
-      });
-    },
-    loadBenefitOptions() {
-      this.benefitOptionsLoading = true;
-      const pageSize = 500;
-      const fetchPage = (pageNumber) =>
-        API_Member.getMemberBenefitByPage({ pageNumber, pageSize, sort: "benefitSort", order: "asc" });
-      return fetchPage(1)
-        .then((res) => {
-          if (!(res && res.success && res.result)) {
-            this.benefitOptions = [];
-            return;
-          }
-          const records = Array.isArray(res.result.records) ? res.result.records : [];
-          const total = Number(res.result.total) || records.length;
-          let all = records.slice();
-          if (total > pageSize) {
-            const pages = Math.ceil(total / pageSize);
-            const rest = [];
-            for (let p = 2; p <= pages; p++) {
-              rest.push(fetchPage(p));
-            }
-            return Promise.all(rest).then((results) => {
-              results.forEach((r) => {
-                if (r && r.success && r.result && Array.isArray(r.result.records)) {
-                  all = all.concat(r.result.records);
-                }
-              });
-              this.benefitOptions = all;
-            });
-          }
-          this.benefitOptions = all;
-        })
-        .catch(() => {
-          this.benefitOptions = [];
-        })
-        .finally(() => {
-          this.benefitOptionsLoading = false;
-        });
-    },
-    parseBenefitIdsFromString(str) {
-      return String(str || "")
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    },
-    fillEditFormFromGrade(grade, benefitsOrderedIds) {
-      this.formEdit = {
-        id: grade.id || "",
-        gradeName: grade.gradeName || "",
-        isDefault: grade.isDefault === true,
-        gradeImage: grade.gradeImage || "",
-        gradeBackground: grade.gradeBackground || "",
-        gradeFontColor: grade.gradeFontColor || "",
-        requiredExperience: Number(grade.requiredExperience) > 0 ? Number(grade.requiredExperience) : 1,
-        gradeSort: Number(grade.gradeSort) > 0 ? Number(grade.gradeSort) : 1,
-        gradeState: grade.gradeState || "OPEN",
-        benefitIds: grade.benefitIds || "",
-      };
-      this.editBenefitOrder = (benefitsOrderedIds || []).map((id) => String(id));
-    },
-    init() {
-      this.getData();
-      this.loadBenefitTypes();
-      this.loadBenefitOptions();
-    },
-    getData() {
-      this.loading = true;
-      API_Member.getMemberGradeByPage().then((res) => {
-        this.loading = false;
-        if (res && res.success) {
-          this.data = Array.isArray(res.result) ? res.result : [];
-        }
-      });
-    },
-    openAdd() {
-      this.addFlag = true;
-      this.submitAddLoading = false;
-      if (!this.benefitOptions.length && !this.benefitOptionsLoading) {
-        this.loadBenefitOptions();
+// 模板 el-form 的 ref（ref="addForm" / ref="editForm"）
+const addForm = ref(null);
+const editForm = ref(null);
+
+const loading = ref(true);
+const data = ref([]);
+const addFlag = ref(false);
+const editFlag = ref(false);
+const submitAddLoading = ref(false);
+const submitEditLoading = ref(false);
+const formAdd = ref(buildDefaultForm());
+const formEdit = ref(buildDefaultForm());
+const addBenefitOrder = ref([]);
+const editBenefitOrder = ref([]);
+const benefitOptions = ref([]);
+const benefitTypeOptions = ref([]);
+const benefitOptionsLoading = ref(false);
+const editDetailLoading = ref(false);
+const rules = ref({
+  gradeName: [{ required: true, message: "请输入等级名称", trigger: "blur" }],
+  gradeImage: [{ required: true, message: "请上传等级图标", trigger: "change" }],
+  requiredExperience: [{ required: true, type: "number", message: "请输入所需经验值", trigger: "change" }],
+  gradeSort: [{ required: true, type: "number", message: "请输入等级排序", trigger: "change" }],
+  gradeState: [{ required: true, message: "请选择等级开关", trigger: "change" }],
+});
+
+function benefitOptionLabel(b) {
+  if (!b) return "";
+  const name = b.benefitName || String(b.id);
+  const opt = benefitTypeOptions.value.find((o) => o.value === b.benefitType);
+  const typeText = opt ? opt.description : b.benefitType || "";
+  return typeText ? `${name}（${typeText}）` : name;
+}
+function onAddBenefitIdsChange(val) {
+  addBenefitOrder.value = syncOrderedBenefitIds(addBenefitOrder.value, val);
+}
+function onEditBenefitIdsChange(val) {
+  editBenefitOrder.value = syncOrderedBenefitIds(editBenefitOrder.value, val);
+}
+function loadBenefitTypes() {
+  API_Member.getMemberBenefitTypes().then((res) => {
+    if (res && res.success && Array.isArray(res.result)) {
+      benefitTypeOptions.value = res.result;
+    } else {
+      benefitTypeOptions.value = [];
+    }
+  });
+}
+function loadBenefitOptions() {
+  benefitOptionsLoading.value = true;
+  const pageSize = 500;
+  const fetchPage = (pageNumber) =>
+    API_Member.getMemberBenefitByPage({ pageNumber, pageSize, sort: "benefitSort", order: "asc" });
+  return fetchPage(1)
+    .then((res) => {
+      if (!(res && res.success && res.result)) {
+        benefitOptions.value = [];
+        return;
       }
-      this.$nextTick(() => {
-        if (this.$refs.addForm) this.$refs.addForm.resetFields();
-        this.formAdd = buildDefaultForm();
-        this.addBenefitOrder = [];
-      });
-    },
-    submitAdd() {
-      this.$refs.addForm.validate((valid) => {
-        if (!valid) return;
-        this.submitAddLoading = true;
-        const { benefitIds: _omit, ...rest } = this.formAdd;
-        const payload = {
-          ...rest,
-          benefitIds: (this.addBenefitOrder || []).join(","),
-        };
-        API_Member.addMemberGrade(payload).then((res) => {
-          this.submitAddLoading = false;
-          if (res && res.success) {
-            ElMessage.success("添加成功");
-            this.addFlag = false;
-            this.getData();
-          }
-        });
-      });
-    },
-    openEdit(row) {
-      this.editFlag = true;
-      this.submitEditLoading = false;
-      this.editDetailLoading = true;
-      if (!this.benefitOptions.length && !this.benefitOptionsLoading) {
-        this.loadBenefitOptions();
-      }
-      this.$nextTick(() => {
-        if (this.$refs.editForm) this.$refs.editForm.resetFields();
-      });
-      API_Member.getMemberGrade(row.id)
-        .then((res) => {
-          this.editDetailLoading = false;
-          if (res && res.success && res.result) {
-            const raw = res.result;
-            const grade = raw.grade != null ? raw.grade : raw;
-            const benefits = Array.isArray(raw.benefits) ? raw.benefits : [];
-            const orderedIds = benefits.length
-              ? benefits.map((b) => b.id).filter((id) => id != null && id !== "")
-              : String(grade.benefitIds || "")
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean);
-            this.fillEditFormFromGrade(grade, orderedIds);
-          } else {
-            this.fillEditFormFromGrade(row, this.parseBenefitIdsFromString(row.benefitIds));
-          }
-        })
-        .catch(() => {
-          this.editDetailLoading = false;
-          this.fillEditFormFromGrade(row, this.parseBenefitIdsFromString(row.benefitIds));
-        });
-    },
-    submitEdit() {
-      this.$refs.editForm.validate((valid) => {
-        if (!valid) return;
-        this.submitEditLoading = true;
-        const { id, benefitIds: _omit, ...rest } = this.formEdit;
-        const payload = {
-          ...rest,
-          benefitIds: (this.editBenefitOrder || []).join(","),
-        };
-        API_Member.updateMemberGrade(id, payload).then((res) => {
-          this.submitEditLoading = false;
-          if (res && res.success) {
-            ElMessage.success("修改成功");
-            this.editFlag = false;
-            this.getData();
-          }
-        });
-      });
-    },
-    onGradeStateSwitch(row, checked) {
-      const nextState = checked ? "OPEN" : "CLOSE";
-      const prevState = row.gradeState;
-      if (nextState === prevState) return;
-      const text = checked ? "开启" : "关闭";
-      ElMessageBox.confirm(`确定${text}该客户等级？`, "提示", { type: "warning" }).then(() => {
-        row._gradeStateLoading = true;
-        return API_Member.updateMemberGradeState(row.id, nextState)
-          .then((res) => {
-            row._gradeStateLoading = false;
-            if (res && res.success) {
-              ElMessage.success(`${text}成功`);
-              row.gradeState = nextState;
-            } else {
-              this.getData();
+      const records = Array.isArray(res.result.records) ? res.result.records : [];
+      const total = Number(res.result.total) || records.length;
+      let all = records.slice();
+      if (total > pageSize) {
+        const pages = Math.ceil(total / pageSize);
+        const rest = [];
+        for (let p = 2; p <= pages; p++) {
+          rest.push(fetchPage(p));
+        }
+        return Promise.all(rest).then((results) => {
+          results.forEach((r) => {
+            if (r && r.success && r.result && Array.isArray(r.result.records)) {
+              all = all.concat(r.result.records);
             }
-          })
-          .catch(() => {
-            row._gradeStateLoading = false;
           });
-      }).catch(() => {});
-    },
-    remove(row) {
-      ElMessageBox.confirm("确定删除该客户等级？", "提示", { type: "warning" }).then(() => {
-        API_Member.deleteMemberGrade(row.id).then((res) => {
-          if (res && res.success) {
-            ElMessage.success("删除成功");
-            this.getData();
-          } else if (res && res.message) {
-            ElMessage.error(res.message);
-          }
+          benefitOptions.value = all;
         });
-      }).catch(() => {});
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+      }
+      benefitOptions.value = all;
+    })
+    .catch(() => {
+      benefitOptions.value = [];
+    })
+    .finally(() => {
+      benefitOptionsLoading.value = false;
+    });
+}
+function parseBenefitIdsFromString(str) {
+  return String(str || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+function fillEditFormFromGrade(grade, benefitsOrderedIds) {
+  formEdit.value = {
+    id: grade.id || "",
+    gradeName: grade.gradeName || "",
+    isDefault: grade.isDefault === true,
+    gradeImage: grade.gradeImage || "",
+    gradeBackground: grade.gradeBackground || "",
+    gradeFontColor: grade.gradeFontColor || "",
+    requiredExperience: Number(grade.requiredExperience) > 0 ? Number(grade.requiredExperience) : 1,
+    gradeSort: Number(grade.gradeSort) > 0 ? Number(grade.gradeSort) : 1,
+    gradeState: grade.gradeState || "OPEN",
+    benefitIds: grade.benefitIds || "",
+  };
+  editBenefitOrder.value = (benefitsOrderedIds || []).map((id) => String(id));
+}
+function init() {
+  getData();
+  loadBenefitTypes();
+  loadBenefitOptions();
+}
+function getData() {
+  loading.value = true;
+  API_Member.getMemberGradeByPage().then((res) => {
+    loading.value = false;
+    if (res && res.success) {
+      data.value = Array.isArray(res.result) ? res.result : [];
+    }
+  });
+}
+function openAdd() {
+  addFlag.value = true;
+  submitAddLoading.value = false;
+  if (!benefitOptions.value.length && !benefitOptionsLoading.value) {
+    loadBenefitOptions();
+  }
+  nextTick(() => {
+    if (addForm.value) addForm.value.resetFields();
+    formAdd.value = buildDefaultForm();
+    addBenefitOrder.value = [];
+  });
+}
+function submitAdd() {
+  addForm.value.validate((valid) => {
+    if (!valid) return;
+    submitAddLoading.value = true;
+    const { benefitIds: _omit, ...rest } = formAdd.value;
+    const payload = {
+      ...rest,
+      benefitIds: (addBenefitOrder.value || []).join(","),
+    };
+    API_Member.addMemberGrade(payload).then((res) => {
+      submitAddLoading.value = false;
+      if (res && res.success) {
+        ElMessage.success("添加成功");
+        addFlag.value = false;
+        getData();
+      }
+    });
+  });
+}
+function openEdit(row) {
+  editFlag.value = true;
+  submitEditLoading.value = false;
+  editDetailLoading.value = true;
+  if (!benefitOptions.value.length && !benefitOptionsLoading.value) {
+    loadBenefitOptions();
+  }
+  nextTick(() => {
+    if (editForm.value) editForm.value.resetFields();
+  });
+  API_Member.getMemberGrade(row.id)
+    .then((res) => {
+      editDetailLoading.value = false;
+      if (res && res.success && res.result) {
+        const raw = res.result;
+        const grade = raw.grade != null ? raw.grade : raw;
+        const benefits = Array.isArray(raw.benefits) ? raw.benefits : [];
+        const orderedIds = benefits.length
+          ? benefits.map((b) => b.id).filter((id) => id != null && id !== "")
+          : String(grade.benefitIds || "")
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+        fillEditFormFromGrade(grade, orderedIds);
+      } else {
+        fillEditFormFromGrade(row, parseBenefitIdsFromString(row.benefitIds));
+      }
+    })
+    .catch(() => {
+      editDetailLoading.value = false;
+      fillEditFormFromGrade(row, parseBenefitIdsFromString(row.benefitIds));
+    });
+}
+function submitEdit() {
+  editForm.value.validate((valid) => {
+    if (!valid) return;
+    submitEditLoading.value = true;
+    const { id, benefitIds: _omit, ...rest } = formEdit.value;
+    const payload = {
+      ...rest,
+      benefitIds: (editBenefitOrder.value || []).join(","),
+    };
+    API_Member.updateMemberGrade(id, payload).then((res) => {
+      submitEditLoading.value = false;
+      if (res && res.success) {
+        ElMessage.success("修改成功");
+        editFlag.value = false;
+        getData();
+      }
+    });
+  });
+}
+function onGradeStateSwitch(row, checked) {
+  const nextState = checked ? "OPEN" : "CLOSE";
+  const prevState = row.gradeState;
+  if (nextState === prevState) return;
+  const text = checked ? "开启" : "关闭";
+  ElMessageBox.confirm(`确定${text}该客户等级？`, "提示", { type: "warning" }).then(() => {
+    row._gradeStateLoading = true;
+    return API_Member.updateMemberGradeState(row.id, nextState)
+      .then((res) => {
+        row._gradeStateLoading = false;
+        if (res && res.success) {
+          ElMessage.success(`${text}成功`);
+          row.gradeState = nextState;
+        } else {
+          getData();
+        }
+      })
+      .catch(() => {
+        row._gradeStateLoading = false;
+      });
+  }).catch(() => {});
+}
+function remove(row) {
+  ElMessageBox.confirm("确定删除该客户等级？", "提示", { type: "warning" }).then(() => {
+    API_Member.deleteMemberGrade(row.id).then((res) => {
+      if (res && res.success) {
+        ElMessage.success("删除成功");
+        getData();
+      } else if (res && res.message) {
+        ElMessage.error(res.message);
+      }
+    });
+  }).catch(() => {});
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style scoped>
 .ops a {

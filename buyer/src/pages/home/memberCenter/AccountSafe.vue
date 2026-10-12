@@ -77,191 +77,187 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { Message, Modal } from "@/utils/message";
 import { Key, Link } from '@element-plus/icons-vue';
 // import { getPwdStatus } from '@/api/account';
 import storage from '@/plugins/storage'
 import { bindThirdAccount, getThirdAccountBindList, getWechatH5QrCode, unbindThirdAccount } from '@/api/login.js'
-export default {
-  components: { Key, Link },
-  name: 'AccountSafe',
-  data () {
-    return {
-      pwdStatus: '',
-      connectLoading: false,
-      bindModalVisible: false,
-      bindSubmitLoading: false,
-      connectBoundTypes: [],
-      thirdAccountTypes: [
-        { type: 'WECHAT', label: '微信' }
-      ],
-      qrCodeLoading: false,
-      qrCodeBase64: '',
-      bindForm: {
-        type: '',
-        typeLabel: '',
-        unionID: ''
-      }
-    }
-  },
-  computed: {
-    wechatConnect () {
-      return this.thirdAccountTypes[0]
-    },
-    qrCodeSrc () {
-      if (!this.qrCodeBase64) return ''
-      if (this.qrCodeBase64.startsWith('data:image')) return this.qrCodeBase64
-      return `data:image/png;base64,${this.qrCodeBase64}`
-    },
-    bindModalOkText () {
-      if (this.bindForm.type === 'WECHAT') return '我已完成绑定'
-      return '确定'
-    }
-  },
-  mounted () {
-    this.getPwdStatus()
-    this.refreshConnectBinds()
-  },
-  methods: {
-    // 设置支付密码
-    goModifyPwd () {
-      this.$router.push({name: 'ModifyPwd', query: { status: 2 }})
-    },
-    modifyPwd () { // 修改密码
-      this.$router.push({name: 'ModifyPwd', query: { status: 1 }})
-    },
-    // 获取密码状态
-    getPwdStatus () {},
-    // getPwdStatus () {
-    //   getPwdStatus().then(res => {
-    //     if (res) {
-    //       this.pwdStatus = '修改密码'
-    //     } else {
-    //       this.pwdStatus = '设置密码'
-    //     }
-    //   });
-    // }
-    isBound (type) {
-      return this.connectBoundTypes.includes(type)
-    },
-    refreshConnectBinds () {
-      this.connectLoading = true
-      return getThirdAccountBindList()
-        .then(res => {
-          if (res && res.success) {
-            this.connectBoundTypes = Array.isArray(res.result) ? res.result : []
-          }
-        })
-        .finally(() => {
-          this.connectLoading = false
-        })
-    },
-    openBindModal (item) {
-      this.bindForm.type = item.type
-      this.bindForm.typeLabel = item.label
-      this.bindForm.unionID = ''
-      this.qrCodeBase64 = ''
-      this.bindModalVisible = true
-      if (item.type === 'WECHAT') {
-        this.fetchWechatQrCode()
-      }
-    },
-    resetBindForm () {
-      this.bindForm.type = ''
-      this.bindForm.typeLabel = ''
-      this.bindForm.unionID = ''
-      this.qrCodeLoading = false
-      this.qrCodeBase64 = ''
-      this.bindSubmitLoading = false
-    },
-    fetchWechatQrCode () {
-      if (this.bindForm.type !== 'WECHAT') return
-      const rawUserInfo = storage.getItem('userInfo')
-      const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : null
-      const userId = userInfo && userInfo.id ? String(userInfo.id) : ''
-      if (!userId) {
-        this.qrCodeBase64 = ''
-        Message.error('未获取到当前用户ID，请重新登录后重试')
-        return
-      }
-      this.qrCodeLoading = true
-      getWechatH5QrCode({ scene: userId })
-        .then(res => {
-          if (res && res.success) {
-            this.qrCodeBase64 = res.result || ''
-            return
-          }
-          this.qrCodeBase64 = ''
-          Message.error((res && res.message) || '二维码获取失败')
-        })
-        .catch(() => {
-          this.qrCodeBase64 = ''
-        })
-        .finally(() => {
-          this.qrCodeLoading = false
-        })
-    },
-    submitBind () {
-      if (this.bindSubmitLoading) return
-      if (this.bindForm.type === 'WECHAT' && !this.bindForm.unionID) {
-        this.bindSubmitLoading = true
-        this.refreshConnectBinds()
-          .then(() => {
-            if (this.isBound(this.bindForm.type)) {
-              Message.success('绑定成功')
-              this.bindModalVisible = false
-              this.resetBindForm()
-              return
-            }
-            Message.warning('暂未检测到绑定，请扫码后重试')
-            this.$nextTick(() => {
-              this.bindModalVisible = true
-            })
-          })
-          .finally(() => {
-            this.bindSubmitLoading = false
-          })
-        return
-      }
-      if (!this.bindForm.type) {
-        Message.error('绑定类型不能为空')
-        return
-      }
-      if (!this.bindForm.unionID) {
-        Message.error('OpenID/UnionID 不能为空')
-        this.$nextTick(() => {
-          this.bindModalVisible = true
-        })
-        return
-      }
 
-      this.bindSubmitLoading = true
-      bindThirdAccount({ unionID: this.bindForm.unionID, type: this.bindForm.type })
-        .then(() => {
-          Message.success('绑定成功')
-          this.bindModalVisible = false
-          this.resetBindForm()
-          this.refreshConnectBinds()
-        })
-        .finally(() => {
-          this.bindSubmitLoading = false
-        })
-    },
-    confirmUnbind (item) {
-      Modal.confirm({
-        title: '解绑确认',
-        content: `<p>确定解绑 ${item.label} 吗？</p>`,
-        onOk: () => {
-          unbindThirdAccount({ type: item.type }).then(() => {
-            Message.success('解绑成功')
-            this.refreshConnectBinds()
-          })
-        }
-      })
-    }
+defineOptions({ name: 'AccountSafe' });
+
+const router = useRouter();
+
+const pwdStatus = ref('');
+const connectLoading = ref(false);
+const bindModalVisible = ref(false);
+const bindSubmitLoading = ref(false);
+const connectBoundTypes = ref([]);
+const thirdAccountTypes = ref([
+  { type: 'WECHAT', label: '微信' }
+]);
+const qrCodeLoading = ref(false);
+const qrCodeBase64 = ref('');
+const bindForm = reactive({
+  type: '',
+  typeLabel: '',
+  unionID: ''
+});
+
+const wechatConnect = computed(() => thirdAccountTypes.value[0]);
+const qrCodeSrc = computed(() => {
+  if (!qrCodeBase64.value) return ''
+  if (qrCodeBase64.value.startsWith('data:image')) return qrCodeBase64.value
+  return `data:image/png;base64,${qrCodeBase64.value}`
+});
+const bindModalOkText = computed(() => {
+  if (bindForm.type === 'WECHAT') return '我已完成绑定'
+  return '确定'
+});
+
+// 设置支付密码
+function goModifyPwd () {
+  router.push({name: 'ModifyPwd', query: { status: 2 }})
+}
+function modifyPwd () { // 修改密码
+  router.push({name: 'ModifyPwd', query: { status: 1 }})
+}
+// 获取密码状态
+function getPwdStatus () {}
+// function getPwdStatus () {
+//   getPwdStatus().then(res => {
+//     if (res) {
+//       pwdStatus.value = '修改密码'
+//     } else {
+//       pwdStatus.value = '设置密码'
+//     }
+//   });
+// }
+function isBound (type) {
+  return connectBoundTypes.value.includes(type)
+}
+function refreshConnectBinds () {
+  connectLoading.value = true
+  return getThirdAccountBindList()
+    .then(res => {
+      if (res && res.success) {
+        connectBoundTypes.value = Array.isArray(res.result) ? res.result : []
+      }
+    })
+    .finally(() => {
+      connectLoading.value = false
+    })
+}
+function openBindModal (item) {
+  bindForm.type = item.type
+  bindForm.typeLabel = item.label
+  bindForm.unionID = ''
+  qrCodeBase64.value = ''
+  bindModalVisible.value = true
+  if (item.type === 'WECHAT') {
+    fetchWechatQrCode()
   }
 }
+function resetBindForm () {
+  bindForm.type = ''
+  bindForm.typeLabel = ''
+  bindForm.unionID = ''
+  qrCodeLoading.value = false
+  qrCodeBase64.value = ''
+  bindSubmitLoading.value = false
+}
+function fetchWechatQrCode () {
+  if (bindForm.type !== 'WECHAT') return
+  const rawUserInfo = storage.getItem('userInfo')
+  const userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : null
+  const userId = userInfo && userInfo.id ? String(userInfo.id) : ''
+  if (!userId) {
+    qrCodeBase64.value = ''
+    Message.error('未获取到当前用户ID，请重新登录后重试')
+    return
+  }
+  qrCodeLoading.value = true
+  getWechatH5QrCode({ scene: userId })
+    .then(res => {
+      if (res && res.success) {
+        qrCodeBase64.value = res.result || ''
+        return
+      }
+      qrCodeBase64.value = ''
+      Message.error((res && res.message) || '二维码获取失败')
+    })
+    .catch(() => {
+      qrCodeBase64.value = ''
+    })
+    .finally(() => {
+      qrCodeLoading.value = false
+    })
+}
+function submitBind () {
+  if (bindSubmitLoading.value) return
+  if (bindForm.type === 'WECHAT' && !bindForm.unionID) {
+    bindSubmitLoading.value = true
+    refreshConnectBinds()
+      .then(() => {
+        if (isBound(bindForm.type)) {
+          Message.success('绑定成功')
+          bindModalVisible.value = false
+          resetBindForm()
+          return
+        }
+        Message.warning('暂未检测到绑定，请扫码后重试')
+        nextTick(() => {
+          bindModalVisible.value = true
+        })
+      })
+      .finally(() => {
+        bindSubmitLoading.value = false
+      })
+    return
+  }
+  if (!bindForm.type) {
+    Message.error('绑定类型不能为空')
+    return
+  }
+  if (!bindForm.unionID) {
+    Message.error('OpenID/UnionID 不能为空')
+    nextTick(() => {
+      bindModalVisible.value = true
+    })
+    return
+  }
+
+  bindSubmitLoading.value = true
+  bindThirdAccount({ unionID: bindForm.unionID, type: bindForm.type })
+    .then(() => {
+      Message.success('绑定成功')
+      bindModalVisible.value = false
+      resetBindForm()
+      refreshConnectBinds()
+    })
+    .finally(() => {
+      bindSubmitLoading.value = false
+    })
+}
+function confirmUnbind (item) {
+  Modal.confirm({
+    title: '解绑确认',
+    content: `<p>确定解绑 ${item.label} 吗？</p>`,
+    onOk: () => {
+      unbindThirdAccount({ type: item.type }).then(() => {
+        Message.success('解绑成功')
+        refreshConnectBinds()
+      })
+    }
+  })
+}
+
+onMounted(() => {
+  getPwdStatus()
+  refreshConnectBinds()
+});
 </script>
 
 <style scoped lang="scss">

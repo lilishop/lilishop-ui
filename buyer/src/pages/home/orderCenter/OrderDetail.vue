@@ -410,7 +410,9 @@
 
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import {
   orderDetail,
@@ -438,276 +440,278 @@ import {
  * 订单详情：E_COUPON 展示 orderItems[].cardKeys，屏蔽售后/物流（FR-B-03 / FR-B-04）。
  * 移动端已完成订单用 Dialog 查看卡密（原型 P-09 / D-01）。
  */
-export default {
-  name: "order-detail",
-  data() {
-    return {
-      order: {}, // 订单详情数据
-      progressList: [], // 订单流程
-      logistics: "", // 物流数据
-      cardKeyDialogVisible: false,
-      cancelParams: {
-        // 取消售后参数
-        orderSn: "",
-        reason: "",
-      },
-      cancelAvail: false, // 取消订单modal控制
-      cancelReason: [], // 取消订单原因
-      orderPackage: [],
-      packageTraceList: [],
-      logisticsModal: false,
-    };
-  },
-  computed: {
-    /** 电子卡券订单：无物流/核验码，卡密数据来自 API-B-01 orderItems[].cardKeys */
-    isECouponOrder() {
-      return checkECouponOrder(this.order?.order?.orderType);
-    },
-    isVirtualOrder() {
-      return this.order?.order?.orderType === "VIRTUAL";
-    },
-    isNonPhysicalOrder() {
-      return this.isVirtualOrder || this.isECouponOrder;
-    },
-    /** 是否展示卡密区块（仅当前订单 orderItems） */
-    hasCardKeySection() {
-      return orderHasCardKeySection({
-        orderItems: this.order.orderItems,
-        isECouponOrder: this.isECouponOrder,
-      });
-    },
-    cardKeyFulfillLines() {
-      return collectCardKeyFulfillLines(this.order.orderItems);
-    },
-    ecouponCardKeyRows() {
-      return flattenOrderCardKeys(this.order.orderItems, false);
-    },
-    /** 商家以无需配送方式发货（包裹 fulfillmentMode=NO_DELIVERY） */
-    isNoDeliveryOrder() {
-      return checkNoDeliveryOrder(this.orderPackage);
-    },
-    displayDeliveryMethodValue() {
-      if (this.isNoDeliveryOrder) return "无需配送";
-      return this.order?.deliveryMethodValue || "-";
-    },
-    noDeliveryPackages() {
-      return (this.orderPackage || []).filter(isNoDeliveryPackage);
-    },
-    noDeliveryRemark() {
-      const pkg = this.noDeliveryPackages.find((p) => p.deliveryRemark);
-      return pkg?.deliveryRemark || "";
-    },
-    noDeliveryShipTime() {
-      const pkg = this.noDeliveryPackages[0];
-      return pkg?.logisticsTime || "";
-    },
-  },
-  methods: {
-    isNoDeliveryPackage,
-    getFulfillmentModeLabel,
-    cardKeyFulfillAlertType,
-    resolveCardKeyFulfillMessage,
-    lineCardKeyRows(line) {
-      return line.cardKeys || [];
-    },
-    copyCardKey(row) {
-      const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
-      this.copyText(text);
-    },
-    copyAllCardKeys() {
-      const text = this.ecouponCardKeyRows
-        .map((row, i) => `${i + 1}. 卡号：${row.cardNo || ""}  卡密：${row.cardSecret || ""}`)
-        .join("\n");
-      this.copyText(text || "");
-    },
-    copyText(text) {
-      if (!text) return;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          Message.success("已复制到剪贴板");
-        });
-      } else {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        Message.success("已复制到剪贴板");
+defineOptions({ name: "order-detail" });
+
+const route = useRoute();
+const router = useRouter();
+
+const order = ref({}); // 订单详情数据
+const progressList = ref([]); // 订单流程
+const logistics = ref(""); // 物流数据
+const cardKeyDialogVisible = ref(false);
+const cancelParams = reactive({
+  // 取消售后参数
+  orderSn: "",
+  reason: "",
+});
+const cancelAvail = ref(false); // 取消订单modal控制
+const cancelReason = ref([]); // 取消订单原因
+const orderPackage = ref([]);
+const packageTraceList = ref([]);
+const logisticsModal = ref(false);
+
+/** 电子卡券订单：无物流/核验码，卡密数据来自 API-B-01 orderItems[].cardKeys */
+const isECouponOrder = computed(() => checkECouponOrder(order.value?.order?.orderType));
+const isVirtualOrder = computed(() => order.value?.order?.orderType === "VIRTUAL");
+const isNonPhysicalOrder = computed(() => isVirtualOrder.value || isECouponOrder.value);
+/** 是否展示卡密区块（仅当前订单 orderItems） */
+const hasCardKeySection = computed(() =>
+  orderHasCardKeySection({
+    orderItems: order.value.orderItems,
+    isECouponOrder: isECouponOrder.value,
+  })
+);
+const cardKeyFulfillLines = computed(() => collectCardKeyFulfillLines(order.value.orderItems));
+const ecouponCardKeyRows = computed(() => flattenOrderCardKeys(order.value.orderItems, false));
+/** 商家以无需配送方式发货（包裹 fulfillmentMode=NO_DELIVERY） */
+const isNoDeliveryOrder = computed(() => checkNoDeliveryOrder(orderPackage.value));
+const displayDeliveryMethodValue = computed(() => {
+  if (isNoDeliveryOrder.value) return "无需配送";
+  return order.value?.deliveryMethodValue || "-";
+});
+const noDeliveryPackages = computed(() => (orderPackage.value || []).filter(isNoDeliveryPackage));
+const noDeliveryRemark = computed(() => {
+  const pkg = noDeliveryPackages.value.find((p) => p.deliveryRemark);
+  return pkg?.deliveryRemark || "";
+});
+const noDeliveryShipTime = computed(() => {
+  const pkg = noDeliveryPackages.value[0];
+  return pkg?.logisticsTime || "";
+});
+
+function lineCardKeyRows(line) {
+  return line.cardKeys || [];
+}
+
+function copyCardKey(row) {
+  const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
+  copyText(text);
+}
+
+function copyAllCardKeys() {
+  const text = ecouponCardKeyRows.value
+    .map((row, i) => `${i + 1}. 卡号：${row.cardNo || ""}  卡密：${row.cardSecret || ""}`)
+    .join("\n");
+  copyText(text || "");
+}
+
+function copyText(text) {
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      Message.success("已复制到剪贴板");
+    });
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    Message.success("已复制到剪贴板");
+  }
+}
+
+function isVatSpecialReceipt(receipt) {
+  if (!receipt) return false;
+  const rt = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
+  if (rt === "2" || rt === "增值税专用发票" || receipt.invoiceKind === "VAT_SPECIAL") {
+    return true;
+  }
+  return false;
+}
+
+function isPersonalReceipt(receipt) {
+  return !isVatSpecialReceipt(receipt);
+}
+
+function formatReceiptType(receipt) {
+  if (!receipt) return "";
+  const rt = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
+  if (rt === "电子普通发票" || rt === "增值税专用发票") return rt;
+  return isVatSpecialReceipt(receipt) ? "增值税专用发票" : "电子普通发票";
+}
+
+function formatReceiptHeaderType(receipt) {
+  if (!receipt) return "";
+  if (isVatSpecialReceipt(receipt)) return "单位";
+  if (receipt.taxpayerId) return "单位";
+  return "个人";
+}
+
+function hasValidReceipt() {
+  const receipt = order.value && order.value.receipt;
+  if (!receipt) return false;
+  const content = receipt.receiptContent ? String(receipt.receiptContent).trim() : '';
+  const title = receipt.receiptTitle ? String(receipt.receiptTitle).trim() : '';
+  const taxpayerId = receipt.taxpayerId ? String(receipt.taxpayerId).trim() : '';
+  // 后端有时会返回占位 receipt（如 receiptContent=不开发票），这里过滤掉
+  if (content === '不开发票') return false;
+  return Boolean(content || title || taxpayerId);
+}
+
+function getInvoiceAddress(receipt) {
+  if (!receipt) return "";
+  return receipt.invoiceAddress || receipt.invoiceFileUrl || "";
+}
+
+function viewReceiptInvoice(receipt) {
+  const invoiceAddress = getInvoiceAddress(receipt);
+  if (!invoiceAddress) {
+    Message.warning("暂无发票附件");
+    return;
+  }
+  window.open(invoiceAddress, "_blank");
+}
+
+function goodsDetail(skuId, goodsId) {
+  // 跳转商品详情
+  let routeUrl = router.resolve({
+    path: "/goodsDetail",
+    query: { skuId, goodsId },
+  });
+  window.open(routeUrl.href, "_blank");
+}
+
+// 跳转店铺首页
+function shopPage(id) {
+  router.push({
+    path: "/merchant",
+    query: { id: id },
+  });
+}
+
+async function getDetail() {
+  // 获取订单详情
+  orderDetail(route.query.sn).then(async (res) => {
+    if (res.success) {
+      order.value = res.result;
+      const receiptId =
+        (res.result.order && res.result.order.receiptId) ||
+        res.result.receiptId ||
+        (res.result.receipt && res.result.receipt.id);
+      if (receiptId) {
+        const receiptRes = await receiptDetail(receiptId);
+        if (receiptRes && receiptRes.success && receiptRes.result) {
+          order.value["receipt"] = receiptRes.result;
+        }
       }
-    },
-    isVatSpecialReceipt (receipt) {
-      if (!receipt) return false;
-      const rt = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
-      if (rt === "2" || rt === "增值税专用发票" || receipt.invoiceKind === "VAT_SPECIAL") {
-        return true;
+      progressList.value = (res.result.orderLogs || []).slice().sort((a, b) => {
+        return new Date(a.createTime).getTime() - new Date(b.createTime).getTime();
+      });
+      if (order.value.order.deliveryMethod === 'LOGISTICS') {
+        getOrderPackage(order.value.order.sn);
       }
-      return false;
-    },
-    isPersonalReceipt (receipt) {
-      return !this.isVatSpecialReceipt(receipt);
-    },
-    formatReceiptType (receipt) {
-      if (!receipt) return "";
-      const rt = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
-      if (rt === "电子普通发票" || rt === "增值税专用发票") return rt;
-      return this.isVatSpecialReceipt(receipt) ? "增值税专用发票" : "电子普通发票";
-    },
-    formatReceiptHeaderType (receipt) {
-      if (!receipt) return "";
-      if (this.isVatSpecialReceipt(receipt)) return "单位";
-      if (receipt.taxpayerId) return "单位";
-      return "个人";
-    },
-    hasValidReceipt () {
-      const receipt = this.order && this.order.receipt;
-      if (!receipt) return false;
-      const content = receipt.receiptContent ? String(receipt.receiptContent).trim() : '';
-      const title = receipt.receiptTitle ? String(receipt.receiptTitle).trim() : '';
-      const taxpayerId = receipt.taxpayerId ? String(receipt.taxpayerId).trim() : '';
-      // 后端有时会返回占位 receipt（如 receiptContent=不开发票），这里过滤掉
-      if (content === '不开发票') return false;
-      return Boolean(content || title || taxpayerId);
-    },
-    getInvoiceAddress (receipt) {
-      if (!receipt) return "";
-      return receipt.invoiceAddress || receipt.invoiceFileUrl || "";
-    },
-    viewReceiptInvoice (receipt) {
-      const invoiceAddress = this.getInvoiceAddress(receipt);
-      if (!invoiceAddress) {
-        Message.warning("暂无发票附件");
-        return;
+    }
+  });
+}
+
+function getOrderPackage(sn) {
+  getPackage(sn).then(res => {
+    if (res.success) {
+      orderPackage.value = Array.isArray(res.result) ? res.result : [];
+      if (!orderPackage.value.length) {
+        traces();
       }
-      window.open(invoiceAddress, "_blank");
-    },
-    goodsDetail(skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
-      });
-      window.open(routeUrl.href, "_blank");
-    },
-    // 跳转店铺首页
-    shopPage(id) {
-      this.$router.push({
-        path: "/merchant",
-        query: { id: id },
-      });
-    },
-    async getDetail() {
-      // 获取订单详情
-      orderDetail(this.$route.query.sn).then(async (res) => {
-        if (res.success) {
-          this.order = res.result;
-          const receiptId =
-            (res.result.order && res.result.order.receiptId) ||
-            res.result.receiptId ||
-            (res.result.receipt && res.result.receipt.id);
-          if (receiptId) {
-            const receiptRes = await receiptDetail(receiptId);
-            if (receiptRes && receiptRes.success && receiptRes.result) {
-              this.order["receipt"] = receiptRes.result;
-            }
-          }
-          this.progressList = (res.result.orderLogs || []).slice().sort((a, b) => {
-            return new Date(a.createTime).getTime() - new Date(b.createTime).getTime();
-          });
-          if (this.order.order.deliveryMethod === 'LOGISTICS') {
-            this.getOrderPackage(this.order.order.sn);
-          }
-        }
-      });
-    },
-    getOrderPackage(sn) {
-      getPackage(sn).then(res => {
-        if (res.success) {
-          this.orderPackage = Array.isArray(res.result) ? res.result : [];
-          if (!this.orderPackage.length) {
-            this.traces();
-          }
-        } else {
-          this.traces();
-        }
-      }).catch(() => {
-        this.traces();
-      });
-    },
-    traces() {
-      // 物流信息
-      getTraces(this.$route.query.sn).then((res) => {
-        if (res.success) {
-          this.logistics = res.result;
-        }
-      });
-    },
-    logisticsList() {
-      this.logisticsModal = true;
-      this.packageTraceList = this.orderPackage;
-      // getTracesList(this.order.order.sn).then((res) => {
-      //   if (res.success && res.result != null) {
-      //     this.packageTraceList = res.result;
-      //   }
-      // });
-    },
-    received(sn) {
-      // 确认收货
-      sureReceived(sn).then((res) => {
-        if (res.success) {
-          Message.success("确认收货成功");
-          this.getDetail();
-        }
-      });
-    },
-    goPay(sn) {
-      // 去支付
-      this.$router.push({
-        path: "/payment",
-        query: { orderType: "ORDER", sn },
-      });
-    },
-    applyAfterSale(sn) {
-      // 申请售后
-      this.$router.push({ name: "ApplyAfterSale", query: { sn: sn } });
-    },
-    comment(sn, goodsIndex) {
-      // 评价
-      this.$router.push({
-        path: "/home/addEval",
-        query: { sn, index: goodsIndex },
-      });
-    },
-    complain(sn, goodsIndex) {
-      // 投诉
-      this.$router.push({ name: "Complain", query: { sn, index: goodsIndex } });
-    },
-    handleCancelOrder(sn) {
-      // 取消订单
-      this.cancelParams.orderSn = sn;
-      afterSaleReason("CANCEL").then((res) => {
-        if (res.success) {
-          this.cancelReason = res.result;
-          this.cancelAvail = true;
-          this.cancelParams.reason = this.cancelReason[0].reason;
-        }
-      });
-    },
-    sureCancel() {
-      // 确定取消
-      cancelOrder(this.cancelParams).then((res) => {
-        if (res.success) {
-          Message.success("取消订单成功");
-          this.getDetail();
-          this.cancelAvail = false;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.getDetail();
-  },
-};
+    } else {
+      traces();
+    }
+  }).catch(() => {
+    traces();
+  });
+}
+
+function traces() {
+  // 物流信息
+  getTraces(route.query.sn).then((res) => {
+    if (res.success) {
+      logistics.value = res.result;
+    }
+  });
+}
+
+function logisticsList() {
+  logisticsModal.value = true;
+  packageTraceList.value = orderPackage.value;
+  // getTracesList(this.order.order.sn).then((res) => {
+  //   if (res.success && res.result != null) {
+  //     this.packageTraceList = res.result;
+  //   }
+  // });
+}
+
+function received(sn) {
+  // 确认收货
+  sureReceived(sn).then((res) => {
+    if (res.success) {
+      Message.success("确认收货成功");
+      getDetail();
+    }
+  });
+}
+
+function goPay(sn) {
+  // 去支付
+  router.push({
+    path: "/payment",
+    query: { orderType: "ORDER", sn },
+  });
+}
+
+function applyAfterSale(sn) {
+  // 申请售后
+  router.push({ name: "ApplyAfterSale", query: { sn: sn } });
+}
+
+function comment(sn, goodsIndex) {
+  // 评价
+  router.push({
+    path: "/home/addEval",
+    query: { sn, index: goodsIndex },
+  });
+}
+
+function complain(sn, goodsIndex) {
+  // 投诉
+  router.push({ name: "Complain", query: { sn, index: goodsIndex } });
+}
+
+function handleCancelOrder(sn) {
+  // 取消订单
+  cancelParams.orderSn = sn;
+  afterSaleReason("CANCEL").then((res) => {
+    if (res.success) {
+      cancelReason.value = res.result;
+      cancelAvail.value = true;
+      cancelParams.reason = cancelReason.value[0].reason;
+    }
+  });
+}
+
+function sureCancel() {
+  // 确定取消
+  cancelOrder(cancelParams).then((res) => {
+    if (res.success) {
+      Message.success("取消订单成功");
+      getDetail();
+      cancelAvail.value = false;
+    }
+  });
+}
+
+onMounted(() => {
+  getDetail();
+});
 </script>
 <style lang="scss" scoped>
 .mb_10 {

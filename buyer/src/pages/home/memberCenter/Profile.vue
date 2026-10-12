@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <UserCenterLayout>
-      <el-form class="profile-form" :model="formItem" :rules="rules" ref="form" label-width="72px" label-position="left">
+      <el-form class="profile-form" :model="formItem" :rules="rules" ref="formRef" label-width="72px" label-position="left">
         <el-form-item label="头像" class="avatar-form-item">
           <div class="avatar-upload">
             <el-avatar v-if="formItem.face" :src="formItem.face" :size="72" />
@@ -42,114 +42,115 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import { editMemberInfo } from '@/api/account.js';
 import { getMemberMsg } from '@/api/login.js';
 import { buyerUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage.js';
 import { User } from '@element-plus/icons-vue';
-export default {
-  components: { User },
-  name: 'Profile',
-  data () {
-    return {
-      rules: { // 验证规则
-        nickName: [{required: true, message: '用户昵称不能为空'}, { max: 16, message: '用户昵称不能超过15个字符' }]
-      },
-      formItem: {}, // 表单数据
-      action: buyerUrl + '/buyer/common/upload/file', // 上传接口
-      accessToken: {} // 验证token
+
+defineOptions({ name: 'Profile' });
+
+const route = useRoute();
+const router = useRouter();
+
+const formRef = ref(null);
+
+const rules = { // 验证规则
+  nickName: [{required: true, message: '用户昵称不能为空'}, { max: 16, message: '用户昵称不能超过15个字符' }]
+};
+const formItem = ref({}); // 表单数据
+const action = buyerUrl + '/buyer/common/upload/file'; // 上传接口
+const accessToken = reactive({}); // 验证token
+
+onMounted(() => {
+  accessToken.accessToken = storage.getItem('accessToken');
+  loadUserInfo();
+});
+
+function loadUserInfo () {
+  const rawUserInfo = storage.getItem('userInfo');
+  if (rawUserInfo) {
+    applyUserInfo(JSON.parse(rawUserInfo));
+    return;
+  }
+  if (!storage.getItem('accessToken')) {
+    redirectToLogin();
+    return;
+  }
+  getMemberMsg().then(res => {
+    if (res.success && res.result) {
+      storage.setItem('userInfo', res.result);
+      applyUserInfo(res.result);
+    } else {
+      redirectToLogin();
     }
-  },
-  mounted () {
-    this.accessToken.accessToken = storage.getItem('accessToken');
-    this.loadUserInfo();
-  },
-  methods: {
-    loadUserInfo () {
-      const rawUserInfo = storage.getItem('userInfo');
-      if (rawUserInfo) {
-        this.applyUserInfo(JSON.parse(rawUserInfo));
-        return;
+  }).catch(() => {
+    redirectToLogin();
+  });
+}
+function applyUserInfo (userInfo) {
+  formItem.value = { ...userInfo };
+  formItem.value.birthday = normalizeBirthday(formItem.value.birthday);
+}
+function redirectToLogin () {
+  router.push({
+    path: '/login',
+    query: {
+      rePath: route.path,
+      query: JSON.stringify(route.query || {}),
+    },
+  });
+}
+function normalizeBirthday (value) {
+  if (!value) return ''
+  if (value instanceof Date) return value
+  if (typeof value === 'number') return new Date(value)
+  if (typeof value === 'string') {
+    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
+    if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+    const d = new Date(value)
+    return isNaN(d.getTime()) ? '' : d
+  }
+  return ''
+}
+function formatBirthday (value) {
+  if (!value) return null
+  if (typeof value === 'string') {
+    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
+    return m ? `${m[1]}-${m[2]}-${m[3]}` : null
+  }
+  const d = value instanceof Date ? value : new Date(value)
+  if (isNaN(d.getTime())) return null
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+function save () { // 保存
+  formRef.value.validate(valid => {
+    if (valid) {
+      let params = {
+        birthday: formatBirthday(formItem.value.birthday),
+        face: formItem.value.face,
+        nickName: formItem.value.nickName,
+        sex: formItem.value.sex
       }
-      if (!storage.getItem('accessToken')) {
-        this.redirectToLogin();
-        return;
-      }
-      getMemberMsg().then(res => {
-        if (res.success && res.result) {
-          storage.setItem('userInfo', res.result);
-          this.applyUserInfo(res.result);
-        } else {
-          this.redirectToLogin();
-        }
-      }).catch(() => {
-        this.redirectToLogin();
-      });
-    },
-    applyUserInfo (userInfo) {
-      this.formItem = { ...userInfo };
-      this.formItem.birthday = this.normalizeBirthday(this.formItem.birthday);
-    },
-    redirectToLogin () {
-      this.$router.push({
-        path: '/login',
-        query: {
-          rePath: this.$route.path,
-          query: JSON.stringify(this.$route.query || {}),
-        },
-      });
-    },
-    normalizeBirthday (value) {
-      if (!value) return ''
-      if (value instanceof Date) return value
-      if (typeof value === 'number') return new Date(value)
-      if (typeof value === 'string') {
-        const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
-        if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
-        const d = new Date(value)
-        return isNaN(d.getTime()) ? '' : d
-      }
-      return ''
-    },
-    formatBirthday (value) {
-      if (!value) return null
-      if (typeof value === 'string') {
-        const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/)
-        return m ? `${m[1]}-${m[2]}-${m[3]}` : null
-      }
-      const d = value instanceof Date ? value : new Date(value)
-      if (isNaN(d.getTime())) return null
-      const yyyy = d.getFullYear()
-      const mm = String(d.getMonth() + 1).padStart(2, '0')
-      const dd = String(d.getDate()).padStart(2, '0')
-      return `${yyyy}-${mm}-${dd}`
-    },
-    save () { // 保存
-      this.$refs.form.validate(valid => {
-        if (valid) {
-          let params = {
-            birthday: this.formatBirthday(this.formItem.birthday),
-            face: this.formItem.face,
-            nickName: this.formItem.nickName,
-            sex: this.formItem.sex
-          }
-          editMemberInfo(params).then(res => {
-            if (res.success) {
-              Message.success('修改个人资料成功')
-              storage.setItem('userInfo', res.result)
-              this.$router.go(0)
-            }
-          })
+      editMemberInfo(params).then(res => {
+        if (res.success) {
+          Message.success('修改个人资料成功')
+          storage.setItem('userInfo', res.result)
+          router.go(0)
         }
       })
-    },
-    handleSuccess (res, file) { // 上传成功
-      this.formItem['face'] = res.result
-    },
-  }
-
+    }
+  })
+}
+function handleSuccess (res, file) { // 上传成功
+  formItem.value['face'] = res.result
 }
 </script>
 

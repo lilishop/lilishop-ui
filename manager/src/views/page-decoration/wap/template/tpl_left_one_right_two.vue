@@ -15,11 +15,10 @@
   </div>
 </template>
 
-<script>
-export default {
-  title: "左一右二",
-  props: ["res"]
-};
+<script setup>
+defineOptions({ title: "左一右二" });
+
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

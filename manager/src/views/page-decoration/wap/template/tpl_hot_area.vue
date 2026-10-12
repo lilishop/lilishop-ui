@@ -6,20 +6,14 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import hotzone from "@/components/hotzone";
 
-export default {
-  components: {
-    hotzone,
-  },
-  props: ["res"],
-  methods: {
-    changeHotzone(info) {
-      this.res.list[0].zoneInfo = info;
-    },
-  },
-};
+const props = defineProps(["res"]);
+
+function changeHotzone(info) {
+  props.res.list[0].zoneInfo = info;
+}
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

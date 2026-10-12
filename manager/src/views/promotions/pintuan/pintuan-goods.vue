@@ -77,75 +77,72 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getPintuanGoodsList, getPintuanDetail } from "@/api/promotion.js";
 import vueQr from "vue-qr";
 
-export default {
-  components: { vueQr },
-  data() {
-    return {
-      loading: false,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      data: [],
-      total: 0,
-      goodsData: [],
-    };
-  },
-  methods: {
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    init() {
-      this.getDataList();
-      this.getPintuanMsg();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      this.searchForm.pintuanId = this.$route.query.id;
-      getPintuanGoodsList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.goodsData = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    getPintuanMsg() {
-      getPintuanDetail(this.$route.query.id).then((res) => {
-        if (res.success) this.data.push(res.result);
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+const route = useRoute();
+
+const loading = ref(false);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const data = ref([]);
+const total = ref(0);
+const goodsData = ref([]);
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+function init() {
+  getDataList();
+  getPintuanMsg();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  searchForm.pintuanId = route.query.id;
+  getPintuanGoodsList(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      goodsData.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function getPintuanMsg() {
+  getPintuanDetail(route.query.id).then((res) => {
+    if (res.success) data.value.push(res.result);
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

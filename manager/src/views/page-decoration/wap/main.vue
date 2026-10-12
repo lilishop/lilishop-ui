@@ -6,37 +6,32 @@
     <component :is="layout[name]"></component>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import layout from "./index";
 import navbar from "./navbar";
-export default {
-  components: {
-    navbar
-  },
 
-  data() {
-    return {
-      layout, // 装修模块
-      name: "index", // 装修的页面
-      pagetype: "INDEX",
-    };
-  },
-  mounted() {
-    if (this.$route.query.pagetype == "ALERT") {
-      this.name = "alertAdvertising";
-    }
-    if (this.$route.query.pagetype == "OPEN_SCREEN_ANIMATION") {
-      this.name = "advertising";
-    }
-    this.pagetype = this.$route.query.pagetype;
-  },
-  methods: {
-    selected(val) {
-      // 顶部栏点击切换
-      this.name = val;
-    }
+const route = useRoute();
+
+// layout 为 import 常量（装修模块），模板中直接使用
+const name = ref("index"); // 装修的页面
+const pagetype = ref("INDEX");
+
+onMounted(() => {
+  if (route.query.pagetype == "ALERT") {
+    name.value = "alertAdvertising";
   }
-};
+  if (route.query.pagetype == "OPEN_SCREEN_ANIMATION") {
+    name.value = "advertising";
+  }
+  pagetype.value = route.query.pagetype;
+});
+
+// 顶部栏点击切换
+function selected(val) {
+  name.value = val;
+}
 </script>
 <style scoped lang="scss">
 .box {

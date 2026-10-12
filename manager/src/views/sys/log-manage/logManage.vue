@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form" @keyup.enter="handleSearch">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="70px" class="search-form" @keyup.enter="handleSearch">
         <el-form-item label="搜索日志" prop="searchKey">
           <el-input v-model="searchForm.searchKey" placeholder="请输入搜索日志内容" clearable style="width: 240px" />
         </el-form-item>
@@ -31,7 +31,7 @@
         v-loading="loading"
         border
         :data="data"
-        ref="table"
+        ref="tableRef"
         style="width: 100%"
       >
         <el-table-column prop="name" label="操作名称" min-width="100" fixed="left" show-overflow-tooltip />
@@ -66,80 +66,79 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { unixToDate } from "@/utils/filters";
 import { getLogListData } from "@/api/index";
 
-export default {
-  name: "log-manage",
-  data() {
-    return {
-      loading: true,
-      selectDate: null,
-      searchForm: {
-        type: 1,
-        searchKey: "",
-        operatorName: "",
-        pageNumber: 1,
-        pageSize: 20,
-        startDate: "",
-        endDate: "",
-        sort: "createTime",
-        order: "desc",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    unixToDate,
-    init() {
-      this.getLogList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getLogList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getLogList();
-    },
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
-      }
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      if (this.selectDate && this.selectDate.length === 2) {
-        this.searchForm.startDate = this.selectDate[0];
-        this.searchForm.endDate = this.selectDate[1];
-      }
-      this.getLogList();
-    },
-    getLogList() {
-      this.loading = true;
-      getLogListData(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res && res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        } else {
-          this.data = [];
-          this.total = 0;
-          ElMessage.error((res && res.message) || "日志查询失败");
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "log-manage" });
+
+const loading = ref(true);
+const selectDate = ref(null);
+const searchForm = reactive({
+  type: 1,
+  searchKey: "",
+  operatorName: "",
+  pageNumber: 1,
+  pageSize: 20,
+  startDate: "",
+  endDate: "",
+  sort: "createTime",
+  order: "desc",
+});
+const data = ref([]);
+const total = ref(0);
+
+// 模板 ref：searchForm 与 reactive 数据同名，改名避免互相覆盖；table 未被 script 使用，仅为保留模板 ref 声明
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+function init() {
+  getLogList();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getLogList();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getLogList();
+}
+function selectDateRange(v) {
+  if (v && v.length === 2) {
+    searchForm.startDate = v[0];
+    searchForm.endDate = v[1];
+  } else {
+    searchForm.startDate = "";
+    searchForm.endDate = "";
+  }
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  if (selectDate.value && selectDate.value.length === 2) {
+    searchForm.startDate = selectDate.value[0];
+    searchForm.endDate = selectDate.value[1];
+  }
+  getLogList();
+}
+function getLogList() {
+  loading.value = true;
+  getLogListData(searchForm).then((res) => {
+    loading.value = false;
+    if (res && res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    } else {
+      data.value = [];
+      total.value = 0;
+      ElMessage.error((res && res.message) || "日志查询失败");
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>

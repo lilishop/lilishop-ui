@@ -18,19 +18,22 @@
     </el-card>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { getFlashDiscountList } from "@/api/promotion.js";
-export default {
-  data() { return { loading: false, rows: [], total: 0, query: { pageNumber: 1, pageSize: 20 } }; },
-  mounted() { this.load(); },
-  methods: {
-    load() {
-      this.loading = true;
-      getFlashDiscountList(this.query).then((res) => {
-        this.loading = false;
-        if (res.success) { this.rows = res.result.records; this.total = res.result.total; }
-      });
-    },
-  },
-};
+
+const loading = ref(false);
+const rows = ref([]);
+const total = ref(0);
+const query = ref({ pageNumber: 1, pageSize: 20 });
+
+onMounted(() => { load(); });
+
+function load() {
+  loading.value = true;
+  getFlashDiscountList(query.value).then((res) => {
+    loading.value = false;
+    if (res.success) { rows.value = res.result.records; total.value = res.result.total; }
+  });
+}
 </script>

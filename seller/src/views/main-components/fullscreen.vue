@@ -9,93 +9,90 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onBeforeUnmount } from "vue";
 import { FullScreen, ScaleToOriginal } from "@element-plus/icons-vue";
 
-export default {
-  name: "fullScreen",
-  components: { FullScreen, ScaleToOriginal },
-  props: {
-    modelValue: {
-      type: Boolean,
-      default: false,
-    },
-    value: {
-      type: Boolean,
-      default: false,
-    },
+defineOptions({ name: "fullScreen" });
+
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false,
   },
-  emits: ["update:modelValue", "input", "on-change"],
-  computed: {
-    showFullScreenBtn() {
-      return window.navigator.userAgent.indexOf("MSIE") < 0;
-    },
+  value: {
+    type: Boolean,
+    default: false,
   },
-  methods: {
-    handleFullscreen() {
-      const main = document.body;
-      if (this.modelValue) {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-          document.mozCancelFullScreen();
-        } else if (document.webkitCancelFullScreen) {
-          document.webkitCancelFullScreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        }
-      } else {
-        if (main.requestFullscreen) {
-          main.requestFullscreen();
-        } else if (main.mozRequestFullScreen) {
-          main.mozRequestFullScreen();
-        } else if (main.webkitRequestFullScreen) {
-          main.webkitRequestFullScreen();
-        } else if (main.msRequestFullscreen) {
-          main.msRequestFullscreen();
-        }
-      }
-    },
-    handleChange() {
-      this.handleFullscreen();
-    },
-    emitFullscreenState(isFullscreen) {
-      this.$emit("update:modelValue", isFullscreen);
-      this.$emit("input", isFullscreen);
-      this.$emit("on-change", isFullscreen);
-    },
-    onFullscreenChange() {
-      const isFullscreen = !!(
-        document.fullscreenElement ||
-        document.mozFullScreenElement ||
-        document.webkitFullscreenElement ||
-        document.fullScreen ||
-        document.mozFullScreen ||
-        document.webkitIsFullScreen
-      );
-      this.emitFullscreenState(isFullscreen);
-    },
-  },
-  created() {
-    const isFullscreen = !!(
-      document.fullscreenElement ||
-      document.mozFullScreenElement ||
-      document.webkitFullscreenElement ||
-      document.fullScreen ||
-      document.mozFullScreen ||
-      document.webkitIsFullScreen
-    );
-    this.emitFullscreenState(isFullscreen);
-    document.addEventListener("fullscreenchange", this.onFullscreenChange);
-    document.addEventListener("mozfullscreenchange", this.onFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", this.onFullscreenChange);
-    document.addEventListener("msfullscreenchange", this.onFullscreenChange);
-  },
-  beforeUnmount() {
-    document.removeEventListener("fullscreenchange", this.onFullscreenChange);
-    document.removeEventListener("mozfullscreenchange", this.onFullscreenChange);
-    document.removeEventListener("webkitfullscreenchange", this.onFullscreenChange);
-    document.removeEventListener("msfullscreenchange", this.onFullscreenChange);
-  },
-};
+});
+const emit = defineEmits(["update:modelValue", "input", "on-change"]);
+
+const showFullScreenBtn = computed(() => {
+  return window.navigator.userAgent.indexOf("MSIE") < 0;
+});
+
+function handleFullscreen() {
+  const main = document.body;
+  if (props.modelValue) {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitCancelFullScreen) {
+      document.webkitCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  } else {
+    if (main.requestFullscreen) {
+      main.requestFullscreen();
+    } else if (main.mozRequestFullScreen) {
+      main.mozRequestFullScreen();
+    } else if (main.webkitRequestFullScreen) {
+      main.webkitRequestFullScreen();
+    } else if (main.msRequestFullscreen) {
+      main.msRequestFullscreen();
+    }
+  }
+}
+function handleChange() {
+  handleFullscreen();
+}
+function emitFullscreenState(isFullscreen) {
+  emit("update:modelValue", isFullscreen);
+  emit("input", isFullscreen);
+  emit("on-change", isFullscreen);
+}
+function onFullscreenChange() {
+  const isFullscreen = !!(
+    document.fullscreenElement ||
+    document.mozFullScreenElement ||
+    document.webkitFullscreenElement ||
+    document.fullScreen ||
+    document.mozFullScreen ||
+    document.webkitIsFullScreen
+  );
+  emitFullscreenState(isFullscreen);
+}
+
+const isFullscreen = !!(
+  document.fullscreenElement ||
+  document.mozFullScreenElement ||
+  document.webkitFullscreenElement ||
+  document.fullScreen ||
+  document.mozFullScreen ||
+  document.webkitIsFullScreen
+);
+emitFullscreenState(isFullscreen);
+document.addEventListener("fullscreenchange", onFullscreenChange);
+document.addEventListener("mozfullscreenchange", onFullscreenChange);
+document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+document.addEventListener("msfullscreenchange", onFullscreenChange);
+
+onBeforeUnmount(() => {
+  document.removeEventListener("fullscreenchange", onFullscreenChange);
+  document.removeEventListener("mozfullscreenchange", onFullscreenChange);
+  document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
+  document.removeEventListener("msfullscreenchange", onFullscreenChange);
+});
 </script>

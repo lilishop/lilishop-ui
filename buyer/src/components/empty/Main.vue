@@ -11,20 +11,19 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Main',
-  props: {
-    _Title: { // 描述内容
-      type: null,
-      default: '暂无更多'
-    },
-    _Size: { // 图片大小
-      type: Number,
-      default: 150
-    }
+<script setup>
+defineOptions({ name: 'Main' })
+
+defineProps({
+  _Title: { // 描述内容
+    type: null,
+    default: '暂无更多'
+  },
+  _Size: { // 图片大小
+    type: Number,
+    default: 150
   }
-};
+})
 </script>
 
 <style scoped lang="scss">

@@ -76,75 +76,70 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
+import { formatLinkType } from "@/utils/filters";
 
-export default {
-  name: "onlyGoodsList",
-  props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  data() {
-    return {
-      flag:false,
-      tabIndex:0,
-      current: 0,
-      showModal: false,
-      selected: {}, // 已选数据
-      picModelFlag: false,
-    };
-  },
-  mounted(){
+defineOptions({ name: "onlyGoodsList" });
 
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
   },
-  methods: {
-    // 删除商品
-    delGoods(val,i) {
-      this.data.options.list.splice(i, 1);
-    },
-    // 添加当前选项卡中的商品
-    addCurrentGoods() {
-      this.$refs.liliDialog.open("goods");
-    },
-    // 编辑模块
-    handleSelectModel(item) {
-      console.log(item);
-      this.selected = item;
-      this.showModal = true;
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      if (val.length) {
-        val.forEach((item) => {
-          const pushGoodsDetail = {
-            img: item.thumbnail,
-            price: item.price,
-            title: item.goodsName,
-            desc: "",
-            url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
-          };
-          this.data.options.list.push(pushGoodsDetail);
-        });
-      }
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      this.selected[this.current].url =
-        this.$filters.formatLinkType(val);
-      this.selected[this.current].type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
+});
 
-      console.log(this.selected[this.current]);
-    },
-    handleSelectLink(index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-      this.current = index;
-    },
-  },
-};
+const flag = ref(false);
+const tabIndex = ref(0);
+const current = ref(0);
+const showModal = ref(false);
+const selected = ref({}); // 已选数据
+const picModelFlag = ref(false);
+
+const liliDialog = ref(null);
+
+// 删除商品
+function delGoods(val, i) {
+  props.data.options.list.splice(i, 1);
+}
+// 添加当前选项卡中的商品
+function addCurrentGoods() {
+  liliDialog.value.open("goods");
+}
+// 编辑模块
+function handleSelectModel(item) {
+  console.log(item);
+  selected.value = item;
+  showModal.value = true;
+}
+// 选择商品回调
+function selectedGoodsData(val) {
+  if (val.length) {
+    val.forEach((item) => {
+      const pushGoodsDetail = {
+        img: item.thumbnail,
+        price: item.price,
+        title: item.goodsName,
+        desc: "",
+        url: `/goodsDetail?skuId=${item.id}&goodsId=${item.goodsId}`,
+      };
+      props.data.options.list.push(pushGoodsDetail);
+    });
+  }
+}
+// 选择链接回调
+function selectedLink(val) {
+  selected.value[current.value].url = formatLinkType(val);
+  selected.value[current.value].type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+
+  console.log(selected.value[current.value]);
+}
+function handleSelectLink(index) {
+  // 调起选择链接弹窗
+  liliDialog.value.open("link");
+  current.value = index;
+}
 </script>
 
 <style scoped lang="scss">

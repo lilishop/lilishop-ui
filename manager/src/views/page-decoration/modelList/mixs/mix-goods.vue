@@ -28,16 +28,17 @@
   </div>
 </template>
 
-<script>
-export default {
+<script setup>
+defineOptions({
   name: "mix-goods",
-  props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
+});
+
+defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
   },
-};
+});
 </script>
 
 <style scoped lang="scss">

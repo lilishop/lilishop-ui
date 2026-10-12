@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form ref="form" :model="form" label-width="120px" :rules="formRule">
+      <el-form ref="formRef" :model="form" label-width="120px" :rules="formRule">
         <div class="base-info-item">
           <h4>积分商品信息</h4>
           <div class="form-item-view">
@@ -82,107 +82,117 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import {
   updatePointsGoods,
   getPointsGoodsById,
   getPointsGoodsCategoryList,
 } from "@/api/promotion";
+import { Message } from "@/utils/message";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "editPointsGoods",
-  data() {
-    return {
-      pointsGoodsCategoryId: "",
-      pointsGoodsCategoryName: "",
-      form: {
-        promotionName: "",
-        applyEndTime: "",
-        startTime: "",
-        seckillPeriod: [],
-        seckillRule: "",
-        goodsSku: {},
-        promotionStatus: "NEW",
-        rangeTime: [],
-      },
-      categoryList: [],
-      id: this.$route.query.id,
-      submitLoading: false,
-      formRule: {
-        settlementPrice: [{ required: true, message: "请填写结算价格" }],
-        pointsGoodsCategoryId: [{ required: true, message: "请选择积分商品分类" }],
-        points: [{ required: true, message: "请填写兑换积分" }],
-        activeStock: [{ required: true, message: "请填写库存" }],
-      },
-    };
-  },
-  async mounted() {
-    await this.getCategory();
-    if (this.id) {
-      this.getData();
-    }
-  },
-  methods: {
-    disabledDate(date) {
-      return date && date.getTime() < Date.now() - 86400000;
-    },
-    changeCategory(id) {
-      const item = this.categoryList.find((c) => c.id === id);
-      this.pointsGoodsCategoryId = id;
-      this.pointsGoodsCategoryName = item ? item.name : "";
-    },
-    closeCurrentPage() {
-      this.$store.commit("removeTag", "edit-points-goods");
-      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
-      this.$router.go(-1);
-    },
-    getData() {
-      getPointsGoodsById(this.id).then((res) => {
-        if (res.success) {
-          const data = res.result;
-          this.form = data;
-          data.rangeTime = [];
-          if (data.startTime && data.endTime) {
-            data.rangeTime = [data.startTime, data.endTime];
-          }
-          if (data.pointsGoodsCategoryId) {
-            this.changeCategory(data.pointsGoodsCategoryId);
-          }
-        }
-      });
-    },
-    async getCategory() {
-      const res = await getPointsGoodsCategoryList();
-      this.categoryList = res.result.records;
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          if (!this.form.rangeTime || this.form.rangeTime.length !== 2) {
-            this.$Message.error("请选择活动时间");
-            return;
-          }
-          this.form.startTime = this.form.rangeTime[0];
-          this.form.endTime = this.form.rangeTime[1];
-          this.submitLoading = true;
-          const params = {
-            ...this.form,
-            pointsGoodsCategoryId: this.pointsGoodsCategoryId || this.form.pointsGoodsCategoryId,
-            pointsGoodsCategoryName:
-              this.pointsGoodsCategoryName || this.form.pointsGoodsCategoryName,
-          };
-          updatePointsGoods(params).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("积分商品修改成功");
-              this.closeCurrentPage();
-            }
-          });
-        }
-      });
-    },
-  },
+defineOptions({ name: "editPointsGoods" });
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const pointsGoodsCategoryId = ref("");
+const pointsGoodsCategoryName = ref("");
+const form = ref({
+  promotionName: "",
+  applyEndTime: "",
+  startTime: "",
+  seckillPeriod: [],
+  seckillRule: "",
+  goodsSku: {},
+  promotionStatus: "NEW",
+  rangeTime: [],
+});
+const categoryList = ref([]);
+const id = route.query.id;
+const submitLoading = ref(false);
+const formRule = {
+  settlementPrice: [{ required: true, message: "请填写结算价格" }],
+  pointsGoodsCategoryId: [{ required: true, message: "请选择积分商品分类" }],
+  points: [{ required: true, message: "请填写兑换积分" }],
+  activeStock: [{ required: true, message: "请填写库存" }],
 };
+
+const formRef = ref(null);
+
+onMounted(async () => {
+  await getCategory();
+  if (id) {
+    getData();
+  }
+});
+
+function disabledDate(date) {
+  return date && date.getTime() < Date.now() - 86400000;
+}
+
+function changeCategory(id) {
+  const item = categoryList.value.find((c) => c.id === id);
+  pointsGoodsCategoryId.value = id;
+  pointsGoodsCategoryName.value = item ? item.name : "";
+}
+
+function closeCurrentPage() {
+  appStore.removeTag("edit-points-goods");
+  localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
+  router.go(-1);
+}
+
+function getData() {
+  getPointsGoodsById(id).then((res) => {
+    if (res.success) {
+      const data = res.result;
+      form.value = data;
+      data.rangeTime = [];
+      if (data.startTime && data.endTime) {
+        data.rangeTime = [data.startTime, data.endTime];
+      }
+      if (data.pointsGoodsCategoryId) {
+        changeCategory(data.pointsGoodsCategoryId);
+      }
+    }
+  });
+}
+
+async function getCategory() {
+  const res = await getPointsGoodsCategoryList();
+  categoryList.value = res.result.records;
+}
+
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      if (!form.value.rangeTime || form.value.rangeTime.length !== 2) {
+        Message.error("请选择活动时间");
+        return;
+      }
+      form.value.startTime = form.value.rangeTime[0];
+      form.value.endTime = form.value.rangeTime[1];
+      submitLoading.value = true;
+      const params = {
+        ...form.value,
+        pointsGoodsCategoryId: pointsGoodsCategoryId.value || form.value.pointsGoodsCategoryId,
+        pointsGoodsCategoryName:
+          pointsGoodsCategoryName.value || form.value.pointsGoodsCategoryName,
+      };
+      updatePointsGoods(params).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("积分商品修改成功");
+          closeCurrentPage();
+        }
+      });
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

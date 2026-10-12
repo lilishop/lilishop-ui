@@ -84,165 +84,165 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
 import * as API_Goods from "@/api/goods";
 import { goodsTypeLabel, goodsTypeTagType } from "@/constants/goodsType";
-export default {
-  props: {
-    selectedWay: {
-      type: Array,
-      default: () => [],
-    },
-  },
-  data() {
-    return {
-      type: "multiple",
-      selectedList: [],
-      skuList: [],
-      total: 0,
-      goodsParams: {
-        pageNumber: 1,
-        pageSize: 15,
-        order: "desc",
-        goodsName: "",
-        sn: "",
-        categoryPath: "",
-        marketEnable: "UPPER",
-        authFlag: "PASS",
-        sort: "createTime",
-      },
-      category: [],
-      goodsData: [],
-      empty: false,
-      loading: false,
-    };
-  },
-  watch: {
-    category(val) {
-      this.goodsParams.categoryPath = val && val.length ? val[2] : "";
-    },
-    selectedWay: {
-      handler(val) {
-        this.selectedList = Array.isArray(val) ? val.slice() : [];
-      },
-      deep: true,
-      immediate: true,
-    },
-    "goodsParams.categoryPath": {
-      handler() {
-        this.goodsData = [];
-        this.goodsParams.pageNumber = 1;
-        this.getQueryGoodsList();
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    goodsTypeLabel,
-    goodsTypeTagType,
-    onSearchGoods() {
-      this.goodsData = [];
-      this.goodsParams.pageNumber = 1;
-      this.getQueryGoodsList();
-    },
-    changePageSize(v) {
-      this.goodsParams.pageNumber = v;
-      this.getQueryGoodsList();
-    },
-    getQueryGoodsList() {
-      this.loading = true;
-      API_Goods.getGoodsSkuData(this.goodsParams)
-        .then((res) => {
-          this.initGoods(res);
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    initGoods(res) {
-      const records = res?.result?.records || [];
-      if (records.length) {
-        records.forEach((item) => {
-          item.selected = false;
-          item.___type = "goods";
-          this.selectedList.forEach((e) => {
-            if (e.id && e.id === item.id) {
-              item.selected = true;
-            }
-          });
-        });
-        this.total = res.result.total || 0;
-        this.goodsData = records;
-        this.empty = false;
-      } else {
-        this.goodsData = [];
-        this.empty = true;
-      }
-    },
-    emitSelected(list) {
-      this.selectedList = list;
-      this.$emit("selected", this.selectedList);
-    },
-    init() {
-      API_Goods.getGoodsSkuData(this.goodsParams).then((res) => {
-        this.initGoods(res);
-      });
-      API_Goods.getCategoryTree({ deleteFlag: false }).then((res) => {
-        if (res.success) {
-          this.deepGroup(res.result);
-        }
-      });
-    },
-    deepGroup(val) {
-      val.forEach((item) => {
-        let childWay = [];
-        if (item.children) {
-          item.children.forEach((child) => {
-            if (child.children) {
-              child.children.forEach((grandson, index, arr) => {
-                arr[index] = {
-                  value: grandson.id,
-                  label: grandson.name,
-                };
-              });
-            }
-            childWay.push({
-              value: child.id,
-              label: child.name,
-              children: child.children,
-            });
-          });
-        }
-        this.skuList.push({
-          value: item.id,
-          label: item.name,
-          children: childWay,
-        });
-      });
-    },
-    checkedGoods(val) {
-      if (this.type !== "multiple") {
-        this.goodsData.forEach((item) => {
-          item.selected = false;
-        });
-        val.selected = true;
-        this.emitSelected([val]);
-        return;
-      }
 
-      if (!val.selected) {
-        val.selected = true;
-        this.emitSelected([...this.selectedList, val]);
-      } else {
-        val.selected = false;
-        this.emitSelected(this.selectedList.filter((item) => item.id !== val.id));
-      }
-    },
+const props = defineProps({
+  selectedWay: {
+    type: Array,
+    default: () => [],
   },
-};
+});
+const emit = defineEmits(["selected"]);
+
+const type = ref("multiple");
+const selectedList = ref([]);
+const skuList = ref([]);
+const total = ref(0);
+const goodsParams = reactive({
+  pageNumber: 1,
+  pageSize: 15,
+  order: "desc",
+  goodsName: "",
+  sn: "",
+  categoryPath: "",
+  marketEnable: "UPPER",
+  authFlag: "PASS",
+  sort: "createTime",
+});
+const category = ref([]);
+const goodsData = ref([]);
+const empty = ref(false);
+const loading = ref(false);
+
+watch(category, (val) => {
+  goodsParams.categoryPath = val && val.length ? val[2] : "";
+});
+watch(
+  () => props.selectedWay,
+  (val) => {
+    selectedList.value = Array.isArray(val) ? val.slice() : [];
+  },
+  { deep: true, immediate: true }
+);
+watch(
+  () => goodsParams.categoryPath,
+  () => {
+    goodsData.value = [];
+    goodsParams.pageNumber = 1;
+    getQueryGoodsList();
+  },
+  { deep: true }
+);
+
+onMounted(() => {
+  init();
+});
+
+function onSearchGoods() {
+  goodsData.value = [];
+  goodsParams.pageNumber = 1;
+  getQueryGoodsList();
+}
+function changePageSize(v) {
+  goodsParams.pageNumber = v;
+  getQueryGoodsList();
+}
+function getQueryGoodsList() {
+  loading.value = true;
+  API_Goods.getGoodsSkuData(goodsParams)
+    .then((res) => {
+      initGoods(res);
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function initGoods(res) {
+  const records = res?.result?.records || [];
+  if (records.length) {
+    records.forEach((item) => {
+      item.selected = false;
+      item.___type = "goods";
+      selectedList.value.forEach((e) => {
+        if (e.id && e.id === item.id) {
+          item.selected = true;
+        }
+      });
+    });
+    total.value = res.result.total || 0;
+    goodsData.value = records;
+    empty.value = false;
+  } else {
+    goodsData.value = [];
+    empty.value = true;
+  }
+}
+function emitSelected(list) {
+  selectedList.value = list;
+  emit("selected", selectedList.value);
+}
+function init() {
+  API_Goods.getGoodsSkuData(goodsParams).then((res) => {
+    initGoods(res);
+  });
+  API_Goods.getCategoryTree({ deleteFlag: false }).then((res) => {
+    if (res.success) {
+      deepGroup(res.result);
+    }
+  });
+}
+function deepGroup(val) {
+  val.forEach((item) => {
+    let childWay = [];
+    if (item.children) {
+      item.children.forEach((child) => {
+        if (child.children) {
+          child.children.forEach((grandson, index, arr) => {
+            arr[index] = {
+              value: grandson.id,
+              label: grandson.name,
+            };
+          });
+        }
+        childWay.push({
+          value: child.id,
+          label: child.name,
+          children: child.children,
+        });
+      });
+    }
+    skuList.value.push({
+      value: item.id,
+      label: item.name,
+      children: childWay,
+    });
+  });
+}
+function checkedGoods(val) {
+  if (type.value !== "multiple") {
+    goodsData.value.forEach((item) => {
+      item.selected = false;
+    });
+    val.selected = true;
+    emitSelected([val]);
+    return;
+  }
+
+  if (!val.selected) {
+    val.selected = true;
+    emitSelected([...selectedList.value, val]);
+  } else {
+    val.selected = false;
+    emitSelected(selectedList.value.filter((item) => item.id !== val.id));
+  }
+}
+
+// 父组件 lili-dialog/index.vue 通过 $refs.goodsDialog.type = "single" 切换单选；
+// expose 的 ref 外部读写等价于原 data 字段
+defineExpose({ type });
 </script>
 <style scoped lang="scss">
 @import "./style.scss";

@@ -19,43 +19,36 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { parseTime } from '@/utils/functions'
 
-export default {
-  components: {},
-  props: {
-    avatar: {
-      type: String,
-      default:
-        'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-    },
-    talk_type: {
-      type: Number,
-      default: 1,
-    },
-    nickname: {
-      type: String,
-      default: '',
-    },
-    content: {
-      type: String,
-      default: '',
-    },
-    datetime: {
-      type: String,
-      default: '',
-    },
+defineProps({
+  avatar: {
+    type: String,
+    default:
+      'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
   },
-  data() {
-    return {}
+  talk_type: {
+    type: Number,
+    default: 1,
   },
-  methods: {
-    formatTime(datetime) {
-      datetime = datetime || new Date()
-      return parseTime(datetime, '{m}/{d} {h}:{i} 分')
-    },
+  nickname: {
+    type: String,
+    default: '',
   },
+  content: {
+    type: String,
+    default: '',
+  },
+  datetime: {
+    type: String,
+    default: '',
+  },
+})
+
+const formatTime = (datetime) => {
+  datetime = datetime || new Date()
+  return parseTime(datetime, '{m}/{d} {h}:{i} 分')
 }
 </script>
 <style lang="less" scoped>

@@ -130,7 +130,7 @@
 
         <el-tab-pane label="店员列表" name="clerk">
           <el-form
-            ref="clerkSearchForm"
+            ref="clerkSearchFormRef"
             :model="clerkSearchForm"
             inline
             label-width="70px"
@@ -198,7 +198,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="订单列表" name="order" style="min-height: 200px">
-          <el-form ref="searchForm" :model="orderSearchForm" inline label-width="70px" class="search-form">
+          <el-form ref="searchFormRef" :model="orderSearchForm" inline label-width="70px" class="search-form">
             <el-form-item label="订单号" prop="orderSn">
               <el-input
                 v-model="orderSearchForm.orderSn"
@@ -326,7 +326,7 @@
 
         <el-tab-pane label="售后列表" name="afterSale">
           <el-form
-            ref="afterSaleSearchForm"
+            ref="afterSaleSearchFormRef"
             :model="afterSaleSearchForm"
             inline
             label-width="70px"
@@ -478,323 +478,324 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { getCategoryTree } from "@/api/goods";
 import * as API_Store from "@/api/shops.js";
 import * as API_Order from "@/api/order.js";
+import { Message } from "@/utils/message";
 
 const isValid = (v) => v !== null && v !== undefined && v !== "" && v !== "null";
 
-export default {
-  name: "member",
-  components: {
-    ossManage,
-  },
-  data() {
-    return {
-      id: "",
-      activeTab: "basic",
-      categories: [],
-      loading: true,
-      storeInfo: {},
-      storeEnabled: false,
-      storeStatusChanging: false,
-      checkAllGroup: [],
-      orderSelectDate: null,
-      afterSaleSelectDate: null,
-      orderData: [],
-      orderTotal: 0,
-      orderSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        payStatus: "",
-        orderSn: "",
-        orderType: "",
-      },
-      afterSaleData: [],
-      afterSaleTotal: 0,
-      afterSaleSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      clerkData: [],
-      clerkTotal: 0,
-      clerkLoading: false,
-      clerkSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        clerkName: "",
-        mobile: "",
-      },
-    };
-  },
-  computed: {
-    displayCategories() {
-      if (!this.categories?.length || !this.checkAllGroup?.length) {
-        return [];
-      }
-      const selected = new Set(this.checkAllGroup.map(String));
-      return this.categories.filter(
-        (item) => item?.id != null && selected.has(String(item.id))
-      );
-    },
-    storeAddress() {
-      const path = isValid(this.storeInfo.storeAddressPath) ? this.storeInfo.storeAddressPath : "";
-      const detail = isValid(this.storeInfo.storeAddressDetail) ? this.storeInfo.storeAddressDetail : "";
-      return path || detail ? `${path} ${detail}`.trim() : "暂未完善";
-    },
-    returnAddress() {
-      const s = this.storeInfo;
-      const consignee = [s.salesConsigneeName, s.salesConsigneeMobile].filter(isValid).join(" ");
-      const addr = [s.salesConsigneeAddressPath, s.salesConsigneeDetail].filter(isValid).join(" ");
-      const text = `${consignee} ${addr}`.trim();
-      return text || "暂未完善";
-    },
-    companyAddress() {
-      const s = this.storeInfo;
-      if (!isValid(s.companyAddressPath) && !isValid(s.companyAddress)) {
-        return "暂未完善";
-      }
-      return `${isValid(s.companyAddressPath) ? s.companyAddressPath : ""} ${
-        isValid(s.companyAddress) ? s.companyAddress : ""
-      }`.trim();
-    },
-    settlementCycles() {
-      if (!this.storeInfo.settlementCycle) {
-        return [];
-      }
-      return this.storeInfo.settlementCycle.split(",").filter(Boolean);
-    },
-  },
-  methods: {
-    blankFilter(v) {
-      return isValid(v) ? v : "-";
-    },
-    orderTypeText(v) {
-      const map = {
-        NORMAL: "普通订单",
-        VIRTUAL: "虚拟订单",
-        E_COUPON: "电子卡券订单",
-        APPOINTMENT: "预约服务订单",
-      };
-      return map[v] || v || "";
-    },
-    clientTypeText(v) {
-      const map = {
-        H5: "移动端",
-        PC: "PC端",
-        WECHAT_MP: "小程序端",
-        APP: "移动应用端",
-      };
-      return map[v] || v || "";
-    },
-    orderStatusText(v) {
-      const map = {
-        UNPAID: "未付款",
-        PAID: "已付款",
-        UNDELIVERED: "待发货",
-        DELIVERED: "已发货",
-        COMPLETED: "已完成",
-        TAKE: "待核验",
-        CANCELLED: "已关闭",
-      };
-      return map[v] || v || "";
-    },
-    payStatusText(v) {
-      const map = {
-        UNPAID: "未付款",
-        PAID: "已付款",
-      };
-      return map[v] || v || "";
-    },
-    groupAfterSaleStatusText(v) {
-      const map = {
-        NEW: "未申请",
-        NOT_APPLIED: "未申请",
-        ALREADY_APPLIED: "已申请",
-        EXPIRED: "已失效",
-      };
-      return map[v] || v || "";
-    },
-    groupComplainStatusText(v) {
-      const map = {
-        NEW: "未申请",
-        NO_APPLY: "未申请",
-        APPLYING: "申请中",
-        COMPLETE: "已完成",
-        EXPIRED: "已失效",
-        CANCEL: "取消投诉",
-      };
-      return map[v] || v || "";
-    },
-    serviceTypeText(type) {
-      const map = {
-        RETURN_MONEY: "退款",
-        RETURN_GOODS: "退货",
-        EXCHANGE_GOODS: "换货",
-      };
-      return map[type] || type || "";
-    },
-    serviceStatusText(status) {
-      const map = {
-        APPLY: "申请中",
-        PASS: "通过售后",
-        REFUSE: "拒绝售后",
-        BUYER_RETURN: "买家退货，待卖家收货",
-        SELLER_RE_DELIVERY: "商家换货/补发",
-        SELLER_CONFIRM: "卖家确认收货",
-        SELLER_TERMINATION: "卖家终止售后",
-        BUYER_CONFIRM: "买家确认收货",
-        BUYER_CANCEL: "买家取消售后",
-        COMPLETE: "完成售后",
-        WAIT_REFUND: "待平台退款",
-      };
-      return map[status] || status || "";
-    },
-    init() {
-      this.getStoreInfo();
-      this.getCategories();
-    },
-    storeInfoChange(v) {
-      if (v == "order") {
-        this.getOrderData();
-      }
-      if (v == "afterSale") {
-        this.getAfterSaleData();
-      }
-      if (v == "clerk") {
-        this.getClerkData();
-      }
-    },
-    getStoreInfo() {
-      API_Store.getShopDetailData(this.id).then((res) => {
-        this.storeInfo = res.result;
-        this.storeEnabled = this.storeInfo.storeDisable === "OPEN";
-        if (this.storeInfo.goodsManagementCategory != null) {
-          this.checkAllGroup = this.storeInfo.goodsManagementCategory
-            .split(",")
-            .filter(Boolean);
-        }
-        this.storeInfo.legalPhoto = (this.storeInfo.legalPhoto || "")
-          .split(",")
-          .filter(Boolean);
-      });
-    },
-    shopStatusChange(v) {
-      this.storeStatusChanging = true;
-      const request = v ? API_Store.enableBrand(this.id) : API_Store.disableShop(this.id);
-      request
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("操作成功");
-            this.getStoreInfo();
-          } else {
-            this.storeEnabled = !v;
-          }
-        })
-        .catch(() => {
-          this.storeEnabled = !v;
-        })
-        .finally(() => {
-          this.storeStatusChanging = false;
-        });
-    },
-    getOrderData() {
-      this.loading = true;
-      this.orderSearchForm.storeId = this.id;
-      API_Order.getOrderList(this.orderSearchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.orderData = res.result.records;
-          this.orderTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    getAfterSaleData() {
-      this.loading = true;
-      this.afterSaleSearchForm.storeId = this.id;
-      API_Order.getAfterSaleOrderPage(this.afterSaleSearchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.afterSaleData = res.result.records;
-          this.afterSaleTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    getCategories() {
-      getCategoryTree().then((res) => {
-        if (res.success) {
-          this.categories = res.result;
-        }
-      });
-    },
-    afterSaleChangePage(v) {
-      this.afterSaleSearchForm.pageNumber = v;
-      this.getAfterSaleData();
-    },
-    afterSaleChangePageSize(v) {
-      this.afterSaleSearchForm.pageSize = v;
-      this.afterSaleSearchForm.pageNumber = 1;
-      this.getAfterSaleData();
-    },
-    getClerkData() {
-      this.clerkLoading = true;
-      API_Store.getShopClerkPage(this.id, this.clerkSearchForm)
-        .then((res) => {
-          if (res.success) {
-            this.clerkData = res.result.records;
-            this.clerkTotal = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.clerkLoading = false;
-        });
-    },
-    clerkChangePage(v) {
-      this.clerkSearchForm.pageNumber = v;
-      this.getClerkData();
-    },
-    clerkChangePageSize(v) {
-      this.clerkSearchForm.pageSize = v;
-      this.clerkSearchForm.pageNumber = 1;
-      this.getClerkData();
-    },
-    orderChangePage(v) {
-      this.orderSearchForm.pageNumber = v;
-      this.getOrderData();
-    },
-    orderChangePageSize(v) {
-      this.orderSearchForm.pageSize = v;
-      this.orderSearchForm.pageNumber = 1;
-      this.getOrderData();
-    },
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.orderSearchForm.startDate = v[0];
-        this.orderSearchForm.endDate = v[1];
+defineOptions({ name: "member" });
+
+const route = useRoute();
+
+const id = ref("");
+const activeTab = ref("basic");
+const categories = ref([]);
+const loading = ref(true);
+const storeInfo = ref({});
+const storeEnabled = ref(false);
+const storeStatusChanging = ref(false);
+const checkAllGroup = ref([]);
+const orderSelectDate = ref(null);
+const afterSaleSelectDate = ref(null);
+const orderData = ref([]);
+const orderTotal = ref(0);
+const orderSearchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  payStatus: "",
+  orderSn: "",
+  orderType: "",
+});
+const afterSaleData = ref([]);
+const afterSaleTotal = ref(0);
+const afterSaleSearchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const clerkData = ref([]);
+const clerkTotal = ref(0);
+const clerkLoading = ref(false);
+const clerkSearchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  clerkName: "",
+  mobile: "",
+});
+
+// 模板 ref（原 Options API 中未在 script 使用，保留）
+const clerkSearchFormRef = ref(null);
+const searchFormRef = ref(null);
+const afterSaleSearchFormRef = ref(null);
+
+const displayCategories = computed(() => {
+  if (!categories.value?.length || !checkAllGroup.value?.length) {
+    return [];
+  }
+  const selected = new Set(checkAllGroup.value.map(String));
+  return categories.value.filter(
+    (item) => item?.id != null && selected.has(String(item.id))
+  );
+});
+const storeAddress = computed(() => {
+  const path = isValid(storeInfo.value.storeAddressPath) ? storeInfo.value.storeAddressPath : "";
+  const detail = isValid(storeInfo.value.storeAddressDetail) ? storeInfo.value.storeAddressDetail : "";
+  return path || detail ? `${path} ${detail}`.trim() : "暂未完善";
+});
+const returnAddress = computed(() => {
+  const s = storeInfo.value;
+  const consignee = [s.salesConsigneeName, s.salesConsigneeMobile].filter(isValid).join(" ");
+  const addr = [s.salesConsigneeAddressPath, s.salesConsigneeDetail].filter(isValid).join(" ");
+  const text = `${consignee} ${addr}`.trim();
+  return text || "暂未完善";
+});
+const companyAddress = computed(() => {
+  const s = storeInfo.value;
+  if (!isValid(s.companyAddressPath) && !isValid(s.companyAddress)) {
+    return "暂未完善";
+  }
+  return `${isValid(s.companyAddressPath) ? s.companyAddressPath : ""} ${
+    isValid(s.companyAddress) ? s.companyAddress : ""
+  }`.trim();
+});
+const settlementCycles = computed(() => {
+  if (!storeInfo.value.settlementCycle) {
+    return [];
+  }
+  return storeInfo.value.settlementCycle.split(",").filter(Boolean);
+});
+
+function blankFilter(v) {
+  return isValid(v) ? v : "-";
+}
+function orderTypeText(v) {
+  const map = {
+    NORMAL: "普通订单",
+    VIRTUAL: "虚拟订单",
+    E_COUPON: "电子卡券订单",
+    APPOINTMENT: "预约服务订单",
+  };
+  return map[v] || v || "";
+}
+function clientTypeText(v) {
+  const map = {
+    H5: "移动端",
+    PC: "PC端",
+    WECHAT_MP: "小程序端",
+    APP: "移动应用端",
+  };
+  return map[v] || v || "";
+}
+function orderStatusText(v) {
+  const map = {
+    UNPAID: "未付款",
+    PAID: "已付款",
+    UNDELIVERED: "待发货",
+    DELIVERED: "已发货",
+    COMPLETED: "已完成",
+    TAKE: "待核验",
+    CANCELLED: "已关闭",
+  };
+  return map[v] || v || "";
+}
+function payStatusText(v) {
+  const map = {
+    UNPAID: "未付款",
+    PAID: "已付款",
+  };
+  return map[v] || v || "";
+}
+function groupAfterSaleStatusText(v) {
+  const map = {
+    NEW: "未申请",
+    NOT_APPLIED: "未申请",
+    ALREADY_APPLIED: "已申请",
+    EXPIRED: "已失效",
+  };
+  return map[v] || v || "";
+}
+function groupComplainStatusText(v) {
+  const map = {
+    NEW: "未申请",
+    NO_APPLY: "未申请",
+    APPLYING: "申请中",
+    COMPLETE: "已完成",
+    EXPIRED: "已失效",
+    CANCEL: "取消投诉",
+  };
+  return map[v] || v || "";
+}
+function serviceTypeText(type) {
+  const map = {
+    RETURN_MONEY: "退款",
+    RETURN_GOODS: "退货",
+    EXCHANGE_GOODS: "换货",
+  };
+  return map[type] || type || "";
+}
+function serviceStatusText(status) {
+  const map = {
+    APPLY: "申请中",
+    PASS: "通过售后",
+    REFUSE: "拒绝售后",
+    BUYER_RETURN: "买家退货，待卖家收货",
+    SELLER_RE_DELIVERY: "商家换货/补发",
+    SELLER_CONFIRM: "卖家确认收货",
+    SELLER_TERMINATION: "卖家终止售后",
+    BUYER_CONFIRM: "买家确认收货",
+    BUYER_CANCEL: "买家取消售后",
+    COMPLETE: "完成售后",
+    WAIT_REFUND: "待平台退款",
+  };
+  return map[status] || status || "";
+}
+function init() {
+  getStoreInfo();
+  getCategories();
+}
+function storeInfoChange(v) {
+  if (v == "order") {
+    getOrderData();
+  }
+  if (v == "afterSale") {
+    getAfterSaleData();
+  }
+  if (v == "clerk") {
+    getClerkData();
+  }
+}
+function getStoreInfo() {
+  API_Store.getShopDetailData(id.value).then((res) => {
+    storeInfo.value = res.result;
+    storeEnabled.value = storeInfo.value.storeDisable === "OPEN";
+    if (storeInfo.value.goodsManagementCategory != null) {
+      checkAllGroup.value = storeInfo.value.goodsManagementCategory
+        .split(",")
+        .filter(Boolean);
+    }
+    storeInfo.value.legalPhoto = (storeInfo.value.legalPhoto || "")
+      .split(",")
+      .filter(Boolean);
+  });
+}
+function shopStatusChange(v) {
+  storeStatusChanging.value = true;
+  const request = v ? API_Store.enableBrand(id.value) : API_Store.disableShop(id.value);
+  request
+    .then((res) => {
+      if (res.success) {
+        Message.success("操作成功");
+        getStoreInfo();
       } else {
-        this.orderSearchForm.startDate = "";
-        this.orderSearchForm.endDate = "";
+        storeEnabled.value = !v;
       }
-    },
-    selectAfterSaleDateRange(v) {
-      if (v && v.length === 2) {
-        this.afterSaleSearchForm.startDate = v[0];
-        this.afterSaleSearchForm.endDate = v[1];
-      } else {
-        this.afterSaleSearchForm.startDate = "";
-        this.afterSaleSearchForm.endDate = "";
+    })
+    .catch(() => {
+      storeEnabled.value = !v;
+    })
+    .finally(() => {
+      storeStatusChanging.value = false;
+    });
+}
+function getOrderData() {
+  loading.value = true;
+  orderSearchForm.storeId = id.value;
+  API_Order.getOrderList(orderSearchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      orderData.value = res.result.records;
+      orderTotal.value = res.result.total;
+    }
+  });
+  loading.value = false;
+}
+function getAfterSaleData() {
+  loading.value = true;
+  afterSaleSearchForm.storeId = id.value;
+  API_Order.getAfterSaleOrderPage(afterSaleSearchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      afterSaleData.value = res.result.records;
+      afterSaleTotal.value = res.result.total;
+    }
+  });
+  loading.value = false;
+}
+function getCategories() {
+  getCategoryTree().then((res) => {
+    if (res.success) {
+      categories.value = res.result;
+    }
+  });
+}
+function afterSaleChangePage(v) {
+  afterSaleSearchForm.pageNumber = v;
+  getAfterSaleData();
+}
+function afterSaleChangePageSize(v) {
+  afterSaleSearchForm.pageSize = v;
+  afterSaleSearchForm.pageNumber = 1;
+  getAfterSaleData();
+}
+function getClerkData() {
+  clerkLoading.value = true;
+  API_Store.getShopClerkPage(id.value, clerkSearchForm)
+    .then((res) => {
+      if (res.success) {
+        clerkData.value = res.result.records;
+        clerkTotal.value = res.result.total;
       }
-    },
-  },
-  mounted() {
-    this.id = this.$route.query.id;
-    this.init();
-  },
-};
+    })
+    .finally(() => {
+      clerkLoading.value = false;
+    });
+}
+function clerkChangePage(v) {
+  clerkSearchForm.pageNumber = v;
+  getClerkData();
+}
+function clerkChangePageSize(v) {
+  clerkSearchForm.pageSize = v;
+  clerkSearchForm.pageNumber = 1;
+  getClerkData();
+}
+function orderChangePage(v) {
+  orderSearchForm.pageNumber = v;
+  getOrderData();
+}
+function orderChangePageSize(v) {
+  orderSearchForm.pageSize = v;
+  orderSearchForm.pageNumber = 1;
+  getOrderData();
+}
+function selectDateRange(v) {
+  if (v && v.length === 2) {
+    orderSearchForm.startDate = v[0];
+    orderSearchForm.endDate = v[1];
+  } else {
+    orderSearchForm.startDate = "";
+    orderSearchForm.endDate = "";
+  }
+}
+function selectAfterSaleDateRange(v) {
+  if (v && v.length === 2) {
+    afterSaleSearchForm.startDate = v[0];
+    afterSaleSearchForm.endDate = v[1];
+  } else {
+    afterSaleSearchForm.startDate = "";
+    afterSaleSearchForm.endDate = "";
+  }
+}
+
+onMounted(() => {
+  id.value = route.query.id;
+  init();
+});
 </script>
 <style lang="scss" scoped>
 @import "shopDetail.scss";

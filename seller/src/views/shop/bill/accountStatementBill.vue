@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -87,88 +87,90 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { onBeforeRouteLeave, useRouter } from "vue-router";
 import * as API_Shop from "@/api/shops";
 
-export default {
-  name: "accountStatementBill",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    billStatusText(v) {
-      const map = { OUT: "已出账", CHECK: "已对账", COMPLETE: "已付款" };
-      return map[v] || "已付款";
-    },
-    billStatusTagType(v) {
-      const map = { OUT: "primary", CHECK: "warning", COMPLETE: "success" };
-      return map[v] || "success";
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleReset() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-      };
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      this.searchForm.billStatus = "OUT";
-      API_Shop.getBillPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    detail(v) {
-      this.$router.push({
-        name: "bill-detail",
-        query: { id: v.id },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-  beforeRouteLeave(to, from, next) {
-    from.meta.keepAlive = false;
-    next();
-  },
-};
+defineOptions({ name: "accountStatementBill" });
+
+const router = useRouter();
+
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+});
+const data = ref([]);
+const total = ref(0);
+
+// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+
+onMounted(() => {
+  init();
+});
+
+onBeforeRouteLeave((to, from) => {
+  from.meta.keepAlive = false;
+});
+
+function billStatusText(v) {
+  const map = { OUT: "已出账", CHECK: "已对账", COMPLETE: "已付款" };
+  return map[v] || "已付款";
+}
+function billStatusTagType(v) {
+  const map = { OUT: "primary", CHECK: "warning", COMPLETE: "success" };
+  return map[v] || "success";
+}
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleReset() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 20,
+    sort: "createTime",
+    order: "desc",
+    startDate: "",
+    endDate: "",
+  };
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  searchForm.value.billStatus = "OUT";
+  API_Shop.getBillPage(searchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function detail(v) {
+  router.push({
+    name: "bill-detail",
+    query: { id: v.id },
+  });
+}
 </script>
 <style lang="scss" scoped>
 @import "@/styles/table-common.scss";

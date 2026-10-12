@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -170,145 +170,144 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, ref } from "vue";
 import * as API_Member from "@/api/member";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-export default {
-  name: "goods-review",
-  data() {
-    return {
-      infoData: {},
-      infoFlag: false,
-      infoTitle: "",
-      currentReviewId: "",
-      detailStatusReady: false,
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        goodsName: "",
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    gradeTagType(grade) {
-      if (grade === "GOOD") return "success";
-      if (grade === "MODERATE") return "warning";
-      return "danger";
-    },
-    gradeText(grade) {
-      if (grade === "GOOD") return "好评";
-      if (grade === "MODERATE") return "中评";
-      return "差评";
-    },
-    changeSwitchView(status) {
-      if (!this.detailStatusReady || !this.currentReviewId) {
-        return;
+defineOptions({ name: "goods-review" });
+
+// 模板中的 el-form ref（原 ref="searchForm"，为避免与数据 searchForm 同名互相覆盖而改名），script 内未使用
+const searchFormRef = ref(null);
+
+const infoData = ref({});
+const infoFlag = ref(false);
+const infoTitle = ref("");
+const currentReviewId = ref("");
+const detailStatusReady = ref(false);
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  goodsName: "",
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+});
+const data = ref([]);
+const total = ref(0);
+
+function gradeTagType(grade) {
+  if (grade === "GOOD") return "success";
+  if (grade === "MODERATE") return "warning";
+  return "danger";
+}
+function gradeText(grade) {
+  if (grade === "GOOD") return "好评";
+  if (grade === "MODERATE") return "中评";
+  return "差评";
+}
+function changeSwitchView(status) {
+  if (!detailStatusReady.value || !currentReviewId.value) {
+    return;
+  }
+  API_Member.updateMemberReview(currentReviewId.value, { status }).then((res) => {
+    if (res.success) {
+      ElMessage.success("修改成功!");
+      getDataList();
+    }
+  });
+}
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getDataList();
+}
+function changeSwitch(row) {
+  if (!row || !row.id) {
+    return;
+  }
+  API_Member.updateMemberReview(row.id, { status: row.status }).then((res) => {
+    if (res.success) {
+      getDataList();
+    }
+  });
+}
+function updateTop(v) {
+  const top = !v.top;
+  API_Member.updateMemberReviewTop(v.id, { top }).then((res) => {
+    if (res.success) {
+      data.value = data.value.map((item) => {
+        if (item.goodsId !== v.goodsId) {
+          return item;
+        }
+        return {
+          ...item,
+          top: item.id === v.id ? top : false,
+        };
+      });
+      ElMessage.success(top ? "置顶成功!" : "取消置顶成功!");
+      init();
+    }
+  });
+}
+function getDataList() {
+  loading.value = true;
+  API_Member.getMemberReview(searchForm.value)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-      API_Member.updateMemberReview(this.currentReviewId, { status }).then((res) => {
-        if (res.success) {
-          ElMessage.success("修改成功!");
-          this.getDataList();
-        }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function info(v) {
+  currentReviewId.value = v.id;
+  detailStatusReady.value = false;
+  infoData.value = {};
+  infoFlag.value = true;
+  infoTitle.value = `用户${v.memberName}的评价详情`;
+  API_Member.getMemberInfoReview(v.id).then((res) => {
+    if (res.result) {
+      infoData.value = res.result;
+      nextTick(() => {
+        detailStatusReady.value = true;
       });
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    changeSwitch(row) {
-      if (!row || !row.id) {
-        return;
-      }
-      API_Member.updateMemberReview(row.id, { status: row.status }).then((res) => {
-        if (res.success) {
-          this.getDataList();
-        }
-      });
-    },
-    updateTop(v) {
-      const top = !v.top;
-      API_Member.updateMemberReviewTop(v.id, { top }).then((res) => {
-        if (res.success) {
-          this.data = this.data.map((item) => {
-            if (item.goodsId !== v.goodsId) {
-              return item;
-            }
-            return {
-              ...item,
-              top: item.id === v.id ? top : false,
-            };
-          });
-          ElMessage.success(top ? "置顶成功!" : "取消置顶成功!");
-          this.init();
-        }
-      });
-    },
-    getDataList() {
-      this.loading = true;
-      API_Member.getMemberReview(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    info(v) {
-      this.currentReviewId = v.id;
-      this.detailStatusReady = false;
-      this.infoData = {};
-      this.infoFlag = true;
-      this.infoTitle = `用户${v.memberName}的评价详情`;
-      API_Member.getMemberInfoReview(v.id).then((res) => {
-        if (res.result) {
-          this.infoData = res.result;
-          this.$nextTick(() => {
-            this.detailStatusReady = true;
-          });
-        }
-      });
-    },
-    onInfoDialogClosed() {
-      this.detailStatusReady = false;
-      this.currentReviewId = "";
-      this.infoData = {};
-    },
-    remove(v) {
-      ElMessageBox.confirm("您确认要删除客户" + v.memberName + "的评论?", "确认删除", { type: "warning" }).then(() => {
-        return API_Member.delMemberReview(v.id).then(() => {
-          ElMessage.success("修改成功");
-          this.init();
-        });
-      }).catch(() => {});
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    }
+  });
+}
+function onInfoDialogClosed() {
+  detailStatusReady.value = false;
+  currentReviewId.value = "";
+  infoData.value = {};
+}
+function remove(v) {
+  ElMessageBox.confirm("您确认要删除客户" + v.memberName + "的评论?", "确认删除", { type: "warning" }).then(() => {
+    return API_Member.delMemberReview(v.id).then(() => {
+      ElMessage.success("修改成功");
+      init();
+    });
+  }).catch(() => {});
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

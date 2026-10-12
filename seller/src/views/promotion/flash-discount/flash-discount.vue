@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form" @keyup.enter="handleSearch">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="70px" class="search-form" @keyup.enter="handleSearch">
         <el-form-item label="活动名称" prop="promotionName">
           <el-input v-model="searchForm.promotionName" placeholder="请输入活动名称" clearable style="width: 240px" />
         </el-form-item>
@@ -50,58 +50,60 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getFlashDiscountList, updateFlashDiscountStatus } from "@/api/promotion.js";
+import { Message } from "@/utils/message";
 
-export default {
-  data() {
-    return {
-      loading: false,
-      total: 0,
-      data: [],
-      searchForm: { pageNumber: 1, pageSize: 20, sort: "createTime", order: "desc" },
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    statusText(s) {
-      return { NEW: "未开始", START: "进行中", END: "已结束", CLOSE: "已关闭" }[s] || s;
-    },
-    statusType(s) {
-      return { NEW: "info", START: "success", END: "danger", CLOSE: "danger" }[s] || "info";
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getFlashDiscountList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    goAdd() {
-      this.$router.push({ name: "flash-discount-add" });
-    },
-    goEdit(row) {
-      this.$router.push({ name: "flash-discount-add", query: { id: row.id } });
-    },
-    toggleStatus(row) {
-      updateFlashDiscountStatus(row.id).then((res) => {
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.getDataList();
-        }
-      });
-    },
-  },
-};
+const router = useRouter();
+
+const loading = ref(false);
+const total = ref(0);
+const data = ref([]);
+const searchForm = reactive({ pageNumber: 1, pageSize: 20, sort: "createTime", order: "desc" });
+
+// searchFormRef：模板 ref 改名避免与顶层变量 searchForm 互相覆盖
+const searchFormRef = ref(null);
+
+onMounted(() => {
+  getDataList();
+});
+
+function statusText(s) {
+  return { NEW: "未开始", START: "进行中", END: "已结束", CLOSE: "已关闭" }[s] || s;
+}
+function statusType(s) {
+  return { NEW: "info", START: "success", END: "danger", CLOSE: "danger" }[s] || "info";
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getFlashDiscountList(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function goAdd() {
+  router.push({ name: "flash-discount-add" });
+}
+function goEdit(row) {
+  router.push({ name: "flash-discount-add", query: { id: row.id } });
+}
+function toggleStatus(row) {
+  updateFlashDiscountStatus(row.id).then((res) => {
+    if (res.success) {
+      Message.success("操作成功");
+      getDataList();
+    }
+  });
+}
 </script>
 
 <style scoped>

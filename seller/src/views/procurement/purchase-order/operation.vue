@@ -122,11 +122,13 @@
       </div>
     </el-card>
 
-    <liliDialog ref="liliDialog" @selectedGoodsData="onGoodsSelected" />
+    <liliDialog ref="liliDialogRef" @selectedGoodsData="onGoodsSelected" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import liliDialog from "@/views/lili-dialog";
 import {
   createProcurementOrder,
@@ -140,182 +142,179 @@ import {
   procurementStatusTag,
   formatMoney,
 } from "../constants";
+import { Message } from "@/utils/message";
+import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "procurement-purchase-order-operation",
-  components: { liliDialog },
-  data() {
-    return {
-      form: { remark: "", stockReasonId: "" },
-      items: [],
-      orderDetail: {},
-      reasonOptions: [],
-      submitLoading: false,
-      readonly: false,
-    };
-  },
-  computed: {
-    pageTitle() {
-      if (this.readonly) return "采购单详情";
-      return this.$route.query.id ? "编辑采购单" : "新建采购单";
-    },
-    totalQuantity() {
-      return this.items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-    },
-    totalAmount() {
-      return this.items.reduce((sum, item) => sum + this.calcSubtotal(item), 0);
-    },
-  },
-  mounted() {
-    this.loadReasons();
-    if (this.$route.query.id) {
-      this.readonly = true;
-      this.loadDetail(this.$route.query.id);
+defineOptions({ name: "procurement-purchase-order-operation" });
+
+const route = useRoute();
+
+const form = reactive({ remark: "", stockReasonId: "" });
+const items = ref([]);
+const orderDetail = ref({});
+const reasonOptions = ref([]);
+const submitLoading = ref(false);
+const readonly = ref(false);
+
+// liliDialogRef：模板 ref 改名避免与 import 的组件同名互相覆盖
+const liliDialogRef = ref(null);
+
+const pageTitle = computed(() => {
+  if (readonly.value) return "采购单详情";
+  return route.query.id ? "编辑采购单" : "新建采购单";
+});
+const totalQuantity = computed(() =>
+  items.value.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
+);
+const totalAmount = computed(() =>
+  items.value.reduce((sum, item) => sum + calcSubtotal(item), 0)
+);
+
+onMounted(() => {
+  loadReasons();
+  if (route.query.id) {
+    readonly.value = true;
+    loadDetail(route.query.id);
+  }
+});
+
+function loadReasons() {
+  getStockReasonList({ category: "INBOUND", pageNumber: 1, pageSize: 100 }).then((res) => {
+    if (res.success) {
+      reasonOptions.value = res.result.records || [];
     }
-  },
-  methods: {
-    procurementStatusText,
-    procurementStatusTag,
-    formatMoney,
-    loadReasons() {
-      getStockReasonList({ category: "INBOUND", pageNumber: 1, pageSize: 100 }).then((res) => {
-        if (res.success) {
-          this.reasonOptions = res.result.records || [];
-        }
-      });
-    },
-    calcSubtotal(row) {
-      return (Number(row.unitPriceWithTax) || 0) * (Number(row.quantity) || 0);
-    },
-    recalcRow() {},
-    onQuantityBlur(row) {
-      const val = parseInt(row.quantity, 10);
-      row.quantity = Number.isNaN(val) || val < 1 ? 1 : val;
-      this.recalcRow(row);
-    },
-    onTaxRateBlur(row) {
-      const val = parseInt(row.taxRate, 10);
-      if (Number.isNaN(val) || val < 0) {
-        row.taxRate = 0;
-      } else if (val > 100) {
-        row.taxRate = 100;
-      } else {
-        row.taxRate = val;
-      }
-      this.recalcRow(row);
-    },
-    onDecimalBlur(row, field) {
-      const val = parseFloat(row[field]);
-      row[field] = Number.isNaN(val) || val < 0 ? 0 : Math.round(val * 100) / 100;
-      this.recalcRow(row);
-    },
-    loadDetail(id) {
-      getProcurementOrderDetail(id).then((res) => {
-        if (res.success && res.result) {
-          this.orderDetail = res.result;
-          this.form.remark = res.result.remark || "";
-          this.form.stockReasonId = res.result.stockReasonId || "";
-          this.items = (res.result.items || []).map((item) => ({ ...item }));
-        }
-      });
-    },
-    openSkuPicker() {
-      this.$refs.liliDialog.goodsData = this.items.map((item) => ({
-        id: item.skuId,
-        goodsId: item.goodsId,
-        goodsName: item.goodsName,
-        price: item.retailPrice,
-      }));
-      this.$refs.liliDialog.open("goods");
-    },
-    onGoodsSelected(selected) {
-      const map = new Map(this.items.map((item) => [item.skuId, item]));
-      this.items = selected.map((sku) => {
-        const existed = map.get(sku.id);
-        if (existed) return existed;
-        return {
-          goodsId: sku.goodsId,
-          skuId: sku.id,
-          goodsName: sku.goodsName,
-          retailPrice: sku.price || 0,
-          quantity: 1,
-          taxRate: 0,
-          unitPriceWithTax: sku.cost || sku.price || 0,
-        };
-      });
-    },
-    removeItem(index) {
-      this.items.splice(index, 1);
-    },
-    validateItems() {
-      if (!this.form.stockReasonId) {
-        this.$Message.warning("请选择出入库原因");
-        return false;
-      }
-      if (!this.items.length) {
-        this.$Message.warning("请至少添加一个商品");
-        return false;
-      }
-      for (const item of this.items) {
-        if (!item.quantity || item.quantity < 1) {
-          this.$Message.warning("采购数量必须大于0");
-          return false;
-        }
-        if (item.unitPriceWithTax == null || item.unitPriceWithTax < 0) {
-          this.$Message.warning("请填写含税单价");
-          return false;
-        }
-      }
-      return true;
-    },
-    handleSave(andSubmit) {
-      if (!this.validateItems()) return;
-      this.submitLoading = true;
-      const payload = {
-        remark: this.form.remark,
-        stockReasonId: this.form.stockReasonId,
-        items: this.items.map((item) => ({
-          goodsId: item.goodsId,
-          skuId: item.skuId,
-          goodsName: item.goodsName,
-          retailPrice: item.retailPrice,
-          quantity: item.quantity,
-          taxRate: item.taxRate || 0,
-          unitPriceWithTax: item.unitPriceWithTax,
-        })),
-      };
-      createProcurementOrder(payload)
-        .then((res) => {
-          if (!res.success) return;
-          const orderId = res.result.id;
-          if (andSubmit) {
-            return submitProcurementOrder(orderId).then((subRes) => {
-              if (subRes.success) {
-                this.$Message.success("保存并提交成功");
-                this.goBack();
-              }
-            });
+  });
+}
+function calcSubtotal(row) {
+  return (Number(row.unitPriceWithTax) || 0) * (Number(row.quantity) || 0);
+}
+function recalcRow() {}
+function onQuantityBlur(row) {
+  const val = parseInt(row.quantity, 10);
+  row.quantity = Number.isNaN(val) || val < 1 ? 1 : val;
+  recalcRow(row);
+}
+function onTaxRateBlur(row) {
+  const val = parseInt(row.taxRate, 10);
+  if (Number.isNaN(val) || val < 0) {
+    row.taxRate = 0;
+  } else if (val > 100) {
+    row.taxRate = 100;
+  } else {
+    row.taxRate = val;
+  }
+  recalcRow(row);
+}
+function onDecimalBlur(row, field) {
+  const val = parseFloat(row[field]);
+  row[field] = Number.isNaN(val) || val < 0 ? 0 : Math.round(val * 100) / 100;
+  recalcRow(row);
+}
+function loadDetail(id) {
+  getProcurementOrderDetail(id).then((res) => {
+    if (res.success && res.result) {
+      orderDetail.value = res.result;
+      form.remark = res.result.remark || "";
+      form.stockReasonId = res.result.stockReasonId || "";
+      items.value = (res.result.items || []).map((item) => ({ ...item }));
+    }
+  });
+}
+function openSkuPicker() {
+  liliDialogRef.value.goodsData = items.value.map((item) => ({
+    id: item.skuId,
+    goodsId: item.goodsId,
+    goodsName: item.goodsName,
+    price: item.retailPrice,
+  }));
+  liliDialogRef.value.open("goods");
+}
+function onGoodsSelected(selected) {
+  const map = new Map(items.value.map((item) => [item.skuId, item]));
+  items.value = selected.map((sku) => {
+    const existed = map.get(sku.id);
+    if (existed) return existed;
+    return {
+      goodsId: sku.goodsId,
+      skuId: sku.id,
+      goodsName: sku.goodsName,
+      retailPrice: sku.price || 0,
+      quantity: 1,
+      taxRate: 0,
+      unitPriceWithTax: sku.cost || sku.price || 0,
+    };
+  });
+}
+function removeItem(index) {
+  items.value.splice(index, 1);
+}
+function validateItems() {
+  if (!form.stockReasonId) {
+    Message.warning("请选择出入库原因");
+    return false;
+  }
+  if (!items.value.length) {
+    Message.warning("请至少添加一个商品");
+    return false;
+  }
+  for (const item of items.value) {
+    if (!item.quantity || item.quantity < 1) {
+      Message.warning("采购数量必须大于0");
+      return false;
+    }
+    if (item.unitPriceWithTax == null || item.unitPriceWithTax < 0) {
+      Message.warning("请填写含税单价");
+      return false;
+    }
+  }
+  return true;
+}
+function handleSave(andSubmit) {
+  if (!validateItems()) return;
+  submitLoading.value = true;
+  const payload = {
+    remark: form.remark,
+    stockReasonId: form.stockReasonId,
+    items: items.value.map((item) => ({
+      goodsId: item.goodsId,
+      skuId: item.skuId,
+      goodsName: item.goodsName,
+      retailPrice: item.retailPrice,
+      quantity: item.quantity,
+      taxRate: item.taxRate || 0,
+      unitPriceWithTax: item.unitPriceWithTax,
+    })),
+  };
+  createProcurementOrder(payload)
+    .then((res) => {
+      if (!res.success) return;
+      const orderId = res.result.id;
+      if (andSubmit) {
+        return submitProcurementOrder(orderId).then((subRes) => {
+          if (subRes.success) {
+            Message.success("保存并提交成功");
+            goBack();
           }
-          this.$Message.success("保存成功");
-          this.goBack();
-        })
-        .finally(() => {
-          this.submitLoading = false;
         });
-    },
-    handleAudit(pass) {
-      auditProcurementOrder(this.orderDetail.id, { pass, remark: "" }).then((res) => {
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.goBack();
-        }
-      });
-    },
-    goBack() {
-      this.$filters.customRouterPush({ name: "procurementPurchaseOrderList" });
-    },
-  },
-};
+      }
+      Message.success("保存成功");
+      goBack();
+    })
+    .finally(() => {
+      submitLoading.value = false;
+    });
+}
+function handleAudit(pass) {
+  auditProcurementOrder(orderDetail.value.id, { pass, remark: "" }).then((res) => {
+    if (res.success) {
+      Message.success("操作成功");
+      goBack();
+    }
+  });
+}
+function goBack() {
+  customRouterPush({ name: "procurementPurchaseOrderList" });
+}
 </script>
 
 <style scoped>

@@ -17,20 +17,21 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "Error403",
-  methods: {
-    backPage() {
-      this.$router.go(-1);
-    },
-    goHome() {
-      this.$router.push({
-        name: "home_index",
-      });
-    },
-  },
-};
+<script setup>
+import { useRouter } from "vue-router";
+
+defineOptions({ name: "Error403" });
+
+const router = useRouter();
+
+function backPage() {
+  router.go(-1);
+}
+function goHome() {
+  router.push({
+    name: "home_index",
+  });
+}
 </script>
 
 <style lang="scss" scoped>

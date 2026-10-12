@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form ref="form" :model="form" label-width="120px" :rules="formRule">
+      <el-form ref="formRef" :model="form" label-width="120px" :rules="formRule">
         <div class="base-info-item">
           <h4>活动信息</h4>
           <div class="form-item-view">
@@ -141,7 +141,7 @@
     >
       <couponTemplate
         v-if="showCouponSelect"
-        ref="couponPicker"
+        ref="couponPickerRef"
         manualConfirm
         :selectedList="tempCouponList"
         getType="ACTIVITY"
@@ -156,7 +156,7 @@
     <el-dialog v-model="checkUserList" width="1200px" title="选择会员" destroy-on-close>
       <userList
         v-if="checkUserList"
-        ref="memberLayout"
+        ref="memberLayoutRef"
         :selectedMember="true"
         :checkboxSelect="true"
         :selectedList="memberSelectSnapshot"
@@ -169,195 +169,211 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
 import couponTemplate from "@/views/promotions/coupon/coupon";
 import userList from "@/views/member/list/index";
 import { saveActivityCoupon } from "@/api/promotion";
+import { useAppStore } from "@/stores/app";
+import { Message } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  name: "add-coupon-activity",
-  components: {
-    couponTemplate,
-    userList,
+defineOptions({ name: "add-coupon-activity" });
+
+const router = useRouter();
+const appStore = useAppStore();
+
+const options = reactive({
+  disabledDate(date) {
+    return date && date.valueOf() < Date.now() - 86400000;
   },
-  data() {
+});
+const showCouponSelect = ref(false);
+const tempCouponList = ref([]);
+const checkUserList = ref(false);
+const memberSelectSnapshot = ref([]);
+const selectedMember = ref([]);
+const form = reactive({
+  promotionName: "",
+  activityScope: "ALL",
+  couponActivityType: "REGISTERED",
+  rangeTime: [],
+  startTime: "",
+  endTime: "",
+  memberDTOS: [],
+  couponActivityItems: [],
+  couponFrequencyEnum: "",
+});
+const submitLoading = ref(false);
+const selectCouponList = ref([]);
+const formRule = reactive({
+  promotionName: [{ required: true, message: "活动名称不能为空" }],
+  rangeTime: [
+    {
+      required: true,
+      validator: (rule, value, callback) => {
+        if (!value || !Array.isArray(value) || value.length !== 2 || !value[0] || !value[1]) {
+          callback(new Error("请选择活动有效期"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "change",
+    },
+  ],
+  description: [{ required: true, message: "请输入范围描述" }],
+});
+
+// 模板 ref 与 data 同名陷阱：form/couponPicker/memberLayout 改名加 Ref 后缀
+const formRef = ref(null);
+const couponPickerRef = ref(null);
+const memberLayoutRef = ref(null);
+
+function scopeTypeText(type) {
+  const map = {
+    ALL: "全品类",
+    PORTION_GOODS_CATEGORY: "商品分类",
+    PORTION_SHOP_CATEGORY: "店铺分类",
+    PORTION_GOODS: "指定商品",
+  };
+  return map[type] || "未知";
+}
+
+function scopeTypeTagType(type) {
+  const map = {
+    ALL: "info",
+    PORTION_GOODS_CATEGORY: "warning",
+    PORTION_SHOP_CATEGORY: "warning",
+    PORTION_GOODS: "primary",
+  };
+  return map[type] || "danger";
+}
+
+function cancelMemberSelect() {
+  checkUserList.value = false;
+}
+
+function confirmMemberSelect() {
+  const list = memberLayoutRef.value?.getSelection?.() || [];
+  selectedMember.value = list;
+  reSelectMember();
+  checkUserList.value = false;
+}
+
+function delUser(index) {
+  selectedMember.value.splice(index, 1);
+  reSelectMember();
+}
+
+function reSelectMember() {
+  form.memberDTOS = selectedMember.value.map((item) => {
     return {
-      options: {
-        disabledDate(date) {
-          return date && date.valueOf() < Date.now() - 86400000;
-        },
-      },
-      showCouponSelect: false,
-      tempCouponList: [],
-      checkUserList: false,
-      memberSelectSnapshot: [],
-      selectedMember: [],
-      form: {
-        promotionName: "",
-        activityScope: "ALL",
-        couponActivityType: "REGISTERED",
-        rangeTime: [],
-        startTime: "",
-        endTime: "",
-        memberDTOS: [],
-        couponActivityItems: [],
-        couponFrequencyEnum: "",
-      },
-      submitLoading: false,
-      selectCouponList: [],
-      formRule: {
-        promotionName: [{ required: true, message: "活动名称不能为空" }],
-        rangeTime: [
-          {
-            required: true,
-            validator: (rule, value, callback) => {
-              if (!value || !Array.isArray(value) || value.length !== 2 || !value[0] || !value[1]) {
-                callback(new Error("请选择活动有效期"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "change",
-          },
-        ],
-        description: [{ required: true, message: "请输入范围描述" }],
-      },
+      nickName: item.nickName,
+      id: item.id,
     };
-  },
-  methods: {
-    scopeTypeText(type) {
-      const map = {
-        ALL: "全品类",
-        PORTION_GOODS_CATEGORY: "商品分类",
-        PORTION_SHOP_CATEGORY: "店铺分类",
-        PORTION_GOODS: "指定商品",
-      };
-      return map[type] || "未知";
-    },
-    scopeTypeTagType(type) {
-      const map = {
-        ALL: "info",
-        PORTION_GOODS_CATEGORY: "warning",
-        PORTION_SHOP_CATEGORY: "warning",
-        PORTION_GOODS: "primary",
-      };
-      return map[type] || "danger";
-    },
-    cancelMemberSelect() {
-      this.checkUserList = false;
-    },
-    confirmMemberSelect() {
-      const list = this.$refs.memberLayout?.getSelection?.() || [];
-      this.selectedMember = list;
-      this.reSelectMember();
-      this.checkUserList = false;
-    },
-    delUser(index) {
-      this.selectedMember.splice(index, 1);
-      this.reSelectMember();
-    },
-    reSelectMember() {
-      this.form.memberDTOS = this.selectedMember.map((item) => {
-        return {
-          nickName: item.nickName,
-          id: item.id,
-        };
-      });
-    },
-    cancelCouponSelect() {
-      this.showCouponSelect = false;
-    },
-    confirmCouponSelect() {
-      const list = this.$refs.couponPicker?.getSelection?.() || [];
-      if (!list.length) {
-        this.$Message.warning("请至少选择一张优惠券");
-        return;
+  });
+}
+
+function cancelCouponSelect() {
+  showCouponSelect.value = false;
+}
+
+function confirmCouponSelect() {
+  const list = couponPickerRef.value?.getSelection?.() || [];
+  if (!list.length) {
+    Message.warning("请至少选择一张优惠券");
+    return;
+  }
+  selectCouponList.value = list;
+  reSelectCoupon();
+  showCouponSelect.value = false;
+}
+
+function delCoupon(index) {
+  selectCouponList.value.splice(index, 1);
+  reSelectCoupon();
+}
+
+function reSelectCoupon() {
+  form.couponActivityItems = selectCouponList.value.map((item) => {
+    const existing = form.couponActivityItems.find(
+      (entry) => entry.couponId === item.id
+    );
+    return {
+      num: existing ? existing.num : 1,
+      couponId: item.id,
+    };
+  });
+}
+
+function addVip() {
+  memberSelectSnapshot.value = JSON.parse(JSON.stringify(selectedMember.value));
+  checkUserList.value = true;
+}
+
+function showSelector() {
+  tempCouponList.value = [...selectCouponList.value];
+  showCouponSelect.value = true;
+}
+
+function handleSubmit() {
+  // 自动发券只能全用户发送：如有自动发券且非全用户，提示并强制切换
+  if (
+    form.couponActivityType === "AUTO_COUPON" &&
+    form.activityScope !== "ALL"
+  ) {
+    Message.info("自动发券只能全用户发送");
+    form.couponActivityType = "SPECIFY";
+    form.activityScope = "ALL";
+    return;
+  }
+
+  formRef.value.validate((valid) => {
+    if (!valid) {
+      return;
+    }
+
+    if (!form.couponActivityItems.length) {
+      Message.warning("请至少选择一张优惠券");
+      return;
+    }
+
+    if (
+      form.couponActivityType === "SPECIFY" &&
+      form.activityScope === "DESIGNATED" &&
+      !form.memberDTOS.length
+    ) {
+      Message.warning("请选择会员");
+      return;
+    }
+
+    // 统一取时间逻辑
+    const [start, end] = form.rangeTime;
+    const startDate = start instanceof Date ? start : new Date(start);
+    const endDate = end instanceof Date ? end : new Date(end);
+    form.startTime = unixToDate(startDate.getTime() / 1000);
+    form.endTime = unixToDate(endDate.getTime() / 1000);
+
+    const params = JSON.parse(JSON.stringify(form));
+    delete params.rangeTime;
+    delete params.id;
+    submitLoading.value = true;
+    saveActivityCoupon(params).then((res) => {
+      submitLoading.value = false;
+      if (res.success) {
+        Message.success("优惠券活动创建成功");
+        closeCurrentPage();
       }
-      this.selectCouponList = list;
-      this.reSelectCoupon();
-      this.showCouponSelect = false;
-    },
-    delCoupon(index) {
-      this.selectCouponList.splice(index, 1);
-      this.reSelectCoupon();
-    },
-    reSelectCoupon() {
-      this.form.couponActivityItems = this.selectCouponList.map((item) => {
-        const existing = this.form.couponActivityItems.find(
-          (entry) => entry.couponId === item.id
-        );
-        return {
-          num: existing ? existing.num : 1,
-          couponId: item.id,
-        };
-      });
-    },
-    addVip() {
-      this.memberSelectSnapshot = JSON.parse(JSON.stringify(this.selectedMember));
-      this.checkUserList = true;
-    },
-    showSelector() {
-      this.tempCouponList = [...this.selectCouponList];
-      this.showCouponSelect = true;
-    },
-    handleSubmit() {
-      // 自动发券只能全用户发送：如有自动发券且非全用户，提示并强制切换
-      if (
-        this.form.couponActivityType === "AUTO_COUPON" &&
-        this.form.activityScope !== "ALL"
-      ) {
-        this.$Message.info("自动发券只能全用户发送");
-        this.form.couponActivityType = "SPECIFY";
-        this.form.activityScope = "ALL";
-        return;
-      }
+    });
+  });
+}
 
-      this.$refs.form.validate((valid) => {
-        if (!valid) {
-          return;
-        }
-
-        if (!this.form.couponActivityItems.length) {
-          this.$Message.warning("请至少选择一张优惠券");
-          return;
-        }
-
-        if (
-          this.form.couponActivityType === "SPECIFY" &&
-          this.form.activityScope === "DESIGNATED" &&
-          !this.form.memberDTOS.length
-        ) {
-          this.$Message.warning("请选择会员");
-          return;
-        }
-
-        // 统一取时间逻辑
-        const [start, end] = this.form.rangeTime;
-        const startDate = start instanceof Date ? start : new Date(start);
-        const endDate = end instanceof Date ? end : new Date(end);
-        this.form.startTime = this.$filters.unixToDate(startDate.getTime() / 1000);
-        this.form.endTime = this.$filters.unixToDate(endDate.getTime() / 1000);
-
-        const params = JSON.parse(JSON.stringify(this.form));
-        delete params.rangeTime;
-        delete params.id;
-        this.submitLoading = true;
-        saveActivityCoupon(params).then((res) => {
-          this.submitLoading = false;
-          if (res.success) {
-            this.$Message.success("优惠券活动创建成功");
-            this.closeCurrentPage();
-          }
-        });
-      });
-    },
-    closeCurrentPage() {
-      this.$store.commit("removeTag", "add-platform-coupon");
-      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
-      this.$router.go(-1);
-    },
-  },
-};
+function closeCurrentPage() {
+  appStore.removeTag("add-platform-coupon");
+  localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
+  router.go(-1);
+}
 </script>
 
 <style lang="scss" scoped>

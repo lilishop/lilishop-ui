@@ -6,7 +6,7 @@
           <el-divider content-position="left">登录设置</el-divider>
           <div class="form-list">
             <el-form
-              ref="formValidate"
+              ref="formValidateRef"
               label-width="140px"
               label-position="right"
               :model="formValidate"
@@ -31,60 +31,61 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive, getCurrentInstance } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 
-export default {
-  data() {
-    return {
-      ruleValidate: {},
-      formValidate: {
-        pc: "",
-        wap: "",
-        callbackUrl: "",
-      },
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    init() {
-      const setting = JSON.parse(this.res || "{}");
-      this.formValidate = { ...setting };
-      Object.keys(this.formValidate).forEach((item) => {
-        if (item.indexOf("pId") < 0) {
-          this.ruleValidate[item] = [
-            {
-              required: true,
-              message: "请填写必填项",
-              trigger: "blur",
-            },
-          ];
-        }
-      });
-    },
-  },
-};
+const props = defineProps(["res", "type"]);
+
+const ruleValidate = reactive({});
+const formValidate = ref({
+  pc: "",
+  wap: "",
+  callbackUrl: "",
+});
+// 模板 ref（原与 data 字段 formValidate 同名，改名避免互相覆盖）
+const formValidateRef = ref(null);
+
+const { proxy } = getCurrentInstance();
+
+function submit(name) {
+  handleSubmit(proxy, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+function setupSetting() {
+  setSetting(props.type, formValidate.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+function init() {
+  const setting = JSON.parse(props.res || "{}");
+  formValidate.value = { ...setting };
+  Object.keys(formValidate.value).forEach((item) => {
+    if (item.indexOf("pId") < 0) {
+      ruleValidate[item] = [
+        {
+          required: true,
+          message: "请填写必填项",
+          trigger: "blur",
+        },
+      ];
+    }
+  });
+}
+
+// submit 为对外暴露的公共方法（供父组件通过 ref 调用）
+defineExpose({ submit });
+
+init();
 </script>
 
 <style lang="scss" scoped>

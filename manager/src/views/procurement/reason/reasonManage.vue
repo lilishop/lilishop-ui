@@ -67,7 +67,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import {
   getStockReasonPage,
   addStockReason,
@@ -75,90 +76,92 @@ import {
   deleteStockReason,
 } from "@/api/procurement";
 import { stockReasonCategoryText } from "../constants";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "manager-stock-reason-manage",
-  data() {
-    return {
-      loading: false,
-      submitLoading: false,
-      modalVisible: false,
-      modalTitle: "添加原因",
-      data: [],
-      total: 0,
-      searchForm: { pageNumber: 1, pageSize: 10, reason: "", category: "" },
-      form: { id: "", reason: "", category: "INBOUND" },
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    stockReasonCategoryText,
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getStockReasonPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    openAdd() {
-      this.modalTitle = "添加原因";
-      this.form = { id: "", reason: "", category: "INBOUND" };
-      this.modalVisible = true;
-    },
-    openEdit(row) {
-      this.modalTitle = "编辑原因";
-      this.form = { id: row.id, reason: row.reason, category: row.category };
-      this.modalVisible = true;
-    },
-    handleSubmit() {
-      if (!this.form.reason || !this.form.category) {
-        this.$Message.warning("请填写完整信息");
-        return;
+defineOptions({ name: "manager-stock-reason-manage" });
+
+const loading = ref(false);
+const submitLoading = ref(false);
+const modalVisible = ref(false);
+const modalTitle = ref("添加原因");
+const data = ref([]);
+const total = ref(0);
+const searchForm = reactive({ pageNumber: 1, pageSize: 10, reason: "", category: "" });
+const form = ref({ id: "", reason: "", category: "INBOUND" });
+
+const formRef = ref(null);
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function getDataList() {
+  loading.value = true;
+  getStockReasonPage(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
       }
-      this.submitLoading = true;
-      const req = this.form.id
-        ? updateStockReason(this.form)
-        : addStockReason({ reason: this.form.reason, category: this.form.category });
-      req
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("保存成功");
-            this.modalVisible = false;
-            this.getDataList();
-          }
-        })
-        .finally(() => {
-          this.submitLoading = false;
-        });
-    },
-    handleDelete(row) {
-      this.$Modal.confirm({
-        title: "删除确认",
-        content: `确认删除原因「${row.reason}」？`,
-        onOk: () => {
-          deleteStockReason(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.getDataList();
-            }
-          });
-        },
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function openAdd() {
+  modalTitle.value = "添加原因";
+  form.value = { id: "", reason: "", category: "INBOUND" };
+  modalVisible.value = true;
+}
+
+function openEdit(row) {
+  modalTitle.value = "编辑原因";
+  form.value = { id: row.id, reason: row.reason, category: row.category };
+  modalVisible.value = true;
+}
+
+function handleSubmit() {
+  if (!form.value.reason || !form.value.category) {
+    Message.warning("请填写完整信息");
+    return;
+  }
+  submitLoading.value = true;
+  const req = form.value.id
+    ? updateStockReason(form.value)
+    : addStockReason({ reason: form.value.reason, category: form.value.category });
+  req
+    .then((res) => {
+      if (res.success) {
+        Message.success("保存成功");
+        modalVisible.value = false;
+        getDataList();
+      }
+    })
+    .finally(() => {
+      submitLoading.value = false;
+    });
+}
+
+function handleDelete(row) {
+  Modal.confirm({
+    title: "删除确认",
+    content: `确认删除原因「${row.reason}」？`,
+    onOk: () => {
+      deleteStockReason(row.id).then((res) => {
+        if (res.success) {
+          Message.success("删除成功");
+          getDataList();
+        }
       });
     },
-  },
-};
+  });
+}
+
+onMounted(() => {
+  getDataList();
+});
 </script>
 
 <style scoped>

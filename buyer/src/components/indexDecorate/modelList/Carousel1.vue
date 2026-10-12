@@ -17,28 +17,26 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'modelCarousel1',
-  props: ['data'],
-  data () {
-    return {
-      showModal: false, // modal显隐
-      selected: null, // 已选数据
-      picModelFlag: false, // 选择图片modal
-      bgColor: '#fff' // 轮播背景色
-    };
-  },
-  mounted () {
-    this.bgColor = this.data.options.list[0].bgColor
-  },
-  methods: {
-    // 自动切换时改变背景色
-    autoChange (index) {
-      this.bgColor = this.data.options.list[index].bgColor
-    }
-  }
-};
+<script setup>
+import { onMounted, ref } from 'vue'
+
+defineOptions({ name: 'modelCarousel1' })
+
+const props = defineProps(['data'])
+
+const showModal = ref(false) // modal显隐
+const selected = ref(null) // 已选数据
+const picModelFlag = ref(false) // 选择图片modal
+const bgColor = ref('#fff') // 轮播背景色
+
+onMounted(() => {
+  bgColor.value = props.data.options.list[0].bgColor
+})
+
+// 自动切换时改变背景色
+function autoChange(index) {
+  bgColor.value = props.data.options.list[index].bgColor
+}
 </script>
 
 <style scoped lang="scss">

@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form ref="form" :model="form" label-width="120px">
+      <el-form ref="formRef" :model="form" label-width="120px">
         <el-form-item label="活动名称" required>
           <el-input v-model="form.promotionName" style="width: 320px" />
         </el-form-item>
@@ -49,82 +49,88 @@
         </el-form-item>
       </el-form>
     </el-card>
-    <liliDialog ref="liliDialog" @selectedGoodsData="selectedGoods" />
+    <liliDialog ref="liliDialogRef" @selectedGoodsData="selectedGoods" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getFlashDiscountDetail, saveFlashDiscount, editFlashDiscount } from "@/api/promotion.js";
 import { promotionPriceMin } from "@/constants/goodsType";
+import { unixToDate } from "@/utils/filters";
+import { Message } from "@/utils/message";
 
-export default {
-  data() {
-    return {
-      form: {
-        promotionName: "",
-        rangeTime: [],
-        limitNum: 0,
-        description: "",
-        scopeType: "PORTION_GOODS",
-        promotionGoodsList: [],
-      },
-    };
-  },
-  mounted() {
-    if (this.$route.query.id) {
-      getFlashDiscountDetail(this.$route.query.id).then((res) => {
-        if (res.success) {
-          Object.assign(this.form, res.result);
-          this.form.rangeTime = [new Date(res.result.startTime), new Date(res.result.endTime)];
-        }
+const route = useRoute();
+const router = useRouter();
+
+const form = reactive({
+  promotionName: "",
+  rangeTime: [],
+  limitNum: 0,
+  description: "",
+  scopeType: "PORTION_GOODS",
+  promotionGoodsList: [],
+});
+
+// formRef / liliDialogRef：模板 ref 改名避免与 form 变量、liliDialog 全局组件互相覆盖
+const formRef = ref(null);
+const liliDialogRef = ref(null);
+
+onMounted(() => {
+  if (route.query.id) {
+    getFlashDiscountDetail(route.query.id).then((res) => {
+      if (res.success) {
+        Object.assign(form, res.result);
+        form.rangeTime = [new Date(res.result.startTime), new Date(res.result.endTime)];
+      }
+    });
+  }
+});
+
+function openGoods() {
+  liliDialogRef.value.open("goods");
+}
+
+function selectedGoods(list) {
+  list.forEach((g) => {
+    if (!form.promotionGoodsList.find((i) => i.skuId === g.id)) {
+      form.promotionGoodsList.push({
+        skuId: g.id,
+        goodsId: g.goodsId,
+        goodsName: g.goodsName,
+        originalPrice: g.price,
+        price: g.price,
+        quantity: g.quantity,
+        goodsType: g.goodsType,
       });
     }
-  },
-  methods: {
-    promotionPriceMin,
-    openGoods() {
-      this.$refs.liliDialog.open("goods");
-    },
-    selectedGoods(list) {
-      list.forEach((g) => {
-        if (!this.form.promotionGoodsList.find((i) => i.skuId === g.id)) {
-          this.form.promotionGoodsList.push({
-            skuId: g.id,
-            goodsId: g.goodsId,
-            goodsName: g.goodsName,
-            originalPrice: g.price,
-            price: g.price,
-            quantity: g.quantity,
-            goodsType: g.goodsType,
-          });
-        }
-      });
-    },
-    submit() {
-      const payload = { ...this.form };
-      if (payload.rangeTime && payload.rangeTime.length === 2) {
-        const start =
-          payload.rangeTime[0] instanceof Date
-            ? payload.rangeTime[0]
-            : new Date(payload.rangeTime[0]);
-        const end =
-          payload.rangeTime[1] instanceof Date
-            ? payload.rangeTime[1]
-            : new Date(payload.rangeTime[1]);
-        payload.startTime = this.$filters.unixToDate(start.getTime() / 1000);
-        payload.endTime = this.$filters.unixToDate(end.getTime() / 1000);
-      }
-      delete payload.rangeTime;
-      const req = payload.id ? editFlashDiscount(payload) : saveFlashDiscount(payload);
-      req.then((res) => {
-        if (res.success) {
-          this.$Message.success("保存成功");
-          this.$router.back();
-        }
-      });
-    },
-  },
-};
+  });
+}
+
+function submit() {
+  const payload = { ...form };
+  if (payload.rangeTime && payload.rangeTime.length === 2) {
+    const start =
+      payload.rangeTime[0] instanceof Date
+        ? payload.rangeTime[0]
+        : new Date(payload.rangeTime[0]);
+    const end =
+      payload.rangeTime[1] instanceof Date
+        ? payload.rangeTime[1]
+        : new Date(payload.rangeTime[1]);
+    payload.startTime = unixToDate(start.getTime() / 1000);
+    payload.endTime = unixToDate(end.getTime() / 1000);
+  }
+  delete payload.rangeTime;
+  const req = payload.id ? editFlashDiscount(payload) : saveFlashDiscount(payload);
+  req.then((res) => {
+    if (res.success) {
+      Message.success("保存成功");
+      router.back();
+    }
+  });
+}
 </script>
 
 <style scoped>

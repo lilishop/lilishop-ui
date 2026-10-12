@@ -45,101 +45,106 @@
   </el-card>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { UploadFilled } from "@element-plus/icons-vue";
 import { downLoadDeliverExcel, uploadDeliverExcel } from "@/api/order.js";
 import { baseUrl } from "@/libs/axios.js";
+import { getStore } from "@/libs/storage";
+import { useAppStore } from "@/stores/app";
 import downloadImg from "@/assets/download.png";
 import uploadImg from "@/assets/upload.png";
 import successImg from "@/assets/success.png";
 
-export default {
-  components: { UploadFilled },
-  data() {
-    return {
-      file: "",
-      action: baseUrl + "/order/order/batchDeliver",
-      accessToken: {},
-      stepList: [
-        {
-          img: downloadImg,
-          title: "1.下载批量发货导入模板",
-          checked: true,
-        },
-        {
-          img: uploadImg,
-          title: "2.上传数据",
-          checked: false,
-        },
-        {
-          img: successImg,
-          title: "3.完成",
-          checked: false,
-        },
-      ],
-    };
+const appStore = useAppStore();
+const router = useRouter();
+
+const file = ref("");
+const action = baseUrl + "/order/order/batchDeliver";
+const accessToken = ref({});
+const stepList = ref([
+  {
+    img: downloadImg,
+    title: "1.下载批量发货导入模板",
+    checked: true,
   },
-  mounted() {
-    this.accessToken.accessToken = this.getStore("accessToken");
+  {
+    img: uploadImg,
+    title: "2.上传数据",
+    checked: false,
   },
-  methods: {
-    handleCheckStep(val) {
-      if (val.title.search("3") === -1) {
-        this.stepList.forEach((item) => {
-          item.checked = false;
-        });
-        val.checked = true;
+  {
+    img: successImg,
+    title: "3.完成",
+    checked: false,
+  },
+]);
+
+onMounted(() => {
+  accessToken.value.accessToken = getStore("accessToken");
+});
+
+function handleCheckStep(val) {
+  if (val.title.search("3") === -1) {
+    stepList.value.forEach((item) => {
+      item.checked = false;
+    });
+    val.checked = true;
+  }
+}
+
+function handleUpload(uploadFile) {
+  file.value = uploadFile;
+  upload();
+  return false;
+}
+
+function navigationToGoodsOrder() {
+  router.push({ path: "/order/orderList" });
+}
+
+function close() {
+  appStore.removeTag("export-order-deliver");
+  localStorage.storeOpenedList = JSON.stringify(appStore.storeOpenedList);
+  router.go(-1);
+}
+
+async function upload() {
+  const fd = new FormData();
+  fd.append("files", file.value);
+  const res = await uploadDeliverExcel(fd);
+  if (res.success) {
+    stepList.value.forEach((item) => {
+      item.checked = false;
+    });
+    stepList.value[2].checked = true;
+  }
+}
+
+function downLoad() {
+  downLoadDeliverExcel()
+    .then((res) => {
+      const blob = new Blob([res], {
+        type: "application/vnd.ms-excel;charset=utf-8",
+      });
+      if ("download" in document.createElement("a")) {
+        const link = document.createElement("a");
+        link.download = "批量发货导入模板.xls";
+        link.style.display = "none";
+        link.href = URL.createObjectURL(blob);
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        document.body.removeChild(link);
+      } else {
+        navigator.msSaveBlob(blob, "批量发货导入模板.xls");
       }
-    },
-    handleUpload(file) {
-      this.file = file;
-      this.upload();
-      return false;
-    },
-    navigationToGoodsOrder() {
-      this.$router.push({ path: "/order/orderList" });
-    },
-    close() {
-      this.$store.commit("removeTag", "export-order-deliver");
-      localStorage.storeOpenedList = JSON.stringify(this.$store.state.app.storeOpenedList);
-      this.$router.go(-1);
-    },
-    async upload() {
-      const fd = new FormData();
-      fd.append("files", this.file);
-      const res = await uploadDeliverExcel(fd);
-      if (res.success) {
-        this.stepList.forEach((item) => {
-          item.checked = false;
-        });
-        this.stepList[2].checked = true;
-      }
-    },
-    downLoad() {
-      downLoadDeliverExcel()
-        .then((res) => {
-          const blob = new Blob([res], {
-            type: "application/vnd.ms-excel;charset=utf-8",
-          });
-          if ("download" in document.createElement("a")) {
-            const link = document.createElement("a");
-            link.download = "批量发货导入模板.xls";
-            link.style.display = "none";
-            link.href = URL.createObjectURL(blob);
-            document.body.appendChild(link);
-            link.click();
-            URL.revokeObjectURL(link.href);
-            document.body.removeChild(link);
-          } else {
-            navigator.msSaveBlob(blob, "批量发货导入模板.xls");
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-  },
-};
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form ref="form" :model="form" label-width="120px" :rules="formRule">
+      <el-form ref="formRef" :model="form" label-width="120px" :rules="formRule">
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
@@ -73,93 +73,104 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { updateSeckill, seckillDetail } from "@/api/promotion";
+import { unixToDate } from "@/utils/filters";
+import { Message } from "@/utils/message";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "addSeckill",
-  data() {
-    return {
-      form: {
-        promotionName: "",
-        applyEndTime: "",
-        startTime: "",
-        seckillPeriod: [],
-        seckillRule: "",
-        promotionStatus: "NEW",
-      },
-      id: this.$route.query.id,
-      periodTime: null,
-      showAddPeriod: false,
-      submitLoading: false,
-      formRule: {
-        promotionName: [{ required: true, message: "请填写活动名称" }],
-        applyEndTime: [{ required: true, message: "请填写报名截止时间" }],
-        seckillPeriod: [{ required: true, message: "请填写抢购时间段" }],
-        startTime: [{ required: true, message: "请填写活动开始时间" }],
-        seckillRule: [{ required: true, message: "请输入申请规则" }],
-      },
-    };
-  },
-  mounted() {
-    if (this.id) {
-      this.getData();
-    }
-  },
-  methods: {
-    closeCurrentPage() {
-      this.$store.commit("removeTag", "manager-seckill-add");
-      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
-      this.$router.go(-1);
-    },
-    getData() {
-      seckillDetail(this.id).then((res) => {
-        if (res.success) {
-          const data = res.result;
-          data.seckillPeriod = res.result.hours.split(",");
-          this.form = data;
-        }
-      });
-    },
-    addPeriod() {
-      this.addPeriodTime();
-      this.showAddPeriod = true;
-    },
-    addPeriodTime() {
-      this.showAddPeriod = false;
-      if (this.periodTime !== null && !this.form.seckillPeriod.includes(this.periodTime)) {
-        this.form.seckillPeriod.push(this.periodTime);
-      }
-    },
-    removePeriodTime(name) {
-      this.form.seckillPeriod = this.form.seckillPeriod.filter((i) => i !== name);
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          this.form.hours = this.form.seckillPeriod.toString();
-          delete this.form.createTime;
-          delete this.form.updateTime;
-          delete this.form.endTime;
-          delete this.form.seckillApplyList;
-          const params = { ...this.form };
-          const startTs = new Date(this.form.startTime).getTime();
-          const applyTs = new Date(this.form.applyEndTime).getTime();
-          params.startTime = this.$filters.unixToDate(startTs / 1000);
-          params.applyEndTime = this.$filters.unixToDate(applyTs / 1000);
-          updateSeckill(params).then((res) => {
-            this.submitLoading = false;
-            if (res && res.success) {
-              this.$Message.success("编辑成功");
-              this.closeCurrentPage();
-            }
-          });
-        }
-      });
-    },
-  },
+defineOptions({ name: "addSeckill" });
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const form = ref({
+  promotionName: "",
+  applyEndTime: "",
+  startTime: "",
+  seckillPeriod: [],
+  seckillRule: "",
+  promotionStatus: "NEW",
+});
+const id = route.query.id;
+const periodTime = ref(null);
+const showAddPeriod = ref(false);
+const submitLoading = ref(false);
+const formRule = {
+  promotionName: [{ required: true, message: "请填写活动名称" }],
+  applyEndTime: [{ required: true, message: "请填写报名截止时间" }],
+  seckillPeriod: [{ required: true, message: "请填写抢购时间段" }],
+  startTime: [{ required: true, message: "请填写活动开始时间" }],
+  seckillRule: [{ required: true, message: "请输入申请规则" }],
 };
+
+const formRef = ref(null);
+
+onMounted(() => {
+  if (id) {
+    getData();
+  }
+});
+
+function closeCurrentPage() {
+  appStore.removeTag("manager-seckill-add");
+  localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
+  router.go(-1);
+}
+
+function getData() {
+  seckillDetail(id).then((res) => {
+    if (res.success) {
+      const data = res.result;
+      data.seckillPeriod = res.result.hours.split(",");
+      form.value = data;
+    }
+  });
+}
+
+function addPeriod() {
+  addPeriodTime();
+  showAddPeriod.value = true;
+}
+
+function addPeriodTime() {
+  showAddPeriod.value = false;
+  if (periodTime.value !== null && !form.value.seckillPeriod.includes(periodTime.value)) {
+    form.value.seckillPeriod.push(periodTime.value);
+  }
+}
+
+function removePeriodTime(name) {
+  form.value.seckillPeriod = form.value.seckillPeriod.filter((i) => i !== name);
+}
+
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      form.value.hours = form.value.seckillPeriod.toString();
+      delete form.value.createTime;
+      delete form.value.updateTime;
+      delete form.value.endTime;
+      delete form.value.seckillApplyList;
+      const params = { ...form.value };
+      const startTs = new Date(form.value.startTime).getTime();
+      const applyTs = new Date(form.value.applyEndTime).getTime();
+      params.startTime = unixToDate(startTs / 1000);
+      params.applyEndTime = unixToDate(applyTs / 1000);
+      updateSeckill(params).then((res) => {
+        submitLoading.value = false;
+        if (res && res.success) {
+          Message.success("编辑成功");
+          closeCurrentPage();
+        }
+      });
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

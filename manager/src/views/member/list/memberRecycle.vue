@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -96,7 +96,7 @@
     </el-card>
 
     <el-dialog v-model="descFlag" :title="descTitle" width="500px" destroy-on-close>
-      <el-form ref="formValidate" :model="formValidate" :rules="ruleValidate" label-width="80px">
+      <el-form ref="formValidateRef" :model="formValidate" :rules="ruleValidate" label-width="80px">
         <el-form-item label="头像">
           <img :src="formValidate.face" class="face" />
           <el-button
@@ -143,7 +143,7 @@
 
     <el-dialog v-model="picModelFlag" width="1200px">
       <ossManage
-        ref="ossManage"
+        ref="ossManageRef"
         @callback="callbackSelected"
         :isComponent="true"
         :initialize="picModelFlag"
@@ -153,152 +153,156 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, nextTick, onMounted } from "vue";
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import multipleMap from "@/components/map/multiple-map";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { customRouterPush } from "@/utils/filters";
+import { md5 } from "@/utils/md5.js";
 
-export default {
-  name: "memberRecycle",
-  components: {
-    ossManage,
-    multipleMap,
-  },
-  data() {
-    return {
-      selectedMember: false,
-      descTitle: "",
-      descFlag: false,
-      openSearch: true,
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        order: "desc",
-        id: "",
-        username: "",
-        mobile: "",
-        disabled: "CLOSE",
-      },
-      picModelFlag: false,
-      formValidate: {},
-      ruleValidate: {},
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    callback(val) {
-      this.$emit("callback", val);
-    },
-    init() {
-      this.getData();
-    },
-    changePage() {
-      this.getData();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getData();
-    },
-    editPerm(val) {
-      this.descTitle = `查看用户 ${val.username}`;
-      this.descFlag = true;
-      this.getMemberInfo(val.id);
-    },
-    getMemberInfo(id) {
-      API_Member.getMemberInfoData(id).then((res) => {
-        if (res.result) {
-          this.formValidate = res.result;
-        }
-      });
-    },
-    getData() {
-      this.loading = true;
-      API_Member.getMemberListData(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    openPicSelector() {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      this.formValidate.face = val.url;
-    },
-    selectedRegion(val) {
-      if (val.type === "select") {
-        const paths = val.data.map((item) => item.name).join(",");
-        const ids = val.data.map((item) => item.id).join(",");
-        this.formValidate.region = paths;
-        this.formValidate.regionId = ids;
-      } else {
-        this.formValidate.region = val.data.addr;
-        this.formValidate.regionId = val.data.addrId;
+defineOptions({ name: "memberRecycle" });
+
+const emit = defineEmits(["callback"]);
+
+// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
+const searchFormRef = ref(null);
+const table = ref(null);
+// 模板编辑弹窗 el-form 的 ref（原 ref="formValidate"，与 data 同名会互相覆盖，改名为 formValidateRef）
+const formValidateRef = ref(null);
+// 模板 ossManage 组件的 ref（原 ref="ossManage"，与组件 import 同名会冲突，改名为 ossManageRef）
+const ossManageRef = ref(null);
+
+const selectedMember = ref(false);
+const descTitle = ref("");
+const descFlag = ref(false);
+const openSearch = ref(true);
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  order: "desc",
+  id: "",
+  username: "",
+  mobile: "",
+  disabled: "CLOSE",
+});
+const picModelFlag = ref(false);
+const formValidate = ref({});
+const ruleValidate = ref({});
+const data = ref([]);
+const total = ref(0);
+
+function callback(val) {
+  emit("callback", val);
+}
+function init() {
+  getData();
+}
+function changePage() {
+  getData();
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  getData();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getData();
+}
+function editPerm(val) {
+  descTitle.value = `查看用户 ${val.username}`;
+  descFlag.value = true;
+  getMemberInfo(val.id);
+}
+function getMemberInfo(id) {
+  API_Member.getMemberInfoData(id).then((res) => {
+    if (res.result) {
+      formValidate.value = res.result;
+    }
+  });
+}
+function getData() {
+  loading.value = true;
+  API_Member.getMemberListData(searchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function openPicSelector() {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  formValidate.value.face = val.url;
+}
+function selectedRegion(val) {
+  if (val.type === "select") {
+    const paths = val.data.map((item) => item.name).join(",");
+    const ids = val.data.map((item) => item.id).join(",");
+    formValidate.value.region = paths;
+    formValidate.value.regionId = ids;
+  } else {
+    formValidate.value.region = val.data.addr;
+    formValidate.value.regionId = val.data.addrId;
+  }
+}
+function detail(row) {
+  customRouterPush({ name: "member-detail", query: { id: row.id } });
+}
+function enable(v) {
+  let params = {
+    memberIds: [v.id],
+    disabled: true,
+  };
+  ElMessageBox.confirm("确定启用此会员？", "提示", { type: "warning" }).then(() => {
+    API_Member.updateMemberStatus(params).then((res) => {
+      if (res.success) {
+        ElMessage.success("启用成功");
+        getData();
       }
-    },
-    detail(row) {
-      customRouterPush({ name: "member-detail", query: { id: row.id } });
-    },
-    enable(v) {
-      let params = {
-        memberIds: [v.id],
-        disabled: true,
-      };
-      ElMessageBox.confirm("确定启用此会员？", "提示", { type: "warning" }).then(() => {
-        API_Member.updateMemberStatus(params).then((res) => {
-          if (res.success) {
-            ElMessage.success("启用成功");
-            this.getData();
-          }
-        });
-      }).catch(() => {});
-    },
-    handleSubmitModal() {
-      const { nickName, sex, username, face, newPassword, id, regionId, region } = this.formValidate;
-      let time = new Date(this.formValidate.birthday);
-      let birthday = time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
-      let submit = {
-        regionId: regionId,
-        region: region,
-        nickName,
-        sex,
-        birthday,
-        face: face || "",
-        id,
-      };
-      if (newPassword) {
-        submit.password = this.md5(newPassword);
-      }
-      API_Member.updateMember(submit).then((res) => {
-        if (res.result) {
-          ElMessage.success("修改成功！");
-          this.descFlag = false;
-          this.init();
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    });
+  }).catch(() => {});
+}
+function handleSubmitModal() {
+  const { nickName, sex, username, face, newPassword, id, regionId, region } = formValidate.value;
+  let time = new Date(formValidate.value.birthday);
+  let birthday = time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
+  let submit = {
+    regionId: regionId,
+    region: region,
+    nickName,
+    sex,
+    birthday,
+    face: face || "",
+    id,
+  };
+  if (newPassword) {
+    // 原 this.md5 为 main.js 注册的全局属性，改为具名导入（同 login.vue / userManage.vue）
+    submit.password = md5(newPassword);
+  }
+  API_Member.updateMember(submit).then((res) => {
+    if (res.result) {
+      ElMessage.success("修改成功！");
+      descFlag.value = false;
+      init();
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .face {

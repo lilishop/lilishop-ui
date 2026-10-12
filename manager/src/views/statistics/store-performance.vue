@@ -90,89 +90,86 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Statistics from "@/api/statistics";
 import { getShopListData } from "@/api/shops";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { unitPrice } from "@/utils/filters";
 
-export default {
-  name: "store-performance-report",
-  data() {
-    return {
-      loading: false,
-      dateRange: [],
-      defaultTime: [new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)],
-      params: { pageNumber: 1, pageSize: 20, storeId: "" },
-      data: [],
-      total: 0,
-      shops: [],
-    };
-  },
-  mounted() {
-    this.initDefaultRange();
-    this.loadShops();
-    this.loadData();
-  },
-  methods: {
-    initDefaultRange() {
-      const end = new Date();
-      const start = new Date();
-      start.setDate(start.getDate() - 6);
-      this.dateRange = [this.formatDate(start, true), this.formatDate(end, false)];
-    },
-    formatDate(date, startOfDay) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
-      return startOfDay ? `${y}-${m}-${d} 00:00:00` : `${y}-${m}-${d} 23:59:59`;
-    },
-    loadShops() {
-      getShopListData({ pageNumber: 1, pageSize: 200 }).then((res) => {
-        if (res.success) this.shops = res.result.records || [];
-      });
-    },
-    buildParams() {
-      const p = { ...this.params };
-      if (this.dateRange && this.dateRange.length === 2) {
-        p.startTime = this.dateRange[0];
-        p.endTime = this.dateRange[1];
-      }
-      return p;
-    },
-    handleSearch() {
-      this.params.pageNumber = 1;
-      this.loadData();
-    },
-    loadData() {
-      this.loading = true;
-      API_Statistics.getStorePerformanceReport(this.buildParams()).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records || [];
-          this.total = res.result.total || 0;
-        }
-      });
-    },
-    handleExport() {
-      API_Statistics.exportStorePerformanceReport(this.buildParams()).then((blob) => {
-        downloadBlob(blob, "店铺业绩报表.xlsx");
-      });
-    },
-    formatMoney(val) {
-      return this.$filters.unitPrice(val, "￥");
-    },
-    formatPercent(val) {
-      if (val == null || val === "") return "0%";
-      return `${Number(val).toFixed(2)}%`;
-    },
-    rateClass(rate) {
-      if (!rate) return "";
-      if (rate.startsWith("+")) return "trend-up";
-      if (rate.startsWith("-") && rate !== "0%") return "trend-down";
-      return "";
-    },
-  },
-};
+defineOptions({ name: "store-performance-report" });
+
+const loading = ref(false);
+const dateRange = ref([]);
+const defaultTime = ref([new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)]);
+const params = reactive({ pageNumber: 1, pageSize: 20, storeId: "" });
+const data = ref([]);
+const total = ref(0);
+const shops = ref([]);
+
+onMounted(() => {
+  initDefaultRange();
+  loadShops();
+  loadData();
+});
+
+function initDefaultRange() {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 6);
+  dateRange.value = [formatDate(start, true), formatDate(end, false)];
+}
+function formatDate(date, startOfDay) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return startOfDay ? `${y}-${m}-${d} 00:00:00` : `${y}-${m}-${d} 23:59:59`;
+}
+function loadShops() {
+  getShopListData({ pageNumber: 1, pageSize: 200 }).then((res) => {
+    if (res.success) shops.value = res.result.records || [];
+  });
+}
+function buildParams() {
+  const p = { ...params };
+  if (dateRange.value && dateRange.value.length === 2) {
+    p.startTime = dateRange.value[0];
+    p.endTime = dateRange.value[1];
+  }
+  return p;
+}
+function handleSearch() {
+  params.pageNumber = 1;
+  loadData();
+}
+function loadData() {
+  loading.value = true;
+  API_Statistics.getStorePerformanceReport(buildParams()).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records || [];
+      total.value = res.result.total || 0;
+    }
+  });
+}
+function handleExport() {
+  API_Statistics.exportStorePerformanceReport(buildParams()).then((blob) => {
+    downloadBlob(blob, "店铺业绩报表.xlsx");
+  });
+}
+function formatMoney(val) {
+  return unitPrice(val, "￥");
+}
+function formatPercent(val) {
+  if (val == null || val === "") return "0%";
+  return `${Number(val).toFixed(2)}%`;
+}
+function rateClass(rate) {
+  if (!rate) return "";
+  if (rate.startsWith("+")) return "trend-up";
+  if (rate.startsWith("-") && rate !== "0%") return "trend-down";
+  return "";
+}
 </script>
 
 <style scoped>

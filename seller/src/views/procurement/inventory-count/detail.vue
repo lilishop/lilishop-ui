@@ -68,7 +68,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import {
   getInventoryCountDetail,
   getInventoryCountItemsPage,
@@ -76,83 +78,80 @@ import {
 } from "@/api/procurement";
 import { MARKET_ENABLE } from "../constants";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "procurement-inventory-count-detail",
-  data() {
-    return {
-      MARKET_ENABLE,
-      loading: false,
-      exporting: false,
-      detail: {},
-      data: [],
-      total: 0,
-      sn: "",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        goodsName: "",
-      },
-    };
-  },
-  mounted() {
-    this.sn = this.$route.query.sn || "";
-    const id = this.$route.query.id;
-    if (id) {
-      getInventoryCountDetail(id).then((res) => {
-        if (res.success) {
-          this.detail = res.result || {};
-          this.sn = this.detail.sn || this.sn;
-        }
-      });
-      this.getDataList();
-    }
-  },
-  methods: {
-    getDataList() {
-      const id = this.$route.query.id;
-      if (!id) return;
-      this.loading = true;
-      getInventoryCountItemsPage(id, this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleReset() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 20,
-        goodsName: "",
-      };
-      this.getDataList();
-    },
-    handleExport() {
-      const id = this.$route.query.id;
-      if (!id) return;
-      this.exporting = true;
-      exportInventoryCountItems(id)
-        .then((blob) => {
-          downloadBlob(blob, `盘点单_${this.sn || id}.xlsx`);
-        })
-        .finally(() => {
-          this.exporting = false;
-        });
-    },
-    goBack() {
-      this.$filters.customRouterPush({ name: "procurementInventoryCountList" });
-    },
-  },
-};
+defineOptions({ name: "procurement-inventory-count-detail" });
+
+const route = useRoute();
+
+const loading = ref(false);
+const exporting = ref(false);
+const detail = ref({});
+const data = ref([]);
+const total = ref(0);
+const sn = ref("");
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  goodsName: "",
+});
+
+onMounted(() => {
+  sn.value = route.query.sn || "";
+  const id = route.query.id;
+  if (id) {
+    getInventoryCountDetail(id).then((res) => {
+      if (res.success) {
+        detail.value = res.result || {};
+        sn.value = detail.value.sn || sn.value;
+      }
+    });
+    getDataList();
+  }
+});
+
+function getDataList() {
+  const id = route.query.id;
+  if (!id) return;
+  loading.value = true;
+  getInventoryCountItemsPage(id, searchForm.value)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleReset() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 20,
+    goodsName: "",
+  };
+  getDataList();
+}
+function handleExport() {
+  const id = route.query.id;
+  if (!id) return;
+  exporting.value = true;
+  exportInventoryCountItems(id)
+    .then((blob) => {
+      downloadBlob(blob, `盘点单_${sn.value || id}.xlsx`);
+    })
+    .finally(() => {
+      exporting.value = false;
+    });
+}
+function goBack() {
+  customRouterPush({ name: "procurementInventoryCountList" });
+}
 </script>
 
 <style scoped>

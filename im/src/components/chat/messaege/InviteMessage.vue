@@ -20,20 +20,20 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  name: 'InviteMessage',
-  props: {
-    invite: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+defineOptions({ name: 'InviteMessage' })
+
+defineProps({
+  invite: {
+    type: Object,
+    required: true,
   },
-  methods: {
-    toUser(user_id) {
-      this.$emit('cat', user_id)
-    },
-  },
+})
+
+const emit = defineEmits(['cat'])
+
+function toUser(user_id) {
+  emit('cat', user_id)
 }
 </script>
 <style lang="less" scoped>

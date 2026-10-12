@@ -1,6 +1,8 @@
 import SocketInstance from "@/im-server/socket-instance";
 import { ServeGetUserSetting,ServeGetStoreSetting } from "@/api/user";
-import store from "@/store";
+import { useUserStore } from "@/stores/user";
+import { useTalkStore } from "@/stores/talk";
+import { useNotifyStore } from "@/stores/notify";
 import { ServeGetTalkList,ServeGetStoreTalkList } from "@/api/chat";
 import { formatTalkItem } from "@/utils/talk";
 export default {
@@ -23,7 +25,7 @@ export default {
         return ServeGetUserSetting().then(async ({ code, result }) => {
           // 如果result有值说明用户创建成功
           if (result) {
-            store.commit("UPDATE_USER_INFO", {
+            useUserStore().UPDATE_USER_INFO({
               id: result.id,
               face: result.face,
               name: result.nickName,
@@ -52,7 +54,7 @@ export default {
         //标识有值代表是店铺
         return ServeGetStoreSetting().then(async ({ code, result }) => {
           if (result) {
-            store.commit("UPDATE_USER_INFO", {
+            useUserStore().UPDATE_USER_INFO({
               id: result.id,
               face: result.storeLogo,
               name: result.storeName,
@@ -77,8 +79,8 @@ export default {
       ServeGetTalkList()
         .then(({ code, result }) => {
           if (code !== 200) return false;
-          store.commit("SET_UNREAD_NUM", 0);
-          store.commit("SET_TALK_ITEMS", {
+          useNotifyStore().SET_UNREAD_NUM(0);
+          useTalkStore().SET_TALK_ITEMS({
             items: result.map((item) => formatTalkItem(item)),
           });
           let index_name = sessionStorage.getItem("send_message_index_name");
@@ -97,8 +99,8 @@ export default {
       this.loadStatus = this.talkNum == 0 ? 0 : 1;
       return ServeGetStoreTalkList().then(({ code, result }) => {
         if (code !== 200 || !Array.isArray(result)) return false;
-        this.$store.commit("SET_UNREAD_NUM", 0);
-        this.$store.commit("SET_TALK_ITEMS", {
+        useNotifyStore().SET_UNREAD_NUM(0);
+        useTalkStore().SET_TALK_ITEMS({
           items: result.map((item) => formatTalkItem(item)),
         });
 

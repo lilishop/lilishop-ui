@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form ref="form" :model="form" label-width="120px">
+      <el-form ref="formRef" :model="form" label-width="120px">
         <div class="base-info-item">
           <h4>基本信息</h4>
           <div class="form-item-view">
@@ -203,97 +203,95 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getPlatformCouponList, getFullDiscountById } from "@/api/promotion";
 import { getGoodsSkuData } from "@/api/goods";
 import vueQr from "vue-qr";
-export default {
-  name: "add-full-discount",
-  components: {
-    "vue-qr": vueQr,
-  },
-  data() {
-    return {
-      form: {
-        discountType: "fullMinusFlag",
-        scopeType: "ALL",
-        promotionGoodsList: [],
-      },
-      id: this.$route.query.id,
-      couponList: [],
-      giftList: [],
-      giftLoading: false,
-      couponLoading: false,
-      options: {
-        disabledDate(date) {
-          return date && date.valueOf() < Date.now() - 86400000;
-        },
-      },
-    };
-  },
-  async mounted() {
-    if (this.id) {
-      this.getDetail();
-    }
-    this.getCouponList();
-    this.getGiftList();
-  },
-  methods: {
-    getDetail() {
-      getFullDiscountById(this.id).then((res) => {
-        let data = res.result;
-        if (!data.scopeType === "ALL") {
-          data.promotionGoodsList = [];
-        }
-        if (data.fullMinusFlag) {
-          data.discountType = "fullMinusFlag";
-          delete data.fullMinusFlag;
-        } else {
-          data.discountType = "fullMinusFlag";
-          delete data.fullRateFlag;
-        }
-        data.rangeTime = [];
-        data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
 
-        this.form = data;
-      });
-    },
-    getCouponList(query) {
-      let params = {
-        pageSize: 20,
-        pageNumber: 1,
-        getType: "ACTIVITY",
-        storeId: "",
-        couponName: query,
-        promotionStatus: "START",
-      };
-      this.couponLoading = true;
-      getPlatformCouponList(params).then((res) => {
-        this.couponLoading = false;
-        if (res.success) {
-          this.couponList = res.result.records;
-        }
-      });
-    },
-    getGiftList(query) {
-      let params = {
-        pageSize: 20,
-        pageNumber: 1,
-        id: query === this.form.giftId ? this.form.giftId : null,
-        goodsName: query === this.form.giftId ? null : query,
-        marketEnable: "UPPER",
-        authFlag: "PASS"
-      };
-      this.giftLoading = true;
-      getGoodsSkuData(params).then((res) => {
-        this.giftLoading = false;
-        if (res.success) {
-          this.giftList = res.result.records;
-        }
-      });
-    },
+defineOptions({ name: "add-full-discount" });
+
+const route = useRoute();
+
+const formRef = ref(null);
+const form = ref({
+  discountType: "fullMinusFlag",
+  scopeType: "ALL",
+  promotionGoodsList: [],
+});
+const id = ref(route.query.id);
+const couponList = ref([]);
+const giftList = ref([]);
+const giftLoading = ref(false);
+const couponLoading = ref(false);
+const options = {
+  disabledDate(date) {
+    return date && date.valueOf() < Date.now() - 86400000;
   },
 };
+
+onMounted(async () => {
+  if (id.value) {
+    getDetail();
+  }
+  getCouponList();
+  getGiftList();
+});
+
+function getDetail() {
+  getFullDiscountById(id.value).then((res) => {
+    let data = res.result;
+    if (!data.scopeType === "ALL") {
+      data.promotionGoodsList = [];
+    }
+    if (data.fullMinusFlag) {
+      data.discountType = "fullMinusFlag";
+      delete data.fullMinusFlag;
+    } else {
+      data.discountType = "fullMinusFlag";
+      delete data.fullRateFlag;
+    }
+    data.rangeTime = [];
+    data.rangeTime.push(new Date(data.startTime), new Date(data.endTime));
+
+    form.value = data;
+  });
+}
+function getCouponList(query) {
+  let params = {
+    pageSize: 20,
+    pageNumber: 1,
+    getType: "ACTIVITY",
+    storeId: "",
+    couponName: query,
+    promotionStatus: "START",
+  };
+  couponLoading.value = true;
+  getPlatformCouponList(params).then((res) => {
+    couponLoading.value = false;
+    if (res.success) {
+      couponList.value = res.result.records;
+    }
+  });
+}
+function getGiftList(query) {
+  let params = {
+    pageSize: 20,
+    pageNumber: 1,
+    id: query === form.value.giftId ? form.value.giftId : null,
+    goodsName: query === form.value.giftId ? null : query,
+    marketEnable: "UPPER",
+    authFlag: "PASS"
+  };
+  giftLoading.value = true;
+  getGoodsSkuData(params).then((res) => {
+    giftLoading.value = false;
+    if (res.success) {
+      giftList.value = res.result.records;
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

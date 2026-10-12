@@ -75,11 +75,13 @@
       </div>
     </div>
     <circleLoading class="loading-position" v-show="loading" />
-    <configDrawer ref="config" />
+    <configDrawer ref="configRef" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { ChatDotRound, Setting, UserFilled } from "@element-plus/icons-vue";
 import shrinkableMenu from "./main-components/shrinkable-menu/shrinkable-menu.vue";
 import tagsPageOpened from "./main-components/tags-page-opened.vue";
@@ -92,147 +94,134 @@ import { logout } from "@/api/index";
 import { getIMDetail } from "@/api/common";
 import { userMsg } from "@/api/index";
 import config from "@/config/index.js";
+import { Message } from "@/utils/message";
+import { getStore, setStore } from "@/libs/storage";
+import { useAppStore } from "@/stores/app";
+import { useUserStore } from "@/stores/user";
+import { useSettingStore } from "@/stores/setting";
 
-export default {
-  components: {
-    ChatDotRound,
-    Setting,
-    UserFilled,
-    shrinkableMenu,
-    tagsPageOpened,
-    circleLoading,
-    configDrawer,
-    storeQrcode,
-  },
-  data() {
-    return {
-      config,
-      sliceNum: 5,
-      userInfo: {},
-      storeSideLogo: "",
-      IMLink: "",
-      load: false,
-    };
-  },
-  computed: {
-    setting() {
-      return this.$store.state.setting.setting;
-    },
-    loading() {
-      return this.$store.state.app.loading;
-    },
-    pageTagsList() {
-      return this.$store.state.app.storeOpenedList;
-    },
-    showSubMenu() {
-      return this.$store.state.app.menuList.length > 0;
-    },
-    lang() {
-      return this.$store.state.app.lang;
-    },
-  },
-  methods: {
-    handleClickSetting() {
-      this.$refs.config.open();
-    },
-    async im() {
-      const accessToken = this.getStore("accessToken");
-      this.load = true;
-      await this.getIMDetailMethods();
-      const userInfo = await userMsg();
-      this.load = false;
-      if (userInfo.success && this.IMLink) {
-        window.open(`${this.IMLink}?token=` + accessToken);
-      } else {
-        this.$Message.error("请登录后再联系客服");
-      }
-    },
-    async getIMDetailMethods() {
-      const res = await getIMDetail();
-      if (res.success) {
-        this.IMLink = res.result;
-      }
-    },
-    init() {
-      const pathArr = util.setCurrentPath(this, this.$route.name);
-      if (pathArr.length >= 2) {
-        this.$store.commit("addOpenSubmenu", pathArr[1].name);
-      }
-      this.storeSideLogo = localStorage.getItem("sellerlogoImg");
-      window.document.title = localStorage.getItem("sellersiteName");
-      const link =
-        document.querySelector("link[rel*='icon']") ||
-        document.createElement("link");
-      link.type = "image/x-icon";
-      link.href = localStorage.getItem("sellerIconImg");
-      link.rel = "shortcut icon";
-      document.getElementsByTagName("head")[0].appendChild(link);
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+const userStore = useUserStore();
+const settingStore = useSettingStore();
 
-      const userInfo = JSON.parse(Cookies.get("userInfoSeller"));
-      this.userInfo = userInfo;
-      this.checkTag(this.$route.name);
+const configRef = ref(null);
+const sliceNum = ref(5);
+const userInfo = ref({});
+const storeSideLogo = ref("");
+const IMLink = ref("");
+const load = ref(false);
 
-      const currWidth = document.body.clientWidth;
-      if (currWidth <= 1200) {
-        this.sliceNum = 2;
-      }
-    },
-    handleClickUserDropdown(name) {
-      if (name === "changePass") {
-        util.openNewPage(this, "change_pass");
-        this.$router.push({ name: "change_pass" });
-      } else if (name === "loginOut") {
-        logout().then(() => {
-          Cookies.set("accessToken", "");
-          this.$store.commit("logout", this);
-          this.$store.commit("clearOpenedSubmenu");
-          this.setStore("accessToken", "");
-          this.setStore("refreshToken", "");
-          this.$router.push({ path: "/login" });
-        });
-      }
-    },
-    checkTag(name) {
-      const openpageHasTag = this.pageTagsList.some((item) => item.name === name);
-      if (!openpageHasTag) {
-        util.openNewPage(
-          this,
-          name,
-          this.$route.params || {},
-          this.$route.query || {}
-        );
-      }
-    },
-    resize() {
-      const currWidth = document.body.clientWidth;
-      const count = currWidth / 300;
-      this.sliceNum = count > 6 ? 6 : count;
-    },
-  },
-  watch: {
-    $route(to) {
-      this.$store.commit("setCurrentPageName", to.name);
-      const pathArr = util.setCurrentPath(this, to.name);
-      if (pathArr.length > 2) {
-        this.$store.commit("addOpenSubmenu", pathArr[1].name);
-      }
-      this.checkTag(to.name);
-      localStorage.currentPageName = to.name;
-    },
-    lang() {
-      util.setCurrentPath(this, this.$route.name);
-    },
-  },
-  created() {
-    this.$store.commit("setOpenedList");
-  },
-  mounted() {
-    this.init();
-    this.resize();
-    window.addEventListener("resize", this.resize);
-  },
-  beforeUnmount() {
-    window.removeEventListener("resize", this.resize);
-  },
-};
+const setting = computed(() => settingStore.setting);
+const loading = computed(() => appStore.loading);
+const pageTagsList = computed(() => appStore.storeOpenedList);
+const showSubMenu = computed(() => appStore.menuList.length > 0);
+const lang = computed(() => appStore.lang);
+
+function handleClickSetting() {
+  configRef.value.open();
+}
+
+async function im() {
+  const accessToken = getStore("accessToken");
+  load.value = true;
+  await getIMDetailMethods();
+  const userInfo = await userMsg();
+  load.value = false;
+  if (userInfo.success && IMLink.value) {
+    window.open(`${IMLink.value}?token=` + accessToken);
+  } else {
+    Message.error("请登录后再联系客服");
+  }
+}
+
+async function getIMDetailMethods() {
+  const res = await getIMDetail();
+  if (res.success) {
+    IMLink.value = res.result;
+  }
+}
+
+function init() {
+  const pathArr = util.setCurrentPath(route.name);
+  if (pathArr.length >= 2) {
+    appStore.addOpenSubmenu(pathArr[1].name);
+  }
+  storeSideLogo.value = localStorage.getItem("sellerlogoImg");
+  window.document.title = localStorage.getItem("sellersiteName");
+  const link =
+    document.querySelector("link[rel*='icon']") ||
+    document.createElement("link");
+  link.type = "image/x-icon";
+  link.href = localStorage.getItem("sellerIconImg");
+  link.rel = "shortcut icon";
+  document.getElementsByTagName("head")[0].appendChild(link);
+
+  userInfo.value = JSON.parse(Cookies.get("userInfoSeller"));
+  checkTag(route.name);
+
+  const currWidth = document.body.clientWidth;
+  if (currWidth <= 1200) {
+    sliceNum.value = 2;
+  }
+}
+
+function handleClickUserDropdown(name) {
+  if (name === "changePass") {
+    util.openNewPage("change_pass");
+    router.push({ name: "change_pass" });
+  } else if (name === "loginOut") {
+    logout().then(() => {
+      Cookies.set("accessToken", "");
+      userStore.logout();
+      appStore.clearOpenedSubmenu();
+      setStore("accessToken", "");
+      setStore("refreshToken", "");
+      router.push({ path: "/login" });
+    });
+  }
+}
+
+function checkTag(name) {
+  const openpageHasTag = pageTagsList.value.some((item) => item.name === name);
+  if (!openpageHasTag) {
+    util.openNewPage(name, route.params || {}, route.query || {});
+  }
+}
+
+function resize() {
+  const currWidth = document.body.clientWidth;
+  const count = currWidth / 300;
+  sliceNum.value = count > 6 ? 6 : count;
+}
+
+watch(
+  () => route.name,
+  (name) => {
+    appStore.setCurrentPageName(name);
+    const pathArr = util.setCurrentPath(name);
+    if (pathArr.length > 2) {
+      appStore.addOpenSubmenu(pathArr[1].name);
+    }
+    checkTag(name);
+    localStorage.currentPageName = name;
+  }
+);
+
+watch(lang, () => {
+  util.setCurrentPath(route.name);
+});
+
+appStore.setOpenedList();
+
+onMounted(() => {
+  init();
+  resize();
+  window.addEventListener("resize", resize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", resize);
+});
 </script>

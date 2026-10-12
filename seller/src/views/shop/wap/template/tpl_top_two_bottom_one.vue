@@ -14,11 +14,9 @@
   </div>
 </template>
 
-<script>
-export default {
-  title: "上二下一",
-  props: ["res"],
-};
+<script setup>
+defineOptions({ title: "上二下一" });
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

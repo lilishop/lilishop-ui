@@ -524,7 +524,7 @@
       </template>
     </el-dialog>
 
-    <hotzone ref="hotzone" @changeZone="changeZone"></hotzone>
+    <hotzone ref="hotzoneRef" @changeZone="changeZone"></hotzone>
 
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
@@ -532,13 +532,15 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, watch, nextTick } from "vue";
 import { CircleClose } from "@element-plus/icons-vue";
+import { Message } from "@/utils/message";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { modelData } from "./config";
 import hotzone from "@/components/hotzone";
@@ -548,316 +550,307 @@ import VideoConfig from "./video-config";
 import alignTextLeft from "@/assets/align-text-left.png";
 import alignTextCenter from "@/assets/align-text-center.png";
 import alignTextRight from "@/assets/align-text-right.png";
-export default {
-  components: {
-    ossManage,
-    hotzone,
-    categoryTemplate,
-    CircleClose,
-    VideoConfig,
-  },
-  data() {
+
+const props = defineProps(["res"]);
+const emit = defineEmits(["handleDrawer"]);
+
+// alignTextLeft/alignTextCenter/alignTextRight、ways(选择链接的类型)、modelData(装修数据) 为 import 常量，模板中直接使用
+const picModelFlag = ref(false); //图片选择器
+const linkType = ref("goods"); // dialog弹窗口类型
+const styleFlag = ref(false); //广告魔方开关
+const textAlign = ref(
+  props.res.options.list[0] ? props.res.options.list[0].textAlign : "center"
+); //文字对齐方式
+const promotionsFlag = ref(false); //广告魔方开关
+const selectedLinkIndex = ref(""); //选择链接的索引
+const selectedGoods = ref(""); // 已选商品
+const selectedLinks = ref(""); // 已选链接
+const modelList = ref(""); // 装修列表
+const enableSelectCategory = ref(false); //商品是否绑定分类
+const pendingCategory = ref(null); // 选择分类弹窗草稿
+const goodsSelectedIndex = ref(0); //绑定商品分类的索引
+const pictureField = ref("img"); //图片选择器回写的字段
+
+// hotzoneRef/ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
+const liliDialog = ref(null);
+const hotzoneRef = ref(null);
+const ossManageRef = ref(null);
+
+watch(
+  () => props.res,
+  (val) => {},
+  { deep: true }
+);
+
+// 选择分类（弹窗内暂存，确定后写回）
+function onCategorySelected(val) {
+  pendingCategory.value = val;
+}
+function handleCancelCategoryModal() {
+  pendingCategory.value = null;
+  enableSelectCategory.value = false;
+}
+function handleConfirmCategoryModal() {
+  if (pendingCategory.value?.length) {
+    confirmCategory(pendingCategory.value);
+  }
+  pendingCategory.value = null;
+  enableSelectCategory.value = false;
+}
+function confirmCategory(val) {
+  let data = {
+    ...props.res.options.list[0].titleWay[goodsSelectedIndex.value],
+  };
+  let callback = {
+    id: val[0].id,
+    name: val[0].name,
+    categoryIdWay: val[0].id,
+  };
+  data = {
+    ...data,
+    bindCategory: callback,
+  };
+  props.res.options.list[0].listWay = props.res.options.list[0].listWay.filter(
+    (item) => {
+      return item.___index != goodsSelectedIndex.value;
+    }
+  );
+  props.res.options.list[0].titleWay[goodsSelectedIndex.value] = data;
+}
+// 商品排序
+function slotGoods(list, key, val) {
+  const newVal = [];
+  let newValIndex = 0;
+  // 给当前点击的商品分组
+  list.forEach((item, index) => {
+    if (item.___index == key) {
+      newVal.push(item);
+    }
+  });
+  // 获得当前点击商品的索引
+  newVal.forEach((item, index) => {
+    if (item.id == val.id) {
+      newValIndex = index;
+    }
+  });
+  // 进行商品排序
+  upData(newVal, newValIndex);
+  if (list.length == newVal.length) {
+    list = newVal;
+  } else {
+    let newList;
+    newVal.forEach((item, index) => {
+      newList = list.filter((child) => {
+        return child.id != item.id && child.___index != key;
+      });
+    });
+    list = [...newList, ...newVal];
+  }
+
+  props.res.options.list[0]["listWay"] = list;
+}
+
+// 轮播图排序
+function slotBanner(val, key, index, down) {
+  if (down == "down") {
+    downData(val.options.list, index);
+  } else {
+    upData(val.options.list, index);
+  }
+}
+function upData(arr, index) {
+  let newArr = [];
+  if (arr.length > 1 && index !== 0) {
+    newArr = swapItems(arr, index, index - 1);
+  }
+  return newArr;
+}
+function swapItems(arr, index1, index2) {
+  arr[index1] = arr.splice(index2, 1, arr[index1])[0];
+  return arr;
+}
+function downData(arr, index) {
+  let newArr = [];
+  if (arr.length > 1 && index !== arr.length - 1) {
+    newArr = swapItems(arr, index, index + 1);
+  }
+  return newArr;
+}
+// 改变横纵切换title内容
+function changeDirection(val, data) {
+  if (val == "horizontal") {
+    const props = { ...data };
+    data.title = [];
+    data.title.push(props.title[0]);
+  }
+}
+// 选择风格
+function selectStyle() {
+  styleFlag.value = !styleFlag.value;
+}
+function selectPromotions() {
+  promotionsFlag.value = !promotionsFlag.value;
+}
+// 回调选择的链接
+function selectedLink(val) {
+  selectedLinks.value.zoneInfo = [];
+  delete val.selected;
+  delete val.intro;
+  delete val.mobileIntro;
+  selectedLinks.value.url = val;
+}
+// 回调的商品信息
+function selectedGoodsData(val) {
+  if (!val) return false;
+  let data = val.map((item) => {
+    delete item.selected;
+    delete item.intro;
+    delete item.mobileIntro;
     return {
-      alignTextLeft,
-      alignTextCenter,
-      alignTextRight,
-      ways, // 选择链接的类型
-      picModelFlag: false, //图片选择器
-      linkType: "goods", // dialog弹窗口类型
-      styleFlag: false, //广告魔方开关
-      textAlign: this.res.options.list[0]
-        ? this.res.options.list[0].textAlign
-        : "center", //文字对齐方式
-      promotionsFlag: false, //广告魔方开关
-      selectedLinkIndex: "", //选择链接的索引
-      modelData, // 装修数据
-      selectedGoods: "", // 已选商品
-      selectedLinks: "", // 已选链接
-      modelList: "", // 装修列表
-      enableSelectCategory: false, //商品是否绑定分类
-      pendingCategory: null, // 选择分类弹窗草稿
-      goodsSelectedIndex: 0, //绑定商品分类的索引
-      pictureField: "img", //图片选择器回写的字段
+      img: item.thumbnail,
+      title: item.goodsName,
+      type: selectedGoods.value.title,
+      ___index: selectedGoods.value.___index,
+      ...item,
     };
-  },
-  watch: {
-    res: {
-      handler: (val) => {},
-      deep: true,
-    },
-  },
-  props: ["res"],
-  methods: {
-    // 选择分类（弹窗内暂存，确定后写回）
-    onCategorySelected(val) {
-      this.pendingCategory = val;
-    },
-    handleCancelCategoryModal() {
-      this.pendingCategory = null;
-      this.enableSelectCategory = false;
-    },
-    handleConfirmCategoryModal() {
-      if (this.pendingCategory?.length) {
-        this.confirmCategory(this.pendingCategory);
-      }
-      this.pendingCategory = null;
-      this.enableSelectCategory = false;
-    },
-    confirmCategory(val) {
-      let data = {
-        ...this.res.options.list[0].titleWay[this.goodsSelectedIndex],
-      };
-      let callback = {
-        id: val[0].id,
-        name: val[0].name,
-        categoryIdWay: val[0].id,
-      };
-      data = {
-        ...data,
-        bindCategory: callback,
-      };
-      this.res.options.list[0].listWay =
-        this.res.options.list[0].listWay.filter((item) => {
-          return item.___index != this.goodsSelectedIndex;
-        });
-      this.res.options.list[0].titleWay[this.goodsSelectedIndex] = data;
-    },
-    // 商品排序
-    slotGoods(list, key, val) {
-      const newVal = [];
-      let newValIndex = 0;
-      // 给当前点击的商品分组
-      list.forEach((item, index) => {
-        if (item.___index == key) {
-          newVal.push(item);
-        }
-      });
-      // 获得当前点击商品的索引
-      newVal.forEach((item, index) => {
-        if (item.id == val.id) {
-          newValIndex = index;
-        }
-      });
-      // 进行商品排序
-      this.upData(newVal, newValIndex);
-      if (list.length == newVal.length) {
-        list = newVal;
-      } else {
-        let newList;
-        newVal.forEach((item, index) => {
-          newList = list.filter((child) => {
-            return child.id != item.id && child.___index != key;
-          });
-        });
-        list = [...newList, ...newVal];
-      }
+  });
+  props.res.options.list[0].listWay.push(...data);
+  // 清除已经绑定的分类
+  props.res.options.list[0].titleWay[goodsSelectedIndex.value].bindCategory =
+    "";
+  linkType.value = "";
+}
+// 绑定商品
+function bindGoodsId(val, index) {
+  selectedGoods.value = val;
+  goodsSelectedIndex.value = index;
+  liliDialogFlag(true);
+}
+// 绑定分类
+function bindGoodsCategory(index, key) {
+  pendingCategory.value = null;
+  enableSelectCategory.value = true;
+  goodsSelectedIndex.value = index;
+}
+// 点击抽屉
+function clickDrawer(item, index) {
+  emit("handleDrawer", item);
+  styleFlag.value = false;
+  promotionsFlag.value = false;
+}
+// 打开图片选择器
+function liliDialogFlag(flag) {
+  liliDialog.value.clearGoodsSelected();
+  liliDialog.value.goodsFlag = flag;
+  liliDialog.value.flag = true;
+}
 
-      this.res.options.list[0]["listWay"] = list;
-    },
-
-    // 轮播图排序
-    slotBanner(val, key, index, down) {
-      if (down == "down") {
-        this.downData(val.options.list, index);
-      } else {
-        this.upData(val.options.list, index);
-      }
-    },
-    upData(arr, index) {
-      let newArr = [];
-      if (arr.length > 1 && index !== 0) {
-        newArr = this.swapItems(arr, index, index - 1);
-      }
-      return newArr;
-    },
-    swapItems(arr, index1, index2) {
-      arr[index1] = arr.splice(index2, 1, arr[index1])[0];
-      return arr;
-    },
-    downData(arr, index) {
-      let newArr = [];
-      if (arr.length > 1 && index !== arr.length - 1) {
-        newArr = this.swapItems(arr, index, index + 1);
-      }
-      return newArr;
-    },
-    // 改变横纵切换title内容
-    changeDirection(val, data) {
-      if (val == "horizontal") {
-        const props = { ...data };
-        data.title = [];
-        data.title.push(props.title[0]);
-      }
-    },
-    // 选择风格
-    selectStyle() {
-      this.styleFlag = !this.styleFlag;
-    },
-    selectPromotions() {
-      this.promotionsFlag = !this.promotionsFlag;
-    },
-    // 回调选择的链接
-    selectedLink(val) {
-      this.selectedLinks.zoneInfo = [];
-      delete val.selected;
-      delete val.intro;
-      delete val.mobileIntro;
-      this.selectedLinks.url = val;
-    },
-    // 回调的商品信息
-    selectedGoodsData(val) {
-      if (!val) return false;
-      let data = val.map((item) => {
-        delete item.selected;
-        delete item.intro;
-        delete item.mobileIntro;
-        return {
-          img: item.thumbnail,
-          title: item.goodsName,
-          type: this.selectedGoods.title,
-          ___index: this.selectedGoods.___index,
-          ...item,
-        };
+function changeTextAlign(val) {
+  props.res.options.list[0].textAlign = val;
+  textAlign.value = val;
+}
+// 点击链接赋值一个唯一值，并将当前选择的模块赋值
+function clickLink(val, index, oval) {
+  selectedLinks.value = val;
+  if (val.model === "hotzone") {
+    if (!val.zoneInfo) {
+      val.zoneInfo = [];
+    }
+    hotzoneRef.value.open(val);
+  } else {
+    liliDialogFlag(false);
+  }
+}
+function addZone(zoneInfo) {
+  selectedLinks.value.zoneInfo.push(zoneInfo);
+}
+function changeZone(zoneInfo) {
+  selectedLinks.value.zoneInfo = zoneInfo;
+}
+//点击图片解析成base64
+function changeFile(item, index) {
+  const file = document.getElementById("files" + index).files[0];
+  if (file == void 0) return false;
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  nextTick((res) => {
+    reader.onload = (e) => {
+      item.img = e.target.result;
+    };
+  });
+}
+//添加设置
+function addDecorate(type, data) {
+  if (type === "notice") {
+    if (data.options.list[0].direction == "vertical") {
+      props.res.options.list[0].title.push({
+        content: "",
       });
-      this.res.options.list[0].listWay.push(...data);
-      // 清除已经绑定的分类
-      this.res.options.list[0].titleWay[this.goodsSelectedIndex].bindCategory =
-        "";
-      this.linkType = "";
-    },
-    // 绑定商品
-    bindGoodsId(val, index) {
-      this.selectedGoods = val;
-      this.goodsSelectedIndex = index;
-      this.liliDialogFlag(true);
-    },
-    // 绑定分类
-    bindGoodsCategory(index, key) {
-      this.pendingCategory = null;
-      this.enableSelectCategory = true;
-      this.goodsSelectedIndex = index;
-    },
-    // 点击抽屉
-    clickDrawer(item, index) {
-      this.$emit("handleDrawer", item);
-      this.styleFlag = false;
-      this.promotionsFlag = false;
-    },
-    // 打开图片选择器
-    liliDialogFlag(flag) {
-      this.$refs.liliDialog.clearGoodsSelected();
-      this.$refs.liliDialog.goodsFlag = flag;
-      this.$refs.liliDialog.flag = true;
-    },
-
-    changeTextAlign(val) {
-      this.res.options.list[0].textAlign = val;
-      this.textAlign = val;
-    },
-    // 点击链接赋值一个唯一值，并将当前选择的模块赋值
-    clickLink(val, index, oval) {
-      this.selectedLinks = val;
-      if (val.model === "hotzone") {
-        if (!val.zoneInfo) {
-          val.zoneInfo = [];
-        }
-        this.$refs.hotzone.open(val);
-      } else {
-        this.liliDialogFlag(false);
-      }
-    },
-    addZone(zoneInfo) {
-      this.selectedLinks.zoneInfo.push(zoneInfo);
-    },
-    changeZone(zoneInfo) {
-      this.selectedLinks.zoneInfo = zoneInfo;
-    },
-    //点击图片解析成base64
-    changeFile(item, index) {
-      const file = document.getElementById("files" + index).files[0];
-      if (file == void 0) return false;
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      this.$nextTick((res) => {
-        reader.onload = (e) => {
-          item.img = e.target.result;
-        };
-      });
-    },
-    //添加设置
-    addDecorate(type, data) {
-      if (type === "notice") {
-        if (data.options.list[0].direction == "vertical") {
-          this.res.options.list[0].title.push({
-            content: "",
-          });
-        } else {
-          this.$Message.error("仅纵向支持多添加");
-        }
-      } else {
-        let way = {
-          img: "https://picsum.photos/id/264/200/200",
-          title: "标题",
-          link: "",
-          url: "",
-          size: this.res.options.list[0] ? this.res.options.list[0].size : "",
-          model: "link",
-        };
-        this.res.options.list.push(way);
-      }
-    },
-    addHotPoint() {
-      let way = {
-        img: "https://picsum.photos/id/264/200/200",
-        text: "标题",
-        link: "",
-        url: "",
-      };
-      this.res.options.list[0].points.push(way);
-    },
-    // 图片选择器回显
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url) return;
-      if (this.pictureField === "bgImage") {
-        if (!this.selectedGoods.style) {
-          this.selectedGoods.style = {};
-        }
-        this.selectedGoods.style.bgImage = val.url;
-        return;
-      }
-      this.selectedGoods[this.pictureField] = val.url;
-    },
-    // 点击选择图片
-    handleClickFile(item, index, field = "img") {
-      this.pictureField = field;
-      this.selectedGoods = item;
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        const oss = this.$refs.ossManage;
-        if (!oss) return;
-        oss.selectImage = true;
-        if (field === "videoUrl") {
-          oss.fileType = "video";
-        } else {
-          oss.fileType = "pic";
-        }
-        oss.changeFileType();
-      });
-    },
-    removeNotice(index) {
-      this.$nextTick(() => {
-        this.res.options.list[0].title.splice(index, 1);
-      });
-    },
-    // 关闭
-    closeDecorate(index) {
-      this.$nextTick(() => {
-        this.res.options.list.splice(index, 1);
-      });
-    },
-  },
-};
+    } else {
+      Message.error("仅纵向支持多添加");
+    }
+  } else {
+    let way = {
+      img: "https://picsum.photos/id/264/200/200",
+      title: "标题",
+      link: "",
+      url: "",
+      size: props.res.options.list[0] ? props.res.options.list[0].size : "",
+      model: "link",
+    };
+    props.res.options.list.push(way);
+  }
+}
+function addHotPoint() {
+  let way = {
+    img: "https://picsum.photos/id/264/200/200",
+    text: "标题",
+    link: "",
+    url: "",
+  };
+  props.res.options.list[0].points.push(way);
+}
+// 图片选择器回显
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url) return;
+  if (pictureField.value === "bgImage") {
+    if (!selectedGoods.value.style) {
+      selectedGoods.value.style = {};
+    }
+    selectedGoods.value.style.bgImage = val.url;
+    return;
+  }
+  selectedGoods.value[pictureField.value] = val.url;
+}
+// 点击选择图片
+function handleClickFile(item, index, field = "img") {
+  pictureField.value = field;
+  selectedGoods.value = item;
+  picModelFlag.value = true;
+  nextTick(() => {
+    const oss = ossManageRef.value;
+    if (!oss) return;
+    oss.selectImage = true;
+    if (field === "videoUrl") {
+      oss.fileType = "video";
+    } else {
+      oss.fileType = "pic";
+    }
+    oss.changeFileType();
+  });
+}
+function removeNotice(index) {
+  nextTick(() => {
+    props.res.options.list[0].title.splice(index, 1);
+  });
+}
+// 关闭
+function closeDecorate(index) {
+  nextTick(() => {
+    props.res.options.list.splice(index, 1);
+  });
+}
 </script>
 <style scoped lang="scss">
 @import "./decorate.scss";

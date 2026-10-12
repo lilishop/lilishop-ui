@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -111,62 +111,60 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Order from "@/api/order";
 
-export default {
-  name: "paymentLog",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        sn: "",
-        payStatus: "",
-        startDate: "",
-        endDate: "",
-      },
-      times: [],
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    changeDate(val) {
-      this.searchForm.startDate = val[0];
-      this.searchForm.endDate = val[1];
-    },
-    getDataList() {
-      this.loading = true;
-      API_Order.paymentLog(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "paymentLog" });
+
+const searchFormRef = ref(null);
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  sn: "",
+  payStatus: "",
+  startDate: "",
+  endDate: "",
+});
+const times = ref([]);
+const data = ref([]);
+const total = ref(0);
+
+function init() {
+  getDataList();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function changeDate(val) {
+  searchForm.startDate = val[0];
+  searchForm.endDate = val[1];
+}
+function getDataList() {
+  loading.value = true;
+  API_Order.paymentLog(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>

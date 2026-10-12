@@ -2,15 +2,9 @@
   <div class="voice-message"></div>
 </template>
 
-<script>
-export default {
+<script setup>
+defineOptions({
   name: 'VoiceMessage',
-  components: {},
-  data() {
-    return {}
-  },
-  methods: {},
-  created() {},
-}
+})
 </script>
 <style lang="less" scoped></style>

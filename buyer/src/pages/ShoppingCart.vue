@@ -45,21 +45,26 @@ export default {
     window.scrollTo(0, 0);
     next();
   },
-  data () {
-    return {
-      detail: {} // 商品详情
-    };
-  },
-  mounted () {
-    const { skuId, goodsId, thumbnail, goodsName } = this.$route.query;
-    this.detail = {
-      skuId,
-      goodsId,
-      thumbnail,
-      goodsName
-    };
-  }
 };
+</script>
+
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+
+const detail = ref({}); // 商品详情
+
+onMounted(() => {
+  const { skuId, goodsId, thumbnail, goodsName } = route.query;
+  detail.value = {
+    skuId,
+    goodsId,
+    thumbnail,
+    goodsName
+  };
+});
 </script>
 
 <style scoped lang="scss">

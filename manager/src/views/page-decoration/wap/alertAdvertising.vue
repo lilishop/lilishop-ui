@@ -85,104 +85,110 @@
         ></liliDialog>
       </div>
       <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManageRef" />
     </el-dialog>
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive, watch, nextTick, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as API_Other from "@/api/other.js";
-export default {
-   components: {
-    ossManage,
+import { useAppStore } from "@/stores/app";
+
+const route = useRoute();
+const appStore = useAppStore();
+
+const result = ref("");
+const picModelFlag = ref(false); //图片选择器
+const type = ref("full"); // 展示方式
+//全屏广告
+const advertising = ref([
+  {
+    img: "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/9136ecddcddf6607184fab689207e7e3.png",
+    size: "612*836",
   },
-  data() {
-    return {
-      result:"",
-      picModelFlag: false, //图片选择器
-      type: "full", // 展示方式
-      //全屏广告
-      advertising: [
-        {
-          img:
-            "https://shopro-1253949872.file.myqcloud.com/uploads/20200704/9136ecddcddf6607184fab689207e7e3.png",
-          size: "612*836",
-        },
-      ],
-      linkType: "", // 选择类型
-      selectedLinks: {},
+]);
+const linkType = ref(""); // 选择类型
+const selectedLinks = reactive({});
+
+const liliDialog = ref(null);
+// files：v-for 文件输入框 ref，脚本内未直接读取（changeFile 通过 document.getElementById 取值）
+const files = ref([]);
+// ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
+const ossManageRef = ref(null);
+
+watch(
+  advertising,
+  (val) => {
+    appStore.openStyleStore = val;
+  },
+  { deep: true }
+);
+
+onMounted(() => {
+  openPage();
+});
+
+// 回调选择的链接
+function selectedLink(val) {
+  selectedLinks.url = val;
+
+  advertising.value[0].config = val;
+}
+
+function openPage() {
+  const alertType = route.query.pagetype;
+  const pageType = {
+    INDEX: "INDEX",
+    ALERT: "OPEN_SCREEN_PAGE",
+    OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
+  }[alertType ? alertType : "INDEX"];
+
+  API_Other.getOpenHomeData(pageType).then((res) => {
+    appStore.openStoreId = res.result.id;
+    if (res.result.pageData) {
+      advertising.value = [JSON.parse(res.result.pageData)];
+    }
+    result.value = res.result;
+  });
+}
+
+// 图片选择器回显
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url) return;
+  advertising.value[0].img = val.url;
+}
+
+// 点击选择图片
+function handleClickFile(item, index) {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+
+// 点击链接
+function clickLink(item) {
+  liliDialog.value.open("link");
+}
+
+//点击图片解析成base64
+function changeFile(item, index) {
+  const file = document.getElementById("files" + index).files[0];
+  if (file == void 0) return false;
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  nextTick((res) => {
+    reader.onload = (e) => {
+      item.img = e.target.result;
     };
-  },
-
-  watch: {
-    advertising: {
-      handler(val) {
-        this.$store.state.openStyleStore = val;
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.openPage();
-  },
-  methods: {
-    // 回调选择的链接
-    selectedLink(val) {
-      this.selectedLinks.url = val;
-
-      this.advertising[0].config = val;
-    },
-    openPage() {
-      const alertType = this.$route.query.pagetype;
-      const pageType = {
-        INDEX: "INDEX",
-        ALERT: "OPEN_SCREEN_PAGE",
-        OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
-      }[alertType ? alertType : "INDEX"];
-
-      API_Other.getOpenHomeData(pageType).then((res) => {
-        this.$store.state.openStoreId = res.result.id;
-        if (res.result.pageData) {
-          this.advertising = [JSON.parse(res.result.pageData)];
-        }
-        this.result = res.result
-      });
-    },
-    // 图片选择器回显
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url) return;
-      this.advertising[0].img = val.url;
-    },
-    // 点击选择图片
-    handleClickFile(item, index) {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    // 点击链接
-    clickLink(item) {
-      this.$refs.liliDialog.open('link')
-    },
-    //点击图片解析成base64
-    changeFile(item, index) {
-      const file = document.getElementById("files" + index).files[0];
-      if (file == void 0) return false;
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      this.$nextTick((res) => {
-        reader.onload = (e) => {
-          item.img = e.target.result;
-        };
-      });
-    },
-
-  },
-};
+  });
+}
 </script>
 <style scoped lang="scss">
 @import "./style.scss";

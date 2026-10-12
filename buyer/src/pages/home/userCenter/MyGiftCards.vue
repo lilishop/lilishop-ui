@@ -4,7 +4,7 @@
 
     <div class="bind-section mb_20">
       <div class="section-title">兑换礼品卡</div>
-      <el-form ref="bindForm" :model="bindForm" :rules="bindRules" inline class="bind-form">
+      <el-form ref="bindFormRef" :model="bindForm" :rules="bindRules" inline class="bind-form">
         <el-form-item label="卡号" prop="cardNo" label-width="60px">
           <el-input v-model="bindForm.cardNo" placeholder="请输入卡号" maxlength="64" style="width: 220px" />
         </el-form-item>
@@ -92,7 +92,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import {
   getGiftCardCashMemberCardPage,
@@ -100,194 +102,201 @@ import {
   activateGiftCardCashMemberCard,
 } from "@/api/promotion.js";
 
-export default {
-  name: "MyGiftCards",
-  data() {
-    return {
-      statusTab: "AVAILABLE",
-      loading: false,
-      total: 0,
-      list: [],
-      params: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        memberCardStatus: "AVAILABLE",
-      },
-      bindSubmitting: false,
-      bindForm: {
-        cardNo: "",
-        cardSecret: "",
-      },
-      bindRules: {
-        cardNo: [{ required: true, message: "请输入卡号", trigger: "blur" }],
-        cardSecret: [{ required: true, message: "请输入兑换码", trigger: "blur" }],
-      },
-      noticeModal: false,
-      serviceHotline: "12221111",
-      activatingId: "",
-    };
-  },
-  computed: {
-    primaryActionLabel() {
-      if (this.statusTab === "PENDING_ACTIVATION") {
-        return "激活自用";
-      }
-      if (this.statusTab === "AVAILABLE") {
-        return "去使用";
-      }
-      return "不可用";
-    },
-    primaryActionDisabled() {
-      return this.statusTab === "UNAVAILABLE";
-    },
-    pendingActivateLocked() {
-      return this.statusTab === "PENDING_ACTIVATION" && !!this.activatingId;
-    },
-  },
-  mounted() {
-    this.getList();
-  },
-  methods: {
-    formatYuan(val) {
-      if (val == null || val === "") {
-        return "—";
-      }
-      const n = Number(val);
-      if (Number.isNaN(n)) {
-        return String(val);
-      }
-      return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.?0+$/, "");
-    },
-    formatValidity(row) {
-      const t = row && row.expireTime;
-      if (!t) {
-        return "长期有效";
-      }
-      const d = new Date(t);
-      if (Number.isNaN(d.getTime())) {
-        return "长期有效";
-      }
-      if (d.getFullYear() >= 2099) {
-        return "长期有效";
-      }
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day} 到期`;
-    },
-    onStatusTab(name) {
-      this.statusTab = name;
-      this.params.memberCardStatus = name;
-      this.params.pageNumber = 1;
-      this.getList();
-    },
-    getList() {
-      this.loading = true;
-      const p = { ...this.params };
-      if (p.memberCardStatus) {
-        p.memberCardStatus = String(p.memberCardStatus);
-      }
-      getGiftCardCashMemberCardPage(p)
-        .then((res) => {
-          this.loading = false;
-          if (res.success && res.result) {
-            this.list = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    changePage(val) {
-      this.params.pageNumber = val;
-      this.getList();
-    },
-    changePageSize(val) {
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList();
-    },
-    resetBindForm() {
-      this.bindForm = { cardNo: "", cardSecret: "" };
-      this.$nextTick(() => {
-        if (this.$refs.bindForm) {
-          this.$refs.bindForm.resetFields();
-        }
-      });
-    },
-    submitBind() {
-      this.$refs.bindForm.validate((valid) => {
-        if (!valid) {
-          return;
-        }
-        this.bindSubmitting = true;
-        bindGiftCardCashMemberCard({
-          cardNo: String(this.bindForm.cardNo).trim(),
-          cardSecret: String(this.bindForm.cardSecret).trim(),
-        })
-          .then((res) => {
-            this.bindSubmitting = false;
-            if (res.success) {
-              Message.success(res.message || "兑换成功");
-              this.resetBindForm();
-              this.params.pageNumber = 1;
-              this.getList();
-            }
-          })
-          .catch(() => {
-            this.bindSubmitting = false;
-          });
-      });
-    },
-    onCardPrimaryAction(item) {
-      if (this.primaryActionDisabled) {
-        return;
-      }
-      if (this.statusTab === "PENDING_ACTIVATION") {
-        const memberCardId = this.resolveMemberCardId(item);
-        if (!memberCardId) {
-          Message.error("卡片信息异常，无法激活");
-          return;
-        }
-        this.activatingId = memberCardId;
-        activateGiftCardCashMemberCard(memberCardId)
-          .then((res) => {
-            if (res.success) {
-              Message.success(res.message || "激活成功");
-              this.getList();
-            }
-          })
-          .catch((err) => {
-            console.warn('激活礼品卡失败', err);
-          })
-          .finally(() => {
-            this.activatingId = "";
-          });
-        return;
-      }
-      if (this.statusTab === "AVAILABLE") {
-        this.$router.push({ path: "/goodsList" });
-      }
-    },
-    resolveMemberCardId(row) {
-      if (!row) {
-        return "";
-      }
-      return row.memberCardId != null && row.memberCardId !== ""
-        ? String(row.memberCardId)
-        : row.id != null && row.id !== ""
-          ? String(row.id)
-          : "";
-    },
-    isActivating(item) {
-      const id = this.resolveMemberCardId(item);
-      return !!this.activatingId && this.activatingId === id;
-    },
-  },
+defineOptions({ name: "MyGiftCards" });
+
+const router = useRouter();
+
+const statusTab = ref("AVAILABLE");
+const loading = ref(false);
+const total = ref(0);
+const list = ref([]);
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  memberCardStatus: "AVAILABLE",
+});
+const bindSubmitting = ref(false);
+const bindForm = ref({
+  cardNo: "",
+  cardSecret: "",
+});
+const bindRules = {
+  cardNo: [{ required: true, message: "请输入卡号", trigger: "blur" }],
+  cardSecret: [{ required: true, message: "请输入兑换码", trigger: "blur" }],
 };
+const noticeModal = ref(false);
+const serviceHotline = ref("12221111");
+const activatingId = ref("");
+const bindFormRef = ref(null);
+
+const primaryActionLabel = computed(() => {
+  if (statusTab.value === "PENDING_ACTIVATION") {
+    return "激活自用";
+  }
+  if (statusTab.value === "AVAILABLE") {
+    return "去使用";
+  }
+  return "不可用";
+});
+const primaryActionDisabled = computed(() => {
+  return statusTab.value === "UNAVAILABLE";
+});
+const pendingActivateLocked = computed(() => {
+  return statusTab.value === "PENDING_ACTIVATION" && !!activatingId.value;
+});
+
+onMounted(() => {
+  getList();
+});
+
+function formatYuan(val) {
+  if (val == null || val === "") {
+    return "—";
+  }
+  const n = Number(val);
+  if (Number.isNaN(n)) {
+    return String(val);
+  }
+  return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.?0+$/, "");
+}
+
+function formatValidity(row) {
+  const t = row && row.expireTime;
+  if (!t) {
+    return "长期有效";
+  }
+  const d = new Date(t);
+  if (Number.isNaN(d.getTime())) {
+    return "长期有效";
+  }
+  if (d.getFullYear() >= 2099) {
+    return "长期有效";
+  }
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day} 到期`;
+}
+
+function onStatusTab(name) {
+  statusTab.value = name;
+  params.memberCardStatus = name;
+  params.pageNumber = 1;
+  getList();
+}
+
+function getList() {
+  loading.value = true;
+  const p = { ...params };
+  if (p.memberCardStatus) {
+    p.memberCardStatus = String(p.memberCardStatus);
+  }
+  getGiftCardCashMemberCardPage(p)
+    .then((res) => {
+      loading.value = false;
+      if (res.success && res.result) {
+        list.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+function changePage(val) {
+  params.pageNumber = val;
+  getList();
+}
+
+function changePageSize(val) {
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList();
+}
+
+function resetBindForm() {
+  bindForm.value = { cardNo: "", cardSecret: "" };
+  nextTick(() => {
+    if (bindFormRef.value) {
+      bindFormRef.value.resetFields();
+    }
+  });
+}
+
+function submitBind() {
+  bindFormRef.value.validate((valid) => {
+    if (!valid) {
+      return;
+    }
+    bindSubmitting.value = true;
+    bindGiftCardCashMemberCard({
+      cardNo: String(bindForm.value.cardNo).trim(),
+      cardSecret: String(bindForm.value.cardSecret).trim(),
+    })
+      .then((res) => {
+        bindSubmitting.value = false;
+        if (res.success) {
+          Message.success(res.message || "兑换成功");
+          resetBindForm();
+          params.pageNumber = 1;
+          getList();
+        }
+      })
+      .catch(() => {
+        bindSubmitting.value = false;
+      });
+  });
+}
+
+function onCardPrimaryAction(item) {
+  if (primaryActionDisabled.value) {
+    return;
+  }
+  if (statusTab.value === "PENDING_ACTIVATION") {
+    const memberCardId = resolveMemberCardId(item);
+    if (!memberCardId) {
+      Message.error("卡片信息异常，无法激活");
+      return;
+    }
+    activatingId.value = memberCardId;
+    activateGiftCardCashMemberCard(memberCardId)
+      .then((res) => {
+        if (res.success) {
+          Message.success(res.message || "激活成功");
+          getList();
+        }
+      })
+      .catch((err) => {
+        console.warn('激活礼品卡失败', err);
+      })
+      .finally(() => {
+        activatingId.value = "";
+      });
+    return;
+  }
+  if (statusTab.value === "AVAILABLE") {
+    router.push({ path: "/goodsList" });
+  }
+}
+
+function resolveMemberCardId(row) {
+  if (!row) {
+    return "";
+  }
+  return row.memberCardId != null && row.memberCardId !== ""
+    ? String(row.memberCardId)
+    : row.id != null && row.id !== ""
+      ? String(row.id)
+      : "";
+}
+
+function isActivating(item) {
+  const id = resolveMemberCardId(item);
+  return !!activatingId.value && activatingId.value === id;
+}
 </script>
 
 <style scoped lang="scss">

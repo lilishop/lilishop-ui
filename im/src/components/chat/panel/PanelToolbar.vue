@@ -35,14 +35,14 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    value: {
-      default: 0,
-    },
+<script setup>
+defineProps({
+  value: {
+    default: 0,
   },
-}
+});
+
+defineEmits(["event"]);
 </script>
 <style lang="less" scoped>
 .multi-select {

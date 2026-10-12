@@ -39,87 +39,84 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    data: {
-      type: Object,
-      default: null,
-    },
-  },
-  data() {
-    return {
-      options: this.data.options,
-      actStatus: 0,
-      actName: "限时秒杀",
-      currHour: "00",
-      diffSeconds: 0,
-      hours: "00",
-      minutes: "00",
-      seconds: "00",
-      interval: undefined,
-    };
-  },
-  watch: {
-    diffSeconds(val) {
-      const hours = Math.floor(val / 3600);
-      const minutes = Math.floor(val / 60) % 60;
-      const seconds = val % 60;
-      this.hours = hours < 10 ? "0" + hours : hours;
-      this.minutes = minutes < 10 ? "0" + minutes : minutes;
-      this.seconds = seconds < 10 ? "0" + seconds : seconds;
+<script setup>
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 
-      if (val === 0) {
-        clearInterval(this.interval);
-        this.hours = 0;
-        this.minutes = 0;
-        this.seconds = 0;
-        this.countDown(this.options.list);
+const props = defineProps({
+  data: {
+    type: Object,
+    default: null,
+  },
+});
+
+const options = ref(props.data.options);
+const actStatus = ref(0);
+const actName = ref("限时秒杀");
+const currHour = ref("00");
+const diffSeconds = ref(0);
+const hours = ref("00");
+const minutes = ref("00");
+const seconds = ref("00");
+let interval = undefined;
+
+watch(diffSeconds, (val) => {
+  const h = Math.floor(val / 3600);
+  const m = Math.floor(val / 60) % 60;
+  const s = val % 60;
+  hours.value = h < 10 ? "0" + h : h;
+  minutes.value = m < 10 ? "0" + m : m;
+  seconds.value = s < 10 ? "0" + s : s;
+
+  if (val === 0) {
+    clearInterval(interval);
+    hours.value = 0;
+    minutes.value = 0;
+    seconds.value = 0;
+    countDown(options.value.list);
+  }
+});
+
+onMounted(() => {
+  countDown(options.value.list);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(interval);
+});
+
+function countDown(list) {
+  const nowHour = new Date().getHours();
+  if (nowHour < Number(list[0].time)) {
+    currHour.value = list[0].time;
+    actStatus.value = 0;
+  } else if (nowHour >= Number(list[list.length - 1].time + 2)) {
+    actStatus.value = 2;
+    currHour.value = list[list.length - 1].time;
+  } else {
+    actStatus.value = 1;
+    for (let i = 0; i < list.length; i++) {
+      if (nowHour == Number(list[i].time)) {
+        currHour.value = list[i].time;
       }
-    },
-  },
-  mounted() {
-    this.countDown(this.options.list);
-  },
-  beforeUnmount() {
-    clearInterval(this.interval);
-  },
-  methods: {
-    countDown(list) {
-      const nowHour = new Date().getHours();
-      if (nowHour < Number(list[0].time)) {
-        this.currHour = list[0].time;
-        this.actStatus = 0;
-      } else if (nowHour >= Number(list[list.length - 1].time + 2)) {
-        this.actStatus = 2;
-        this.currHour = list[list.length - 1].time;
-      } else {
-        this.actStatus = 1;
-        for (let i = 0; i < list.length; i++) {
-          if (nowHour == Number(list[i].time)) {
-            this.currHour = list[i].time;
-          }
-          if (
-            nowHour > Number(list[i].time) &&
-            nowHour < Number(list[i].time + 2)
-          ) {
-            this.currHour = list[i].time;
-          }
-        }
-        const zeroTime = new Date(new Date().toLocaleDateString()).getTime();
-        this.diffSeconds = Math.floor(
-          (zeroTime +
-            3600 * 1000 * (this.currHour + 2) -
-            new Date().getTime()) /
-            1000
-        );
-        this.interval = setInterval(() => {
-          this.diffSeconds--;
-        }, 1000);
+      if (
+        nowHour > Number(list[i].time) &&
+        nowHour < Number(list[i].time + 2)
+      ) {
+        currHour.value = list[i].time;
       }
-    },
-  },
-};
+    }
+    const zeroTime = new Date(new Date().toLocaleDateString()).getTime();
+    diffSeconds.value = Math.floor(
+      (zeroTime +
+        3600 * 1000 * (currHour.value + 2) -
+        new Date().getTime()) /
+        1000
+    );
+    interval = setInterval(() => {
+      diffSeconds.value--;
+    }, 1000);
+  }
+}
 </script>
 <style lang="scss" scoped>
 .seckill-wrap {

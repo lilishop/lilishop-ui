@@ -35,109 +35,108 @@
     <BaseFooter></BaseFooter>
   </div>
 </template>
-<script>
-
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { tradeDetail, pay } from '@/api/pay.js';
 import { Message, Modal } from "@/utils/message";
 
-export default {
-  data () {
-    return {
-      payDetail: {},
-      support: [],
-      walletValue: 0,
-      qrcode: '',
-      endTime: 0,
-      endText: '订单已超时取消',
-      isStart: false,
-      now: Date.now(),
-      countdownTimer: null,
-    };
-  },
-  computed: {
-    countdownText () {
-      if (!this.isStart || !this.endTime) return '';
-      const diff = this.endTime - this.now;
-      if (diff <= 0) return this.endText;
-      const days = Math.floor(diff / 86400000);
-      const hours = Math.floor((diff % 86400000) / 3600000);
-      const minutes = Math.floor((diff % 3600000) / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
-    },
-  },
-  methods: {
-    // 获取订单详情
-    getTradeDetail () {
-      const params = this.$route.query;
-      params.clientType = 'PC'
-      tradeDetail(params).then(res => {
-        if (res.success) {
-          this.payDetail = res.result;
-          this.endTime = this.payDetail.autoCancel
-          this.isStart = true
-          this.support = this.payDetail.support
-          this.walletValue = this.payDetail.walletValue
-          const price = Number(this.payDetail.price);
-          if (!Number.isNaN(price) && price <= 0) {
-            this.$router.replace('/payDone');
-          }
-        }
-      }).catch((err) => {
-        this.$router.push({name: 'MyOrder'});
-      });
-    },
-    // 支付
-    handlePay (way) {
-      // 余额支付则直接跳转
-      if (way === 'WALLET') {
-        // 如果待支付金额大于余额，则报错
-        if (this.payDetail.price > this.walletValue) {
-          Message.error('余额不足以支付当前订单，如需充值请前往会员中心');
-          return;
-        }
-      }
-      const params = this.$route.query;
-      params.paymentMethod = way;
-      params.paymentClient = 'NATIVE';
-      params.price = this.payDetail.price;
-      if (way === 'WALLET') {
-        Modal.confirm({
-          title: '支付确认',
-          content: '确认使用余额支付吗？',
-          onOk: () => {
-            return pay(params)
-              .then((res) => {
-                if (res.success) {
-                  Message.success(res.message || '支付成功');
-                  this.$router.push('/payDone');
-                } else {
-                  Message.warning(res.message || '支付失败');
-                }
-              })
-              .catch((err) => {
-                // 支付失败兜底：业务错误（如 CARD_KEY_STORE_SELL_FORBIDDEN）通常已由 axios 拦截器提示
-                if (err?.message && !err?.data?.message) {
-                  Message.error(err.message);
-                }
-              });
-          }
-        });
-      } else {
-        this.$router.push({path: '/qrpay', query: params});
+const route = useRoute();
+const router = useRouter();
+
+const payDetail = ref({});
+const support = ref([]);
+const walletValue = ref(0);
+const qrcode = ref('');
+const endTime = ref(0);
+const endText = ref('订单已超时取消');
+const isStart = ref(false);
+const now = ref(Date.now());
+let countdownTimer = null;
+
+const countdownText = computed(() => {
+  if (!isStart.value || !endTime.value) return '';
+  const diff = endTime.value - now.value;
+  if (diff <= 0) return endText.value;
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+  return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
+});
+
+// 获取订单详情
+function getTradeDetail() {
+  const params = route.query;
+  params.clientType = 'PC'
+  tradeDetail(params).then(res => {
+    if (res.success) {
+      payDetail.value = res.result;
+      endTime.value = payDetail.value.autoCancel
+      isStart.value = true
+      support.value = payDetail.value.support
+      walletValue.value = payDetail.value.walletValue
+      const price = Number(payDetail.value.price);
+      if (!Number.isNaN(price) && price <= 0) {
+        router.replace('/payDone');
       }
     }
-  },
-  mounted () {
-    this.getTradeDetail();
-    this.countdownTimer = setInterval(() => {
-      this.now = Date.now();
-    }, 1000);
-  },
-  beforeUnmount () {
-    if (this.countdownTimer) clearInterval(this.countdownTimer);
-  },
-};
+  }).catch((err) => {
+    router.push({name: 'MyOrder'});
+  });
+}
+
+// 支付
+function handlePay(way) {
+  // 余额支付则直接跳转
+  if (way === 'WALLET') {
+    // 如果待支付金额大于余额，则报错
+    if (payDetail.value.price > walletValue.value) {
+      Message.error('余额不足以支付当前订单，如需充值请前往会员中心');
+      return;
+    }
+  }
+  const params = route.query;
+  params.paymentMethod = way;
+  params.paymentClient = 'NATIVE';
+  params.price = payDetail.value.price;
+  if (way === 'WALLET') {
+    Modal.confirm({
+      title: '支付确认',
+      content: '确认使用余额支付吗？',
+      onOk: () => {
+        return pay(params)
+          .then((res) => {
+            if (res.success) {
+              Message.success(res.message || '支付成功');
+              router.push('/payDone');
+            } else {
+              Message.warning(res.message || '支付失败');
+            }
+          })
+          .catch((err) => {
+            // 支付失败兜底：业务错误（如 CARD_KEY_STORE_SELL_FORBIDDEN）通常已由 axios 拦截器提示
+            if (err?.message && !err?.data?.message) {
+              Message.error(err.message);
+            }
+          });
+      }
+    });
+  } else {
+    router.push({path: '/qrpay', query: params});
+  }
+}
+
+onMounted(() => {
+  getTradeDetail();
+  countdownTimer = setInterval(() => {
+    now.value = Date.now();
+  }, 1000);
+});
+
+onBeforeUnmount(() => {
+  if (countdownTimer) clearInterval(countdownTimer);
+});
 </script>
 <style scoped lang="scss">
 .head-left {

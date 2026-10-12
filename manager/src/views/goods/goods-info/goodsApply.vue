@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -87,104 +87,103 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { authGoods, getAuthGoodsListData } from "@/api/goods";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "goodsApply",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-      },
-      goodsAuditForm: {
-        auth_flag: 1,
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    unitPrice,
-    authFlagText(v) {
-      const map = {
-        TOBEAUDITED: "待审核",
-        PASS: "审核通过",
-        REFUSE: "审核拒绝",
-      };
-      return map[v] || v || "-";
-    },
-    authFlagTagType(v) {
-      const map = {
-        TOBEAUDITED: "warning",
-        PASS: "success",
-        REFUSE: "danger",
-      };
-      return map[v] || "info";
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      this.searchForm.authFlag = 0;
-      getAuthGoodsListData(this.searchForm)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    examine(v, authFlag) {
-      const examine = authFlag === 1 ? "通过" : "拒绝";
-      this.goodsAuditForm.authFlag = authFlag === 1 ? "PASS" : "REFUSE";
-      ElMessageBox.confirm(`您确认要审核${examine} ${v.goodsName} ?`, "确认审核", { type: "warning" }).then(() => {
-        const formData = new FormData();
-        formData.append("goodsIds", v.id);
-        formData.append("authFlag", this.goodsAuditForm.authFlag);
-        return authGoods(formData).then((res) => {
-          if (res.success) {
-            ElMessage.success("审核成功");
-            this.getDataList();
-          }
-        });
-      }).catch(() => {});
-    },
-    showDetail(v) {
-      customRouterPush({
-        name: "goods-detail",
-        query: { id: v.id },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "goodsApply" });
+
+// 模板中 el-form 的 ref 与数据 searchForm 同名，避免相互覆盖改名
+const searchFormRef = ref(null);
+const table = ref(null);
+
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "create_time",
+  order: "desc",
+});
+const goodsAuditForm = ref({
+  auth_flag: 1,
+});
+const data = ref([]);
+const total = ref(0);
+
+function authFlagText(v) {
+  const map = {
+    TOBEAUDITED: "待审核",
+    PASS: "审核通过",
+    REFUSE: "审核拒绝",
+  };
+  return map[v] || v || "-";
+}
+function authFlagTagType(v) {
+  const map = {
+    TOBEAUDITED: "warning",
+    PASS: "success",
+    REFUSE: "danger",
+  };
+  return map[v] || "info";
+}
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  searchForm.value.authFlag = 0;
+  getAuthGoodsListData(searchForm.value)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+function examine(v, authFlag) {
+  const examine = authFlag === 1 ? "通过" : "拒绝";
+  goodsAuditForm.value.authFlag = authFlag === 1 ? "PASS" : "REFUSE";
+  ElMessageBox.confirm(`您确认要审核${examine} ${v.goodsName} ?`, "确认审核", { type: "warning" }).then(() => {
+    const formData = new FormData();
+    formData.append("goodsIds", v.id);
+    formData.append("authFlag", goodsAuditForm.value.authFlag);
+    return authGoods(formData).then((res) => {
+      if (res.success) {
+        ElMessage.success("审核成功");
+        getDataList();
+      }
+    });
+  }).catch(() => {});
+}
+function showDetail(v) {
+  customRouterPush({
+    name: "goods-detail",
+    query: { id: v.id },
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style scoped>

@@ -33,567 +33,608 @@
   </div>
 </template>
 
-<script>
-import { markRaw } from "vue";
+<script setup>
+import { markRaw, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import config from "@/config/index";
+import { Message } from "@/utils/message";
 
 const OVERLAY_ID = "polygon";
 
-export default {
-  name: "ServiceAreaFence",
-  props: {
-    modelValue: {
-      type: String,
-      default: "",
-    },
-    visible: {
-      type: Boolean,
-      default: true,
-    },
+defineOptions({ name: "ServiceAreaFence" });
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: "",
   },
-  emits: ["update:modelValue"],
-  data() {
-    return {
-      keyword: "",
-      tips: [],
-      pointCount: 0,
-      areaCount: 0,
-      drawing: false,
-      mode: "edit",
-      ready: false,
-    };
+  visible: {
+    type: Boolean,
+    default: true,
   },
-  created() {
-    this.map = null;
-    this.editor = null;
-    this.polygon = null;
-    this.suggestion = null;
-    this.TMap = null;
-    this.geometryId = "";
-    this.draftRing = [];
-    this.clickRing = [];
-    this.areas = [];
-    this.booting = false;
-    this.alive = true;
-  },
-  watch: {
-    visible(val) {
-      if (!val) {
-        this.destroyMap();
-        return;
-      }
-      this.$nextTick(() => this.scheduleInit());
-    },
-    modelValue(val) {
-      if (!this.ready || val === this.currentJson()) {
-        return;
-      }
-      this.renderPolygons(parsePolygons(val));
-    },
-  },
-  mounted() {
-    this.observer = new ResizeObserver(() => {
-      if (this.map) {
-        this.resizeMap();
-        return;
-      }
-      this.scheduleInit();
-    });
-    if (this.$refs.mapEl) {
-      this.observer.observe(this.$refs.mapEl);
+});
+
+const emit = defineEmits(["update:modelValue"]);
+
+const keyword = ref("");
+const tips = ref([]);
+const pointCount = ref(0);
+const areaCount = ref(0);
+const drawing = ref(false);
+const mode = ref("edit");
+const ready = ref(false);
+
+// 模板 ref（原 this.$refs.mapEl），与顶层变量无同名冲突，保持原名
+const mapEl = ref(null);
+
+// 以下字段原本未在 data 声明、直接挂 this 上（created/mounted/方法内赋值），
+// 非响应式实例字段，这里补声明为普通变量，避免 script setup 严格模式 ReferenceError
+let map = null;
+let editor = null;
+let polygon = null;
+let suggestion = null;
+let TMap = null;
+let geometryId = "";
+let draftRing = [];
+let clickRing = [];
+let areas = [];
+let booting = false;
+let alive = true;
+let observer = null;
+let mapBox = null;
+let onMapDblClick = null;
+let onMapContextMenu = null;
+let pendingRing = null;
+let committedJson = "";
+
+watch(
+  () => props.visible,
+  (val) => {
+    if (!val) {
+      destroyMap();
+      return;
     }
-    this.scheduleInit();
-  },
-  beforeUnmount() {
-    this.alive = false;
-    if (this.observer) {
-      this.observer.disconnect();
+    nextTick(() => scheduleInit());
+  }
+);
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (!ready.value || val === currentJson()) {
+      return;
     }
-    this.destroyMap();
-  },
-  methods: {
-    scheduleInit() {
-      if (this.map || this.booting || !this.visible || !this.alive) {
+    renderPolygons(parsePolygons(val));
+  }
+);
+
+onMounted(() => {
+  observer = new ResizeObserver(() => {
+    if (map) {
+      resizeMap();
+      return;
+    }
+    scheduleInit();
+  });
+  if (mapEl.value) {
+    observer.observe(mapEl.value);
+  }
+  scheduleInit();
+});
+
+onBeforeUnmount(() => {
+  alive = false;
+  if (observer) {
+    observer.disconnect();
+  }
+  destroyMap();
+});
+
+function scheduleInit() {
+  if (map || booting || !props.visible || !alive) {
+    return;
+  }
+  const el = mapEl.value;
+  if (!el || el.clientWidth < 10 || el.clientHeight < 10) {
+    return;
+  }
+  initMap();
+}
+
+function initMap() {
+  if (!config.tMapKey) {
+    // 原代码写作 this.$message，但全局只注册了 $Message（小写笔误），此处按作者意图使用 Message
+    Message.error("未配置腾讯地图 Key");
+    return;
+  }
+  const el = mapEl.value;
+  if (!el || el.clientWidth < 10 || el.clientHeight < 10) {
+    return;
+  }
+  booting = true;
+  loadTMap(config.tMapKey)
+    .then((tmap) => {
+      if (!alive || !props.visible) {
+        booting = false;
         return;
       }
-      const el = this.$refs.mapEl;
-      if (!el || el.clientWidth < 10 || el.clientHeight < 10) {
+      const box = mapEl.value;
+      if (!box || box.clientWidth < 10 || box.clientHeight < 10) {
+        booting = false;
         return;
       }
-      this.initMap();
-    },
-    initMap() {
-      if (!config.tMapKey) {
-        this.$message.error("未配置腾讯地图 Key");
-        return;
-      }
-      const el = this.$refs.mapEl;
-      if (!el || el.clientWidth < 10 || el.clientHeight < 10) {
-        return;
-      }
-      this.booting = true;
-      loadTMap(config.tMapKey)
-        .then((TMap) => {
-          if (!this.alive || !this.visible) {
-            this.booting = false;
-            return;
-          }
-          const box = this.$refs.mapEl;
-          if (!box || box.clientWidth < 10 || box.clientHeight < 10) {
-            this.booting = false;
-            return;
-          }
-          this.TMap = markRaw(TMap);
-          this.map = markRaw(
-            new TMap.Map(box, {
-              zoom: 11,
-              center: new TMap.LatLng(39.90923, 116.397428),
-              doubleClickZoom: false,
-            })
-          );
-          if (typeof this.map.setDoubleClickZoom === "function") {
-            this.map.setDoubleClickZoom(false);
-          }
-          this.bindFinishGesture(box);
-          const polygonStyle = new TMap.PolygonStyle({
-            color: "rgba(64,158,255,0.25)",
-            showBorder: true,
-            borderColor: "#409EFF",
-            borderWidth: 2,
-          });
-          this.polygon = markRaw(
-            new TMap.MultiPolygon({
-              map: this.map,
-              styles: {
-                default: polygonStyle,
-                highlight: polygonStyle,
-              },
-              geometries: [],
-            })
-          );
-          this.editor = markRaw(
-            new TMap.tools.GeometryEditor({
-              map: this.map,
-              overlayList: [
-                {
-                  id: OVERLAY_ID,
-                  overlay: this.polygon,
-                  drawingStyleId: "highlight",
-                  selectedStyleId: "highlight",
-                },
-              ],
-              actionMode: TMap.tools.constants.EDITOR_ACTION.INTERACT,
-              activeOverlayId: OVERLAY_ID,
-              selectable: true,
-              snappable: true,
-              enableKeyboardEsc: true,
-              enableUndoDraw: true,
-            })
-          );
-          if (typeof this.editor.setSnapPolyStartPointOnDrawing === "function") {
-            this.editor.setSnapPolyStartPointOnDrawing(true);
-          }
-          if (typeof this.editor.setUndoDrawEnable === "function") {
-            this.editor.setUndoDrawEnable(true);
-          }
-          if (typeof this.editor.setKeyboardEscEnable === "function") {
-            this.editor.setKeyboardEscEnable(true);
-          }
-          this.map.on("click", (event) => this.onMapClick(event));
-          this.editor.on("drawing", (evt) => this.onDrawing(evt));
-          this.editor.on("draw_complete", (geometry) => this.onDrawComplete(geometry));
-          this.editor.on("draw_error", () => {
-            this.$message.warning("围栏不能自相交，请调整顶点后再结束");
-          });
-          this.editor.on("adjust_complete", (geometry) => this.onAdjustComplete(geometry));
-          this.editor.on("delete_complete", (list) => this.onDeleteComplete(list));
-          this.suggestion = markRaw(new TMap.service.Suggestion({ pageSize: 8 }));
-          this.ready = true;
-          this.booting = false;
-          this.renderPolygons(parsePolygons(this.modelValue));
-          this.$nextTick(() => this.resizeMap());
+      TMap = markRaw(tmap);
+      map = markRaw(
+        new TMap.Map(box, {
+          zoom: 11,
+          center: new TMap.LatLng(39.90923, 116.397428),
+          doubleClickZoom: false,
         })
-        .catch((error) => {
-          this.destroyMap();
-          const text = String(error && error.message ? error.message : error);
-          if (text.includes("far <= 0") || text.includes("near <= 0")) {
-            return;
-          }
-          this.$message.error("腾讯地图加载失败，请检查 Key 是否开通 JavaScript API GL");
-        });
-    },
-    resizeMap() {
-      const el = this.$refs.mapEl;
-      if (!this.map || !el || el.clientWidth < 10 || el.clientHeight < 10) {
-        return;
-      }
-      if (typeof this.map.resize === "function") {
-        this.map.resize();
-      }
-    },
-    search() {
-      const keyword = (this.keyword || "").trim();
-      if (!this.suggestion || !keyword) {
-        this.tips = [];
-        return;
-      }
-      this.suggestion
-        .getSuggestions({ keyword })
-        .then((result) => {
-          this.tips = (result.data || [])
-            .filter((item) => item.location)
-            .map((item) => ({
-              name: item.title,
-              address: item.address || "",
-              location: item.location,
-            }));
-        })
-        .catch(() => {
-          this.tips = [];
-        });
-    },
-    selectTip(tip) {
-      if (!tip || !tip.location || !this.map) {
-        return;
-      }
-      this.map.setCenter(tip.location);
-      this.map.setZoom(15);
-      this.tips = [];
-    },
-    bindFinishGesture(box) {
-      this.unbindFinishGesture();
-      this.mapBox = box;
-      this.onMapDblClick = (event) => {
-        if (!this.drawing || this.pickedCount() < 3) {
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        this.finishDraw();
-      };
-      this.onMapContextMenu = (event) => {
-        if (this.mode !== "draw") {
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        this.undoDrawPoint();
-      };
-      box.addEventListener("dblclick", this.onMapDblClick, true);
-      box.addEventListener("contextmenu", this.onMapContextMenu, true);
-    },
-    unbindFinishGesture() {
-      if (this.mapBox && this.onMapDblClick) {
-        this.mapBox.removeEventListener("dblclick", this.onMapDblClick, true);
-      }
-      if (this.mapBox && this.onMapContextMenu) {
-        this.mapBox.removeEventListener("contextmenu", this.onMapContextMenu, true);
-      }
-      this.mapBox = null;
-      this.onMapDblClick = null;
-      this.onMapContextMenu = null;
-    },
-    undoDrawPoint() {
-      if (!this.editor) {
-        return;
-      }
-      if (typeof this.editor.undo === "function") {
-        this.editor.undo();
-        return;
-      }
-      const event = new KeyboardEvent("keydown", {
-        key: "z",
-        code: "KeyZ",
-        ctrlKey: true,
-        bubbles: true,
-        cancelable: true,
-      });
-      if (this.mapBox) {
-        this.mapBox.dispatchEvent(event);
-      }
-      document.dispatchEvent(event);
-    },
-    onMapClick(event) {
-      if (!this.drawing) {
-        return;
-      }
-      const point = latLngOf(event && (event.latLng || event.latlng));
-      if (!point) {
-        return;
-      }
-      this.clickRing = dedupeRing((this.clickRing || []).concat([point]));
-      this.pointCount = this.pickedCount();
-    },
-    onDrawing(evt) {
-      const ring = dedupeRing(ringFromPaths(evt && evt.geometry && evt.geometry.paths));
-      if (!ring.length) {
-        return;
-      }
-      this.draftRing = ring;
-      this.pointCount = this.pickedCount();
-    },
-    pickedCount() {
-      return Math.max((this.draftRing || []).length, (this.clickRing || []).length);
-    },
-    pickedRing() {
-      const editorRing = dedupeRing(this.draftRing || []);
-      const clickRing = dedupeRing(this.clickRing || []);
-      if (clickRing.length >= 3) {
-        return clickRing;
-      }
-      return editorRing.length >= clickRing.length ? editorRing : clickRing;
-    },
-    startDraw() {
-      if (!this.editor || !this.polygon) {
-        return;
-      }
-      this.mode = "draw";
-      this.drawing = true;
-      this.pointCount = 0;
-      this.draftRing = [];
-      this.clickRing = [];
-      this.pendingRing = null;
-      this.editor.setActiveOverlay(OVERLAY_ID);
-      if (typeof this.editor.setSelectable === "function") {
-        this.editor.setSelectable(false);
-      }
-      this.editor.setActionMode(this.TMap.tools.constants.EDITOR_ACTION.DRAW);
-    },
-    startEdit() {
-      if (!this.editor) {
-        return;
-      }
-      if (this.drawing && this.pickedCount() >= 3) {
-        this.finishDraw();
-      } else if (typeof this.editor.stop === "function") {
-        try {
-          this.editor.stop();
-        } catch (e) {
-          // 没有进行中的绘制时停止会抛错
-        }
-      }
-      this.mode = "edit";
-      this.drawing = false;
-      this.pointCount = 0;
-      this.draftRing = [];
-      this.clickRing = [];
-      this.pendingRing = null;
-      if (typeof this.editor.setSelectable === "function") {
-        this.editor.setSelectable(true);
-      }
-      this.editor.setActionMode(this.TMap.tools.constants.EDITOR_ACTION.INTERACT);
-      this.fitAll();
-    },
-    finishDraw() {
-      if (!this.editor || !this.polygon || !this.drawing) {
-        return;
-      }
-      const ring = this.pickedRing();
-      if (ring.length < 3) {
-        this.$message.warning("至少点击 3 个顶点后再结束");
-        return;
-      }
-      this.pendingRing = ring;
-      const before = (this.areas || []).length;
-      if (typeof this.editor.stop === "function") {
-        try {
-          this.editor.stop();
-        } catch (e) {
-          // 编辑器中断绘制时可能抛错，随后用已选顶点落图
-        }
-      }
-      if ((this.areas || []).length === before && this.pendingRing) {
-        this.appendArea("fence-" + Date.now(), this.pendingRing);
-      }
-      this.pendingRing = null;
-    },
-    deleteSelected() {
-      if (!this.editor || this.mode !== "edit") {
-        this.$message.warning("请先进入编辑模式并选中区域");
-        return;
-      }
-      const selected = typeof this.editor.getSelectedList === "function" ? this.editor.getSelectedList() || [] : [];
-      if (!selected.length) {
-        this.$message.warning("请先选中要删除的区域");
-        return;
-      }
-      const ids = selected.map((item) => item && item.id).filter(Boolean);
-      if (typeof this.editor.delete === "function") {
-        this.editor.delete();
-      }
-      this.areas = (this.areas || []).filter((area) => !ids.includes(area.id));
-      this.redrawAreas();
-      this.publishAreas();
-    },
-    onDrawComplete(geometry) {
-      if (!this.polygon) {
-        return;
-      }
-      let ring = ringFromGeometry(geometry);
-      if (ring.length < 3) {
-        ring = this.pendingRing || this.pickedRing();
-      }
-      this.pendingRing = null;
-      if (ring.length < 3) {
-        return;
-      }
-      this.appendArea((geometry && geometry.id) || "fence-" + Date.now(), ring);
-    },
-    onAdjustComplete(geometry) {
-      const ring = ringFromGeometry(geometry);
-      const id = geometry && geometry.id;
-      if (!id || ring.length < 3) {
-        return;
-      }
-      const areas = (this.areas || []).slice();
-      const index = areas.findIndex((item) => item.id === id);
-      if (index >= 0) {
-        areas[index] = { id, ring };
-      } else {
-        areas.push({ id, ring });
-      }
-      this.areas = areas;
-      this.publishAreas();
-    },
-    onDeleteComplete(list) {
-      const ids = (list || []).map((item) => item && item.id).filter(Boolean);
-      if (!ids.length) {
-        return;
-      }
-      this.areas = (this.areas || []).filter((area) => !ids.includes(area.id));
-      this.publishAreas();
-    },
-    appendArea(id, ring) {
-      const clean = dedupeRing(ring || []);
-      if (clean.length < 3) {
-        return;
-      }
-      const areas = (this.areas || []).filter((area) => area.id !== id);
-      areas.push({ id, ring: clean });
-      this.areas = areas;
-      this.redrawAreas();
-      this.publishAreas();
-      this.draftRing = [];
-      this.clickRing = [];
-      this.pointCount = 0;
-      this.fitAll();
-      if (this.mode === "draw") {
-        this.drawing = true;
-        if (typeof this.editor.setSelectable === "function") {
-          this.editor.setSelectable(false);
-        }
-        this.editor.setActionMode(this.TMap.tools.constants.EDITOR_ACTION.DRAW);
-      }
-    },
-    redrawAreas() {
-      if (!this.polygon || !this.TMap) {
-        return;
-      }
-      this.polygon.setGeometries(
-        (this.areas || []).map((area) => ({
-          id: area.id,
-          styleId: "highlight",
-          paths: area.ring.map((point) => new this.TMap.LatLng(point.lat, point.lng)),
-        }))
       );
-    },
-    publishAreas() {
-      const areas = this.areas || [];
-      this.areaCount = areas.length;
-      if (!areas.length) {
-        this.committedJson = "";
-        if (this.modelValue) {
-          this.$emit("update:modelValue", "");
-        }
-        return;
+      if (typeof map.setDoubleClickZoom === "function") {
+        map.setDoubleClickZoom(false);
       }
-      const json = JSON.stringify({
-        paths: areas.map((area) =>
-          area.ring.map((point) => [
-            Number(Number(point.lng).toFixed(6)),
-            Number(Number(point.lat).toFixed(6)),
-          ])
-        ),
+      bindFinishGesture(box);
+      const polygonStyle = new TMap.PolygonStyle({
+        color: "rgba(64,158,255,0.25)",
+        showBorder: true,
+        borderColor: "#409EFF",
+        borderWidth: 2,
       });
-      this.committedJson = json;
-      if (json !== (this.modelValue || "")) {
-        this.$emit("update:modelValue", json);
+      polygon = markRaw(
+        new TMap.MultiPolygon({
+          map: map,
+          styles: {
+            default: polygonStyle,
+            highlight: polygonStyle,
+          },
+          geometries: [],
+        })
+      );
+      editor = markRaw(
+        new TMap.tools.GeometryEditor({
+          map: map,
+          overlayList: [
+            {
+              id: OVERLAY_ID,
+              overlay: polygon,
+              drawingStyleId: "highlight",
+              selectedStyleId: "highlight",
+            },
+          ],
+          actionMode: TMap.tools.constants.EDITOR_ACTION.INTERACT,
+          activeOverlayId: OVERLAY_ID,
+          selectable: true,
+          snappable: true,
+          enableKeyboardEsc: true,
+          enableUndoDraw: true,
+        })
+      );
+      if (typeof editor.setSnapPolyStartPointOnDrawing === "function") {
+        editor.setSnapPolyStartPointOnDrawing(true);
       }
-    },
-    renderPolygons(polygons) {
-      if (!this.polygon || !this.TMap || !this.editor) {
-        return;
+      if (typeof editor.setUndoDrawEnable === "function") {
+        editor.setUndoDrawEnable(true);
       }
-      if (typeof this.editor.stop === "function") {
-        try {
-          this.editor.stop();
-        } catch (e) {
-          // 初始化时没有进行中的绘制
-        }
+      if (typeof editor.setKeyboardEscEnable === "function") {
+        editor.setKeyboardEscEnable(true);
       }
-      this.areas = (polygons || []).map((ring, index) => ({
-        id: "fence-" + index,
-        ring,
-      }));
-      this.redrawAreas();
-      this.areaCount = this.areas.length;
-      this.committedJson = this.modelValue || "";
-      this.mode = "edit";
-      this.drawing = false;
-      this.pointCount = 0;
-      this.editor.setActiveOverlay(OVERLAY_ID);
-      if (typeof this.editor.setSelectable === "function") {
-        this.editor.setSelectable(true);
-      }
-      this.editor.setActionMode(this.TMap.tools.constants.EDITOR_ACTION.INTERACT);
-      this.fitAll();
-    },
-    fitAll() {
-      if (!this.map || !this.TMap) {
-        return;
-      }
-      const points = [];
-      (this.areas || []).forEach((area) => {
-        (area.ring || []).forEach((point) => points.push(point));
+      map.on("click", (event) => onMapClick(event));
+      editor.on("drawing", (evt) => onDrawing(evt));
+      editor.on("draw_complete", (geometry) => onDrawComplete(geometry));
+      editor.on("draw_error", () => {
+        Message.warning("围栏不能自相交，请调整顶点后再结束");
       });
-      if (points.length < 2) {
+      editor.on("adjust_complete", (geometry) => onAdjustComplete(geometry));
+      editor.on("delete_complete", (list) => onDeleteComplete(list));
+      suggestion = markRaw(new TMap.service.Suggestion({ pageSize: 8 }));
+      ready.value = true;
+      booting = false;
+      renderPolygons(parsePolygons(props.modelValue));
+      nextTick(() => resizeMap());
+    })
+    .catch((error) => {
+      destroyMap();
+      const text = String(error && error.message ? error.message : error);
+      if (text.includes("far <= 0") || text.includes("near <= 0")) {
         return;
       }
-      const bounds = new this.TMap.LatLngBounds();
-      points.forEach((point) => bounds.extend(new this.TMap.LatLng(point.lat, point.lng)));
-      this.map.fitBounds(bounds, { padding: 48 });
-    },
-    currentJson() {
-      return this.committedJson || "";
-    },
-    destroyMap() {
-      this.ready = false;
-      this.booting = false;
-      this.drawing = false;
-      this.unbindFinishGesture();
-      const editor = this.editor;
-      const map = this.map;
-      this.editor = null;
-      this.map = null;
-      this.polygon = null;
-      this.suggestion = null;
-      try {
-        if (editor && typeof editor.destroy === "function") {
-          editor.destroy();
-        }
-      } catch (e) {
-        // 容器已隐藏时，腾讯地图会在销毁过程中抛 far <= 0
-      }
-      try {
-        if (map && typeof map.destroy === "function") {
-          map.destroy();
-        }
-      } catch (e) {
-        // 同上
-      }
-    },
-  },
-};
+      Message.error("腾讯地图加载失败，请检查 Key 是否开通 JavaScript API GL");
+    });
+}
+
+function resizeMap() {
+  const el = mapEl.value;
+  if (!map || !el || el.clientWidth < 10 || el.clientHeight < 10) {
+    return;
+  }
+  if (typeof map.resize === "function") {
+    map.resize();
+  }
+}
+
+function search() {
+  const kw = (keyword.value || "").trim();
+  if (!suggestion || !kw) {
+    tips.value = [];
+    return;
+  }
+  suggestion
+    .getSuggestions({ keyword: kw })
+    .then((result) => {
+      tips.value = (result.data || [])
+        .filter((item) => item.location)
+        .map((item) => ({
+          name: item.title,
+          address: item.address || "",
+          location: item.location,
+        }));
+    })
+    .catch(() => {
+      tips.value = [];
+    });
+}
+
+function selectTip(tip) {
+  if (!tip || !tip.location || !map) {
+    return;
+  }
+  map.setCenter(tip.location);
+  map.setZoom(15);
+  tips.value = [];
+}
+
+function bindFinishGesture(box) {
+  unbindFinishGesture();
+  mapBox = box;
+  onMapDblClick = (event) => {
+    if (!drawing.value || pickedCount() < 3) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    finishDraw();
+  };
+  onMapContextMenu = (event) => {
+    if (mode.value !== "draw") {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    undoDrawPoint();
+  };
+  box.addEventListener("dblclick", onMapDblClick, true);
+  box.addEventListener("contextmenu", onMapContextMenu, true);
+}
+
+function unbindFinishGesture() {
+  if (mapBox && onMapDblClick) {
+    mapBox.removeEventListener("dblclick", onMapDblClick, true);
+  }
+  if (mapBox && onMapContextMenu) {
+    mapBox.removeEventListener("contextmenu", onMapContextMenu, true);
+  }
+  mapBox = null;
+  onMapDblClick = null;
+  onMapContextMenu = null;
+}
+
+function undoDrawPoint() {
+  if (!editor) {
+    return;
+  }
+  if (typeof editor.undo === "function") {
+    editor.undo();
+    return;
+  }
+  const event = new KeyboardEvent("keydown", {
+    key: "z",
+    code: "KeyZ",
+    ctrlKey: true,
+    bubbles: true,
+    cancelable: true,
+  });
+  if (mapBox) {
+    mapBox.dispatchEvent(event);
+  }
+  document.dispatchEvent(event);
+}
+
+function onMapClick(event) {
+  if (!drawing.value) {
+    return;
+  }
+  const point = latLngOf(event && (event.latLng || event.latlng));
+  if (!point) {
+    return;
+  }
+  clickRing = dedupeRing((clickRing || []).concat([point]));
+  pointCount.value = pickedCount();
+}
+
+function onDrawing(evt) {
+  const ring = dedupeRing(ringFromPaths(evt && evt.geometry && evt.geometry.paths));
+  if (!ring.length) {
+    return;
+  }
+  draftRing = ring;
+  pointCount.value = pickedCount();
+}
+
+function pickedCount() {
+  return Math.max((draftRing || []).length, (clickRing || []).length);
+}
+
+function pickedRing() {
+  const editorRing = dedupeRing(draftRing || []);
+  const clickRingDeduped = dedupeRing(clickRing || []);
+  if (clickRingDeduped.length >= 3) {
+    return clickRingDeduped;
+  }
+  return editorRing.length >= clickRingDeduped.length ? editorRing : clickRingDeduped;
+}
+
+function startDraw() {
+  if (!editor || !polygon) {
+    return;
+  }
+  mode.value = "draw";
+  drawing.value = true;
+  pointCount.value = 0;
+  draftRing = [];
+  clickRing = [];
+  pendingRing = null;
+  editor.setActiveOverlay(OVERLAY_ID);
+  if (typeof editor.setSelectable === "function") {
+    editor.setSelectable(false);
+  }
+  editor.setActionMode(TMap.tools.constants.EDITOR_ACTION.DRAW);
+}
+
+function startEdit() {
+  if (!editor) {
+    return;
+  }
+  if (drawing.value && pickedCount() >= 3) {
+    finishDraw();
+  } else if (typeof editor.stop === "function") {
+    try {
+      editor.stop();
+    } catch (e) {
+      // 没有进行中的绘制时停止会抛错
+    }
+  }
+  mode.value = "edit";
+  drawing.value = false;
+  pointCount.value = 0;
+  draftRing = [];
+  clickRing = [];
+  pendingRing = null;
+  if (typeof editor.setSelectable === "function") {
+    editor.setSelectable(true);
+  }
+  editor.setActionMode(TMap.tools.constants.EDITOR_ACTION.INTERACT);
+  fitAll();
+}
+
+function finishDraw() {
+  if (!editor || !polygon || !drawing.value) {
+    return;
+  }
+  const ring = pickedRing();
+  if (ring.length < 3) {
+    Message.warning("至少点击 3 个顶点后再结束");
+    return;
+  }
+  pendingRing = ring;
+  const before = (areas || []).length;
+  if (typeof editor.stop === "function") {
+    try {
+      editor.stop();
+    } catch (e) {
+      // 编辑器中断绘制时可能抛错，随后用已选顶点落图
+    }
+  }
+  if ((areas || []).length === before && pendingRing) {
+    appendArea("fence-" + Date.now(), pendingRing);
+  }
+  pendingRing = null;
+}
+
+function deleteSelected() {
+  if (!editor || mode.value !== "edit") {
+    Message.warning("请先进入编辑模式并选中区域");
+    return;
+  }
+  const selected = typeof editor.getSelectedList === "function" ? editor.getSelectedList() || [] : [];
+  if (!selected.length) {
+    Message.warning("请先选中要删除的区域");
+    return;
+  }
+  const ids = selected.map((item) => item && item.id).filter(Boolean);
+  if (typeof editor.delete === "function") {
+    editor.delete();
+  }
+  areas = (areas || []).filter((area) => !ids.includes(area.id));
+  redrawAreas();
+  publishAreas();
+}
+
+function onDrawComplete(geometry) {
+  if (!polygon) {
+    return;
+  }
+  let ring = ringFromGeometry(geometry);
+  if (ring.length < 3) {
+    ring = pendingRing || pickedRing();
+  }
+  pendingRing = null;
+  if (ring.length < 3) {
+    return;
+  }
+  appendArea((geometry && geometry.id) || "fence-" + Date.now(), ring);
+}
+
+function onAdjustComplete(geometry) {
+  const ring = ringFromGeometry(geometry);
+  const id = geometry && geometry.id;
+  if (!id || ring.length < 3) {
+    return;
+  }
+  const list = (areas || []).slice();
+  const index = list.findIndex((item) => item.id === id);
+  if (index >= 0) {
+    list[index] = { id, ring };
+  } else {
+    list.push({ id, ring });
+  }
+  areas = list;
+  publishAreas();
+}
+
+function onDeleteComplete(list) {
+  const ids = (list || []).map((item) => item && item.id).filter(Boolean);
+  if (!ids.length) {
+    return;
+  }
+  areas = (areas || []).filter((area) => !ids.includes(area.id));
+  publishAreas();
+}
+
+function appendArea(id, ring) {
+  const clean = dedupeRing(ring || []);
+  if (clean.length < 3) {
+    return;
+  }
+  const list = (areas || []).filter((area) => area.id !== id);
+  list.push({ id, ring: clean });
+  areas = list;
+  redrawAreas();
+  publishAreas();
+  draftRing = [];
+  clickRing = [];
+  pointCount.value = 0;
+  fitAll();
+  if (mode.value === "draw") {
+    drawing.value = true;
+    if (typeof editor.setSelectable === "function") {
+      editor.setSelectable(false);
+    }
+    editor.setActionMode(TMap.tools.constants.EDITOR_ACTION.DRAW);
+  }
+}
+
+function redrawAreas() {
+  if (!polygon || !TMap) {
+    return;
+  }
+  polygon.setGeometries(
+    (areas || []).map((area) => ({
+      id: area.id,
+      styleId: "highlight",
+      paths: area.ring.map((point) => new TMap.LatLng(point.lat, point.lng)),
+    }))
+  );
+}
+
+function publishAreas() {
+  const list = areas || [];
+  areaCount.value = list.length;
+  if (!list.length) {
+    committedJson = "";
+    if (props.modelValue) {
+      emit("update:modelValue", "");
+    }
+    return;
+  }
+  const json = JSON.stringify({
+    paths: list.map((area) =>
+      area.ring.map((point) => [
+        Number(Number(point.lng).toFixed(6)),
+        Number(Number(point.lat).toFixed(6)),
+      ])
+    ),
+  });
+  committedJson = json;
+  if (json !== (props.modelValue || "")) {
+    emit("update:modelValue", json);
+  }
+}
+
+function renderPolygons(polygons) {
+  if (!polygon || !TMap || !editor) {
+    return;
+  }
+  if (typeof editor.stop === "function") {
+    try {
+      editor.stop();
+    } catch (e) {
+      // 初始化时没有进行中的绘制
+    }
+  }
+  areas = (polygons || []).map((ring, index) => ({
+    id: "fence-" + index,
+    ring,
+  }));
+  redrawAreas();
+  areaCount.value = areas.length;
+  committedJson = props.modelValue || "";
+  mode.value = "edit";
+  drawing.value = false;
+  pointCount.value = 0;
+  editor.setActiveOverlay(OVERLAY_ID);
+  if (typeof editor.setSelectable === "function") {
+    editor.setSelectable(true);
+  }
+  editor.setActionMode(TMap.tools.constants.EDITOR_ACTION.INTERACT);
+  fitAll();
+}
+
+function fitAll() {
+  if (!map || !TMap) {
+    return;
+  }
+  const points = [];
+  (areas || []).forEach((area) => {
+    (area.ring || []).forEach((point) => points.push(point));
+  });
+  if (points.length < 2) {
+    return;
+  }
+  const bounds = new TMap.LatLngBounds();
+  points.forEach((point) => bounds.extend(new TMap.LatLng(point.lat, point.lng)));
+  map.fitBounds(bounds, { padding: 48 });
+}
+
+function currentJson() {
+  return committedJson || "";
+}
+
+function destroyMap() {
+  ready.value = false;
+  booting = false;
+  drawing.value = false;
+  unbindFinishGesture();
+  const oldEditor = editor;
+  const oldMap = map;
+  editor = null;
+  map = null;
+  polygon = null;
+  suggestion = null;
+  try {
+    if (oldEditor && typeof oldEditor.destroy === "function") {
+      oldEditor.destroy();
+    }
+  } catch (e) {
+    // 容器已隐藏时，腾讯地图会在销毁过程中抛 far <= 0
+  }
+  try {
+    if (oldMap && typeof oldMap.destroy === "function") {
+      oldMap.destroy();
+    }
+  } catch (e) {
+    // 同上
+  }
+}
 
 function ensureProcessShim() {
   const current = window.process;

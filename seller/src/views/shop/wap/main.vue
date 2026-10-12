@@ -6,31 +6,25 @@
     <component :is="layout[name]"></component>
   </div>
 </template>
-<script>
-import layout from "./index";
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
+import layout from "./index"; // 装修模块
 import navbar from "./navbar";
-export default {
-  components: {
-    navbar
-  },
 
-  data() {
-    return {
-      layout, // 装修模块
-      name: "index", // 装修的页面
-      pagetype: "INDEX",
-    };
-  },
-  mounted() {
-    this.pagetype = this.$route.query.pagetype || "INDEX";
-  },
-  methods: {
-    selected(val) {
-      // 顶部栏点击切换
-      this.name = val;
-    }
-  }
-};
+const route = useRoute();
+
+const name = ref("index"); // 装修的页面
+const pagetype = ref("INDEX");
+
+onMounted(() => {
+  pagetype.value = route.query.pagetype || "INDEX";
+});
+
+function selected(val) {
+  // 顶部栏点击切换
+  name.value = val;
+}
 </script>
 <style scoped lang="scss">
 .box {

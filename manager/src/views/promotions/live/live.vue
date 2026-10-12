@@ -67,65 +67,63 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { getLiveList, whetherStar } from "@/api/promotion.js";
 
-export default {
-  data() {
-    return {
-      total: 0,
-      searchForm: {
-        pageSize: 20,
-        pageNumber: 1,
-        status: "NEW",
-      },
-      tabs: [
-        { title: "直播中", status: "START" },
-        { title: "未开始", status: "NEW" },
-        { title: "已结束", status: "END" },
-      ],
-      liveData: [],
-    };
+const router = useRouter();
+
+const total = ref(0);
+const searchForm = reactive({
+  pageSize: 20,
+  pageNumber: 1,
+  status: "NEW",
+});
+const tabs = ref([
+  { title: "直播中", status: "START" },
+  { title: "未开始", status: "NEW" },
+  { title: "已结束", status: "END" },
+]);
+const liveData = ref([]);
+
+watch(
+  () => searchForm.status,
+  () => {
+    liveData.value = [];
+    getStoreLives();
   },
-  watch: {
-    "searchForm.status": {
-      handler() {
-        this.liveData = [];
-        this.getStoreLives();
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.getStoreLives();
-  },
-  methods: {
-    async star(val, index) {
-      let switched = this.liveData[index].recommend;
-      await whetherStar({ id: val.id, recommend: switched });
-      this.getStoreLives();
-    },
-    changePageSize() {
-      this.getStoreLives();
-    },
-    changePageNumber() {
-      this.getStoreLives();
-    },
-    async getStoreLives() {
-      let result = await getLiveList(this.searchForm);
-      if (result.success) {
-        this.liveData = result.result.records;
-        this.total = result.result.total;
-      }
-    },
-    getLiveDetail(val) {
-      this.$router.push({
-        path: "/live-detail",
-        query: { ...val, liveStatus: this.searchForm.status },
-      });
-    },
-  },
-};
+  { deep: true }
+);
+
+onMounted(() => {
+  getStoreLives();
+});
+
+async function star(val, index) {
+  let switched = liveData.value[index].recommend;
+  await whetherStar({ id: val.id, recommend: switched });
+  getStoreLives();
+}
+function changePageSize() {
+  getStoreLives();
+}
+function changePageNumber() {
+  getStoreLives();
+}
+async function getStoreLives() {
+  let result = await getLiveList(searchForm);
+  if (result.success) {
+    liveData.value = result.result.records;
+    total.value = result.result.total;
+  }
+}
+function getLiveDetail(val) {
+  router.push({
+    path: "/live-detail",
+    query: { ...val, liveStatus: searchForm.status },
+  });
+}
 </script>
 
 <style lang="scss" scoped>

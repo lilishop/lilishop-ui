@@ -84,137 +84,137 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { Clock, ArrowLeft } from "@element-plus/icons-vue";
 import * as API_Index from "@/api/index";
 
-export default {
-  name: "message_index",
-  components: { Clock, ArrowLeft },
-  data() {
-    return {
-      loading: true,
-      mesTypeList: [
-        { type: "unread", title: "未读消息" },
-        { type: "read", title: "已读消息" },
-        { type: "recycleBin", title: "回收站" },
-      ],
-      params: {
-        status: "UN_READY",
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-      },
-      total: 0,
-      currentMesList: [],
-      currentMessageType: "unread",
-      showMesTitleList: true,
-      unReadCount: 0,
-      noDataText: "暂无未读消息",
-      mes: {
-        title: "",
-        time: "",
-        content: "",
-      },
-    };
-  },
-  methods: {
-    changePage() {
-      this.refreshMessage();
-    },
-    changePageSize() {
-      this.refreshMessage();
-    },
-    refreshMessage() {
-      let status;
-      const type = this.currentMessageType;
-      if (type == "unread") status = "UN_READY";
-      else if (type == "read") status = "ALREADY_READY";
-      else status = "ALREADY_REMOVE";
-      this.params.status = status;
-      this.loading = true;
-      API_Index.getMessageSendData(this.params).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.currentMesList = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    getAll() {
-      API_Index.getAllMessage(this.params).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.unReadCount = res.result.UN_READY.total;
-          this.currentMesList = res.result.UN_READY.records;
-        }
-      });
-    },
-    backMesTitleList() {
-      this.showMesTitleList = true;
-    },
-    setCurrentMesType(type) {
-      if (this.currentMessageType !== type) {
-        this.showMesTitleList = true;
-      }
-      this.currentMessageType = type;
-      if (type == "unread") this.noDataText = "暂无未读消息";
-      else if (type == "read") this.noDataText = "暂无已读消息";
-      else this.noDataText = "回收站无消息";
-      this.params.pageNumber = 1;
-      this.refreshMessage();
-    },
-    openMessage(row) {
-      this.showMesTitleList = false;
-      this.mes.title = row.title;
-      this.mes.time = row.createTime;
-      this.getContent(row);
-    },
-    markAsRead(v) {
-      this.loading = true;
-      API_Index.read(v.id).then((res) => {
-        this.loading = false;
-        if (res.success) this.getAll();
-      });
-    },
-    deleteMes(v) {
-      this.loading = true;
-      API_Index.deleteMessage(v.id).then((res) => {
-        this.loading = false;
-        if (res.success) this.refreshMessage();
-      });
-    },
-    restoreMes(v) {
-      API_Index.reductionMessage(v.id).then((res) => {
-        this.loading = false;
-        if (res.success) this.refreshMessage();
-      });
-    },
-    deleteReal(v) {
-      this.loading = true;
-      API_Index.clearMessage(v.id).then((res) => {
-        this.loading = false;
-        if (res.success) this.refreshMessage();
-      });
-    },
-    getContent(v) {
-      this.mes.content = v.content;
-      API_Index.read(v.id).then((res) => {
-        this.loading = false;
-        if (res.success) this.getAll();
-      });
-    },
-  },
-  mounted() {
-    this.getAll();
-  },
-  watch: {
-    $route(to) {
-      if (to.name == "message_index") this.getAll();
-    },
-  },
-};
+defineOptions({ name: "message_index" });
+
+const route = useRoute();
+
+const loading = ref(true);
+const mesTypeList = ref([
+  { type: "unread", title: "未读消息" },
+  { type: "read", title: "已读消息" },
+  { type: "recycleBin", title: "回收站" },
+]);
+const params = reactive({
+  status: "UN_READY",
+  pageNumber: 1,
+  pageSize: 10,
+  sort: "createTime",
+  order: "desc",
+});
+const total = ref(0);
+const currentMesList = ref([]);
+const currentMessageType = ref("unread");
+const showMesTitleList = ref(true);
+const unReadCount = ref(0);
+const noDataText = ref("暂无未读消息");
+const mes = reactive({
+  title: "",
+  time: "",
+  content: "",
+});
+
+// messageList：模板 ref 对应声明（原 Options API 中未在 script 内使用，仅保留绑定）
+const messageList = ref(null);
+
+onMounted(() => {
+  getAll();
+});
+
+watch(() => route, (to) => {
+  if (to.name == "message_index") getAll();
+});
+
+function changePage() {
+  refreshMessage();
+}
+function changePageSize() {
+  refreshMessage();
+}
+function refreshMessage() {
+  let status;
+  const type = currentMessageType.value;
+  if (type == "unread") status = "UN_READY";
+  else if (type == "read") status = "ALREADY_READY";
+  else status = "ALREADY_REMOVE";
+  params.status = status;
+  loading.value = true;
+  API_Index.getMessageSendData(params).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      currentMesList.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function getAll() {
+  API_Index.getAllMessage(params).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      unReadCount.value = res.result.UN_READY.total;
+      currentMesList.value = res.result.UN_READY.records;
+    }
+  });
+}
+function backMesTitleList() {
+  showMesTitleList.value = true;
+}
+function setCurrentMesType(type) {
+  if (currentMessageType.value !== type) {
+    showMesTitleList.value = true;
+  }
+  currentMessageType.value = type;
+  if (type == "unread") noDataText.value = "暂无未读消息";
+  else if (type == "read") noDataText.value = "暂无已读消息";
+  else noDataText.value = "回收站无消息";
+  params.pageNumber = 1;
+  refreshMessage();
+}
+function openMessage(row) {
+  showMesTitleList.value = false;
+  mes.title = row.title;
+  mes.time = row.createTime;
+  getContent(row);
+}
+function markAsRead(v) {
+  loading.value = true;
+  API_Index.read(v.id).then((res) => {
+    loading.value = false;
+    if (res.success) getAll();
+  });
+}
+function deleteMes(v) {
+  loading.value = true;
+  API_Index.deleteMessage(v.id).then((res) => {
+    loading.value = false;
+    if (res.success) refreshMessage();
+  });
+}
+function restoreMes(v) {
+  API_Index.reductionMessage(v.id).then((res) => {
+    loading.value = false;
+    if (res.success) refreshMessage();
+  });
+}
+function deleteReal(v) {
+  loading.value = true;
+  API_Index.clearMessage(v.id).then((res) => {
+    loading.value = false;
+    if (res.success) refreshMessage();
+  });
+}
+function getContent(v) {
+  mes.content = v.content;
+  API_Index.read(v.id).then((res) => {
+    loading.value = false;
+    if (res.success) getAll();
+  });
+}
 </script>
 
 <style lang="scss" scoped>

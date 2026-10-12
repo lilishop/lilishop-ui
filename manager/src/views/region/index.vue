@@ -34,100 +34,100 @@
   </el-card>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage } from "element-plus";
+import { Message, Modal } from "@/utils/message";
 import { getChildRegion, asyncRegion } from "@/api/index";
 
-export default {
-  data() {
-    return {
-      loading: false,
-      asyncLoading: false,
-      num: 10,
-      tableData: [],
-      levelMap: {
-        country: "国家",
-        province: "省份",
-        city: "市",
-        district: "区县",
-        street: "街道",
-      },
-    };
-  },
-  mounted() {
-    this.loadRoot();
-  },
-  methods: {
-    isLeafRegion(child, parentName = "") {
-      return (
-        child.level === "street" ||
-        child.name === "台湾省" ||
-        parentName === "香港特别行政区" ||
-        parentName === "澳门特别行政区"
-      );
-    },
-    mapRegionRow(child, parentName = "") {
-      return {
-        ...child,
-        cityCode: child.cityCode === "null" ? "" : child.cityCode,
-        hasChildren: !this.isLeafRegion(child, parentName),
-      };
-    },
-    loadRoot() {
-      this.loading = true;
-      getChildRegion(0)
-        .then((res) => {
-          this.tableData = (res.result || []).map((item) => this.mapRegionRow(item));
-        })
-        .finally(() => {
-          this.loading = false;
+const loading = ref(false);
+const asyncLoading = ref(false);
+const num = ref(10);
+const tableData = ref([]);
+const levelMap = reactive({
+  country: "国家",
+  province: "省份",
+  city: "市",
+  district: "区县",
+  street: "街道",
+});
+
+function isLeafRegion(child, parentName = "") {
+  return (
+    child.level === "street" ||
+    child.name === "台湾省" ||
+    parentName === "香港特别行政区" ||
+    parentName === "澳门特别行政区"
+  );
+}
+
+function mapRegionRow(child, parentName = "") {
+  return {
+    ...child,
+    cityCode: child.cityCode === "null" ? "" : child.cityCode,
+    hasChildren: !isLeafRegion(child, parentName),
+  };
+}
+
+function loadRoot() {
+  loading.value = true;
+  getChildRegion(0)
+    .then((res) => {
+      tableData.value = (res.result || []).map((item) => mapRegionRow(item));
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function loadChildren(row, _treeNode, resolve) {
+  getChildRegion(row.id).then((res) => {
+    if (!res.result?.length) {
+      resolve([]);
+      return;
+    }
+    resolve(res.result.map((child) => mapRegionRow(child, row.name)));
+  });
+}
+
+function handleAsyncRegion() {
+  num.value = 10;
+  Modal.confirm({
+    title: "确定更新？",
+    content: "更新后店铺以及用户地区绑定数据将全部错乱",
+    onOk: () => {
+      asyncLoading.value = true;
+      let messageInstance = null;
+      const showCountdown = () => {
+        if (messageInstance) messageInstance.close();
+        messageInstance = ElMessage.info({
+          message: `地区数据将在 ${num.value} 秒后更新`,
+          duration: 0,
+          showClose: true,
         });
+      };
+      showCountdown();
+      const number = setInterval(() => {
+        num.value--;
+        showCountdown();
+      }, 1000);
+      setTimeout(() => {
+        clearInterval(number);
+        if (messageInstance) messageInstance.close();
+        ElMessage.closeAll();
+        asyncRegion().then(() => {
+          asyncLoading.value = false;
+          Message.success("地区数据正在更新中！");
+          loadRoot();
+        });
+      }, 10000);
     },
-    loadChildren(row, _treeNode, resolve) {
-      getChildRegion(row.id).then((res) => {
-        if (!res.result?.length) {
-          resolve([]);
-          return;
-        }
-        resolve(res.result.map((child) => this.mapRegionRow(child, row.name)));
-      });
-    },
-    handleAsyncRegion() {
-      this.num = 10;
-      this.$Modal.confirm({
-        title: "确定更新？",
-        content: "更新后店铺以及用户地区绑定数据将全部错乱",
-        onOk: () => {
-          this.asyncLoading = true;
-          let messageInstance = null;
-          const showCountdown = () => {
-            if (messageInstance) messageInstance.close();
-            messageInstance = ElMessage.info({
-              message: `地区数据将在 ${this.num} 秒后更新`,
-              duration: 0,
-              showClose: true,
-            });
-          };
-          showCountdown();
-          const number = setInterval(() => {
-            this.num--;
-            showCountdown();
-          }, 1000);
-          setTimeout(() => {
-            clearInterval(number);
-            if (messageInstance) messageInstance.close();
-            ElMessage.closeAll();
-            asyncRegion().then(() => {
-              this.asyncLoading = false;
-              this.$Message.success("地区数据正在更新中！");
-              this.loadRoot();
-            });
-          }, 10000);
-        },
-      });
-    },
-  },
-};
+  });
+}
+
+onMounted(() => {
+  loadRoot();
+});
 </script>
 
 <style scoped lang="scss">

@@ -5,7 +5,7 @@
         <el-card>
           <el-tabs v-model="activeTab" @tab-change="paneChange">
             <el-tab-pane label="站内信列表" name="MESSAGE">
-              <el-form ref="searchForm" :model="searchMessageForm" inline label-width="70px" class="search-form">
+              <el-form ref="searchFormRef" :model="searchMessageForm" inline label-width="70px" class="search-form">
                 <el-form-item label="消息标题" prop="title">
                   <el-input
                     v-model="searchMessageForm.title"
@@ -135,7 +135,7 @@
           </div>
         </div>
         <div class="send-form">
-          <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+          <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
             <el-form-item label="通知节点" prop="noticeNode">
               <el-input v-model="form.noticeNode" clearable maxlength="20" disabled style="width: 90%" />
             </el-form-item>
@@ -169,7 +169,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="messageSendForm" :model="messageSendForm" label-width="100px" :rules="messageFormValidate">
+      <el-form ref="messageSendFormRef" :model="messageSendForm" label-width="100px" :rules="messageFormValidate">
         <el-form-item label="消息标题" prop="title">
           <el-input v-model="messageSendForm.title" maxlength="15" clearable style="width: 70%" />
         </el-form-item>
@@ -353,7 +353,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import * as API_Setting from "@/api/setting.js";
 import * as API_Other from "@/api/other.js";
@@ -361,364 +362,361 @@ import * as API_Shop from "@/api/shops.js";
 import userList from "@/views/member/list/index";
 import { regular } from "@/utils";
 
-export default {
-  name: "noticeMessageTemplate",
-  components: {
-    userList,
-  },
-  data() {
-    return {
-      activeTab: "MESSAGE",
-      checkUserList: false,
-      memberSelectSnapshot: [],
-      selectedMember: [],
-      loading: true,
-      modalVisible: false,
-      modalTitle: "",
-      messageModalVisible: false,
-      messageModalTitle: "",
-      messageDetailModalVisible: false,
-      shopShow: false,
-      memberShow: false,
-      shopList: [],
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      messageFormValidate: {
-        title: [regular.REQUIRED, regular.VARCHAR20],
-        content: [regular.REQUIRED, regular.VARCHAR255],
-      },
-      searchMessageForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      searchShopMessageForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      searchMemberMessageForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      form: {
-        noticeNode: "",
-        noticeTitle: "",
-      },
-      messageSendForm: {
-        messageRange: "ALL",
-        messageClient: "member",
-        userIds: [],
-        userNames: [],
-      },
-      formValidate: {
-        noticeNode: [{ required: true, message: "请输入通知节点", trigger: "blur" }],
-        noticeTitle: [{ required: true, message: "请输入通知标题", trigger: "blur" }],
-        noticeContent: [{ required: true, message: "请输通知内容", trigger: "blur" }],
-      },
-      submitLoading: false,
-      noticeData: [],
-      noticeDataTotal: 0,
-      messageData: [],
-      messageDataTotal: 0,
-      shopMessageData: [],
-      shopMessageDataTotal: 0,
-      memberMessageData: [],
-      memberMessageDataTotal: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getMessage();
-    },
-    callbackSelectUser(val) {
-      let findUser = this.selectedMember.find((item) => item.id === val.id);
-      if (!findUser) {
-        this.selectedMember.push(val);
-      } else {
-        this.selectedMember.map((item, index) => {
-          if (item.id === findUser.id) {
-            this.selectedMember.splice(index, 1);
-          }
-        });
-      }
-      this.reSelectMember();
-    },
-    delUser(index) {
-      this.selectedMember.splice(index, 1);
-      this.reSelectMember();
-    },
-    reSelectMember() {
-      this.form.memberDTOS = this.selectedMember.map((item) => ({
-        nickName: item.nickName,
-        id: item.id,
-      }));
-    },
-    getShopList() {
-      this.loading = true;
-      API_Shop.getShopList().then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.shopList = res.result;
-        }
-      });
-      this.loading = false;
-    },
-    addVip() {
-      this.memberSelectSnapshot = JSON.parse(JSON.stringify(this.selectedMember));
-      this.checkUserList = true;
-    },
-    cancelMemberSelect() {
-      this.selectedMember = JSON.parse(JSON.stringify(this.memberSelectSnapshot));
-      this.reSelectMember();
-      this.checkUserList = false;
-    },
-    confirmMemberSelect() {
-      this.reSelectMember();
-      this.checkUserList = false;
-    },
-    paneChange(v) {
-      if (v == "SETTING") {
-        this.getNoticeMessage();
-      }
-      if (v == "MESSAGE") {
-        this.getMessage();
-      }
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getNoticeMessage();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getNoticeMessage();
-    },
-    handleSearch() {
-      this.searchMessageForm.pageNumber = 1;
-      this.getMessage();
-    },
-    messageChangePageSize(v) {
-      this.searchMessageForm.pageSize = v;
-      this.searchMessageForm.pageNumber = 1;
-      this.getMessage();
-    },
-    messageChangePage(v) {
-      this.searchMessageForm.pageNumber = v;
-      this.getMessage();
-    },
-    memberMessageChangePageSize(v) {
-      this.searchMemberMessageForm.pageSize = v;
-      this.searchMemberMessageForm.pageNumber = 1;
-      this.messageDetail();
-    },
-    memberMessageChangePage(v) {
-      this.searchMemberMessageForm.pageNumber = v;
-      this.messageDetail();
-    },
-    memberMessageChangeSort(e) {
-      this.searchMemberMessageForm.sort = e.prop;
-      this.searchMemberMessageForm.order =
-        e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
-      this.messageDetail();
-    },
-    shopMessageChangePageSize(v) {
-      this.searchShopMessageForm.pageSize = v;
-      this.messageDetail();
-    },
-    shopMessageChangePage(v) {
-      this.searchShopMessageForm.pageNumber = v;
-      this.messageDetail();
-    },
-    shopMessageChangeSort(e) {
-      this.searchShopMessageForm.sort = e.prop;
-      this.searchShopMessageForm.order =
-        e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
-      this.messageDetail();
-    },
-    onShopIdsChange(ids) {
-      this.messageSendForm.userIds = ids || [];
-      this.messageSendForm.userNames = (ids || []).map((id) => {
-        const shop = this.shopList.find((s) => s.id === id);
-        return shop ? shop.storeName : "";
-      });
-    },
-    removeMessage(id) {
-      ElMessageBox.confirm("您确认删除此站内信 ?", "确认删除", { type: "warning" }).then(() => {
-          API_Setting.deleteMessage(id).then((res) => {
-            if (res.success) {
-              ElMessage.success("删除成功");
-            }
-            this.getMessage();
-          });
-      }).catch(() => {});
-    },
-    sendMessage() {
-      this.messageModalVisible = true;
-      this.messageModalTitle = "发送站内信";
-      this.shopShow = false;
-      this.memberShow = false;
-      this.selectedMember = [];
-      this.messageSendForm = {
-        messageRange: "ALL",
-        messageClient: "member",
-        content: "",
-        title: "",
-        userIds: [],
-        userNames: [],
-      };
-    },
-    sendMessageSubmit() {
-      let userIds = [];
-      let userNames = [];
-      if (this.messageSendForm.messageClient == "member" && this.messageSendForm.messageRange == "MEMBER") {
-        this.selectedMember.forEach(function (item) {
-          userIds.push(item.id);
-          userNames.push(item.username);
-        });
-        this.messageSendForm.userIds = userIds;
-        this.messageSendForm.userNames = userNames;
-      }
+defineOptions({ name: "noticeMessageTemplate" });
 
-      if (this.messageSendForm.userIds.length <= 0 && this.messageSendForm.messageRange == "APPOINT") {
-        ElMessage.error("请选择发送对象");
-        return;
-      }
-      this.$refs["messageSendForm"].validate((valid) => {
-        if (valid) {
-          API_Other.sendMessage(this.messageSendForm).then((res) => {
-            this.loading = false;
-            if (res.success) {
-              ElMessage.success("发送成功");
-              this.messageModalVisible = false;
-              this.getMessage();
-            }
-          });
-          this.loading = false;
-        }
-      });
-    },
-    selectObject() {
-      this.messageSendForm.messageRange = "ALL";
-      this.shopShow = false;
-      this.memberShow = false;
-    },
-    selectShop(v) {
-      if (v == "APPOINT") {
-        this.getShopList();
-        this.shopShow = true;
-        this.memberShow = false;
-      }
-      if (v == "ALL") {
-        this.shopShow = false;
-        this.memberShow = false;
-      }
-      if (v == "MEMBER") {
-        this.shopShow = false;
-        this.memberShow = true;
-        this.selectedMember = [];
-      }
-    },
-    getMessage() {
-      this.loading = true;
-      API_Other.getMessagePage(this.searchMessageForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.messageData = res.result.records;
-          this.messageDataTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    getNoticeMessage() {
-      this.loading = true;
-      API_Setting.getNoticeMessageData(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.noticeData = res.result.records;
-          this.noticeDataTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          let params = {
-            noticeContent: this.form.noticeContent,
-            noticeTitle: this.form.noticeTitle,
-          };
-          API_Setting.editNoticeMessage(this.form.id, params).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              ElMessage.success("修改成功");
-              this.modalVisible = false;
-              this.getNoticeMessage();
-            }
-          });
-        }
-      });
-    },
-    messageDetail() {
-      if (this.messageSendForm.messageClient == "member") {
-        API_Other.getMemberMessage(this.searchMemberMessageForm).then((res) => {
-          if (res.success) {
-            this.memberMessageData = res.result.records;
-            this.memberMessageDataTotal = res.result.total;
-          }
-        });
-      } else {
-        API_Other.getShopMessage(this.searchShopMessageForm).then((res) => {
-          if (res.success) {
-            this.shopMessageData = res.result.records;
-            this.shopMessageDataTotal = res.result.total;
-          }
-        });
-      }
-    },
-    detail(v) {
-      this.messageSendForm = v;
-      if (this.messageSendForm.messageClient == "member") {
-        this.searchMemberMessageForm.messageId = v.id;
-      } else {
-        this.searchShopMessageForm.messageId = v.id;
-      }
-      this.messageDetail();
-      this.messageDetailModalVisible = true;
-      this.modalTitle = "消息详情";
-    },
-    edit(v) {
-      API_Setting.getNoticeMessageDetail(v.id).then((res) => {
-        if (res.success) {
-          this.modalTitle = "编辑通知类推送";
-          this.modalVisible = true;
-          this.form = res.result;
-        }
-      });
-    },
-    disable(v) {
-      API_Setting.updateMessageStatus(v.id, "CLOSE").then((res) => {
-        if (res.success) {
-          ElMessage.success("禁用成功");
-          this.getNoticeMessage();
-        }
-      });
-    },
-    enable(v) {
-      API_Setting.updateMessageStatus(v.id, "OPEN").then((res) => {
-        if (res.success) {
-          ElMessage.success("启用成功");
-          this.getNoticeMessage();
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
+const activeTab = ref("MESSAGE");
+const checkUserList = ref(false);
+const memberSelectSnapshot = ref([]);
+const selectedMember = ref([]);
+const loading = ref(true);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const messageModalVisible = ref(false);
+const messageModalTitle = ref("");
+const messageDetailModalVisible = ref(false);
+const shopShow = ref(false);
+const memberShow = ref(false);
+const shopList = ref([]);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const messageFormValidate = {
+  title: [regular.REQUIRED, regular.VARCHAR20],
+  content: [regular.REQUIRED, regular.VARCHAR255],
 };
+const searchMessageForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const searchShopMessageForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const searchMemberMessageForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const form = ref({
+  noticeNode: "",
+  noticeTitle: "",
+});
+const messageSendForm = ref({
+  messageRange: "ALL",
+  messageClient: "member",
+  userIds: [],
+  userNames: [],
+});
+const formValidate = {
+  noticeNode: [{ required: true, message: "请输入通知节点", trigger: "blur" }],
+  noticeTitle: [{ required: true, message: "请输入通知标题", trigger: "blur" }],
+  noticeContent: [{ required: true, message: "请输通知内容", trigger: "blur" }],
+};
+const submitLoading = ref(false);
+const noticeData = ref([]);
+const noticeDataTotal = ref(0);
+const messageData = ref([]);
+const messageDataTotal = ref(0);
+const shopMessageData = ref([]);
+const shopMessageDataTotal = ref(0);
+const memberMessageData = ref([]);
+const memberMessageDataTotal = ref(0);
+
+// 模板 ref 与 data 重名（searchForm/form/messageSendForm），改名避免互相覆盖
+const searchFormRef = ref(null);
+const formRef = ref(null);
+const messageSendFormRef = ref(null);
+
+function init() {
+  getMessage();
+}
+function callbackSelectUser(val) {
+  let findUser = selectedMember.value.find((item) => item.id === val.id);
+  if (!findUser) {
+    selectedMember.value.push(val);
+  } else {
+    selectedMember.value.map((item, index) => {
+      if (item.id === findUser.id) {
+        selectedMember.value.splice(index, 1);
+      }
+    });
+  }
+  reSelectMember();
+}
+function delUser(index) {
+  selectedMember.value.splice(index, 1);
+  reSelectMember();
+}
+function reSelectMember() {
+  form.value.memberDTOS = selectedMember.value.map((item) => ({
+    nickName: item.nickName,
+    id: item.id,
+  }));
+}
+function getShopList() {
+  loading.value = true;
+  API_Shop.getShopList().then((res) => {
+    loading.value = false;
+    if (res.success) {
+      shopList.value = res.result;
+    }
+  });
+  loading.value = false;
+}
+function addVip() {
+  memberSelectSnapshot.value = JSON.parse(JSON.stringify(selectedMember.value));
+  checkUserList.value = true;
+}
+function cancelMemberSelect() {
+  selectedMember.value = JSON.parse(JSON.stringify(memberSelectSnapshot.value));
+  reSelectMember();
+  checkUserList.value = false;
+}
+function confirmMemberSelect() {
+  reSelectMember();
+  checkUserList.value = false;
+}
+function paneChange(v) {
+  if (v == "SETTING") {
+    getNoticeMessage();
+  }
+  if (v == "MESSAGE") {
+    getMessage();
+  }
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getNoticeMessage();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getNoticeMessage();
+}
+function handleSearch() {
+  searchMessageForm.pageNumber = 1;
+  getMessage();
+}
+function messageChangePageSize(v) {
+  searchMessageForm.pageSize = v;
+  searchMessageForm.pageNumber = 1;
+  getMessage();
+}
+function messageChangePage(v) {
+  searchMessageForm.pageNumber = v;
+  getMessage();
+}
+function memberMessageChangePageSize(v) {
+  searchMemberMessageForm.pageSize = v;
+  searchMemberMessageForm.pageNumber = 1;
+  messageDetail();
+}
+function memberMessageChangePage(v) {
+  searchMemberMessageForm.pageNumber = v;
+  messageDetail();
+}
+function memberMessageChangeSort(e) {
+  searchMemberMessageForm.sort = e.prop;
+  searchMemberMessageForm.order =
+    e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
+  messageDetail();
+}
+function shopMessageChangePageSize(v) {
+  searchShopMessageForm.pageSize = v;
+  messageDetail();
+}
+function shopMessageChangePage(v) {
+  searchShopMessageForm.pageNumber = v;
+  messageDetail();
+}
+function shopMessageChangeSort(e) {
+  searchShopMessageForm.sort = e.prop;
+  searchShopMessageForm.order =
+    e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
+  messageDetail();
+}
+function onShopIdsChange(ids) {
+  messageSendForm.value.userIds = ids || [];
+  messageSendForm.value.userNames = (ids || []).map((id) => {
+    const shop = shopList.value.find((s) => s.id === id);
+    return shop ? shop.storeName : "";
+  });
+}
+function removeMessage(id) {
+  ElMessageBox.confirm("您确认删除此站内信 ?", "确认删除", { type: "warning" }).then(() => {
+      API_Setting.deleteMessage(id).then((res) => {
+        if (res.success) {
+          ElMessage.success("删除成功");
+        }
+        getMessage();
+      });
+  }).catch(() => {});
+}
+function sendMessage() {
+  messageModalVisible.value = true;
+  messageModalTitle.value = "发送站内信";
+  shopShow.value = false;
+  memberShow.value = false;
+  selectedMember.value = [];
+  messageSendForm.value = {
+    messageRange: "ALL",
+    messageClient: "member",
+    content: "",
+    title: "",
+    userIds: [],
+    userNames: [],
+  };
+}
+function sendMessageSubmit() {
+  let userIds = [];
+  let userNames = [];
+  if (messageSendForm.value.messageClient == "member" && messageSendForm.value.messageRange == "MEMBER") {
+    selectedMember.value.forEach(function (item) {
+      userIds.push(item.id);
+      userNames.push(item.username);
+    });
+    messageSendForm.value.userIds = userIds;
+    messageSendForm.value.userNames = userNames;
+  }
+
+  if (messageSendForm.value.userIds.length <= 0 && messageSendForm.value.messageRange == "APPOINT") {
+    ElMessage.error("请选择发送对象");
+    return;
+  }
+  messageSendFormRef.value.validate((valid) => {
+    if (valid) {
+      API_Other.sendMessage(messageSendForm.value).then((res) => {
+        loading.value = false;
+        if (res.success) {
+          ElMessage.success("发送成功");
+          messageModalVisible.value = false;
+          getMessage();
+        }
+      });
+      loading.value = false;
+    }
+  });
+}
+function selectObject() {
+  messageSendForm.value.messageRange = "ALL";
+  shopShow.value = false;
+  memberShow.value = false;
+}
+function selectShop(v) {
+  if (v == "APPOINT") {
+    getShopList();
+    shopShow.value = true;
+    memberShow.value = false;
+  }
+  if (v == "ALL") {
+    shopShow.value = false;
+    memberShow.value = false;
+  }
+  if (v == "MEMBER") {
+    shopShow.value = false;
+    memberShow.value = true;
+    selectedMember.value = [];
+  }
+}
+function getMessage() {
+  loading.value = true;
+  API_Other.getMessagePage(searchMessageForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      messageData.value = res.result.records;
+      messageDataTotal.value = res.result.total;
+    }
+  });
+  loading.value = false;
+}
+function getNoticeMessage() {
+  loading.value = true;
+  API_Setting.getNoticeMessageData(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      noticeData.value = res.result.records;
+      noticeDataTotal.value = res.result.total;
+    }
+  });
+  loading.value = false;
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      let params = {
+        noticeContent: form.value.noticeContent,
+        noticeTitle: form.value.noticeTitle,
+      };
+      API_Setting.editNoticeMessage(form.value.id, params).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          ElMessage.success("修改成功");
+          modalVisible.value = false;
+          getNoticeMessage();
+        }
+      });
+    }
+  });
+}
+function messageDetail() {
+  if (messageSendForm.value.messageClient == "member") {
+    API_Other.getMemberMessage(searchMemberMessageForm).then((res) => {
+      if (res.success) {
+        memberMessageData.value = res.result.records;
+        memberMessageDataTotal.value = res.result.total;
+      }
+    });
+  } else {
+    API_Other.getShopMessage(searchShopMessageForm).then((res) => {
+      if (res.success) {
+        shopMessageData.value = res.result.records;
+        shopMessageDataTotal.value = res.result.total;
+      }
+    });
+  }
+}
+function detail(v) {
+  messageSendForm.value = v;
+  if (messageSendForm.value.messageClient == "member") {
+    searchMemberMessageForm.messageId = v.id;
+  } else {
+    searchShopMessageForm.messageId = v.id;
+  }
+  messageDetail();
+  messageDetailModalVisible.value = true;
+  modalTitle.value = "消息详情";
+}
+function edit(v) {
+  API_Setting.getNoticeMessageDetail(v.id).then((res) => {
+    if (res.success) {
+      modalTitle.value = "编辑通知类推送";
+      modalVisible.value = true;
+      form.value = res.result;
+    }
+  });
+}
+function disable(v) {
+  API_Setting.updateMessageStatus(v.id, "CLOSE").then((res) => {
+    if (res.success) {
+      ElMessage.success("禁用成功");
+      getNoticeMessage();
+    }
+  });
+}
+function enable(v) {
+  API_Setting.updateMessageStatus(v.id, "OPEN").then((res) => {
+    if (res.success) {
+      ElMessage.success("启用成功");
+      getNoticeMessage();
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss">

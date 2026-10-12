@@ -41,36 +41,37 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getProcurementOrderDetail, getStockReasonPage } from "@/api/procurement";
 import { procurementStatusText, procurementStatusTag, formatMoney } from "../constants";
 
-export default {
-  name: "manager-procurement-order-detail",
-  data() {
-    return { detail: {}, reasonOptions: [] };
-  },
-  computed: {
-    stockReasonText() {
-      const reason = this.reasonOptions.find((item) => item.id === this.detail.stockReasonId);
-      return reason ? reason.reason : "-";
-    },
-  },
-  mounted() {
-    getStockReasonPage({ category: "INBOUND", pageNumber: 1, pageSize: 100 }).then((res) => {
-      if (res.success) {
-        this.reasonOptions = res.result.records || [];
-      }
-    });
-    const id = this.$route.query.id;
-    if (id) {
-      getProcurementOrderDetail(id).then((res) => {
-        if (res.success) this.detail = res.result || {};
-      });
+defineOptions({ name: "manager-procurement-order-detail" });
+
+const route = useRoute();
+
+const detail = ref({});
+const reasonOptions = ref([]);
+
+const stockReasonText = computed(() => {
+  const reason = reasonOptions.value.find((item) => item.id === detail.value.stockReasonId);
+  return reason ? reason.reason : "-";
+});
+
+onMounted(() => {
+  getStockReasonPage({ category: "INBOUND", pageNumber: 1, pageSize: 100 }).then((res) => {
+    if (res.success) {
+      reasonOptions.value = res.result.records || [];
     }
-  },
-  methods: { procurementStatusText, procurementStatusTag, formatMoney },
-};
+  });
+  const id = route.query.id;
+  if (id) {
+    getProcurementOrderDetail(id).then((res) => {
+      if (res.success) detail.value = res.result || {};
+    });
+  }
+});
 </script>
 
 <style scoped>

@@ -34,57 +34,55 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, nextTick, getCurrentInstance } from 'vue'
 import { ServeSearchContact } from '@/api/contacts'
 
-export default {
-  name: 'UserSearch',
-  data() {
-    return {
-      loading: false,
-      isShow: false,
-      mobile: '',
-      error: false,
-    }
-  },
-  methods: {
-    // 显示窗口
-    open() {
-      this.mobile = ''
-      this.isShow = true
-      this.$nextTick(() => {
-        document.getElementById('serach-mobile').focus()
-      })
-    },
+defineOptions({ name: 'UserSearch' })
 
-    // 关闭窗口
-    close() {
-      this.isShow = false
-    },
+const { proxy } = getCurrentInstance()
 
-    onSubmit() {
-      let { mobile } = this
+const loading = ref(false)
+const isShow = ref(false)
+const mobile = ref('')
+const error = ref(false)
 
-      if (mobile == '') return false
-
-      this.loading = true
-      ServeSearchContact({
-        mobile,
-      })
-        .then(res => {
-          if (res.code == 200) {
-            this.$user(res.data.id)
-            this.close()
-          } else {
-            this.error = true
-          }
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
-  },
+// 显示窗口
+const open = () => {
+  mobile.value = ''
+  isShow.value = true
+  nextTick(() => {
+    document.getElementById('serach-mobile').focus()
+  })
 }
+
+// 关闭窗口
+const close = () => {
+  isShow.value = false
+}
+
+const onSubmit = () => {
+  if (mobile.value == '') return false
+
+  loading.value = true
+  ServeSearchContact({
+    mobile: mobile.value,
+  })
+    .then(res => {
+      if (res.code == 200) {
+        proxy.$user(res.data.id)
+        close()
+      } else {
+        error.value = true
+      }
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+// 父组件通过 ref 调用 open()（im/src/views/message/index.vue）
+defineExpose({ open, close })
 </script>
 <style lang="less" scoped>
 .lum-dialog-box {

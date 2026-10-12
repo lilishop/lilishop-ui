@@ -80,110 +80,110 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import {
   seckillGoodsList,
   seckillDetail,
   delSeckillGoods,
 } from "@/api/promotion.js";
+import { Message, Modal } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  data() {
-    return {
-      promotionStatus: "",
-      loading: false,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      total: 0,
-      data: [],
-      goodsList: [],
-    };
-  },
-  methods: {
-    seckillStatusText(status) {
-      const map = {
-        NEW: "新建",
-        START: "开始",
-        END: "结束",
-        CLOSE: "废弃",
+const route = useRoute();
+
+const promotionStatus = ref("");
+const loading = ref(false);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const total = ref(0);
+const data = ref([]);
+const goodsList = ref([]);
+
+function seckillStatusText(status) {
+  const map = {
+    NEW: "新建",
+    START: "开始",
+    END: "结束",
+    CLOSE: "废弃",
+  };
+  return map[status] || status || "-";
+}
+function seckillStatusTagType(status) {
+  const map = {
+    NEW: "danger",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+function init() {
+  getSeckillMsg();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  searchForm.seckillId = route.query.id;
+  seckillGoodsList(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success && res.result) {
+      goodsList.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function getSeckillMsg() {
+  seckillDetail(route.query.id).then((res) => {
+    if (res.success && res.result) {
+      data.value = [];
+      data.value.push(res.result);
+      promotionStatus.value = res.result.promotionStatus;
+      getDataList();
+    }
+  });
+}
+function delGoods(index, row) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除该商品吗?删除后不可恢复",
+    onOk: () => {
+      const params = {
+        seckillId: row.seckillId,
+        id: row.id,
       };
-      return map[status] || status || "-";
-    },
-    seckillStatusTagType(status) {
-      const map = {
-        NEW: "danger",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    init() {
-      this.getSeckillMsg();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      this.searchForm.seckillId = this.$route.query.id;
-      seckillGoodsList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success && res.result) {
-          this.goodsList = res.result.records;
-          this.total = res.result.total;
+      delSeckillGoods(params).then((res) => {
+        if (res.success) {
+          goodsList.value.splice(index, 1);
+          Message.success("删除成功！");
         }
       });
     },
-    getSeckillMsg() {
-      seckillDetail(this.$route.query.id).then((res) => {
-        if (res.success && res.result) {
-          this.data = [];
-          this.data.push(res.result);
-          this.promotionStatus = res.result.promotionStatus;
-          this.getDataList();
-        }
-      });
-    },
-    delGoods(index, row) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除该商品吗?删除后不可恢复",
-        onOk: () => {
-          const params = {
-            seckillId: row.seckillId,
-            id: row.id,
-          };
-          delSeckillGoods(params).then((res) => {
-            if (res.success) {
-              this.goodsList.splice(index, 1);
-              this.$Message.success("删除成功！");
-            }
-          });
-        },
-      });
-    },
-    unixDate(time) {
-      return this.$filters.unixToDate(new Date(time) / 1000);
-    },
-    unixHours(item) {
-      const hourArr = item.split(",");
-      for (let i = 0; i < hourArr.length; i++) {
-        hourArr[i] += ":00";
-      }
-      return hourArr;
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+function unixDate(time) {
+  return unixToDate(new Date(time) / 1000);
+}
+function unixHours(item) {
+  const hourArr = item.split(",");
+  for (let i = 0; i < hourArr.length; i++) {
+    hourArr[i] += ":00";
+  }
+  return hourArr;
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

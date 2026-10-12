@@ -3,7 +3,7 @@
     <el-card class="change-pass">
       <template #header>修改密码</template>
       <el-form
-        ref="editPasswordForm"
+        ref="editPasswordFormRef"
         :model="editPasswordForm"
         label-width="100px"
         label-position="right"
@@ -41,84 +41,83 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import SetPassword from "@/components/lili/set-password";
 import { changePass } from "@/api/index";
 import { ElMessageBox } from "element-plus";
+import { md5 } from "@/utils/md5.js";
+import { useAppStore } from "@/stores/app";
+import { useUserStore } from "@/stores/user";
 
-export default {
-  name: "change_pass",
-  components: {
-    SetPassword,
-  },
-  data() {
-    const valideRePassword = (rule, value, callback) => {
-      if (value !== this.editPasswordForm.newPassword) {
-        callback(new Error("两次输入密码不一致"));
-      } else {
-        callback();
-      }
-    };
-    return {
-      savePassLoading: false,
-      editPasswordForm: {
-        oldPass: "",
-        newPassword: "",
-        rePass: "",
-      },
-      strength: "",
-      passwordValidate: {
-        oldPass: [{ required: true, message: "请输入原密码", trigger: "blur" }],
-        newPassword: [
-          { required: true, message: "请输入新密码", trigger: "blur" },
-          { min: 6, message: "请至少输入6个字符", trigger: "blur" },
-          { max: 32, message: "最多输入32个字符", trigger: "blur" },
-        ],
-        rePass: [
-          { required: true, message: "请再次输入新密码", trigger: "blur" },
-          { validator: valideRePassword, trigger: "blur" },
-        ],
-      },
-    };
-  },
-  methods: {
-    changeInputPass(v, grade, strength) {
-      this.strength = strength;
-    },
-    editPassword() {
-      const params = {
-        password: this.md5(this.editPasswordForm.oldPass),
-        newPassword: this.md5(this.editPasswordForm.newPassword),
-      };
-      this.$refs.editPasswordForm.validate((valid) => {
-        if (!valid) return;
-        this.savePassLoading = true;
-        changePass(params)
-          .then((res) => {
-            if (res?.success) {
-              ElMessageBox.alert("修改密码成功，需重新登录", "修改密码成功", {
-                confirmButtonText: "确定",
-              }).then(() => {
-                this.$store.commit("logout", this);
-                this.$store.commit("clearOpenedSubmenu");
-                this.$router.push({ name: "login" });
-              });
-            }
-          })
-          .finally(() => {
-            this.savePassLoading = false;
-          });
-      });
-    },
-    cancelEditPass() {
-      this.$store.commit("removeTag", "change_pass");
-      localStorage.storeOpenedList = JSON.stringify(
-        this.$store.state.app.storeOpenedList
-      );
-      const list = this.$store.state.app.storeOpenedList;
-      const lastPageName = list.length > 1 ? list[list.length - 1].name : list[0].name;
-      this.$router.push({ name: lastPageName });
-    },
-  },
+defineOptions({ name: "change_pass" });
+
+const router = useRouter();
+const appStore = useAppStore();
+const userStore = useUserStore();
+
+const editPasswordFormRef = ref(null);
+const savePassLoading = ref(false);
+const editPasswordForm = reactive({
+  oldPass: "",
+  newPassword: "",
+  rePass: "",
+});
+const strength = ref("");
+const valideRePassword = (rule, value, callback) => {
+  if (value !== editPasswordForm.newPassword) {
+    callback(new Error("两次输入密码不一致"));
+  } else {
+    callback();
+  }
 };
+const passwordValidate = {
+  oldPass: [{ required: true, message: "请输入原密码", trigger: "blur" }],
+  newPassword: [
+    { required: true, message: "请输入新密码", trigger: "blur" },
+    { min: 6, message: "请至少输入6个字符", trigger: "blur" },
+    { max: 32, message: "最多输入32个字符", trigger: "blur" },
+  ],
+  rePass: [
+    { required: true, message: "请再次输入新密码", trigger: "blur" },
+    { validator: valideRePassword, trigger: "blur" },
+  ],
+};
+
+function changeInputPass(v, grade, strengthVal) {
+  strength.value = strengthVal;
+}
+function editPassword() {
+  const params = {
+    password: md5(editPasswordForm.oldPass),
+    newPassword: md5(editPasswordForm.newPassword),
+  };
+  editPasswordFormRef.value.validate((valid) => {
+    if (!valid) return;
+    savePassLoading.value = true;
+    changePass(params)
+      .then((res) => {
+        if (res?.success) {
+          ElMessageBox.alert("修改密码成功，需重新登录", "修改密码成功", {
+            confirmButtonText: "确定",
+          }).then(() => {
+            userStore.logout();
+            appStore.clearOpenedSubmenu();
+            router.push({ name: "login" });
+          });
+        }
+      })
+      .finally(() => {
+        savePassLoading.value = false;
+      });
+  });
+}
+function cancelEditPass() {
+  appStore.removeTag("change_pass");
+  localStorage.storeOpenedList = JSON.stringify(appStore.storeOpenedList);
+  const list = appStore.storeOpenedList;
+  const lastPageName = list.length > 1 ? list[list.length - 1].name : list[0].name;
+  router.push({ name: lastPageName });
+}
 </script>

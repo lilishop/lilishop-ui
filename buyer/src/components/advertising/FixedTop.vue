@@ -5,22 +5,18 @@
     <el-icon :size="20" @click="show = false"><CircleClose /></el-icon>
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue';
 import { CircleClose } from '@element-plus/icons-vue';
-export default {
-  components: { CircleClose },
-  props: {
-    data: { // 传入的广告信息
-      type: Object,
-      default: null
-    }
-  },
-  data () {
-    return {
-      show: true // 是否显示头部广告
-    }
+
+defineProps({
+  data: { // 传入的广告信息
+    type: Object,
+    default: null
   }
-};
+});
+
+const show = ref(true); // 是否显示头部广告
 </script>
 <style scoped lang="scss">
 .advertising {

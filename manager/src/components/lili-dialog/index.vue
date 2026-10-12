@@ -17,7 +17,7 @@
           }
         "
         v-if="goodsFlag"
-        ref="goodsDialog"
+        ref="goodsDialogRef"
         :selectedWay="goodsData"
       />
       <linkDialog
@@ -36,68 +36,82 @@
     </template>
   </el-dialog>
 </template>
-<script>
+<script setup>
+import { ref } from "vue";
 import goodsDialog from "./goods-dialog";
 import linkDialog from "./link-dialog";
-export default {
-  components: {
-    goodsDialog,
-    linkDialog,
-  },
-  data() {
-    return {
-      goodsFlag: false, // 是否商品选择器
-      goodsData: [], //选择的商品
-      linkData: "", //选择的链接
-      flag: false, // modal显隐
-    };
-  },
-  methods: {
-    clearGoodsSelected(){
-      this.goodsData = []
-    },
-    // 关闭弹窗
-    clickClose() {
-      this.flag = false;
-      this.goodsFlag = false;
-      this.$emit("closeFlag", false);
-    },
-    // 单选商品
-    singleGoods() {
-      var timer = setInterval(() => {
-        if (this.$refs.goodsDialog) {
-          this.$refs.goodsDialog.type = "single";
-          clearInterval(timer);
-        }
-      }, 100);
-    },
-    // 点击确认
-    clickOK() {
-      if (this.goodsFlag) {
-        this.$emit("selectedGoodsData", this.goodsData);
-      } else {
-        this.$emit("selectedLink", this.linkData);
-      }
-      this.clickClose();
-    },
-    // 打开组件方法
-    open(type, mutiple) {
-      this.flag = true;
-      if (type == "goods") {
-        this.goodsFlag = true;
-        if (mutiple) {
-          this.singleGoods();
-        }
-      } else {
-        this.goodsFlag = false;
-      }
-    },
-    // 关闭组件
-    close() {
-      this.flag = false;
-    },
-  },
-};
+
+const emit = defineEmits(["closeFlag", "selectedGoodsData", "selectedLink"]);
+
+const goodsFlag = ref(false); // 是否商品选择器
+const goodsData = ref([]); //选择的商品
+const linkData = ref(""); //选择的链接
+const flag = ref(false); // modal显隐
+
+// 模板 ref：原 ref="goodsDialog" 与 import 的组件同名，改名避免互相覆盖
+const goodsDialogRef = ref(null);
+
+function clearGoodsSelected() {
+  goodsData.value = [];
+}
+// 关闭弹窗
+function clickClose() {
+  flag.value = false;
+  goodsFlag.value = false;
+  emit("closeFlag", false);
+}
+// 单选商品
+function singleGoods() {
+  var timer = setInterval(() => {
+    if (goodsDialogRef.value) {
+      goodsDialogRef.value.type = "single";
+      clearInterval(timer);
+    }
+  }, 100);
+}
+// 点击确认
+function clickOK() {
+  if (goodsFlag.value) {
+    emit("selectedGoodsData", goodsData.value);
+  } else {
+    emit("selectedLink", linkData.value);
+  }
+  clickClose();
+}
+// 打开组件方法
+function open(type, mutiple) {
+  flag.value = true;
+  if (type == "goods") {
+    goodsFlag.value = true;
+    if (mutiple) {
+      singleGoods();
+    }
+  } else {
+    goodsFlag.value = false;
+  }
+}
+// 关闭组件
+function close() {
+  flag.value = false;
+}
+
+// 外部通过 ref 访问的成员（grep manager/src 全量确认）：
+// - open：page-decoration 各 modelList、modelForm/modelFormItem、hotzone/Zone、wap/advertising、alertAdvertising 等打开弹窗（goods/link）
+// - singleGoods：modelList/forYour.vue、mixModel.vue 直接调用
+// - clearGoodsSelected：wap/decorate.vue、modelList/goodsAndType.vue 调用
+// - goodsData：modelList/newGoodsSort.vue、notEnough.vue 回写已选商品
+// - goodsFlag：wap/decorate.vue 直接写入
+// - flag：wap/decorate.vue 直接写入 true 打开弹窗
+// - close：未被 grep 到外部调用，原 Options API 实例天然暴露，保守保留
+defineExpose({
+  open,
+  close,
+  singleGoods,
+  clearGoodsSelected,
+  goodsData,
+  goodsFlag,
+  flag,
+});
 </script>
 <style scoped lang="scss">
 :deep(.el-dialog__body) {

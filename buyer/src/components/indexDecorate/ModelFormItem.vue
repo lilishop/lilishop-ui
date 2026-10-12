@@ -138,7 +138,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import ModelCarousel from "./modelList/Carousel.vue";
 import ModelCarousel1 from "./modelList/Carousel1.vue";
 import ModelCarousel2 from "./modelList/Carousel2.vue";
@@ -152,34 +153,15 @@ import goodsAndType from "./modelList/goodsAndType.vue";
 import onlyGoodsModel from "./modelList/onlyGoodsModel.vue";
 import mixModel from "./modelList/mixModel.vue";
 import forYour from "./modelList/forYour.vue";
-import decorateImg from "@/assets/images/decorate.png";
+import decorateImgUrl from "@/assets/images/decorate.png";
 
-export default {
-  name: "modelFormItem",
-  props: ["element", "select", "index", "data"],
-  components: {
-    ModelCarousel,
-    ModelCarousel1,
-    ModelCarousel2,
-    Recommend,
-    NewGoodsSort,
-    FirstPageAdvert,
-    NotEnough,
-    Seckill,
-    oneRowThreeColumns,
-    goodsAndType,
-    onlyGoodsModel,
-    mixModel,
-    forYour
-  },
-  data() {
-    return {
-      decorateImg,
-      showModal: false, // 控制模态框显隐
-      selected: {}, // 已选数据
-    };
-  },
-};
+defineOptions({ name: "modelFormItem" });
+
+defineProps(["element", "select", "index", "data"]);
+
+const decorateImg = ref(decorateImgUrl);
+const showModal = ref(false); // 控制模态框显隐
+const selected = ref({}); // 已选数据
 </script>
 <style lang="scss" scoped>
 .model-item {

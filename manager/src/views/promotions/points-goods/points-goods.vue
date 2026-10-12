@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -62,7 +62,7 @@
       </div>
 
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         border
         :data="data"
@@ -155,138 +155,142 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import {
   getPointsGoodsList,
   editPointsGoodsStatus,
   deletePointsGoodsStatus,
 } from "@/api/promotion";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "pointsGoods",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      statusList: [
-        { label: "未开始", value: "NEW" },
-        { label: "已开始", value: "START" },
-        { label: "已结束", value: "END" },
-        { label: "已关闭", value: "CLOSE" },
-      ],
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    init() {
-      this.getDataList();
-    },
-    addPointsGoods() {
-      this.$router.push({ name: "add-points-goods" });
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      if (this.searchForm.pointsS) {
-        this.searchForm.points =
-          this.searchForm.pointsS + "_" + (this.searchForm.pointsE ? this.searchForm.pointsE : "");
+defineOptions({ name: "pointsGoods" });
+
+const router = useRouter();
+
+// 模板 ref，与 data 字段同名会互相覆盖，改为 searchFormRef / tableRef
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const statusList = ref([
+  { label: "未开始", value: "NEW" },
+  { label: "已开始", value: "START" },
+  { label: "已结束", value: "END" },
+  { label: "已关闭", value: "CLOSE" },
+]);
+const data = ref([]);
+const total = ref(0);
+
+onMounted(() => {
+  init();
+});
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+function init() {
+  getDataList();
+}
+function addPointsGoods() {
+  router.push({ name: "add-points-goods" });
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  if (searchForm.pointsS) {
+    searchForm.points =
+      searchForm.pointsS + "_" + (searchForm.pointsE ? searchForm.pointsE : "");
+  }
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getPointsGoodsList(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getPointsGoodsList(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    edit(id) {
-      this.$router.push({ name: "edit-points-goods", query: { id } });
-    },
-    statusChanged(id, status, startTime, endTime) {
-      let text = "";
-      let params = {};
-      if (status == "START") {
-        text = "开启";
-        params = { startTime, endTime };
-      } else if (status == "CLOSE") {
-        text = "关闭";
-      }
-      this.$Modal.confirm({
-        title: "确认" + text,
-        content: "您确认要" + text + "此积分商品?",
-        loading: true,
-        onOk: () => {
-          editPointsGoodsStatus(id, params).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success(text + "成功");
-              this.getDataList();
-            }
-          });
-        },
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function edit(id) {
+  router.push({ name: "edit-points-goods", query: { id } });
+}
+function statusChanged(id, status, startTime, endTime) {
+  let text = "";
+  let params = {};
+  if (status == "START") {
+    text = "开启";
+    params = { startTime, endTime };
+  } else if (status == "CLOSE") {
+    text = "关闭";
+  }
+  Modal.confirm({
+    title: "确认" + text,
+    content: "您确认要" + text + "此积分商品?",
+    loading: true,
+    onOk: () => {
+      editPointsGoodsStatus(id, params).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success(text + "成功");
+          getDataList();
+        }
       });
     },
-    close(id) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除此积分商品?",
-        loading: true,
-        onOk: () => {
-          deletePointsGoodsStatus(id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
+  });
+}
+function close(id) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除此积分商品?",
+    loading: true,
+    onOk: () => {
+      deletePointsGoodsStatus(id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
       });
     },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
 </script>
 
 <style scoped>

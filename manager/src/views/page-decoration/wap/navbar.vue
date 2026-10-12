@@ -56,218 +56,223 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { reactive, ref, watch, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import * as API_Other from "@/api/other.js";
+import { getStore, setStore } from "@/libs/storage";
+import { Message } from "@/utils/message";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  props: ["pagetype"],
-  data() {
-    return {
-      hasCache:false, // 是否有缓存
-      progress: true, // 展示进度
-      num: 20, // 提交进度
-      saveDialog: false, // 加载状态
-      way: [
-        // 装修tab栏切换
-        {
-          title: "首页",
-          name: "index",
-          selected: true,
-        },
-        {
-          title: "全屏广告",
-          name: "advertising",
-          selected: false,
-        },
-        {
-          title: "弹窗广告",
-          name: "ALERT",
-          selected: false,
-        },
-      ],
+const props = defineProps(["pagetype"]);
+const emit = defineEmits(["selected"]);
 
-      submitWay: {
-        // 表单信息
-        pageShow: this.$route.query.type || false,
-        name: this.$route.query.name || "模板名称",
-        pageClientType: "H5"
-      }
-    };
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const hasCache = ref(false); // 是否有缓存
+const progress = ref(true); // 展示进度
+const num = ref(20); // 提交进度
+const saveDialog = ref(false); // 加载状态
+const way = ref([
+  // 装修tab栏切换
+  {
+    title: "首页",
+    name: "index",
+    selected: true,
   },
-  watch: {
-    pagetype: {
-      handler(val) {
-        this.way.length = 0;
-        if (val == "INDEX") {
-          this.way.push({ title: "首页", name: "index", selected: true });
-        } else if (val == "SPECIAL") {
-          this.way.push({ title: "专题", name: "special", selected: true });
-        } else if (val == "ALERT") {
-          this.way.push({ title: "开屏广告", name: "alert", selected: true });
-        }else if (val == "OPEN_SCREEN_ANIMATION") {
-          this.way.push({ title: "app开屏页面", name: "OPEN_SCREEN_ANIMATION", selected: true });
-        }
-      },
-      immediate: true,
-    },
+  {
+    title: "全屏广告",
+    name: "advertising",
+    selected: false,
   },
-  mounted() {
-    this.hasCache = this.getStore('managerMobilePageCache') ? true : false;
+  {
+    title: "弹窗广告",
+    name: "ALERT",
+    selected: false,
   },
-  methods: {
-    clearCache(){
-      this.setStore('managerMobilePageCache','');
-      this.$Message.success('清空成功')
-    },
-    // 将楼层装修的内容写入到本地缓存中
-    witeLocalStore(){
-      this.setStore('managerMobilePageCache', this.$store.state.styleStore)
-      this.$Message.success('写入成功')
-    },
+]);
 
-    clickBtn(val) {
-      this.way.forEach((item, index) => {
-        item.selected = false;
-      });
-      val.selected = true;
-      this.$emit("selected", val.name);
-    },
+const submitWay = reactive({
+  // 表单信息
+  pageShow: route.query.type || false,
+  name: route.query.name || "模板名称",
+  pageClientType: "H5"
+});
 
-    /**
-     * 加载，并保存模板
-     */
-    handleSpinShow() {
-      this.saveDialog = true;
-    },
-
-    // 填写是否发布，模板名称之后保存
-    save() {
-       if (
-        this.$store.state.styleStore == void 0 &&
-        (this.$route.query.pagetype && this.$route.query.pagetype != 'ALERT' &&  this.$route.query.pagetype != 'OPEN_SCREEN_ANIMATION')
-      ) {
-        this.$Message.error("请装修楼层");
-        return false;
-      }
-
-      this.submitWay?.pageShow === true
-        ? (this.submitWay.pageShow = "OPEN")
-        : (this.submitWay.pageShow = "CLOSE");
-
-      this.submitWay.pageData = JSON.stringify(this.$store.state.styleStore);
-      this.submitWay.pageType = "INDEX";
-      this.submitWay.pageType =  this.$route.query.pagetype ||  "INDEX";
-      // this.submitWay.pageType = this.pagetype;
-
-      if (this.$route.query.pagetype == 'ALERT' || this.$route.query.pagetype == 'OPEN_SCREEN_ANIMATION') {
-        this.update(this.submitWay);
-      } else {
-        this.$route.query.id ? this.updateHome() : this.submit(this.submitWay);
-      }
-
-      // this.$route.query.id ? this.update() : this.submit(this.submitWay);
-    },
-
-    // 更新
-    updateHome() {
-      this.progress = false;
-      API_Other.updateHome(this.$route.query.id, {
-        pageData: JSON.stringify(this.$store.state.styleStore),
-        name: this.submitWay.name,
-        pageShow: this.submitWay.pageShow,
-        pageType: this.submitWay.pageType,
-        pageClientType: "H5",
-      })
-        .then(res => {
-          this.num = 50;
-          if (res.success) {
-            this.num = 80;
-            /**制作保存成功动画¸ */
-            setTimeout(() => {
-              this.saveDialog = false;
-              this.$Message.success("修改成功");
-              this.goBack();
-            }, 1000);
-          } else {
-            this.saveDialog = false;
-            this.$Message.error("修改失败，请稍后重试");
-          }
-        });
-    },
-
-
-    // 更新
-    update(submitWay) {
-      if (this.$store.state.openStyleStore == void 0) {
-        this.$Message.error("请装修楼层!");
-        return false;
-      }
-      this.progress = false;
-
-      let id = this.$route.query.id;
-      const pagetype = this.$route.query.pagetype;
-      const pageType = {
-        INDEX: "INDEX",
-        ALERT: "OPEN_SCREEN_PAGE",
-        OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
-      }[pagetype ? pagetype : "INDEX"];
-
-      if (pagetype) {
-        submitWay.pageData = JSON.stringify(
-          this.$store.state.openStyleStore[0]
-        );
-        submitWay.pageType = pageType;
-        id = this.$store.state.openStoreId;
-      }
-
-      API_Other.updateHome(id, submitWay)
-        .then((res) => {
-          this.num = 50;
-          if (res.success) {
-            this.num = 80;
-            /**制作保存成功动画¸ */
-            setTimeout(() => {
-              this.saveDialog = false;
-              this.$Message.success("修改成功");
-              this.goBack();
-            }, 1000);
-          } else {
-            this.saveDialog = false;
-            this.$Message.error("修改失败，请稍后重试");
-          }
-        });
-    },
-
-
-
-    // 返回查询数据页面
-    goBack() {
-      this.$router.go(-1);
-    },
-
-    // 保存
-    submit(submitWay) {
-      this.progress = false;
-      API_Other.setHomeSetup(submitWay)
-        .then(res => {
-          this.num = 50;
-          if (res.success) {
-            this.num = 80;
-            /**制作保存成功动画¸ */
-            setTimeout(() => {
-              this.saveDialog = false;
-              this.$Message.success("保存成功");
-              this.goBack();
-            }, 1000);
-          } else {
-            this.progress = true;
-            this.saveDialog = false;
-            this.$Message.error("保存失败，请稍后重试");
-          }
-        });
+watch(
+  () => props.pagetype,
+  (val) => {
+    way.value.length = 0;
+    if (val == "INDEX") {
+      way.value.push({ title: "首页", name: "index", selected: true });
+    } else if (val == "SPECIAL") {
+      way.value.push({ title: "专题", name: "special", selected: true });
+    } else if (val == "ALERT") {
+      way.value.push({ title: "开屏广告", name: "alert", selected: true });
+    }else if (val == "OPEN_SCREEN_ANIMATION") {
+      way.value.push({ title: "app开屏页面", name: "OPEN_SCREEN_ANIMATION", selected: true });
     }
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  hasCache.value = getStore('managerMobilePageCache') ? true : false;
+});
+
+function clearCache(){
+  setStore('managerMobilePageCache','');
+  Message.success('清空成功')
+}
+// 将楼层装修的内容写入到本地缓存中
+function witeLocalStore(){
+  setStore('managerMobilePageCache', appStore.styleStore)
+  Message.success('写入成功')
+}
+
+function clickBtn(val) {
+  way.value.forEach((item, index) => {
+    item.selected = false;
+  });
+  val.selected = true;
+  emit("selected", val.name);
+}
+
+/**
+ * 加载，并保存模板
+ */
+function handleSpinShow() {
+  saveDialog.value = true;
+}
+
+// 填写是否发布，模板名称之后保存
+function save() {
+   if (
+    appStore.styleStore == void 0 &&
+    (route.query.pagetype && route.query.pagetype != 'ALERT' &&  route.query.pagetype != 'OPEN_SCREEN_ANIMATION')
+  ) {
+    Message.error("请装修楼层");
+    return false;
   }
-};
+
+  submitWay?.pageShow === true
+    ? (submitWay.pageShow = "OPEN")
+    : (submitWay.pageShow = "CLOSE");
+
+  submitWay.pageData = JSON.stringify(appStore.styleStore);
+  submitWay.pageType = "INDEX";
+  submitWay.pageType =  route.query.pagetype ||  "INDEX";
+  // submitWay.pageType = props.pagetype;
+
+  if (route.query.pagetype == 'ALERT' || route.query.pagetype == 'OPEN_SCREEN_ANIMATION') {
+    update(submitWay);
+  } else {
+    route.query.id ? updateHome() : submit(submitWay);
+  }
+
+  // route.query.id ? update() : submit(submitWay);
+}
+
+// 更新
+function updateHome() {
+  progress.value = false;
+  API_Other.updateHome(route.query.id, {
+    pageData: JSON.stringify(appStore.styleStore),
+    name: submitWay.name,
+    pageShow: submitWay.pageShow,
+    pageType: submitWay.pageType,
+    pageClientType: "H5",
+  })
+    .then(res => {
+      num.value = 50;
+      if (res.success) {
+        num.value = 80;
+        /**制作保存成功动画¸ */
+        setTimeout(() => {
+          saveDialog.value = false;
+          Message.success("修改成功");
+          goBack();
+        }, 1000);
+      } else {
+        saveDialog.value = false;
+        Message.error("修改失败，请稍后重试");
+      }
+    });
+}
+
+
+// 更新
+function update(submitWay) {
+  if (appStore.openStyleStore == void 0) {
+    Message.error("请装修楼层!");
+    return false;
+  }
+  progress.value = false;
+
+  let id = route.query.id;
+  const pagetype = route.query.pagetype;
+  const pageType = {
+    INDEX: "INDEX",
+    ALERT: "OPEN_SCREEN_PAGE",
+    OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
+  }[pagetype ? pagetype : "INDEX"];
+
+  if (pagetype) {
+    submitWay.pageData = JSON.stringify(
+      appStore.openStyleStore[0]
+    );
+    submitWay.pageType = pageType;
+    id = appStore.openStoreId;
+  }
+
+  API_Other.updateHome(id, submitWay)
+    .then((res) => {
+      num.value = 50;
+      if (res.success) {
+        num.value = 80;
+        /**制作保存成功动画¸ */
+        setTimeout(() => {
+          saveDialog.value = false;
+          Message.success("修改成功");
+          goBack();
+        }, 1000);
+      } else {
+        saveDialog.value = false;
+        Message.error("修改失败，请稍后重试");
+      }
+    });
+}
+
+
+
+// 返回查询数据页面
+function goBack() {
+  router.go(-1);
+}
+
+// 保存
+function submit(submitWay) {
+  progress.value = false;
+  API_Other.setHomeSetup(submitWay)
+    .then(res => {
+      num.value = 50;
+      if (res.success) {
+        num.value = 80;
+        /**制作保存成功动画¸ */
+        setTimeout(() => {
+          saveDialog.value = false;
+          Message.success("保存成功");
+          goBack();
+        }, 1000);
+      } else {
+        progress.value = true;
+        saveDialog.value = false;
+        Message.error("保存失败，请稍后重试");
+      }
+    });
+}
 </script>
 <style scoped lang="scss">
 .model-item {

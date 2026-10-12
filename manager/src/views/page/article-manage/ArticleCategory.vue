@@ -39,7 +39,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="form" :model="formAdd" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="formAdd" label-width="100px" :rules="formValidate">
         <el-form-item v-if="showParent" label="上级分类" prop="parentId">
           {{ parentTitle }}
           <el-input v-model="formAdd.parentId" style="display: none" />
@@ -59,137 +59,137 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
 import { saveArticleCategory, getArticleCategory, delArticleCategory, updateArticleCategory } from "@/api/pages";
 import { regular } from "@/utils";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "lili-components",
-  data() {
-    return {
-      submitLoading: false,
-      loading: false,
-      expandLevel: 1,
-      modalType: 0,
-      modalVisible: false,
-      modalTitle: "",
-      showParent: false,
-      parentTitle: "",
-      formAdd: {
-        parentId: "",
-        sort: 1,
-        level: 0,
-        articleCategoryName: "",
-      },
-      formValidate: {
-        articleCategoryName: [regular.REQUIRED],
-        sort: [regular.REQUIRED, regular.INTEGER],
-      },
-      tableData: [],
-    };
-  },
-  methods: {
-    init() {
-      this.getAllList();
-    },
-    addChildren(v) {
-      this.modalType = 0;
-      this.modalTitle = "添加子分类";
-      this.formAdd.articleCategoryName = "";
-      this.parentTitle = v.articleCategoryName;
-      this.formAdd.level = Number(v.level) + 1;
-      this.showParent = true;
-      delete this.formAdd.id;
-      this.formAdd.parentId = v.id;
-      this.modalVisible = true;
-    },
-    edit(v) {
-      this.modalType = 1;
-      this.modalTitle = "编辑";
-      this.formAdd.id = v.id;
-      this.formAdd.articleCategoryName = v.articleCategoryName;
-      this.formAdd.level = v.level;
-      this.formAdd.parentId = v.parentId;
-      this.formAdd.sort = v.sort;
-      this.showParent = false;
-      this.modalVisible = true;
-    },
-    addParent() {
-      this.modalType = 0;
-      this.modalTitle = "添加一级分类";
-      this.parentTitle = "顶级分类";
-      this.showParent = true;
-      this.$refs.form?.resetFields();
-      delete this.formAdd.id;
-      this.formAdd.parentId = 0;
-      this.modalVisible = true;
-    },
-    Submit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        if (this.modalType === 0) {
-          delete this.formAdd.id;
-          saveArticleCategory(this.formAdd).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("添加成功");
-              this.formAdd = {
-                parentId: "",
-                sort: 1,
-                level: 0,
-                articleCategoryName: "",
-              };
-            }
-            this.getAllList();
-            this.modalVisible = false;
-          });
-        } else {
-          updateArticleCategory(this.formAdd, this.formAdd.id).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("修改成功");
-            }
-            this.getAllList();
-            this.modalVisible = false;
-            this.$refs.form.resetFields();
-          });
+defineOptions({ name: "lili-components" });
+
+const submitLoading = ref(false);
+const loading = ref(false);
+const expandLevel = ref(1);
+const modalType = ref(0);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const showParent = ref(false);
+const parentTitle = ref("");
+const formAdd = ref({
+  parentId: "",
+  sort: 1,
+  level: 0,
+  articleCategoryName: "",
+});
+const formValidate = ref({
+  articleCategoryName: [regular.REQUIRED],
+  sort: [regular.REQUIRED, regular.INTEGER],
+});
+const tableData = ref([]);
+
+// 模板 el-form 的 ref（原 ref="form"，避免与顶层变量重名，改名为 formRef）
+const formRef = ref(null);
+
+function init() {
+  getAllList();
+}
+function addChildren(v) {
+  modalType.value = 0;
+  modalTitle.value = "添加子分类";
+  formAdd.value.articleCategoryName = "";
+  parentTitle.value = v.articleCategoryName;
+  formAdd.value.level = Number(v.level) + 1;
+  showParent.value = true;
+  delete formAdd.value.id;
+  formAdd.value.parentId = v.id;
+  modalVisible.value = true;
+}
+function edit(v) {
+  modalType.value = 1;
+  modalTitle.value = "编辑";
+  formAdd.value.id = v.id;
+  formAdd.value.articleCategoryName = v.articleCategoryName;
+  formAdd.value.level = v.level;
+  formAdd.value.parentId = v.parentId;
+  formAdd.value.sort = v.sort;
+  showParent.value = false;
+  modalVisible.value = true;
+}
+function addParent() {
+  modalType.value = 0;
+  modalTitle.value = "添加一级分类";
+  parentTitle.value = "顶级分类";
+  showParent.value = true;
+  formRef.value?.resetFields();
+  delete formAdd.value.id;
+  formAdd.value.parentId = 0;
+  modalVisible.value = true;
+}
+function Submit() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+    if (modalType.value === 0) {
+      delete formAdd.value.id;
+      saveArticleCategory(formAdd.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("添加成功");
+          formAdd.value = {
+            parentId: "",
+            sort: 1,
+            level: 0,
+            articleCategoryName: "",
+          };
+        }
+        getAllList();
+        modalVisible.value = false;
+      });
+    } else {
+      updateArticleCategory(formAdd.value, formAdd.value.id).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("修改成功");
+        }
+        getAllList();
+        modalVisible.value = false;
+        formRef.value.resetFields();
+      });
+    }
+  });
+}
+function remove(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除 " + v.articleCategoryName + " ?",
+    loading: true,
+    onOk: () => {
+      delArticleCategory(v.id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getAllList();
         }
       });
     },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除 " + v.articleCategoryName + " ?",
-        loading: true,
-        onOk: () => {
-          delArticleCategory(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
-            }
-          });
-        },
-      });
-    },
-    getAllList() {
-      this.loading = true;
-      getArticleCategory()
-        .then((res) => {
-          if (res.success) {
-            this.tableData = res.result || [];
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+function getAllList() {
+  loading.value = true;
+  getArticleCategory()
+    .then((res) => {
+      if (res.success) {
+        tableData.value = res.result || [];
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -220,7 +220,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import {
   importCardKey,
   addCardKey,
@@ -235,6 +237,7 @@ import {
   formatCardKeyStatus,
   CARD_KEY_STATUS_TAG,
 } from "@/constants/cardKey";
+import { Message, Modal } from "@/utils/message";
 
 /**
  * 商家卡池管理页：导入/新增/作废/导出，列表展示明文卡密（仅商家授权上下文）。
@@ -243,332 +246,355 @@ import {
  * @author Mike
  * @date 2026-07-31
  */
-export default {
-  name: "cardKeyPool",
-  data() {
-    return {
-      skuId: "",
-      goodsId: "",
-      goodsName: "",
-      skuOptions: [],
-      skuLoading: false,
-      statusTab: "ALL",
-      stats: null,
-      poolLocked: false,
-      loading: false,
-      exportLoading: false,
-      templateLoading: false,
-      data: [],
-      total: 0,
-      importRange: [],
-      searchForm: {
-        cardNo: "",
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      importModal: false,
-      importResultVisible: false,
-      importResult: {},
-      addVisible: false,
-      addLoading: false,
-      addForm: {
-        cardNo: "",
-        cardSecret: "",
-      },
-      addRules: {
-        cardNo: [{ required: true, message: "卡号不能为空", trigger: "blur" }],
-        cardSecret: [{ required: true, message: "卡密不能为空", trigger: "blur" }],
-      },
-    };
-  },
-  computed: {
-    statusTabsWithCount() {
-      const s = this.stats || {};
-      const withCount = (label, count) =>
-        count != null && this.stats ? `${label}(${count})` : label;
-      const total =
-        (s.unusedCount || 0) +
-        (s.reservedCount || 0) +
-        (s.allocatedCount || 0) +
-        (s.voidedCount || 0);
-      return [
-        { title: withCount("全部", total), value: "ALL" },
-        { title: withCount("未使用", s.unusedCount || 0), value: "UNUSED" },
-        { title: withCount("已预占", s.reservedCount || 0), value: "RESERVED" },
-        { title: withCount("已分配", s.allocatedCount || 0), value: "ALLOCATED" },
-        { title: withCount("已作废", s.voidedCount || 0), value: "VOIDED" },
-      ];
-    },
-  },
-  watch: {
-    "$route.query": {
-      handler() {
-        const prevSkuId = this.skuId;
-        this.initFromRoute();
-        if (this.skuId && this.skuId !== prevSkuId) {
-          this.resetPoolViewState();
-          this.loadStats();
-          this.getList();
-        }
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    formatStatus: formatCardKeyStatus,
-    statusTag(status) {
-      return CARD_KEY_STATUS_TAG[status] || "info";
-    },
-    goBack() {
-      this.$router.back();
-    },
-    initFromRoute() {
-      const q = this.$route.query;
-      this.skuId = q.skuId || "";
-      this.goodsId = q.goodsId || "";
-      this.goodsName = q.goodsName || "";
-    },
-    formatSkuOptionLabel(sku) {
-      if (!sku) return "";
-      const spec = sku.simpleSpecs || sku.sn || sku.id;
-      const qty =
-        sku.poolStock != null && sku.poolStock !== ""
-          ? sku.poolStock
-          : sku.quantity != null
-            ? sku.quantity
-            : "—";
-      return `${spec}（库存 ${qty}）`;
-    },
-    resetPoolViewState() {
-      this.statusTab = "ALL";
-      this.searchForm.pageNumber = 1;
-      this.searchForm.cardNo = "";
-      this.importRange = [];
-      this.poolLocked = false;
-      this.stats = null;
-      this.data = [];
-      this.total = 0;
-    },
-    /** 卡池变更后刷新 SKU 选择器中的可售库存（后端 syncSkuStock → quantity） */
-    refreshSkuOptionStock() {
-      if (!this.goodsId) return Promise.resolve();
-      return this.loadSkuOptions();
-    },
-    async loadSkuOptions() {
-      if (!this.goodsId) {
-        this.skuOptions = [];
-        return;
-      }
-      this.skuLoading = true;
-      try {
-        const res = await getQueryGoodsIdGoodsList(this.goodsId);
-        if (res.success) {
-          this.skuOptions = (res.result || []).filter((s) => !s.deleteFlag);
-        }
-      } catch {
-        this.skuOptions = [];
-      } finally {
-        this.skuLoading = false;
-      }
-    },
-    onSkuChange(newSkuId) {
-      if (!newSkuId) return;
-      this.skuId = newSkuId;
-      this.resetPoolViewState();
-      this.$router.replace({
-        path: this.$route.path,
-        query: {
-          ...this.$route.query,
-          skuId: newSkuId,
-          goodsId: this.goodsId,
-          goodsName: this.goodsName,
-        },
-      });
-      this.loadStats();
-      this.getList();
-    },
-    onStatusTabClick(tab) {
-      this.statusTab = tab.paneName;
-      this.searchForm.pageNumber = 1;
-      this.getList();
-    },
-    buildListParams() {
-      const params = {
-        skuId: this.skuId,
-        pageNumber: this.searchForm.pageNumber,
-        pageSize: this.searchForm.pageSize,
-      };
-      if (this.goodsId) params.goodsId = this.goodsId;
-      if (this.searchForm.cardNo) params.cardNo = this.searchForm.cardNo;
-      if (this.statusTab && this.statusTab !== "ALL") {
-        params.status = this.statusTab;
-      }
-      if (this.importRange && this.importRange.length === 2) {
-        params.createTimeStart = this.importRange[0];
-        params.createTimeEnd = this.importRange[1];
-      }
-      return params;
-    },
-    loadStats() {
-      if (!this.skuId) return;
-      getCardKeyStats(this.skuId).then((res) => {
-        if (res.success) {
-          this.stats = res.result;
-        }
-      });
-    },
-    getList() {
-      if (!this.skuId) return;
-      this.loading = true;
-      getCardKeyList(this.buildListParams())
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-            this.poolLocked = false;
-          } else {
-            this.checkPoolLocked(res);
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    /** 审核拒绝 / SKU 删除 / 关店时禁用卡池操作（S-06 / S-07 / EC-21~23） */
-    checkPoolLocked(res) {
-      const lockedCodes = [
-        "CARD_KEY_GOODS_AUTH_REFUSE",
-        "CARD_KEY_SKU_DELETED",
-        "CARD_KEY_STORE_CLOSED",
-      ];
-      if (res.code && lockedCodes.includes(String(res.code))) {
-        this.poolLocked = true;
-      }
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getList();
-    },
-    handleReset() {
-      this.searchForm.cardNo = "";
-      this.importRange = [];
-      this.searchForm.pageNumber = 1;
-      this.getList();
-    },
-    onPageSizeChange() {
-      this.searchForm.pageNumber = 1;
-      this.getList();
-    },
-    handleImportUpload(file) {
-      if (!/\.xlsx$/i.test(file.name)) {
-        this.$Message.error("请上传 .xlsx 文件");
-        return false;
-      }
-      importCardKey(this.skuId, file).then((res) => {
-        if (res.success) {
-          this.importModal = false;
-          this.importResult = res.result || {};
-          this.importResultVisible = true;
-          this.loadStats();
-          this.getList();
-          this.refreshSkuOptionStock();
-        } else {
-          this.checkPoolLocked(res);
-        }
-      });
-      return false;
-    },
-    handleDownloadTemplate() {
-      this.templateLoading = true;
-      downloadImportTemplate()
-        .then(() => {
-          this.$Message.success("模板下载成功");
-        })
-        .catch(() => {})
-        .finally(() => {
-          this.templateLoading = false;
-        });
-    },
-    openAddDialog() {
-      this.addForm = { cardNo: "", cardSecret: "" };
-      this.addVisible = true;
-    },
-    submitAdd() {
-      this.$refs.addFormRef.validate((valid) => {
-        if (!valid) return;
-        this.addLoading = true;
-        addCardKey({
-          skuId: this.skuId,
-          cardNo: this.addForm.cardNo.trim(),
-          cardSecret: this.addForm.cardSecret.trim(),
-        })
-          .then((res) => {
-            this.addLoading = false;
-            if (res.success) {
-              this.$Message.success("新增成功");
-              this.addVisible = false;
-              this.loadStats();
-              this.getList();
-              this.refreshSkuOptionStock();
-            } else {
-              this.checkPoolLocked(res);
-            }
-          })
-          .catch(() => {
-            this.addLoading = false;
-          });
-      });
-    },
-    handleVoid(row) {
-      this.$Modal.confirm({
-        title: "确认作废",
-        content: `确定作废卡号「${row.cardNo}」？作废后不可恢复。`,
-        onOk: () => {
-          voidCardKey(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("作废成功");
-              this.loadStats();
-              this.getList();
-              this.refreshSkuOptionStock();
-            }
-          });
-        },
-      });
-    },
-    handleExport() {
-      this.exportLoading = true;
-      const params = { ...this.buildListParams() };
-      delete params.pageNumber;
-      delete params.pageSize;
-      exportCardKey(params, this.skuId)
-        .then(() => {
-          this.$Message.success("导出成功");
-        })
-        .catch(() => {})
-        .finally(() => {
-          this.exportLoading = false;
-        });
-    },
-    async init() {
-      this.initFromRoute();
-      if (this.goodsId) {
-        await this.loadSkuOptions();
-      }
-      if (!this.skuId && this.skuOptions.length) {
-        this.onSkuChange(this.skuOptions[0].id);
-        return;
-      }
-      if (this.skuId) {
-        this.loadStats();
-        this.getList();
-      }
-    },
-  },
-  mounted() {
-    this.init();
-  },
+defineOptions({ name: "cardKeyPool" });
+
+const route = useRoute();
+const router = useRouter();
+
+const skuId = ref("");
+const goodsId = ref("");
+const goodsName = ref("");
+const skuOptions = ref([]);
+const skuLoading = ref(false);
+const statusTab = ref("ALL");
+const stats = ref(null);
+const poolLocked = ref(false);
+const loading = ref(false);
+const exportLoading = ref(false);
+const templateLoading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const importRange = ref([]);
+const searchForm = reactive({
+  cardNo: "",
+  pageNumber: 1,
+  pageSize: 20,
+});
+const importModal = ref(false);
+const importResultVisible = ref(false);
+const importResult = ref({});
+const addVisible = ref(false);
+const addLoading = ref(false);
+const addForm = ref({
+  cardNo: "",
+  cardSecret: "",
+});
+const addRules = {
+  cardNo: [{ required: true, message: "卡号不能为空", trigger: "blur" }],
+  cardSecret: [{ required: true, message: "卡密不能为空", trigger: "blur" }],
 };
+
+const searchFormRef = ref(null);
+const addFormRef = ref(null);
+
+const statusTabsWithCount = computed(() => {
+  const s = stats.value || {};
+  const withCount = (label, count) =>
+    count != null && stats.value ? `${label}(${count})` : label;
+  const totalCount =
+    (s.unusedCount || 0) +
+    (s.reservedCount || 0) +
+    (s.allocatedCount || 0) +
+    (s.voidedCount || 0);
+  return [
+    { title: withCount("全部", totalCount), value: "ALL" },
+    { title: withCount("未使用", s.unusedCount || 0), value: "UNUSED" },
+    { title: withCount("已预占", s.reservedCount || 0), value: "RESERVED" },
+    { title: withCount("已分配", s.allocatedCount || 0), value: "ALLOCATED" },
+    { title: withCount("已作废", s.voidedCount || 0), value: "VOIDED" },
+  ];
+});
+
+watch(
+  () => route.query,
+  () => {
+    const prevSkuId = skuId.value;
+    initFromRoute();
+    if (skuId.value && skuId.value !== prevSkuId) {
+      resetPoolViewState();
+      loadStats();
+      getList();
+    }
+  },
+  { deep: true }
+);
+
+const formatStatus = formatCardKeyStatus;
+
+function statusTag(status) {
+  return CARD_KEY_STATUS_TAG[status] || "info";
+}
+
+function goBack() {
+  router.back();
+}
+
+function initFromRoute() {
+  const q = route.query;
+  skuId.value = q.skuId || "";
+  goodsId.value = q.goodsId || "";
+  goodsName.value = q.goodsName || "";
+}
+
+function formatSkuOptionLabel(sku) {
+  if (!sku) return "";
+  const spec = sku.simpleSpecs || sku.sn || sku.id;
+  const qty =
+    sku.poolStock != null && sku.poolStock !== ""
+      ? sku.poolStock
+      : sku.quantity != null
+        ? sku.quantity
+        : "—";
+  return `${spec}（库存 ${qty}）`;
+}
+
+function resetPoolViewState() {
+  statusTab.value = "ALL";
+  searchForm.pageNumber = 1;
+  searchForm.cardNo = "";
+  importRange.value = [];
+  poolLocked.value = false;
+  stats.value = null;
+  data.value = [];
+  total.value = 0;
+}
+
+/** 卡池变更后刷新 SKU 选择器中的可售库存（后端 syncSkuStock → quantity） */
+function refreshSkuOptionStock() {
+  if (!goodsId.value) return Promise.resolve();
+  return loadSkuOptions();
+}
+
+async function loadSkuOptions() {
+  if (!goodsId.value) {
+    skuOptions.value = [];
+    return;
+  }
+  skuLoading.value = true;
+  try {
+    const res = await getQueryGoodsIdGoodsList(goodsId.value);
+    if (res.success) {
+      skuOptions.value = (res.result || []).filter((s) => !s.deleteFlag);
+    }
+  } catch {
+    skuOptions.value = [];
+  } finally {
+    skuLoading.value = false;
+  }
+}
+
+function onSkuChange(newSkuId) {
+  if (!newSkuId) return;
+  skuId.value = newSkuId;
+  resetPoolViewState();
+  router.replace({
+    path: route.path,
+    query: {
+      ...route.query,
+      skuId: newSkuId,
+      goodsId: goodsId.value,
+      goodsName: goodsName.value,
+    },
+  });
+  loadStats();
+  getList();
+}
+
+function onStatusTabClick(tab) {
+  statusTab.value = tab.paneName;
+  searchForm.pageNumber = 1;
+  getList();
+}
+
+function buildListParams() {
+  const params = {
+    skuId: skuId.value,
+    pageNumber: searchForm.pageNumber,
+    pageSize: searchForm.pageSize,
+  };
+  if (goodsId.value) params.goodsId = goodsId.value;
+  if (searchForm.cardNo) params.cardNo = searchForm.cardNo;
+  if (statusTab.value && statusTab.value !== "ALL") {
+    params.status = statusTab.value;
+  }
+  if (importRange.value && importRange.value.length === 2) {
+    params.createTimeStart = importRange.value[0];
+    params.createTimeEnd = importRange.value[1];
+  }
+  return params;
+}
+
+function loadStats() {
+  if (!skuId.value) return;
+  getCardKeyStats(skuId.value).then((res) => {
+    if (res.success) {
+      stats.value = res.result;
+    }
+  });
+}
+
+function getList() {
+  if (!skuId.value) return;
+  loading.value = true;
+  getCardKeyList(buildListParams())
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+        poolLocked.value = false;
+      } else {
+        checkPoolLocked(res);
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+/** 审核拒绝 / SKU 删除 / 关店时禁用卡池操作（S-06 / S-07 / EC-21~23） */
+function checkPoolLocked(res) {
+  const lockedCodes = [
+    "CARD_KEY_GOODS_AUTH_REFUSE",
+    "CARD_KEY_SKU_DELETED",
+    "CARD_KEY_STORE_CLOSED",
+  ];
+  if (res.code && lockedCodes.includes(String(res.code))) {
+    poolLocked.value = true;
+  }
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getList();
+}
+
+function handleReset() {
+  searchForm.cardNo = "";
+  importRange.value = [];
+  searchForm.pageNumber = 1;
+  getList();
+}
+
+function onPageSizeChange() {
+  searchForm.pageNumber = 1;
+  getList();
+}
+
+function handleImportUpload(file) {
+  if (!/\.xlsx$/i.test(file.name)) {
+    Message.error("请上传 .xlsx 文件");
+    return false;
+  }
+  importCardKey(skuId.value, file).then((res) => {
+    if (res.success) {
+      importModal.value = false;
+      importResult.value = res.result || {};
+      importResultVisible.value = true;
+      loadStats();
+      getList();
+      refreshSkuOptionStock();
+    } else {
+      checkPoolLocked(res);
+    }
+  });
+  return false;
+}
+
+function handleDownloadTemplate() {
+  templateLoading.value = true;
+  downloadImportTemplate()
+    .then(() => {
+      Message.success("模板下载成功");
+    })
+    .catch(() => {})
+    .finally(() => {
+      templateLoading.value = false;
+    });
+}
+
+function openAddDialog() {
+  addForm.value = { cardNo: "", cardSecret: "" };
+  addVisible.value = true;
+}
+
+function submitAdd() {
+  addFormRef.value.validate((valid) => {
+    if (!valid) return;
+    addLoading.value = true;
+    addCardKey({
+      skuId: skuId.value,
+      cardNo: addForm.value.cardNo.trim(),
+      cardSecret: addForm.value.cardSecret.trim(),
+    })
+      .then((res) => {
+        addLoading.value = false;
+        if (res.success) {
+          Message.success("新增成功");
+          addVisible.value = false;
+          loadStats();
+          getList();
+          refreshSkuOptionStock();
+        } else {
+          checkPoolLocked(res);
+        }
+      })
+      .catch(() => {
+        addLoading.value = false;
+      });
+  });
+}
+
+function handleVoid(row) {
+  Modal.confirm({
+    title: "确认作废",
+    content: `确定作废卡号「${row.cardNo}」？作废后不可恢复。`,
+    onOk: () => {
+      voidCardKey(row.id).then((res) => {
+        if (res.success) {
+          Message.success("作废成功");
+          loadStats();
+          getList();
+          refreshSkuOptionStock();
+        }
+      });
+    },
+  });
+}
+
+function handleExport() {
+  exportLoading.value = true;
+  const params = { ...buildListParams() };
+  delete params.pageNumber;
+  delete params.pageSize;
+  exportCardKey(params, skuId.value)
+    .then(() => {
+      Message.success("导出成功");
+    })
+    .catch(() => {})
+    .finally(() => {
+      exportLoading.value = false;
+    });
+}
+
+async function init() {
+  initFromRoute();
+  if (goodsId.value) {
+    await loadSkuOptions();
+  }
+  if (!skuId.value && skuOptions.value.length) {
+    onSkuChange(skuOptions.value[0].id);
+    return;
+  }
+  if (skuId.value) {
+    loadStats();
+    getList();
+  }
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         label-width="70px"
         class="search-form order-search-form"
@@ -74,7 +74,7 @@
         <el-button type="warning" class="export" :loading="exporting" @click="exportOrder">导出订单</el-button>
       </div>
 
-      <el-table v-loading="loading" :data="data" ref="table" class="mt_10" style="width: 100%">
+      <el-table v-loading="loading" :data="data" ref="tableRef" class="mt_10" style="width: 100%">
         <el-table-column prop="sn" label="订单号" min-width="200" show-overflow-tooltip />
         <el-table-column label="商品" min-width="280">
           <template #default="{ row }">
@@ -149,7 +149,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
 import * as API_Order from "@/api/order";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
@@ -229,264 +230,260 @@ function readSavedQuery() {
   }
 }
 
-export default {
-  name: "orderList",
-  data() {
-    return {
-      loading: true,
-      exporting: false,
-      pageSizes: PAGE_SIZES,
-      promotionOptions: PROMOTION_OPTIONS,
-      orderTypeOptions: ORDER_TYPE_OPTIONS,
-      paymentOptions: PAYMENT_OPTIONS,
-      searchForm: emptySearchForm(),
-      selectDate: null,
-      data: [],
-      total: 0,
-      orderNumData: {},
-      currentStatus: "ALL",
-    };
-  },
-  computed: {
-    orderStatusWithCount() {
-      const count = (value) => (value ? `(${value})` : "");
-      return [
-        { title: "全部", value: "ALL" },
-        { title: `未付款${count(this.orderNumData.waitPayNum)}`, value: "UNPAID" },
-        { title: `已付款${count(this.orderNumData.waitDeliveryNum)}`, value: "PAID" },
-        { title: `待发货${count(this.orderNumData.waitShipNum)}`, value: "UNDELIVERED" },
-        { title: `部分发货${count(this.orderNumData.partsDeliveredNumNum)}`, value: "PARTS_DELIVERED" },
-        { title: `待收货${count(this.orderNumData.deliveredNum)}`, value: "DELIVERED" },
-        { title: `待核验${count(this.orderNumData.waitCheckNum)}`, value: "TAKE" },
-        { title: `待自提${count(this.orderNumData.waitSelfPickNum)}`, value: "STAY_PICKED_UP" },
-        { title: `已完成${count(this.orderNumData.finishNum)}`, value: "COMPLETED" },
-        { title: `已关闭${count(this.orderNumData.closeNum)}`, value: "CANCELLED" },
-      ];
-    },
-  },
-  methods: {
-    unitPrice,
-    onStatusTabClick(tab) {
-      this.orderStatusClick(tab.paneName);
-    },
-    orderGoods(row) {
-      const items = row && row.orderItems;
-      return items && items.length ? items : [];
-    },
-    clientTypeText(v) {
-      const map = { H5: "移动端", PC: "PC端", WECHAT_MP: "小程序端", APP: "移动应用端" };
-      return map[v] || v || "—";
-    },
-    orderTypeText(v) {
-      const found = ORDER_TYPE_OPTIONS.find((item) => item.value === v);
-      return found ? found.label : v || "—";
-    },
-    orderPromotionText(v) {
-      const found = PROMOTION_OPTIONS.find((item) => item.value === v);
-      return found ? found.label : v || "—";
-    },
-    orderPromotionTagType(v) {
-      const map = {
-        NORMAL: "primary",
-        PINTUAN: "danger",
-        GIFT: "success",
-        POINTS: "info",
-        KANJIA: "warning",
-      };
-      return map[v] || "info";
-    },
-    deliveryMethodText(v) {
-      const map = {
-        SELF_PICK_UP: "自提",
-        LOCAL_TOWN_DELIVERY: "同城配送",
-        LOGISTICS: "物流",
-        VIRTUAL: "虚拟发货",
-      };
-      return map[v] || v || "—";
-    },
-    paymentMethodText(v) {
-      const map = {
-        NOT_ACTUALLY_PAID: "—",
-        WECHAT: "微信支付",
-        ALIPAY: "支付宝",
-        WALLET: "余额支付",
-        BANK_TRANSFER: "线下转账",
-      };
-      return map[v] || v || "—";
-    },
-    orderStatusText(v) {
-      const map = {
-        UNPAID: "未付款",
-        PAID: "已付款",
-        UNDELIVERED: "待发货",
-        STAY_PICKED_UP: "待自提",
-        PARTS_DELIVERED: "部分发货",
-        DELIVERED: "已发货",
-        COMPLETED: "已完成",
-        TAKE: "待核验",
-        CANCELLED: "已关闭",
-      };
-      return map[v] || v || "—";
-    },
-    orderStatusTagType(v) {
-      const map = {
-        UNPAID: "danger",
-        PAID: "primary",
-        UNDELIVERED: "info",
-        STAY_PICKED_UP: "info",
-        PARTS_DELIVERED: "warning",
-        DELIVERED: "warning",
-        COMPLETED: "success",
-        TAKE: "warning",
-        CANCELLED: "danger",
-      };
-      return map[v] || "info";
-    },
-    rememberQuery() {
-      sessionStorage.setItem(
-        QUERY_KEY,
-        JSON.stringify({
-          searchForm: this.searchForm,
-          selectDate: this.selectDate,
-          currentStatus: this.currentStatus,
-        })
+defineOptions({ name: "orderList" });
+
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const loading = ref(true);
+const exporting = ref(false);
+const pageSizes = ref(PAGE_SIZES);
+const promotionOptions = ref(PROMOTION_OPTIONS);
+const orderTypeOptions = ref(ORDER_TYPE_OPTIONS);
+const paymentOptions = ref(PAYMENT_OPTIONS);
+const searchForm = ref(emptySearchForm());
+const selectDate = ref(null);
+const data = ref([]);
+const total = ref(0);
+const orderNumData = ref({});
+const currentStatus = ref("ALL");
+
+const orderStatusWithCount = computed(() => {
+  const count = (value) => (value ? `(${value})` : "");
+  return [
+    { title: "全部", value: "ALL" },
+    { title: `未付款${count(orderNumData.value.waitPayNum)}`, value: "UNPAID" },
+    { title: `已付款${count(orderNumData.value.waitDeliveryNum)}`, value: "PAID" },
+    { title: `待发货${count(orderNumData.value.waitShipNum)}`, value: "UNDELIVERED" },
+    { title: `部分发货${count(orderNumData.value.partsDeliveredNumNum)}`, value: "PARTS_DELIVERED" },
+    { title: `待收货${count(orderNumData.value.deliveredNum)}`, value: "DELIVERED" },
+    { title: `待核验${count(orderNumData.value.waitCheckNum)}`, value: "TAKE" },
+    { title: `待自提${count(orderNumData.value.waitSelfPickNum)}`, value: "STAY_PICKED_UP" },
+    { title: `已完成${count(orderNumData.value.finishNum)}`, value: "COMPLETED" },
+    { title: `已关闭${count(orderNumData.value.closeNum)}`, value: "CANCELLED" },
+  ];
+});
+
+function onStatusTabClick(tab) {
+  orderStatusClick(tab.paneName);
+}
+function orderGoods(row) {
+  const items = row && row.orderItems;
+  return items && items.length ? items : [];
+}
+function clientTypeText(v) {
+  const map = { H5: "移动端", PC: "PC端", WECHAT_MP: "小程序端", APP: "移动应用端" };
+  return map[v] || v || "—";
+}
+function orderTypeText(v) {
+  const found = ORDER_TYPE_OPTIONS.find((item) => item.value === v);
+  return found ? found.label : v || "—";
+}
+function orderPromotionText(v) {
+  const found = PROMOTION_OPTIONS.find((item) => item.value === v);
+  return found ? found.label : v || "—";
+}
+function orderPromotionTagType(v) {
+  const map = {
+    NORMAL: "primary",
+    PINTUAN: "danger",
+    GIFT: "success",
+    POINTS: "info",
+    KANJIA: "warning",
+  };
+  return map[v] || "info";
+}
+function deliveryMethodText(v) {
+  const map = {
+    SELF_PICK_UP: "自提",
+    LOCAL_TOWN_DELIVERY: "同城配送",
+    LOGISTICS: "物流",
+    VIRTUAL: "虚拟发货",
+  };
+  return map[v] || v || "—";
+}
+function paymentMethodText(v) {
+  const map = {
+    NOT_ACTUALLY_PAID: "—",
+    WECHAT: "微信支付",
+    ALIPAY: "支付宝",
+    WALLET: "余额支付",
+    BANK_TRANSFER: "线下转账",
+  };
+  return map[v] || v || "—";
+}
+function orderStatusText(v) {
+  const map = {
+    UNPAID: "未付款",
+    PAID: "已付款",
+    UNDELIVERED: "待发货",
+    STAY_PICKED_UP: "待自提",
+    PARTS_DELIVERED: "部分发货",
+    DELIVERED: "已发货",
+    COMPLETED: "已完成",
+    TAKE: "待核验",
+    CANCELLED: "已关闭",
+  };
+  return map[v] || v || "—";
+}
+function orderStatusTagType(v) {
+  const map = {
+    UNPAID: "danger",
+    PAID: "primary",
+    UNDELIVERED: "info",
+    STAY_PICKED_UP: "info",
+    PARTS_DELIVERED: "warning",
+    DELIVERED: "warning",
+    COMPLETED: "success",
+    TAKE: "warning",
+    CANCELLED: "danger",
+  };
+  return map[v] || "info";
+}
+function rememberQuery() {
+  sessionStorage.setItem(
+    QUERY_KEY,
+    JSON.stringify({
+      searchForm: searchForm.value,
+      selectDate: selectDate.value,
+      currentStatus: currentStatus.value,
+    })
+  );
+}
+function restoreQuery() {
+  const saved = readSavedQuery();
+  if (!saved) return;
+  searchForm.value = saved.searchForm;
+  selectDate.value = saved.selectDate;
+  currentStatus.value = saved.currentStatus;
+}
+function init() {
+  getDataList();
+  getOrderNumData();
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+  getOrderNumData();
+}
+function handleReset() {
+  const pageSize = searchForm.value.pageSize;
+  searchForm.value = emptySearchForm(pageSize);
+  selectDate.value = null;
+  currentStatus.value = "ALL";
+  sessionStorage.removeItem(QUERY_KEY);
+  init();
+}
+function selectDateRange(v) {
+  if (v && v.length === 2) {
+    searchForm.value.startDate = v[0];
+    searchForm.value.endDate = v[1];
+  } else {
+    searchForm.value.startDate = "";
+    searchForm.value.endDate = "";
+  }
+}
+function countParams() {
+  const params = { ...searchForm.value };
+  delete params.orderStatus;
+  delete params.pageNumber;
+  delete params.pageSize;
+  delete params.sort;
+  delete params.order;
+  return params;
+}
+function getDataList() {
+  loading.value = true;
+  rememberQuery();
+  API_Order.getOrderList(searchForm.value)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function detail(v) {
+  customRouterPush({
+    name: "order-detail",
+    query: { sn: v.sn },
+  });
+}
+async function exportOrder() {
+  if (!searchForm.value.startDate || !searchForm.value.endDate) {
+    try {
+      await ElMessageBox.confirm(
+        "未选择下单时间，将按当前筛选条件导出全部匹配订单。",
+        "导出订单",
+        { type: "warning", confirmButtonText: "继续导出", cancelButtonText: "取消" }
       );
-    },
-    restoreQuery() {
-      const saved = readSavedQuery();
-      if (!saved) return;
-      this.searchForm = saved.searchForm;
-      this.selectDate = saved.selectDate;
-      this.currentStatus = saved.currentStatus;
-    },
-    init() {
-      this.getDataList();
-      this.getOrderNumData();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-      this.getOrderNumData();
-    },
-    handleReset() {
-      const pageSize = this.searchForm.pageSize;
-      this.searchForm = emptySearchForm(pageSize);
-      this.selectDate = null;
-      this.currentStatus = "ALL";
-      sessionStorage.removeItem(QUERY_KEY);
-      this.init();
-    },
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
-      }
-    },
-    countParams() {
-      const params = { ...this.searchForm };
-      delete params.orderStatus;
-      delete params.pageNumber;
-      delete params.pageSize;
-      delete params.sort;
-      delete params.order;
-      return params;
-    },
-    getDataList() {
-      this.loading = true;
-      this.rememberQuery();
-      API_Order.getOrderList(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    detail(v) {
-      customRouterPush({
-        name: "order-detail",
-        query: { sn: v.sn },
+    } catch (e) {
+      return;
+    }
+  }
+  exporting.value = true;
+  API_Order.exportOrder(searchForm.value)
+    .then((res) => {
+      const blob = new Blob([res], {
+        type: "application/vnd.ms-excel;charset=utf-8",
       });
-    },
-    async exportOrder() {
-      if (!this.searchForm.startDate || !this.searchForm.endDate) {
-        try {
-          await ElMessageBox.confirm(
-            "未选择下单时间，将按当前筛选条件导出全部匹配订单。",
-            "导出订单",
-            { type: "warning", confirmButtonText: "继续导出", cancelButtonText: "取消" }
-          );
-        } catch (e) {
-          return;
-        }
+      const link = document.createElement("a");
+      link.download = "订单列表.xlsx";
+      link.style.display = "none";
+      link.href = URL.createObjectURL(blob);
+      document.body.appendChild(link);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+    })
+    .catch(() => {
+      ElMessage.error("导出失败");
+    })
+    .finally(() => {
+      exporting.value = false;
+    });
+}
+function orderStatusClick(name) {
+  if (name === "ALL" || name === "" || name === undefined) {
+    searchForm.value.orderStatus = "";
+    currentStatus.value = "ALL";
+  } else {
+    searchForm.value.orderStatus = name;
+    currentStatus.value = name;
+  }
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function getOrderNumData() {
+  API_Order.getOrderNum(countParams())
+    .then((res) => {
+      if (res.success) {
+        orderNumData.value = res.result;
       }
-      this.exporting = true;
-      API_Order.exportOrder(this.searchForm)
-        .then((res) => {
-          const blob = new Blob([res], {
-            type: "application/vnd.ms-excel;charset=utf-8",
-          });
-          const link = document.createElement("a");
-          link.download = "订单列表.xlsx";
-          link.style.display = "none";
-          link.href = URL.createObjectURL(blob);
-          document.body.appendChild(link);
-          link.click();
-          URL.revokeObjectURL(link.href);
-          document.body.removeChild(link);
-        })
-        .catch(() => {
-          ElMessage.error("导出失败");
-        })
-        .finally(() => {
-          this.exporting = false;
-        });
-    },
-    orderStatusClick(name) {
-      if (name === "ALL" || name === "" || name === undefined) {
-        this.searchForm.orderStatus = "";
-        this.currentStatus = "ALL";
-      } else {
-        this.searchForm.orderStatus = name;
-        this.currentStatus = name;
-      }
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getOrderNumData() {
-      API_Order.getOrderNum(this.countParams())
-        .then((res) => {
-          if (res.success) {
-            this.orderNumData = res.result;
-          }
-        })
-        .catch(() => {
-          this.orderNumData = {};
-        });
-    },
-  },
-  created() {
-    this.restoreQuery();
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .catch(() => {
+      orderNumData.value = {};
+    });
+}
+
+// created
+restoreQuery();
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

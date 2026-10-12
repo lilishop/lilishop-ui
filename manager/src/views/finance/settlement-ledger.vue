@@ -16,31 +16,30 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
 
-export default {
-  name: "finance-settlement-ledger",
-  data() {
-    return { loading: false, data: [] };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    loadData() {
-      this.loading = true;
-      API_Finance.getSettlementLedger({}).then((res) => {
-        this.loading = false;
-        if (res.success) this.data = res.result || [];
-      });
-    },
-    handleExport() {
-      API_Finance.exportSettlementLedger({}).then((blob) => {
-        downloadBlob(blob, "结算台账.xlsx");
-      });
-    },
-  },
-};
+defineOptions({ name: "finance-settlement-ledger" });
+
+const loading = ref(false);
+const data = ref([]);
+
+onMounted(() => {
+  loadData();
+});
+
+function loadData() {
+  loading.value = true;
+  API_Finance.getSettlementLedger({}).then((res) => {
+    loading.value = false;
+    if (res.success) data.value = res.result || [];
+  });
+}
+function handleExport() {
+  API_Finance.exportSettlementLedger({}).then((blob) => {
+    downloadBlob(blob, "结算台账.xlsx");
+  });
+}
 </script>

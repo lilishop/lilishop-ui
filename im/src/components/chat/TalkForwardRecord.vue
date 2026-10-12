@@ -77,48 +77,48 @@
     </el-container>
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { ServeGetForwardRecords } from '@/api/chat'
 
-export default {
-  name: 'TalkForwardRecord',
-  data() {
-    return {
-      record_id: 0,
-      records: [],
-      loading: false,
-      isShow: false,
-    }
-  },
-  methods: {
-    open(record_id) {
-      if (record_id !== this.record_id) {
-        this.record_id = record_id
-        this.records = []
-        this.loadRecords()
-      }
+defineOptions({ name: 'TalkForwardRecord' })
 
-      this.isShow = true
-    },
-    close() {
-      this.isShow = false
-    },
-    loadRecords() {
-      this.loading = true
-      ServeGetForwardRecords({
-        record_id: this.record_id,
-      })
-        .then(res => {
-          if (res.code == 200) {
-            this.records = res.data.rows
-          }
-        })
-        .finally(() => {
-          this.loading = false
-        })
-    },
-  },
+const record_id = ref(0)
+const records = ref([])
+const loading = ref(false)
+const isShow = ref(false)
+
+// 由父组件通过 ref 调用（如 ForwardMessage），必须暴露
+const open = id => {
+  if (id !== record_id.value) {
+    record_id.value = id
+    records.value = []
+    loadRecords()
+  }
+
+  isShow.value = true
 }
+
+const close = () => {
+  isShow.value = false
+}
+
+const loadRecords = () => {
+  loading.value = true
+  ServeGetForwardRecords({
+    record_id: record_id.value,
+  })
+    .then(res => {
+      if (res.code == 200) {
+        records.value = res.data.rows
+      }
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+defineExpose({ open })
 </script>
 <style lang="less" scoped>
 .lum-dialog-mask {

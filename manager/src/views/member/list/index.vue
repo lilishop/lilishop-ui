@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -168,7 +168,7 @@
 
     <el-dialog v-model="addFlag" title="添加会员" width="500px" destroy-on-close class="add-member-dialog">
       <el-form
-        ref="addMemberForm"
+        ref="addMemberFormRef"
         :model="addMemberForm"
         :rules="addRule"
         label-width="100px"
@@ -210,7 +210,7 @@
     </el-dialog>
 
     <el-dialog v-model="descFlag" :title="descTitle" width="500px" destroy-on-close>
-      <el-form ref="form" :model="form" :rules="ruleValidate" label-width="80px">
+      <el-form ref="formRef" :model="form" :rules="ruleValidate" label-width="80px">
         <el-input v-model="form.id" style="display: none" />
         <el-form-item label="头像">
           <img :src="form.face || defaultPic" class="face" />
@@ -251,7 +251,7 @@
     </el-dialog>
 
     <el-dialog v-model="walletIncreaseFlag" title="增加余额" width="420px" destroy-on-close>
-      <el-form ref="walletIncreaseForm" :model="walletIncreaseForm" :rules="walletIncreaseRule" label-width="90px">
+      <el-form ref="walletIncreaseFormRef" :model="walletIncreaseForm" :rules="walletIncreaseRule" label-width="90px">
         <el-form-item label="充值金额" prop="rechargeMoney">
           <el-input-number v-model="walletIncreaseForm.rechargeMoney" :min="0.01" :precision="2" style="width: 240px" />
         </el-form-item>
@@ -263,7 +263,7 @@
     </el-dialog>
 
     <el-dialog v-model="memberPointFlag" title="修改积分" width="420px" destroy-on-close>
-      <el-form ref="memberPointForm" :model="memberPointForm" :rules="memberPointRule" label-width="90px">
+      <el-form ref="memberPointFormRef" :model="memberPointForm" :rules="memberPointRule" label-width="90px">
         <el-form-item label="类型" prop="type">
           <el-radio-group v-model="memberPointForm.type">
             <el-radio-button value="INCREASE">增加</el-radio-button>
@@ -281,7 +281,7 @@
     </el-dialog>
 
     <el-dialog v-model="memberGroupFlag" title="设定会员分组" width="420px" destroy-on-close>
-      <el-form ref="memberGroupForm" :model="memberGroupForm" :rules="memberGroupRule" label-width="90px">
+      <el-form ref="memberGroupFormRef" :model="memberGroupForm" :rules="memberGroupRule" label-width="90px">
         <el-form-item label="会员分组" prop="groupId">
           <el-select v-model="memberGroupForm.groupId" clearable filterable style="width: 240px">
             <el-option
@@ -300,13 +300,14 @@
     </el-dialog>
 
     <el-dialog v-model="picModelFlag" width="1200px">
-      <ossManage ref="ossManage" @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" />
+      <ossManage ref="ossManageRef" @callback="callbackSelected" :isComponent="true" :initialize="picModelFlag" />
     </el-dialog>
     <multipleMap ref="map" @callback="selectedRegion" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, nextTick, onMounted } from "vue";
 import { ArrowDown } from "@element-plus/icons-vue";
 import multipleMap from "@/components/map/multiple-map";
 import * as API_Member from "@/api/member.js";
@@ -314,451 +315,456 @@ import ossManage from "@/views/sys/oss-manage/ossManage";
 import * as RegExp from "@/libs/RegExp.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { customRouterPush } from "@/utils/filters";
+import { md5 } from "@/utils/md5.js";
 import defaultPic from "@/assets/default.png";
 
-export default {
-  name: "member",
-  components: {
-    multipleMap,
-    ossManage,
-    ArrowDown,
+defineOptions({ name: "member" });
+
+const props = defineProps({
+  selectedMember: {
+    type: Boolean,
+    default: false,
   },
-  props: {
-    selectedMember: {
-      type: Boolean,
-      default: false,
-    },
-    selectedList: {
-      type: null,
-      default: () => [],
-    },
-    checkboxSelect: {
-      type: Boolean,
-      default: false,
-    },
+  selectedList: {
+    type: null,
+    default: () => [],
   },
-  data() {
-    return {
-      defaultPic,
-      descTitle: "",
-      descFlag: false,
-      loading: true,
-      addFlag: false,
-      addMemberForm: {
-        mobile: "",
-        username: "",
-        password: "",
-      },
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        order: "desc",
-        id: "",
-        username: "",
-        mobile: "",
-        disabled: "OPEN",
-        groupId: "",
-      },
-      picModelFlag: false,
-      form: {},
-      walletIncreaseFlag: false,
-      walletIncreaseLoading: false,
-      walletIncreaseForm: {
-        memberId: "",
-        rechargeMoney: null,
-      },
-      walletIncreaseRule: {
-        rechargeMoney: [
-          { required: true, type: "number", message: "请输入充值金额", trigger: "change" },
-          {
-            validator: (rule, value, callback) => {
-              if (typeof value !== "number" || value <= 0) {
-                callback(new Error("充值金额必须大于0"));
-                return;
-              }
-              callback();
-            },
-            trigger: "change",
-          },
-        ],
-      },
-      memberPointFlag: false,
-      memberPointLoading: false,
-      memberPointForm: {
-        memberId: "",
-        point: null,
-        type: "INCREASE",
-      },
-      selectedRows: [],
-      memberGroupFlag: false,
-      memberGroupLoading: false,
-      memberGroupForm: {
-        groupId: "",
-      },
-      memberGroupRule: {
-        groupId: [{ required: true, message: "请选择会员分组", trigger: "change" }],
-      },
-      memberGroupList: [],
-      memberGradeList: [],
-      memberPointRule: {
-        type: [{ required: true, message: "请选择类型", trigger: "change" }],
-        point: [
-          { required: true, type: "number", message: "请输入积分", trigger: "change" },
-          {
-            validator: (rule, value, callback) => {
-              if (typeof value !== "number" || value <= 0) {
-                callback(new Error("积分必须大于0"));
-                return;
-              }
-              callback();
-            },
-            trigger: "change",
-          },
-        ],
-      },
-      addRule: {
-        mobile: [
-          { required: true, message: "请输入手机号码" },
-          { pattern: RegExp.mobile, message: "请输入正确的手机号" },
-        ],
-        username: [{ required: true, message: "请输入客户名称" }],
-        password: [{ required: true, message: "请输入密码" }],
-      },
-      ruleValidate: {},
-      data: [],
-      total: 0,
-      selectMember: [],
-    };
+  checkboxSelect: {
+    type: Boolean,
+    default: false,
   },
-  watch: {
-    selectedList: {
-      handler(val) {
-        this.selectMember = JSON.parse(JSON.stringify(val));
-        this.init(this.data);
+});
+const emit = defineEmits(["callback"]);
+
+// 模板 el-form/el-table 的模板 ref（原 ref="searchForm"/"addMemberForm"/"form" 等与 data 同名会互相覆盖，
+// 改名为 xxxRef；ossManage 与 import 同名，改名 ossManageRef）
+const searchFormRef = ref(null);
+const table = ref(null);
+const addMemberFormRef = ref(null);
+const formRef = ref(null);
+const walletIncreaseFormRef = ref(null);
+const memberPointFormRef = ref(null);
+const memberGroupFormRef = ref(null);
+const ossManageRef = ref(null);
+
+const descTitle = ref("");
+const descFlag = ref(false);
+const loading = ref(true);
+const addFlag = ref(false);
+const addMemberForm = ref({
+  mobile: "",
+  username: "",
+  password: "",
+});
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  order: "desc",
+  id: "",
+  username: "",
+  mobile: "",
+  disabled: "OPEN",
+  groupId: "",
+});
+const picModelFlag = ref(false);
+const form = ref({});
+const walletIncreaseFlag = ref(false);
+const walletIncreaseLoading = ref(false);
+const walletIncreaseForm = ref({
+  memberId: "",
+  rechargeMoney: null,
+});
+const walletIncreaseRule = ref({
+  rechargeMoney: [
+    { required: true, type: "number", message: "请输入充值金额", trigger: "change" },
+    {
+      validator: (rule, value, callback) => {
+        if (typeof value !== "number" || value <= 0) {
+          callback(new Error("充值金额必须大于0"));
+          return;
+        }
+        callback();
       },
-      deep: true,
-      immediate: true,
+      trigger: "change",
     },
+  ],
+});
+const memberPointFlag = ref(false);
+const memberPointLoading = ref(false);
+const memberPointForm = ref({
+  memberId: "",
+  point: null,
+  type: "INCREASE",
+});
+const selectedRows = ref([]);
+const memberGroupFlag = ref(false);
+const memberGroupLoading = ref(false);
+const memberGroupForm = ref({
+  groupId: "",
+});
+const memberGroupRule = ref({
+  groupId: [{ required: true, message: "请选择会员分组", trigger: "change" }],
+});
+const memberGroupList = ref([]);
+const memberGradeList = ref([]);
+const memberPointRule = ref({
+  type: [{ required: true, message: "请选择类型", trigger: "change" }],
+  point: [
+    { required: true, type: "number", message: "请输入积分", trigger: "change" },
+    {
+      validator: (rule, value, callback) => {
+        if (typeof value !== "number" || value <= 0) {
+          callback(new Error("积分必须大于0"));
+          return;
+        }
+        callback();
+      },
+      trigger: "change",
+    },
+  ],
+});
+const addRule = ref({
+  mobile: [
+    { required: true, message: "请输入手机号码" },
+    { pattern: RegExp.mobile, message: "请输入正确的手机号" },
+  ],
+  username: [{ required: true, message: "请输入客户名称" }],
+  password: [{ required: true, message: "请输入密码" }],
+});
+const ruleValidate = ref({});
+const data = ref([]);
+const total = ref(0);
+const selectMember = ref([]);
+
+watch(
+  () => props.selectedList,
+  (val) => {
+    selectMember.value = JSON.parse(JSON.stringify(val));
+    init(data.value);
   },
-  methods: {
-    handleMoreCommand(name, row) {
-      if (name === "edit") this.editPerm(row);
-      if (name === "disabled") this.disabled(row);
-      if (name === "increaseWallet") this.openWalletIncrease(row);
-      if (name === "updatePoint") this.openMemberPoint(row);
-    },
-    onSelectionChange(selection) {
-      if (this.selectedMember && this.checkboxSelect) {
-        this.selectMember = selection || [];
-        return;
+  { deep: true, immediate: true }
+);
+
+function handleMoreCommand(name, row) {
+  if (name === "edit") editPerm(row);
+  if (name === "disabled") disabled(row);
+  if (name === "increaseWallet") openWalletIncrease(row);
+  if (name === "updatePoint") openMemberPoint(row);
+}
+function onSelectionChange(selection) {
+  if (props.selectedMember && props.checkboxSelect) {
+    selectMember.value = selection || [];
+    return;
+  }
+  selectedRows.value = selection || [];
+}
+function getSelection() {
+  return selectMember.value || [];
+}
+function syncTableSelection() {
+  if (!props.selectedMember || !props.checkboxSelect) {
+    return;
+  }
+  nextTick(() => {
+    clearSelection();
+    data.value.forEach((row) => {
+      if (selectMember.value.some((member) => member.id === row.id)) {
+        table.value?.toggleRowSelection(row, true);
       }
-      this.selectedRows = selection || [];
-    },
-    getSelection() {
-      return this.selectMember || [];
-    },
-    syncTableSelection() {
-      if (!this.selectedMember || !this.checkboxSelect) {
-        return;
+    });
+  });
+}
+function openSetMemberGroup() {
+  memberGroupFlag.value = true;
+  memberGroupLoading.value = false;
+  memberGroupForm.value = { groupId: "" };
+  nextTick(() => {
+    if (memberGroupFormRef.value) memberGroupFormRef.value.resetFields();
+  });
+  loadMemberGroupList();
+}
+function loadMemberGroupList() {
+  API_Member.getMemberGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+    if (res && res.success && res.result) {
+      memberGroupList.value = res.result.records || [];
+    }
+  });
+}
+function loadMemberGradeList() {
+  API_Member.getMemberGradeByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+    if (res && res.success && res.result) {
+      memberGradeList.value = res.result || [];
+    }
+  });
+}
+function clearSelection() {
+  table.value?.clearSelection();
+}
+function submitSetMemberGroup() {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning("请先选择会员");
+    return;
+  }
+  memberGroupFormRef.value.validate((valid) => {
+    if (!valid) return;
+    const memberIds = selectedRows.value.map((item) => item.id);
+    const groupId = memberGroupForm.value.groupId;
+    memberGroupLoading.value = true;
+    Promise.all(
+      memberIds.map((memberId) => API_Member.setMemberUserGroups(memberId, [groupId]))
+    )
+      .then((results) => {
+        memberGroupLoading.value = false;
+        const failed = results.find((res) => !res || !res.success);
+        if (failed) {
+          ElMessage.error(failed.message || "设置失败");
+          return;
+        }
+        ElMessage.success("设置成功");
+        memberGroupFlag.value = false;
+        selectedRows.value = [];
+        clearSelection();
+        getData();
+      })
+      .catch(() => {
+        memberGroupLoading.value = false;
+        ElMessage.error("设置失败，请稍后重试");
+      });
+  });
+}
+function callback(val) {
+  selectMember.value.forEach((item) => {
+    item.___selected = false;
+  });
+  val.___selected = !val.___selected;
+  let findUser = selectMember.value.find((item) => item.id == val.id);
+  if (!findUser) {
+    selectMember.value.push(val);
+  } else {
+    selectMember.value.map((item, index) => {
+      if (item.id == findUser.id) {
+        selectMember.value.splice(index, 1);
       }
-      this.$nextTick(() => {
-        this.clearSelection();
-        this.data.forEach((row) => {
-          if (this.selectMember.some((member) => member.id === row.id)) {
-            this.$refs.table?.toggleRowSelection(row, true);
-          }
-        });
-      });
-    },
-    openSetMemberGroup() {
-      this.memberGroupFlag = true;
-      this.memberGroupLoading = false;
-      this.memberGroupForm = { groupId: "" };
-      this.$nextTick(() => {
-        if (this.$refs.memberGroupForm) this.$refs.memberGroupForm.resetFields();
-      });
-      this.loadMemberGroupList();
-    },
-    loadMemberGroupList() {
-      API_Member.getMemberGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
-        if (res && res.success && res.result) {
-          this.memberGroupList = res.result.records || [];
+    });
+  }
+  emit("callback", val);
+}
+function init(list) {
+  list.forEach((item) => {
+    if (selectMember.value.length != 0) {
+      selectMember.value.forEach((member) => {
+        if (member.id == item.id) {
+          item.___selected = true;
         }
       });
-    },
-    loadMemberGradeList() {
-      API_Member.getMemberGradeByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
-        if (res && res.success && res.result) {
-          this.memberGradeList = res.result || [];
+    } else {
+      item.___selected = false;
+    }
+  });
+  data.value = list;
+}
+function changePage() {
+  getData();
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  getData();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 20;
+  getData();
+}
+function editPerm(val) {
+  descTitle.value = `查看用户 ${val.username}`;
+  descFlag.value = true;
+  getMemberInfo(val.id);
+}
+function addMember() {
+  addMemberForm.value = {
+    mobile: "",
+    username: "",
+    password: "",
+  };
+  addFlag.value = true;
+  nextTick(() => {
+    addMemberFormRef.value?.clearValidate();
+  });
+}
+function getMemberInfo(id) {
+  API_Member.getMemberInfoData(id).then((res) => {
+    if (res.result) {
+      form.value = res.result;
+    }
+  });
+}
+function getData() {
+  loading.value = true;
+  if (!props.selectedMember) {
+    selectedRows.value = [];
+    clearSelection();
+  }
+  API_Member.getMemberListData(searchForm.value).then((res) => {
+    if (res.result.records) {
+      loading.value = false;
+      init(res.result.records);
+      total.value = res.result.total;
+      syncTableSelection();
+    }
+  });
+}
+function openPicSelector() {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  form.value.face = val.url;
+}
+function addMemberSubmit() {
+  addMemberForm.value.password = md5(addMemberForm.value.password);
+  addMemberFormRef.value.validate((valid) => {
+    if (valid) {
+      API_Member.addMember(addMemberForm.value).then((res) => {
+        if (res.result) {
+          addMemberFormRef.value.resetFields();
+          getData();
+          ElMessage.success("添加成功！");
+          addFlag.value = false;
         }
       });
-    },
-    clearSelection() {
-      this.$refs.table?.clearSelection();
-    },
-    submitSetMemberGroup() {
-      if (this.selectedRows.length === 0) {
-        ElMessage.warning("请先选择会员");
-        return;
+    }
+  });
+}
+function selectedRegion(val) {
+  if (val.type === "select") {
+    const paths = val.data.map((item) => item.name).join(",");
+    const ids = val.data.map((item) => item.id).join(",");
+    form.value.region = paths;
+    form.value.regionId = ids;
+  } else {
+    form.value.region = val.data.addr;
+    form.value.regionId = val.data.addrId;
+  }
+}
+function detail(row) {
+  customRouterPush({ name: "member-detail", query: { id: row.id } });
+}
+function disabled(v) {
+  let params = {
+    memberIds: [v.id],
+    disabled: false,
+  };
+  ElMessageBox.confirm("确认禁用此会员？", "提示", { type: "warning" }).then(() => {
+    API_Member.updateMemberStatus(params).then((res) => {
+      if (res.success) {
+        ElMessage.success("禁用成功");
+        getData();
       }
-      this.$refs.memberGroupForm.validate((valid) => {
-        if (!valid) return;
-        const memberIds = this.selectedRows.map((item) => item.id);
-        const groupId = this.memberGroupForm.groupId;
-        this.memberGroupLoading = true;
-        Promise.all(
-          memberIds.map((memberId) => API_Member.setMemberUserGroups(memberId, [groupId]))
-        )
-          .then((results) => {
-            this.memberGroupLoading = false;
-            const failed = results.find((res) => !res || !res.success);
-            if (failed) {
-              ElMessage.error(failed.message || "设置失败");
-              return;
-            }
-            ElMessage.success("设置成功");
-            this.memberGroupFlag = false;
-            this.selectedRows = [];
-            this.clearSelection();
-            this.getData();
-          })
-          .catch(() => {
-            this.memberGroupLoading = false;
-            ElMessage.error("设置失败，请稍后重试");
-          });
-      });
-    },
-    callback(val) {
-      this.selectMember.forEach((item) => {
-        item.___selected = false;
-      });
-      val.___selected = !val.___selected;
-      let findUser = this.selectMember.find((item) => item.id == val.id);
-      if (!findUser) {
-        this.selectMember.push(val);
-      } else {
-        this.selectMember.map((item, index) => {
-          if (item.id == findUser.id) {
-            this.selectMember.splice(index, 1);
-          }
-        });
-      }
-      this.$emit("callback", val);
-    },
-    init(data) {
-      data.forEach((item) => {
-        if (this.selectMember.length != 0) {
-          this.selectMember.forEach((member) => {
-            if (member.id == item.id) {
-              item.___selected = true;
-            }
-          });
+    });
+  }).catch(() => {});
+}
+function openWalletIncrease(row) {
+  walletIncreaseLoading.value = false;
+  walletIncreaseForm.value = { memberId: row.id, rechargeMoney: null };
+  walletIncreaseFlag.value = true;
+  nextTick(() => {
+    walletIncreaseFormRef.value && walletIncreaseFormRef.value.resetFields();
+  });
+}
+function submitWalletIncrease() {
+  walletIncreaseFormRef.value.validate((valid) => {
+    if (!valid) return;
+    walletIncreaseLoading.value = true;
+    API_Member.increaseMemberWallet({
+      memberId: walletIncreaseForm.value.memberId,
+      rechargeMoney: walletIncreaseForm.value.rechargeMoney,
+    })
+      .then((res) => {
+        if (res && res.success) {
+          ElMessage.success("充值成功");
+          walletIncreaseFlag.value = false;
+          getData();
         } else {
-          item.___selected = false;
+          ElMessage.error((res && res.message) || "充值失败");
         }
+      })
+      .finally(() => {
+        walletIncreaseLoading.value = false;
       });
-      this.data = data;
-    },
-    changePage() {
-      this.getData();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getData();
-    },
-    editPerm(val) {
-      this.descTitle = `查看用户 ${val.username}`;
-      this.descFlag = true;
-      this.getMemberInfo(val.id);
-    },
-    addMember() {
-      this.addMemberForm = {
-        mobile: "",
-        username: "",
-        password: "",
-      };
-      this.addFlag = true;
-      this.$nextTick(() => {
-        this.$refs.addMemberForm?.clearValidate();
-      });
-    },
-    getMemberInfo(id) {
-      API_Member.getMemberInfoData(id).then((res) => {
-        if (res.result) {
-          this.form = res.result;
+  });
+}
+function openMemberPoint(row) {
+  memberPointLoading.value = false;
+  memberPointForm.value = { memberId: row.id, point: null, type: "INCREASE" };
+  memberPointFlag.value = true;
+  nextTick(() => {
+    memberPointFormRef.value && memberPointFormRef.value.resetFields();
+  });
+}
+function submitMemberPoint() {
+  memberPointFormRef.value.validate((valid) => {
+    if (!valid) return;
+    memberPointLoading.value = true;
+    API_Member.updateMemberPoint({
+      memberId: memberPointForm.value.memberId,
+      point: memberPointForm.value.point,
+      type: memberPointForm.value.type,
+    })
+      .then((res) => {
+        if (res && res.success) {
+          ElMessage.success("修改成功");
+          memberPointFlag.value = false;
+          getData();
+        } else {
+          ElMessage.error((res && res.message) || "修改失败");
         }
+      })
+      .finally(() => {
+        memberPointLoading.value = false;
       });
-    },
-    getData() {
-      this.loading = true;
-      if (!this.selectedMember) {
-        this.selectedRows = [];
-        this.clearSelection();
-      }
-      API_Member.getMemberListData(this.searchForm).then((res) => {
-        if (res.result.records) {
-          this.loading = false;
-          this.init(res.result.records);
-          this.total = res.result.total;
-          this.syncTableSelection();
-        }
-      });
-    },
-    openPicSelector() {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      this.form.face = val.url;
-    },
-    addMemberSubmit() {
-      this.addMemberForm.password = this.md5(this.addMemberForm.password);
-      this.$refs.addMemberForm.validate((valid) => {
-        if (valid) {
-          API_Member.addMember(this.addMemberForm).then((res) => {
-            if (res.result) {
-              this.$refs.addMemberForm.resetFields();
-              this.getData();
-              ElMessage.success("添加成功！");
-              this.addFlag = false;
-            }
-          });
-        }
-      });
-    },
-    selectedRegion(val) {
-      if (val.type === "select") {
-        const paths = val.data.map((item) => item.name).join(",");
-        const ids = val.data.map((item) => item.id).join(",");
-        this.form.region = paths;
-        this.form.regionId = ids;
-      } else {
-        this.form.region = val.data.addr;
-        this.form.regionId = val.data.addrId;
-      }
-    },
-    detail(row) {
-      customRouterPush({ name: "member-detail", query: { id: row.id } });
-    },
-    disabled(v) {
-      let params = {
-        memberIds: [v.id],
-        disabled: false,
-      };
-      ElMessageBox.confirm("确认禁用此会员？", "提示", { type: "warning" }).then(() => {
-        API_Member.updateMemberStatus(params).then((res) => {
-          if (res.success) {
-            ElMessage.success("禁用成功");
-            this.getData();
-          }
-        });
-      }).catch(() => {});
-    },
-    openWalletIncrease(row) {
-      this.walletIncreaseLoading = false;
-      this.walletIncreaseForm = { memberId: row.id, rechargeMoney: null };
-      this.walletIncreaseFlag = true;
-      this.$nextTick(() => {
-        this.$refs.walletIncreaseForm && this.$refs.walletIncreaseForm.resetFields();
-      });
-    },
-    submitWalletIncrease() {
-      this.$refs.walletIncreaseForm.validate((valid) => {
-        if (!valid) return;
-        this.walletIncreaseLoading = true;
-        API_Member.increaseMemberWallet({
-          memberId: this.walletIncreaseForm.memberId,
-          rechargeMoney: this.walletIncreaseForm.rechargeMoney,
-        })
-          .then((res) => {
-            if (res && res.success) {
-              ElMessage.success("充值成功");
-              this.walletIncreaseFlag = false;
-              this.getData();
-            } else {
-              ElMessage.error((res && res.message) || "充值失败");
-            }
-          })
-          .finally(() => {
-            this.walletIncreaseLoading = false;
-          });
-      });
-    },
-    openMemberPoint(row) {
-      this.memberPointLoading = false;
-      this.memberPointForm = { memberId: row.id, point: null, type: "INCREASE" };
-      this.memberPointFlag = true;
-      this.$nextTick(() => {
-        this.$refs.memberPointForm && this.$refs.memberPointForm.resetFields();
-      });
-    },
-    submitMemberPoint() {
-      this.$refs.memberPointForm.validate((valid) => {
-        if (!valid) return;
-        this.memberPointLoading = true;
-        API_Member.updateMemberPoint({
-          memberId: this.memberPointForm.memberId,
-          point: this.memberPointForm.point,
-          type: this.memberPointForm.type,
-        })
-          .then((res) => {
-            if (res && res.success) {
-              ElMessage.success("修改成功");
-              this.memberPointFlag = false;
-              this.getData();
-            } else {
-              ElMessage.error((res && res.message) || "修改失败");
-            }
-          })
-          .finally(() => {
-            this.memberPointLoading = false;
-          });
-      });
-    },
-    handleSubmitModal() {
-      const { nickName, sex, username, face, newPassword, id, regionId, region } = this.form;
-      let time = new Date(this.form.birthday);
-      let birthday =
-        this.form.birthday === undefined
-          ? ""
-          : time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
-      let submit = {
-        regionId,
-        region,
-        nickName,
-        sex,
-        birthday,
-        face,
-        id,
-      };
-      if (newPassword) {
-        submit.password = this.md5(newPassword);
-      }
-      API_Member.updateMember(submit).then((res) => {
-        if (res.result) {
-          ElMessage.success("修改成功！");
-          this.descFlag = false;
-          this.getData();
-        }
-      });
-    },
-  },
-  mounted() {
-    this.getData();
-    this.loadMemberGroupList();
-    this.loadMemberGradeList();
-  },
-};
+  });
+}
+function handleSubmitModal() {
+  const { nickName, sex, username, face, newPassword, id, regionId, region } = form.value;
+  let time = new Date(form.value.birthday);
+  let birthday =
+    form.value.birthday === undefined
+      ? ""
+      : time.getFullYear() + "-" + (time.getMonth() + 1) + "-" + time.getDate();
+  let submit = {
+    regionId,
+    region,
+    nickName,
+    sex,
+    birthday,
+    face,
+    id,
+  };
+  if (newPassword) {
+    submit.password = md5(newPassword);
+  }
+  API_Member.updateMember(submit).then((res) => {
+    if (res.result) {
+      ElMessage.success("修改成功！");
+      descFlag.value = false;
+      getData();
+    }
+  });
+}
+
+onMounted(() => {
+  getData();
+  loadMemberGroupList();
+  loadMemberGradeList();
+});
+
+// 外部通过 ref 调用（promotions/coupon-activity/coupon-publish.vue 的 memberLayoutRef.getSelection()）
+defineExpose({ getSelection });
 </script>
 <style lang="scss" scoped>
 .face {

@@ -8,12 +8,10 @@
   </div>
 </template>
 
-<script>
-export default {
-  title: "四列单行图片模块",
-  props: ["res"],
+<script setup>
+defineOptions({ title: "四列单行图片模块" });
 
-};
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

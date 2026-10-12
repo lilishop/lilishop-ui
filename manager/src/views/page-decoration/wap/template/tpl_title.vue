@@ -25,11 +25,10 @@
   </div>
 </template>
 
-<script>
-export default {
-  title: "标题栏",
-  props: ["res"],
-};
+<script setup>
+defineOptions({ title: "标题栏" });
+
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

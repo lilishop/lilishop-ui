@@ -50,77 +50,80 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getNthItemDiscountDetail, saveNthItemDiscount, editNthItemDiscount } from "@/api/promotion.js";
+import { Message } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  data() {
-    return {
-      form: {
-        promotionName: "",
-        rangeTime: [],
-        nthNum: 2,
-        discountType: "HALF",
-        discountValue: 8,
-        description: "",
-        scopeType: "PORTION_GOODS",
-        promotionGoodsList: [],
-      },
-    };
-  },
-  mounted() {
-    if (this.$route.query.id) {
-      getNthItemDiscountDetail(this.$route.query.id).then((res) => {
-        if (res.success) {
-          Object.assign(this.form, res.result);
-          this.form.rangeTime = [new Date(res.result.startTime), new Date(res.result.endTime)];
-        }
+const route = useRoute();
+const router = useRouter();
+
+const liliDialog = ref(null);
+
+const form = reactive({
+  promotionName: "",
+  rangeTime: [],
+  nthNum: 2,
+  discountType: "HALF",
+  discountValue: 8,
+  description: "",
+  scopeType: "PORTION_GOODS",
+  promotionGoodsList: [],
+});
+
+onMounted(() => {
+  if (route.query.id) {
+    getNthItemDiscountDetail(route.query.id).then((res) => {
+      if (res.success) {
+        Object.assign(form, res.result);
+        form.rangeTime = [new Date(res.result.startTime), new Date(res.result.endTime)];
+      }
+    });
+  }
+});
+
+function openGoods() {
+  liliDialog.value.open("goods");
+}
+function selectedGoods(list) {
+  list.forEach((g) => {
+    if (!form.promotionGoodsList.find((i) => i.skuId === g.id)) {
+      form.promotionGoodsList.push({
+        skuId: g.id,
+        goodsId: g.goodsId,
+        goodsName: g.goodsName,
+        originalPrice: g.price,
+        price: g.price,
+        quantity: g.quantity,
       });
     }
-  },
-  methods: {
-    openGoods() {
-      this.$refs.liliDialog.open("goods");
-    },
-    selectedGoods(list) {
-      list.forEach((g) => {
-        if (!this.form.promotionGoodsList.find((i) => i.skuId === g.id)) {
-          this.form.promotionGoodsList.push({
-            skuId: g.id,
-            goodsId: g.goodsId,
-            goodsName: g.goodsName,
-            originalPrice: g.price,
-            price: g.price,
-            quantity: g.quantity,
-          });
-        }
-      });
-    },
-    submit() {
-      const payload = { ...this.form };
-      if (payload.rangeTime && payload.rangeTime.length === 2) {
-        const start =
-          payload.rangeTime[0] instanceof Date
-            ? payload.rangeTime[0]
-            : new Date(payload.rangeTime[0]);
-        const end =
-          payload.rangeTime[1] instanceof Date
-            ? payload.rangeTime[1]
-            : new Date(payload.rangeTime[1]);
-        payload.startTime = this.$filters.unixToDate(start.getTime() / 1000);
-        payload.endTime = this.$filters.unixToDate(end.getTime() / 1000);
-      }
-      delete payload.rangeTime;
-      const req = payload.id ? editNthItemDiscount(payload) : saveNthItemDiscount(payload);
-      req.then((res) => {
-        if (res.success) {
-          this.$Message.success("保存成功");
-          this.$router.back();
-        }
-      });
-    },
-  },
-};
+  });
+}
+function submit() {
+  const payload = { ...form };
+  if (payload.rangeTime && payload.rangeTime.length === 2) {
+    const start =
+      payload.rangeTime[0] instanceof Date
+        ? payload.rangeTime[0]
+        : new Date(payload.rangeTime[0]);
+    const end =
+      payload.rangeTime[1] instanceof Date
+        ? payload.rangeTime[1]
+        : new Date(payload.rangeTime[1]);
+    payload.startTime = unixToDate(start.getTime() / 1000);
+    payload.endTime = unixToDate(end.getTime() / 1000);
+  }
+  delete payload.rangeTime;
+  const req = payload.id ? editNthItemDiscount(payload) : saveNthItemDiscount(payload);
+  req.then((res) => {
+    if (res.success) {
+      Message.success("保存成功");
+      router.back();
+    }
+  });
+}
 </script>
 
 <style scoped>

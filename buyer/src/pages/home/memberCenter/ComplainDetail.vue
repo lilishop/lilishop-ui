@@ -129,75 +129,74 @@
     </UserCenterLayout>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import { View } from '@element-plus/icons-vue';
 import {getComplainDetail} from '@/api/member.js';
 import {communication} from '@/api/order';
-export default {
-  components: { View },
-  data () {
-    return {
-      detail: {}, // 评价详情
-      visible: false, // 图片预览
-      previewImage: '', // 预览图片地址
-      loading: false, // 加载状态
-      submitLoading: false, // 回复消息loading
-      // 状态
-      statusLabel: {
-        NO_APPLY: '未申请',
-        APPLYING: '申请中',
-        COMPLETE: '已完成',
-        EXPIRED: '已失效',
-        CANCEL: '已取消',
-        NEW: '待审核'
-      },
-      // 商家回复内容
-      params: {
-        content: '',
-        complainId: ''
-      }
-    }
-  },
-  methods: {
-    getDetail () { // 获取投诉详情
-      getComplainDetail(this.$route.query.id).then(res => {
-        if (res.success) this.detail = res.result
-      })
-    },
-    goGoodsDetail (skuId, goodsId) { // 跳转商品详情
-      let routerUrl = this.$router.resolve({
-        path: '/goodsDetail',
-        query: {skuId, goodsId}
-      })
-      window.open(routerUrl.href, '_blank')
-    },
-    handleView (name) { // 预览图片
-      this.previewImage = name;
-      this.visible = true;
-    },
-    // 回复消息
-    handleSubmit () {
-      if (this.params.content === '') {
-        Message.error('请填写对话内容');
-        return;
-      }
-      this.submitLoading = true;
-      this.params.complainId = this.$route.query.id;
-      communication(this.params).then((res) => {
-        this.submitLoading = false;
-        if (res.success) {
-          Message.success('对话成功');
-          this.params.content = '';
-          this.getDetail();
-        }
-      });
-    }
-  },
-  mounted () {
-    this.getDetail()
-  }
+
+const route = useRoute();
+const router = useRouter();
+
+const detail = ref({}); // 评价详情
+const visible = ref(false); // 图片预览
+const previewImage = ref(''); // 预览图片地址
+const loading = ref(false); // 加载状态
+const submitLoading = ref(false); // 回复消息loading
+// 状态
+const statusLabel = {
+  NO_APPLY: '未申请',
+  APPLYING: '申请中',
+  COMPLETE: '已完成',
+  EXPIRED: '已失效',
+  CANCEL: '已取消',
+  NEW: '待审核'
+};
+// 商家回复内容
+const params = reactive({
+  content: '',
+  complainId: ''
+});
+
+function getDetail () { // 获取投诉详情
+  getComplainDetail(route.query.id).then(res => {
+    if (res.success) detail.value = res.result
+  })
 }
+function goGoodsDetail (skuId, goodsId) { // 跳转商品详情
+  let routerUrl = router.resolve({
+    path: '/goodsDetail',
+    query: {skuId, goodsId}
+  })
+  window.open(routerUrl.href, '_blank')
+}
+function handleView (name) { // 预览图片
+  previewImage.value = name;
+  visible.value = true;
+}
+// 回复消息
+function handleSubmit () {
+  if (params.content === '') {
+    Message.error('请填写对话内容');
+    return;
+  }
+  submitLoading.value = true;
+  params.complainId = route.query.id;
+  communication(params).then((res) => {
+    submitLoading.value = false;
+    if (res.success) {
+      Message.success('对话成功');
+      params.content = '';
+      getDetail();
+    }
+  });
+}
+
+onMounted(() => {
+  getDetail()
+})
 </script>
 <style lang="scss" scoped>
 .speak-way {

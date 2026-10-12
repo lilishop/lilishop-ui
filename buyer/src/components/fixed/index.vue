@@ -8,106 +8,104 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getIconUrl } from "@/assets/iconfont/iconMap";
 import storage from "@/plugins/storage.js";
 
-export default {
-  name: "fixed-index",
-  data(){
-    return{
-      iconList:[
-        {
-          icon:"user",
-          label:"会员中心",
-          path:"/home",
-          requireLogin: true,
-        },
-        {
-          icon:"carts",
-          label:"购物车",
-          path:"/cart",
-          requireLogin: true,
-        },
-        {
-          icon:"notification",
-          label:"消息",
-          path:"/home/MsgList",
-          requireLogin: true,
-        },
-        {
-          icon:"collage",
-          label:"收藏",
-          path:"/home/Favorites",
-          requireLogin: true,
-        },
-        {
-          icon:"back",
-          label:"顶部",
-          path:"back"
-        },
-      ],
-      isScrolling:false,
-      timeoutId:"",
+defineOptions({ name: "fixed-index" });
+
+const route = useRoute();
+const router = useRouter();
+
+const iconList = ref([
+  {
+    icon:"user",
+    label:"会员中心",
+    path:"/home",
+    requireLogin: true,
+  },
+  {
+    icon:"carts",
+    label:"购物车",
+    path:"/cart",
+    requireLogin: true,
+  },
+  {
+    icon:"notification",
+    label:"消息",
+    path:"/home/MsgList",
+    requireLogin: true,
+  },
+  {
+    icon:"collage",
+    label:"收藏",
+    path:"/home/Favorites",
+    requireLogin: true,
+  },
+  {
+    icon:"back",
+    label:"顶部",
+    path:"back"
+  },
+]);
+let isScrolling = false;
+let timeoutId = "";
+
+onMounted(() => {
+  // 添加滚轮事件监听器
+  window.addEventListener('wheel', function() {
+    if (isScrolling) {
+      // 如果页面正在滚动，则取消定时器并设置 isScrolling 为 false
+      window.cancelAnimationFrame(timeoutId);
+      isScrolling  = false;
     }
-  },
-  mounted() {
-    const vm = this
-    // 添加滚轮事件监听器
-    window.addEventListener('wheel', function() {
-      if (vm.isScrolling) {
-        // 如果页面正在滚动，则取消定时器并设置 isScrolling 为 false
-        window.cancelAnimationFrame(vm.timeoutId);
-        vm.isScrolling  = false;
-      }
-    });
+  });
 
 
-  },
-  methods:{
-    getIconUrl,
-    scrollToTop() {
-      const c = document.documentElement.scrollTop || document.body.scrollTop;
-      if (c > 0) {
-        this.timeoutId = window.requestAnimationFrame(this.scrollToTop);
-        window.scrollTo(0, c - c / 4);
-        this.isScrolling = true;
-      }else {
-        this.isScrolling = false;
-      }
-    },
-    isLoggedIn () {
-      const rawUserInfo = storage.getItem('userInfo');
-      if (rawUserInfo) {
-        try {
-          return !!JSON.parse(rawUserInfo).username;
-        } catch {
-          return false;
-        }
-      }
-      return !!storage.getItem('accessToken');
-    },
-    goLogin (rePath) {
-      this.$router.push({
-        path: '/login',
-        query: {
-          rePath,
-          query: JSON.stringify(this.$route.query || {}),
-        },
-      });
-    },
-    handleClickIcon (val) {
-      if (val.path === 'back') {
-        this.scrollToTop();
-        return;
-      }
-      if (val.requireLogin && !this.isLoggedIn()) {
-        this.goLogin(val.path);
-        return;
-      }
-      this.$router.push(val.path);
-    },
+});
+
+function scrollToTop() {
+  const c = document.documentElement.scrollTop || document.body.scrollTop;
+  if (c > 0) {
+    timeoutId = window.requestAnimationFrame(scrollToTop);
+    window.scrollTo(0, c - c / 4);
+    isScrolling = true;
+  }else {
+    isScrolling = false;
   }
+}
+function isLoggedIn () {
+  const rawUserInfo = storage.getItem('userInfo');
+  if (rawUserInfo) {
+    try {
+      return !!JSON.parse(rawUserInfo).username;
+    } catch {
+      return false;
+    }
+  }
+  return !!storage.getItem('accessToken');
+}
+function goLogin (rePath) {
+  router.push({
+    path: '/login',
+    query: {
+      rePath,
+      query: JSON.stringify(route.query || {}),
+    },
+  });
+}
+function handleClickIcon (val) {
+  if (val.path === 'back') {
+    scrollToTop();
+    return;
+  }
+  if (val.requireLogin && !isLoggedIn()) {
+    goLogin(val.path);
+    return;
+  }
+  router.push(val.path);
 }
 </script>
 

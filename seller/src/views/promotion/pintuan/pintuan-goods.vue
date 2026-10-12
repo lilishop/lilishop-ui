@@ -125,209 +125,226 @@
       </div>
     </el-card>
 
-    <liliDialog ref="liliDialog" @selectedGoodsData="selectedGoodsData" />
+    <liliDialog ref="liliDialogRef" @selectedGoodsData="selectedGoodsData" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getPintuanGoodsList, getPintuanDetail, editPintuan } from "@/api/promotion.js";
 import liliDialog from "@/views/lili-dialog";
 import vueQr from "vue-qr";
 import { promotionPriceMin } from "@/constants/goodsType";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  components: { liliDialog, vueQr },
-  data() {
+const route = useRoute();
+const router = useRouter();
+
+const loading = ref(false);
+const submitLoading = ref(false);
+const promotionStatus = ref("");
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const data = ref([]);
+const total = ref(0);
+const goodsData = ref([]);
+const selectList = ref([]);
+const selectCount = ref(0);
+
+// liliDialogRef：模板 ref 改名避免与 import 的组件同名互相覆盖
+const liliDialogRef = ref(null);
+const table = ref(null);
+
+const readonly = computed(() => {
+  return route.query.status === "view" || promotionStatus.value !== "NEW";
+});
+
+onMounted(() => {
+  init();
+});
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+
+function closeCurrentPage() {
+  router.back();
+}
+
+function init() {
+  getPintuanMsg();
+}
+
+function changePage() {
+  getDataList();
+}
+
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function getPintuanMsg() {
+  getPintuanDetail(route.query.id).then((res) => {
+    if (res.success && res.result) {
+      data.value = [res.result];
+      promotionStatus.value = res.result.promotionStatus;
+      getDataList();
+    }
+  });
+}
+
+function getDataList() {
+  loading.value = true;
+  const params = {
+    pintuanId: route.query.id,
+    pageNumber: readonly.value ? searchForm.pageNumber : 1,
+    pageSize: readonly.value ? searchForm.pageSize : 1000,
+  };
+  getPintuanGoodsList(params).then((res) => {
+    loading.value = false;
+    if (res.success && res.result) {
+      const serverRecords = res.result.records || [];
+      goodsData.value = readonly.value
+        ? serverRecords
+        : mergeGoodsData(serverRecords);
+      total.value = res.result.total || 0;
+    }
+  });
+}
+
+function mergeGoodsData(serverRecords) {
+  const localMap = new Map(goodsData.value.map((item) => [item.skuId, item]));
+  const serverSkuIds = new Set(serverRecords.map((item) => item.skuId));
+
+  const merged = serverRecords.map((serverItem) => {
+    const local = localMap.get(serverItem.skuId);
+    return local ? { ...serverItem, price: local.price } : serverItem;
+  });
+
+  const unsavedItems = goodsData.value.filter(
+    (item) => item.skuId && !serverSkuIds.has(item.skuId)
+  );
+  return [...merged, ...unsavedItems];
+}
+
+function openSkuList() {
+  const data = JSON.parse(JSON.stringify(goodsData.value));
+  data.forEach((e) => {
+    e.id = e.skuId;
+  });
+  liliDialogRef.value.goodsData = data;
+  liliDialogRef.value.open("goods");
+}
+
+function selectedGoodsData(selected) {
+  const existingMap = new Map(goodsData.value.map((item) => [item.skuId, item]));
+  goodsData.value = selected.map((item) => {
+    const existed = existingMap.get(item.id);
+    if (existed) {
+      return existed;
+    }
     return {
-      loading: false,
-      submitLoading: false,
-      promotionStatus: "",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      data: [],
-      total: 0,
-      goodsData: [],
-      selectList: [],
-      selectCount: 0,
+      goodsName: item.goodsName,
+      price: item.price,
+      originalPrice: item.price,
+      quantity: item.quantity,
+      storeId: item.storeId,
+      sellerName: item.sellerName,
+      thumbnail: item.thumbnail,
+      skuId: item.id,
+      categoryPath: item.categoryPath,
+      goodsId: item.goodsId,
+      goodsType: item.goodsType,
     };
-  },
-  computed: {
-    readonly() {
-      return this.$route.query.status === "view" || this.promotionStatus !== "NEW";
-    },
-  },
-  methods: {
-    promotionPriceMin,
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    closeCurrentPage() {
-      this.$router.back();
-    },
-    init() {
-      this.getPintuanMsg();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getPintuanMsg() {
-      getPintuanDetail(this.$route.query.id).then((res) => {
-        if (res.success && res.result) {
-          this.data = [res.result];
-          this.promotionStatus = res.result.promotionStatus;
-          this.getDataList();
-        }
-      });
-    },
-    getDataList() {
-      this.loading = true;
-      const params = {
-        pintuanId: this.$route.query.id,
-        pageNumber: this.readonly ? this.searchForm.pageNumber : 1,
-        pageSize: this.readonly ? this.searchForm.pageSize : 1000,
-      };
-      getPintuanGoodsList(params).then((res) => {
-        this.loading = false;
-        if (res.success && res.result) {
-          const serverRecords = res.result.records || [];
-          this.goodsData = this.readonly
-            ? serverRecords
-            : this.mergeGoodsData(serverRecords);
-          this.total = res.result.total || 0;
-        }
-      });
-    },
-    mergeGoodsData(serverRecords) {
-      const localMap = new Map(this.goodsData.map((item) => [item.skuId, item]));
-      const serverSkuIds = new Set(serverRecords.map((item) => item.skuId));
+  });
+  clearSelectAll();
+}
 
-      const merged = serverRecords.map((serverItem) => {
-        const local = localMap.get(serverItem.skuId);
-        return local ? { ...serverItem, price: local.price } : serverItem;
-      });
+function updateGoodsPrice(index, value) {
+  if (goodsData.value[index]) {
+    goodsData.value[index].price = value;
+  }
+}
 
-      const unsavedItems = this.goodsData.filter(
-        (item) => item.skuId && !serverSkuIds.has(item.skuId)
-      );
-      return [...merged, ...unsavedItems];
+function changeSelect(selection) {
+  selectList.value = selection;
+  selectCount.value = selection.length;
+}
+
+function clearSelectAll() {
+  table.value?.clearSelection();
+  selectList.value = [];
+  selectCount.value = 0;
+}
+
+function delGoods(index) {
+  goodsData.value.splice(index, 1);
+  selectCount.value = 0;
+}
+
+function delAll() {
+  if (selectCount.value <= 0) {
+    Message.warning("您还未选择要删除的数据");
+    return;
+  }
+  Modal.confirm({
+    title: "确认删除",
+    content: `您确认要删除所选 ${selectCount.value} 项数据?`,
+    onOk: () => {
+      const ids = selectList.value.map((e) => e.skuId);
+      goodsData.value = goodsData.value.filter((item) => !ids.includes(item.skuId));
+      clearSelectAll();
     },
-    openSkuList() {
-      const data = JSON.parse(JSON.stringify(this.goodsData));
-      data.forEach((e) => {
-        e.id = e.skuId;
-      });
-      this.$refs.liliDialog.goodsData = data;
-      this.$refs.liliDialog.open("goods");
-    },
-    selectedGoodsData(selected) {
-      const existingMap = new Map(this.goodsData.map((item) => [item.skuId, item]));
-      this.goodsData = selected.map((item) => {
-        const existed = existingMap.get(item.id);
-        if (existed) {
-          return existed;
-        }
-        return {
-          goodsName: item.goodsName,
-          price: item.price,
-          originalPrice: item.price,
-          quantity: item.quantity,
-          storeId: item.storeId,
-          sellerName: item.sellerName,
-          thumbnail: item.thumbnail,
-          skuId: item.id,
-          categoryPath: item.categoryPath,
-          goodsId: item.goodsId,
-          goodsType: item.goodsType,
-        };
-      });
-      this.clearSelectAll();
-    },
-    updateGoodsPrice(index, value) {
-      if (this.goodsData[index]) {
-        this.goodsData[index].price = value;
-      }
-    },
-    changeSelect(selection) {
-      this.selectList = selection;
-      this.selectCount = selection.length;
-    },
-    clearSelectAll() {
-      this.$refs.table?.clearSelection();
-      this.selectList = [];
-      this.selectCount = 0;
-    },
-    delGoods(index) {
-      this.goodsData.splice(index, 1);
-      this.selectCount = 0;
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: `您确认要删除所选 ${this.selectCount} 项数据?`,
-        onOk: () => {
-          const ids = this.selectList.map((e) => e.skuId);
-          this.goodsData = this.goodsData.filter((item) => !ids.includes(item.skuId));
-          this.clearSelectAll();
-        },
-      });
-    },
-    save() {
-      if (!this.goodsData.length) {
-        this.$Message.warning("请选择活动商品");
-        return;
-      }
-      for (const item of this.goodsData) {
-        if (item.price === "" || item.price === null || item.price === undefined) {
-          this.$Message.warning(`请填写【${item.goodsName}】的价格`);
-          return;
-        }
-      }
-      const params = JSON.parse(JSON.stringify(this.data[0]));
-      params.promotionGoodsList = this.goodsData.map((item) => ({
-        ...item,
-        promotionId: params.id,
-        startTime: params.startTime,
-        endTime: params.endTime,
-      }));
-      this.submitLoading = true;
-      editPintuan(params).then((res) => {
-        this.submitLoading = false;
-        if (res.success) {
-          this.$Message.success("修改拼团商品成功");
-          this.closeCurrentPage();
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+function save() {
+  if (!goodsData.value.length) {
+    Message.warning("请选择活动商品");
+    return;
+  }
+  for (const item of goodsData.value) {
+    if (item.price === "" || item.price === null || item.price === undefined) {
+      Message.warning(`请填写【${item.goodsName}】的价格`);
+      return;
+    }
+  }
+  const params = JSON.parse(JSON.stringify(data.value[0]));
+  params.promotionGoodsList = goodsData.value.map((item) => ({
+    ...item,
+    promotionId: params.id,
+    startTime: params.startTime,
+    endTime: params.endTime,
+  }));
+  submitLoading.value = true;
+  editPintuan(params).then((res) => {
+    submitLoading.value = false;
+    if (res.success) {
+      Message.success("修改拼团商品成功");
+      closeCurrentPage();
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

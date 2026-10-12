@@ -105,7 +105,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
 import {
   cancelRecommendLiveCoupon,
   getLiveCouponList,
@@ -114,189 +115,192 @@ import {
   setRecommendLiveCoupon,
 } from "@/api/live";
 import { getPlatformCouponList } from "@/api/promotion";
+import { Message, Modal } from "@/utils/message";
+import { unitPrice } from "@/utils/filters";
 
-export default {
-  name: "LiveCoupon",
-  props: {
-    liveId: {
-      type: String,
-      required: true,
-    },
-    liveRoomName: {
-      type: String,
-      default: "",
-    },
+defineOptions({ name: "LiveCoupon" });
+
+const props = defineProps({
+  liveId: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      loading: false,
-      couponList: [],
-      selectedIds: [],
-      pickerVisible: false,
-      pickerLoading: false,
-      pickerSubmitting: false,
-      pickerList: [],
-      pickerTotal: 0,
-      pickerSelected: [],
-      pickerSearch: {
-        pageNumber: 1,
-        pageSize: 10,
-        couponName: "",
-        promotionStatus: "START",
-        sort: "create_time",
-        order: "desc",
-      },
-    };
+  liveRoomName: {
+    type: String,
+    default: "",
   },
-  watch: {
-    liveId() {
-      this.loadCoupons();
-    },
-  },
-  mounted() {
-    this.loadCoupons();
-  },
-  methods: {
-    formatPrice(price) {
-      return this.$filters.unitPrice(price, "￥");
-    },
-    promotionStatusText(status) {
-      const map = { NEW: "未开始", START: "已开始", END: "已结束", CLOSE: "已关闭" };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = { NEW: "info", START: "success", END: "warning", CLOSE: "danger" };
-      return map[status] || "info";
-    },
-    loadCoupons() {
-      if (!this.liveId) return;
-      this.loading = true;
-      getLiveCouponList(this.liveId)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.couponList = res.result || [];
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    handleSelectionChange(rows) {
-      this.selectedIds = (rows || []).map((r) => r.id);
-    },
-    openCouponSelector() {
-      this.pickerVisible = true;
-      this.pickerSelected = [];
-      this.pickerSearch.pageNumber = 1;
-      this.loadPickerCoupons();
-    },
-    loadPickerCoupons() {
-      this.pickerLoading = true;
-      getPlatformCouponList(this.pickerSearch)
-        .then((res) => {
-          this.pickerLoading = false;
-          if (res.success) {
-            this.pickerList = res.result?.records || [];
-            this.pickerTotal = res.result?.total || 0;
-          }
-        })
-        .catch(() => {
-          this.pickerLoading = false;
-        });
-    },
-    onPickerPageSizeChange() {
-      this.pickerSearch.pageNumber = 1;
-      this.loadPickerCoupons();
-    },
-    handlePickerSelectionChange(rows) {
-      this.pickerSelected = rows || [];
-    },
-    buildLiveCouponPayload(item) {
-      return {
-        couponId: item.id,
-        couponPrice: Number(item.price ?? 0),
-        couponName: item.couponName || "",
-        liveRoomId: this.liveId,
-        liveRoomName: this.liveRoomName || "",
-        hideFlag: false,
-        recommend: false,
-      };
-    },
-    confirmPicker() {
-      if (!this.pickerSelected.length) {
-        this.$Message.warning("请选择优惠券");
-        return;
+});
+
+const table = ref(null);
+const pickerTable = ref(null);
+
+const loading = ref(false);
+const couponList = ref([]);
+const selectedIds = ref([]);
+const pickerVisible = ref(false);
+const pickerLoading = ref(false);
+const pickerSubmitting = ref(false);
+const pickerList = ref([]);
+const pickerTotal = ref(0);
+const pickerSelected = ref([]);
+const pickerSearch = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+  couponName: "",
+  promotionStatus: "START",
+  sort: "create_time",
+  order: "desc",
+});
+
+watch(
+  () => props.liveId,
+  () => {
+    loadCoupons();
+  }
+);
+
+onMounted(() => {
+  loadCoupons();
+});
+
+function formatPrice(price) {
+  return unitPrice(price, "￥");
+}
+function promotionStatusText(status) {
+  const map = { NEW: "未开始", START: "已开始", END: "已结束", CLOSE: "已关闭" };
+  return map[status] || "未知";
+}
+function promotionStatusTagType(status) {
+  const map = { NEW: "info", START: "success", END: "warning", CLOSE: "danger" };
+  return map[status] || "info";
+}
+function loadCoupons() {
+  if (!props.liveId) return;
+  loading.value = true;
+  getLiveCouponList(props.liveId)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        couponList.value = res.result || [];
       }
-      const existingCouponIds = new Set(this.couponList.map((c) => String(c.couponId)));
-      const payload = this.pickerSelected
-        .filter((item) => !existingCouponIds.has(String(item.id)))
-        .map((item) => this.buildLiveCouponPayload(item));
-      if (!payload.length) {
-        this.$Message.warning("所选优惠券均已添加");
-        return;
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+function handleSelectionChange(rows) {
+  selectedIds.value = (rows || []).map((r) => r.id);
+}
+function openCouponSelector() {
+  pickerVisible.value = true;
+  pickerSelected.value = [];
+  pickerSearch.pageNumber = 1;
+  loadPickerCoupons();
+}
+function loadPickerCoupons() {
+  pickerLoading.value = true;
+  getPlatformCouponList(pickerSearch)
+    .then((res) => {
+      pickerLoading.value = false;
+      if (res.success) {
+        pickerList.value = res.result?.records || [];
+        pickerTotal.value = res.result?.total || 0;
       }
-      this.pickerSubmitting = true;
-      saveBatchLiveCoupon(payload)
-        .then((res) => {
-          this.pickerSubmitting = false;
-          if (res.success) {
-            this.$Message.success("添加成功");
-            this.pickerVisible = false;
-            this.loadCoupons();
-          }
-        })
-        .catch(() => {
-          this.pickerSubmitting = false;
-        });
-    },
-    handleRemove(record) {
-      this.$Modal.confirm({
-        title: "确认移除",
-        content: "确定要移除该优惠券吗？",
-        onOk: () => {
-          return removeBatchLiveCoupon([record.id]).then((res) => {
-            if (res.success) {
-              this.$Message.success("移除成功");
-              this.loadCoupons();
-            }
-          });
-        },
-      });
-    },
-    handleBatchRemove() {
-      this.$Modal.confirm({
-        title: "确认批量移除",
-        content: `确定要移除选中的 ${this.selectedIds.length} 个优惠券吗？`,
-        onOk: () => {
-          return removeBatchLiveCoupon(this.selectedIds).then((res) => {
-            if (res.success) {
-              this.$Message.success("移除成功");
-              this.selectedIds = [];
-              this.loadCoupons();
-            }
-          });
-        },
-      });
-    },
-    handleRecommend(record) {
-      setRecommendLiveCoupon(record.id).then((res) => {
+    })
+    .catch(() => {
+      pickerLoading.value = false;
+    });
+}
+function onPickerPageSizeChange() {
+  pickerSearch.pageNumber = 1;
+  loadPickerCoupons();
+}
+function handlePickerSelectionChange(rows) {
+  pickerSelected.value = rows || [];
+}
+function buildLiveCouponPayload(item) {
+  return {
+    couponId: item.id,
+    couponPrice: Number(item.price ?? 0),
+    couponName: item.couponName || "",
+    liveRoomId: props.liveId,
+    liveRoomName: props.liveRoomName || "",
+    hideFlag: false,
+    recommend: false,
+  };
+}
+function confirmPicker() {
+  if (!pickerSelected.value.length) {
+    Message.warning("请选择优惠券");
+    return;
+  }
+  const existingCouponIds = new Set(couponList.value.map((c) => String(c.couponId)));
+  const payload = pickerSelected.value
+    .filter((item) => !existingCouponIds.has(String(item.id)))
+    .map((item) => buildLiveCouponPayload(item));
+  if (!payload.length) {
+    Message.warning("所选优惠券均已添加");
+    return;
+  }
+  pickerSubmitting.value = true;
+  saveBatchLiveCoupon(payload)
+    .then((res) => {
+      pickerSubmitting.value = false;
+      if (res.success) {
+        Message.success("添加成功");
+        pickerVisible.value = false;
+        loadCoupons();
+      }
+    })
+    .catch(() => {
+      pickerSubmitting.value = false;
+    });
+}
+function handleRemove(record) {
+  Modal.confirm({
+    title: "确认移除",
+    content: "确定要移除该优惠券吗？",
+    onOk: () => {
+      return removeBatchLiveCoupon([record.id]).then((res) => {
         if (res.success) {
-          this.$Message.success("已设为推荐");
-          this.loadCoupons();
+          Message.success("移除成功");
+          loadCoupons();
         }
       });
     },
-    handleCancelRecommend(record) {
-      cancelRecommendLiveCoupon(record.id).then((res) => {
+  });
+}
+function handleBatchRemove() {
+  Modal.confirm({
+    title: "确认批量移除",
+    content: `确定要移除选中的 ${selectedIds.value.length} 个优惠券吗？`,
+    onOk: () => {
+      return removeBatchLiveCoupon(selectedIds.value).then((res) => {
         if (res.success) {
-          this.$Message.success("已取消推荐");
-          this.loadCoupons();
+          Message.success("移除成功");
+          selectedIds.value = [];
+          loadCoupons();
         }
       });
     },
-  },
-};
+  });
+}
+function handleRecommend(record) {
+  setRecommendLiveCoupon(record.id).then((res) => {
+    if (res.success) {
+      Message.success("已设为推荐");
+      loadCoupons();
+    }
+  });
+}
+function handleCancelRecommend(record) {
+  cancelRecommendLiveCoupon(record.id).then((res) => {
+    if (res.success) {
+      Message.success("已取消推荐");
+      loadCoupons();
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

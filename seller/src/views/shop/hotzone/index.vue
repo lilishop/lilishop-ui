@@ -11,7 +11,7 @@
   >
     <template v-if="flag && hotzoneRes">
       <hotzone
-        ref="hotzone"
+        ref="hotzoneRef"
         :zonesInit="hotzoneRes.zoneInfo"
         :image="hotzoneRes.img"
         @change="changeHotzone"
@@ -23,47 +23,50 @@
     </template>
   </el-dialog>
 </template>
-<script>
+<script setup>
+import { ref } from "vue";
 import hotzone from "./components/Hotzone.vue";
 
-export default {
-  components: {
-    hotzone,
-  },
-  data() {
-    return {
-      flag: false,
-      hotzoneRes: null,
-    };
-  },
-  methods: {
-    changeHotzone(info) {
-      if (this.hotzoneRes) {
-        this.hotzoneRes.zoneInfo = info;
-      }
-      this.$emit("changeZone", info);
-    },
-    clickClose() {
-      this.flag = false;
-      this.hotzoneRes = null;
-      this.$emit("closeFlag", false);
-    },
-    clickOK() {
-      this.clickClose();
-    },
-    open(val) {
-      this.hotzoneRes = val || null;
-      if (this.hotzoneRes && !this.hotzoneRes.zoneInfo) {
-        this.hotzoneRes.zoneInfo = [];
-      }
-      this.flag = true;
-    },
-    close() {
-      this.flag = false;
-      this.hotzoneRes = null;
-    },
-  },
+const emit = defineEmits(["changeZone", "closeFlag"]);
+
+const flag = ref(false);
+const hotzoneRes = ref(null);
+
+// hotzoneRef：模板 ref 与组件 import 同名，改名避免互相覆盖
+const hotzoneRef = ref(null);
+
+const changeHotzone = (info) => {
+  if (hotzoneRes.value) {
+    hotzoneRes.value.zoneInfo = info;
+  }
+  emit("changeZone", info);
 };
+
+const clickClose = () => {
+  flag.value = false;
+  hotzoneRes.value = null;
+  emit("closeFlag", false);
+};
+
+const clickOK = () => {
+  clickClose();
+};
+
+const open = (val) => {
+  hotzoneRes.value = val || null;
+  if (hotzoneRes.value && !hotzoneRes.value.zoneInfo) {
+    hotzoneRes.value.zoneInfo = [];
+  }
+  flag.value = true;
+};
+
+const close = () => {
+  flag.value = false;
+  hotzoneRes.value = null;
+};
+
+// decorate.vue 通过 hotzoneRef.value.open(val) 调用
+defineExpose({ open, close });
 </script>
 <style scoped lang="scss">
 :deep(.el-dialog__body) {

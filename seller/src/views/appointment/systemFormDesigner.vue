@@ -260,7 +260,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
   Delete,
@@ -299,282 +301,268 @@ import {
   hasOptions,
 } from "@/constants/systemForm";
 
-export default {
-  name: "appointmentSystemFormDesigner",
-  components: { editor, SystemFormFieldPreview, Delete, CopyDocument, ArrowUp, ArrowDown },
-  data() {
-    return {
-      loading: false,
-      saving: false,
-      formId: "",
-      formName: "",
-      fields: [],
-      selectedKey: "",
-      baseline: "",
-      batchVisible: false,
-      batchText: "",
-      palette: FORM_FIELD_PALETTE,
-      paletteIcons: {
-        CHECKBOX: Checked,
-        CITY: Location,
-        RADIO: CircleCheck,
-        DATE: Calendar,
-        DATE_RANGE: Tickets,
-        SELECT: ArrowDown,
-        TEXT: EditPen,
-        TIME: Clock,
-        TIME_RANGE: Timer,
-        RICH_TEXT: Document,
-        IMAGE: Picture,
-      },
-      OPTION_MAX,
-      FIELD_LABEL_MAX,
-      OPTION_LABEL_MAX,
-      HINT_TEXT_MAX,
-      Delete,
-    };
-  },
-  computed: {
-    selected() {
-      return this.fields.find((item) => item.field_key === this.selectedKey) || null;
-    },
-    dateRangeValue: {
-      get() {
-        const field = this.selected;
-        if (!field) return null;
-        return field.default_date_start && field.default_date_end
-          ? [field.default_date_start, field.default_date_end]
-          : null;
-      },
-      set(val) {
-        if (!this.selected) return;
-        this.selected.default_date_start = val?.[0] || null;
-        this.selected.default_date_end = val?.[1] || null;
-      },
-    },
-    timeRangeValue: {
-      get() {
-        const field = this.selected;
-        if (!field) return null;
-        return field.default_time_start && field.default_time_end
-          ? [field.default_time_start, field.default_time_end]
-          : null;
-      },
-      set(val) {
-        if (!this.selected) return;
-        this.selected.default_time_start = val?.[0] || null;
-        this.selected.default_time_end = val?.[1] || null;
-      },
-    },
-  },
-  watch: {
-    selectedKey() {
-      this.closeBatch();
-    },
-  },
-  mounted() {
-    this.formId = this.$route.query.id || "";
-    if (this.formId) {
-      this.loadForm();
-    } else {
-      this.captureBaseline();
-    }
-  },
-  methods: {
-    addOption,
-    removeOption,
-    hasRequiredSwitch,
-    hasOptions,
-    fieldTypeLabel(type) {
-      return FORM_FIELD_LABEL[type] || type;
-    },
-    captureBaseline() {
-      this.baseline = JSON.stringify({
-        formName: this.formName,
-        fields: this.fields,
-      });
-    },
-    loadForm() {
-      this.loading = true;
-      getRequest(`/appointment/system-forms/${this.formId}`)
-        .then((res) => {
-          if (!res.success || !res.result) {
-            ElMessage.error("表单不存在");
-            this.$router.push({ name: "appointment-system-forms" });
-            return;
-          }
-          this.formName = res.result.formName || "";
-          this.fields = parseFormSchema(res.result.formSchema);
-          this.selectedKey = this.fields[0]?.field_key || "";
-          this.captureBaseline();
-        })
-        .catch(() => {
-          ElMessage.error("加载表单失败");
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    addField(type) {
-      const field = createField(type);
-      this.fields.push(field);
-      this.selectedKey = field.field_key;
-    },
-    removeField(index) {
-      this.fields.splice(index, 1);
-      this.selectedKey = this.fields[index]?.field_key || this.fields[index - 1]?.field_key || "";
-    },
-    copyField(index) {
-      const source = this.fields[index];
-      if (!source) return;
-      const cloned = JSON.parse(JSON.stringify(source));
-      cloned.field_key = createFieldKey();
-      if (Array.isArray(cloned.options)) {
-        cloned.options = cloned.options.map((opt) => ({
-          ...opt,
-          value: createFieldKey(), // 避免与原字段共用 option value
-        }));
-      }
-      this.fields.splice(index + 1, 0, cloned);
-      this.selectedKey = cloned.field_key;
-    },
-    moveField(index, step) {
-      const target = index + step;
-      if (target < 0 || target >= this.fields.length) return;
-      const list = [...this.fields];
-      const [item] = list.splice(index, 1);
-      list.splice(target, 0, item);
-      this.fields = list;
-    },
-    closeBatch() {
-      this.batchVisible = false;
-      this.batchText = "";
-    },
-    confirmBatch() {
-      if (!this.selected) return;
-      this.selected.options = batchAddOptions(this.selected.options, this.batchText, {
-        radio: this.selected.field_type === "RADIO",
-      });
-      this.closeBatch();
-    },
-    handleReset() {
-      ElMessageBox.confirm("将撤销本次未保存的编辑，恢复进入页面时的内容？", "重置", {
-        type: "warning",
-      }).then(() => {
-        const snap = JSON.parse(this.baseline || "{}");
-        this.formName = snap.formName || "";
-        this.fields = JSON.parse(JSON.stringify(snap.fields || []));
-        this.selectedKey = this.fields[0]?.field_key || "";
-      }).catch(() => {});
-    },
-    validate() {
-      if (!this.formName.trim()) {
-        ElMessage.error("请填写表单名称");
-        return false;
-      }
-      if (!this.fields.length) {
-        ElMessage.error("请至少添加一个表单组件");
-        return false;
-      }
-      for (const field of this.fields) {
-        if (field.field_type !== "RICH_TEXT") {
-          const label = (field.field_label || "").trim();
-          if (!label) {
-            ElMessage.error("请填写组件标题");
-            return false;
-          }
-          if (label.length > FIELD_LABEL_MAX) {
-            ElMessage.error(`组件标题最多 ${FIELD_LABEL_MAX} 个字`);
-            return false;
-          }
-        }
-        if (hasOptions(field.field_type)) {
-          const labels = (field.options || []).map((item) => item.label?.trim()).filter(Boolean);
-          if (labels.length < 2) {
-            ElMessage.error(`${field.field_label || "选项组件"}至少需要 2 个选项`);
-            return false;
-          }
-          if ((field.options || []).some((item) => (item.label || "").length > OPTION_LABEL_MAX)) {
-            ElMessage.error("选项最多 10 个字");
-            return false;
-          }
-        }
-        if (field.hint_text && field.hint_text.length > HINT_TEXT_MAX) {
-          ElMessage.error("提示语最多 10 个字");
-          return false;
-        }
-        if (
-          field.default_visibility === "SHOW" &&
-          field.default_date_mode === "SPECIFIED_DATE" &&
-          field.field_type === "DATE" &&
-          !field.default_date
-        ) {
-          ElMessage.error("请为日期组件指定默认日期");
-          return false;
-        }
-        if (
-          field.default_visibility === "SHOW" &&
-          field.default_date_mode === "SPECIFIED_DATE" &&
-          field.field_type === "DATE_RANGE"
-        ) {
-          if (!field.default_date_start || !field.default_date_end) {
-            ElMessage.error("请为日期范围指定起止日期");
-            return false;
-          }
-          if (field.default_date_start > field.default_date_end) {
-            ElMessage.error("日期范围的结束日期不能早于开始日期");
-            return false;
-          }
-        }
-        if (
-          field.default_visibility === "SHOW" &&
-          field.default_time_mode === "SPECIFIED_TIME" &&
-          field.field_type === "TIME" &&
-          !field.default_time
-        ) {
-          ElMessage.error("请为时间组件指定默认时间");
-          return false;
-        }
-        if (
-          field.default_visibility === "SHOW" &&
-          field.default_time_mode === "SPECIFIED_TIME" &&
-          field.field_type === "TIME_RANGE"
-        ) {
-          if (!field.default_time_start || !field.default_time_end) {
-            ElMessage.error("请为时间范围指定起止时间");
-            return false;
-          }
-          if (field.default_time_start > field.default_time_end) {
-            ElMessage.error("时间范围的结束时间不能早于开始时间");
-            return false;
-          }
-        }
-      }
-      return true;
-    },
-    handleSave() {
-      if (!this.validate()) return;
-      this.saving = true;
-      postRequestWithNoForm("/appointment/system-forms", {
-        id: this.formId || undefined,
-        formName: this.formName.trim(),
-        formSchema: serializeFormSchema(this.fields),
-        status: "ENABLED",
-      })
-        .then((res) => {
-          if (res.success) {
-            ElMessage.success("已保存并发布");
-            this.formId = res.result?.id || this.formId;
-            this.captureBaseline();
-            this.$router.push({ name: "appointment-system-forms" });
-          }
-        })
-        .finally(() => {
-          this.saving = false;
-        });
-    },
-  },
+defineOptions({ name: "appointmentSystemFormDesigner" });
+
+const route = useRoute();
+const router = useRouter();
+
+const loading = ref(false);
+const saving = ref(false);
+const formId = ref("");
+const formName = ref("");
+const fields = ref([]);
+const selectedKey = ref("");
+const baseline = ref("");
+const batchVisible = ref(false);
+const batchText = ref("");
+const palette = FORM_FIELD_PALETTE;
+const paletteIcons = {
+  CHECKBOX: Checked,
+  CITY: Location,
+  RADIO: CircleCheck,
+  DATE: Calendar,
+  DATE_RANGE: Tickets,
+  SELECT: ArrowDown,
+  TEXT: EditPen,
+  TIME: Clock,
+  TIME_RANGE: Timer,
+  RICH_TEXT: Document,
+  IMAGE: Picture,
 };
+
+const selected = computed(
+  () => fields.value.find((item) => item.field_key === selectedKey.value) || null
+);
+const dateRangeValue = computed({
+  get() {
+    const field = selected.value;
+    if (!field) return null;
+    return field.default_date_start && field.default_date_end
+      ? [field.default_date_start, field.default_date_end]
+      : null;
+  },
+  set(val) {
+    if (!selected.value) return;
+    selected.value.default_date_start = val?.[0] || null;
+    selected.value.default_date_end = val?.[1] || null;
+  },
+});
+const timeRangeValue = computed({
+  get() {
+    const field = selected.value;
+    if (!field) return null;
+    return field.default_time_start && field.default_time_end
+      ? [field.default_time_start, field.default_time_end]
+      : null;
+  },
+  set(val) {
+    if (!selected.value) return;
+    selected.value.default_time_start = val?.[0] || null;
+    selected.value.default_time_end = val?.[1] || null;
+  },
+});
+
+watch(selectedKey, () => {
+  closeBatch();
+});
+
+onMounted(() => {
+  formId.value = route.query.id || "";
+  if (formId.value) {
+    loadForm();
+  } else {
+    captureBaseline();
+  }
+});
+
+function fieldTypeLabel(type) {
+  return FORM_FIELD_LABEL[type] || type;
+}
+function captureBaseline() {
+  baseline.value = JSON.stringify({
+    formName: formName.value,
+    fields: fields.value,
+  });
+}
+function loadForm() {
+  loading.value = true;
+  getRequest(`/appointment/system-forms/${formId.value}`)
+    .then((res) => {
+      if (!res.success || !res.result) {
+        ElMessage.error("表单不存在");
+        router.push({ name: "appointment-system-forms" });
+        return;
+      }
+      formName.value = res.result.formName || "";
+      fields.value = parseFormSchema(res.result.formSchema);
+      selectedKey.value = fields.value[0]?.field_key || "";
+      captureBaseline();
+    })
+    .catch(() => {
+      ElMessage.error("加载表单失败");
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function addField(type) {
+  const field = createField(type);
+  fields.value.push(field);
+  selectedKey.value = field.field_key;
+}
+function removeField(index) {
+  fields.value.splice(index, 1);
+  selectedKey.value = fields.value[index]?.field_key || fields.value[index - 1]?.field_key || "";
+}
+function copyField(index) {
+  const source = fields.value[index];
+  if (!source) return;
+  const cloned = JSON.parse(JSON.stringify(source));
+  cloned.field_key = createFieldKey();
+  if (Array.isArray(cloned.options)) {
+    cloned.options = cloned.options.map((opt) => ({
+      ...opt,
+      value: createFieldKey(), // 避免与原字段共用 option value
+    }));
+  }
+  fields.value.splice(index + 1, 0, cloned);
+  selectedKey.value = cloned.field_key;
+}
+function moveField(index, step) {
+  const target = index + step;
+  if (target < 0 || target >= fields.value.length) return;
+  const list = [...fields.value];
+  const [item] = list.splice(index, 1);
+  list.splice(target, 0, item);
+  fields.value = list;
+}
+function closeBatch() {
+  batchVisible.value = false;
+  batchText.value = "";
+}
+function confirmBatch() {
+  if (!selected.value) return;
+  selected.value.options = batchAddOptions(selected.value.options, batchText.value, {
+    radio: selected.value.field_type === "RADIO",
+  });
+  closeBatch();
+}
+function handleReset() {
+  ElMessageBox.confirm("将撤销本次未保存的编辑，恢复进入页面时的内容？", "重置", {
+    type: "warning",
+  }).then(() => {
+    const snap = JSON.parse(baseline.value || "{}");
+    formName.value = snap.formName || "";
+    fields.value = JSON.parse(JSON.stringify(snap.fields || []));
+    selectedKey.value = fields.value[0]?.field_key || "";
+  }).catch(() => {});
+}
+function validate() {
+  if (!formName.value.trim()) {
+    ElMessage.error("请填写表单名称");
+    return false;
+  }
+  if (!fields.value.length) {
+    ElMessage.error("请至少添加一个表单组件");
+    return false;
+  }
+  for (const field of fields.value) {
+    if (field.field_type !== "RICH_TEXT") {
+      const label = (field.field_label || "").trim();
+      if (!label) {
+        ElMessage.error("请填写组件标题");
+        return false;
+      }
+      if (label.length > FIELD_LABEL_MAX) {
+        ElMessage.error(`组件标题最多 ${FIELD_LABEL_MAX} 个字`);
+        return false;
+      }
+    }
+    if (hasOptions(field.field_type)) {
+      const labels = (field.options || []).map((item) => item.label?.trim()).filter(Boolean);
+      if (labels.length < 2) {
+        ElMessage.error(`${field.field_label || "选项组件"}至少需要 2 个选项`);
+        return false;
+      }
+      if ((field.options || []).some((item) => (item.label || "").length > OPTION_LABEL_MAX)) {
+        ElMessage.error("选项最多 10 个字");
+        return false;
+      }
+    }
+    if (field.hint_text && field.hint_text.length > HINT_TEXT_MAX) {
+      ElMessage.error("提示语最多 10 个字");
+      return false;
+    }
+    if (
+      field.default_visibility === "SHOW" &&
+      field.default_date_mode === "SPECIFIED_DATE" &&
+      field.field_type === "DATE" &&
+      !field.default_date
+    ) {
+      ElMessage.error("请为日期组件指定默认日期");
+      return false;
+    }
+    if (
+      field.default_visibility === "SHOW" &&
+      field.default_date_mode === "SPECIFIED_DATE" &&
+      field.field_type === "DATE_RANGE"
+    ) {
+      if (!field.default_date_start || !field.default_date_end) {
+        ElMessage.error("请为日期范围指定起止日期");
+        return false;
+      }
+      if (field.default_date_start > field.default_date_end) {
+        ElMessage.error("日期范围的结束日期不能早于开始日期");
+        return false;
+      }
+    }
+    if (
+      field.default_visibility === "SHOW" &&
+      field.default_time_mode === "SPECIFIED_TIME" &&
+      field.field_type === "TIME" &&
+      !field.default_time
+    ) {
+      ElMessage.error("请为时间组件指定默认时间");
+      return false;
+    }
+    if (
+      field.default_visibility === "SHOW" &&
+      field.default_time_mode === "SPECIFIED_TIME" &&
+      field.field_type === "TIME_RANGE"
+    ) {
+      if (!field.default_time_start || !field.default_time_end) {
+        ElMessage.error("请为时间范围指定起止时间");
+        return false;
+      }
+      if (field.default_time_start > field.default_time_end) {
+        ElMessage.error("时间范围的结束时间不能早于开始时间");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+function handleSave() {
+  if (!validate()) return;
+  saving.value = true;
+  postRequestWithNoForm("/appointment/system-forms", {
+    id: formId.value || undefined,
+    formName: formName.value.trim(),
+    formSchema: serializeFormSchema(fields.value),
+    status: "ENABLED",
+  })
+    .then((res) => {
+      if (res.success) {
+        ElMessage.success("已保存并发布");
+        formId.value = res.result?.id || formId.value;
+        captureBaseline();
+        router.push({ name: "appointment-system-forms" });
+      }
+    })
+    .finally(() => {
+      saving.value = false;
+    });
+}
 </script>
 
 <style scoped lang="scss">

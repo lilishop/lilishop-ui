@@ -31,70 +31,80 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  mounted() {
-    window.addEventListener('scroll',this.handleScrollx,true)
+<script setup>
+import { onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default: null,
   },
-  props: {
-    data: {
-      type: Object,
-      default: null,
-    },
-  },
-  data() {
-    return {
-      screenHeight:document.body.clientHeight,
-      scrollHieght:0,
-      topSearchShow: true, //展示 导航条
-      topIndex: 0, // 当前滚动条位置 （取整）
-      scrollTops: 0,
-      open:'',
-      currentIndex: 0, // 当前分类下标
-      conData: this.data, // 装修数据
-      showContent: true, // 是否展示内容
-    };
-  },
-  watch: {
-    data: function (val) {
-      this.conData = val;
-    },
-    conData: function (val) {
-      this.$emit("content", val);
-    },
-  },
-  methods: {
-    handleScrollx(){
-      // console.log('滚动高度',window.pageYOffset) // 获取滚动条的高度
-      // console.log(this.$refs.obtain.getBoundingClientRect().top) //获取到距离顶部的距离
-      // this.scrollHieght = Number(window.pageYOffset);//获取到距离顶部的距离
-      // this.scrollTops = Number(this.$refs.obtain.getBoundingClientRect().top); // 获取到距离顶部的距离
-      //    this.topSearchShow = true; // 展示图钉
-      //     if(this.scrollTops < -660){ // 超过隐藏
-      //       this.topSearchShow = false;
-      // }
-    },
-     toguid(path,id){
-      var path =path;
-      var Id = id;
-      localStorage.setItem('toId',Id);
-      this.$router.push(path);
-    },
-    change(status){ //获取是否获取到图钉
-      this.open = status
-    },
-    gotoDemo(){ // 跳转到demo的位置
-    if(this.open){ // 获取到图钉之后在跳转当前位置
-       document.querySelector("#demo").scrollIntoView(true);
-    }
-      //scrollIntoView()可以在所有的HTML元素上调用，通过滚动浏览器窗口或某个容器元素
-    },
-    changeCurr(index) {
-      // 选择分类
-      this.currentIndex = index;
-    },
-  },
-};
+});
+
+const emit = defineEmits(['content']);
+
+const router = useRouter();
+
+const obtain = ref(null);
+const screenHeight = ref(document.body.clientHeight);
+const scrollHieght = ref(0);
+const topSearchShow = ref(true); //展示 导航条
+const topIndex = ref(0); // 当前滚动条位置 （取整）
+const scrollTops = ref(0);
+const open = ref('');
+const currentIndex = ref(0); // 当前分类下标
+const conData = ref(props.data); // 装修数据
+const showContent = ref(true); // 是否展示内容
+
+watch(
+  () => props.data,
+  (val) => {
+    conData.value = val;
+  }
+);
+
+watch(conData, (val) => {
+  emit('content', val);
+});
+
+function handleScrollx() {
+  // console.log('滚动高度',window.pageYOffset) // 获取滚动条的高度
+  // console.log(obtain.value.getBoundingClientRect().top) //获取到距离顶部的距离
+  // scrollHieght.value = Number(window.pageYOffset);//获取到距离顶部的距离
+  // scrollTops.value = Number(obtain.value.getBoundingClientRect().top); // 获取到距离顶部的距离
+  //    topSearchShow.value = true; // 展示图钉
+  //     if(scrollTops.value < -660){ // 超过隐藏
+  //       topSearchShow.value = false;
+  // }
+}
+
+function toguid(path, id) {
+  var path = path;
+  var Id = id;
+  localStorage.setItem('toId', Id);
+  router.push(path);
+}
+
+function change(status) { //获取是否获取到图钉
+  open.value = status
+}
+
+function gotoDemo() { // 跳转到demo的位置
+  if (open.value) { // 获取到图钉之后在跳转当前位置
+    document.querySelector("#demo").scrollIntoView(true);
+  }
+  //scrollIntoView()可以在所有的HTML元素上调用，通过滚动浏览器窗口或某个容器元素
+}
+
+function changeCurr(index) {
+  // 选择分类
+  currentIndex.value = index;
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScrollx, true)
+});
 </script>
 <style lang="scss" scoped>
 .not-enough {

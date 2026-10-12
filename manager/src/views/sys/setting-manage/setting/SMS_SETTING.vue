@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+    <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
       <el-form-item label="是否测试模式" prop="isTestModel">
         <el-radio-group v-model="formValidate.isTestModel">
           <el-radio-button value="true">开启</el-radio-button>
@@ -71,88 +71,87 @@
       </el-form-item>
 
       <div class="label-btns">
-        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
+        <el-button type="primary" @click="submit('formValidateRef')">保存</el-button>
 
       </div>
     </el-form>
   </div>
 </template>
-<script>
+<script setup>
+import { getCurrentInstance, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import {setSetting} from "@/api/index";
 import {handleSubmit} from "./validate";
 
-export default {
-  data() {
-    return {
-      result: "",
-      ruleValidate: {}, // 验证规则
-      formValidate: { // 表单数据
-        isTestModel:1,
-        loginTemplateCode:"",
-        registerTemplateCode:"",
-        findPasswordTemplateCode:"",
-        walletPasswordTemplateCode:"",
-        payPasswordTemplateCode:"",
-        accessKeyId: "",
-        regionId: "",
-        picLocation: "",
-        accessSecret: "",
-        tencentSecretId: "",
-        tencentSecretKey: "",
-        tencentSdkAppId: "",
-        tencentSignName: "",
-        huaweiAppKey: "",
-        huaweiAppSecret: "",
-        huaweiSender: "",
-        huaweiSignature: "",
+const props = defineProps(["res", "type"]);
+
+// handleSubmit 通过 vm.$refs 访问表单实例
+const { proxy } = getCurrentInstance();
+
+const result = ref("");
+const ruleValidate = reactive({}); // 验证规则
+const formValidate = ref({ // 表单数据
+  isTestModel:1,
+  loginTemplateCode:"",
+  registerTemplateCode:"",
+  findPasswordTemplateCode:"",
+  walletPasswordTemplateCode:"",
+  payPasswordTemplateCode:"",
+  accessKeyId: "",
+  regionId: "",
+  picLocation: "",
+  accessSecret: "",
+  tencentSecretId: "",
+  tencentSecretKey: "",
+  tencentSdkAppId: "",
+  tencentSignName: "",
+  huaweiAppKey: "",
+  huaweiAppSecret: "",
+  huaweiSender: "",
+  huaweiSignature: "",
+});
+// 表单实例：原模板 ref="formValidate" 与 data 同名会互相覆盖，改名 formValidateRef
+const formValidateRef = ref(null);
+
+// 保存
+function submit(name) {
+  handleSubmit(proxy, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+// 保存设置
+function setupSetting() {
+  setSetting(props.type, formValidate.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+// 实例化数据
+function init() {
+  result.value = JSON.parse(props.res);
+
+  Object.keys(result.value).map((item) => {
+    result.value[item] += "";
+  });
+
+  formValidate.value = { ...result.value };
+  Object.keys(formValidate.value).forEach((item) => {
+    ruleValidate[item] = [
+      {
+        required: true,
+        message: "请填写必填项",
+        trigger: "blur",
       },
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    // 保存
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    // 保存设置
-    setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    // 实例化数据
-    init() {
-      this.result = JSON.parse(this.res);
+    ];
+  });
+}
 
-      Object.keys(this.result).map((item) => {
-        this.result[item] += "";
-      });
-
-      this.formValidate = { ...this.result };
-      Object.keys(this.formValidate).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-        ];
-      });
-    },
-  },
-};
+init();
 </script>
 
 <style lang="scss" scoped>

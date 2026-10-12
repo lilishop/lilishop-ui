@@ -40,28 +40,30 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getDamageReportDetail, getDamageReportItems } from "@/api/procurement";
 import { damageStatusText, damageStatusTag, formatMoney } from "../constants";
 
-export default {
-  name: "manager-damage-report-detail",
-  data() {
-    return { detail: {}, items: [] };
-  },
-  mounted() {
-    const id = this.$route.query.id;
-    if (id) {
-      getDamageReportDetail(id).then((res) => {
-        if (res.success) this.detail = res.result || {};
-      });
-      getDamageReportItems(id).then((res) => {
-        if (res.success) this.items = res.result || [];
-      });
-    }
-  },
-  methods: { damageStatusText, damageStatusTag, formatMoney },
-};
+defineOptions({ name: "manager-damage-report-detail" });
+
+const route = useRoute();
+
+const detail = ref({});
+const items = ref([]);
+
+onMounted(() => {
+  const id = route.query.id;
+  if (id) {
+    getDamageReportDetail(id).then((res) => {
+      if (res.success) detail.value = res.result || {};
+    });
+    getDamageReportItems(id).then((res) => {
+      if (res.success) items.value = res.result || [];
+    });
+  }
+});
 </script>
 
 <style scoped>

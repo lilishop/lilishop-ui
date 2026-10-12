@@ -1,10 +1,10 @@
 import { createApp } from "vue";
+import { createPinia } from "pinia";
 import "core-js/stable";
 import "./styles/theme.less";
 import "@/styles/common.scss";
 import App from "./App.vue";
 import { router } from "./router/index";
-import store from "./store";
 import i18n from "@/locale";
 import { setupElementPlus } from "@/plugins/element";
 import { setupLegacyMessage } from "@/utils/message";
@@ -46,7 +46,7 @@ setupLegacyMessage(app);
 installVueQr(app);
 
 app.use(router);
-app.use(store);
+app.use(createPinia());
 app.use(i18n);
 
 app.component("liliDialog", liliDialog);

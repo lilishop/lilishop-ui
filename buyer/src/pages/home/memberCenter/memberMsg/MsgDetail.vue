@@ -22,86 +22,90 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { Message, Modal } from "@/utils/message";
 import { delMemberMsg, getMemberMessage, readMemberMsg } from '@/api/member.js';
 import { refreshUnreadMessage } from '@/utils/unreadMessage';
 
+defineOptions({ name: 'MsgDetail' });
+
+const route = useRoute();
+const router = useRouter();
+
 const CACHE_KEY = 'buyer-member-message';
 
-export default {
-  name: 'MsgDetail',
-  data () {
-    return {
-      detail: {},
-      loaded: false
+const detail = ref({});
+const loaded = ref(false);
+
+function loadDetail () {
+  const id = route.query.id
+  if (!id) {
+    loaded.value = true
+    return
+  }
+  const cached = readCache(id)
+  if (cached) detail.value = cached
+  getMemberMessage(id).then(res => {
+    if (res && res.success && res.result && res.result.id) {
+      detail.value = res.result
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(res.result))
     }
-  },
-  mounted () {
-    this.loadDetail()
-  },
-  methods: {
-    loadDetail () {
-      const id = this.$route.query.id
-      if (!id) {
-        this.loaded = true
-        return
-      }
-      const cached = this.readCache(id)
-      if (cached) this.detail = cached
-      getMemberMessage(id).then(res => {
-        if (res && res.success && res.result && res.result.id) {
-          this.detail = res.result
-          sessionStorage.setItem(CACHE_KEY, JSON.stringify(res.result))
-        }
-      }).catch((err) => {
-        console.warn('获取消息详情失败', err)
-      }).finally(() => {
-        this.loaded = true
-        this.markRead()
-      })
-    },
-    readCache (id) {
-      try {
-        const raw = sessionStorage.getItem(CACHE_KEY)
-        if (!raw) return null
-        const message = JSON.parse(raw)
-        return message && String(message.id) === String(id) ? message : null
-      } catch (e) {
-        return null
-      }
-    },
-    markRead () {
-      if (!this.detail.id || this.detail.status !== 'UN_READY') return
-      readMemberMsg(this.detail.id).then(res => {
-        if (res && res.success) {
-          this.detail.status = 'ALREADY_READY'
-          refreshUnreadMessage()
-        }
-      }).catch(() => {
-        // 标记已读为尽力而为操作，失败可忽略
-      })
-    },
-    goBack () {
-      this.$router.push({ name: 'MsgList' })
-    },
-    removeMessage () {
-      Modal.confirm({
-        title: '确认删除',
-        content: '确认要删除此消息?',
-        loading: true,
-        onOk: () =>
-          delMemberMsg(this.detail.id).then((res) => {
-            if (res.success) {
-              Message.success('消息已成功放入回收站')
-              refreshUnreadMessage()
-              this.goBack()
-            }
-          })
-      })
-    }
+  }).catch((err) => {
+    console.warn('获取消息详情失败', err)
+  }).finally(() => {
+    loaded.value = true
+    markRead()
+  })
+}
+
+function readCache (id) {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const message = JSON.parse(raw)
+    return message && String(message.id) === String(id) ? message : null
+  } catch (e) {
+    return null
   }
 }
+
+function markRead () {
+  if (!detail.value.id || detail.value.status !== 'UN_READY') return
+  readMemberMsg(detail.value.id).then(res => {
+    if (res && res.success) {
+      detail.value.status = 'ALREADY_READY'
+      refreshUnreadMessage()
+    }
+  }).catch(() => {
+    // 标记已读为尽力而为操作，失败可忽略
+  })
+}
+
+function goBack () {
+  router.push({ name: 'MsgList' })
+}
+
+function removeMessage () {
+  Modal.confirm({
+    title: '确认删除',
+    content: '确认要删除此消息?',
+    loading: true,
+    onOk: () =>
+      delMemberMsg(detail.value.id).then((res) => {
+        if (res.success) {
+          Message.success('消息已成功放入回收站')
+          refreshUnreadMessage()
+          goBack()
+        }
+      })
+  })
+}
+
+onMounted(() => {
+  loadDetail()
+})
 </script>
 
 <style lang="scss" scoped>

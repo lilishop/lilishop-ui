@@ -218,243 +218,239 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import * as API_Setting from "@/api/setting.js";
 
-export default {
-  name: "messageTemplate",
-  data() {
-    return {
-      loading: false,
-      activeTab: "member",
-      syncOaLoading: false,
-      syncMpLoading: false,
-      total: 0,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      memberRows: [],
-      currentRow: {},
-      noticeDetailText: "",
-      noticeModalVisible: false,
-      oaModalVisible: false,
-      mpModalVisible: false,
-      emailModalVisible: false,
-      emailDetailText: "",
-    };
-  },
-  methods: {
-    isOpen(status) {
-      return String(status || "").toUpperCase() === "OPEN";
-    },
-    wechatEnableToOpenClose(enable) {
-      if (enable === true || enable === "true" || enable === 1) return "OPEN";
-      return "CLOSE";
-    },
-    toOpenClose(flag) {
-      return flag ? "OPEN" : "CLOSE";
-    },
-    safeText(v) {
-      return v === undefined || v === null ? "" : String(v);
-    },
-    pickByKeys(obj, keys) {
-      for (let i = 0; i < keys.length; i++) {
-        const val = obj ? obj[keys[i]] : "";
-        if (val !== undefined && val !== null && val !== "") return val;
-      }
-      return "";
-    },
-    formatOaContent(item) {
-      if (!item) return "";
-      const first = this.pickByKeys(item, ["first", "title", "name"]);
-      const remark = this.pickByKeys(item, ["remark", "content"]);
-      const keywords = Array.isArray(item.keywords)
-        ? item.keywords.map((k) => this.pickByKeys(k, ["name", "value", "label"])).filter(Boolean).join(" / ")
-        : this.safeText(item.keywordsText || "");
-      return [first, keywords, remark].filter(Boolean).join("\n");
-    },
-    formatMpContent(item) {
-      if (!item) return "";
-      const keywordsText = this.safeText(item.keywordsText);
-      if (keywordsText) return keywordsText;
-      if (Array.isArray(item.keywords)) {
-        return item.keywords.map((k) => this.pickByKeys(k, ["name", "value", "label"])).filter(Boolean).join(" / ");
-      }
-      return this.safeText(item.content);
-    },
-    async loadMemberPage() {
-      this.loading = true;
-      try {
-        const res = await API_Setting.getMessageTemplateAggregatePage(this.searchForm);
-        if (!(res && res.success && res.result)) {
-          this.memberRows = [];
-          this.total = 0;
-          ElMessage.error((res && res.message) || "加载消息模板失败");
-          return;
-        }
-        const records = res.result.records || [];
-        this.total = res.result.total || 0;
-        this.memberRows = records.map((agg, idx) => {
-          const item = { ...(agg.notice || {}) };
-          const oa = agg.wechatOa;
-          const mp = agg.wechatMp;
-          return {
-            ...item,
-            emailStatus: item.emailStatus || "CLOSE",
-            emailContent: item.emailContent || "",
-            index: (this.searchForm.pageNumber - 1) * this.searchForm.pageSize + idx + 1,
-            oaId: oa ? oa.id : "",
-            oaName: oa ? this.pickByKeys(oa, ["name", "templateName", "title"]) : "",
-            oaCode: oa ? this.pickByKeys(oa, ["code", "templateId"]) : "",
-            oaStatus: oa ? this.wechatEnableToOpenClose(oa.enable) : "",
-            oaRaw: oa || null,
-            oaContent: this.formatOaContent(oa),
-            mpId: mp ? mp.id : "",
-            mpName: mp ? this.pickByKeys(mp, ["name", "templateName", "title"]) : "",
-            mpTemplateId: mp ? this.pickByKeys(mp, ["templateId"]) : "",
-            mpCode: mp ? this.pickByKeys(mp, ["code"]) : "",
-            mpStatus: mp ? this.wechatEnableToOpenClose(mp.enable) : "",
-            mpRaw: mp || null,
-            mpContent: this.formatMpContent(mp),
-          };
-        });
-      } finally {
-        this.loading = false;
-      }
-    },
-    reloadCurrent() {
-      if (this.activeTab === "member") this.loadMemberPage();
-    },
-    async syncOaTemplates() {
-      this.syncOaLoading = true;
-      try {
-        const res = await API_Setting.wechatMessageSync();
-        if (res && res.success) {
-          await this.loadMemberPage();
-          ElMessage.success("服务号模板同步成功");
-        } else {
-          ElMessage.error((res && res.message) || "服务号模板同步失败");
-        }
-      } finally {
-        this.syncOaLoading = false;
-      }
-    },
-    async syncMpTemplates() {
-      this.syncMpLoading = true;
-      try {
-        const res = await API_Setting.wechatMPMessageSync();
-        if (res && res.success) {
-          await this.loadMemberPage();
-          ElMessage.success("小程序模板同步成功");
-        } else {
-          ElMessage.error((res && res.message) || "小程序模板同步失败");
-        }
-      } finally {
-        this.syncMpLoading = false;
-      }
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.loadMemberPage();
-    },
-    async openNoticeModal(row) {
-      this.currentRow = { ...row };
-      this.noticeDetailText = row.noticeContent || "";
-      this.noticeModalVisible = true;
-      const res = await API_Setting.getNoticeMessageDetail(row.id);
-      if (res && res.success && res.result) {
-        const d = res.result;
-        this.noticeDetailText = [d.noticeTitle, d.noticeContent].filter(Boolean).join("\n");
-      }
-    },
-    openOaModal(row) {
-      this.currentRow = { ...row };
-      this.oaModalVisible = true;
-    },
-    openMpModal(row) {
-      this.currentRow = { ...row };
-      this.mpModalVisible = true;
-    },
-    async openEmailModal(row) {
-      this.currentRow = { ...row };
-      const fallback = row.emailContent || row.noticeContent || "";
-      this.emailDetailText = row.noticeTitle ? [row.noticeTitle, fallback].filter(Boolean).join("\n") : fallback;
-      this.emailModalVisible = true;
-      const res = await API_Setting.getNoticeMessageDetail(row.id);
-      if (res && res.success && res.result) {
-        const d = res.result;
-        if (d.emailContent) {
-          this.emailDetailText = d.emailContent;
-        } else {
-          this.emailDetailText = [d.noticeTitle, d.noticeContent].filter(Boolean).join("\n");
-        }
-      }
-    },
-    updateRowStatus(row, key, val) {
-      const idx = this.memberRows.findIndex((x) => x.id === row.id);
-      if (idx >= 0) this.memberRows[idx][key] = val;
-      if (this.currentRow && this.currentRow.id === row.id) this.currentRow[key] = val;
-    },
-    async toggleNoticeChannel(v, row) {
-      const old = row.noticeStatus;
-      this.updateRowStatus(row, "noticeStatus", this.toOpenClose(v));
-      const res = await API_Setting.updateMessageStatus(row.id, this.toOpenClose(v));
-      if (!(res && res.success)) {
-        this.updateRowStatus(row, "noticeStatus", old);
-        ElMessage.error((res && res.message) || "站内信开关更新失败");
-      } else {
-        ElMessage.success("站内信开关更新成功");
-      }
-    },
-    async toggleOaChannel(v, row) {
-      if (!row.oaId) return;
-      const old = row.oaStatus;
-      this.updateRowStatus(row, "oaStatus", this.toOpenClose(v));
-      const params = { id: row.oaId, enable: v };
-      try {
-        const res = await API_Setting.editWechatMessageTemplate(row.oaId, params);
-        if (!(res && res.success)) {
-          this.updateRowStatus(row, "oaStatus", old);
-          ElMessage.error((res && res.message) || "服务号开关更新失败");
-        } else {
-          ElMessage.success("服务号开关更新成功");
-        }
-      } catch (e) {
-        this.updateRowStatus(row, "oaStatus", old);
-        ElMessage.error((e && e.message) || "服务号开关更新失败");
-      }
-    },
-    async toggleMpChannel(v, row) {
-      if (!row.mpId) return;
-      const old = row.mpStatus;
-      this.updateRowStatus(row, "mpStatus", this.toOpenClose(v));
-      const params = { id: row.mpId, enable: v };
-      const res = await API_Setting.editWechatMPMessageTemplate(row.mpId, params);
-      if (!(res && res.success)) {
-        this.updateRowStatus(row, "mpStatus", old);
-        ElMessage.error((res && res.message) || "小程序开关更新失败");
-      } else {
-        ElMessage.success("小程序开关更新成功");
-      }
-    },
-    async toggleEmailChannel(v, row) {
-      const old = row.emailStatus || "CLOSE";
-      this.updateRowStatus(row, "emailStatus", this.toOpenClose(v));
-      const res = await API_Setting.updateNoticeMessageEmailStatus(row.id, this.toOpenClose(v));
-      if (!(res && res.success)) {
-        this.updateRowStatus(row, "emailStatus", old);
-        ElMessage.error((res && res.message) || "邮箱开关更新失败");
-      } else {
-        ElMessage.success("邮箱开关更新成功");
-      }
-    },
-  },
-  mounted() {
-    this.loadMemberPage();
-  },
-};
+defineOptions({ name: "messageTemplate" });
+
+const loading = ref(false);
+const activeTab = ref("member");
+const syncOaLoading = ref(false);
+const syncMpLoading = ref(false);
+const total = ref(0);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const memberRows = ref([]);
+const currentRow = ref({});
+const noticeDetailText = ref("");
+const noticeModalVisible = ref(false);
+const oaModalVisible = ref(false);
+const mpModalVisible = ref(false);
+const emailModalVisible = ref(false);
+const emailDetailText = ref("");
+
+function isOpen(status) {
+  return String(status || "").toUpperCase() === "OPEN";
+}
+function wechatEnableToOpenClose(enable) {
+  if (enable === true || enable === "true" || enable === 1) return "OPEN";
+  return "CLOSE";
+}
+function toOpenClose(flag) {
+  return flag ? "OPEN" : "CLOSE";
+}
+function safeText(v) {
+  return v === undefined || v === null ? "" : String(v);
+}
+function pickByKeys(obj, keys) {
+  for (let i = 0; i < keys.length; i++) {
+    const val = obj ? obj[keys[i]] : "";
+    if (val !== undefined && val !== null && val !== "") return val;
+  }
+  return "";
+}
+function formatOaContent(item) {
+  if (!item) return "";
+  const first = pickByKeys(item, ["first", "title", "name"]);
+  const remark = pickByKeys(item, ["remark", "content"]);
+  const keywords = Array.isArray(item.keywords)
+    ? item.keywords.map((k) => pickByKeys(k, ["name", "value", "label"])).filter(Boolean).join(" / ")
+    : safeText(item.keywordsText || "");
+  return [first, keywords, remark].filter(Boolean).join("\n");
+}
+function formatMpContent(item) {
+  if (!item) return "";
+  const keywordsText = safeText(item.keywordsText);
+  if (keywordsText) return keywordsText;
+  if (Array.isArray(item.keywords)) {
+    return item.keywords.map((k) => pickByKeys(k, ["name", "value", "label"])).filter(Boolean).join(" / ");
+  }
+  return safeText(item.content);
+}
+async function loadMemberPage() {
+  loading.value = true;
+  try {
+    const res = await API_Setting.getMessageTemplateAggregatePage(searchForm.value);
+    if (!(res && res.success && res.result)) {
+      memberRows.value = [];
+      total.value = 0;
+      ElMessage.error((res && res.message) || "加载消息模板失败");
+      return;
+    }
+    const records = res.result.records || [];
+    total.value = res.result.total || 0;
+    memberRows.value = records.map((agg, idx) => {
+      const item = { ...(agg.notice || {}) };
+      const oa = agg.wechatOa;
+      const mp = agg.wechatMp;
+      return {
+        ...item,
+        emailStatus: item.emailStatus || "CLOSE",
+        emailContent: item.emailContent || "",
+        index: (searchForm.value.pageNumber - 1) * searchForm.value.pageSize + idx + 1,
+        oaId: oa ? oa.id : "",
+        oaName: oa ? pickByKeys(oa, ["name", "templateName", "title"]) : "",
+        oaCode: oa ? pickByKeys(oa, ["code", "templateId"]) : "",
+        oaStatus: oa ? wechatEnableToOpenClose(oa.enable) : "",
+        oaRaw: oa || null,
+        oaContent: formatOaContent(oa),
+        mpId: mp ? mp.id : "",
+        mpName: mp ? pickByKeys(mp, ["name", "templateName", "title"]) : "",
+        mpTemplateId: mp ? pickByKeys(mp, ["templateId"]) : "",
+        mpCode: mp ? pickByKeys(mp, ["code"]) : "",
+        mpStatus: mp ? wechatEnableToOpenClose(mp.enable) : "",
+        mpRaw: mp || null,
+        mpContent: formatMpContent(mp),
+      };
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+function reloadCurrent() {
+  if (activeTab.value === "member") loadMemberPage();
+}
+async function syncOaTemplates() {
+  syncOaLoading.value = true;
+  try {
+    const res = await API_Setting.wechatMessageSync();
+    if (res && res.success) {
+      await loadMemberPage();
+      ElMessage.success("服务号模板同步成功");
+    } else {
+      ElMessage.error((res && res.message) || "服务号模板同步失败");
+    }
+  } finally {
+    syncOaLoading.value = false;
+  }
+}
+async function syncMpTemplates() {
+  syncMpLoading.value = true;
+  try {
+    const res = await API_Setting.wechatMPMessageSync();
+    if (res && res.success) {
+      await loadMemberPage();
+      ElMessage.success("小程序模板同步成功");
+    } else {
+      ElMessage.error((res && res.message) || "小程序模板同步失败");
+    }
+  } finally {
+    syncMpLoading.value = false;
+  }
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  loadMemberPage();
+}
+async function openNoticeModal(row) {
+  currentRow.value = { ...row };
+  noticeDetailText.value = row.noticeContent || "";
+  noticeModalVisible.value = true;
+  const res = await API_Setting.getNoticeMessageDetail(row.id);
+  if (res && res.success && res.result) {
+    const d = res.result;
+    noticeDetailText.value = [d.noticeTitle, d.noticeContent].filter(Boolean).join("\n");
+  }
+}
+function openOaModal(row) {
+  currentRow.value = { ...row };
+  oaModalVisible.value = true;
+}
+function openMpModal(row) {
+  currentRow.value = { ...row };
+  mpModalVisible.value = true;
+}
+async function openEmailModal(row) {
+  currentRow.value = { ...row };
+  const fallback = row.emailContent || row.noticeContent || "";
+  emailDetailText.value = row.noticeTitle ? [row.noticeTitle, fallback].filter(Boolean).join("\n") : fallback;
+  emailModalVisible.value = true;
+  const res = await API_Setting.getNoticeMessageDetail(row.id);
+  if (res && res.success && res.result) {
+    const d = res.result;
+    if (d.emailContent) {
+      emailDetailText.value = d.emailContent;
+    } else {
+      emailDetailText.value = [d.noticeTitle, d.noticeContent].filter(Boolean).join("\n");
+    }
+  }
+}
+function updateRowStatus(row, key, val) {
+  const idx = memberRows.value.findIndex((x) => x.id === row.id);
+  if (idx >= 0) memberRows.value[idx][key] = val;
+  if (currentRow.value && currentRow.value.id === row.id) currentRow.value[key] = val;
+}
+async function toggleNoticeChannel(v, row) {
+  const old = row.noticeStatus;
+  updateRowStatus(row, "noticeStatus", toOpenClose(v));
+  const res = await API_Setting.updateMessageStatus(row.id, toOpenClose(v));
+  if (!(res && res.success)) {
+    updateRowStatus(row, "noticeStatus", old);
+    ElMessage.error((res && res.message) || "站内信开关更新失败");
+  } else {
+    ElMessage.success("站内信开关更新成功");
+  }
+}
+async function toggleOaChannel(v, row) {
+  if (!row.oaId) return;
+  const old = row.oaStatus;
+  updateRowStatus(row, "oaStatus", toOpenClose(v));
+  const params = { id: row.oaId, enable: v };
+  try {
+    const res = await API_Setting.editWechatMessageTemplate(row.oaId, params);
+    if (!(res && res.success)) {
+      updateRowStatus(row, "oaStatus", old);
+      ElMessage.error((res && res.message) || "服务号开关更新失败");
+    } else {
+      ElMessage.success("服务号开关更新成功");
+    }
+  } catch (e) {
+    updateRowStatus(row, "oaStatus", old);
+    ElMessage.error((e && e.message) || "服务号开关更新失败");
+  }
+}
+async function toggleMpChannel(v, row) {
+  if (!row.mpId) return;
+  const old = row.mpStatus;
+  updateRowStatus(row, "mpStatus", toOpenClose(v));
+  const params = { id: row.mpId, enable: v };
+  const res = await API_Setting.editWechatMPMessageTemplate(row.mpId, params);
+  if (!(res && res.success)) {
+    updateRowStatus(row, "mpStatus", old);
+    ElMessage.error((res && res.message) || "小程序开关更新失败");
+  } else {
+    ElMessage.success("小程序开关更新成功");
+  }
+}
+async function toggleEmailChannel(v, row) {
+  const old = row.emailStatus || "CLOSE";
+  updateRowStatus(row, "emailStatus", toOpenClose(v));
+  const res = await API_Setting.updateNoticeMessageEmailStatus(row.id, toOpenClose(v));
+  if (!(res && res.success)) {
+    updateRowStatus(row, "emailStatus", old);
+    ElMessage.error((res && res.message) || "邮箱开关更新失败");
+  } else {
+    ElMessage.success("邮箱开关更新成功");
+  }
+}
+
+onMounted(() => {
+  loadMemberPage();
+});
 </script>
 
 <style lang="scss" scoped>

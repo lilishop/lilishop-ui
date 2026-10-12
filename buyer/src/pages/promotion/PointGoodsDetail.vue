@@ -93,6 +93,18 @@
 </template>
 
 <script>
+export default {
+  name: "PointGoodsDetail",
+  beforeRouteEnter(to, from, next) {
+    window.scrollTo(0, 0);
+    next();
+  },
+};
+</script>
+
+<script setup>
+import { ref, computed, onMounted, nextTick } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import Search from "@/components/Search";
 import { addCartGoods } from "@/api/cart.js";
@@ -104,115 +116,109 @@ import {
   E_COUPON_CART_POINTS,
 } from "@/constants/goodsType";
 
-export default {
-  name: "PointGoodsDetail",
-  components: { Search },
-  beforeRouteEnter(to, from, next) {
-    window.scrollTo(0, 0);
-    next();
-  },
-  created() {
-    this.getGoodsDetail();
-  },
-  mounted() {
-    window.addEventListener("scroll", this.handleScroll);
-  },
-  data() {
-    return {
-      goodsMsg: {},
-      goodsSku: {},
-      isLoading: false,
-      onceFlag: true,
-      count: 1,
-      loading: false,
-    };
-  },
-  computed: {
-    isECouponSku() {
-      return isECoupon(this.goodsSku.goodsType);
-    },
-    displayStock() {
-      if (this.isECouponSku) {
-        return getECouponStock(this.goodsSku);
+const route = useRoute();
+const router = useRouter();
+
+const goodsMsg = ref({});
+const goodsSku = ref({});
+const isLoading = ref(false);
+const onceFlag = ref(true);
+const count = ref(1);
+const loading = ref(false);
+const itemIntroGoods = ref(null);
+
+const isECouponSku = computed(() => {
+  return isECoupon(goodsSku.value.goodsType);
+});
+const displayStock = computed(() => {
+  if (isECouponSku.value) {
+    return getECouponStock(goodsSku.value);
+  }
+  return Number(goodsSku.value.quantity) || 0;
+});
+const quantityMax = computed(() => {
+  if (isECouponSku.value) {
+    return getECouponMaxBuyNum(goodsSku.value);
+  }
+  const qty = Number(goodsSku.value.quantity) || 0;
+  return qty > 0 ? qty : 1;
+});
+const isOutOfStock = computed(() => {
+  return displayStock.value <= 0;
+});
+
+function getGoodsDetail() {
+  isLoading.value = true;
+  pointGoodsDetail(route.query.id)
+    .then((res) => {
+      isLoading.value = false;
+      if (res.success) {
+        goodsMsg.value = res.result;
+        goodsSku.value = res.result.goodsSku || {};
+        syncCountWithQuantity();
+      } else {
+        Message.error(res.message);
+        router.push("/");
       }
-      return Number(this.goodsSku.quantity) || 0;
-    },
-    quantityMax() {
-      if (this.isECouponSku) {
-        return getECouponMaxBuyNum(this.goodsSku);
+    })
+    .catch(() => {
+      router.push("/");
+    });
+}
+
+function syncCountWithQuantity() {
+  const max = quantityMax.value;
+  if (max <= 0) {
+    count.value = 1;
+    return;
+  }
+  if (count.value > max) count.value = max;
+  if (count.value < 1) count.value = 1;
+}
+
+function pointBuy() {
+  const params = {
+    num: count.value,
+    skuId: goodsMsg.value.skuId,
+    cartType: E_COUPON_CART_POINTS,
+  };
+  loading.value = true;
+  addCartGoods(params)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        router.push({ path: "/pay", query: { way: params.cartType } });
+      } else {
+        Message.warning(res.message);
       }
-      const qty = Number(this.goodsSku.quantity) || 0;
-      return qty > 0 ? qty : 1;
-    },
-    isOutOfStock() {
-      return this.displayStock <= 0;
-    },
-  },
-  methods: {
-    getGoodsDetail() {
-      this.isLoading = true;
-      pointGoodsDetail(this.$route.query.id)
-        .then((res) => {
-          this.isLoading = false;
-          if (res.success) {
-            this.goodsMsg = res.result;
-            this.goodsSku = res.result.goodsSku || {};
-            this.syncCountWithQuantity();
-          } else {
-            Message.error(res.message);
-            this.$router.push("/");
-          }
-        })
-        .catch(() => {
-          this.$router.push("/");
-        });
-    },
-    syncCountWithQuantity() {
-      const max = this.quantityMax;
-      if (max <= 0) {
-        this.count = 1;
-        return;
-      }
-      if (this.count > max) this.count = max;
-      if (this.count < 1) this.count = 1;
-    },
-    pointBuy() {
-      const params = {
-        num: this.count,
-        skuId: this.goodsMsg.skuId,
-        cartType: E_COUPON_CART_POINTS,
-      };
-      this.loading = true;
-      addCartGoods(params)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.$router.push({ path: "/pay", query: { way: params.cartType } });
-          } else {
-            Message.warning(res.message);
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    handleScroll() {
-      if (this.onceFlag) {
-        this.$nextTick(() => {
-          this.changeHeight();
-        });
-        this.onceFlag = false;
-      }
-    },
-    changeHeight() {
-      const goodsDetailCon = document.querySelector(".item-intro");
-      if (!goodsDetailCon || !this.$refs.itemIntroGoods) return;
-      let heightCss = window.getComputedStyle(goodsDetailCon).height;
-      heightCss = parseInt(heightCss.substr(0, heightCss.length - 2), 10) + 89;
-      this.$refs.itemIntroGoods.style.height = heightCss + "px";
-    },
-  },
-};
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+function handleScroll() {
+  if (onceFlag.value) {
+    nextTick(() => {
+      changeHeight();
+    });
+    onceFlag.value = false;
+  }
+}
+
+function changeHeight() {
+  const goodsDetailCon = document.querySelector(".item-intro");
+  if (!goodsDetailCon || !itemIntroGoods.value) return;
+  let heightCss = window.getComputedStyle(goodsDetailCon).height;
+  heightCss = parseInt(heightCss.substr(0, heightCss.length - 2), 10) + 89;
+  itemIntroGoods.value.style.height = heightCss + "px";
+}
+
+getGoodsDetail();
+
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll);
+});
 </script>
 
 <style scoped lang="scss">

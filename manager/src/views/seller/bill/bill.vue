@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -56,7 +56,7 @@
         <el-button :disabled="selectCount === 0" @click="handleBatchDownload">批量下载</el-button>
       </div>
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         border
         :data="data"
@@ -106,159 +106,176 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import * as API_Shop from "@/api/shops";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { customRouterPush } from "@/utils/filters";
+import { Message, Modal } from "@/utils/message";
+import { deleteRequest } from "@/libs/axios";
 
-export default {
-  name: "bill",
-  data() {
-    return {
-      loading: true,
-      selectDate: [],
-      defaultTime: [new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)],
-      activeStatus: "",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        sn: "",
-        storeName: "",
-        billStatus: "",
-        startDate: null,
-        endDate: null,
-      },
-      selectList: [],
-      selectCount: 0,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    billStatusText(v) {
-      const map = { OUT: "已出账", CHECK: "已对账", COMPLETE: "已付款" };
-      return map[v] || v;
-    },
-    billStatusTagType(v) {
-      const map = { OUT: "primary", CHECK: "warning", COMPLETE: "success" };
-      return map[v] || "success";
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    handleStatusChange(name) {
-      this.searchForm.billStatus = name;
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startDate = this.selectDate[0];
-        this.searchForm.endDate = this.selectDate[1];
-      } else {
-        this.searchForm.startDate = null;
-        this.searchForm.endDate = null;
-      }
-      this.getDataList();
-    },
-    handleReset() {
-      this.selectDate = [];
-      this.searchForm.sn = "";
-      this.searchForm.storeName = "";
-      this.searchForm.startDate = null;
-      this.searchForm.endDate = null;
-      this.handleSearch();
-    },
-    getDataList() {
-      this.loading = true;
-      API_Shop.getBuyBillPage(this.searchForm).then((res) => {
-        this.loading = false;
+defineOptions({ name: "bill" });
+
+const loading = ref(true);
+const selectDate = ref([]);
+const defaultTime = ref([new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)]);
+const activeStatus = ref("");
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  sn: "",
+  storeName: "",
+  billStatus: "",
+  startDate: null,
+  endDate: null,
+});
+const selectList = ref([]);
+const selectCount = ref(0);
+const data = ref([]);
+const total = ref(0);
+
+// 模板 ref（原 script 未使用 $refs，仅保留占位避免模板 ref 与响应式数据同名互相覆盖）
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+function billStatusText(v) {
+  const map = { OUT: "已出账", CHECK: "已对账", COMPLETE: "已付款" };
+  return map[v] || v;
+}
+
+function billStatusTagType(v) {
+  const map = { OUT: "primary", CHECK: "warning", COMPLETE: "success" };
+  return map[v] || "success";
+}
+
+function init() {
+  getDataList();
+}
+
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+
+function changePageSize(v) {
+  searchForm.pageSize = v;
+  getDataList();
+}
+
+function changeSelect(e) {
+  selectList.value = e;
+  selectCount.value = e.length;
+}
+
+function handleStatusChange(name) {
+  searchForm.billStatus = name;
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.startDate = selectDate.value[0];
+    searchForm.endDate = selectDate.value[1];
+  } else {
+    searchForm.startDate = null;
+    searchForm.endDate = null;
+  }
+  getDataList();
+}
+
+function handleReset() {
+  selectDate.value = [];
+  searchForm.sn = "";
+  searchForm.storeName = "";
+  searchForm.startDate = null;
+  searchForm.endDate = null;
+  handleSearch();
+}
+
+function getDataList() {
+  loading.value = true;
+  API_Shop.getBuyBillPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+function detail(v) {
+  customRouterPush({
+    name: "bill-detail",
+    query: { id: v.id },
+  });
+}
+
+function handleExportList() {
+  API_Finance.exportBillList({ ...searchForm }).then((blob) => {
+    downloadBlob(blob, "结算单列表.xlsx");
+  });
+}
+
+function handleBatchDownload() {
+  if (selectCount.value <= 0) {
+    Message.warning("请先选择结算单");
+    return;
+  }
+  const billIds = selectList.value.map((item) => item.id);
+  API_Finance.batchDownloadBills(billIds).then((blob) => {
+    downloadBlob(blob, "结算单批量下载.zip");
+  });
+}
+
+function remove(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除 " + v.name + " ?",
+    loading: true,
+    onOk: () => {
+      deleteRequest("/bill/delByIds/" + v.id).then((res) => {
+        Modal.remove();
         if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
+          Message.success("操作成功");
+          getDataList();
         }
       });
     },
-    detail(v) {
-      this.$filters.customRouterPush({
-        name: "bill-detail",
-        query: { id: v.id },
+  });
+}
+
+function delAll() {
+  if (selectCount.value <= 0) {
+    Message.warning("您还未选择要删除的数据");
+    return;
+  }
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除所选的 " + selectCount.value + " 条数据?",
+    loading: true,
+    onOk: () => {
+      let ids = "";
+      selectList.value.forEach(function (e) {
+        ids += e.id + ",";
+      });
+      ids = ids.substring(0, ids.length - 1);
+      deleteRequest("/bill/delByIds/" + ids).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
       });
     },
-    handleExportList() {
-      API_Finance.exportBillList({ ...this.searchForm }).then((blob) => {
-        downloadBlob(blob, "结算单列表.xlsx");
-      });
-    },
-    handleBatchDownload() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("请先选择结算单");
-        return;
-      }
-      const billIds = this.selectList.map((item) => item.id);
-      API_Finance.batchDownloadBills(billIds).then((blob) => {
-        downloadBlob(blob, "结算单批量下载.zip");
-      });
-    },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
-          this.deleteRequest("/bill/delByIds/" + v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
-          let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
-          ids = ids.substring(0, ids.length - 1);
-          this.deleteRequest("/bill/delByIds/" + ids).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>

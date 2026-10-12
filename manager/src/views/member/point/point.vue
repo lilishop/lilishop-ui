@@ -19,7 +19,7 @@
         <el-tab-pane label="积分列表" name="pointList">
           <el-card class="point-content-card">
             <el-form
-              ref="memberSearchForm"
+              ref="memberSearchFormRef"
               :model="memberSearchForm"
               inline
               label-width="70px"
@@ -131,7 +131,7 @@
         <el-tab-pane label="积分增减记录" name="pointChangeRecord">
           <el-card class="point-content-card">
             <el-form
-              ref="searchForm"
+              ref="searchFormRef"
               :model="searchForm"
               inline
               label-width="70px"
@@ -203,132 +203,135 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Member from "@/api/member.js";
 import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "point",
-  data() {
-    return {
-      activeTab: "pointList",
-      loading: true,
-      memberLoading: false,
-      pointsStatistics: {
-        totalPoint: 0,
-        unUsedPoint: 0,
-      },
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      memberSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        nickName: "",
-        username: "",
-        disabled: "",
-        minPoint: null,
-        maxPoint: null,
-      },
-      data: [],
-      memberData: [],
-      memberTotal: 0,
-      total: 0,
-    };
-  },
-  methods: {
-    callback(val) {
-      this.$emit("callback", val);
-    },
-    detail(row) {
-      customRouterPush({ name: "member-detail", query: { id: row.id } });
-    },
-    init() {
-      this.getStatistics();
-      this.getMemberList();
-      this.getData();
-    },
-    getStatistics() {
-      API_Member.queryMemberPointsStatistics().then((res) => {
-        if (res && res.success && res.result) {
-          this.pointsStatistics = {
-            totalPoint: res.result.totalPoint || 0,
-            unUsedPoint: res.result.unUsedPoint || 0,
-          };
-        }
-      });
-    },
-    formatNumber(value) {
-      const numericValue = Number(value || 0);
-      if (!Number.isFinite(numericValue)) return "0";
-      return numericValue.toLocaleString();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getData();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getData();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getData();
-    },
-    handleMemberSearch() {
-      this.memberSearchForm.pageNumber = 1;
-      this.getMemberList();
-    },
-    changeMemberPage(v) {
-      this.memberSearchForm.pageNumber = v;
-      this.getMemberList();
-    },
-    changeMemberPageSize(v) {
-      this.memberSearchForm.pageNumber = 1;
-      this.memberSearchForm.pageSize = v;
-      this.getMemberList();
-    },
-    getMemberList() {
-      this.memberLoading = true;
-      const params = {
-        pageNumber: this.memberSearchForm.pageNumber,
-        pageSize: this.memberSearchForm.pageSize,
-        nickName: this.memberSearchForm.nickName || undefined,
-        username: this.memberSearchForm.username || undefined,
-        disabled: this.memberSearchForm.disabled || undefined,
-        minPoint: this.memberSearchForm.minPoint,
-        maxPoint: this.memberSearchForm.maxPoint,
+defineOptions({ name: "point" });
+
+const emit = defineEmits(["callback"]);
+
+// 模板 ref，script 内未使用
+const memberSearchFormRef = ref(null);
+const searchFormRef = ref(null);
+const table = ref(null);
+
+const activeTab = ref("pointList");
+const loading = ref(true);
+const memberLoading = ref(false);
+const pointsStatistics = ref({
+  totalPoint: 0,
+  unUsedPoint: 0,
+});
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const memberSearchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  nickName: "",
+  username: "",
+  disabled: "",
+  minPoint: null,
+  maxPoint: null,
+});
+const data = ref([]);
+const memberData = ref([]);
+const memberTotal = ref(0);
+const total = ref(0);
+
+function callback(val) {
+  emit("callback", val);
+}
+function detail(row) {
+  customRouterPush({ name: "member-detail", query: { id: row.id } });
+}
+function init() {
+  getStatistics();
+  getMemberList();
+  getData();
+}
+function getStatistics() {
+  API_Member.queryMemberPointsStatistics().then((res) => {
+    if (res && res.success && res.result) {
+      pointsStatistics.value = {
+        totalPoint: res.result.totalPoint || 0,
+        unUsedPoint: res.result.unUsedPoint || 0,
       };
-      API_Member.getMemberListData(params)
-        .then((res) => {
-          this.memberLoading = false;
-          if (res && res.success && res.result && res.result.records) {
-            this.memberData = res.result.records;
-            this.memberTotal = res.result.total;
-          }
-        })
-        .catch(() => {
-          this.memberLoading = false;
-        });
-    },
-    getData() {
-      this.loading = true;
-      API_Member.getHistoryPointData(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    }
+  });
+}
+function formatNumber(value) {
+  const numericValue = Number(value || 0);
+  if (!Number.isFinite(numericValue)) return "0";
+  return numericValue.toLocaleString();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getData();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getData();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getData();
+}
+function handleMemberSearch() {
+  memberSearchForm.pageNumber = 1;
+  getMemberList();
+}
+function changeMemberPage(v) {
+  memberSearchForm.pageNumber = v;
+  getMemberList();
+}
+function changeMemberPageSize(v) {
+  memberSearchForm.pageNumber = 1;
+  memberSearchForm.pageSize = v;
+  getMemberList();
+}
+function getMemberList() {
+  memberLoading.value = true;
+  const params = {
+    pageNumber: memberSearchForm.pageNumber,
+    pageSize: memberSearchForm.pageSize,
+    nickName: memberSearchForm.nickName || undefined,
+    username: memberSearchForm.username || undefined,
+    disabled: memberSearchForm.disabled || undefined,
+    minPoint: memberSearchForm.minPoint,
+    maxPoint: memberSearchForm.maxPoint,
+  };
+  API_Member.getMemberListData(params)
+    .then((res) => {
+      memberLoading.value = false;
+      if (res && res.success && res.result && res.result.records) {
+        memberData.value = res.result.records;
+        memberTotal.value = res.result.total;
+      }
+    })
+    .catch(() => {
+      memberLoading.value = false;
+    });
+}
+function getData() {
+  loading.value = true;
+  API_Member.getHistoryPointData(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .points-statistics-card {

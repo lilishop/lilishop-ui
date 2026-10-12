@@ -65,7 +65,7 @@
 
     <div v-if="showFloorView">
       <!-- 楼层装修部分 -->
-      <model-form ref="modelForm" :data="modelForm"></model-form>
+      <model-form ref="modelFormRef" :data="modelForm"></model-form>
     </div>
 
 
@@ -120,9 +120,11 @@
   </div>
 </template>
 
-<script>
+<script setup>
 
-import { Message } from "@/utils/message";
+import { reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Message, Modal } from "@/utils/message";
 import { ArrowDown, StarFilled } from '@element-plus/icons-vue';
 import {getCateById, getDetailById} from "@/api/shopentry";
 import {
@@ -130,254 +132,325 @@ import {
   collectStore,
   isStoreCollection,
 } from "@/api/member";
-import {goodsList} from "@/api/goods";
+import {goodsList as goodsListApi} from "@/api/goods";
 import Search from "@/components/Search";
 import ModelForm from "@/components/indexDecorate/ModelForm";
 import storage from "@/plugins/storage";
 import {getFloorStoreData} from "@/api/index.js";
 import { seckillByDay } from "@/api/promotion";
-import imTalk from '@/components/mixes/talkIm'
+import { getIMDetail } from "@/api/common";
+import { getMemberMsg } from "@/api/login";
 
-export default {
-  name: "Merchant",
-  components: { Search, ModelForm, StarFilled, ArrowDown },
-  mixins: [imTalk],
-  data() {
-    return {
-      // 店铺装修的内容
-      modelForm: {list: []}, // 楼层装修数据
-      topAdvert: {}, // 顶部广告
-      showNav: false, // 是否展示分类栏
-      topSearchShow: false, // 滚动后顶部搜索栏展示
-      carouselLarge: false, // 不同轮播分类尺寸
-      carouselOpacity: false, // 不同轮播分类样式,
-      enablePageData: false, //是否显示楼层装修内容
-      basePageData: false, //基础店铺信息
-      showFloorView: false, // 是否展示楼层装修（有有效装修数据时为 true）
-      storeMsg: {}, // 店铺信息
-      cateList: [], // 店铺分裂
-      goodsList: [], // 商品列表
-      total: 0, // 商品数量
-      params: {
-        // 请求参数
-        pageNumber: 1,
-        pageSize: 20,
-        keyword: "",
-        storeId: this.$route.query.id,
-        storeCatId: "",
-      },
-      cateName: "店铺推荐", // 分类名称
-      storeCollected: false, // 是否收藏
-    };
-  },
-  created() {
-    this.getStoreMsg();
-    window.onscroll = () => {
-      const top =
-        document.documentElement.scrollTop || document.body.scrollTop;
-      this.topSearchShow = top > 300;
-    };
-  },
-  methods: {
-    isFloorEnabled() {
-      const pageShow = this.storeMsg && this.storeMsg.pageShow;
-      return pageShow === "1" || pageShow === 1 || pageShow === "OPEN" || pageShow === true;
-    },
-    loadStoreGoodsView() {
-      this.showFloorView = false;
-      this.getGoodsList();
-      this.getCateList();
-    },
-    getIndexData() {
-      getFloorStoreData({
-        clientType: "PC",
-        num: this.$route.query.id,
-        pageType: "STORE",
-      })
-        .then(async (res) => {
-          if (res.success && res.result?.pageData) {
-            try {
-              await this.parsePageData(res.result.pageData);
-              this.showFloorView = true;
-            } catch {
-              this.loadStoreGoodsView();
-            }
-          } else {
-            this.loadStoreGoodsView();
-          }
-        })
-        .catch(() => {
-          this.loadStoreGoodsView();
-        });
-    },
-    async parsePageData(pageData) {
-      const dataJson = JSON.parse(pageData);
-      for (let i = 0; i < dataJson.list.length; i++) {
-        const type = dataJson.list[i].type;
-        if (type === "carousel2") {
-          this.carouselLarge = true;
-        } else if (type === "carousel1") {
-          this.carouselLarge = true;
-          this.carouselOpacity = true;
-        } else if (type === "seckill") {
-          dataJson.list[i].options.list = await this.getListByDay();
+defineOptions({ name: "Merchant" });
+
+const route = useRoute();
+const router = useRouter();
+
+// 店铺装修的内容
+const modelForm = ref({list: []}); // 楼层装修数据
+const modelFormRef = ref(null);
+const topAdvert = ref({}); // 顶部广告
+const showNav = ref(false); // 是否展示分类栏
+const topSearchShow = ref(false); // 滚动后顶部搜索栏展示
+const carouselLarge = ref(false); // 不同轮播分类尺寸
+const carouselOpacity = ref(false); // 不同轮播分类样式,
+const enablePageData = ref(false); //是否显示楼层装修内容
+const basePageData = ref(false); //基础店铺信息
+const showFloorView = ref(false); // 是否展示楼层装修（有有效装修数据时为 true）
+const storeMsg = ref({}); // 店铺信息
+const cateList = ref([]); // 店铺分裂
+const goodsList = ref([]); // 商品列表
+const total = ref(0); // 商品数量
+const params = reactive({
+  // 请求参数
+  pageNumber: 1,
+  pageSize: 20,
+  keyword: "",
+  storeId: route.query.id,
+  storeCatId: "",
+});
+const cateName = ref("店铺推荐"); // 分类名称
+const storeCollected = ref(false); // 是否收藏
+// 原 talkIm mixin 的 IM 链接
+const IMLink = ref("");
+
+function isFloorEnabled() {
+  const pageShow = storeMsg.value && storeMsg.value.pageShow;
+  return pageShow === "1" || pageShow === 1 || pageShow === "OPEN" || pageShow === true;
+}
+
+function loadStoreGoodsView() {
+  showFloorView.value = false;
+  getGoodsList();
+  getCateList();
+}
+
+function getIndexData() {
+  getFloorStoreData({
+    clientType: "PC",
+    num: route.query.id,
+    pageType: "STORE",
+  })
+    .then(async (res) => {
+      if (res.success && res.result?.pageData) {
+        try {
+          await parsePageData(res.result.pageData);
+          showFloorView.value = true;
+        } catch {
+          loadStoreGoodsView();
         }
+      } else {
+        loadStoreGoodsView();
       }
-      this.modelForm = dataJson;
-      storage.setItem("navList", dataJson.list[1]);
-      this.showNav = true;
-      this.topAdvert = dataJson.list[0];
-    },
-    async getListByDay() {
-      const res = await seckillByDay();
-      if (res.success && res.result?.length) {
-        return res.result;
-      }
-      return [];
-    },
+    })
+    .catch(() => {
+      loadStoreGoodsView();
+    });
+}
 
+async function parsePageData(pageData) {
+  const dataJson = JSON.parse(pageData);
+  for (let i = 0; i < dataJson.list.length; i++) {
+    const type = dataJson.list[i].type;
+    if (type === "carousel2") {
+      carouselLarge.value = true;
+    } else if (type === "carousel1") {
+      carouselLarge.value = true;
+      carouselOpacity.value = true;
+    } else if (type === "seckill") {
+      dataJson.list[i].options.list = await getListByDay();
+    }
+  }
+  modelForm.value = dataJson;
+  storage.setItem("navList", dataJson.list[1]);
+  showNav.value = true;
+  topAdvert.value = dataJson.list[0];
+}
 
-    checkStoreCollectionStatus() {
-      const storeId = this.storeMsg && this.storeMsg.storeId;
-      if (!storeId || !this.Cookies.getItem("userInfo")) {
-        return;
+async function getListByDay() {
+  const res = await seckillByDay();
+  if (res.success && res.result?.length) {
+    return res.result;
+  }
+  return [];
+}
+
+function checkStoreCollectionStatus() {
+  const storeId = storeMsg.value && storeMsg.value.storeId;
+  if (!storeId || !storage.getItem("userInfo")) {
+    return;
+  }
+  isStoreCollection("STORE", storeId)
+    .then((res) => {
+      if (res.success && res.result) {
+        storeCollected.value = true;
       }
-      isStoreCollection("STORE", storeId)
-        .then((res) => {
-          if (res.success && res.result) {
-            this.storeCollected = true;
-          }
-        })
-        .catch(() => {
-          // 收藏状态查询失败不影响店铺页展示，静默处理
-        });
-    },
-    getStoreMsg() {
-      const storeId = this.$route.query.id;
-      if (!storeId) {
-        Message.warning("店铺不存在");
-        return;
-      }
-      getDetailById(storeId)
-        .then((res) => {
-          if (res.success && res.result) {
-            this.storeMsg = res.result;
-            document.title = this.storeMsg.storeName || "店铺";
-            this.checkStoreCollectionStatus();
-            if (this.isFloorEnabled()) {
-              this.getIndexData();
-            } else {
-              this.loadStoreGoodsView();
-            }
-          } else {
-            this.storeMsg = { storeId };
-            this.loadStoreGoodsView();
-          }
-        })
-        .catch(() => {
-          this.storeMsg = { storeId };
-          this.loadStoreGoodsView();
-        });
-    },
-    getCateList() {
-      // 店铺分类
-      getCateById(this.$route.query.id).then((res) => {
-        if (res.success) {
-          this.cateList = res.result;
-        }
-      });
-    },
-    getGoodsList() {
-      // 商品信息
-      goodsList(this.params)
-        .then((res) => {
-          if (res.success) {
-            this.goodsList = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .catch((err) => {
-          console.warn('获取商品列表失败', err);
-        });
-    },
-    goGoodsDetail(skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: {skuId, goodsId},
-      });
-      window.open(routeUrl.href, "_blank");
-    },
-    search(val) {
-      // 搜索本店商品
-      this.params.keyword = val;
-      this.getGoodsList();
-    },
-    searchByCate(cate) {
-      // 搜索同分类下商品
-      this.params.storeCatId = cate.id;
-      this.params.pageNumber = 1;
-      this.cateName = cate.labelName;
-      this.getGoodsList();
-    },
-    isCateActive(cate) {
-      if (!cate || !this.params.storeCatId) return false;
-      if (this.params.storeCatId === cate.id) return true;
-      return Array.isArray(cate.children) && cate.children.some((sec) => sec.id === this.params.storeCatId);
-    },
-    formatGrade(grade) {
-      if (grade === null || grade === undefined || grade === "") return 100;
-      const num = Number(grade);
-      if (Number.isNaN(num)) return 100;
-      const fixed = Number(num.toFixed(1));
-      return fixed % 1 === 0 ? fixed.toFixed(0) : String(fixed);
-    },
-    // 分页 修改页码
-    changePageNum(val) {
-      this.params.pageNumber = val;
-      this.getGoodsList();
-    },
-    // 分页 修改页数
-    changePageSize(val) {
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getGoodsList();
-    },
-    async collect() {
-      // 收藏店铺
-      const storeId = this.storeMsg && this.storeMsg.storeId;
-      if (!storeId) {
-        return;
-      }
-      if (!this.Cookies.getItem("userInfo")) {
-        Message.warning("请先登录");
-        this.$router.push("/login");
-        return;
-      }
-      try {
-        if (this.storeCollected) {
-          const cancel = await cancelStoreCollect("STORE", storeId);
-          if (cancel.success) {
-            Message.success("已取消收藏");
-            this.storeCollected = false;
-          }
+    })
+    .catch(() => {
+      // 收藏状态查询失败不影响店铺页展示，静默处理
+    });
+}
+
+function getStoreMsg() {
+  const storeId = route.query.id;
+  if (!storeId) {
+    Message.warning("店铺不存在");
+    return;
+  }
+  getDetailById(storeId)
+    .then((res) => {
+      if (res.success && res.result) {
+        storeMsg.value = res.result;
+        document.title = storeMsg.value.storeName || "店铺";
+        checkStoreCollectionStatus();
+        if (isFloorEnabled()) {
+          getIndexData();
         } else {
-          const collect = await collectStore("STORE", storeId);
-          if (collect.success || collect.code === 200) {
-            this.storeCollected = true;
-            Message.success(
-              "收藏店铺成功,可以前往个人中心我的收藏查看"
-            );
-          }
+          loadStoreGoodsView();
         }
-      } catch (err) {
-        const msg = err?.message || err?.data?.message || "";
-        if (msg.includes("重复收藏")) {
-          this.storeCollected = true;
-        }
+      } else {
+        storeMsg.value = { storeId };
+        loadStoreGoodsView();
       }
+    })
+    .catch(() => {
+      storeMsg.value = { storeId };
+      loadStoreGoodsView();
+    });
+}
+
+function getCateList() {
+  // 店铺分类
+  getCateById(route.query.id).then((res) => {
+    if (res.success) {
+      cateList.value = res.result;
+    }
+  });
+}
+
+function getGoodsList() {
+  // 商品信息
+  goodsListApi(params)
+    .then((res) => {
+      if (res.success) {
+        goodsList.value = res.result.records;
+        total.value = res.result.total;
+      }
+    })
+    .catch((err) => {
+      console.warn('获取商品列表失败', err);
+    });
+}
+
+function goGoodsDetail(skuId, goodsId) {
+  // 跳转商品详情
+  let routeUrl = router.resolve({
+    path: "/goodsDetail",
+    query: {skuId, goodsId},
+  });
+  window.open(routeUrl.href, "_blank");
+}
+
+function search(val) {
+  // 搜索本店商品
+  params.keyword = val;
+  getGoodsList();
+}
+
+function searchByCate(cate) {
+  // 搜索同分类下商品
+  params.storeCatId = cate.id;
+  params.pageNumber = 1;
+  cateName.value = cate.labelName;
+  getGoodsList();
+}
+
+function isCateActive(cate) {
+  if (!cate || !params.storeCatId) return false;
+  if (params.storeCatId === cate.id) return true;
+  return Array.isArray(cate.children) && cate.children.some((sec) => sec.id === params.storeCatId);
+}
+
+function formatGrade(grade) {
+  if (grade === null || grade === undefined || grade === "") return 100;
+  const num = Number(grade);
+  if (Number.isNaN(num)) return 100;
+  const fixed = Number(num.toFixed(1));
+  return fixed % 1 === 0 ? fixed.toFixed(0) : String(fixed);
+}
+
+// 分页 修改页码
+function changePageNum(val) {
+  params.pageNumber = val;
+  getGoodsList();
+}
+
+// 分页 修改页数
+function changePageSize(val) {
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getGoodsList();
+}
+
+async function collect() {
+  // 收藏店铺
+  const storeId = storeMsg.value && storeMsg.value.storeId;
+  if (!storeId) {
+    return;
+  }
+  if (!storage.getItem("userInfo")) {
+    Message.warning("请先登录");
+    router.push("/login");
+    return;
+  }
+  try {
+    if (storeCollected.value) {
+      const cancel = await cancelStoreCollect("STORE", storeId);
+      if (cancel.success) {
+        Message.success("已取消收藏");
+        storeCollected.value = false;
+      }
+    } else {
+      const collect = await collectStore("STORE", storeId);
+      if (collect.success || collect.code === 200) {
+        storeCollected.value = true;
+        Message.success(
+          "收藏店铺成功,可以前往个人中心我的收藏查看"
+        );
+      }
+    }
+  } catch (err) {
+    const msg = err?.message || err?.data?.message || "";
+    if (msg.includes("重复收藏")) {
+      storeCollected.value = true;
+    }
+  }
+}
+
+// 原 talkIm mixin 的登录提示
+function promptLogin() {
+  Modal.confirm({
+    title: "温馨提示",
+    content: "请登录后执行此操作",
+    okText: "立即登录",
+    cancelText: "取消",
+    onOk: () => {
+      router.push({
+        path: "/login",
+        query: {
+          rePath: route.path,
+          query: JSON.stringify(route.query || {}),
+        },
+      });
     },
-  },
+  });
+}
+
+// 获取im信息（原 talkIm mixin）
+async function getIMDetailMethods() {
+  let res = await getIMDetail();
+  if (res.success) {
+    IMLink.value = res.result;
+  }
+}
+
+// 跳转im客服（原 talkIm mixin）
+async function IMService(id, goodsId, skuId) {
+  if (!storage.getItem("accessToken")) {
+    promptLogin();
+    return;
+  }
+
+  try {
+    await getIMDetailMethods();
+    const userInfo = await getMemberMsg();
+    if (!userInfo.success) {
+      promptLogin();
+      return;
+    }
+
+    const accessToken = storage.getItem("accessToken");
+    const storeId = id || storeMsg.value?.storeId;
+    const baseUrl = `${IMLink.value}?token=${accessToken}&id=${storeId}`;
+
+    if (goodsId && skuId) {
+      window.open(`${baseUrl}&goodsId=${goodsId}&skuId=${skuId}`);
+    } else {
+      window.open(baseUrl);
+    }
+  } catch {
+    // token 过期等场景由 request 拦截器处理；未登录时避免未捕获异常
+    if (!storage.getItem("accessToken")) {
+      promptLogin();
+    }
+  }
+}
+
+getStoreMsg();
+window.onscroll = () => {
+  const top =
+    document.documentElement.scrollTop || document.body.scrollTop;
+  topSearchShow.value = top > 300;
 };
 </script>
 

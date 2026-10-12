@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -23,7 +23,7 @@
     </el-card>
 
     <el-card>
-      <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
+      <el-table v-loading="loading" border :data="data" ref="tableRef" class="mt_10" style="width: 100%">
         <el-table-column prop="id" label="编号" min-width="120" />
         <el-table-column label="商品原图" width="120" align="center">
           <template #default="{ row }">
@@ -66,88 +66,94 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getDraftGoodsListData, deleteDraftGoods } from "@/api/goods";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "goods",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "create_time",
-        order: "desc",
-        saveType: "TEMPLATE",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    editGoods(v) {
-      this.$router.push({
-        name: "goods-template-operation-edit",
-        query: { draftId: v.id },
-      });
-    },
-    removeDraft(id) {
-      this.$Modal.confirm({
-        title: "确认审核",
-        content: "您确认要删除id为 " + id + " 的模版吗?",
-        loading: true,
-        onOk: () => {
-          deleteDraftGoods(id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.getDataList();
-    },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getDraftGoodsListData(this.searchForm).then((res) => {
-        this.loading = false;
+defineOptions({ name: "goods" });
+
+const route = useRoute();
+const router = useRouter();
+
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  sort: "create_time",
+  order: "desc",
+  saveType: "TEMPLATE",
+});
+const data = ref([]);
+const total = ref(0);
+
+function init() {
+  getDataList();
+}
+function editGoods(v) {
+  router.push({
+    name: "goods-template-operation-edit",
+    query: { draftId: v.id },
+  });
+}
+function removeDraft(id) {
+  Modal.confirm({
+    title: "确认审核",
+    content: "您确认要删除id为 " + id + " 的模版吗?",
+    loading: true,
+    onOk: () => {
+      deleteDraftGoods(id).then((res) => {
+        Modal.remove();
         if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
+          Message.success("删除成功");
+          getDataList();
         }
       });
     },
-  },
-  mounted() {
-    this.init();
-  },
-  watch: {
-    $route() {
-      this.init();
-    },
-  },
-};
+  });
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 10;
+  getDataList();
+}
+function handleReset() {
+  searchFormRef.value.resetFields();
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 10;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getDraftGoodsListData(searchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
+
+watch(
+  () => route.query,
+  () => {
+    init();
+  }
+);
 </script>
 
 <style lang="scss" scoped>

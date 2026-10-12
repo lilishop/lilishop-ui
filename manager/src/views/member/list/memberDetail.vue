@@ -379,7 +379,7 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form ref="addressForm" :model="addressForm" label-width="100px" :rules="addressFormValidate">
+      <el-form ref="addressFormRef" :model="addressForm" label-width="100px" :rules="addressFormValidate">
         <el-form-item label="收货人姓名" prop="name">
           <el-input v-model="addressForm.name" maxlength="8" clearable style="width: 80%" />
         </el-form-item>
@@ -388,7 +388,7 @@
         </el-form-item>
         <el-form-item label="收货人地址" prop="consigneeAddressPath">
           <span>{{ addressForm.consigneeAddressPath || "暂无地址" }}</span>
-          <el-button style="margin-left: 10px" @click="$refs.map.open()">选择</el-button>
+          <el-button style="margin-left: 10px" @click="map.open()">选择</el-button>
         </el-form-item>
         <el-form-item label="详细地址" prop="detail">
           <el-input v-model="addressForm.detail" maxlength="35" clearable style="width: 80%" />
@@ -412,7 +412,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, nextTick, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import * as API_Member from "@/api/member.js";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import multipleMap from "@/components/map/multiple-map";
@@ -420,374 +422,373 @@ import * as RegExp from "@/libs/RegExp.js";
 import * as API_Order from "@/api/order.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-export default {
-  name: "memberDetail",
-  components: {
-    ossManage,
-    multipleMap,
-  },
-  data() {
-    return {
-      id: "",
-      activeTab: "point",
-      loading: true,
-      addressLoading: false,
-      memberInfo: {},
-      memberWalletInfo: {},
-      addressModalTitle: "",
-      addressModalVisible: false,
-      addressForm: {
-        id: "",
-        isDefault: 0,
-        consigneeAddressPath: "",
-        consigneeAddressIdPath: "",
-      },
-      selectDate: null,
-      submitLoading: false,
-      addressFormValidate: {
-        name: [{ required: true, message: "收货人姓名不能为空" }],
-        mobile: [
-          { required: true, message: "请输入收货人手机号码" },
-          {
-            pattern: RegExp.mobile,
-            message: "请输入正确的手机号",
-          },
-        ],
-        consigneeAddressPath: [{ required: true, message: "收货人地址不能为空" }],
-        detail: [{ required: true, message: "收货人详细地址不能为空" }],
-      },
-      pointData: [],
-      pointTotal: 0,
-      pointSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      orderData: [],
-      orderTotal: 0,
-      orderSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        payStatus: "",
-        orderSn: "",
-        orderType: "",
-      },
-      addressData: [],
-      addressTotal: 0,
-      addressSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      walletSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      walletData: [],
-      walletTotal: 0,
-      receiptRecordSearchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      receiptRecordData: [],
-      receiptRecordTotal: 0,
-    };
-  },
-  methods: {
-    orderTypeText(v) {
-      const map = {
-        NORMAL: "普通订单",
-        VIRTUAL: "虚拟订单",
-        GIFT: "赠品订单",
-        PINTUAN: "拼团订单",
-      };
-      return map[v] || v || "";
-    },
-    clientTypeText(v) {
-      const map = {
-        H5: "移动端",
-        PC: "PC端",
-        WECHAT_MP: "小程序端",
-        APP: "移动应用端",
-      };
-      return map[v] || v || "";
-    },
-    orderStatusText(v) {
-      const map = {
-        UNPAID: "未付款",
-        PAID: "已付款",
-        UNDELIVERED: "待发货",
-        DELIVERED: "已发货",
-        COMPLETED: "已完成",
-        TAKE: "待核验",
-        CANCELLED: "已关闭",
-      };
-      return map[v] || v || "";
-    },
-    payStatusText(v) {
-      const map = {
-        UNPAID: "未付款",
-        PAID: "已付款",
-      };
-      return map[v] || v || "";
-    },
-    groupAfterSaleStatusText(v) {
-      const map = {
-        NEW: "未申请",
-        NOT_APPLIED: "未申请",
-        ALREADY_APPLIED: "已申请",
-        EXPIRED: "已失效",
-      };
-      return map[v] || v || "";
-    },
-    groupComplainStatusText(v) {
-      const map = {
-        NEW: "未申请",
-        NO_APPLY: "未申请",
-        APPLYING: "申请中",
-        COMPLETE: "已完成",
-        EXPIRED: "已失效",
-        CANCEL: "取消投诉",
-      };
-      return map[v] || v || "";
-    },
-    walletServiceTypeText(type) {
-      if (type === "WALLET_WITHDRAWAL") return "余额提现";
-      if (type === "WALLET_PAY") return "余额支付";
-      if (type === "WALLET_REFUND") return "余额退款";
-      if (type === "WALLET_RECHARGE") return "余额充值";
-      return "佣金提成";
-    },
-    init() {
-      this.getMemberInfo();
-      this.getPointData();
-    },
-    memberInfoChange(v) {
-      if (v == "point") {
-        this.getPointData();
-      }
-      if (v == "address") {
-        this.$nextTick(() => {
-          this.getAddressData();
-        });
-      }
-      if (v == "order") {
-        this.getOrderData();
-      }
-      if (v == "wallet") {
-        this.getMemberWalletData();
-        this.getDepositLogData();
-      }
-      if (v == "receipt") {
-        this.getReceiptRecordData();
-      }
-    },
-    getMemberInfo() {
-      API_Member.getMemberInfoData(this.id).then((res) => {
-        this.memberInfo = res.result;
-      });
-    },
-    memberStatusChange(v) {
-      let params = {
-        memberIds: [this.id],
-        disabled: v,
-      };
-      API_Member.updateMemberStatus(params).then((res) => {});
-    },
-    getMemberWalletData() {
-      this.loading = true;
-      let params = {
-        memberId: this.id,
-      };
-      API_Member.getMemberWallet(params).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.memberWalletInfo = res.result;
-        }
-      });
-      this.loading = false;
-    },
-    getDepositLogData() {
-      this.loading = true;
-      this.walletSearchForm.memberId = this.id;
-      API_Member.getUserWallet(this.walletSearchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.walletData = res.result.records;
-          this.walletTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    getReceiptRecordData() {
-      this.loading = true;
-      this.receiptRecordSearchForm.pageNumber = 1;
-      this.receiptRecordSearchForm.pageSize = 20;
-      this.receiptRecordSearchForm.memberId = this.id;
-      API_Order.getReceiptPage(this.receiptRecordSearchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.receiptRecordData = res.result.records;
-          this.receiptRecordTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    getOrderData() {
-      this.loading = true;
-      this.orderSearchForm.pageNumber = 1;
-      this.orderSearchForm.pageSize = 20;
-      this.orderSearchForm.memberId = this.id;
-      API_Order.getOrderList(this.orderSearchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.orderData = res.result.records;
-          this.orderTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    orderDetail(v) {
-      this.$router.push({
-        name: "order-detail",
-        query: { sn: v },
-      });
-    },
-    getPointData() {
-      this.loading = true;
-      this.pointSearchForm.memberId = this.id;
-      API_Member.getHistoryPointData(this.pointSearchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.pointData = res.result.records;
-          this.pointTotal = res.result.total;
-        }
-      });
-      this.loading = false;
-    },
-    addressSubmit() {
-      this.addressForm.memberId = this.id;
-      this.$refs.addressForm.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          let submit = JSON.parse(JSON.stringify(this.addressForm));
-          submit.isDefault ? (submit.isDefault = true) : (submit.isDefault = false);
-          if (submit.id != "") {
-            API_Member.editMemberAddress(submit).then((res) => {
-              this.submitLoading = false;
-              if (res && res.success) {
-                ElMessage.success("修改成功");
-                this.addressModalVisible = false;
-                this.getAddressData();
-              }
-            });
-          } else {
-            API_Member.addMemberAddress(submit).then((res) => {
-              this.submitLoading = false;
-              if (res && res.success) {
-                ElMessage.success("添加成功");
-                this.addressModalVisible = false;
-                this.getAddressData();
-              }
-            });
-          }
-        }
-      });
-    },
-    getAddress(val) {
-      if (val.type === "select") {
-        const paths = val.data.map((item) => item.name).join(",");
-        const ids = val.data.map((item) => item.id).join(",");
+defineOptions({ name: "memberDetail" });
 
-        this.addressForm.consigneeAddressPath = paths;
-        this.addressForm.consigneeAddressIdPath = ids;
+const route = useRoute();
+const router = useRouter();
 
-        const coord = val.data[val.data.length - 1].center.split(",");
-        this.addressForm.lat = coord[1];
-        this.addressForm.lon = coord[0];
-      } else {
-        this.addressForm.consigneeAddressPath = val.data.addr;
-        this.addressForm.consigneeAddressIdPath = val.data.addrId;
-        this.addressForm.lat = val.data.position.lat;
-        this.addressForm.lon = val.data.position.lng;
-      }
+// 模板 el-form 的 ref（原 ref="addressForm"，与 data 同名会互相覆盖，改名为 addressFormRef）
+const addressFormRef = ref(null);
+// 模板 multipleMap 的 ref（ref="map"）
+const map = ref(null);
+
+const id = ref("");
+const activeTab = ref("point");
+const loading = ref(true);
+const addressLoading = ref(false);
+const memberInfo = ref({});
+const memberWalletInfo = ref({});
+const addressModalTitle = ref("");
+const addressModalVisible = ref(false);
+const addressForm = reactive({
+  id: "",
+  isDefault: 0,
+  consigneeAddressPath: "",
+  consigneeAddressIdPath: "",
+});
+const selectDate = ref(null);
+const submitLoading = ref(false);
+const addressFormValidate = reactive({
+  name: [{ required: true, message: "收货人姓名不能为空" }],
+  mobile: [
+    { required: true, message: "请输入收货人手机号码" },
+    {
+      pattern: RegExp.mobile,
+      message: "请输入正确的手机号",
     },
-    memberAddressRemove(v) {
-      ElMessageBox.confirm("确定要删除此收货地址？", "删除", { type: "warning" }).then(() => {
-        API_Member.removeMemberAddress(v.id).then((res) => {
-          if (res.success) {
-            ElMessage.success("删除成功");
-            this.getAddressData();
+  ],
+  consigneeAddressPath: [{ required: true, message: "收货人地址不能为空" }],
+  detail: [{ required: true, message: "收货人详细地址不能为空" }],
+});
+const pointData = ref([]);
+const pointTotal = ref(0);
+const pointSearchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const orderData = ref([]);
+const orderTotal = ref(0);
+const orderSearchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  payStatus: "",
+  orderSn: "",
+  orderType: "",
+});
+const addressData = ref([]);
+const addressTotal = ref(0);
+const addressSearchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const walletSearchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const walletData = ref([]);
+const walletTotal = ref(0);
+const receiptRecordSearchForm = ref({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const receiptRecordData = ref([]);
+const receiptRecordTotal = ref(0);
+
+function orderTypeText(v) {
+  const map = {
+    NORMAL: "普通订单",
+    VIRTUAL: "虚拟订单",
+    GIFT: "赠品订单",
+    PINTUAN: "拼团订单",
+  };
+  return map[v] || v || "";
+}
+function clientTypeText(v) {
+  const map = {
+    H5: "移动端",
+    PC: "PC端",
+    WECHAT_MP: "小程序端",
+    APP: "移动应用端",
+  };
+  return map[v] || v || "";
+}
+function orderStatusText(v) {
+  const map = {
+    UNPAID: "未付款",
+    PAID: "已付款",
+    UNDELIVERED: "待发货",
+    DELIVERED: "已发货",
+    COMPLETED: "已完成",
+    TAKE: "待核验",
+    CANCELLED: "已关闭",
+  };
+  return map[v] || v || "";
+}
+function payStatusText(v) {
+  const map = {
+    UNPAID: "未付款",
+    PAID: "已付款",
+  };
+  return map[v] || v || "";
+}
+function groupAfterSaleStatusText(v) {
+  const map = {
+    NEW: "未申请",
+    NOT_APPLIED: "未申请",
+    ALREADY_APPLIED: "已申请",
+    EXPIRED: "已失效",
+  };
+  return map[v] || v || "";
+}
+function groupComplainStatusText(v) {
+  const map = {
+    NEW: "未申请",
+    NO_APPLY: "未申请",
+    APPLYING: "申请中",
+    COMPLETE: "已完成",
+    EXPIRED: "已失效",
+    CANCEL: "取消投诉",
+  };
+  return map[v] || v || "";
+}
+function walletServiceTypeText(type) {
+  if (type === "WALLET_WITHDRAWAL") return "余额提现";
+  if (type === "WALLET_PAY") return "余额支付";
+  if (type === "WALLET_REFUND") return "余额退款";
+  if (type === "WALLET_RECHARGE") return "余额充值";
+  return "佣金提成";
+}
+function init() {
+  getMemberInfo();
+  getPointData();
+}
+function memberInfoChange(v) {
+  if (v == "point") {
+    getPointData();
+  }
+  if (v == "address") {
+    nextTick(() => {
+      getAddressData();
+    });
+  }
+  if (v == "order") {
+    getOrderData();
+  }
+  if (v == "wallet") {
+    getMemberWalletData();
+    getDepositLogData();
+  }
+  if (v == "receipt") {
+    getReceiptRecordData();
+  }
+}
+function getMemberInfo() {
+  API_Member.getMemberInfoData(id.value).then((res) => {
+    memberInfo.value = res.result;
+  });
+}
+function memberStatusChange(v) {
+  let params = {
+    memberIds: [id.value],
+    disabled: v,
+  };
+  API_Member.updateMemberStatus(params).then((res) => {});
+}
+function getMemberWalletData() {
+  loading.value = true;
+  let params = {
+    memberId: id.value,
+  };
+  API_Member.getMemberWallet(params).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      memberWalletInfo.value = res.result;
+    }
+  });
+  loading.value = false;
+}
+function getDepositLogData() {
+  loading.value = true;
+  walletSearchForm.value.memberId = id.value;
+  API_Member.getUserWallet(walletSearchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      walletData.value = res.result.records;
+      walletTotal.value = res.result.total;
+    }
+  });
+  loading.value = false;
+}
+function getReceiptRecordData() {
+  loading.value = true;
+  receiptRecordSearchForm.value.pageNumber = 1;
+  receiptRecordSearchForm.value.pageSize = 20;
+  receiptRecordSearchForm.value.memberId = id.value;
+  API_Order.getReceiptPage(receiptRecordSearchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      receiptRecordData.value = res.result.records;
+      receiptRecordTotal.value = res.result.total;
+    }
+  });
+  loading.value = false;
+}
+function getOrderData() {
+  loading.value = true;
+  orderSearchForm.value.pageNumber = 1;
+  orderSearchForm.value.pageSize = 20;
+  orderSearchForm.value.memberId = id.value;
+  API_Order.getOrderList(orderSearchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      orderData.value = res.result.records;
+      orderTotal.value = res.result.total;
+    }
+  });
+  loading.value = false;
+}
+function orderDetail(v) {
+  router.push({
+    name: "order-detail",
+    query: { sn: v },
+  });
+}
+function getPointData() {
+  loading.value = true;
+  pointSearchForm.value.memberId = id.value;
+  API_Member.getHistoryPointData(pointSearchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      pointData.value = res.result.records;
+      pointTotal.value = res.result.total;
+    }
+  });
+  loading.value = false;
+}
+function addressSubmit() {
+  addressForm.memberId = id.value;
+  addressFormRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      let submit = JSON.parse(JSON.stringify(addressForm));
+      submit.isDefault ? (submit.isDefault = true) : (submit.isDefault = false);
+      if (submit.id != "") {
+        API_Member.editMemberAddress(submit).then((res) => {
+          submitLoading.value = false;
+          if (res && res.success) {
+            ElMessage.success("修改成功");
+            addressModalVisible.value = false;
+            getAddressData();
           }
         });
-      }).catch(() => {});
-    },
-    getAddressData() {
-      this.addressLoading = true;
-      API_Member.getMemberAddressData(this.id, this.addressSearchForm)
-        .then((res) => {
-          if (res.success) {
-            this.addressData = res.result.records;
-            this.addressTotal = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.addressLoading = false;
-        });
-    },
-    pointChangePage(v) {
-      this.pointSearchForm.pageNumber = v;
-      this.getPointData();
-    },
-    pointChangePageSize(v) {
-      this.pointSearchForm.pageNumber = 1;
-      this.pointSearchForm.pageSize = v;
-      this.getPointData();
-    },
-    addressChangePage(v) {
-      this.addressSearchForm.pageNumber = v;
-      this.getAddressData();
-    },
-    addressChangePageSize(v) {
-      this.addressSearchForm.pageNumber = 1;
-      this.addressSearchForm.pageSize = v;
-      this.getAddressData();
-    },
-    walletChangePage(v) {
-      this.walletSearchForm.pageNumber = v;
-      this.getDepositLogData();
-    },
-    walletChangePageSize(v) {
-      this.walletSearchForm.pageNumber = 1;
-      this.walletSearchForm.pageSize = v;
-      this.getDepositLogData();
-    },
-    orderChangePage(v) {
-      this.orderSearchForm.pageNumber = v;
-      this.getOrderData();
-    },
-    orderChangePageSize(v) {
-      this.orderSearchForm.pageNumber = 1;
-      this.orderSearchForm.pageSize = v;
-      this.getOrderData();
-    },
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.orderSearchForm.startDate = v[0];
-        this.orderSearchForm.endDate = v[1];
       } else {
-        delete this.orderSearchForm.startDate;
-        delete this.orderSearchForm.endDate;
+        API_Member.addMemberAddress(submit).then((res) => {
+          submitLoading.value = false;
+          if (res && res.success) {
+            ElMessage.success("添加成功");
+            addressModalVisible.value = false;
+            getAddressData();
+          }
+        });
       }
-    },
-  },
-  mounted() {
-    this.id = this.$route.query.id;
-    this.init();
-  },
-};
+    }
+  });
+}
+function getAddress(val) {
+  if (val.type === "select") {
+    const paths = val.data.map((item) => item.name).join(",");
+    const ids = val.data.map((item) => item.id).join(",");
+
+    addressForm.consigneeAddressPath = paths;
+    addressForm.consigneeAddressIdPath = ids;
+
+    const coord = val.data[val.data.length - 1].center.split(",");
+    addressForm.lat = coord[1];
+    addressForm.lon = coord[0];
+  } else {
+    addressForm.consigneeAddressPath = val.data.addr;
+    addressForm.consigneeAddressIdPath = val.data.addrId;
+    addressForm.lat = val.data.position.lat;
+    addressForm.lon = val.data.position.lng;
+  }
+}
+function memberAddressRemove(v) {
+  ElMessageBox.confirm("确定要删除此收货地址？", "删除", { type: "warning" }).then(() => {
+    API_Member.removeMemberAddress(v.id).then((res) => {
+      if (res.success) {
+        ElMessage.success("删除成功");
+        getAddressData();
+      }
+    });
+  }).catch(() => {});
+}
+function getAddressData() {
+  addressLoading.value = true;
+  API_Member.getMemberAddressData(id.value, addressSearchForm.value)
+    .then((res) => {
+      if (res.success) {
+        addressData.value = res.result.records;
+        addressTotal.value = res.result.total;
+      }
+    })
+    .finally(() => {
+      addressLoading.value = false;
+    });
+}
+function pointChangePage(v) {
+  pointSearchForm.value.pageNumber = v;
+  getPointData();
+}
+function pointChangePageSize(v) {
+  pointSearchForm.value.pageNumber = 1;
+  pointSearchForm.value.pageSize = v;
+  getPointData();
+}
+function addressChangePage(v) {
+  addressSearchForm.value.pageNumber = v;
+  getAddressData();
+}
+function addressChangePageSize(v) {
+  addressSearchForm.value.pageNumber = 1;
+  addressSearchForm.value.pageSize = v;
+  getAddressData();
+}
+function walletChangePage(v) {
+  walletSearchForm.value.pageNumber = v;
+  getDepositLogData();
+}
+function walletChangePageSize(v) {
+  walletSearchForm.value.pageNumber = 1;
+  walletSearchForm.value.pageSize = v;
+  getDepositLogData();
+}
+function orderChangePage(v) {
+  orderSearchForm.value.pageNumber = v;
+  getOrderData();
+}
+function orderChangePageSize(v) {
+  orderSearchForm.value.pageNumber = 1;
+  orderSearchForm.value.pageSize = v;
+  getOrderData();
+}
+function selectDateRange(v) {
+  if (v && v.length === 2) {
+    orderSearchForm.value.startDate = v[0];
+    orderSearchForm.value.endDate = v[1];
+  } else {
+    delete orderSearchForm.value.startDate;
+    delete orderSearchForm.value.endDate;
+  }
+}
+
+onMounted(() => {
+  id.value = route.query.id;
+  init();
+});
 </script>
 <style lang="scss" scoped>
 @import "memberDetail.scss";

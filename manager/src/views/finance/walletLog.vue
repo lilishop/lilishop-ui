@@ -36,59 +36,55 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Finance from "@/api/finance";
 import { getRequest } from "@/libs/axios";
 import { downloadBlob } from "@/utils/downloadBlob";
 
-export default {
-  name: "finance-wallet-log",
-  data() {
-    return {
-      loading: false,
-      searchForm: { memberName: "" },
-      dateRange: [],
-      pageNumber: 1,
-      pageSize: 20,
-      data: [],
-      total: 0,
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    handleSearch() {
-      this.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      const params = {
-        pageNumber: this.pageNumber,
-        pageSize: this.pageSize,
-        memberName: this.searchForm.memberName,
-      };
-      getRequest("/wallet/log", params).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      }).catch(() => {
-        this.loading = false;
-      });
-    },
-    handleExport() {
-      const params = { memberName: this.searchForm.memberName };
-      if (this.dateRange?.length === 2) {
-        params.startDate = this.dateRange[0];
-        params.endDate = this.dateRange[1];
-      }
-      API_Finance.exportWalletLog(params).then((blob) => {
-        downloadBlob(blob, "钱包流水.xlsx");
-      });
-    },
-  },
-};
+defineOptions({ name: "finance-wallet-log" });
+
+const loading = ref(false);
+const searchForm = reactive({ memberName: "" });
+const dateRange = ref([]);
+const pageNumber = ref(1);
+const pageSize = ref(20);
+const data = ref([]);
+const total = ref(0);
+
+onMounted(() => {
+  getDataList();
+});
+
+function handleSearch() {
+  pageNumber.value = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  const params = {
+    pageNumber: pageNumber.value,
+    pageSize: pageSize.value,
+    memberName: searchForm.memberName,
+  };
+  getRequest("/wallet/log", params).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  }).catch(() => {
+    loading.value = false;
+  });
+}
+function handleExport() {
+  const params = { memberName: searchForm.memberName };
+  if (dateRange.value?.length === 2) {
+    params.startDate = dateRange.value[0];
+    params.endDate = dateRange.value[1];
+  }
+  API_Finance.exportWalletLog(params).then((blob) => {
+    downloadBlob(blob, "钱包流水.xlsx");
+  });
+}
 </script>

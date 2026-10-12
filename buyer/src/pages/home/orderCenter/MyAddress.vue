@@ -35,59 +35,59 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
 import { Delete, Edit } from '@element-plus/icons-vue';
 import { memberAddress, delMemberAddress } from '@/api/address.js';
 
-export default {
-  components: { Delete, Edit },
-  name: 'MyAddress',
+defineOptions({ name: 'MyAddress' });
 
-  data () {
-    return {
-      list: [] // 地址列表
-    };
-  },
-  methods: {
-    add () {
-      this.$router.push('/home/addAddress');
-    },
-    edit (id) {
-      // 编辑地址
-      this.$router.push({ path: '/home/addAddress', query: { id: id } });
-    },
-    del (id) {
-      // 删除地址
-      Modal.confirm({
-        title: '提示',
-        content: '你确定删除这个收货地址',
-        onOk: () => {
-          delMemberAddress(id).then((res) => {
-            if (res.success) {
-              Message.success('删除成功');
-              this.getAddrList();
-            }
-          });
-        },
-        onCancel: () => {
-          Message.info('取消删除');
-        }
-      });
-    },
-    getAddrList () {
-      // 获取地址列表
-      memberAddress().then((res) => {
+const router = useRouter();
+
+const list = ref([]); // 地址列表
+
+function add () {
+  router.push('/home/addAddress');
+}
+
+// 编辑地址
+function edit (id) {
+  router.push({ path: '/home/addAddress', query: { id: id } });
+}
+
+// 删除地址
+function del (id) {
+  Modal.confirm({
+    title: '提示',
+    content: '你确定删除这个收货地址',
+    onOk: () => {
+      delMemberAddress(id).then((res) => {
         if (res.success) {
-          this.list = res.result.records;
+          Message.success('删除成功');
+          getAddrList();
         }
       });
+    },
+    onCancel: () => {
+      Message.info('取消删除');
     }
-  },
-  mounted () {
-    this.getAddrList();
-  }
-};
+  });
+}
+
+// 获取地址列表
+function getAddrList () {
+  memberAddress().then((res) => {
+    if (res.success) {
+      list.value = res.result.records;
+    }
+  });
+}
+
+onMounted(() => {
+  getAddrList();
+});
 </script>
 
 <style scoped lang="scss">

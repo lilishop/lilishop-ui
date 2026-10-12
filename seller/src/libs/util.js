@@ -3,6 +3,7 @@ import lazyLoading from "./lazyLoading.js";
 import { router } from "@/router/index";
 import Cookies from "js-cookie";
 import config from "@/config/index";
+import { useAppStore } from "@/stores/app";
 
 let util = {};
 
@@ -199,13 +200,14 @@ util.handleTitle = function (vm, item) {
   return item.title;
 };
 
-util.setCurrentPath = function (vm, name) {
+util.setCurrentPath = function (name) {
+  const appStore = useAppStore();
   let title = "";
   let isOtherRouter = false;
-  vm.$store.state.app.routers.forEach((item) => {
+  appStore.routers.forEach((item) => {
     if (item.children.length == 1) {
       if (item.children[0].name == name) {
-        title = util.handleTitle(vm, item);
+        title = util.handleTitle(null, item);
         if (item.name == "otherRouter") {
           isOtherRouter = true;
         }
@@ -213,7 +215,7 @@ util.setCurrentPath = function (vm, name) {
     } else {
       item.children.forEach((child) => {
         if (child.name == name) {
-          title = util.handleTitle(vm, child);
+          title = util.handleTitle(null, child);
           if (item.name == "otherRouter") {
             isOtherRouter = true;
           }
@@ -226,8 +228,8 @@ util.setCurrentPath = function (vm, name) {
     currentPathArr = [
       {
         title: util.handleTitle(
-          vm,
-          util.getRouterObjByName(vm.$store.state.app.routers, "home_index")
+          null,
+          util.getRouterObjByName(appStore.routers, "home_index")
         ),
         path: "",
         name: "home_index",
@@ -237,8 +239,8 @@ util.setCurrentPath = function (vm, name) {
     currentPathArr = [
       {
         title: util.handleTitle(
-          vm,
-          util.getRouterObjByName(vm.$store.state.app.routers, "home_index")
+          null,
+          util.getRouterObjByName(appStore.routers, "home_index")
         ),
         path: "/home",
         name: "home_index",
@@ -250,7 +252,7 @@ util.setCurrentPath = function (vm, name) {
       },
     ];
   } else {
-    let currentPathObj = vm.$store.state.app.routers.filter((item) => {
+    let currentPathObj = appStore.routers.filter((item) => {
       if (item.children.length <= 1) {
         return item.children[0].name == name;
       }
@@ -311,22 +313,20 @@ util.setCurrentPath = function (vm, name) {
       ];
     }
   }
-  vm.$store.commit("setCurrentPath", currentPathArr);
+  appStore.setCurrentPath(currentPathArr);
 
   return currentPathArr;
 };
 
-util.openNewPage = function (vm, name, argu, query) {
-  if (!vm.$store) {
-    return;
-  }
-  let storeOpenedList = vm.$store.state.app.storeOpenedList;
+util.openNewPage = function (name, argu, query) {
+  const appStore = useAppStore();
+  let storeOpenedList = appStore.storeOpenedList;
   let openedPageLen = storeOpenedList.length;
   let i = 0;
   let tagHasOpened = false;
   while (i < openedPageLen) {
     if (name == storeOpenedList[i].name) {
-      vm.$store.commit("storeOpenedList", {
+      appStore.updateOpenedList({
         index: i,
         argu: argu,
         query: query,
@@ -337,7 +337,7 @@ util.openNewPage = function (vm, name, argu, query) {
     i++;
   }
   if (!tagHasOpened) {
-    let tag = vm.$store.state.app.tagsList.filter((item) => {
+    let tag = appStore.tagsList.filter((item) => {
       if (item.children) {
         return name == item.children[0].name;
       }
@@ -348,10 +348,10 @@ util.openNewPage = function (vm, name, argu, query) {
       tag = tag.children ? tag.children[0] : tag;
       if (argu) tag.argu = argu;
       if (query) tag.query = query;
-      vm.$store.commit("increateTag", tag);
+      appStore.increateTag(tag);
     }
   }
-  vm.$store.commit("setCurrentPageName", name);
+  appStore.setCurrentPageName(name);
 };
 
 util.toDefaultPage = function (routers, name, route, next) {
@@ -378,13 +378,14 @@ util.toDefaultPage = function (routers, name, route, next) {
   }
 };
 
-util.initRouter = function (vm) {
+util.initRouter = function () {
+  const appStore = useAppStore();
   const constRoutes = [];
   let userInfo = Cookies.get("userInfoSeller");
   if (!userInfo) {
     return;
   }
-  if (!vm.$store.state.app.added) {
+  if (!appStore.added) {
     getCurrentPermissionList().then((res) => {
       if (!res.success) return false;
       let menuData = res.result;
@@ -405,24 +406,23 @@ util.initRouter = function (vm) {
       }
       util.initAllMenuData(constRoutes, menuData);
       util.registerDynamicRoutes(menuData);
-      vm.$store.commit(
-        "updateAppRouter",
+      appStore.updateAppRouter(
         constRoutes.filter((item) => item.children && item.children.length > 0)
       );
-      util.initMenuData(vm, menuData);
+      util.initMenuData(menuData);
       window.localStorage.setItem("menuData", JSON.stringify(menuData));
-      vm.$store.commit("setAdded", true);
+      appStore.setAdded(true);
     });
   } else {
     let data = window.localStorage.getItem("menuData");
     if (!data) {
-      vm.$store.commit("setAdded", false);
-      util.initRouter(vm);
+      appStore.setAdded(false);
+      util.initRouter();
       return;
     }
     let menuData = JSON.parse(data);
     util.registerDynamicRoutes(menuData);
-    util.initMenuData(vm, menuData);
+    util.initMenuData(menuData);
   }
 };
 
@@ -438,7 +438,8 @@ util.initAllMenuData = function (constRoutes, data) {
   util.initRouterNode(constRoutes, allMenuData);
 };
 
-util.initMenuData = function (vm, data) {
+util.initMenuData = function (data) {
+  const appStore = useAppStore();
   const menuRoutes = [];
   let menuData = data;
   let navList = [HOME_NAV_ITEM];
@@ -448,23 +449,23 @@ util.initMenuData = function (vm, data) {
   if (navList.length < 1) {
     return;
   }
-  vm.$store.commit("setNavList", navList);
+  appStore.setNavList(navList);
   let currNav = window.localStorage.getItem("currNav");
   if (currNav) {
     for (let item of navList) {
       if (item.name == currNav) {
-        vm.$store.commit("setCurrNavTitle", item.title);
+        appStore.setCurrNavTitle(item.title);
         break;
       }
     }
   } else {
     currNav = HOME_NAV_NAME;
-    vm.$store.commit("setCurrNavTitle", HOME_NAV_ITEM.title);
+    appStore.setCurrNavTitle(HOME_NAV_ITEM.title);
   }
-  vm.$store.commit("setCurrNav", currNav);
+  appStore.setCurrNav(currNav);
 
   if (currNav === HOME_NAV_NAME) {
-    vm.$store.commit("updateMenulist", []);
+    appStore.updateMenulist([]);
     return;
   }
 
@@ -475,20 +476,19 @@ util.initMenuData = function (vm, data) {
     }
   }
   util.initRouterNode(menuRoutes, menuData);
-  vm.$store.commit(
-    "updateMenulist",
+  appStore.updateMenulist(
     menuRoutes.filter((item) => item.children.length > 0)
   );
 
   let tagsList = [];
-  vm.$store.state.app.routers.map((item) => {
+  appStore.routers.map((item) => {
     if (item.children.length <= 1) {
       tagsList.push(item.children[0]);
     } else {
       tagsList.push(...item.children);
     }
   });
-  vm.$store.commit("setTagsList", tagsList);
+  appStore.setTagsList(tagsList);
 };
 
 util.initRouterNode = function (routers, data) {
