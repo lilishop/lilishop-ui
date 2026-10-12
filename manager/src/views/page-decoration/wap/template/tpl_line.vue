@@ -2,14 +2,14 @@
   <div
     class="tpl-line"
     :style="{
-      background: res.bgColor,
-      padding: `0 ${res.paddingX}px`,
-      marginBottom: res.pageGap + 'px',
+      background: res.bgColor ?? '#FFFFFF',
+      padding: `0 ${res.paddingX ?? 0}px`,
+      marginBottom: (res.pageGap ?? 10) + 'px',
     }"
   >
     <div
       :style="{
-        borderTop: `${res.lineHeight}px ${res.lineStyle} ${res.lineColor}`,
+        borderTop: `${res.lineHeight ?? 1}px ${res.lineStyle ?? 'dashed'} ${res.lineColor ?? '#979797'}`,
       }"
     ></div>
   </div>

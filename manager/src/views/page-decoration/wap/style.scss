@@ -92,6 +92,15 @@
   top: 10px;
   z-index: 99;
 }
+.unknown-component {
+  padding: 16px 10px;
+  background: #fff2f0;
+  border: 1px dashed #ffccc7;
+  color: #cf1322;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+}
 
 .model-btn {
   > * {

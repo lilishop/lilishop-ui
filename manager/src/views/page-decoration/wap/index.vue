@@ -51,6 +51,13 @@
                   :is="templates[element.type]"
                   :res="element.options"
                 ></component>
+                <div
+                  v-else
+                  class="component unknown-component"
+                  @click="handleUnknownComponent(element, index)"
+                >
+                  未知组件「{{ element.type }}」已下线，点击删除
+                </div>
                 <el-icon
                   v-if="selected == index"
                   @click="closeComponent(index)"
@@ -209,6 +216,11 @@ export default {
     handleComponent(val, index) {
       this.selected = index;
       this["decorateData"] = val;
+    },
+    // 已下线的未知组件：点击占位条直接删除
+    handleUnknownComponent(element, index) {
+      console.warn(`[page-decoration] 未知组件类型: ${element.type}`);
+      this.closeComponent(index);
     },
     // 右侧栏回调
     handleDrawer(val) {

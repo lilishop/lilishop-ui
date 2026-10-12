@@ -2,14 +2,14 @@
   <div
     class="tpl-rich-text"
     :style="{
-      background: res.bgColor,
-      padding: `0 ${res.paddingX}px`,
-      marginBottom: res.pageGap + 'px',
-      borderRadius: res.borderRadius + 'px',
+      background: res.bgColor ?? '#FFFFFF',
+      padding: `0 ${res.paddingX ?? 12}px`,
+      marginBottom: (res.pageGap ?? 10) + 'px',
+      borderRadius: (res.borderRadius ?? 0) + 'px',
       overflow: 'hidden',
     }"
   >
-    <div class="rich-content" v-html="res.content"></div>
+    <div class="rich-content" v-html="res.content ?? ''"></div>
   </div>
 </template>
 

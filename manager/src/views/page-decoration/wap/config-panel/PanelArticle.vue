@@ -72,7 +72,7 @@ const DEFAULT_ITEM = { title: "文章列表", categoryId: "", count: 3 };
 function flattenCategories(tree, level = 0) {
   const result = [];
   (tree || []).forEach((node) => {
-    result.push({ id: node.id, name: "　".repeat(level) + node.name });
+    result.push({ id: node.id, name: "　".repeat(level) + node.articleCategoryName });
     if (node.children && node.children.length) {
       result.push(...flattenCategories(node.children, level + 1));
     }
