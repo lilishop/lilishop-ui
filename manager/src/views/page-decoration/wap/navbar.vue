@@ -14,7 +14,7 @@
         </div>
       </template></el-popconfirm>-->
       <el-button size="default" type="default" v-if="hasCache" @click="clearCache">清空本地缓存</el-button>
-      <el-button size="default" type="primary" @click="handleSpinShow">保存模板</el-button>
+      <el-button size="default" type="primary" @click="handleSpinShow">保存页面</el-button>
 
       <el-dialog
         title="保存中"
@@ -280,6 +280,7 @@ export default {
   color: #333;
   font-size: 14px;
   > .model-title-view-btn {
+    margin-right: 15%;
     > * {
       margin: 0 10px;
     }
