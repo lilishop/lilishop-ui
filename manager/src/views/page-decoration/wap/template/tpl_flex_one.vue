@@ -1,6 +1,15 @@
 <template>
-    <div class="layout">
-        <div class="flex-one">
+    <div
+        class="layout"
+        :style="{
+            background: res.bgColor ?? 'transparent',
+            padding: `${res.paddingTop ?? 0}px ${res.paddingX ?? 0}px ${res.paddingBottom ?? 0}px`,
+            marginBottom: (res.pageGap ?? 0) + 'px',
+            borderRadius: (res.borderRadius ?? 0) + 'px',
+            overflow: (res.borderRadius ?? 0) > 0 ? 'hidden' : 'visible',
+        }"
+    >
+        <div class="flex-one" :style="{ borderRadius: (res.imgRadius ?? 0) + 'px' }">
             <img :src="res.list[0].img" alt="">
         </div>
     </div>

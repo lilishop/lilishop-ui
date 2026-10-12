@@ -7,6 +7,7 @@ import PanelIntegral from "./PanelIntegral.vue";
 import PanelCoupon from "./PanelCoupon.vue";
 import PanelArticle from "./PanelArticle.vue";
 import PanelShop from "./PanelShop.vue";
+import PanelFlexOne from "./PanelFlexOne.vue";
 
 export default {
   blank: PanelBlank,
@@ -16,4 +17,5 @@ export default {
   coupon: PanelCoupon,
   article: PanelArticle,
   shop: PanelShop,
+  flexOne: PanelFlexOne,
 };
