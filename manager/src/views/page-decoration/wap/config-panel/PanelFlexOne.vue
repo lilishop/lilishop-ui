@@ -1,14 +1,17 @@
 <template>
   <div class="panel-flex-one">
-    <div class="panel-tabs">
-      <div
-        v-for="tab in tabs"
-        :key="tab.key"
-        class="panel-tab"
-        :class="{ active: activeTab === tab.key }"
-        @click="activeTab = tab.key"
-      >
-        {{ tab.title }}
+    <div class="panel-header">
+      <span class="panel-name">{{ res.name }}</span>
+      <div class="panel-tabs">
+        <div
+          v-for="tab in tabs"
+          :key="tab.key"
+          class="panel-tab"
+          :class="{ active: activeTab === tab.key }"
+          @click="activeTab = tab.key"
+        >
+          {{ tab.title }}
+        </div>
       </div>
     </div>
 
@@ -104,6 +107,7 @@ const DEFAULTS = {
 
 export default {
   name: "PanelFlexOne",
+  hideDecorateTitle: true,
   components: { ColorField, SliderField, hotzone, ossManage },
   props: {
     res: { type: Object, required: true },
@@ -164,16 +168,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.panel-tabs {
+.panel-header {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  margin-bottom: 4px;
+  .panel-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #303133;
+  }
+}
+.panel-tabs {
+  display: inline-flex;
   background: #f4f4f5;
   border-radius: 8px;
   padding: 3px;
-  margin-bottom: 14px;
   .panel-tab {
-    flex: 1;
-    text-align: center;
-    padding: 6px 0;
+    padding: 5px 14px;
     font-size: 13px;
     border-radius: 6px;
     cursor: pointer;

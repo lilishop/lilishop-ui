@@ -1,6 +1,6 @@
 <template>
   <div class="decorate">
-    <div class="decorate-title">
+    <div class="decorate-title" v-if="!hidePanelTitle">
       {{ res.name }}
 
       <el-button
@@ -590,6 +590,10 @@ export default {
     // 新组件按 type 分发到独立配置面板；老组件走下方遗留分支
     panelComponent() {
       return (this.res && panelMap[this.res.type]) || null;
+    },
+    // 面板声明 hideDecorateTitle 时，标题行由面板自己渲染
+    hidePanelTitle() {
+      return !!(this.panelComponent && this.panelComponent.hideDecorateTitle);
     },
   },
   methods: {
