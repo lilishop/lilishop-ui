@@ -389,19 +389,8 @@
 
           <!-- 填写链接 -->
 
-          <div class="decorate-view" v-if="res.onlyImg">
-            <div class="decorate-view-title">选择模式</div>
-
-            <div>
-              <el-radio-group v-model="item.model">
-                <el-radio value="link">链接</el-radio>
-                <el-radio value="hotzone">热区</el-radio>
-              </el-radio-group>
-            </div>
-          </div>
-
           <div class="decorate-view" v-if="!res.notLink">
-            <div class="decorate-view-title">选择链接</div>
+            <div class="decorate-view-title">{{ item.model === "hotzone" ? "热区" : "选择链接" }}</div>
             <div
               v-if="item.url && item.url.length != 0"
               class="decorate-view-link"

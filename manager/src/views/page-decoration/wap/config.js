@@ -26,7 +26,7 @@ export const modelData = [
           url: "",
           link: "",
           size: "750*280",
-          model: "link"
+          model: "hotzone"
         }
       ]
     }
