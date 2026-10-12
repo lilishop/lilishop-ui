@@ -44,7 +44,8 @@ export default {
   width: 100%;
   margin: 0;
   padding: 0 20px;
-  background: #fff;
+  background: #f5f7fa;
   overflow: hidden;
+  box-sizing: border-box;
 }
 </style>

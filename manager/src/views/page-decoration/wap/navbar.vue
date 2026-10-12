@@ -299,12 +299,18 @@ export default {
   }
 }
 .model-title {
-  height: 70px;
+  height: 60px;
+  margin-top: 12px;
+  padding: 0 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: #333;
   font-size: 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
   > .model-title-left {
     display: flex;
     align-items: center;
@@ -327,7 +333,6 @@ export default {
     }
   }
   > .model-title-view-btn {
-    margin-right: 2%;
     > * {
       margin: 0 10px;
     }
