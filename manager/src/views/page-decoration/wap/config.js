@@ -716,5 +716,18 @@ export const modelData = [
       paddingX: 0,
       pageGap: 10
     }
+  },
+  {
+    type: "richText",
+    name: "富文本",
+    group: "tools",
+    img: "md-image",
+    options: {
+      content: "",
+      bgColor: "#FFFFFF",
+      paddingX: 12,
+      pageGap: 10,
+      borderRadius: 0
+    }
   }
 ];
