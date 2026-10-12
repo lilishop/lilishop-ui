@@ -1,8 +1,24 @@
 <template>
   <!-- 预览保存 -->
   <div class="model-title">
-    <div>
+    <div class="model-title-left">
       <el-button size="default" @click="goBack">返回</el-button>
+      <div class="page-name">
+        <template v-if="!editingName">
+          <span class="page-name-label">当前页面：{{ submitWay.name }}</span>
+          <el-icon class="page-name-edit" @click="startEditName"><Edit /></el-icon>
+        </template>
+        <el-input
+          v-else
+          ref="nameInput"
+          v-model="submitWay.name"
+          size="small"
+          style="width: 200px"
+          maxlength="30"
+          @blur="editingName = false"
+          @keyup.enter="editingName = false"
+        />
+      </div>
     </div>
     <div class="model-title-view-btn">
       <!-- TODO 后期会补全 目前版本暂无 -->
@@ -51,12 +67,15 @@
 </template>
 <script>
 import * as API_Other from "@/api/other.js";
+import { Edit } from "@element-plus/icons-vue";
 
 export default {
+  components: { Edit },
   props: ["pagetype"],
   data() {
     return {
       hasCache:false, // 是否有缓存
+      editingName: false, // 页面名称编辑态
       progress: true, // 展示进度
       num: 20, // 提交进度
       saveDialog: false, // 加载状态
@@ -111,6 +130,13 @@ export default {
     clearCache(){
       this.setStore('managerMobilePageCache','');
       this.$Message.success('清空成功')
+    },
+    // 进入页面名称编辑态并聚焦输入框
+    startEditName() {
+      this.editingName = true;
+      this.$nextTick(() => {
+        this.$refs.nameInput && this.$refs.nameInput.focus();
+      });
     },
     // 将楼层装修的内容写入到本地缓存中
     witeLocalStore(){
@@ -279,6 +305,27 @@ export default {
   align-items: center;
   color: #333;
   font-size: 14px;
+  > .model-title-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .page-name {
+    display: flex;
+    align-items: center;
+    .page-name-label {
+      font-size: 14px;
+      color: #303133;
+    }
+    .page-name-edit {
+      margin-left: 6px;
+      cursor: pointer;
+      color: #909399;
+      &:hover {
+        color: #409eff;
+      }
+    }
+  }
   > .model-title-view-btn {
     margin-right: 2%;
     > * {
