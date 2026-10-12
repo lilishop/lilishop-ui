@@ -2,15 +2,6 @@
   <!-- 预览保存 -->
   <div class="model-title">
     <div></div>
-    <div class="btns">
-      <el-button
-        @click="clickBtn(item)"
-        size="small"
-        v-for="(item, index) in way"
-        :key="index"
-        :type="item.selected ? 'primary' : ''"
-      >{{ item.title }}</el-button>
-    </div>
     <div class="model-title-view-btn">
       <!-- TODO 后期会补全 目前版本暂无 -->
       <!-- <Poptip placement="bottom" width="100">
