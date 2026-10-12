@@ -188,7 +188,12 @@ export default {
   align-items: center;
   justify-content: space-between;
   height: 50px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  padding: 0 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
   .panel-name {
     font-size: 14px;
     font-weight: bold;
