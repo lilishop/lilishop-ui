@@ -12,7 +12,7 @@ export const modelData = [
 
   {
     type: "flexOne",
-    name: "图片",
+    name: "热区",
     icon: "Picture",
     group: "base",
     // drawer: true,
