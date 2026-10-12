@@ -1,7 +1,7 @@
 <template>
   <!-- 预览保存 -->
   <div class="model-title">
-    <div>店铺装修</div>
+    <div></div>
     <div class="btns">
       <el-button
         @click="clickBtn(item)"
