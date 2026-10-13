@@ -18,7 +18,7 @@
       <el-table-column prop="num" label="购买数量" />
     </el-table>
     <div>
-      <el-form :model="form" ref="form" class="mt_10" :rules="rules" label-width="80px">
+      <el-form :model="form" ref="formRef" class="mt_10" :rules="rules" label-width="80px">
         <el-form-item label="售后类别">
           <el-radio-group v-model="form.serviceType" @change="changeReason" type="button" button-style="solid">
             <el-radio v-if="info.returnGoods" label="RETURN_GOODS">退货</el-radio>
@@ -101,125 +101,125 @@
     </UserCenterLayout>
   </div>
 </template>
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message, Notice } from "@/utils/message";
 import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { afterSaleReason, afterSaleInfo, applyAfterSale } from '@/api/member.js'
 import { buyerUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
 import * as RegExp from '@/plugins/RegExp'
-export default {
-  components: { Camera, Delete, View },
-  data () {
-    const checkNum = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('请填写提交数量'));
-      } else if (value > this.info.num) {
-        callback(new Error('提交数量不能大于购买数量'));
-      } else if (!RegExp.integer.test(value)) {
-        callback(new Error('提交数量必须为正整数'));
-      } else {
-        callback();
-      }
-    };
-    return {
-      goodsData: [], // 商品数据
-      reasonList: [], // 售后原因列表
-      info: {}, // 售后信息
-      form: { // 售后数据
-        serviceType: 'RETURN_GOODS',
-        num: 1
-      },
-      uploadList: [], // 上传列表
-      action: buyerUrl + '/buyer/common/upload/file', // 上传地址
-      accessToken: {}, // 验证token
-      visible: false, // 图片预览
-      previewImage: '', // 预览图片url
-      rules: { // 验证规则
-        num: [{ validator: checkNum }],
-        reason: [{ required: true, message: '请选择提交原因' }],
-        problemDesc: [{ required: true, message: '请输入问题描述' }],
-        bankAccountNumber: [
-          { required: true, message: '请输入银行卡号' },
-          {
-            type: 'string',
-            pattern: /^[0-9]\d*$/,
-            message: '请输入正确的银行卡号'
-          }
-        ],
-        bankAccountName: [{ required: true, message: '请输入银行开户名' }],
-        bankDepositName: [{ required: true, message: '请输入银行开户行' }]
-      }
+
+const route = useRoute();
+const router = useRouter();
+
+const formRef = ref(null);
+
+const goodsData = ref([]); // 商品数据
+const reasonList = ref([]); // 售后原因列表
+const info = ref({}); // 售后信息
+const form = reactive({ // 售后数据
+  serviceType: 'RETURN_GOODS',
+  num: 1
+});
+const uploadList = ref([]); // 上传列表
+const action = buyerUrl + '/buyer/common/upload/file'; // 上传地址
+const accessToken = reactive({}); // 验证token
+const visible = ref(false); // 图片预览
+const previewImage = ref(''); // 预览图片url
+
+const checkNum = (rule, value, callback) => {
+  if (value === '') {
+    callback(new Error('请填写提交数量'));
+  } else if (value > info.value.num) {
+    callback(new Error('提交数量不能大于购买数量'));
+  } else if (!RegExp.integer.test(value)) {
+    callback(new Error('提交数量必须为正整数'));
+  } else {
+    callback();
+  }
+};
+const rules = { // 验证规则
+  num: [{ validator: checkNum }],
+  reason: [{ required: true, message: '请选择提交原因' }],
+  problemDesc: [{ required: true, message: '请输入问题描述' }],
+  bankAccountNumber: [
+    { required: true, message: '请输入银行卡号' },
+    {
+      type: 'string',
+      pattern: /^[0-9]\d*$/,
+      message: '请输入正确的银行卡号'
     }
-  },
-  methods: {
-    getInfo () { // 获取售后信息
-      afterSaleInfo(this.$route.query.sn).then(res => {
+  ],
+  bankAccountName: [{ required: true, message: '请输入银行开户名' }],
+  bankDepositName: [{ required: true, message: '请输入银行开户行' }]
+};
+
+function getInfo () { // 获取售后信息
+  afterSaleInfo(route.query.sn).then(res => {
+    if (res.success) {
+      info.value = res.result
+      goodsData.value.push(res.result)
+      if (!info.value.returnGoods && info.value.returnMoney) {
+        form.serviceType = 'RETURN_MONEY'
+      }
+      getReason(form.serviceType)
+    }
+  })
+}
+function getReason (type) { // 获取售后原因
+  afterSaleReason(type).then(res => {
+    if (res.success) reasonList.value = res.result
+  })
+}
+function changeReason (type) { // 改变售后原因列表
+  form.reason = undefined
+  getReason(type)
+  nextTick(() => {
+    formRef.value?.clearValidate('reason')
+  })
+}
+function apply () { // 售后申请提交
+  formRef.value.validate(valid => {
+    if (valid) {
+      let params = Object.assign(info.value, form)
+      params.images = uploadList.value.toString()
+      params.orderItemSn = route.query.sn
+      params.reason = reasonList.value.find(item => item.id == params.reason).reason
+      applyAfterSale(params).then(res => {
         if (res.success) {
-          this.info = res.result
-          this.goodsData.push(res.result)
-          if (!this.info.returnGoods && this.info.returnMoney) {
-            this.form.serviceType = 'RETURN_MONEY'
-          }
-          this.getReason(this.form.serviceType)
+          Message.success('售后申请提交成功，请到售后订单查看！')
+          router.push({name: 'AfterSale'})
         }
       })
-    },
-    getReason (type) { // 获取售后原因
-      afterSaleReason(type).then(res => {
-        if (res.success) this.reasonList = res.result
-      })
-    },
-    changeReason (type) { // 改变售后原因列表
-      this.form.reason = undefined
-      this.getReason(type)
-      this.$nextTick(() => {
-        this.$refs.form?.clearValidate('reason')
-      })
-    },
-    apply () { // 售后申请提交
-      this.$refs.form.validate(valid => {
-        if (valid) {
-          let params = Object.assign(this.info, this.form)
-          params.images = this.uploadList.toString()
-          params.orderItemSn = this.$route.query.sn
-          params.reason = this.reasonList.find(item => item.id == params.reason).reason
-          applyAfterSale(params).then(res => {
-            if (res.success) {
-              Message.success('售后申请提交成功，请到售后订单查看！')
-              this.$router.push({name: 'AfterSale'})
-            }
-          })
-        }
-      })
-    },
-    handleView (name) { // 预览图片
-      this.previewImage = name;
-      this.visible = true;
-    },
-    handleRemove (index) { // 移除图片
-      this.uploadList.splice(index, 1)
-      this.$forceUpdate()
-    },
-    handleSuccess (res, file) { // 上传成功回调
-      this.uploadList.push(res.result)
-      this.$forceUpdate()
-    },
-    handleBeforeUpload () { // 上传之前钩子函数
-      const check = this.uploadList.length < 6;
-      if (!check) {
-        Notice.warning({
-          title: '最多可以上传5张图片'
-        });
-        return check;
-      }
     }
-  },
-  mounted () {
-    this.accessToken.accessToken = storage.getItem('accessToken');
-    this.getInfo()
+  })
+}
+function handleView (name) { // 预览图片
+  previewImage.value = name;
+  visible.value = true;
+}
+function handleRemove (index) { // 移除图片
+  uploadList.value.splice(index, 1)
+}
+function handleSuccess (res, file) { // 上传成功回调
+  uploadList.value.push(res.result)
+}
+function handleBeforeUpload () { // 上传之前钩子函数
+  const check = uploadList.value.length < 6;
+  if (!check) {
+    Notice.warning({
+      title: '最多可以上传5张图片'
+    });
+    return check;
   }
 }
+
+onMounted(() => {
+  accessToken.accessToken = storage.getItem('accessToken');
+  getInfo()
+});
 </script>
 <style lang="scss" scoped>
 

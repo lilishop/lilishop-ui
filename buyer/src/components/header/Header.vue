@@ -90,7 +90,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Modal } from "@/utils/message";
 import { ShoppingCart } from '@element-plus/icons-vue';
 import storage from '@/plugins/storage.js';
@@ -98,149 +100,145 @@ import {cartGoodsAll} from '@/api/cart.js';
 import {logout} from '@/api/account.js';
 import config from '@/config';
 import { refreshUnreadMessage } from '@/utils/unreadMessage';
+import { useAppStore } from '@/stores/app';
 
-export default {
-  components: { ShoppingCart },
-  name: 'M-Header',
-  created() {
-    if (storage.getItem('userInfo')) {
-      this.userInfo = JSON.parse(storage.getItem('userInfo'));
-      refreshUnreadMessage();
-    }
-  },
+defineOptions({ name: 'M-Header' });
 
-  data() {
-    return {
-      config,
-      userInfo: {}, // 用户信息
-      shoppingCart: [], // 购物车
-      cartLoading: false,
-      cartLoadedAt: 0,
-      cartCacheTime: 5000
-    };
-  },
-  computed: {
-    // 购物车商品数量
-    cartNum() {
-      return this.$store.state.cartNum;
-    },
-    unreadMsg() {
-      return Number(this.$store.state.unreadMsg) || 0;
-    },
-    unreadLabel() {
-      return this.unreadMsg > 99 ? '99+' : String(this.unreadMsg);
-    }
-  },
-  methods: {
-    goToPay() {
-      if (!this.userInfo.username) {
-        Modal.confirm({
-          title: '温馨提示',
-          content: '请登录后执行此操作',
-          okText: '立即登录',
-          cancelText: '取消',
-          onOk: () => {
-            this.$router.push({
-              path: '/login',
-              query: {
-                rePath: '/cart',
-                query: JSON.stringify(this.$route.query || {}),
-              },
-            });
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const userInfo = ref({}); // 用户信息
+const shoppingCart = ref([]); // 购物车
+const cartLoading = ref(false);
+const cartLoadedAt = ref(0);
+const cartCacheTime = ref(5000);
+
+// 购物车商品数量
+const cartNum = computed(() => appStore.cartNum);
+const unreadMsg = computed(() => appStore.unreadMsg);
+const unreadLabel = computed(() => {
+  return unreadMsg.value > 99 ? '99+' : String(unreadMsg.value);
+});
+
+if (storage.getItem('userInfo')) {
+  userInfo.value = JSON.parse(storage.getItem('userInfo'));
+  refreshUnreadMessage();
+}
+
+function goToPay() {
+  if (!userInfo.value.username) {
+    Modal.confirm({
+      title: '温馨提示',
+      content: '请登录后执行此操作',
+      okText: '立即登录',
+      cancelText: '取消',
+      onOk: () => {
+        router.push({
+          path: '/login',
+          query: {
+            rePath: '/cart',
+            query: JSON.stringify(route.query || {}),
           },
         });
-        return;
-      }
-      this.$router.push('/cart');
-    },
-    myInfo() { // 跳转会员中心
-      this.$router.push('/home');
-    },
-    signOutFun() { // 退出登录
-      logout().then(res => {
-        storage.removeItem('accessToken');
-        storage.removeItem('refreshToken');
-        storage.removeItem('userInfo');
-        storage.removeItem('cartNum');
-        this.$store.commit('SET_CARTNUM', 0)
-        this.$store.commit('SET_UNREAD_MSG', 0)
-        this.$router.push('/login');
-      });
-    },
-    goUserCenter(path) {
-      // 跳转我的订单，我的足迹、收藏等
-      if (this.userInfo.username) {
-        this.$router.push({path: path});
-      } else {
-        Modal.confirm({
-          title: '请登录',
-          content: '请登录后执行此操作',
-          okText: '立即登录',
-          cancelText: '继续浏览',
-          onOk: () => {
-            this.$router.push({
-              path: '/login',
-              query: {
-                rePath: this.$route.path,
-                query: JSON.stringify(this.$route.query || {}),
-              },
-            });
-          }
+      },
+    });
+    return;
+  }
+  router.push('/cart');
+}
+
+function myInfo() { // 跳转会员中心
+  router.push('/home');
+}
+
+function signOutFun() { // 退出登录
+  logout().then(res => {
+    storage.removeItem('accessToken');
+    storage.removeItem('refreshToken');
+    storage.removeItem('userInfo');
+    storage.removeItem('cartNum');
+    appStore.setCartNum(0)
+    appStore.setUnreadMsg(0)
+    router.push('/login');
+  });
+}
+
+function goUserCenter(path) {
+  // 跳转我的订单，我的足迹、收藏等
+  if (userInfo.value.username) {
+    router.push({path: path});
+  } else {
+    Modal.confirm({
+      title: '请登录',
+      content: '请登录后执行此操作',
+      okText: '立即登录',
+      cancelText: '继续浏览',
+      onOk: () => {
+        router.push({
+          path: '/login',
+          query: {
+            rePath: route.path,
+            query: JSON.stringify(route.query || {}),
+          },
         });
       }
-    },
-    shopEntry() {
-      if (storage.getItem('accessToken')) {
-        this.$router.push({
-          path: '/shopEntry',
-          query: { id: 1 },
-        });
-        return;
-      }
-      Modal.confirm({
-        title: '温馨提示',
-        content: '请登录后执行此操作',
-        okText: '立即登录',
-        cancelText: '取消',
-        onOk: () => {
-          this.$router.push({
-            path: '/login',
-            query: {
-              rePath: '/shopEntry',
-              query: JSON.stringify({ id: 1 }),
-            },
-          });
+    });
+  }
+}
+
+function shopEntry() {
+  if (storage.getItem('accessToken')) {
+    router.push({
+      path: '/shopEntry',
+      query: { id: 1 },
+    });
+    return;
+  }
+  Modal.confirm({
+    title: '温馨提示',
+    content: '请登录后执行此操作',
+    okText: '立即登录',
+    cancelText: '取消',
+    onOk: () => {
+      router.push({
+        path: '/login',
+        query: {
+          rePath: '/shopEntry',
+          query: JSON.stringify({ id: 1 }),
         },
       });
     },
-    handleCartDropdownVisible(visible) {
-      if (visible) {
-        this.getCartList();
-      }
-    },
-    getCartList() {
-      // 获取购物车列表
-      if (!this.userInfo.username || this.cartLoading) {
-        return;
-      }
-      const now = Date.now();
-      if (this.cartLoadedAt && now - this.cartLoadedAt < this.cartCacheTime) {
-        return;
-      }
-      this.cartLoadedAt = now;
-      this.cartLoading = true;
-      cartGoodsAll().then((res) => {
-        if (res.success) {
-          this.shoppingCart = (res.result && res.result.skuList) || [];
-          this.$store.commit('SET_CARTNUM', this.shoppingCart.length);
-          this.Cookies.setItem('cartNum', this.shoppingCart.length);
-        }
-      }).finally(() => {
-        this.cartLoading = false;
-      });
-    }
+  });
+}
+
+function handleCartDropdownVisible(visible) {
+  if (visible) {
+    getCartList();
   }
-};
+}
+
+function getCartList() {
+  // 获取购物车列表
+  if (!userInfo.value.username || cartLoading.value) {
+    return;
+  }
+  const now = Date.now();
+  if (cartLoadedAt.value && now - cartLoadedAt.value < cartCacheTime.value) {
+    return;
+  }
+  cartLoadedAt.value = now;
+  cartLoading.value = true;
+  cartGoodsAll().then((res) => {
+    if (res.success) {
+      shoppingCart.value = (res.result && res.result.skuList) || [];
+      appStore.setCartNum(shoppingCart.value.length);
+      storage.setItem('cartNum', shoppingCart.value.length);
+    }
+  }).finally(() => {
+    cartLoading.value = false;
+  });
+}
 </script>
 
 <style scoped lang="scss">

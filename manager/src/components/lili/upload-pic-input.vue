@@ -60,7 +60,7 @@
       @closed="resetPicModal"
     >
       <ossManage
-        ref="ossManage"
+        ref="ossManageRef"
         :is-component="true"
         :initialize="picModalFlag"
         :max-select="1"
@@ -70,110 +70,112 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, ref, useAttrs, watch } from "vue";
 import { View } from "@element-plus/icons-vue";
 import { uploadFile } from "@/api/index";
+import { getStore } from "@/libs/storage";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 
-export default {
-  name: "uploadPicInput",
-  components: {
-    ossManage,
-    View,
+defineOptions({ name: "uploadPicInput" });
+
+const props = defineProps({
+  modelValue: String,
+  value: String,
+  size: {
+    default: "default",
+    type: String,
   },
-  props: {
-    modelValue: String,
-    value: String,
-    size: {
-      default: "default",
-      type: String,
-    },
-    placeholder: {
-      type: String,
-      default: "图片链接",
-    },
-    showInput: {
-      type: Boolean,
-      default: true,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-    readonly: {
-      type: Boolean,
-      default: false,
-    },
-    maxlength: Number,
+  placeholder: {
+    type: String,
+    default: "图片链接",
   },
-  emits: ["update:modelValue", "input", "on-change"],
-  data() {
-    return {
-      accessToken: {},
-      currentValue: this.modelValue ?? this.value ?? "",
-      viewImage: false,
-      uploadFileUrl: uploadFile,
-      picModalFlag: false,
-      selectedFormBtnName: "",
-      picIndex: "",
-    };
+  showInput: {
+    type: Boolean,
+    default: true,
   },
-  methods: {
-    handleCLickImg(val, index) {
-      this.picModalFlag = true;
-      this.selectedFormBtnName = val;
-      this.picIndex = index;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    handleOssCallback(item) {
-      this.picModalFlag = false;
-      if (!item?.url) return;
-      this.currentValue = item.url;
-      this.picIndex = "";
-      this.emitValue(this.currentValue);
-    },
-    resetPicModal() {
-      this.selectedFormBtnName = "";
-      this.picIndex = "";
-    },
-    init() {
-      this.accessToken = {
-        accessToken: this.getStore("accessToken"),
-      };
-    },
-    emitValue(val) {
-      this.$emit("update:modelValue", val);
-      this.$emit("input", val);
-      this.$emit("on-change", val);
-    },
-    handleChange() {
-      this.emitValue(this.currentValue);
-      this.$attrs.rollback && this.$attrs.rollback();
-    },
-    setCurrentValue(value) {
-      if (value === this.currentValue) {
-        return;
-      }
-      this.currentValue = value ?? "";
-      this.emitValue(this.currentValue);
-    },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
-  watch: {
-    modelValue(val) {
-      this.setCurrentValue(val);
-    },
-    value(val) {
-      this.setCurrentValue(val);
-    },
+  readonly: {
+    type: Boolean,
+    default: false,
   },
-  created() {
-    this.init();
-  },
-};
+  maxlength: Number,
+});
+const emit = defineEmits(["update:modelValue", "input", "on-change"]);
+const attrs = useAttrs();
+
+const accessToken = ref({});
+const currentValue = ref(props.modelValue ?? props.value ?? "");
+const viewImage = ref(false);
+const uploadFileUrl = ref(uploadFile);
+const picModalFlag = ref(false);
+const selectedFormBtnName = ref("");
+const picIndex = ref("");
+
+// 模板 ref：ossManage 与 import 组件同名，改名避免互相覆盖
+const ossManageRef = ref(null);
+
+function handleCLickImg(val, index) {
+  picModalFlag.value = true;
+  selectedFormBtnName.value = val;
+  picIndex.value = index;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+function handleOssCallback(item) {
+  picModalFlag.value = false;
+  if (!item?.url) return;
+  currentValue.value = item.url;
+  picIndex.value = "";
+  emitValue(currentValue.value);
+}
+function resetPicModal() {
+  selectedFormBtnName.value = "";
+  picIndex.value = "";
+}
+function init() {
+  accessToken.value = {
+    accessToken: getStore("accessToken"),
+  };
+}
+function emitValue(val) {
+  emit("update:modelValue", val);
+  emit("input", val);
+  emit("on-change", val);
+}
+function handleChange() {
+  emitValue(currentValue.value);
+  attrs.rollback && attrs.rollback();
+}
+function setCurrentValue(value) {
+  if (value === currentValue.value) {
+    return;
+  }
+  currentValue.value = value ?? "";
+  emitValue(currentValue.value);
+}
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    setCurrentValue(val);
+  }
+);
+watch(
+  () => props.value,
+  (val) => {
+    setCurrentValue(val);
+  }
+);
+
+// 原 created 钩子
+init();
 </script>
 
 <style lang="scss" scoped>

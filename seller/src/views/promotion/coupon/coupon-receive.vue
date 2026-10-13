@@ -3,7 +3,7 @@
     <el-button style="margin-bottom: 10px" @click="back()">返回</el-button>
 
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="90px" class="search-form mb_10">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="90px" class="search-form mb_10">
         <el-form-item label="优惠券名称" prop="couponName">
           <el-input
             v-model="searchForm.couponName"
@@ -144,93 +144,111 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, watch, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getCouponReceiveList } from "@/api/promotion";
-export default {
-  name: "coupon-recevie",
-  props: {
-    promotionStatus: {
-      type: String,
-      default: "",
-    },
+import { useAppStore } from "@/stores/app";
+
+defineOptions({ name: "coupon-recevie" });
+
+const props = defineProps({
+  promotionStatus: {
+    type: String,
+    default: "",
   },
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-        getType: "",
-        couponId: this.$route.query.couponId,
-      },
-      selectList: [],
-      selectCount: 0,
-      data: [],
-      total: 0,
-      refreshTable: true,
-      selectDate: [],
-    };
-  },
-  watch: {
-    $route(e) {
-      this.searchForm.couponId = e.query.couponId;
-      if (this.couponId) {
-        this.getDataList();
-      } else {
-        this.$refs.searchForm?.resetFields();
-      }
-    },
-  },
-  methods: {
-    back() {
-      this.$store.commit("removeTag", "coupon-receive");
-      this.$router.go(-1);
-    },
-    check() {
-      this.$emit("selected", this.selectList);
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-      if (this.getType === "ACTIVITY") this.check();
-    },
-    getDataList() {
-      this.loading = true;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = this.selectDate[0].getTime();
-        this.searchForm.endTime = this.selectDate[1].getTime();
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
-      }
-      getCouponReceiveList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+});
+const emit = defineEmits(["selected"]);
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "create_time",
+  order: "desc",
+  getType: "",
+  couponId: route.query.couponId,
+});
+const selectList = ref([]);
+const selectCount = ref(0);
+const data = ref([]);
+const total = ref(0);
+const refreshTable = ref(true);
+const selectDate = ref([]);
+
+const searchFormRef = ref(null);
+
+watch(
+  () => route.query,
+  (query) => {
+    searchForm.couponId = query.couponId;
+    // 原代码此处判断的 couponId 在 data 中并不存在，恒为 undefined；保持原行为
+    if (props.couponId) {
+      getDataList();
+    } else {
+      searchFormRef.value?.resetFields();
+    }
+  }
+);
+
+function back() {
+  appStore.removeTag("coupon-receive");
+  router.go(-1);
+}
+
+function check() {
+  emit("selected", selectList.value);
+}
+
+function init() {
+  getDataList();
+}
+
+function changePage() {
+  getDataList();
+}
+
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function changeSelect(e) {
+  selectList.value = e;
+  selectCount.value = e.length;
+  // 原代码此处判断的 getType 组件并未声明该 prop，恒为 undefined；保持原行为
+  if (props.getType === "ACTIVITY") check();
+}
+
+function getDataList() {
+  loading.value = true;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.startTime = selectDate.value[0].getTime();
+    searchForm.endTime = selectDate.value[1].getTime();
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  getCouponReceiveList(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>

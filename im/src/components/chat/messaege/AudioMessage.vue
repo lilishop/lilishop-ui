@@ -27,7 +27,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from "vue";
+
+defineOptions({ name: 'AudioMessage' });
+
+defineProps({
+  src: {
+    type: String,
+    default: '',
+  },
+});
+
 function formatSeconds(value) {
   var theTime = parseInt(value) // 秒
   var theTime1 = 0 // 分
@@ -59,64 +70,47 @@ function formatSeconds(value) {
   return result
 }
 
-export default {
-  name: 'AudioMessage',
-  props: {
-    src: {
-      type: String,
-      default: '',
-    },
-  },
-  data() {
-    return {
-      loading: true,
-      isPlay: false,
-      duration: 0,
-      currentTime: 0,
-      progress: 0,
-    }
-  },
-  computed: {
-    getTotalDuration() {
-      return formatSeconds(this.duration)
-    },
-    getCurrDuration() {
-      return formatSeconds(this.currentTime)
-    },
-  },
-  methods: {
-    toPlay() {
-      if (this.loading) {
-        return
-      }
+const loading = ref(true)
+const isPlay = ref(false)
+const duration = ref(0)
+const currentTime = ref(0)
+const progress = ref(0)
 
-      let audio = this.$refs.audio
-      if (this.isPlay) {
-        audio.pause()
-      } else {
-        audio.play()
-      }
-      this.isPlay = !this.isPlay
-    },
+const audio = ref(null)
 
-    // 当目前的播放位置已更改时
-    timeupdate() {
-      let audio = this.$refs.audio
-      this.currentTime = audio.currentTime
-      this.progress = (audio.currentTime / audio.duration) * 100
-    },
+const getTotalDuration = computed(() => formatSeconds(duration.value))
+const getCurrDuration = computed(() => formatSeconds(currentTime.value))
 
-    // 当浏览器可以播放音频/视频时
-    canplay() {
-      this.duration = this.$refs.audio.duration
-      this.loading = false
-    },
+function toPlay() {
+  if (loading.value) {
+    return
+  }
 
-    // 当目前的播放列表已结束时
-    ended() {
-      this.isPlay = false
-    },
-  },
+  let audioEl = audio.value
+  if (isPlay.value) {
+    audioEl.pause()
+  } else {
+    audioEl.play()
+  }
+  isPlay.value = !isPlay.value
+}
+
+// 当目前的播放位置已更改时
+function timeupdate() {
+  let audioEl = audio.value
+  currentTime.value = audioEl.currentTime
+  progress.value = (audioEl.currentTime / audioEl.duration) * 100
+}
+
+// 当浏览器可以播放音频/视频时
+function canplay() {
+  duration.value = audio.value.duration
+  loading.value = false
+}
+
+// 当目前的播放列表已结束时
+function ended() {
+  isPlay.value = false
 }
 </script>
 <style scoped lang="less">

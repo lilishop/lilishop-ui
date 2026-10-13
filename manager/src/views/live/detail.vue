@@ -42,66 +42,66 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getLiveInfo } from "@/api/live";
+import { Message } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 import LiveGoods from "./components/LiveGoods.vue";
 
-export default {
-  name: "live-detail",
-  components: { LiveGoods },
-  data() {
-    return {
-      loading: false,
-      liveId: "",
-      detail: {},
-    };
-  },
-  computed: {
-    liveStatus() {
-      return this.detail.liveStatus || this.detail.status || "";
-    },
-  },
-  mounted() {
-    this.liveId = String(this.$route.query.id || "");
-    if (!this.liveId) {
-      this.$Message.error("缺少直播ID");
-      this.handleBack();
-      return;
-    }
-    this.loadDetail();
-  },
-  methods: {
-    formatTime(time) {
-      if (!time) return "-";
-      return this.$filters.unixToDate(time);
-    },
-    liveStatusText(status) {
-      const map = { NEW: "未开始", LIVING: "直播中", ENDED: "已结束" };
-      return map[status] || "未知";
-    },
-    liveStatusTagType(status) {
-      const map = { NEW: "info", LIVING: "success", ENDED: "warning" };
-      return map[status] || "info";
-    },
-    loadDetail() {
-      this.loading = true;
-      getLiveInfo(this.liveId)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.detail = res.result || {};
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-          this.handleBack();
-        });
-    },
-    handleBack() {
-      this.$router.push({ path: "/live-list" });
-    },
-  },
-};
+defineOptions({ name: "live-detail" });
+
+const route = useRoute();
+const router = useRouter();
+
+const loading = ref(false);
+const liveId = ref("");
+const detail = ref({});
+
+const liveStatus = computed(() => {
+  return detail.value.liveStatus || detail.value.status || "";
+});
+
+onMounted(() => {
+  liveId.value = String(route.query.id || "");
+  if (!liveId.value) {
+    Message.error("缺少直播ID");
+    handleBack();
+    return;
+  }
+  loadDetail();
+});
+
+function formatTime(time) {
+  if (!time) return "-";
+  return unixToDate(time);
+}
+function liveStatusText(status) {
+  const map = { NEW: "未开始", LIVING: "直播中", ENDED: "已结束" };
+  return map[status] || "未知";
+}
+function liveStatusTagType(status) {
+  const map = { NEW: "info", LIVING: "success", ENDED: "warning" };
+  return map[status] || "info";
+}
+function loadDetail() {
+  loading.value = true;
+  getLiveInfo(liveId.value)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        detail.value = res.result || {};
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+      handleBack();
+    });
+}
+function handleBack() {
+  router.push({ path: "/live-list" });
+}
 </script>
 
 <style lang="scss" scoped>

@@ -197,266 +197,264 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
-import { getOrderList, sureReceived, cancelOrder, delOrder } from '@/api/order';
+import { getOrderList, sureReceived, cancelOrder, delOrder as deleteOrder } from '@/api/order';
 import { afterSaleReason } from '@/api/member';
 import { orderStatusList, afterSaleStatusList } from '../enumeration.js'
-export default {
-  name: 'MyOrder',
-  props: {
-    homePage: { // 判断是否个人中心首页展示内容
-      type: Boolean,
-      default: false
-    }
-  },
-  data () {
-    return {
-      orderList: [], // 订单列表
-      params: { // 请求参数
-        pageNumber: 1,
-        pageSize: 20,
-        // orderStatus: 'ALL',
-        keywords: '',
-        tag: 'ALL'
-      },
-      cancelParams: { // 取消售后参数
-        orderSn: '',
-        reason: ''
-      },
-      // 状态数组
-      orderStatusList,
-      afterSaleStatusList,
-      changeWay: ['全部', '待付款', '待发货', '待收货/使用'],
-      activeOrderTab: 0,
-      total: 0, // 数据总数
-      spinShow: false, // 加载状态
-      afterSaleModal: false, // 选择售后商品模态框
-      afterSaleArr: [], // 售后商品列表
-      cancelAvail: false, // 取消订单modal控制
-      cancelReason: [] // 取消订单原因
-    };
-  },
-  mounted () {
-    if (this.homePage) this.params.pageSize = 5;
-    if (!this.homePage) this.applyRouteTag();
-    this.getList();
-  },
-  watch: {
-    '$route.query.tag' () {
-      if (this.homePage || this.$route.name !== 'MyOrder') return;
-      const next = this.$route.query.tag || 'ALL';
-      if (this.params.tag === next) return;
-      this.applyRouteTag();
-      this.getList();
-    }
-  },
-  methods: {
-    // 退款状态枚举
-    refundPriceList(status) {
-      switch (status) {
-        case 'ALL_REFUND':
-          return "全部退款";
-        case 'PART_REFUND':
-          return "部分退款";
-        case 'NO_REFUND':
-          return "";
-        case 'REFUNDING':
-          return "退款中";
-        default:
-          return "";
-      }
-    },
-    goodsDetail (skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
-        path: '/goodsDetail',
-        query: { skuId, goodsId }
-      });
-      window.open(routeUrl.href, '_blank');
-    },
-    orderTags () {
-      return ['ALL', 'WAIT_PAY', 'WAIT_SHIP', 'WAIT_USE'];
-    },
-    applyRouteTag () {
-      const tags = this.orderTags();
-      const tag = this.$route.query.tag;
-      const index = tags.indexOf(tag);
-      this.activeOrderTab = index > -1 ? index : 0;
-      this.params.tag = tags[this.activeOrderTab];
-      this.params.pageNumber = 1;
-    },
-    // 切换订单状态
-    change (index) {
-      this.activeOrderTab = index;
-      this.params.pageNumber = 1;
-      delete this.params.commentStatus;
-      const tags = this.orderTags();
-      this.params.tag = tags[index] || 'ALL';
-      const query = { ...this.$route.query };
-      if (index === 0) delete query.tag;
-      else query.tag = this.params.tag;
-      const current = this.$route.query.tag || 'ALL';
-      if (current !== this.params.tag) {
-        this.$router.replace({ name: 'MyOrder', query });
-      }
-      this.getList()
-    },
-    // 跳转店铺首页
-    shopPage (id) {
-      this.$router.push({
-        path: '/merchant',
-        query: { id: id }
-      });
-    },
-    orderDetail (sn) {
-      this.$router.push({ name: 'OrderDetail', query: {sn} });
-    },
-    goAfterSaleDetail (sn) {
-      this.$router.push({ name: 'AfterSaleDetail', query: { sn } });
-    },
-    received (sn) { // 确认收货
-      sureReceived(sn).then(res => {
-        if (res.success) {
-          Message.success('确认收货成功')
-          this.getList()
-        }
-      })
-    },
-    goPay (sn) { // 去支付
-      this.$router.push({path: '/payment', query: {orderType: 'ORDER', sn}});
-    },
-    applyAfterSale (goodsItem) { // 申请售后
-      let arr = []
-      goodsItem.forEach(e => {
-        if (e.afterSaleStatus === 'NOT_APPLIED'|| e.afterSaleStatus === 'PART_AFTER_SALE') {
-          arr.push(e)
-        }
-      });
-      if (arr.length === 1) {
-        this.$router.push({name: 'ApplyAfterSale', query: {sn: arr[0].sn}})
-      } else {
-        this.afterSaleArr = arr;
-        this.afterSaleModal = true
-      }
-    },
-    // 申请售后
-    afterSaleSelect (item) {
-      this.$router.push({name: 'ApplyAfterSale', query: {sn: item.sn}})
-    },
-    complain (sn, goodsIndex) { // 投诉
-      this.$router.push({name: 'Complain', query: {sn, index: goodsIndex}})
-    },
-    delOrder (sn) { // 删除订单
-      Modal.confirm({
-        title: '删除订单',
-        content: '<p>确认删除当前订单吗？</p>',
-        onOk: () => {
-          delOrder(sn).then(res => {
-            if (res.success) {
-              Message.success('删除成功');
-              this.getList()
-            }
-          })
-        },
-        onCancel: () => {}
-      });
-    },
-    getList () {
-      this.spinShow = true;
-      let params = JSON.parse(JSON.stringify(this.params))
-      if (params.orderStatus === 'ALL') {
-        delete params.orderStatus
-      }
-      getOrderList(params).then(res => {
-        this.spinShow = false
-        if (res.success) {
-          this.orderList = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    mapAfterSaleOrder (item) {
-      return {
-        ...item,
-        isAfterSale: true,
-        serviceSn: item.sn,
-        sn: item.orderSn,
-        orderStatus: item.serviceStatus,
-        flowPrice: item.applyRefundPrice,
-        orderItems: [
-          {
-            image: item.goodsImage,
-            name: item.goodsName,
-            skuId: item.skuId,
-            goodsId: item.goodsId,
-            goodsPrice: item.flowPrice,
-            num: item.num,
-          },
-        ],
-        allowOperationVO: {},
-      }
-    },
-    changePageNum (val) { // 修改页码
-      this.params.pageNumber = val;
-      this.getList()
-    },
-    changePageSize (val) { // 修改页数
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList()
-    },
-    handleCancelOrder (sn) {
-      // 取消订单
-      this.cancelParams.orderSn = sn;
-      afterSaleReason('CANCEL').then(res => {
-        if (res.success) {
-          this.cancelReason = res.result;
-          this.cancelAvail = true
-          this.cancelParams.reason = this.cancelReason[0].reason
-        }
-      })
-    },
-    sureCancel () { // 确定取消
-      cancelOrder(this.cancelParams).then(res => {
-        if (res.success) {
-          Message.success('取消订单成功')
-          this.getList()
-          this.cancelAvail = false
-        }
-      })
-    },
-    filterOrderStatus (status) { // 获取订单状态中文
-      const ob = this.orderStatusList.filter(e => { return e.status === status });
-      return ob && ob[0] ? ob[0].name : status
-    },
-    filterAfterSaleStatus (status) {
-      const ob = this.afterSaleStatusList.filter(e => e.status === status);
-      return ob && ob[0] ? ob[0].name : status
-    },
-    canAfterSale (order) {
-      if (order.isAfterSale || order.orderType === 'E_COUPON' || !order.groupAfterSaleStatus) {
-        return false
-      }
-      return order.groupAfterSaleStatus.includes('NOT_APPLIED') || order.groupAfterSaleStatus.includes('PART_AFTER_SALE')
-    },
-    paymentLabel (order) {
-      const map = {
-        WECHAT: '微信支付',
-        ALIPAY: '支付宝',
-        WALLET: '余额支付',
-        BANK_TRANSFER: '线下转账'
-      }
-      if (order.paymentMethod && map[order.paymentMethod]) {
-        return map[order.paymentMethod]
-      }
-      if (order.payStatus === 'UNPAID' || order.orderStatus === 'UNPAID') {
-        return '待支付'
-      }
-      return ''
-    }
+
+defineOptions({ name: 'MyOrder' });
+
+const props = defineProps({
+  homePage: { // 判断是否个人中心首页展示内容
+    type: Boolean,
+    default: false
   }
-};
+});
+
+const route = useRoute();
+const router = useRouter();
+
+const orderList = ref([]); // 订单列表
+const params = reactive({ // 请求参数
+  pageNumber: 1,
+  pageSize: 20,
+  // orderStatus: 'ALL',
+  keywords: '',
+  tag: 'ALL'
+});
+const cancelParams = reactive({ // 取消售后参数
+  orderSn: '',
+  reason: ''
+});
+const changeWay = ref(['全部', '待付款', '待发货', '待收货/使用']);
+const activeOrderTab = ref(0);
+const total = ref(0); // 数据总数
+const spinShow = ref(false); // 加载状态
+const afterSaleModal = ref(false); // 选择售后商品模态框
+const afterSaleArr = ref([]); // 售后商品列表
+const cancelAvail = ref(false); // 取消订单modal控制
+const cancelReason = ref([]); // 取消订单原因
+
+// 退款状态枚举
+function refundPriceList(status) {
+  switch (status) {
+    case 'ALL_REFUND':
+      return "全部退款";
+    case 'PART_REFUND':
+      return "部分退款";
+    case 'NO_REFUND':
+      return "";
+    case 'REFUNDING':
+      return "退款中";
+    default:
+      return "";
+  }
+}
+function goodsDetail (skuId, goodsId) {
+  // 跳转商品详情
+  let routeUrl = router.resolve({
+    path: '/goodsDetail',
+    query: { skuId, goodsId }
+  });
+  window.open(routeUrl.href, '_blank');
+}
+function orderTags () {
+  return ['ALL', 'WAIT_PAY', 'WAIT_SHIP', 'WAIT_USE'];
+}
+function applyRouteTag () {
+  const tags = orderTags();
+  const tag = route.query.tag;
+  const index = tags.indexOf(tag);
+  activeOrderTab.value = index > -1 ? index : 0;
+  params.tag = tags[activeOrderTab.value];
+  params.pageNumber = 1;
+}
+// 切换订单状态
+function change (index) {
+  activeOrderTab.value = index;
+  params.pageNumber = 1;
+  delete params.commentStatus;
+  const tags = orderTags();
+  params.tag = tags[index] || 'ALL';
+  const query = { ...route.query };
+  if (index === 0) delete query.tag;
+  else query.tag = params.tag;
+  const current = route.query.tag || 'ALL';
+  if (current !== params.tag) {
+    router.replace({ name: 'MyOrder', query });
+  }
+  getList()
+}
+// 跳转店铺首页
+function shopPage (id) {
+  router.push({
+    path: '/merchant',
+    query: { id: id }
+  });
+}
+function orderDetail (sn) {
+  router.push({ name: 'OrderDetail', query: {sn} });
+}
+function goAfterSaleDetail (sn) {
+  router.push({ name: 'AfterSaleDetail', query: { sn } });
+}
+function received (sn) { // 确认收货
+  sureReceived(sn).then(res => {
+    if (res.success) {
+      Message.success('确认收货成功')
+      getList()
+    }
+  })
+}
+function goPay (sn) { // 去支付
+  router.push({path: '/payment', query: {orderType: 'ORDER', sn}});
+}
+function applyAfterSale (goodsItem) { // 申请售后
+  let arr = []
+  goodsItem.forEach(e => {
+    if (e.afterSaleStatus === 'NOT_APPLIED'|| e.afterSaleStatus === 'PART_AFTER_SALE') {
+      arr.push(e)
+    }
+  });
+  if (arr.length === 1) {
+    router.push({name: 'ApplyAfterSale', query: {sn: arr[0].sn}})
+  } else {
+    afterSaleArr.value = arr;
+    afterSaleModal.value = true
+  }
+}
+// 申请售后
+function afterSaleSelect (item) {
+  router.push({name: 'ApplyAfterSale', query: {sn: item.sn}})
+}
+function complain (sn, goodsIndex) { // 投诉
+  router.push({name: 'Complain', query: {sn, index: goodsIndex}})
+}
+function delOrder (sn) { // 删除订单
+  Modal.confirm({
+    title: '删除订单',
+    content: '<p>确认删除当前订单吗？</p>',
+    onOk: () => {
+      deleteOrder(sn).then(res => {
+        if (res.success) {
+          Message.success('删除成功');
+          getList()
+        }
+      })
+    },
+    onCancel: () => {}
+  });
+}
+function getList () {
+  spinShow.value = true;
+  let _params = JSON.parse(JSON.stringify(params))
+  if (_params.orderStatus === 'ALL') {
+    delete _params.orderStatus
+  }
+  getOrderList(_params).then(res => {
+    spinShow.value = false
+    if (res.success) {
+      orderList.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function mapAfterSaleOrder (item) {
+  return {
+    ...item,
+    isAfterSale: true,
+    serviceSn: item.sn,
+    sn: item.orderSn,
+    orderStatus: item.serviceStatus,
+    flowPrice: item.applyRefundPrice,
+    orderItems: [
+      {
+        image: item.goodsImage,
+        name: item.goodsName,
+        skuId: item.skuId,
+        goodsId: item.goodsId,
+        goodsPrice: item.flowPrice,
+        num: item.num,
+      },
+    ],
+    allowOperationVO: {},
+  }
+}
+function changePageNum (val) { // 修改页码
+  params.pageNumber = val;
+  getList()
+}
+function changePageSize (val) { // 修改页数
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList()
+}
+function handleCancelOrder (sn) {
+  // 取消订单
+  cancelParams.orderSn = sn;
+  afterSaleReason('CANCEL').then(res => {
+    if (res.success) {
+      cancelReason.value = res.result;
+      cancelAvail.value = true
+      cancelParams.reason = cancelReason.value[0].reason
+    }
+  })
+}
+function sureCancel () { // 确定取消
+  cancelOrder(cancelParams).then(res => {
+    if (res.success) {
+      Message.success('取消订单成功')
+      getList()
+      cancelAvail.value = false
+    }
+  })
+}
+function filterOrderStatus (status) { // 获取订单状态中文
+  const ob = orderStatusList.filter(e => { return e.status === status });
+  return ob && ob[0] ? ob[0].name : status
+}
+function filterAfterSaleStatus (status) {
+  const ob = afterSaleStatusList.filter(e => e.status === status);
+  return ob && ob[0] ? ob[0].name : status
+}
+function canAfterSale (order) {
+  if (order.isAfterSale || order.orderType === 'E_COUPON' || !order.groupAfterSaleStatus) {
+    return false
+  }
+  return order.groupAfterSaleStatus.includes('NOT_APPLIED') || order.groupAfterSaleStatus.includes('PART_AFTER_SALE')
+}
+function paymentLabel (order) {
+  const map = {
+    WECHAT: '微信支付',
+    ALIPAY: '支付宝',
+    WALLET: '余额支付',
+    BANK_TRANSFER: '线下转账'
+  }
+  if (order.paymentMethod && map[order.paymentMethod]) {
+    return map[order.paymentMethod]
+  }
+  if (order.payStatus === 'UNPAID' || order.orderStatus === 'UNPAID') {
+    return '待支付'
+  }
+  return ''
+}
+
+watch(() => route.query.tag, () => {
+  if (props.homePage || route.name !== 'MyOrder') return;
+  const next = route.query.tag || 'ALL';
+  if (params.tag === next) return;
+  applyRouteTag();
+  getList();
+});
+
+onMounted(() => {
+  if (props.homePage) params.pageSize = 5;
+  if (!props.homePage) applyRouteTag();
+  getList();
+});
 </script>
 
 <style scoped lang="scss">

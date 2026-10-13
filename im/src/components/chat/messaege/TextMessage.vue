@@ -8,44 +8,42 @@
     <pre v-html="html" />
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from "vue";
 import { textReplaceLink } from "@/utils/functions";
 import { textReplaceEmoji } from "@/utils/emojis";
 
-export default {
+defineOptions({
   name: "TextMessage",
-  props: {
-    content: {
-      type: [String, Number],
-      default: "",
-    },
-    float: {
-      type: String,
-      default: "left",
-    },
-    fullWidth: {
-      type: Boolean,
-      default: true,
-    },
-    arrow: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data () {
-    return {
-      html: "",
-    };
-  },
-  created () {
-    const text = textReplaceLink(
-      this.content,
-      this.float == "right" ? "#ffffff" : "rgb(9 149 208)"
-    );
+});
 
-    this.html = textReplaceEmoji(text);
+const props = defineProps({
+  content: {
+    type: [String, Number],
+    default: "",
   },
-};
+  float: {
+    type: String,
+    default: "left",
+  },
+  fullWidth: {
+    type: Boolean,
+    default: true,
+  },
+  arrow: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const html = ref("");
+
+const text = textReplaceLink(
+  props.content,
+  props.float == "right" ? "#ffffff" : "rgb(9 149 208)"
+);
+
+html.value = textReplaceEmoji(text);
 </script>
 <style lang="less" scoped>
 @bg-left-color: #f5f5f5;

@@ -20,32 +20,22 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import todayHotWords from "./template/todayHotWords";
 import historyHotWords from "./template/historyHotWords";
 import setupHotWords from "./template/setupHotWords";
 import statisticsHotWords from "./template/statisticsHotWords";
 
-export default {
-  name: "hotWords",
-  components: {
-    todayHotWords,
-    historyHotWords,
-    setupHotWords,
-    statisticsHotWords,
-  },
-  data() {
-    return {
-      templatesWay: [
-        { template: "todayHotWords", label: "今日热词" },
-        { template: "historyHotWords", label: "历史热词" },
-        { template: "statisticsHotWords", label: "热词统计" },
-        { template: "setupHotWords", label: "设置热词" },
-      ],
-      currentTemplate: "todayHotWords",
-    };
-  },
-};
+defineOptions({ name: "hotWords" });
+
+const templatesWay = ref([
+  { template: "todayHotWords", label: "今日热词" },
+  { template: "historyHotWords", label: "历史热词" },
+  { template: "statisticsHotWords", label: "热词统计" },
+  { template: "setupHotWords", label: "设置热词" },
+]);
+const currentTemplate = ref("todayHotWords");
 </script>
 
 <style lang="scss" scoped></style>

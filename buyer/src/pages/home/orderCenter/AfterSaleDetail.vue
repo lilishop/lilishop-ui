@@ -106,7 +106,7 @@
         <span>提交物流信息</span>
       </p></template>
       <div>
-        <el-form ref="form" :model="form" label-position="left" label-width="100px" :rules="rules">
+        <el-form ref="formRef" :model="form" label-position="left" label-width="100px" :rules="rules">
           <el-form-item label="物流公司" prop="logisticsId">
             <el-select v-model="form.logisticsId" placeholder="请选择物流公司">
               <el-option v-for="item in companyList" :value="item.id" :key="item.id">{{ item.name }}</el-option>
@@ -135,150 +135,151 @@
     </UserCenterLayout>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
 import { afterSaleDetail, afterSaleLog, afterSaleReason, cancelAfterSale } from '@/api/member.js';
 import { afterSaleDelivery, getLogisticsCompany } from '@/api/order.js';
 import { afterSaleStatusList } from '../enumeration.js'
-export default {
-  name: 'aftersale-detail',
-  data () {
-    return {
-      afterSale: {}, // 售后详情数据
-      logList: [], // 日志
-      reasonList: [], // 售后原因列表
-      afterSaleStatusList, // 售后状态列表
-      companyList: [], // 物流公司列表
-      logisticsShow: false, // 物流信息modal
-      form: { // 物流信息数据
-        afterSaleSn: '',
-        logisticsId: '',
-        logisticsNo: '',
-        mDeliverTime: ''
-      },
-      rules: { // 必填校验
-        logisticsId: [{ required: true, message: '请选择物流公司' }],
-        logisticsNo: [{ required: true, message: '请填写物流编号' }],
-        mDeliverTime: [{ required: true, message: '请选择发货时间' }]
-      },
-      submitLoading: false // 提交加载状态
-    };
-  },
-  computed: {
-    canSubmitLogistics () {
-      return this.afterSale.serviceStatus == 'PASS' && this.afterSale.serviceType != 'RETURN_MONEY'
-    },
-    canCancel () {
-      return this.afterSale.afterSaleAllowOperationVO && this.afterSale.afterSaleAllowOperationVO.cancel
-    }
-  },
-  methods: {
-    getDetail () { // 售后详情
-      afterSaleDetail(this.$route.query.sn).then(res => {
-        if (res.success) {
-          this.afterSale = res.result;
-          this.afterSale.serviceName = this.filterOrderStatus(this.afterSale.serviceStatus)
-          // 如果是原因id，则调接口查询原因中文释义
-          const pattern3 = new RegExp('[0-9]+');
-          if (pattern3.test(this.afterSale.reason)) {
-            this.getReason(this.afterSale.serviceType)
-          } else {
-            this.afterSale['reasonName'] = this.afterSale.reason
-          }
-        }
-      })
-    },
-    getReason (type) { // 获取售后原因
-      afterSaleReason(type).then(res => {
-        if (res.success) {
-          this.reasonList = res.result
-          this.reasonList.forEach(e => {
-            if (e.id === this.afterSale.reason) {
-              this.afterSale['reasonName'] = e.reason
-            }
-          })
-        }
-      })
-    },
-    getLog () { // 获取售后日志
-      afterSaleLog(this.$route.query.sn).then(res => {
-        this.logList = (res.result || []).slice().sort((a, b) => {
-          return new Date(a.createTime).getTime() - new Date(b.createTime).getTime()
-        })
-      })
-    },
-    logDesc (log) {
-      const operator = log.operatorName ? `操作人：${log.operatorName}` : ''
-      return [operator, log.createTime].filter(Boolean).join('  ')
-    },
-    shopPage (id) {
-      if (!id) return
-      this.$router.push({
-        path: '/merchant',
-        query: { id }
-      })
-    },
-    filterOrderStatus (status) { // 获取订单状态中文
-      const ob = this.afterSaleStatusList.filter(e => { return e.status === status });
-      if (ob.length) return ob[0].name
-    },
-    perviewImg (img) { // 查看图片
-      window.open(img, '_blank')
-    },
-    cancel (sn) { // 取消售后申请
-      Modal.confirm({
-        title: '取消',
-        content: '<p>确定取消此次售后申请吗？</p>',
-        onOk: () => {
-          cancelAfterSale(sn).then(res => {
-            if (res.success) {
-              Message.success('取消售后申请成功')
-              this.getDetail()
-            }
-          })
-        },
-        onCancel: () => {}
-      });
-    },
-    // 获取物流公司列表
-    getCompany () {
-      getLogisticsCompany().then(res => {
-        if (res.success) {
-          this.companyList = res.result
-        }
-      })
-    },
-    // 提交物流信息
-    submitDelivery () {
-      this.submitLoading = true
-      afterSaleDelivery(this.form).then(res => {
-        if (res.success) {
-          this.logisticsShow = false;
-          Message.success('提交成功')
-          this.getDetail()
-        }
-        this.submitLoading = false
-      }).catch(() => {
-        this.submitLoading = false
-      })
-    },
-    // 提交物流modal
-    openModal () {
-      this.logisticsShow = true;
-      if (!this.companyList.length) {
-        this.getCompany();
-      }
-      this.$nextTick(() => {
-        this.$refs.form?.resetFields();
-        this.form.afterSaleSn = this.afterSale.sn;
-      });
-    }
-  },
-  mounted () {
-    this.getDetail();
-    this.getLog()
-  }
+
+defineOptions({ name: 'aftersale-detail' });
+
+const route = useRoute();
+const router = useRouter();
+
+const afterSale = ref({}); // 售后详情数据
+const logList = ref([]); // 日志
+const reasonList = ref([]); // 售后原因列表
+const companyList = ref([]); // 物流公司列表
+const logisticsShow = ref(false); // 物流信息modal
+const form = reactive({ // 物流信息数据
+  afterSaleSn: '',
+  logisticsId: '',
+  logisticsNo: '',
+  mDeliverTime: ''
+});
+const rules = { // 必填校验
+  logisticsId: [{ required: true, message: '请选择物流公司' }],
+  logisticsNo: [{ required: true, message: '请填写物流编号' }],
+  mDeliverTime: [{ required: true, message: '请选择发货时间' }]
 };
+const submitLoading = ref(false); // 提交加载状态
+
+const formRef = ref(null);
+
+const canSubmitLogistics = computed(() => {
+  return afterSale.value.serviceStatus == 'PASS' && afterSale.value.serviceType != 'RETURN_MONEY'
+});
+const canCancel = computed(() => {
+  return afterSale.value.afterSaleAllowOperationVO && afterSale.value.afterSaleAllowOperationVO.cancel
+});
+
+function getDetail () { // 售后详情
+  afterSaleDetail(route.query.sn).then(res => {
+    if (res.success) {
+      afterSale.value = res.result;
+      afterSale.value.serviceName = filterOrderStatus(afterSale.value.serviceStatus)
+      // 如果是原因id，则调接口查询原因中文释义
+      const pattern3 = new RegExp('[0-9]+');
+      if (pattern3.test(afterSale.value.reason)) {
+        getReason(afterSale.value.serviceType)
+      } else {
+        afterSale.value['reasonName'] = afterSale.value.reason
+      }
+    }
+  })
+}
+function getReason (type) { // 获取售后原因
+  afterSaleReason(type).then(res => {
+    if (res.success) {
+      reasonList.value = res.result
+      reasonList.value.forEach(e => {
+        if (e.id === afterSale.value.reason) {
+          afterSale.value['reasonName'] = e.reason
+        }
+      })
+    }
+  })
+}
+function getLog () { // 获取售后日志
+  afterSaleLog(route.query.sn).then(res => {
+    logList.value = (res.result || []).slice().sort((a, b) => {
+      return new Date(a.createTime).getTime() - new Date(b.createTime).getTime()
+    })
+  })
+}
+function logDesc (log) {
+  const operator = log.operatorName ? `操作人：${log.operatorName}` : ''
+  return [operator, log.createTime].filter(Boolean).join('  ')
+}
+function shopPage (id) {
+  if (!id) return
+  router.push({
+    path: '/merchant',
+    query: { id }
+  })
+}
+function filterOrderStatus (status) { // 获取订单状态中文
+  const ob = afterSaleStatusList.filter(e => { return e.status === status });
+  if (ob.length) return ob[0].name
+}
+function perviewImg (img) { // 查看图片
+  window.open(img, '_blank')
+}
+function cancel (sn) { // 取消售后申请
+  Modal.confirm({
+    title: '取消',
+    content: '<p>确定取消此次售后申请吗？</p>',
+    onOk: () => {
+      cancelAfterSale(sn).then(res => {
+        if (res.success) {
+          Message.success('取消售后申请成功')
+          getDetail()
+        }
+      })
+    },
+    onCancel: () => {}
+  });
+}
+// 获取物流公司列表
+function getCompany () {
+  getLogisticsCompany().then(res => {
+    if (res.success) {
+      companyList.value = res.result
+    }
+  })
+}
+// 提交物流信息
+function submitDelivery () {
+  submitLoading.value = true
+  afterSaleDelivery(form).then(res => {
+    if (res.success) {
+      logisticsShow.value = false;
+      Message.success('提交成功')
+      getDetail()
+    }
+    submitLoading.value = false
+  }).catch(() => {
+    submitLoading.value = false
+  })
+}
+// 提交物流modal
+function openModal () {
+  logisticsShow.value = true;
+  if (!companyList.value.length) {
+    getCompany();
+  }
+  nextTick(() => {
+    formRef.value?.resetFields();
+    form.afterSaleSn = afterSale.value.sn;
+  });
+}
+
+onMounted(() => {
+  getDetail();
+  getLog()
+});
 </script>
 <style lang="scss" scoped>
 .order-detail {

@@ -211,190 +211,187 @@
     </el-container>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import { ServeGetContacts } from "@/api/contacts";
 import { ServeFindTalkRecords } from "@/api/chat";
 import { formatSize as renderSize, download, imgZoom } from "@/utils/functions";
+import { ElNotification } from "@/utils/message";
+import { useUserStore } from "@/stores/user";
 
-export default {
-  name: "TalkSearchRecord",
-  props: {
-    params: {
-      type: Object,
-      default: () => {
-        return {
-          talk_type: 0,
-          receiver_id: 0,
-          title: "",
-        };
-      },
-    },
-  },
-  data() {
-    return {
-      fullscreen: false,
+defineOptions({ name: "TalkSearchRecord" });
 
-      user_id: this.$store.state.user.id,
-      title: "",
-
-      // 侧边栏相关信息
-      broadside: false,
-      contacts: {
-        show: "friends",
-        friends: [],
-        groups: [],
-      },
-
-      query: {
+const props = defineProps({
+  params: {
+    type: Object,
+    default: () => {
+      return {
         talk_type: 0,
         receiver_id: 0,
-        msg_type: 0,
-      },
-
-      // 用户聊天记录
-      records: {
-        record_id: 0,
-        items: [],
-        isEmpty: false,
-        loadStatus: 0,
-      },
-
-      showBox: 0,
-
-      tabType: [
-        { name: "全部", type: 0 },
-        { name: "文件", type: 2 },
-        { name: "会话记录", type: 3 },
-        { name: "代码块", type: 4 },
-        { name: "群投票", type: 5 },
-      ],
-
-      search: {
-        keyword: "", // 关键字查询
-        date: "", // 时间查询
-        page: 1, // 当前分页
-        totalPage: 50, // 总分页
-        items: [], // 数据列表
-        isShowDate: false,
-      },
-    };
-  },
-  mounted() {
-    this.title = this.params.title;
-    this.query = {
-      talk_type: this.params.talk_type,
-      receiver_id: this.params.receiver_id,
-      msg_type: 0,
-    };
-
-    this.loadChatRecord(0);
-  },
-  created() {
-    this.loadFriends();
-  },
-  methods: {
-    download,
-    renderSize,
-
-    // 获取图片信息
-    getImgStyle(url) {
-      return imgZoom(url, 200);
-    },
-
-    // 获取会话记录消息名称
-    getForwardTitle(item) {
-      let arr = [...new Set(item.map((v) => v.nickname))];
-      return arr.join("、") + "的会话记录";
-    },
-
-    // 获取好友列表
-    loadFriends() {
-      ServeGetContacts().then(({ code, data }) => {
-        if (code == 200) {
-          this.contacts.friends = data.map((item) => {
-            return {
-              id: item.id,
-              type: 1,
-              avatar: item.avatar,
-              name: item.friend_remark ? item.friend_remark : item.nickname,
-            };
-          });
-        }
-      });
-    },
-
-    // 左侧联系人菜单点击事件
-    triggerMenuItem(item) {
-      this.title = item.name;
-      this.query.talk_type = item.type;
-      this.query.receiver_id = item.id;
-      this.showBox = 0;
-
-      this.triggerLoadType(0);
-    },
-
-    // 加载历史记录
-    loadChatRecord() {
-      let data = {
-        talk_type: this.query.talk_type,
-        receiver_id: this.query.receiver_id,
-        record_id: this.records.record_id,
-        msg_type: this.query.msg_type,
+        title: "",
       };
-
-      if (this.records.loadStatus == 1) return;
-
-      this.records.loadStatus = 1;
-      ServeFindTalkRecords(data)
-        .then((res) => {
-          if (res.code != 200) return;
-
-          let records = data.record_id == 0 ? [] : this.records.items;
-
-          records.push(...res.data.rows);
-
-          this.records.items = records;
-          this.records.loadStatus =
-            res.data.rows.length < res.data.limit ? 2 : 0;
-
-          if (this.records.items.length == 0) {
-            this.records.isEmpty = true;
-          } else {
-            this.records.record_id =
-              this.records.items[this.records.items.length - 1].id;
-          }
-        })
-        .catch(() => {
-          this.records.loadStatus = 0;
-        });
-    },
-
-    triggerLoadType(type) {
-      this.records.record_id = 0;
-      this.query.msg_type = type;
-      this.records.isEmpty = false;
-      this.records.items = [];
-
-      this.loadChatRecord();
-    },
-
-    searchText() {
-      if (this.search.keyword == "") {
-        this.showBox = 0;
-        return false;
-      }
-
-      this.$notify.info({
-        title: "消息",
-        message: "查询功能正在开发中...",
-      });
-    },
-
-    triggerBroadside() {
-      this.broadside = !this.broadside;
     },
   },
-};
+});
+
+const emit = defineEmits(["close"]);
+
+const userStore = useUserStore();
+
+const fullscreen = ref(false);
+
+const user_id = ref(userStore.id);
+const title = ref("");
+
+// 侧边栏相关信息
+const broadside = ref(false);
+const contacts = reactive({
+  show: "friends",
+  friends: [],
+  groups: [],
+});
+
+const query = ref({
+  talk_type: 0,
+  receiver_id: 0,
+  msg_type: 0,
+});
+
+// 用户聊天记录
+const records = reactive({
+  record_id: 0,
+  items: [],
+  isEmpty: false,
+  loadStatus: 0,
+});
+
+const showBox = ref(0);
+
+const tabType = ref([
+  { name: "全部", type: 0 },
+  { name: "文件", type: 2 },
+  { name: "会话记录", type: 3 },
+  { name: "代码块", type: 4 },
+  { name: "群投票", type: 5 },
+]);
+
+const search = reactive({
+  keyword: "", // 关键字查询
+  date: "", // 时间查询
+  page: 1, // 当前分页
+  totalPage: 50, // 总分页
+  items: [], // 数据列表
+  isShowDate: false,
+});
+
+// 获取图片信息
+function getImgStyle(url) {
+  return imgZoom(url, 200);
+}
+
+// 获取会话记录消息名称
+function getForwardTitle(item) {
+  let arr = [...new Set(item.map((v) => v.nickname))];
+  return arr.join("、") + "的会话记录";
+}
+
+// 获取好友列表
+function loadFriends() {
+  ServeGetContacts().then(({ code, data }) => {
+    if (code == 200) {
+      contacts.friends = data.map((item) => {
+        return {
+          id: item.id,
+          type: 1,
+          avatar: item.avatar,
+          name: item.friend_remark ? item.friend_remark : item.nickname,
+        };
+      });
+    }
+  });
+}
+
+// 左侧联系人菜单点击事件
+function triggerMenuItem(item) {
+  title.value = item.name;
+  query.value.talk_type = item.type;
+  query.value.receiver_id = item.id;
+  showBox.value = 0;
+
+  triggerLoadType(0);
+}
+
+// 加载历史记录
+function loadChatRecord() {
+  let data = {
+    talk_type: query.value.talk_type,
+    receiver_id: query.value.receiver_id,
+    record_id: records.record_id,
+    msg_type: query.value.msg_type,
+  };
+
+  if (records.loadStatus == 1) return;
+
+  records.loadStatus = 1;
+  ServeFindTalkRecords(data)
+    .then((res) => {
+      if (res.code != 200) return;
+
+      let items = data.record_id == 0 ? [] : records.items;
+
+      items.push(...res.data.rows);
+
+      records.items = items;
+      records.loadStatus = res.data.rows.length < res.data.limit ? 2 : 0;
+
+      if (records.items.length == 0) {
+        records.isEmpty = true;
+      } else {
+        records.record_id = records.items[records.items.length - 1].id;
+      }
+    })
+    .catch(() => {
+      records.loadStatus = 0;
+    });
+}
+
+function triggerLoadType(type) {
+  records.record_id = 0;
+  query.value.msg_type = type;
+  records.isEmpty = false;
+  records.items = [];
+
+  loadChatRecord();
+}
+
+function searchText() {
+  if (search.keyword == "") {
+    showBox.value = 0;
+    return false;
+  }
+
+  ElNotification.info({
+    title: "消息",
+    message: "查询功能正在开发中...",
+  });
+}
+
+function triggerBroadside() {
+  broadside.value = !broadside.value;
+}
+
+loadFriends();
+
+onMounted(() => {
+  title.value = props.params.title;
+  query.value = {
+    talk_type: props.params.talk_type,
+    receiver_id: props.params.receiver_id,
+    msg_type: 0,
+  };
+
+  loadChatRecord(0);
+});
 </script>
 <style lang="less" scoped>
 :deep(.el-scrollbar__wrap ) {

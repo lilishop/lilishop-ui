@@ -7,7 +7,7 @@
       </div>
 
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         border
         :data="data"
@@ -56,7 +56,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="roleForm" :model="roleForm" label-width="80px" :rules="roleFormValidate">
+      <el-form ref="roleFormRef" :model="roleForm" label-width="80px" :rules="roleFormValidate">
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="roleForm.name" />
         </el-form-item>
@@ -81,7 +81,7 @@
     >
       <div v-loading="treeLoading" style="position: relative; max-height: 560px; overflow: auto">
         <el-tree
-          ref="permTree"
+          ref="permTreeRef"
           :key="permTreeKey"
           :data="permData"
           :props="{ label: 'title', children: 'children', disabled: 'disabled' }"
@@ -148,376 +148,379 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, ref } from "vue";
 import {
-  getRoleList,
+  getRoleList as fetchRoleList,
   getAllPermissionList,
-  addRole,
+  addRole as addRoleReq,
   editRole,
   deleteRole,
   loadDepartment,
   selectRoleMenu,
   saveRoleMenu,
 } from "@/api/index";
+import { Message, Modal } from "@/utils/message";
 import util from "@/libs/util.js";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "role-manage",
-  data() {
-    return {
-      superModelLoading: false,
-      selectIsSuperModel: false,
-      rolePermsWay: [],
-      openLevel: "0",
-      loading: true,
-      treeLoading: true,
-      depTreeLoading: true,
-      submitPermLoading: false,
-      submitDepLoading: false,
-      sortColumn: "",
-      sortType: "desc",
-      modalType: 0,
-      roleModalVisible: false,
-      permModalVisible: false,
-      depModalVisible: false,
-      modalTitle: "",
-      roleForm: {
-        name: "",
-        description: "",
-      },
-      roleFormValidate: {
-        name: [{ required: true, message: "角色名称不能为空", trigger: "blur" }],
-      },
-      submitLoading: false,
-      selectList: [],
-      selectCount: 0,
-      data: [],
-      pageNumber: 1,
-      pageSize: 20,
-      total: 0,
-      permData: [],
-      editRolePermId: "",
-      selectAllFlag: false,
-      depData: [],
-      dataType: 0,
-      editDepartments: [],
-      saveRoleWay: [],
-      permTreeKey: 0,
-      permCheckedKeys: [],
-      permExpandedKeys: [],
-    };
-  },
-  methods: {
-    init() {
-      this.getRoleList();
-      this.getPermList();
-    },
-    changePage() {
-      this.getRoleList();
-      this.clearSelectAll();
-    },
-    changePageSize() {
-      this.pageNumber = 1;
-      this.getRoleList();
-    },
-    changeSort(e) {
-      this.sortColumn = e.prop;
-      this.sortType = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
-      if (!e.order) {
-        this.sortType = "";
+defineOptions({ name: "role-manage" });
+
+const appStore = useAppStore();
+
+const tableRef = ref(null);
+const roleFormRef = ref(null);
+const permTreeRef = ref(null);
+
+const superModelLoading = ref(false);
+const selectIsSuperModel = ref(false);
+const rolePermsWay = ref([]);
+const openLevel = ref("0");
+const loading = ref(true);
+const treeLoading = ref(true);
+const depTreeLoading = ref(true);
+const submitPermLoading = ref(false);
+const submitDepLoading = ref(false);
+const sortColumn = ref("");
+const sortType = ref("desc");
+const modalType = ref(0);
+const roleModalVisible = ref(false);
+const permModalVisible = ref(false);
+const depModalVisible = ref(false);
+const modalTitle = ref("");
+const roleForm = ref({
+  name: "",
+  description: "",
+});
+const roleFormValidate = {
+  name: [{ required: true, message: "角色名称不能为空", trigger: "blur" }],
+};
+const submitLoading = ref(false);
+const selectList = ref([]);
+const selectCount = ref(0);
+const data = ref([]);
+const pageNumber = ref(1);
+const pageSize = ref(20);
+const total = ref(0);
+const permData = ref([]);
+const editRolePermId = ref("");
+const selectAllFlag = ref(false);
+const depData = ref([]);
+const dataType = ref(0);
+const editDepartments = ref([]);
+const saveRoleWay = ref([]);
+const permTreeKey = ref(0);
+const permCheckedKeys = ref([]);
+const permExpandedKeys = ref([]);
+
+function init() {
+  getRoleList();
+  getPermList();
+}
+function changePage() {
+  getRoleList();
+  clearSelectAll();
+}
+function changePageSize() {
+  pageNumber.value = 1;
+  getRoleList();
+}
+function changeSort(e) {
+  sortColumn.value = e.prop;
+  sortType.value = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
+  if (!e.order) {
+    sortType.value = "";
+  }
+  getRoleList();
+}
+function setRole(val) {
+  let enable;
+  val == "onlyView" ? (enable = 0) : (enable = 1);
+  saveRoleWay.value.map((item) => {
+    item.isSuper = enable;
+  });
+}
+function getRoleList() {
+  loading.value = true;
+  let params = {
+    pageNumber: pageNumber.value,
+    pageSize: pageSize.value,
+    sort: sortColumn.value,
+    order: sortType.value,
+  };
+  fetchRoleList(params).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function getPermList() {
+  treeLoading.value = true;
+  getAllPermissionList().then((res) => {
+    if (res.success) {
+      deleteDisableNode(res.result);
+      permData.value = res.result;
+    }
+    treeLoading.value = false;
+  });
+}
+function deleteDisableNode(permData) {
+  permData.forEach(function (e) {
+    if (e.status == -1) {
+      e.title = "[已禁用] " + e.title;
+      e.disabled = true;
+    }
+    if (e.children && e.children.length > 0) {
+      deleteDisableNode(e.children);
+    }
+  });
+}
+function submitRole() {
+  roleFormRef.value.validate((valid) => {
+    if (valid) {
+      if (modalType.value == 0) {
+        submitLoading.value = true;
+        addRoleReq(roleForm.value).then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            Message.success("操作成功");
+            getRoleList();
+            roleModalVisible.value = false;
+          }
+        });
+      } else {
+        submitLoading.value = true;
+        roleForm.value.roleId = roleForm.value.id;
+        editRole(roleForm.value).then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            Message.success("操作成功");
+            getRoleList();
+            roleModalVisible.value = false;
+          }
+        });
       }
-      this.getRoleList();
-    },
-    setRole(val) {
-      let enable;
-      val == "onlyView" ? (enable = 0) : (enable = 1);
-      this.saveRoleWay.map((item) => {
-        item.isSuper = enable;
-      });
-    },
-    getRoleList() {
-      this.loading = true;
-      let params = {
-        pageNumber: this.pageNumber,
-        pageSize: this.pageSize,
-        sort: this.sortColumn,
-        order: this.sortType,
-      };
-      getRoleList(params).then((res) => {
-        this.loading = false;
+    }
+  });
+}
+function addRole() {
+  modalType.value = 0;
+  modalTitle.value = "添加角色";
+  roleForm.value = {
+    name: "",
+    description: "",
+  };
+  roleModalVisible.value = true;
+  nextTick(() => {
+    roleFormRef.value?.clearValidate();
+  });
+}
+function edit(v) {
+  modalType.value = 1;
+  modalTitle.value = "编辑角色";
+  roleFormRef.value?.resetFields();
+  for (let attr in v) {
+    if (v[attr] == null) {
+      v[attr] = "";
+    }
+  }
+  let str = JSON.stringify(v);
+  let roleInfo = JSON.parse(str);
+  roleForm.value = roleInfo;
+  roleModalVisible.value = true;
+}
+function remove(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除角色 " + v.name + " ?",
+    loading: true,
+    onOk: () => {
+      deleteRole(v.id).then((res) => {
+        Modal.remove();
         if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
+          Message.success("删除成功");
+          getRoleList();
         }
       });
     },
-    getPermList() {
-      this.treeLoading = true;
-      getAllPermissionList().then((res) => {
+  });
+}
+function clearSelectAll() {
+  tableRef.value?.clearSelection();
+}
+function changeSelect(e) {
+  selectList.value = e;
+  selectCount.value = e.length;
+}
+function delAll() {
+  if (selectCount.value <= 0) {
+    Message.warning("您还未选择要删除的数据");
+    return;
+  }
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除所选的 " + selectCount.value + " 条数据?",
+    loading: true,
+    onOk: () => {
+      let ids = "";
+      selectList.value.forEach(function (e) {
+        ids += e.id + ",";
+      });
+      ids = ids.substring(0, ids.length - 1);
+      deleteRole(ids).then((res) => {
+        Modal.remove();
         if (res.success) {
-          this.deleteDisableNode(res.result);
-          this.permData = res.result;
+          Message.success("删除成功");
+          clearSelectAll();
+          getRoleList();
         }
-        this.treeLoading = false;
       });
     },
-    deleteDisableNode(permData) {
-      let that = this;
-      permData.forEach(function (e) {
+  });
+}
+async function editPerm(v) {
+  permData.value.map((item) => {
+    item.children.length != 0
+      ? item.children.map((child) => {
+          child.children.length != 0
+            ? child.children.map((kid) => {
+                delete kid.isSuper;
+              })
+            : "";
+          delete child.isSuper;
+        })
+      : "";
+    delete item.isSuper;
+  });
+
+  if (treeLoading.value) {
+    Message.warning("菜单权限数据加载中，请稍后点击查看");
+    return;
+  }
+  editRolePermId.value = v.id;
+  modalTitle.value = "分配 " + v.name + " 的菜单权限";
+  let rolePerms;
+  let res = await selectRoleMenu(v.id);
+  if (res.result) {
+    rolePerms = res.result;
+    rolePermsWay.value = res.result;
+  }
+  permCheckedKeys.value = collectCheckedKeys(permData.value, rolePerms);
+  permExpandedKeys.value = computeExpandedKeys(openLevel.value);
+  permTreeKey.value += 1;
+  permModalVisible.value = true;
+}
+function collectCheckedKeys(permData, rolePerms) {
+  const keys = [];
+  const walk = (nodes) => {
+    nodes.forEach((p) => {
+      if (hasPerm(p, rolePerms) && p.status != -1) {
+        if (p.children && p.children.length === 0) {
+          keys.push(p.id);
+        }
+      }
+      if (p.children && p.children.length > 0) {
+        walk(p.children);
+      }
+    });
+  };
+  walk(permData);
+  return keys;
+}
+function hasPerm(p, rolePerms) {
+  if (!rolePerms) return false;
+  let flag = false;
+  for (let i = 0; i < rolePerms.length; i++) {
+    if (p.id == rolePerms[i].menuId) {
+      p.isSuper = rolePerms[i].isSuper;
+      flag = true;
+      break;
+    }
+  }
+  return flag;
+}
+function submitPermEdit() {
+  saveRoleWay.value = [];
+  selectIsSuperModel.value = true;
+  const tree = permTreeRef.value;
+  const selectedNodes = [
+    ...tree.getCheckedNodes(false, true),
+  ];
+  let way = [];
+  selectedNodes.forEach((e) => {
+    let perm = {
+      title: e.title,
+      isSuper: e.isSuper ? 1 : 0,
+      menuId: e.id,
+      roleId: editRolePermId.value,
+    };
+    way.push(perm);
+    saveRoleWay.value = way;
+  });
+}
+function saveRole() {
+  superModelLoading.value = true;
+  saveRoleMenu(editRolePermId.value, saveRoleWay.value).then((res) => {
+    superModelLoading.value = false;
+    if (res.success) {
+      Message.success("操作成功");
+      appStore.setAdded(false);
+      util.initRouter();
+      getRoleList();
+      permModalVisible.value = false;
+      selectIsSuperModel.value = false;
+    }
+  });
+}
+function loadData(item, callback) {
+  loadDepartment(item.id, { openDataFilter: false }).then((res) => {
+    if (res.success) {
+      res.result.forEach(function (e) {
+        e.checked = false;
+        if (e.isParent) {
+          e.loading = false;
+          e.children = [];
+        }
         if (e.status == -1) {
           e.title = "[已禁用] " + e.title;
           e.disabled = true;
         }
-        if (e.children && e.children.length > 0) {
-          that.deleteDisableNode(e.children);
-        }
       });
-    },
-    submitRole() {
-      this.$refs.roleForm.validate((valid) => {
-        if (valid) {
-          if (this.modalType == 0) {
-            this.submitLoading = true;
-            addRole(this.roleForm).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getRoleList();
-                this.roleModalVisible = false;
-              }
-            });
-          } else {
-            this.submitLoading = true;
-            this.roleForm.roleId = this.roleForm.id;
-            editRole(this.roleForm).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("操作成功");
-                this.getRoleList();
-                this.roleModalVisible = false;
-              }
-            });
-          }
-        }
-      });
-    },
-    addRole() {
-      this.modalType = 0;
-      this.modalTitle = "添加角色";
-      this.roleForm = {
-        name: "",
-        description: "",
-      };
-      this.roleModalVisible = true;
-      this.$nextTick(() => {
-        this.$refs.roleForm?.clearValidate();
-      });
-    },
-    edit(v) {
-      this.modalType = 1;
-      this.modalTitle = "编辑角色";
-      this.$refs.roleForm?.resetFields();
-      for (let attr in v) {
-        if (v[attr] == null) {
-          v[attr] = "";
-        }
+      callback(res.result);
+    }
+  });
+}
+function computeExpandedKeys(level) {
+  const keys = [];
+  const walk = (nodes, depth) => {
+    nodes.forEach((n) => {
+      if (level === "0") {
+        keys.push(n.id);
+      } else if (level === "2" && depth < 1) {
+        keys.push(n.id);
+      } else if (level === "3" && depth < 2) {
+        keys.push(n.id);
       }
-      let str = JSON.stringify(v);
-      let roleInfo = JSON.parse(str);
-      this.roleForm = roleInfo;
-      this.roleModalVisible = true;
-    },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除角色 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
-          deleteRole(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.getRoleList();
-            }
-          });
-        },
-      });
-    },
-    clearSelectAll() {
-      this.$refs.table?.clearSelection();
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
+      if (n.children && n.children.length) {
+        walk(n.children, depth + 1);
       }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条数据?",
-        loading: true,
-        onOk: () => {
-          let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
-          ids = ids.substring(0, ids.length - 1);
-          deleteRole(ids).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.clearSelectAll();
-              this.getRoleList();
-            }
-          });
-        },
-      });
-    },
-    async editPerm(v) {
-      this.permData.map((item) => {
-        item.children.length != 0
-          ? item.children.map((child) => {
-              child.children.length != 0
-                ? child.children.map((kid) => {
-                    delete kid.isSuper;
-                  })
-                : "";
-              delete child.isSuper;
-            })
-          : "";
-        delete item.isSuper;
-      });
+    });
+  };
+  if (level !== "1") {
+    walk(permData.value, 0);
+  }
+  return keys;
+}
+function changeOpen(v) {
+  permExpandedKeys.value = computeExpandedKeys(v);
+  permTreeKey.value += 1;
+}
 
-      if (this.treeLoading) {
-        this.$Message.warning("菜单权限数据加载中，请稍后点击查看");
-        return;
-      }
-      this.editRolePermId = v.id;
-      this.modalTitle = "分配 " + v.name + " 的菜单权限";
-      let rolePerms;
-      let res = await selectRoleMenu(v.id);
-      if (res.result) {
-        rolePerms = res.result;
-        this.rolePermsWay = res.result;
-      }
-      this.permCheckedKeys = this.collectCheckedKeys(this.permData, rolePerms);
-      this.permExpandedKeys = this.computeExpandedKeys(this.openLevel);
-      this.permTreeKey += 1;
-      this.permModalVisible = true;
-    },
-    collectCheckedKeys(permData, rolePerms) {
-      const keys = [];
-      const walk = (nodes) => {
-        nodes.forEach((p) => {
-          if (this.hasPerm(p, rolePerms) && p.status != -1) {
-            if (p.children && p.children.length === 0) {
-              keys.push(p.id);
-            }
-          }
-          if (p.children && p.children.length > 0) {
-            walk(p.children);
-          }
-        });
-      };
-      walk(permData);
-      return keys;
-    },
-    hasPerm(p, rolePerms) {
-      if (!rolePerms) return false;
-      let flag = false;
-      for (let i = 0; i < rolePerms.length; i++) {
-        if (p.id == rolePerms[i].menuId) {
-          p.isSuper = rolePerms[i].isSuper;
-          flag = true;
-          break;
-        }
-      }
-      return flag;
-    },
-    submitPermEdit() {
-      this.saveRoleWay = [];
-      this.selectIsSuperModel = true;
-      const tree = this.$refs.permTree;
-      const selectedNodes = [
-        ...tree.getCheckedNodes(false, true),
-      ];
-      let way = [];
-      selectedNodes.forEach((e) => {
-        let perm = {
-          title: e.title,
-          isSuper: e.isSuper ? 1 : 0,
-          menuId: e.id,
-          roleId: this.editRolePermId,
-        };
-        way.push(perm);
-        this.saveRoleWay = way;
-      });
-    },
-    saveRole() {
-      this.superModelLoading = true;
-      saveRoleMenu(this.editRolePermId, this.saveRoleWay).then((res) => {
-        this.superModelLoading = false;
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.$store.commit("setAdded", false);
-          util.initRouter(this);
-          this.getRoleList();
-          this.permModalVisible = false;
-          this.selectIsSuperModel = false;
-        }
-      });
-    },
-    loadData(item, callback) {
-      loadDepartment(item.id, { openDataFilter: false }).then((res) => {
-        if (res.success) {
-          res.result.forEach(function (e) {
-            e.checked = false;
-            if (e.isParent) {
-              e.loading = false;
-              e.children = [];
-            }
-            if (e.status == -1) {
-              e.title = "[已禁用] " + e.title;
-              e.disabled = true;
-            }
-          });
-          callback(res.result);
-        }
-      });
-    },
-    computeExpandedKeys(level) {
-      const keys = [];
-      const walk = (nodes, depth) => {
-        nodes.forEach((n) => {
-          if (level === "0") {
-            keys.push(n.id);
-          } else if (level === "2" && depth < 1) {
-            keys.push(n.id);
-          } else if (level === "3" && depth < 2) {
-            keys.push(n.id);
-          }
-          if (n.children && n.children.length) {
-            walk(n.children, depth + 1);
-          }
-        });
-      };
-      if (level !== "1") {
-        walk(this.permData, 0);
-      }
-      return keys;
-    },
-    changeOpen(v) {
-      this.permExpandedKeys = this.computeExpandedKeys(v);
-      this.permTreeKey += 1;
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .role-list {

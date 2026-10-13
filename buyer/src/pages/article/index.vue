@@ -48,87 +48,89 @@
   </div>
 </template>
 
-<script>
-import { articleCateList, articleDetail, articleList } from '@/api/common.js'
+<script setup>
+import { onMounted, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { articleCateList, articleDetail, articleList as fetchArticleList } from '@/api/common.js'
 
-export default {
-  name: 'ArticleIndex',
-  data () {
-    return {
-      list: [],
-      detail: '',
-      articleList: [],
-      activeName: '1347456734864367616',
-      openName: [],
-      menuKey: 0,
-      params: {
-        pageNumber: 1,
-        pageSize: 100,
-        categoryId: '',
-        sort: 'sort'
-      },
-      showList: true
-    };
-  },
-  methods: {
-    onSelect (id) {
-      this.getList(id)
-      this.detail = ''
-      this.showList = true
-    },
-    getCateList () {
-      articleCateList().then(res => {
-        if (res.success) {
-          this.list = res.result || []
-          this.openName = []
-          if (this.$route.query.id && this.detail && this.detail.categoryId) {
-            this.activeName = this.detail.categoryId
-            this.list.forEach(e => {
-              const children = e.children || []
-              const hitParent = String(e.id) === String(this.activeName)
-              const hitChild = children.some(i => i && String(i.id) === String(this.activeName))
-              if ((hitParent || hitChild) && children.length) {
-                this.openName.push(String(e.id))
-              }
-            })
-          } else if (this.list[0] && this.list[0].id) {
-            this.activeName = this.list[0].id
-            if (this.list[0].children && this.list[0].children.length) {
-              this.openName.push(String(this.list[0].id))
-            }
+defineOptions({ name: 'ArticleIndex' })
+
+const route = useRoute()
+
+const list = ref([])
+const detail = ref('')
+const articleList = ref([])
+const activeName = ref('1347456734864367616')
+const openName = ref([])
+const menuKey = ref(0)
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 100,
+  categoryId: '',
+  sort: 'sort'
+})
+const showList = ref(true)
+
+function onSelect (id) {
+  getList(id)
+  detail.value = ''
+  showList.value = true
+}
+
+function getCateList () {
+  articleCateList().then(res => {
+    if (res.success) {
+      list.value = res.result || []
+      openName.value = []
+      if (route.query.id && detail.value && detail.value.categoryId) {
+        activeName.value = detail.value.categoryId
+        list.value.forEach(e => {
+          const children = e.children || []
+          const hitParent = String(e.id) === String(activeName.value)
+          const hitChild = children.some(i => i && String(i.id) === String(activeName.value))
+          if ((hitParent || hitChild) && children.length) {
+            openName.value.push(String(e.id))
           }
-          this.menuKey++
-          if (this.activeName) {
-            this.getList(this.activeName)
-          }
+        })
+      } else if (list.value[0] && list.value[0].id) {
+        activeName.value = list.value[0].id
+        if (list.value[0].children && list.value[0].children.length) {
+          openName.value.push(String(list.value[0].id))
         }
-      })
-    },
-    getList (id) {
-      this.params.categoryId = id
-      articleList(this.params).then(res => {
-        if (res.success) {
-          this.articleList = res.result.records
-        }
-      })
-    },
-    async getDetail (id) {
-      await articleDetail(id).then(res => {
-        if (res.success) {
-          this.detail = res.result
-          this.showList = false
-        }
-      })
+      }
+      menuKey.value++
+      if (activeName.value) {
+        getList(activeName.value)
+      }
     }
-  },
-  async mounted () {
-    const articleId = this.$route.query.id
-    if (articleId) {
-      await this.getDetail(articleId)
+  })
+}
+
+function getList (id) {
+  params.categoryId = id
+  fetchArticleList(params).then(res => {
+    if (res.success) {
+      articleList.value = res.result.records
     }
-    this.getCateList()
+  })
+}
+
+async function getDetail (id) {
+  await articleDetail(id).then(res => {
+    if (res.success) {
+      detail.value = res.result
+      showList.value = false
+    }
+  })
+}
+
+onMounted(async () => {
+  const articleId = route.query.id
+  if (articleId) {
+    await getDetail(articleId)
   }
-};
+  getCateList()
+})
 </script>
 
 <style scoped lang="scss">

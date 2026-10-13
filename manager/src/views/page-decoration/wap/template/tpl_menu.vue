@@ -10,34 +10,22 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from "vue";
 import { cubeWrapperStyle, cubeImgStyle } from "./cubeStyle";
 
-export default {
-  props: ["res"],
-  computed: {
-    // 面板保存过样式字段才启用自定义样式，老数据保持原样
-    styled() {
-      return this.res && this.res.paddingTop !== undefined;
-    },
-    wrapperStyle() {
-      return cubeWrapperStyle(this.res);
-    },
-    imgStyle() {
-      return cubeImgStyle(this.res);
-    },
-    listStyle() {
-      return this.styled
-        ? { rowGap: `${(Number(this.res.contentGap) || 0) / 2}px` }
-        : {};
-    },
-    titleStyle() {
-      return this.styled && this.res.textColor
-        ? { color: this.res.textColor }
-        : {};
-    },
-  },
-};
+const props = defineProps(["res"]);
+
+// 面板保存过样式字段才启用自定义样式，老数据保持原样
+const styled = computed(() => props.res && props.res.paddingTop !== undefined);
+const wrapperStyle = computed(() => cubeWrapperStyle(props.res));
+const imgStyle = computed(() => cubeImgStyle(props.res));
+const listStyle = computed(() =>
+  styled.value ? { rowGap: `${(Number(props.res.contentGap) || 0) / 2}px` } : {}
+);
+const titleStyle = computed(() =>
+  styled.value && props.res.textColor ? { color: props.res.textColor } : {}
+);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

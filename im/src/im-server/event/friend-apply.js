@@ -1,5 +1,5 @@
 import Base from './base'
-import store from '@/store'
+import { useNotifyStore } from '@/stores/notify'
 import router from '@/router'
 
 /**
@@ -23,7 +23,7 @@ class FriendApply extends Base {
   }
 
   handle() {
-    store.commit('INCR_APPLY_NUM')
+    useNotifyStore().INCR_APPLY_NUM()
 
     this.$notify({
       title: '好友申请',
@@ -33,7 +33,7 @@ class FriendApply extends Base {
       type: 'info',
       customClass: 'pointer',
       onClick: function() {
-        store.commit('SET_APPLY_NUM', 0)
+        useNotifyStore().SET_APPLY_NUM(0)
         router.push({
           path: '/contacts/apply',
           query: { t: new Date().getTime() },

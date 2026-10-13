@@ -3,7 +3,7 @@
     <!-- 顶部logo -->
     <div class="top-content" @click="hideVerify">
       <div class="logo-box">
-        <img :src="$store.state.logoImg" @click="$router.push('/')" />
+        <img :src="logoImg" @click="$router.push('/')" />
         <div>欢迎登录</div>
       </div>
     </div>
@@ -27,7 +27,7 @@
         <div>
           <div>
           <!-- 账号密码登录 -->
-          <el-form ref="formInline" :model="formData" :rules="ruleInline" v-show="type === true"
+          <el-form ref="formInlineRef" :model="formData" :rules="ruleInline" v-show="type === true"
                 @click.self="hideVerify">
             <el-form-item prop="username">
               <el-input type="text" v-model="formData.username" clearable placeholder="用户名">
@@ -44,7 +44,7 @@
             </el-form-item>
           </el-form>
           <!-- 验证码登录 -->
-          <el-form ref="formSms" :model="formSms" :rules="ruleInline" v-show="type === false"
+          <el-form ref="formSmsRef" :model="formSms" :rules="ruleInline" v-show="type === false"
                 @click.self="hideVerify">
             <el-form-item prop="mobile">
               <el-input type="text" v-model="formSms.mobile" clearable placeholder="手机号">
@@ -88,7 +88,7 @@
 
 
       <!-- 拼图验证码 -->
-      <verify ref="verify" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
+      <verify ref="verifyRef" class="verify-con" verifyType="LOGIN" @change="verifyChange"></verify>
     </div>
     <div class="foot">
       <div type="flex" justify="space-around" class="help">
@@ -105,8 +105,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
 
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message, Spin } from "@/utils/message";
 import * as RegExp from "@/plugins/RegExp.js";
 import { md5 } from "@/plugins/md5.js";
@@ -117,235 +119,240 @@ import storage from "@/plugins/storage.js";
 import verify from "@/components/verify";
 import { User, Lock, Document, Iphone } from "@element-plus/icons-vue";
 import config from "@/config";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "Login",
-  components: {
-    verify,
-    User,
-    Lock,
-    Document,
-    Iphone,
-  },
-  data() {
-    return {
-      config,
-      type: true, // true 账号登录  false 验证码登录
-      formData: {
-        // 登录表单
-        username: "",
-        password: "",
-      },
-      formSms: {
-        // 手机号登录
-        code: "",
-        mobile: "",
-      },
-      verifyStatus: false, // 是否图片验证通过
-      codeSent: false, // 是否已成功发送短信验证码
-      ruleInline: {
-        // 验证规则
-        username: [{required: true, message: "请输入用户名"}],
-        password: [
-          {required: true, message: "请输入密码"},
-          {type: "string", min: 6, message: "密码不能少于6位"},
-        ],
-        mobile: [
-          {required: true, message: "请输入手机号码"},
-          {
-            pattern: RegExp.mobile,
-            message: "请输入正确的手机号",
-          },
-        ],
-        code: [{required: true, message: "请输入手机验证码"}],
-      },
-      codeMsg: "发送验证码", // 验证码文字
-      interval: null, // 定时器
-      time: 60, // 倒计时
-      year: new Date().getFullYear(),
-    };
-  },
-  methods: {
-    hideVerify() {
-      this.$refs.verify?.close?.();
-    },
+defineOptions({ name: "Login" });
 
-    // 登录
-    handleSubmit(name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          if (this.type) {
-            this.$refs.verify?.init();
-          } else {
-            if (!this.codeSent) {
-              Message.warning("请先获取短信验证码");
-              return;
-            }
-            const data = JSON.parse(JSON.stringify(this.formSms));
-            apiLogin.smsLogin(data).then((res) => {
-              this.hideVerify();
-              if (res.success) {
-                Message.success("登录成功");
-                storage.setItem("accessToken", res.result.accessToken);
-                storage.setItem("refreshToken", res.result.refreshToken);
-                storage.setItem('getTimes',0)
-                apiLogin.getMemberMsg().then((res) => {
-                  if (res.success) {
-                    storage.setItem("userInfo", res.result);
-                    let query = this.$route.query;
-                    if (query.rePath) {
-                      this.$router.push({
-                        path: query.rePath,
-                        query: JSON.parse(query.query),
-                      });
-                    } else {
-                      this.$router.push("/");
-                    }
-                  }
-                });
-              } else {
-                Message.error(res.message);
-              }
-            }).catch((err) => {
-              console.warn('短信登录失败', err);
-            });
-          }
-        }
-      });
-    },
-    // 发送手机验证码
-    sendCode() {
-      if (this.time !== 60) return;
-      if (this.formSms.mobile === "") {
-        Message.warning("请先填写手机号");
-        return;
-      }
-      if (!RegExp.mobile.test(this.formSms.mobile)) {
-        Message.warning("请输入正确的手机号");
-        return;
-      }
-      this.$refs.verify?.init();
-    },
-    dispatchSms() {
-      sendSms({
-        mobile: this.formSms.mobile,
-        verificationEnums: "LOGIN",
-      }).then((res) => {
-        if (res.success) {
-          Message.success("验证码发送成功");
-          this.codeSent = true;
-          this.interval = setInterval(() => {
-            this.time--;
-            if (this.time === 0) {
-              this.time = 60;
-              this.codeMsg = "重新发送";
-              this.verifyStatus = false;
-              this.codeSent = false;
-              clearInterval(this.interval);
-            } else {
-              this.codeMsg = this.time;
-            }
-          }, 1000);
-        } else {
-          this.verifyStatus = false;
-          Message.warning(res.message);
-        }
-      }).catch(() => {
-        this.verifyStatus = false;
-      });
-    },
-    verifyChange(con) {
-      // 拼图验证码回显
-      if (!con.status) return;
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
 
-      if (this.type === true) {
-        // 账号密码登录
-        let data = JSON.parse(JSON.stringify(this.formData));
-        data.password = md5(data.password);
-        this.hideVerify();
-        Spin.show();
-        apiLogin
-          .login(data)
-          .then((res) => {
-            if (res.success) {
-              this.loginSuccess(res.result.accessToken,res.result.refreshToken);
-            } else {
-              Spin.hide();
-              Message.error(res.message);
-            }
-          })
-          .catch(() => {
-            Spin.hide();
-          });
-      } else {
-        this.verifyStatus = true;
-        this.hideVerify();
-        this.dispatchSms();
-      }
-    },
-    handleWebLogin(type) {
-      // 第三方登录
-      webLogin(type);
-    },
-    loginSuccess(accessToken,refreshToken){
-      Message.success("登录成功");
-      storage.setItem("accessToken", accessToken);
-      storage.setItem("refreshToken", refreshToken);
-      apiLogin.getMemberMsg().then((res) => {
-        Spin.hide();
-        if (res.success) {
-          storage.setItem("userInfo", res.result);
-          let query = this.$route.query;
-          if (query.rePath) {
-            this.$router.push({
-              path: query.rePath,
-              query: JSON.parse(query.query),
-            });
-          } else {
-            this.$router.push("/");
-          }
-        }
-      });
-    },
+const logoImg = computed(() => appStore.logoImg);
 
-  },
-  beforeUnmount() {
-    clearInterval(this.interval);
-  },
-  mounted() {
-    let uuid = this.$route.query.state;
-    if (uuid) {
-      storage.setItem("uuid", uuid);
-      loginCallback(uuid).then((res) => {
-        if (res.success) {
-          this.loginSuccess(res.result.accessToken,res.result.refreshToken);
-        }
-      });
-    }
-  },
-  watch: {
-    type(v) {
-      if (v) {
-        this.$refs.formInline.resetFields();
-      } else {
-        this.$refs.formSms.resetFields();
-      }
-      this.verifyStatus = false;
-      this.codeSent = false;
-      this.hideVerify();
-      clearInterval(this.interval);
-      this.codeMsg = "发送验证码";
-      this.time = 60;
-    },
-    "formSms.mobile"() {
-      this.codeSent = false;
-      this.verifyStatus = false;
-      clearInterval(this.interval);
-      this.codeMsg = "发送验证码";
-      this.time = 60;
-    },
-  },
+const formInlineRef = ref(null);
+const formSmsRef = ref(null);
+const verifyRef = ref(null);
+const formRefs = {
+  formInline: formInlineRef,
+  formSms: formSmsRef,
 };
+
+const type = ref(true); // true 账号登录  false 验证码登录
+const formData = reactive({
+  // 登录表单
+  username: "",
+  password: "",
+});
+const formSms = reactive({
+  // 手机号登录
+  code: "",
+  mobile: "",
+});
+const verifyStatus = ref(false); // 是否图片验证通过
+const codeSent = ref(false); // 是否已成功发送短信验证码
+const ruleInline = {
+  // 验证规则
+  username: [{required: true, message: "请输入用户名"}],
+  password: [
+    {required: true, message: "请输入密码"},
+    {type: "string", min: 6, message: "密码不能少于6位"},
+  ],
+  mobile: [
+    {required: true, message: "请输入手机号码"},
+    {
+      pattern: RegExp.mobile,
+      message: "请输入正确的手机号",
+    },
+  ],
+  code: [{required: true, message: "请输入手机验证码"}],
+};
+const codeMsg = ref("发送验证码"); // 验证码文字
+const interval = ref(null); // 定时器
+const time = ref(60); // 倒计时
+const year = new Date().getFullYear();
+
+function hideVerify() {
+  verifyRef.value?.close?.();
+}
+
+// 登录
+function handleSubmit(name) {
+  formRefs[name].value.validate((valid) => {
+    if (valid) {
+      if (type.value) {
+        verifyRef.value?.init();
+      } else {
+        if (!codeSent.value) {
+          Message.warning("请先获取短信验证码");
+          return;
+        }
+        const data = JSON.parse(JSON.stringify(formSms));
+        apiLogin.smsLogin(data).then((res) => {
+          hideVerify();
+          if (res.success) {
+            Message.success("登录成功");
+            storage.setItem("accessToken", res.result.accessToken);
+            storage.setItem("refreshToken", res.result.refreshToken);
+            storage.setItem('getTimes',0)
+            apiLogin.getMemberMsg().then((res) => {
+              if (res.success) {
+                storage.setItem("userInfo", res.result);
+                let query = route.query;
+                if (query.rePath) {
+                  router.push({
+                    path: query.rePath,
+                    query: JSON.parse(query.query),
+                  });
+                } else {
+                  router.push("/");
+                }
+              }
+            });
+          } else {
+            Message.error(res.message);
+          }
+        }).catch((err) => {
+          console.warn('短信登录失败', err);
+        });
+      }
+    }
+  });
+}
+// 发送手机验证码
+function sendCode() {
+  if (time.value !== 60) return;
+  if (formSms.mobile === "") {
+    Message.warning("请先填写手机号");
+    return;
+  }
+  if (!RegExp.mobile.test(formSms.mobile)) {
+    Message.warning("请输入正确的手机号");
+    return;
+  }
+  verifyRef.value?.init();
+}
+function dispatchSms() {
+  sendSms({
+    mobile: formSms.mobile,
+    verificationEnums: "LOGIN",
+  }).then((res) => {
+    if (res.success) {
+      Message.success("验证码发送成功");
+      codeSent.value = true;
+      interval.value = setInterval(() => {
+        time.value--;
+        if (time.value === 0) {
+          time.value = 60;
+          codeMsg.value = "重新发送";
+          verifyStatus.value = false;
+          codeSent.value = false;
+          clearInterval(interval.value);
+        } else {
+          codeMsg.value = time.value;
+        }
+      }, 1000);
+    } else {
+      verifyStatus.value = false;
+      Message.warning(res.message);
+    }
+  }).catch(() => {
+    verifyStatus.value = false;
+  });
+}
+function verifyChange(con) {
+  // 拼图验证码回显
+  if (!con.status) return;
+
+  if (type.value === true) {
+    // 账号密码登录
+    let data = JSON.parse(JSON.stringify(formData));
+    data.password = md5(data.password);
+    hideVerify();
+    Spin.show();
+    apiLogin
+      .login(data)
+      .then((res) => {
+        if (res.success) {
+          loginSuccess(res.result.accessToken,res.result.refreshToken);
+        } else {
+          Spin.hide();
+          Message.error(res.message);
+        }
+      })
+      .catch(() => {
+        Spin.hide();
+      });
+  } else {
+    verifyStatus.value = true;
+    hideVerify();
+    dispatchSms();
+  }
+}
+function handleWebLogin(type) {
+  // 第三方登录
+  webLogin(type);
+}
+function loginSuccess(accessToken,refreshToken){
+  Message.success("登录成功");
+  storage.setItem("accessToken", accessToken);
+  storage.setItem("refreshToken", refreshToken);
+  apiLogin.getMemberMsg().then((res) => {
+    Spin.hide();
+    if (res.success) {
+      storage.setItem("userInfo", res.result);
+      let query = route.query;
+      if (query.rePath) {
+        router.push({
+          path: query.rePath,
+          query: JSON.parse(query.query),
+        });
+      } else {
+        router.push("/");
+      }
+    }
+  });
+}
+
+onBeforeUnmount(() => {
+  clearInterval(interval.value);
+});
+
+onMounted(() => {
+  let uuid = route.query.state;
+  if (uuid) {
+    storage.setItem("uuid", uuid);
+    loginCallback(uuid).then((res) => {
+      if (res.success) {
+        loginSuccess(res.result.accessToken,res.result.refreshToken);
+      }
+    });
+  }
+});
+
+watch(type, (v) => {
+  if (v) {
+    formInlineRef.value.resetFields();
+  } else {
+    formSmsRef.value.resetFields();
+  }
+  verifyStatus.value = false;
+  codeSent.value = false;
+  hideVerify();
+  clearInterval(interval.value);
+  codeMsg.value = "发送验证码";
+  time.value = 60;
+});
+
+watch(
+  () => formSms.mobile,
+  () => {
+    codeSent.value = false;
+    verifyStatus.value = false;
+    clearInterval(interval.value);
+    codeMsg.value = "发送验证码";
+    time.value = 60;
+  }
+);
 </script>
 <style scoped lang="scss">
 .login {

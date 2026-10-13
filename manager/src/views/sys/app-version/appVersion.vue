@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -72,7 +72,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="版本名称" prop="versionName">
           <el-input v-model="form.versionName" maxlength="15" clearable style="width: 40%" />
         </el-form-item>
@@ -163,147 +163,154 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { unixToDate } from "@/utils/filters";
 import * as API_Setting from "@/api/setting";
 
-export default {
-  name: "appVersion",
-  data() {
-    return {
-      queryModalVisible: false,
-      queryModalTitle: "查看更新信息",
-      loading: true,
-      modalVisible: false,
-      modalTitle: "",
-      modalType: 0,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        type: "",
-      },
-      form: {
-        versionName: "",
-        version: "",
-        forceUpdate: 1,
-        type: "IOS",
-        downloadUrl: "",
-        content: "",
-        versionUpdateDate: "",
-      },
-      versionUpdateDate: "",
-      formValidate: {
-        version: [{ required: true, message: "版本号不能为空", trigger: "blur" }],
-        versionName: [{ required: true, message: "版本名称不能为空", trigger: "blur" }],
-        downloadUrl: [{ required: true, message: "下载地址不能为空", trigger: "blur" }],
-        versionUpdateDate: [{ required: true, message: "更新时间不能为空" }],
-      },
-      submitLoading: false,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getData();
-    },
-    changePage() {
-      this.getData();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    getData() {
-      this.loading = true;
-      API_Setting.appVersionPage(this.searchForm).then((res) => {
-        this.loading = false;
+defineOptions({ name: "appVersion" });
+
+const queryModalVisible = ref(false);
+const queryModalTitle = ref("查看更新信息");
+const loading = ref(true);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const modalType = ref(0);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  type: "",
+});
+const form = ref({
+  versionName: "",
+  version: "",
+  forceUpdate: 1,
+  type: "IOS",
+  downloadUrl: "",
+  content: "",
+  versionUpdateDate: "",
+});
+const versionUpdateDate = ref("");
+const formValidate = reactive({
+  version: [{ required: true, message: "版本号不能为空", trigger: "blur" }],
+  versionName: [{ required: true, message: "版本名称不能为空", trigger: "blur" }],
+  downloadUrl: [{ required: true, message: "下载地址不能为空", trigger: "blur" }],
+  versionUpdateDate: [{ required: true, message: "更新时间不能为空" }],
+});
+const submitLoading = ref(false);
+const data = ref([]);
+const total = ref(0);
+
+const formRef = ref(null);
+
+function init() {
+  getData();
+}
+
+function changePage() {
+  getData();
+}
+
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getData();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getData();
+}
+
+function getData() {
+  loading.value = true;
+  API_Setting.appVersionPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+function addAppVersion() {
+  modalVisible.value = true;
+  modalTitle.value = "添加APP版本信息";
+  modalType.value = 0;
+  const versionUpdateDate = unixToDate(new Date() / 1000);
+  form.value = {
+    forceUpdate: 0,
+    type: "IOS",
+    versionUpdateDate: versionUpdateDate,
+    content: " ",
+  };
+}
+
+function editAppVersion(v) {
+  modalVisible.value = true;
+  modalTitle.value = "修改APP版本信息";
+  modalType.value = 1;
+  v.forceUpdate ? (v.forceUpdate = 1) : (v.forceUpdate = 0);
+  form.value = v;
+}
+
+function saveAppVersion() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      if (JSON.stringify(form.value.versionUpdateDate).includes("T")) {
+        const versionUpdateDate = unixToDate(
+          form.value.versionUpdateDate / 1000
+        );
+        form.value.versionUpdateDate = versionUpdateDate;
+        form.value.updateTime = versionUpdateDate;
+      }
+      if (modalType.value == 0) {
+        delete form.value.id;
+        API_Setting.addVersion(form.value).then((res) => {
+          submitLoading.value = false;
+          if (res && res.success) {
+            ElMessage.success("添加成功");
+            modalVisible.value = false;
+            getData();
+          }
+        });
+      } else {
+        API_Setting.editVersion(form.value, form.value.id).then((res) => {
+          submitLoading.value = false;
+          if (res && res.success) {
+            ElMessage.success("修改成功");
+            modalVisible.value = false;
+            getData();
+          }
+        });
+      }
+    }
+  });
+}
+
+function remove(v) {
+  ElMessageBox.confirm("您确认要删除么?", "确认删除", { type: "warning" }).then(() => {
+      API_Setting.deleteVersion(v.id).then((res) => {
         if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
+          ElMessage.success("删除成功");
+          getData();
         }
       });
-    },
-    addAppVersion() {
-      this.modalVisible = true;
-      this.modalTitle = "添加APP版本信息";
-      this.modalType = 0;
-      const versionUpdateDate = unixToDate(new Date() / 1000);
-      this.form = {
-        forceUpdate: 0,
-        type: "IOS",
-        versionUpdateDate: versionUpdateDate,
-        content: " ",
-      };
-    },
-    editAppVersion(v) {
-      this.modalVisible = true;
-      this.modalTitle = "修改APP版本信息";
-      this.modalType = 1;
-      v.forceUpdate ? (v.forceUpdate = 1) : (v.forceUpdate = 0);
-      this.form = v;
-    },
-    saveAppVersion() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (JSON.stringify(this.form.versionUpdateDate).includes("T")) {
-            const versionUpdateDate = unixToDate(
-              this.form.versionUpdateDate / 1000
-            );
-            this.form.versionUpdateDate = versionUpdateDate;
-            this.form.updateTime = versionUpdateDate;
-          }
-          if (this.modalType == 0) {
-            delete this.form.id;
-            API_Setting.addVersion(this.form).then((res) => {
-              this.submitLoading = false;
-              if (res && res.success) {
-                ElMessage.success("添加成功");
-                this.modalVisible = false;
-                this.getData();
-              }
-            });
-          } else {
-            API_Setting.editVersion(this.form, this.form.id).then((res) => {
-              this.submitLoading = false;
-              if (res && res.success) {
-                ElMessage.success("修改成功");
-                this.modalVisible = false;
-                this.getData();
-              }
-            });
-          }
-        }
-      });
-    },
-    remove(v) {
-      ElMessageBox.confirm("您确认要删除么?", "确认删除", { type: "warning" }).then(() => {
-          API_Setting.deleteVersion(v.id).then((res) => {
-            if (res.success) {
-              ElMessage.success("删除成功");
-              this.getData();
-            }
-          });
-      }).catch(() => {});
-    },
-    detail(v) {
-      this.queryModalVisible = true;
-      this.form = JSON.parse(JSON.stringify(v));
-      this.versionUpdateDate = this.form.versionUpdateDate;
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  }).catch(() => {});
+}
+
+function detail(v) {
+  queryModalVisible.value = true;
+  form.value = JSON.parse(JSON.stringify(v));
+  versionUpdateDate.value = form.value.versionUpdateDate;
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .search-form {

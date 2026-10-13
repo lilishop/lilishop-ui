@@ -63,120 +63,120 @@
   </el-dialog>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from "vue";
 import { getDistributionMemberPage } from "@/api/distribution";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "distributionSelector",
-  props: {
-    modelValue: {
-      type: Boolean,
-      default: false,
-    },
-    excludeId: {
-      type: String,
-      default: "",
-    },
+defineOptions({ name: "distributionSelector" });
+
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false,
   },
-  emits: ["update:modelValue", "confirm"],
-  data() {
-    return {
-      loading: false,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        mobile: "",
-        nickname: "",
-      },
-      data: [],
-      total: 0,
-      selectedId: "",
-      selectedRow: null,
-    };
+  excludeId: {
+    type: String,
+    default: "",
   },
-  watch: {
-    modelValue(val) {
-      if (val) {
-        this.resetState();
-        this.getDataList();
+});
+const emit = defineEmits(["update:modelValue", "confirm"]);
+
+const loading = ref(false);
+// searchForm 在 resetState 中被整体替换，用 ref 而非 reactive
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  mobile: "",
+  nickname: "",
+});
+const data = ref([]);
+const total = ref(0);
+const selectedId = ref("");
+const selectedRow = ref(null);
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) {
+      resetState();
+      getDataList();
+    }
+  }
+);
+
+function resetState() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 10,
+    mobile: "",
+    nickname: "",
+  };
+  selectedId.value = "";
+  selectedRow.value = null;
+}
+function buildParams() {
+  const params = {
+    pageNumber: searchForm.value.pageNumber,
+    pageSize: searchForm.value.pageSize,
+    distributionStatus: "PASS",
+  };
+  if (searchForm.value.mobile) params.mobile = searchForm.value.mobile;
+  if (searchForm.value.nickname) params.nickname = searchForm.value.nickname;
+  return params;
+}
+function getDataList() {
+  loading.value = true;
+  getDistributionMemberPage(buildParams())
+    .then((res) => {
+      loading.value = false;
+      if (!res.success) return;
+      const result = res.result || {};
+      let records = result.records || [];
+      const beforeCount = records.length;
+      if (props.excludeId) {
+        records = records.filter((item) => item.id !== props.excludeId);
       }
-    },
-  },
-  methods: {
-    resetState() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 10,
-        mobile: "",
-        nickname: "",
-      };
-      this.selectedId = "";
-      this.selectedRow = null;
-    },
-    buildParams() {
-      const params = {
-        pageNumber: this.searchForm.pageNumber,
-        pageSize: this.searchForm.pageSize,
-        distributionStatus: "PASS",
-      };
-      if (this.searchForm.mobile) params.mobile = this.searchForm.mobile;
-      if (this.searchForm.nickname) params.nickname = this.searchForm.nickname;
-      return params;
-    },
-    getDataList() {
-      this.loading = true;
-      getDistributionMemberPage(this.buildParams())
-        .then((res) => {
-          this.loading = false;
-          if (!res.success) return;
-          const result = res.result || {};
-          let records = result.records || [];
-          const beforeCount = records.length;
-          if (this.excludeId) {
-            records = records.filter((item) => item.id !== this.excludeId);
-          }
-          this.data = records;
-          const excludedCount = beforeCount - records.length;
-          this.total = Math.max(0, (result.total || 0) - excludedCount);
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleRowClick(row) {
-      if (!row) return;
-      this.selectedRow = row;
-      this.selectedId = row.id;
-    },
-    handleCurrentChange(row) {
-      if (!row) return;
-      this.selectedRow = row;
-      this.selectedId = row.id;
-    },
-    handleRadioChange(row) {
-      this.selectedRow = row;
-    },
-    handleClose() {
-      this.$emit("update:modelValue", false);
-    },
-    handleConfirm() {
-      if (!this.selectedRow) {
-        this.$Message.warning("请选择分销员");
-        return;
-      }
-      this.$emit("confirm", this.selectedRow);
-      this.handleClose();
-    },
-  },
-};
+      data.value = records;
+      const excludedCount = beforeCount - records.length;
+      total.value = Math.max(0, (result.total || 0) - excludedCount);
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleRowClick(row) {
+  if (!row) return;
+  selectedRow.value = row;
+  selectedId.value = row.id;
+}
+function handleCurrentChange(row) {
+  if (!row) return;
+  selectedRow.value = row;
+  selectedId.value = row.id;
+}
+function handleRadioChange(row) {
+  selectedRow.value = row;
+}
+function handleClose() {
+  emit("update:modelValue", false);
+}
+function handleConfirm() {
+  if (!selectedRow.value) {
+    Message.warning("请选择分销员");
+    return;
+  }
+  emit("confirm", selectedRow.value);
+  handleClose();
+}
 </script>
 
 <style scoped lang="scss">

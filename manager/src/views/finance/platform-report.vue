@@ -39,44 +39,40 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
 
-export default {
-  name: "finance-platform-report",
-  data() {
-    return {
-      loading: false,
-      dateRange: [],
-      params: { granularity: "DAY" },
-      data: [],
-    };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    buildParams() {
-      const p = { ...this.params };
-      if (this.dateRange && this.dateRange.length === 2) {
-        p.startDate = this.dateRange[0];
-        p.endDate = this.dateRange[1];
-      }
-      return p;
-    },
-    loadData() {
-      this.loading = true;
-      API_Finance.getPlatformReport(this.buildParams()).then((res) => {
-        this.loading = false;
-        if (res.success) this.data = res.result || [];
-      });
-    },
-    handleExport() {
-      API_Finance.exportPlatformReport(this.buildParams()).then((blob) => {
-        downloadBlob(blob, "平台经营报表.xlsx");
-      });
-    },
-  },
-};
+defineOptions({ name: "finance-platform-report" });
+
+const loading = ref(false);
+const dateRange = ref([]);
+const params = ref({ granularity: "DAY" });
+const data = ref([]);
+
+onMounted(() => {
+  loadData();
+});
+
+function buildParams() {
+  const p = { ...params.value };
+  if (dateRange.value && dateRange.value.length === 2) {
+    p.startDate = dateRange.value[0];
+    p.endDate = dateRange.value[1];
+  }
+  return p;
+}
+function loadData() {
+  loading.value = true;
+  API_Finance.getPlatformReport(buildParams()).then((res) => {
+    loading.value = false;
+    if (res.success) data.value = res.result || [];
+  });
+}
+function handleExport() {
+  API_Finance.exportPlatformReport(buildParams()).then((blob) => {
+    downloadBlob(blob, "平台经营报表.xlsx");
+  });
+}
 </script>

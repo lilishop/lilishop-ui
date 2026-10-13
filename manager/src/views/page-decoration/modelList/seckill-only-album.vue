@@ -35,103 +35,100 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    data: {
-      type: Object,
-      default: null,
-    },
-  },
-  data() {
-    return {
-      options: this.data.options, // 当前数据
-      actStatus: 0, // 0 未开始  1 进行中   2 已结束
-      actName: "限时秒杀",
-      currHour: "00", // 当前秒杀场
-      diffSeconds: 0, // 倒地时
-      hours: "00", // 小时
-      minutes: "00", // 分钟
-      seconds: "00", // 秒
-      interval: undefined, // 定时器
-    };
-  },
-  watch: {
-    diffSeconds(val) {
-      const hours = Math.floor(val / 3600);
-      // 当前秒数 / 60，向下取整
-      // 获取到所有分钟数 3600 / 60 = 60分钟
-      // 对60取模，超过小时数的分钟数
-      const minutes = Math.floor(val / 60) % 60;
-      // 当前的秒数 % 60，获取到 超过小时数、分钟数的秒数（秒数）
-      const seconds = val % 60;
-      this.hours = hours < 10 ? "0" + hours : hours;
-      this.minutes = minutes < 10 ? "0" + minutes : minutes;
-      this.seconds = seconds < 10 ? "0" + seconds : seconds;
+<script setup>
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 
-      if (val === 0) {
-        clearInterval(this.interval);
-        this.hours = 0;
-        this.minutes = 0;
-        this.seconds = 0;
-        this.countDown(this.options.list);
+const props = defineProps({
+  data: {
+    type: Object,
+    default: null,
+  },
+});
+
+const options = ref(props.data.options); // 当前数据
+const actStatus = ref(0); // 0 未开始  1 进行中   2 已结束
+const actName = ref("限时秒杀");
+const currHour = ref("00"); // 当前秒杀场
+const diffSeconds = ref(0); // 倒地时
+const hours = ref("00"); // 小时
+const minutes = ref("00"); // 分钟
+const seconds = ref("00"); // 秒
+const interval = ref(undefined); // 定时器
+
+watch(diffSeconds, (val) => {
+  const hours = Math.floor(val / 3600);
+  // 当前秒数 / 60，向下取整
+  // 获取到所有分钟数 3600 / 60 = 60分钟
+  // 对60取模，超过小时数的分钟数
+  const minutes = Math.floor(val / 60) % 60;
+  // 当前的秒数 % 60，获取到 超过小时数、分钟数的秒数（秒数）
+  const seconds = val % 60;
+  hours.value = hours < 10 ? "0" + hours : hours;
+  minutes.value = minutes < 10 ? "0" + minutes : minutes;
+  seconds.value = seconds < 10 ? "0" + seconds : seconds;
+
+  if (val === 0) {
+    clearInterval(interval.value);
+    hours.value = 0;
+    minutes.value = 0;
+    seconds.value = 0;
+    countDown(options.value.list);
+  }
+});
+
+onMounted(() => {
+  countDown(options.value.list);
+});
+
+onBeforeUnmount(() => {
+  clearInterval(interval.value);
+});
+
+// 倒计时
+function countDown(list) {
+  /**
+   * 默认倒计时两小时
+   * 如果没有开始，则显示未开始
+   * 进行中显示倒计时
+   * 今天的秒杀结束则显示已结束
+   */
+  let nowHour = new Date().getHours();
+  if (nowHour < Number(list[0].time)) {
+    // 活动未开始
+    currHour.value = list[0].time;
+    actStatus.value = 0;
+  } else if (nowHour >= Number(list[list.length - 1].time + 2)) {
+    // 活动已结束
+    actStatus.value = 2;
+    currHour.value = list[list.length - 1].time;
+  } else {
+    // 活动进行中
+    actStatus.value = 1;
+    for (let i = 0; i < list.length; i++) {
+      if (nowHour == Number(list[i].time)) {
+        currHour.value = list[i].time;
       }
-    },
-  },
-  mounted() {
-    this.countDown(this.options.list);
-  },
-  beforeUnmount() {
-    clearInterval(this.interval);
-  },
-  methods: {
-    // 倒计时
-    countDown(list) {
-      /**
-       * 默认倒计时两小时
-       * 如果没有开始，则显示未开始
-       * 进行中显示倒计时
-       * 今天的秒杀结束则显示已结束
-       */
-      let nowHour = new Date().getHours();
-      if (nowHour < Number(list[0].time)) {
-        // 活动未开始
-        this.currHour = list[0].time;
-        this.actStatus = 0;
-      } else if (nowHour >= Number(list[list.length - 1].time + 2)) {
-        // 活动已结束
-        this.actStatus = 2;
-        this.currHour = list[list.length - 1].time;
-      } else {
-        // 活动进行中
-        this.actStatus = 1;
-        for (let i = 0; i < list.length; i++) {
-          if (nowHour == Number(list[i].time)) {
-            this.currHour = list[i].time;
-          }
-          if (
-            nowHour > Number(list[i].time) &&
-            nowHour < Number(list[i].time + 2)
-          ) {
-            this.currHour = list[i].time;
-          }
-        }
-        // 当前0点时间戳
-        let zeroTime = new Date(new Date().toLocaleDateString()).getTime();
-        // 活动倒计时
-        this.diffSeconds = Math.floor(
-          (zeroTime +
-            3600 * 1000 * (this.currHour + 2) -
-            new Date().getTime()) /
-          1000
-        );
-        this.interval = setInterval(() => {
-          this.diffSeconds--;
-        }, 1000);
+      if (
+        nowHour > Number(list[i].time) &&
+        nowHour < Number(list[i].time + 2)
+      ) {
+        currHour.value = list[i].time;
       }
-    },
-  },
-};
+    }
+    // 当前0点时间戳
+    let zeroTime = new Date(new Date().toLocaleDateString()).getTime();
+    // 活动倒计时
+    diffSeconds.value = Math.floor(
+      (zeroTime +
+        3600 * 1000 * (currHour.value + 2) -
+        new Date().getTime()) /
+      1000
+    );
+    interval.value = setInterval(() => {
+      diffSeconds.value--;
+    }, 1000);
+  }
+}
 </script>
 <style lang="scss" scoped>
 .seckill {

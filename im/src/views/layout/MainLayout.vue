@@ -43,62 +43,66 @@
     </audio>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, watch } from "vue";
 import Face from '../../components/face'
-import { mapState } from "vuex";
+import { useAppStore } from "@/stores/app";
+import { useUserStore } from "@/stores/user";
+import { useNotifyStore } from "@/stores/notify";
+import { useSettingsStore } from "@/stores/settings";
 import { ServeFindFriendApplyNum } from "@/api/contacts";
 
-export default {
-  components: { Face },
-  name: "MainLayout",
-  props: {
-    idx: {
-      type: Number,
-      default: 0,
-    },
+defineOptions({ name: "MainLayout" });
+
+defineProps({
+  idx: {
+    type: Number,
+    default: 0,
   },
-  computed: {
-    ...mapState({
-      face: (state) => state.user.face,
-      name: (state) => state.user.name,
-      id: (state) => state.user.id,
-      defaultAvatar: (state) => state.defaultAvatar,
-      socketStatus: (state) => state.socketStatus,
-      unreadNum: (state) => state.notify.unreadNum,
-      applyNum: (state) => state.notify.applyNum,
-      notifyCueTone: (state) => state.settings.notifyCueTone,
-      themeMode: (state) => state.settings.themeMode,
-      themeBagImg: (state) => state.settings.themeBagImg,
-    }),
-  },
-  watch: {
-    unreadNum (n, o) {
-      if (n > 0 && n > o && this.notifyCueTone) {
-        this.play();
-      }
-    },
-  },
-  created () {
-    this.setApplyNum();
-  },
-  methods: {
-    play () {
-      document
-        .querySelector("#audio")
-        .play()
-        .catch(() => {
-          console.error("消息提示音播放异常");
-        });
-    },
-    logout () {
-      this.$store.dispatch("ACT_USER_LOGOUT");
-    },
-    setApplyNum () {
-      // TODO 暂且return
-      return;
-    },
-  },
-};
+});
+
+const appStore = useAppStore();
+const userStore = useUserStore();
+const notifyStore = useNotifyStore();
+const settingsStore = useSettingsStore();
+
+const face = computed(() => userStore.face);
+const name = computed(() => userStore.name);
+const id = computed(() => userStore.id);
+const defaultAvatar = computed(() => appStore.defaultAvatar);
+const socketStatus = computed(() => appStore.socketStatus);
+const unreadNum = computed(() => notifyStore.unreadNum);
+const applyNum = computed(() => notifyStore.applyNum);
+const notifyCueTone = computed(() => settingsStore.notifyCueTone);
+const themeMode = computed(() => settingsStore.themeMode);
+const themeBagImg = computed(() => settingsStore.themeBagImg);
+
+watch(unreadNum, (n, o) => {
+  if (n > 0 && n > o && notifyCueTone.value) {
+    play();
+  }
+});
+
+// 原 created 钩子
+setApplyNum();
+
+function play () {
+  document
+    .querySelector("#audio")
+    .play()
+    .catch(() => {
+      console.error("消息提示音播放异常");
+    });
+}
+
+function logout () {
+  userStore.ACT_USER_LOGOUT();
+}
+
+function setApplyNum () {
+  // TODO 暂且return
+  return;
+}
 </script>
 <style lang="less" >
 .main-layout {

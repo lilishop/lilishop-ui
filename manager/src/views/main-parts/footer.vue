@@ -12,17 +12,11 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import config from "@/config/index";
 
-export default {
-  data() {
-    return {
-      config,
-      year: new Date().getFullYear(),
-    };
-  },
-};
+const year = ref(new Date().getFullYear());
 </script>
 
 <style lang="scss" scoped>

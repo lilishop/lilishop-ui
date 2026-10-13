@@ -3,7 +3,7 @@
     <div class="top-content">
       <div class="top-inner">
         <div class="logo-box">
-          <img :src="$store.state.logoImg" @click="$router.push('/')" />
+          <img :src="logoImg" @click="$router.push('/')" />
           <div>欢迎注册</div>
         </div>
         <div class="to-login">已有账号？<a @click.stop="$router.push('login')">立即登录</a></div>
@@ -17,7 +17,7 @@
       />
       <div class="signup-card">
         <el-form
-          ref="formRegist"
+          ref="formRegistRef"
           :model="formRegist"
           :rules="ruleInline"
           class="signup-form"
@@ -91,8 +91,9 @@
   </div>
 </template>
 
-<script>
-
+<script setup>
+import { onMounted, reactive, ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import * as RegExp from '@/plugins/RegExp.js';
 import { md5 } from '@/plugins/md5.js';
@@ -101,120 +102,126 @@ import { sendSms } from '@/api/common.js';
 import Verify from '@/components/verify';
 import { User, Lock, Iphone, Document } from '@element-plus/icons-vue';
 import config from '@/config';
-export default {
-  name: 'SignUp',
-  components: { Verify, User, Lock, Iphone, Document },
-  data () {
-    return {
-      config,
-      year: new Date().getFullYear(),
-      formRegist: {
-        // 注册表单
-        mobilePhone: '',
-        code: '',
-        username: '',
-        password: ''
-      },
-      ruleInline: {
-        // 验证规则
-        username: [{ required: true, message: '请输入用户名' }],
-        password: [
-          { required: true, message: '请输入密码' },
-          { type: 'string', min: 6, message: '密码不能少于6位' }
-        ],
-        mobilePhone: [
-          { required: true, message: '请输入手机号码' },
-          {
-            pattern: RegExp.mobile,
-            trigger: 'blur',
-            message: '请输入正确的手机号'
-          }
-        ],
-        code: [{ required: true, message: '请输入手机验证码' }]
-      },
-      verifyStatus: false, // 是否验证通过
-      verifyType: 'REGISTER', // 验证状态
-      codeMsg: '发送验证码', // 提示文字
-      interval: '', // 定时器
-      time: 60 // 倒计时
-    };
-  },
-  methods: {
-    hideVerify() {
-      this.$refs.verify?.close?.();
-    },
-    // 注册
-    handleRegist () {
-      this.$refs.formRegist.validate((valid) => {
-        if (!valid) {
-          return;
-        }
-        const data = JSON.parse(JSON.stringify(this.formRegist));
-        data.password = md5(data.password);
-        apiLogin.regist(data).then((res) => {
-          if (res.success) {
-            Message.success('注册成功!');
-            this.$router.push('login');
-          } else {
-            Message.warning(res.message || '注册失败');
-          }
-        }).catch((err) => {
-          console.warn('注册请求失败', err);
-        });
-      }).catch(() => {
-        // 表单校验使用回调模式，此 catch 仅为兜底
-      });
-    },
-    // 发送短信验证码
-    sendCode () {
-      if (this.time !== 60) return;
-      if (this.formRegist.mobilePhone === '') {
-        Message.warning('请先填写手机号');
-        return;
-      }
-      if (!RegExp.mobile.test(this.formRegist.mobilePhone)) {
-        Message.warning('请输入正确的手机号');
-        return;
-      }
-      this.$refs.verify?.init();
-    },
-    dispatchSms () {
-      sendSms({
-        mobile: this.formRegist.mobilePhone,
-        verificationEnums: 'REGISTER'
-      }).then(res => {
-        if (res.success) {
-          Message.success('验证码发送成功');
-          this.interval = setInterval(() => {
-            this.time--;
-            if (this.time === 0) {
-              this.time = 60;
-              this.codeMsg = '重新发送';
-              this.verifyStatus = false;
-              clearInterval(this.interval);
-            } else {
-              this.codeMsg = this.time;
-            }
-          }, 1000);
-        } else {
-          this.verifyStatus = false;
-          Message.warning(res.message || '验证码发送失败');
-        }
-      }).catch(() => {
-        this.verifyStatus = false;
-      });
-    },
-    verifyChange (con) {
-      if (!con.status) return;
-      this.hideVerify();
-      this.verifyStatus = true;
-      this.dispatchSms();
+import { useAppStore } from '@/stores/app';
+
+defineOptions({ name: 'SignUp' });
+
+const router = useRouter();
+const appStore = useAppStore();
+const logoImg = computed(() => appStore.logoImg);
+
+const year = new Date().getFullYear();
+const formRegist = reactive({
+  // 注册表单
+  mobilePhone: '',
+  code: '',
+  username: '',
+  password: ''
+});
+const ruleInline = reactive({
+  // 验证规则
+  username: [{ required: true, message: '请输入用户名' }],
+  password: [
+    { required: true, message: '请输入密码' },
+    { type: 'string', min: 6, message: '密码不能少于6位' }
+  ],
+  mobilePhone: [
+    { required: true, message: '请输入手机号码' },
+    {
+      pattern: RegExp.mobile,
+      trigger: 'blur',
+      message: '请输入正确的手机号'
     }
-  },
-  mounted () {
-    this.$refs.formRegist.resetFields();
+  ],
+  code: [{ required: true, message: '请输入手机验证码' }]
+});
+const verifyStatus = ref(false); // 是否验证通过
+const verifyType = ref('REGISTER'); // 验证状态
+const codeMsg = ref('发送验证码'); // 提示文字
+const interval = ref(''); // 定时器
+const time = ref(60); // 倒计时
+
+const formRegistRef = ref(null);
+const verify = ref(null);
+
+function hideVerify() {
+  verify.value?.close?.();
+}
+
+// 注册
+function handleRegist () {
+  formRegistRef.value.validate((valid) => {
+    if (!valid) {
+      return;
+    }
+    const data = JSON.parse(JSON.stringify(formRegist));
+    data.password = md5(data.password);
+    apiLogin.regist(data).then((res) => {
+      if (res.success) {
+        Message.success('注册成功!');
+        router.push('login');
+      } else {
+        Message.warning(res.message || '注册失败');
+      }
+    }).catch((err) => {
+      console.warn('注册请求失败', err);
+    });
+  }).catch(() => {
+    // 表单校验使用回调模式，此 catch 仅为兜底
+  });
+}
+
+// 发送短信验证码
+function sendCode () {
+  if (time.value !== 60) return;
+  if (formRegist.mobilePhone === '') {
+    Message.warning('请先填写手机号');
+    return;
   }
-};
+  if (!RegExp.mobile.test(formRegist.mobilePhone)) {
+    Message.warning('请输入正确的手机号');
+    return;
+  }
+  verify.value?.init();
+}
+
+function dispatchSms () {
+  sendSms({
+    mobile: formRegist.mobilePhone,
+    verificationEnums: 'REGISTER'
+  }).then(res => {
+    if (res.success) {
+      Message.success('验证码发送成功');
+      interval.value = setInterval(() => {
+        time.value--;
+        if (time.value === 0) {
+          time.value = 60;
+          codeMsg.value = '重新发送';
+          verifyStatus.value = false;
+          clearInterval(interval.value);
+        } else {
+          codeMsg.value = time.value;
+        }
+      }, 1000);
+    } else {
+      verifyStatus.value = false;
+      Message.warning(res.message || '验证码发送失败');
+    }
+  }).catch(() => {
+    verifyStatus.value = false;
+  });
+}
+
+function verifyChange (con) {
+  if (!con.status) return;
+  hideVerify();
+  verifyStatus.value = true;
+  dispatchSms();
+}
+
+onMounted(() => {
+  formRegistRef.value.resetFields();
+});
 </script>
 <style scoped lang="scss">
 .sign-up {

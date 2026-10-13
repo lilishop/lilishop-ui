@@ -27,49 +27,53 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "UserCenterLayout",
-  props: {
-    title: {
-      type: String,
-      default: "",
-    },
-    tabs: {
-      type: Array,
-      default: () => [],
-    },
-    activeTab: {
-      type: Number,
-      default: 0,
-    },
-    moreText: {
-      type: String,
-      default: "",
-    },
-    moreTo: {
-      type: [String, Object],
-      default: "",
-    },
+<script setup>
+import { computed, useSlots } from "vue";
+import { useRouter } from "vue-router";
+
+defineOptions({ name: "UserCenterLayout" });
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: "",
   },
-  emits: ["tab-change", "more"],
-  computed: {
-    showToolbar() {
-      return this.tabs.length || this.moreText || this.$slots.extra;
-    },
+  tabs: {
+    type: Array,
+    default: () => [],
   },
-  methods: {
-    handleMore() {
-      this.$emit("more");
-      if (!this.moreTo) return;
-      if (typeof this.moreTo === "string") {
-        this.$router.push(this.moreTo);
-      } else {
-        this.$router.push(this.moreTo);
-      }
-    },
+  activeTab: {
+    type: Number,
+    default: 0,
   },
-};
+  moreText: {
+    type: String,
+    default: "",
+  },
+  moreTo: {
+    type: [String, Object],
+    default: "",
+  },
+});
+
+const emit = defineEmits(["tab-change", "more"]);
+
+const router = useRouter();
+const slots = useSlots();
+
+const showToolbar = computed(() => {
+  return props.tabs.length || props.moreText || slots.extra;
+});
+
+function handleMore() {
+  emit("more");
+  if (!props.moreTo) return;
+  if (typeof props.moreTo === "string") {
+    router.push(props.moreTo);
+  } else {
+    router.push(props.moreTo);
+  }
+}
 </script>
 
 <style scoped lang="scss">

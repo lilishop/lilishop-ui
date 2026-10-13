@@ -4,15 +4,7 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'VideoMessage',
-  components: {},
-  data() {
-    return {}
-  },
-  methods: {},
-  created() {},
-}
+<script setup>
+defineOptions({ name: 'VideoMessage' })
 </script>
 <style lang="less" scoped></style>

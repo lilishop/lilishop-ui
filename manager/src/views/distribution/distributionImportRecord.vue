@@ -43,85 +43,82 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import {
   downloadDistributionImportFailItems,
   getDistributionImportBatches,
 } from "@/api/distribution";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "distributionImportRecord",
-  data() {
-    return {
-      loading: false,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    statusLabel(status) {
-      const map = {
-        PROCESSING: "处理中",
-        DONE: "已完成",
-        FAILED: "失败",
-      };
-      return map[status] || status || "-";
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getDistributionImportBatches(this.searchForm)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
+defineOptions({ name: "distributionImportRecord" });
+
+const loading = ref(false);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const data = ref([]);
+const total = ref(0);
+
+onMounted(() => {
+  getDataList();
+});
+
+function statusLabel(status) {
+  const map = {
+    PROCESSING: "处理中",
+    DONE: "已完成",
+    FAILED: "失败",
+  };
+  return map[status] || status || "-";
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getDistributionImportBatches(searchForm)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+function downloadFailList(row) {
+  if (!row || !row.failCount) return;
+  downloadDistributionImportFailItems(row.id)
+    .then((blob) => {
+      if (blob && blob.type && blob.type.includes("application/json")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const result = JSON.parse(reader.result);
+            Message.error(result.message || "下载失败");
+          } catch (e) {
+            Message.error("下载失败");
           }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    downloadFailList(row) {
-      if (!row || !row.failCount) return;
-      downloadDistributionImportFailItems(row.id)
-        .then((blob) => {
-          if (blob && blob.type && blob.type.includes("application/json")) {
-            const reader = new FileReader();
-            reader.onload = () => {
-              try {
-                const result = JSON.parse(reader.result);
-                this.$Message.error(result.message || "下载失败");
-              } catch (e) {
-                this.$Message.error("下载失败");
-              }
-            };
-            reader.readAsText(blob);
-            return;
-          }
-          downloadBlob(blob, `分销员导入失败列表_${row.id}.xlsx`);
-          this.$Message.success("下载成功");
-        })
-        .catch(() => {
-          this.$Message.error("下载失败");
-        });
-    },
-  },
-};
+        };
+        reader.readAsText(blob);
+        return;
+      }
+      downloadBlob(blob, `分销员导入失败列表_${row.id}.xlsx`);
+      Message.success("下载成功");
+    })
+    .catch(() => {
+      Message.error("下载失败");
+    });
+}
 </script>
 
 <style scoped lang="scss">

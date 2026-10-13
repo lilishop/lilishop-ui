@@ -17,39 +17,37 @@
   </div>
 </template>
 
-<script>
-import { mapState } from "vuex";
+<script setup>
+import { computed, ref, watch } from "vue";
+import { useSettingStore } from "@/stores/setting";
+import { setStore } from "@/libs/storage";
 
-export default {
-  name: "configDrawer",
-  data() {
-    return {
-      drawer: false,
-    };
+defineOptions({ name: "configDrawer" });
+
+const settingStore = useSettingStore();
+
+const drawer = ref(false);
+
+const setting = computed(() => settingStore.setting);
+
+watch(
+  setting,
+  (val) => {
+    setStore("setting", val);
+    settingStore.updateSetting(val);
   },
-  computed: {
-    ...mapState({
-      setting: (state) => state.setting.setting,
-    }),
-  },
-  watch: {
-    setting: {
-      handler(val) {
-        this.setStore("setting", val);
-        this.$store.commit("updateSetting", val);
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    open() {
-      this.drawer = true;
-    },
-    close() {
-      this.drawer = false;
-    },
-  },
-};
+  { deep: true }
+);
+
+function open() {
+  drawer.value = true;
+}
+
+function close() {
+  drawer.value = false;
+}
+
+defineExpose({ open, close });
 </script>
 
 <style lang="scss" scoped>

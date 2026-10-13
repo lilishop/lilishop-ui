@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog v-model="wechatModal" title="微信设置" width="530px">
-      <el-form ref="wechatFormData" :model="wechatFormData" label-width="100px">
+      <el-form ref="wechatFormRef" :model="wechatFormData" label-width="100px">
         <el-form-item v-if="tab === 'WECHAT'" label="模板名称">
           <el-input v-model="wechatFormData.name" maxlength="9" disabled />
         </el-form-item>
@@ -105,171 +105,169 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import {
   wechatMessageSync,
-  getWechatMessagePage,
+  getWechatMessagePage as fetchWechatMessagePage,
   editWechatMessageTemplate,
   delWechatMessageTemplate,
   wechatMPMessageSync,
-  getWechatMPMessagePage,
+  getWechatMPMessagePage as fetchWechatMPMessagePage,
   editWechatMPMessageTemplate,
   delWechatMPMessageTemplate,
 } from "@/api/setting";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-export default {
-  title: "wechat-message-manage",
-  data() {
-    return {
-      wechatModal: false,
-      wechatFormData: {},
-      wechatMPFormData: {},
-      tab: "WECHAT",
-      searchForm: { type: "WECHAT" },
-      loading: true,
-      id: "",
-      weChatSearchForm: { pageNumber: 1, pageSize: 20 },
-      weChatMPSearchForm: { pageNumber: 1, pageSize: 20 },
-      weChatData: [],
-      weChatMPData: [],
-      weChatTotal: 0,
-      weChatMPTotal: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.type = this.tab;
-      if (this.tab === "WECHAT") {
-        this.weChatSearchForm.pageNumber = v;
-        this.getWechatMessagePage();
-      } else {
-        this.weChatMPSearchForm.pageNumber = v;
-        this.getWechatMPMessagePage();
-      }
-    },
-    changePageSize(v) {
-      this.searchForm.type = this.tab;
-      if (this.tab === "WECHAT") {
-        this.weChatSearchForm.pageSize = v;
-        this.getWechatMessagePage();
-      } else {
-        this.weChatMPSearchForm.pageSize = v;
-        this.getWechatMPMessagePage();
-      }
-    },
-    wechatSettingAlert(v) {
-      this.wechatFormData = v;
-      this.id = v.id;
-      this.wechatModal = true;
-    },
-    weChatSync(mp) {
-      ElMessageBox.confirm("确认要初始化微信小程序消息订阅?", "提示", { type: "warning" }).then(() => {
-        if (mp === "mp") {
-          wechatMPMessageSync().then((res) => {
-            if (res.success) {
-              ElMessage.success("微信小程序消息订阅初始化");
-              this.getWechatMPMessagePage();
-            }
-          });
-        } else {
-          wechatMessageSync().then((res) => {
-            if (res.success) {
-              ElMessage.success("微信消息模板初始化成功");
-              this.getWechatMessagePage();
-            }
-          });
-        }
-      }).catch(() => {});
-    },
-    wechatFormDataEdit() {
-      this.$refs.wechatFormData.validate((valid) => {
-        if (valid) {
-          if (!this.wechatFormData.updateTime) {
-            this.wechatFormData.updateTime = "";
-          }
-          editWechatMessageTemplate(this.id, this.wechatFormData).then((res) => {
-            if (res.message === "success") {
-              ElMessage.success("微信模板修改成功");
-              this.wechatModal = false;
-              this.getWechatMessagePage();
-            }
-          });
-        }
-      });
-    },
-    wechatMPFormDataEdit() {
-      this.$refs.wechatFormData.validate((valid) => {
-        if (valid) {
-          editWechatMPMessageTemplate(this.id, this.wechatMPFormData).then((res) => {
-            if (res.message === "success") {
-              ElMessage.success("微信消息订阅模板修改成功");
-              this.wechatModal = false;
-              this.getWechatMPMessagePage();
-            }
-          });
-        }
-      });
-    },
-    delWeChat(v) {
-      ElMessageBox.confirm("确定删除此模板?", "提示", { type: "warning" }).then(() => {
-        if (this.tab === "WECHAT") {
-          delWechatMessageTemplate(v.id).then((res) => {
-            if (res.success) {
-              ElMessage.success("微信模板删除成功");
-              this.getWechatMessagePage();
-            }
-          });
-        } else {
-          delWechatMPMessageTemplate(v.id).then((res) => {
-            if (res.success) {
-              ElMessage.success("微信消息订阅删除成功");
-              this.getWechatMPMessagePage();
-            }
-          });
-        }
-      }).catch(() => {});
-    },
-    getDataList() {
-      this.getWechatMessagePage();
-    },
-    getWechatMessagePage() {
-      this.loading = true;
-      getWechatMessagePage(this.weChatSearchForm).then((res) => {
-        this.loading = false;
+defineOptions({ title: "wechat-message-manage" });
+
+const wechatFormRef = ref(null);
+
+const wechatModal = ref(false);
+const wechatFormData = ref({});
+const wechatMPFormData = ref({});
+const tab = ref("WECHAT");
+const searchForm = reactive({ type: "WECHAT" });
+const loading = ref(true);
+const id = ref("");
+const weChatSearchForm = reactive({ pageNumber: 1, pageSize: 20 });
+const weChatMPSearchForm = reactive({ pageNumber: 1, pageSize: 20 });
+const weChatData = ref([]);
+const weChatMPData = ref([]);
+const weChatTotal = ref(0);
+const weChatMPTotal = ref(0);
+
+onMounted(() => {
+  init();
+});
+
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.type = tab.value;
+  if (tab.value === "WECHAT") {
+    weChatSearchForm.pageNumber = v;
+    getWechatMessagePage();
+  } else {
+    weChatMPSearchForm.pageNumber = v;
+    getWechatMPMessagePage();
+  }
+}
+function changePageSize(v) {
+  searchForm.type = tab.value;
+  if (tab.value === "WECHAT") {
+    weChatSearchForm.pageSize = v;
+    getWechatMessagePage();
+  } else {
+    weChatMPSearchForm.pageSize = v;
+    getWechatMPMessagePage();
+  }
+}
+function wechatSettingAlert(v) {
+  wechatFormData.value = v;
+  id.value = v.id;
+  wechatModal.value = true;
+}
+function weChatSync(mp) {
+  ElMessageBox.confirm("确认要初始化微信小程序消息订阅?", "提示", { type: "warning" }).then(() => {
+    if (mp === "mp") {
+      wechatMPMessageSync().then((res) => {
         if (res.success) {
-          this.weChatData = res.result.records;
-          this.weChatTotal = res.result.total;
+          ElMessage.success("微信小程序消息订阅初始化");
+          getWechatMPMessagePage();
         }
       });
-    },
-    getWechatMPMessagePage() {
-      this.loading = true;
-      getWechatMPMessagePage(this.weChatMPSearchForm).then((res) => {
-        this.loading = false;
+    } else {
+      wechatMessageSync().then((res) => {
         if (res.success) {
-          this.weChatMPData = res.result.records;
-          this.weChatMPTotal = res.result.total;
+          ElMessage.success("微信消息模板初始化成功");
+          getWechatMessagePage();
         }
       });
-    },
-    tabPaneChange(tab) {
-      const v = tab.paneName || this.tab;
-      this.searchForm.type = v;
-      if (v === "WECHAT") {
-        this.getWechatMessagePage();
-      } else if (v === "WECHATMP") {
-        this.getWechatMPMessagePage();
+    }
+  }).catch(() => {});
+}
+function wechatFormDataEdit() {
+  wechatFormRef.value.validate((valid) => {
+    if (valid) {
+      if (!wechatFormData.value.updateTime) {
+        wechatFormData.value.updateTime = "";
       }
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+      editWechatMessageTemplate(id.value, wechatFormData.value).then((res) => {
+        if (res.message === "success") {
+          ElMessage.success("微信模板修改成功");
+          wechatModal.value = false;
+          getWechatMessagePage();
+        }
+      });
+    }
+  });
+}
+function wechatMPFormDataEdit() {
+  wechatFormRef.value.validate((valid) => {
+    if (valid) {
+      editWechatMPMessageTemplate(id.value, wechatMPFormData.value).then((res) => {
+        if (res.message === "success") {
+          ElMessage.success("微信消息订阅模板修改成功");
+          wechatModal.value = false;
+          getWechatMPMessagePage();
+        }
+      });
+    }
+  });
+}
+function delWeChat(v) {
+  ElMessageBox.confirm("确定删除此模板?", "提示", { type: "warning" }).then(() => {
+    if (tab.value === "WECHAT") {
+      delWechatMessageTemplate(v.id).then((res) => {
+        if (res.success) {
+          ElMessage.success("微信模板删除成功");
+          getWechatMessagePage();
+        }
+      });
+    } else {
+      delWechatMPMessageTemplate(v.id).then((res) => {
+        if (res.success) {
+          ElMessage.success("微信消息订阅删除成功");
+          getWechatMPMessagePage();
+        }
+      });
+    }
+  }).catch(() => {});
+}
+function getDataList() {
+  getWechatMessagePage();
+}
+function getWechatMessagePage() {
+  loading.value = true;
+  fetchWechatMessagePage(weChatSearchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      weChatData.value = res.result.records;
+      weChatTotal.value = res.result.total;
+    }
+  });
+}
+function getWechatMPMessagePage() {
+  loading.value = true;
+  fetchWechatMPMessagePage(weChatMPSearchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      weChatMPData.value = res.result.records;
+      weChatMPTotal.value = res.result.total;
+    }
+  });
+}
+function tabPaneChange(tabPane) {
+  const v = tabPane.paneName || tab.value;
+  searchForm.type = v;
+  if (v === "WECHAT") {
+    getWechatMessagePage();
+  } else if (v === "WECHATMP") {
+    getWechatMPMessagePage();
+  }
+}
 </script>
 <style scoped>
 .link-text {

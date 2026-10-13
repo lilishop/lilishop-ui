@@ -4,7 +4,7 @@
       <template #header>
         <span class="page-title">编辑直播</span>
       </template>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px" class="live-form">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" class="live-form">
         <el-form-item v-if="form.liveStatus !== 'NEW'" label="直播状态">
           <el-tag :type="liveStatusTagType(form.liveStatus)">{{ liveStatusText(form.liveStatus) }}</el-tag>
         </el-form-item>
@@ -81,7 +81,7 @@
 
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
-        ref="ossManage"
+        ref="ossManageRef"
         :is-component="true"
         :initialize="picModelFlag"
         @callback="callbackSelected"
@@ -90,10 +90,21 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Picture } from "@element-plus/icons-vue";
 import { getLiveInfo, updateLive } from "@/api/live";
+import { Message } from "@/utils/message";
 import ossManage from "@/views/sys/oss-manage/ossManage";
+
+defineOptions({ name: "live-edit" });
+
+const route = useRoute();
+const router = useRouter();
+
+const formRef = ref(null);
+const ossManageRef = ref(null);
 
 function getCharLength(str) {
   if (!str) return 0;
@@ -130,133 +141,126 @@ function formatDateTime(value) {
   return String(value);
 }
 
-export default {
-  name: "live-edit",
-  components: { Picture, ossManage },
-  data() {
-    const validateTitle = (rule, value, callback) => {
-      const len = getCharLength(value);
-      if (len < 6) {
-        callback(new Error("直播间名字最短3个汉字"));
-        return;
-      }
-      if (len > 34) {
-        callback(new Error("直播间名字最长17个汉字"));
-        return;
-      }
-      callback();
-    };
-    return {
-      picModelFlag: false,
-      loading: false,
-      submitting: false,
-      liveId: "",
-      endTime: "",
-      form: {
-        title: "",
-        displayMode: "0",
-        startTime: "",
-        coverImg: "",
-        liveIntroduce: "",
-        liveStatus: "NEW",
-      },
-      rules: {
-        title: [
-          { required: true, message: "请输入直播标题", trigger: "blur" },
-          { validator: validateTitle, trigger: "blur" },
-        ],
-        displayMode: [{ required: true, message: "请选择显示模式", trigger: "change" }],
-        startTime: [{ required: true, message: "请选择直播开始时间", trigger: "change" }],
-        coverImg: [{ required: true, message: "请上传直播封面", trigger: "change" }],
-      },
-    };
-  },
-  mounted() {
-    this.liveId = String(this.$route.query.id || "");
-    if (!this.liveId) {
-      this.$Message.error("缺少直播ID");
-      this.handleBack();
-      return;
-    }
-    this.loadDetail();
-  },
-  methods: {
-    liveStatusText(status) {
-      const map = { NEW: "未开始", LIVING: "直播中", ENDED: "已结束" };
-      return map[status] || "未知";
-    },
-    liveStatusTagType(status) {
-      const map = { NEW: "info", LIVING: "success", ENDED: "warning" };
-      return map[status] || "info";
-    },
-    openCoverPicker() {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (val?.url) {
-        this.form.coverImg = val.url;
-        this.$refs.form?.validateField("coverImg");
-      }
-    },
-    loadDetail() {
-      this.loading = true;
-      getLiveInfo(this.liveId)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            const data = res.result || {};
-            this.form.title = data.title || "";
-            this.form.displayMode = normalizeDisplayMode(data.displayMode);
-            this.form.coverImg = data.coverImg || "";
-            this.form.liveIntroduce = data.liveIntroduce || "";
-            this.form.liveStatus = data.liveStatus || data.status || "NEW";
-            this.endTime = formatDateTime(data.endTime);
-            this.form.startTime = formatDateTime(data.startTime);
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        let endTime = this.endTime;
-        if (!endTime || endTime <= this.form.startTime) {
-          endTime = buildEndTime(this.form.startTime);
-        }
-        this.submitting = true;
-        updateLive(this.liveId, {
-          title: this.form.title,
-          displayMode: this.form.displayMode,
-          coverImg: this.form.coverImg,
-          startTime: this.form.startTime,
-          endTime,
-          liveIntroduce: this.form.liveIntroduce,
-        })
-          .then((res) => {
-            this.submitting = false;
-            if (res.success) {
-              this.$Message.success("保存成功");
-              this.$router.push({ path: "/live-list" });
-            }
-          })
-          .catch(() => {
-            this.submitting = false;
-          });
-      });
-    },
-    handleBack() {
-      this.$router.push({ path: "/live-list" });
-    },
-  },
+const validateTitle = (rule, value, callback) => {
+  const len = getCharLength(value);
+  if (len < 6) {
+    callback(new Error("直播间名字最短3个汉字"));
+    return;
+  }
+  if (len > 34) {
+    callback(new Error("直播间名字最长17个汉字"));
+    return;
+  }
+  callback();
 };
+
+const picModelFlag = ref(false);
+const loading = ref(false);
+const submitting = ref(false);
+const liveId = ref("");
+const endTime = ref("");
+const form = reactive({
+  title: "",
+  displayMode: "0",
+  startTime: "",
+  coverImg: "",
+  liveIntroduce: "",
+  liveStatus: "NEW",
+});
+const rules = reactive({
+  title: [
+    { required: true, message: "请输入直播标题", trigger: "blur" },
+    { validator: validateTitle, trigger: "blur" },
+  ],
+  displayMode: [{ required: true, message: "请选择显示模式", trigger: "change" }],
+  startTime: [{ required: true, message: "请选择直播开始时间", trigger: "change" }],
+  coverImg: [{ required: true, message: "请上传直播封面", trigger: "change" }],
+});
+
+onMounted(() => {
+  liveId.value = String(route.query.id || "");
+  if (!liveId.value) {
+    Message.error("缺少直播ID");
+    handleBack();
+    return;
+  }
+  loadDetail();
+});
+
+function liveStatusText(status) {
+  const map = { NEW: "未开始", LIVING: "直播中", ENDED: "已结束" };
+  return map[status] || "未知";
+}
+function liveStatusTagType(status) {
+  const map = { NEW: "info", LIVING: "success", ENDED: "warning" };
+  return map[status] || "info";
+}
+function openCoverPicker() {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (val?.url) {
+    form.coverImg = val.url;
+    formRef.value?.validateField("coverImg");
+  }
+}
+function loadDetail() {
+  loading.value = true;
+  getLiveInfo(liveId.value)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        const data = res.result || {};
+        form.title = data.title || "";
+        form.displayMode = normalizeDisplayMode(data.displayMode);
+        form.coverImg = data.coverImg || "";
+        form.liveIntroduce = data.liveIntroduce || "";
+        form.liveStatus = data.liveStatus || data.status || "NEW";
+        endTime.value = formatDateTime(data.endTime);
+        form.startTime = formatDateTime(data.startTime);
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    let endTimeVal = endTime.value;
+    if (!endTimeVal || endTimeVal <= form.startTime) {
+      endTimeVal = buildEndTime(form.startTime);
+    }
+    submitting.value = true;
+    updateLive(liveId.value, {
+      title: form.title,
+      displayMode: form.displayMode,
+      coverImg: form.coverImg,
+      startTime: form.startTime,
+      endTime: endTimeVal,
+      liveIntroduce: form.liveIntroduce,
+    })
+      .then((res) => {
+        submitting.value = false;
+        if (res.success) {
+          Message.success("保存成功");
+          router.push({ path: "/live-list" });
+        }
+      })
+      .catch(() => {
+        submitting.value = false;
+      });
+  });
+}
+function handleBack() {
+  router.push({ path: "/live-list" });
+}
 </script>
 
 <style lang="scss" scoped>

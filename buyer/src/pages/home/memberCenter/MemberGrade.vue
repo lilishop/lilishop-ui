@@ -74,206 +74,218 @@
 
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from 'vue'
 import { memberGradeCurrent, memberGradeList, memberGradeRules } from '@/api/member.js'
 
-export default {
-  name: 'MemberGrade',
-  data () {
-    return {
-      ruleList: [],
-      rulesLoading: false,
-      rulesDescription: '',
-      /** 接口返回 List MemberGradeDetailVO，每项 { grade, benefits } */
-      gradeDetails: [],
-      gradeList: [],
-      currentGrade: {},
-      currentExperience: 0,
-      currentGradeId: '',
-      selectedRuleKey: '',
-      activeGradeTab: 'rules',
-      logLoading: false,
-      gradeLoading: false,
-      params: {
-        pageNumber: 1,
-        pageSize: 20
-      },
-      experienceLogs: {}
-    }
-  },
-  computed: {
-    rulesMap () {
-      const map = {}
-      this.ruleList.forEach(item => {
-        map[item.ruleKey] = item.ruleName
-      })
-      return map
-    },
-    sortedGradeList () {
-      const list = Array.isArray(this.gradeList) ? this.gradeList.slice() : []
-      list.sort((a, b) => {
-        const sa = a && a.gradeSort != null ? Number(a.gradeSort) : 0
-        const sb = b && b.gradeSort != null ? Number(b.gradeSort) : 0
-        if (sa !== sb) return sa - sb
-        const ea = a && a.requiredExperience != null ? Number(a.requiredExperience) : 0
-        const eb = b && b.requiredExperience != null ? Number(b.requiredExperience) : 0
-        return ea - eb
-      })
-      return list
-    },
-    currentGradeIndex () {
-      if (!this.currentGradeId) return -1
-      return this.sortedGradeList.findIndex(g => g && g.id === this.currentGradeId)
-    },
-    nextGrade () {
-      const idx = this.currentGradeIndex
-      if (idx < 0) return null
-      return this.sortedGradeList[idx + 1] || null
-    },
-    diffExperience () {
-      if (!this.nextGrade || this.nextGrade.requiredExperience == null) return 0
-      const diff = Number(this.nextGrade.requiredExperience) - Number(this.currentExperience || 0)
-      return diff > 0 ? diff : 0
-    },
-    /** 当前等级在列表详情中对应的启用权益（顺序与后台 benefits 一致） */
-    currentGradeBenefits () {
-      const id = this.currentGradeId
-      if (!id || !Array.isArray(this.gradeDetails) || !this.gradeDetails.length) return []
-      const detail = this.gradeDetails.find(
-        (d) => d && d.grade && String(d.grade.id) === String(id)
-      )
-      const list = detail && Array.isArray(detail.benefits) ? detail.benefits : []
-      return list.filter((b) => b && b.benefitState === 'OPEN')
-    },
-  },
-  mounted () {
-    this.init()
-  },
-  methods: {
-    init () {
-      this.loadRules()
-      this.loadGradeList()
-      this.loadCurrent()
-    },
-    loadRules () {
-      this.rulesLoading = true
-      memberGradeRules()
-        .then(res => {
-          if (res && res.success) {
-            const items = res.result && Array.isArray(res.result.items) ? res.result.items : []
-            this.rulesDescription = (res.result && res.result.description) || ''
-            this.ruleList = items
-          }
-        })
-        .finally(() => {
-          this.rulesLoading = false
-        })
-    },
-    loadGradeList () {
-      this.gradeLoading = true
-      memberGradeList()
-        .then(res => {
-          if (res && res.success) {
-            const raw = Array.isArray(res.result) ? res.result : []
-            this.gradeDetails = raw
-              .map((item) => {
-                if (!item) return null
-                if (item.grade != null) {
-                  return {
-                    grade: item.grade,
-                    benefits: Array.isArray(item.benefits) ? item.benefits : []
-                  }
-                }
-                return { grade: item, benefits: [] }
-              })
-              .filter(Boolean)
-            this.gradeList = this.gradeDetails.map((d) => d.grade).filter(Boolean)
-          } else {
-            this.gradeDetails = []
-            this.gradeList = []
-          }
-        })
-        .finally(() => {
-          this.gradeLoading = false
-        })
-    },
-    loadCurrent () {
-      this.logLoading = true
-      const params = {
-        pageNumber: this.params.pageNumber,
-        pageSize: this.params.pageSize
+defineOptions({ name: 'MemberGrade' })
+
+const ruleList = ref([])
+const rulesLoading = ref(false)
+const rulesDescription = ref('')
+/** 接口返回 List MemberGradeDetailVO，每项 { grade, benefits } */
+const gradeDetails = ref([])
+const gradeList = ref([])
+const currentGrade = ref({})
+const currentExperience = ref(0)
+const currentGradeId = ref('')
+const selectedRuleKey = ref('')
+const activeGradeTab = ref('rules')
+const logLoading = ref(false)
+const gradeLoading = ref(false)
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20
+})
+const experienceLogs = ref({})
+
+const rulesMap = computed(() => {
+  const map = {}
+  ruleList.value.forEach(item => {
+    map[item.ruleKey] = item.ruleName
+  })
+  return map
+})
+
+const sortedGradeList = computed(() => {
+  const list = Array.isArray(gradeList.value) ? gradeList.value.slice() : []
+  list.sort((a, b) => {
+    const sa = a && a.gradeSort != null ? Number(a.gradeSort) : 0
+    const sb = b && b.gradeSort != null ? Number(b.gradeSort) : 0
+    if (sa !== sb) return sa - sb
+    const ea = a && a.requiredExperience != null ? Number(a.requiredExperience) : 0
+    const eb = b && b.requiredExperience != null ? Number(b.requiredExperience) : 0
+    return ea - eb
+  })
+  return list
+})
+
+const currentGradeIndex = computed(() => {
+  if (!currentGradeId.value) return -1
+  return sortedGradeList.value.findIndex(g => g && g.id === currentGradeId.value)
+})
+
+const nextGrade = computed(() => {
+  const idx = currentGradeIndex.value
+  if (idx < 0) return null
+  return sortedGradeList.value[idx + 1] || null
+})
+
+const diffExperience = computed(() => {
+  if (!nextGrade.value || nextGrade.value.requiredExperience == null) return 0
+  const diff = Number(nextGrade.value.requiredExperience) - Number(currentExperience.value || 0)
+  return diff > 0 ? diff : 0
+})
+
+/** 当前等级在列表详情中对应的启用权益（顺序与后台 benefits 一致） */
+const currentGradeBenefits = computed(() => {
+  const id = currentGradeId.value
+  if (!id || !Array.isArray(gradeDetails.value) || !gradeDetails.value.length) return []
+  const detail = gradeDetails.value.find(
+    (d) => d && d.grade && String(d.grade.id) === String(id)
+  )
+  const list = detail && Array.isArray(detail.benefits) ? detail.benefits : []
+  return list.filter((b) => b && b.benefitState === 'OPEN')
+})
+
+onMounted(() => {
+  init()
+})
+
+function init () {
+  loadRules()
+  loadGradeList()
+  loadCurrent()
+}
+
+function loadRules () {
+  rulesLoading.value = true
+  memberGradeRules()
+    .then(res => {
+      if (res && res.success) {
+        const items = res.result && Array.isArray(res.result.items) ? res.result.items : []
+        rulesDescription.value = (res.result && res.result.description) || ''
+        ruleList.value = items
       }
-      if (this.selectedRuleKey) params.ruleKey = this.selectedRuleKey
-      memberGradeCurrent(params)
-        .then(res => {
-          if (res && res.success && res.result) {
-            this.currentGrade = res.result.grade || {}
-            this.currentExperience = res.result.experience || 0
-            this.currentGradeId = res.result.gradeId || (this.currentGrade && this.currentGrade.id) || ''
-            this.experienceLogs = res.result.experienceLogs || {}
-          }
-        })
-        .finally(() => {
-          this.logLoading = false
-        })
-    },
-    selectRule (ruleKey) {
-      this.selectedRuleKey = ruleKey || ''
-      this.params.pageNumber = 1
-      this.loadCurrent()
-    },
-    changePage (val) {
-      this.params.pageNumber = val
-      this.loadCurrent()
-    },
-    changePageSize (val) {
-      this.params.pageSize = val
-      this.params.pageNumber = 1
-      this.loadCurrent()
-    },
-    getRuleName (ruleKey) {
-      if (!ruleKey) return '-'
-      return this.rulesMap[ruleKey] || ruleKey
-    },
-    getRuleDesc (ruleKey) {
-      const map = {
-        CONSUME: '客户消费1元可获取经验值，向下取整',
-        REGISTER: '会员注册成功后可获取经验值',
-        SIGN_IN: '客户每日签到后可获取的经验值',
-        COMMENT: '对已购买商品完成发表评价获取经验值；仅针对评论字数大于30字的评论进行发放',
-        SHARE: '会员分享商城页面可获取的经验值',
-        PROFILE: '完善个人基本信息可获得经验值，每个会员仅可获得一次',
-        FOLLOW_STORE: '关注店铺可获得经验值，每个客户ID同店铺仅第一次关注可进行获得',
-        BIND_WECHAT: '绑定微信成功后获得经验值，每个会员仅可获得一次',
-        ADD_ADDRESS: '添加收货地址可获得经验值，每个会员仅可获得一次',
-        SHARE_REGISTER: '仅被注册成功后可获得相应奖励经验值',
-        SHARE_BUY: '仅被购买成功后可获得相应奖励经验值'
+    })
+    .finally(() => {
+      rulesLoading.value = false
+    })
+}
+
+function loadGradeList () {
+  gradeLoading.value = true
+  memberGradeList()
+    .then(res => {
+      if (res && res.success) {
+        const raw = Array.isArray(res.result) ? res.result : []
+        gradeDetails.value = raw
+          .map((item) => {
+            if (!item) return null
+            if (item.grade != null) {
+              return {
+                grade: item.grade,
+                benefits: Array.isArray(item.benefits) ? item.benefits : []
+              }
+            }
+            return { grade: item, benefits: [] }
+          })
+          .filter(Boolean)
+        gradeList.value = gradeDetails.value.map((d) => d.grade).filter(Boolean)
+      } else {
+        gradeDetails.value = []
+        gradeList.value = []
       }
-      if (!ruleKey) return '-'
-      return map[ruleKey] || '-'
-    },
-    getLogDeltaRaw (row) {
-      if (!row) return 0
-      const candidate = row.variableExperience != null ? row.variableExperience : (row.changeExperience != null ? row.changeExperience : (row.experience != null ? row.experience : row.value))
-      if (candidate == null) return 0
-      const num = Number(candidate)
-      if (Number.isNaN(num)) return 0
-      if (row.type === 'DECREASE') return -Math.abs(num)
-      if (row.type === 'INCREASE') return Math.abs(num)
-      return num
-    },
-    getLogDeltaSign (row) {
-      const num = this.getLogDeltaRaw(row)
-      return num >= 0 ? '+' : '-'
-    },
-    getLogDeltaAbsValue (row) {
-      const num = this.getLogDeltaRaw(row)
-      return Math.abs(num)
-    },
-    getLogDeltaColor (row) {
-      return this.getLogDeltaRaw(row) >= 0 ? 'green' : 'red'
-    }
+    })
+    .finally(() => {
+      gradeLoading.value = false
+    })
+}
+
+function loadCurrent () {
+  logLoading.value = true
+  const reqParams = {
+    pageNumber: params.pageNumber,
+    pageSize: params.pageSize
   }
+  if (selectedRuleKey.value) reqParams.ruleKey = selectedRuleKey.value
+  memberGradeCurrent(reqParams)
+    .then(res => {
+      if (res && res.success && res.result) {
+        currentGrade.value = res.result.grade || {}
+        currentExperience.value = res.result.experience || 0
+        currentGradeId.value = res.result.gradeId || (currentGrade.value && currentGrade.value.id) || ''
+        experienceLogs.value = res.result.experienceLogs || {}
+      }
+    })
+    .finally(() => {
+      logLoading.value = false
+    })
+}
+
+function selectRule (ruleKey) {
+  selectedRuleKey.value = ruleKey || ''
+  params.pageNumber = 1
+  loadCurrent()
+}
+
+function changePage (val) {
+  params.pageNumber = val
+  loadCurrent()
+}
+
+function changePageSize (val) {
+  params.pageSize = val
+  params.pageNumber = 1
+  loadCurrent()
+}
+
+function getRuleName (ruleKey) {
+  if (!ruleKey) return '-'
+  return rulesMap.value[ruleKey] || ruleKey
+}
+
+function getRuleDesc (ruleKey) {
+  const map = {
+    CONSUME: '客户消费1元可获取经验值，向下取整',
+    REGISTER: '会员注册成功后可获取经验值',
+    SIGN_IN: '客户每日签到后可获取的经验值',
+    COMMENT: '对已购买商品完成发表评价获取经验值；仅针对评论字数大于30字的评论进行发放',
+    SHARE: '会员分享商城页面可获取的经验值',
+    PROFILE: '完善个人基本信息可获得经验值，每个会员仅可获得一次',
+    FOLLOW_STORE: '关注店铺可获得经验值，每个客户ID同店铺仅第一次关注可进行获得',
+    BIND_WECHAT: '绑定微信成功后获得经验值，每个会员仅可获得一次',
+    ADD_ADDRESS: '添加收货地址可获得经验值，每个会员仅可获得一次',
+    SHARE_REGISTER: '仅被注册成功后可获得相应奖励经验值',
+    SHARE_BUY: '仅被购买成功后可获得相应奖励经验值'
+  }
+  if (!ruleKey) return '-'
+  return map[ruleKey] || '-'
+}
+
+function getLogDeltaRaw (row) {
+  if (!row) return 0
+  const candidate = row.variableExperience != null ? row.variableExperience : (row.changeExperience != null ? row.changeExperience : (row.experience != null ? row.experience : row.value))
+  if (candidate == null) return 0
+  const num = Number(candidate)
+  if (Number.isNaN(num)) return 0
+  if (row.type === 'DECREASE') return -Math.abs(num)
+  if (row.type === 'INCREASE') return Math.abs(num)
+  return num
+}
+
+function getLogDeltaSign (row) {
+  const num = getLogDeltaRaw(row)
+  return num >= 0 ? '+' : '-'
+}
+
+function getLogDeltaAbsValue (row) {
+  const num = getLogDeltaRaw(row)
+  return Math.abs(num)
+}
+
+function getLogDeltaColor (row) {
+  return getLogDeltaRaw(row) >= 0 ? 'green' : 'red'
 }
 </script>
 

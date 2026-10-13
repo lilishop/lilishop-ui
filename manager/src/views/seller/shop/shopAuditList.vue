@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="70px" class="search-form">
         <el-form-item label="会员名称" prop="memberName">
           <el-input
             v-model="searchForm.memberName"
@@ -88,69 +88,80 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { getShopListData } from "@/api/shops";
 
-export default {
-  name: "shop",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-      },
-      selectDate: null,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    callback(val) {
-      this.$emit("callback", val);
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      }
-    },
-    getDataList() {
-      this.loading = true;
-      this.searchForm.storeDisable = "APPLYING";
-      getShopListData(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    edit(v) {
-      this.$router.push({ path: "/shop-operation", query: { shopId: v.id } });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "shop" });
+
+const emit = defineEmits(["callback"]);
+
+const router = useRouter();
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+});
+const selectDate = ref(null);
+const data = ref([]);
+const total = ref(0);
+
+const searchFormRef = ref(null);
+const table = ref(null);
+
+function callback(val) {
+  emit("callback", val);
+}
+
+function init() {
+  getDataList();
+}
+
+function changePage() {
+  getDataList();
+}
+
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function selectDateRange(v) {
+  if (v) {
+    searchForm.startDate = v[0];
+    searchForm.endDate = v[1];
+  }
+}
+
+function getDataList() {
+  loading.value = true;
+  searchForm.storeDisable = "APPLYING";
+  getShopListData(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+function edit(v) {
+  router.push({ path: "/shop-operation", query: { shopId: v.id } });
+}
+
+onMounted(() => {
+  init();
+});
 </script>

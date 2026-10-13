@@ -4,7 +4,7 @@
     <!-- 顶部logo -->
     <div class="logo-box">
       <img
-        :src="$store.state.logoImg" width='150'
+        :src="logoImg" width='150'
         @click="$router.push('/')"
       />
       <div>修改密码</div>
@@ -12,7 +12,7 @@
     <div class="login-container">
         <!-- 验证手机号 -->
         <el-form
-          ref="formFirst"
+          ref="formFirstRef"
           :model="formFirst"
           :rules="ruleInline"
           style="width:300px;"
@@ -47,7 +47,7 @@
           </el-form-item>
         </el-form>
         <el-form
-          ref="form"
+          ref="formRef"
           :model="form"
           :rules="ruleInline"
           style="width:300px;"
@@ -79,7 +79,7 @@
         </el-form>
         <!-- 拼图验证码 -->
         <Verify
-          ref="verify"
+          ref="verifyRef"
           class="verify-con"
           :verifyType="verifyType"
           @change="verifyChange"
@@ -103,8 +103,9 @@
   </div>
 </template>
 
-<script>
-
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import * as RegExp from '@/plugins/RegExp.js';
 import { md5 } from '@/plugins/md5.js';
@@ -113,143 +114,148 @@ import { sendSms } from '@/api/common.js';
 import Verify from '@/components/verify';
 import { Lock, Iphone, Document } from '@element-plus/icons-vue';
 import config from '@/config';
-export default {
-  name: 'ForgetPassword',
-  components: { Verify, Lock, Iphone, Document },
-  data () {
-    return {
-      config,
-      loading: false, // 加载状态
-      loading1: false, // 第二步加载状态
-      formFirst: { // 手机验证码表单
-        // 注册表单
-        mobile: '',
-        code: ''
-      },
-      form: { // 密码
-        password: '',
-        oncePasd: ''
-      },
-      year: new Date().getFullYear(), // 当前年份
-      step: 0, // 步骤
-      ruleInline: {
-        // 验证规则
-        mobile: [
-          { required: true, message: '请输入手机号码' },
-          {
-            pattern: RegExp.mobile,
-            trigger: 'blur',
-            message: '请输入正确的手机号'
-          }
-        ],
-        code: [{ required: true, message: '请输入手机验证码' }],
-        password: [{required: true, message: '密码不能为空'}, {pattern: RegExp.password, message: '密码不能少于6位'}]
-      },
-      verifyStatus: false, // 图片验证状态
-      verifyType: 'FIND_USER', // 图片验证类型
-      codeMsg: '发送验证码', // 验证码文字
-      interval: '', // 定时器
-      time: 60 // 倒计时时间
-    };
-  },
-  methods: {
-    hideVerify() {
-      this.$refs.verify?.close?.();
-    },
-    // 提交短信验证码，修改密码
-    next () {
-      this.$refs.formFirst.validate((valid) => {
-        if (valid) {
-          this.loading = true;
-          let data = JSON.parse(JSON.stringify(this.formFirst));
-          apiLogin.validateCode(data).then((res) => {
-            this.loading = false;
-            if (res.success) {
-            //   Message.success('');
-              this.step = 1;
-            } else {
-              Message.warning(res.message);
-            }
-          }).catch(() => { this.loading = false; });
-        }
-      });
-    },
-    handleSubmit () { // 提交密码
-      this.$refs.form.validate(valid => {
-        if (valid) {
-          let params = JSON.parse(JSON.stringify(this.form));
-          if (params.password !== params.oncePasd) {
-            Message.warning('两次输入密码不一致');
-            return;
-          };
-          params.mobile = this.formFirst.mobile;
-          params.password = md5(params.password);
-          delete params.oncePasd;
-          this.loading1 = true;
+import { useAppStore } from '@/stores/app';
 
-          apiLogin.resetPassword(params).then(res => {
-            this.loading1 = false;
-            if (res.success) {
-              Message.success('修改密码成功');
-              this.$router.push('login');
-            }
-          }).catch(() => { this.loading = false; });
-        };
-      });
-    },
-    sendCode () { // 发送验证码
-      if (this.time === 60) {
-        if (this.formFirst.mobile === '') {
-          Message.warning('请先填写手机号');
-          return;
-        }
-        if (!this.verifyStatus) {
-          Message.warning('请先完成安全验证');
-          return;
-        }
-        let params = {
-          mobile: this.formFirst.mobile,
-          verificationEnums: 'FIND_USER'
-        };
-        sendSms(params).then(res => {
-          if (res.success) {
-            Message.success('验证码发送成功');
-            let that = this;
-            this.interval = setInterval(() => {
-              that.time--;
-              if (that.time === 0) {
-                that.time = 60;
-                that.codeMsg = '重新发送';
-                that.verifyStatus = false;
-                clearInterval(that.interval);
-              } else {
-                that.codeMsg = that.time;
-              }
-            }, 1000);
-          } else {
-            Message.warning(res.message);
-          }
-        });
-      }
-    },
-    verifyChange (con) { // 验证通过
-      if (!con.status) return;
-      this.hideVerify();
-      this.verifyStatus = true;
-    },
-    verifyBtnClick () {
-      if (!this.verifyStatus) {
-        this.$refs.verify?.init();
-      }
+defineOptions({ name: 'ForgetPassword' });
+
+const router = useRouter();
+const appStore = useAppStore();
+const logoImg = computed(() => appStore.logoImg);
+
+const loading = ref(false); // 加载状态
+const loading1 = ref(false); // 第二步加载状态
+const formFirst = reactive({ // 手机验证码表单
+  // 注册表单
+  mobile: '',
+  code: ''
+});
+const form = reactive({ // 密码
+  password: '',
+  oncePasd: ''
+});
+const year = new Date().getFullYear(); // 当前年份
+const step = ref(0); // 步骤
+const ruleInline = {
+  // 验证规则
+  mobile: [
+    { required: true, message: '请输入手机号码' },
+    {
+      pattern: RegExp.mobile,
+      trigger: 'blur',
+      message: '请输入正确的手机号'
     }
-  },
-  mounted () {
-    document.querySelector('.forget-password').style.height = window.innerHeight + 'px'
-    this.$refs.formFirst.resetFields();
-  },
-  watch: {
-  }
+  ],
+  code: [{ required: true, message: '请输入手机验证码' }],
+  password: [{required: true, message: '密码不能为空'}, {pattern: RegExp.password, message: '密码不能少于6位'}]
 };
+const verifyStatus = ref(false); // 图片验证状态
+const verifyType = ref('FIND_USER'); // 图片验证类型
+const codeMsg = ref('发送验证码'); // 验证码文字
+const interval = ref(''); // 定时器
+const time = ref(60); // 倒计时时间
+
+const formFirstRef = ref(null);
+const formRef = ref(null);
+const verifyRef = ref(null);
+
+function hideVerify() {
+  verifyRef.value?.close?.();
+}
+
+// 提交短信验证码，修改密码
+function next () {
+  formFirstRef.value.validate((valid) => {
+    if (valid) {
+      loading.value = true;
+      let data = JSON.parse(JSON.stringify(formFirst));
+      apiLogin.validateCode(data).then((res) => {
+        loading.value = false;
+        if (res.success) {
+        //   Message.success('');
+          step.value = 1;
+        } else {
+          Message.warning(res.message);
+        }
+      }).catch(() => { loading.value = false; });
+    }
+  });
+}
+
+function handleSubmit () { // 提交密码
+  formRef.value.validate(valid => {
+    if (valid) {
+      let params = JSON.parse(JSON.stringify(form));
+      if (params.password !== params.oncePasd) {
+        Message.warning('两次输入密码不一致');
+        return;
+      };
+      params.mobile = formFirst.mobile;
+      params.password = md5(params.password);
+      delete params.oncePasd;
+      loading1.value = true;
+
+      apiLogin.resetPassword(params).then(res => {
+        loading1.value = false;
+        if (res.success) {
+          Message.success('修改密码成功');
+          router.push('login');
+        }
+      }).catch(() => { loading.value = false; });
+    };
+  });
+}
+
+function sendCode () { // 发送验证码
+  if (time.value === 60) {
+    if (formFirst.mobile === '') {
+      Message.warning('请先填写手机号');
+      return;
+    }
+    if (!verifyStatus.value) {
+      Message.warning('请先完成安全验证');
+      return;
+    }
+    let params = {
+      mobile: formFirst.mobile,
+      verificationEnums: 'FIND_USER'
+    };
+    sendSms(params).then(res => {
+      if (res.success) {
+        Message.success('验证码发送成功');
+        interval.value = setInterval(() => {
+          time.value--;
+          if (time.value === 0) {
+            time.value = 60;
+            codeMsg.value = '重新发送';
+            verifyStatus.value = false;
+            clearInterval(interval.value);
+          } else {
+            codeMsg.value = time.value;
+          }
+        }, 1000);
+      } else {
+        Message.warning(res.message);
+      }
+    });
+  }
+}
+
+function verifyChange (con) { // 验证通过
+  if (!con.status) return;
+  hideVerify();
+  verifyStatus.value = true;
+}
+
+function verifyBtnClick () {
+  if (!verifyStatus.value) {
+    verifyRef.value?.init();
+  }
+}
+
+onMounted(() => {
+  document.querySelector('.forget-password').style.height = window.innerHeight + 'px'
+  formFirstRef.value.resetFields();
+});
 </script>
 
 <style scoped lang="scss">

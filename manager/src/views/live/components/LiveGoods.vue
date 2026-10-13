@@ -76,7 +76,7 @@
     </div>
     <el-empty v-if="!loading && !goodsList.length" description="暂无直播商品" />
 
-    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData" />
+    <sku-select ref="skuSelectRef" @selectedGoodsData="selectedGoodsData" />
 
     <el-dialog v-model="popularityVisible" title="设置商品热度" width="400px">
       <el-form label-width="80px">
@@ -92,7 +92,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
 import {
   cancelRecommendLiveGoods,
   getLiveGoodsList,
@@ -104,193 +105,208 @@ import {
   setRecommendLiveGoods,
 } from "@/api/live";
 import skuSelect from "@/components/lili-dialog";
+import { Message, Modal } from "@/utils/message";
+import { unitPrice } from "@/utils/filters";
 
-export default {
-  name: "LiveGoods",
-  components: { skuSelect },
-  props: {
-    liveId: {
-      type: String,
-      required: true,
-    },
-    readonly: {
-      type: Boolean,
-      default: false,
-    },
+defineOptions({ name: "LiveGoods" });
+
+const props = defineProps({
+  liveId: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      loading: false,
-      goodsList: [],
-      selectedIds: [],
-      popularityVisible: false,
-      currentGoods: null,
-      popularityForm: {
-        popularity: 0,
-      },
-    };
+  readonly: {
+    type: Boolean,
+    default: false,
   },
-  watch: {
-    liveId() {
-      this.loadGoods();
-    },
-  },
-  mounted() {
-    this.loadGoods();
-  },
-  methods: {
-    formatPrice(price) {
-      return this.$filters.unitPrice(price, "￥");
-    },
-    isSellOut(row) {
-      return !!row.soldOutFlag;
-    },
-    buildLiveGoodsPayload(item) {
-      const price = Number(item.price ?? 0);
-      const originPrice = Number(
-        item.originPrice ?? item.cost ?? item.originalPrice ?? price
-      );
-      return {
-        liveRoomId: this.liveId,
-        goodsId: item.goodsId,
-        skuId: item.id || item.skuId,
-        goodsName: item.goodsName || "",
-        stock: String(item.quantity ?? item.stock ?? ""),
-        price,
-        thumbnail: item.thumbnail || "",
-        salesCount: Number(item.salesCount ?? item.buyCount ?? 0),
-        storeId: item.storeId || "",
-        storeName: item.storeName || "",
-        originPrice,
-        sellPoint: item.sellPoint || item.sellingPoint || "",
-        popularity: 0,
-        hideFlag: false,
-        canBuyFlag: true,
-        soldOutFlag: false,
-        recommend: false,
-      };
-    },
-    loadGoods() {
-      if (!this.liveId) return;
-      this.loading = true;
-      getLiveGoodsList(this.liveId)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.goodsList = res.result || [];
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    openChooseGoods() {
-      this.$refs.skuSelect.open("goods");
-      const data = JSON.parse(JSON.stringify(this.goodsList));
-      data.forEach((e) => {
-        if (e.skuId) e.id = e.skuId;
-      });
-      this.$refs.skuSelect.goodsData = data;
-    },
-    selectedGoodsData(selected) {
-      if (!selected?.length) return;
-      const existingSkuIds = new Set(this.goodsList.map((g) => String(g.skuId)));
-      const payload = selected
-        .filter((item) => !existingSkuIds.has(String(item.id || item.skuId)))
-        .map((item) => this.buildLiveGoodsPayload(item));
-      if (!payload.length) {
-        this.$Message.warning("所选商品均已添加");
-        return;
+});
+
+const loading = ref(false);
+const goodsList = ref([]);
+const selectedIds = ref([]);
+const popularityVisible = ref(false);
+const currentGoods = ref(null);
+const popularityForm = reactive({
+  popularity: 0,
+});
+
+// 模板 ref：原 ref="skuSelect" 与 import 的组件同名，改名避免互相覆盖
+const skuSelectRef = ref(null);
+
+watch(
+  () => props.liveId,
+  () => {
+    loadGoods();
+  }
+);
+
+function formatPrice(price) {
+  return unitPrice(price, "￥");
+}
+
+function isSellOut(row) {
+  return !!row.soldOutFlag;
+}
+
+function buildLiveGoodsPayload(item) {
+  const price = Number(item.price ?? 0);
+  const originPrice = Number(
+    item.originPrice ?? item.cost ?? item.originalPrice ?? price
+  );
+  return {
+    liveRoomId: props.liveId,
+    goodsId: item.goodsId,
+    skuId: item.id || item.skuId,
+    goodsName: item.goodsName || "",
+    stock: String(item.quantity ?? item.stock ?? ""),
+    price,
+    thumbnail: item.thumbnail || "",
+    salesCount: Number(item.salesCount ?? item.buyCount ?? 0),
+    storeId: item.storeId || "",
+    storeName: item.storeName || "",
+    originPrice,
+    sellPoint: item.sellPoint || item.sellingPoint || "",
+    popularity: 0,
+    hideFlag: false,
+    canBuyFlag: true,
+    soldOutFlag: false,
+    recommend: false,
+  };
+}
+
+function loadGoods() {
+  if (!props.liveId) return;
+  loading.value = true;
+  getLiveGoodsList(props.liveId)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        goodsList.value = res.result || [];
       }
-      saveBatchLiveGoods(payload).then((res) => {
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+function openChooseGoods() {
+  skuSelectRef.value.open("goods");
+  const data = JSON.parse(JSON.stringify(goodsList.value));
+  data.forEach((e) => {
+    if (e.skuId) e.id = e.skuId;
+  });
+  skuSelectRef.value.goodsData = data;
+}
+
+function selectedGoodsData(selected) {
+  if (!selected?.length) return;
+  const existingSkuIds = new Set(goodsList.value.map((g) => String(g.skuId)));
+  const payload = selected
+    .filter((item) => !existingSkuIds.has(String(item.id || item.skuId)))
+    .map((item) => buildLiveGoodsPayload(item));
+  if (!payload.length) {
+    Message.warning("所选商品均已添加");
+    return;
+  }
+  saveBatchLiveGoods(payload).then((res) => {
+    if (res.success) {
+      Message.success("添加成功");
+      loadGoods();
+    }
+  });
+}
+
+function handleSelectionChange(rows) {
+  selectedIds.value = (rows || []).map((r) => r.id);
+}
+
+function handleRemove(record) {
+  Modal.confirm({
+    title: "确认移除",
+    content: "确定要移除该商品吗？",
+    onOk: () => {
+      return removeBatchLiveGoods([record.id]).then((res) => {
         if (res.success) {
-          this.$Message.success("添加成功");
-          this.loadGoods();
+          Message.success("移除成功");
+          loadGoods();
         }
       });
     },
-    handleSelectionChange(rows) {
-      this.selectedIds = (rows || []).map((r) => r.id);
-    },
-    handleRemove(record) {
-      this.$Modal.confirm({
-        title: "确认移除",
-        content: "确定要移除该商品吗？",
-        onOk: () => {
-          return removeBatchLiveGoods([record.id]).then((res) => {
-            if (res.success) {
-              this.$Message.success("移除成功");
-              this.loadGoods();
-            }
-          });
-        },
-      });
-    },
-    handleBatchRemove() {
-      this.$Modal.confirm({
-        title: "确认批量移除",
-        content: `确定要移除选中的 ${this.selectedIds.length} 个商品吗？`,
-        onOk: () => {
-          return removeBatchLiveGoods(this.selectedIds).then((res) => {
-            if (res.success) {
-              this.$Message.success("移除成功");
-              this.selectedIds = [];
-              this.loadGoods();
-            }
-          });
-        },
-      });
-    },
-    handleRecommend(record) {
-      setRecommendLiveGoods(record.id).then((res) => {
+  });
+}
+
+function handleBatchRemove() {
+  Modal.confirm({
+    title: "确认批量移除",
+    content: `确定要移除选中的 ${selectedIds.value.length} 个商品吗？`,
+    onOk: () => {
+      return removeBatchLiveGoods(selectedIds.value).then((res) => {
         if (res.success) {
-          this.$Message.success("已设为推荐");
-          this.loadGoods();
+          Message.success("移除成功");
+          selectedIds.value = [];
+          loadGoods();
         }
       });
     },
-    handleCancelRecommend(record) {
-      cancelRecommendLiveGoods(record.id).then((res) => {
-        if (res.success) {
-          this.$Message.success("已取消推荐");
-          this.loadGoods();
-        }
-      });
-    },
-    handleToggleSoldOut(record) {
-      const soldOutFlag = !this.isSellOut(record);
-      setLiveGoodsSoldOut(record.id, soldOutFlag).then((res) => {
-        if (res.success) {
-          this.$Message.success(soldOutFlag ? "已设为售罄" : "已取消售罄");
-          this.loadGoods();
-        }
-      });
-    },
-    openPopularityModal(record) {
-      this.currentGoods = record;
-      getLiveGoodsPopularity(record.id, this.liveId).then((res) => {
-        this.popularityForm.popularity = res.success
-          ? res.result?.popularity ?? record.popularity ?? 0
-          : record.popularity ?? 0;
-        this.popularityVisible = true;
-      });
-    },
-    handleSavePopularity() {
-      if (!this.currentGoods) return;
-      setLiveGoodsPopularity(
-        this.currentGoods.id,
-        this.liveId,
-        this.popularityForm.popularity
-      ).then((res) => {
-        if (res.success) {
-          this.$Message.success("热度设置成功");
-          this.popularityVisible = false;
-          this.loadGoods();
-        }
-      });
-    },
-  },
-};
+  });
+}
+
+function handleRecommend(record) {
+  setRecommendLiveGoods(record.id).then((res) => {
+    if (res.success) {
+      Message.success("已设为推荐");
+      loadGoods();
+    }
+  });
+}
+
+function handleCancelRecommend(record) {
+  cancelRecommendLiveGoods(record.id).then((res) => {
+    if (res.success) {
+      Message.success("已取消推荐");
+      loadGoods();
+    }
+  });
+}
+
+function handleToggleSoldOut(record) {
+  const soldOutFlag = !isSellOut(record);
+  setLiveGoodsSoldOut(record.id, soldOutFlag).then((res) => {
+    if (res.success) {
+      Message.success(soldOutFlag ? "已设为售罄" : "已取消售罄");
+      loadGoods();
+    }
+  });
+}
+
+function openPopularityModal(record) {
+  currentGoods.value = record;
+  getLiveGoodsPopularity(record.id, props.liveId).then((res) => {
+    popularityForm.popularity = res.success
+      ? res.result?.popularity ?? record.popularity ?? 0
+      : record.popularity ?? 0;
+    popularityVisible.value = true;
+  });
+}
+
+function handleSavePopularity() {
+  if (!currentGoods.value) return;
+  setLiveGoodsPopularity(
+    currentGoods.value.id,
+    props.liveId,
+    popularityForm.popularity
+  ).then((res) => {
+    if (res.success) {
+      Message.success("热度设置成功");
+      popularityVisible.value = false;
+      loadGoods();
+    }
+  });
+}
+
+onMounted(() => {
+  loadGoods();
+});
 </script>
 
 <style lang="scss" scoped>

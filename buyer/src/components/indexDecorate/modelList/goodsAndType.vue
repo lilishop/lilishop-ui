@@ -43,31 +43,28 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "goods",
-  props: {
-    paramData: {
-      type: Object,
-      default: () => ({}),
-    },
+<script setup>
+import { onMounted, ref } from "vue";
+
+defineOptions({ name: "goods" });
+
+const props = defineProps({
+  paramData: {
+    type: Object,
+    default: () => ({}),
   },
-  data() {
-    return {
-      current: "",
-    };
-  },
-  watch: {},
-  mounted() {
-    this.current = this.paramData.options.labels[0].___index;
-  },
-  methods: {
-    // 筛选出当前分类下的商品
-    handleClickLabel(val, index) {
-      this.current = index;
-    },
-  },
-};
+});
+
+const current = ref("");
+
+onMounted(() => {
+  current.value = props.paramData.options.labels[0].___index;
+});
+
+// 筛选出当前分类下的商品
+function handleClickLabel(val, index) {
+  current.value = index;
+}
 </script>
 
 <style scoped lang="scss">

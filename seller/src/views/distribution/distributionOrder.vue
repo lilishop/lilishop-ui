@@ -2,7 +2,7 @@
   <div>
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -122,110 +122,119 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { getDistributionOrder } from "@/api/distribution";
-import { orderStatusList } from "./dataJson";
 import vueQr from "vue-qr";
+import * as filters from "@/utils/filters";
 
-export default {
-  name: "distributionOrder",
-  components: { vueQr },
-  data() {
-    return {
-      timeRange: [],
-      orderStatusList,
-      distributionId: this.$route.query.id,
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  watch: {
-    $route(e) {
-      this.distributionId = e.query.id ? e.query.id : undefined;
-      this.getDataList();
-    },
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.searchForm.distributionId = this.distributionId;
-      this.loading = true;
-      if (this.timeRange && this.timeRange[0] && this.timeRange[1]) {
-        const startTime = new Date(this.timeRange[0]).getTime();
-        const endTime = new Date(this.timeRange[1]).getTime();
-        this.searchForm.startTime = this.$filters.unixToDate(startTime / 1000);
-        this.searchForm.endTime = this.$filters.unixToDate(endTime / 1000);
+defineOptions({ name: "distributionOrder" });
+
+const route = useRoute();
+
+const timeRange = ref([]);
+const distributionId = ref(route.query.id);
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "create_time",
+  order: "desc",
+});
+const data = ref([]);
+const total = ref(0);
+
+// searchFormRef：模板 ref 改名避免与响应式变量 searchForm 互相覆盖
+const searchFormRef = ref(null);
+const table = ref(null);
+
+watch(
+  () => route.query,
+  (e) => {
+    distributionId.value = e.id ? e.id : undefined;
+    getDataList();
+  }
+);
+
+onMounted(() => {
+  init();
+});
+
+function init() {
+  getDataList();
+}
+
+function changePage() {
+  getDataList();
+}
+
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function getDataList() {
+  searchForm.distributionId = distributionId.value;
+  loading.value = true;
+  if (timeRange.value && timeRange.value[0] && timeRange.value[1]) {
+    const startTime = new Date(timeRange.value[0]).getTime();
+    const endTime = new Date(timeRange.value[1]).getTime();
+    searchForm.startTime = filters.unixToDate(startTime / 1000);
+    searchForm.endTime = filters.unixToDate(endTime / 1000);
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  getDistributionOrder(searchForm)
+    .then((res) => {
+      if (res?.success) {
+        const page = res.result || {};
+        data.value = page.records || [];
+        total.value = page.total || 0;
       } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
+        data.value = [];
+        total.value = 0;
       }
-      getDistributionOrder(this.searchForm)
-        .then((res) => {
-          if (res?.success) {
-            const page = res.result || {};
-            this.data = page.records || [];
-            this.total = page.total || 0;
-          } else {
-            this.data = [];
-            this.total = 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    filterStatus(status) {
-      const arr = [
-        { status: "NO_COMPLETED", title: "未完成" },
-        { status: "COMPLETE", title: "完成" },
-        { status: "REFUND", title: "退款" },
-      ];
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i].status === status) {
-          return arr[i].title;
-        }
-      }
-      return "未完成";
-    },
-    filterStatusTagType(status) {
-      const arr = [
-        { status: "NO_COMPLETED", type: "warning" },
-        { status: "COMPLETE", type: "success" },
-        { status: "REFUND", type: "danger" },
-      ];
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i].status === status) {
-          return arr[i].type;
-        }
-      }
-      return "warning";
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function filterStatus(status) {
+  const arr = [
+    { status: "NO_COMPLETED", title: "未完成" },
+    { status: "COMPLETE", title: "完成" },
+    { status: "REFUND", title: "退款" },
+  ];
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].status === status) {
+      return arr[i].title;
+    }
+  }
+  return "未完成";
+}
+
+function filterStatusTagType(status) {
+  const arr = [
+    { status: "NO_COMPLETED", type: "warning" },
+    { status: "COMPLETE", type: "success" },
+    { status: "REFUND", type: "danger" },
+  ];
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].status === status) {
+      return arr[i].type;
+    }
+  }
+  return "warning";
+}
 </script>
 
 <style lang="scss">

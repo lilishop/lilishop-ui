@@ -46,120 +46,117 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { getShopListData } from "@/api/shops.js";
 
-export default {
-  props: ["closeShop"],
-  data() {
-    return {
-      month: "",
-      selectedWay: {
-        title: "过去7天",
-        selected: true,
-        searchType: "LAST_SEVEN",
-      },
-      storeId: "",
-      dates: [],
-      params: {
-        pageNumber: 1,
-        pageSize: 100,
-        storeName: "",
-      },
-      dateList: [
-        { title: "今天", selected: false, searchType: "TODAY" },
-        { title: "昨天", selected: false, searchType: "YESTERDAY" },
-        { title: "过去7天", selected: true, searchType: "LAST_SEVEN" },
-        { title: "过去30天", selected: false, searchType: "LAST_THIRTY" },
-      ],
-      originDateList: [
-        { title: "今天", selected: false, searchType: "TODAY" },
-        { title: "昨天", selected: false, searchType: "YESTERDAY" },
-        { title: "过去7天", selected: true, searchType: "LAST_SEVEN" },
-        { title: "过去30天", selected: false, searchType: "LAST_THIRTY" },
-      ],
-      shopTotal: 0,
-      shopsData: [],
+defineProps(["closeShop"]);
+const emit = defineEmits(["selected"]);
+
+const month = ref("");
+const selectedWay = ref({
+  title: "过去7天",
+  selected: true,
+  searchType: "LAST_SEVEN",
+});
+const storeId = ref("");
+const dates = ref([]);
+const params = ref({
+  pageNumber: 1,
+  pageSize: 100,
+  storeName: "",
+});
+const dateList = ref([
+  { title: "今天", selected: false, searchType: "TODAY" },
+  { title: "昨天", selected: false, searchType: "YESTERDAY" },
+  { title: "过去7天", selected: true, searchType: "LAST_SEVEN" },
+  { title: "过去30天", selected: false, searchType: "LAST_THIRTY" },
+]);
+const originDateList = ref([
+  { title: "今天", selected: false, searchType: "TODAY" },
+  { title: "昨天", selected: false, searchType: "YESTERDAY" },
+  { title: "过去7天", selected: true, searchType: "LAST_SEVEN" },
+  { title: "过去30天", selected: false, searchType: "LAST_THIRTY" },
+]);
+const shopTotal = ref(0);
+const shopsData = ref([]);
+
+onMounted(() => {
+  getFiveYears();
+  getShopList();
+});
+
+function getShopList() {
+  getShopListData(params.value).then((res) => {
+    if (res.success) {
+      shopTotal.value = res.result.total;
+      shopsData.value = res.result.records || [];
+    }
+  });
+}
+function changeshop() {
+  selectedWay.value.storeId = storeId.value;
+  emit("selected", selectedWay.value);
+}
+function getFiveYears() {
+  const getYear = new Date().getFullYear();
+  const lastFiveYear = getYear - 5;
+  const maxMonth = new Date().getMonth() + 1;
+  const list = [];
+  for (let year = lastFiveYear; year <= getYear; year++) {
+    for (let month = 1; month <= 12; month++) {
+      if (year === getYear && month > maxMonth) {
+        continue;
+      }
+      list.push({ year, month });
+    }
+  }
+  dates.value = list.reverse();
+}
+function changeSelect(e) {
+  month.value = e;
+  if (month.value) {
+    dateList.value.forEach((res) => {
+      res.selected = false;
+    });
+    const parts = String(month.value).split("-");
+    selectedWay.value = {
+      ...selectedWay.value,
+      year: parts[0],
+      month: parts[1],
+      searchType: "",
+      storeId: storeId.value,
     };
-  },
-  mounted() {
-    this.getFiveYears();
-    this.getShopList();
-  },
-  methods: {
-    getShopList() {
-      getShopListData(this.params).then((res) => {
-        if (res.success) {
-          this.shopTotal = res.result.total;
-          this.shopsData = res.result.records || [];
-        }
-      });
-    },
-    changeshop() {
-      this.selectedWay.storeId = this.storeId;
-      this.$emit("selected", this.selectedWay);
-    },
-    getFiveYears() {
-      const getYear = new Date().getFullYear();
-      const lastFiveYear = getYear - 5;
-      const maxMonth = new Date().getMonth() + 1;
-      const dates = [];
-      for (let year = lastFiveYear; year <= getYear; year++) {
-        for (let month = 1; month <= 12; month++) {
-          if (year === getYear && month > maxMonth) {
-            continue;
-          }
-          dates.push({ year, month });
-        }
-      }
-      this.dates = dates.reverse();
-    },
-    changeSelect(e) {
-      this.month = e;
-      if (this.month) {
-        this.dateList.forEach((res) => {
-          res.selected = false;
-        });
-        const parts = String(this.month).split("-");
-        this.selectedWay = {
-          ...this.selectedWay,
-          year: parts[0],
-          month: parts[1],
-          searchType: "",
-          storeId: this.storeId,
-        };
-        this.$emit("selected", this.selectedWay);
-      } else {
-        const current =
-          this.dateList.find((item) => item.selected) ||
-          this.dateList.find((item) => item.title === this.selectedWay.title) ||
-          this.dateList.find((item) => item.searchType === "LAST_SEVEN");
-        this.clickBreadcrumb(current);
-      }
-    },
-    clickBreadcrumb(item) {
-      if (!item) return;
-      let currentIndex;
-      this.dateList.forEach((res, index) => {
-        res.selected = false;
-        if (res.title === item.title) {
-          currentIndex = index;
-        }
-      });
-      item.selected = true;
-      item.storeId = this.storeId;
-      this.month = "";
-      if (item.searchType === "") {
-        const origin = this.originDateList[currentIndex];
-        item.searchType = (origin && origin.searchType) || "LAST_SEVEN";
-      }
-      this.selectedWay = item;
-      this.selectedWay.year = new Date().getFullYear();
-      this.selectedWay.month = "";
-      this.$emit("selected", this.selectedWay);
-    },
-  },
-};
+    emit("selected", selectedWay.value);
+  } else {
+    const current =
+      dateList.value.find((item) => item.selected) ||
+      dateList.value.find((item) => item.title === selectedWay.value.title) ||
+      dateList.value.find((item) => item.searchType === "LAST_SEVEN");
+    clickBreadcrumb(current);
+  }
+}
+function clickBreadcrumb(item) {
+  if (!item) return;
+  let currentIndex;
+  dateList.value.forEach((res, index) => {
+    res.selected = false;
+    if (res.title === item.title) {
+      currentIndex = index;
+    }
+  });
+  item.selected = true;
+  item.storeId = storeId.value;
+  month.value = "";
+  if (item.searchType === "") {
+    const origin = originDateList.value[currentIndex];
+    item.searchType = (origin && origin.searchType) || "LAST_SEVEN";
+  }
+  selectedWay.value = item;
+  selectedWay.value.year = new Date().getFullYear();
+  selectedWay.value.month = "";
+  emit("selected", selectedWay.value);
+}
 </script>
 
 <style lang="scss" scoped>

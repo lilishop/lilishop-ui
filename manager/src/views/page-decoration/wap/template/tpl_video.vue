@@ -28,7 +28,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from "vue";
 import {
   ensureVideoItem,
   getVideoWrapperStyle,
@@ -36,25 +37,16 @@ import {
   getAspectPadding,
 } from "../video-style";
 
-export default {
-  props: ["res"],
-  computed: {
-    item() {
-      const data = this.res.list[0] || {};
-      ensureVideoItem(data);
-      return data;
-    },
-    wrapperStyle() {
-      return getVideoWrapperStyle(this.item);
-    },
-    boxStyle() {
-      return getVideoBoxStyle(this.item);
-    },
-    aspectPadding() {
-      return getAspectPadding(this.item.aspectRatio);
-    },
-  },
-};
+const props = defineProps(["res"]);
+
+const item = computed(() => {
+  const data = props.res.list[0] || {};
+  ensureVideoItem(data);
+  return data;
+});
+const wrapperStyle = computed(() => getVideoWrapperStyle(item.value));
+const boxStyle = computed(() => getVideoBoxStyle(item.value));
+const aspectPadding = computed(() => getAspectPadding(item.value.aspectRatio));
 </script>
 <style lang="scss" scoped>
 .layout {

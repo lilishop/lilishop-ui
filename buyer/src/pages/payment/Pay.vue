@@ -4,7 +4,7 @@
     <!-- LOGO 步骤条 -->
     <div class="width_1200 logo">
       <div>
-        <router-link to="/"><img :src="$store.state.logoImg" /></router-link>
+        <router-link to="/"><img :src="logoImg" /></router-link>
         <div>结算页</div>
       </div>
       <div class="cart-steps">
@@ -317,7 +317,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, getCurrentInstance, nextTick, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message, Modal, Spin } from "@/utils/message";
 import { ArrowDown, ArrowUp, Check, Help } from '@element-plus/icons-vue';
 import invoiceModal from "@/components/invoiceModal";
@@ -337,638 +339,647 @@ import {
 import { getStoreAddress } from "@/api/shopentry.js"
 import { canUseCouponList } from "@/api/member.js";
 import { isECoupon, shouldSkipPaymentPage } from "@/constants/goodsType";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "Pay",
-  components: { invoiceModal, addressManage },
-  computed: {
-    hasInvoiceInfo() {
-      const title =
-        this.invoiceData.personalName ||
-        this.invoiceData.companyName ||
-        this.invoiceData.receiptTitle;
-      const content = this.invoiceData.receiptContent;
-      if (content && String(content).trim() === "不开发票") return false;
-      return Boolean(
-        (title && String(title).trim()) ||
-        (content && String(content).trim())
-      );
-    },
-    invoiceDisplayTitle() {
-      return (
-        this.invoiceData.personalName ||
-        this.invoiceData.companyName ||
-        this.invoiceData.receiptTitle ||
-        ""
-      );
-    },
-    giftCardDeductAmount() {
-      if (this.tradeGiftCardDeductTotal != null && Number(this.tradeGiftCardDeductTotal) > 0) {
-        return Number(this.tradeGiftCardDeductTotal);
-      }
-      const items = this.giftCardDeductItems || [];
-      let sum = 0;
-      items.forEach((it) => {
-        sum += Number(it.deductAmount || 0);
-      });
-      if (sum > 0) {
-        return sum;
-      }
-      const p = this.priceDetailDTO || {};
-      const n = Number(
-        p.giftCardPrice != null
-          ? p.giftCardPrice
-          : p.giftCardDiscountPrice != null
-            ? p.giftCardDiscountPrice
-            : p.memberCardPrice != null
-              ? p.memberCardPrice
-              : 0
-      );
-      return Number.isFinite(n) ? n : 0;
-    },
-    /** 电子卡券结算：免地址、隐藏发票；优惠券/礼品卡/促销明细可用（M-02） */
-    isECouponCheckout() {
-      return isECoupon(this.goodsType);
-    },
-    /** 虚拟型结算（核销虚拟 + 电子卡券）：均不需要收货地址 */
-    isVirtualLikeCheckout() {
-      return this.goodsType === "VIRTUAL_GOODS" || this.isECouponCheckout;
-    },
+defineOptions({ name: "Pay" });
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+const instance = getCurrentInstance();
+
+const logoImg = computed(() => appStore.logoImg);
+
+const invModal = ref(null);
+const address = ref(null);
+
+const selectedStoreAddress = ref('m');
+const selectMethod = ref('');
+const stepIndex = ref(1); // 顶部步骤条状态
+const invoiceAvailable = ref(false); // 发票编辑按钮
+const showEditBtn = ref(""); // 鼠标移入显示编辑按钮
+const orderMark = ref(""); // 订单备注
+const remarkEditing = ref({}); // 正在填写备注的店铺
+const goodsType = ref(""); // 商品类型
+const storeMoreAddr = ref(false);
+const invoiceData = ref({
+  // 发票数据
+  //receiptContent: "不开发票",
+});
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 100
+});
+const shippingMethod = ref([]);
+const storeAddressList = ref([]);
+const shippingWay = [
+  {
+    value: "LOGISTICS",
+    label: "物流",
   },
-  data() {
-    return {
-      selectedStoreAddress: 'm',
-      selectMethod: '',
-      stepIndex: 1, // 顶部步骤条状态
-      invoiceAvailable: false, // 发票编辑按钮
-      showEditBtn: "", // 鼠标移入显示编辑按钮
-      orderMark: "", // 订单备注
-      remarkEditing: {}, // 正在填写备注的店铺
-      goodsType: "", // 商品类型
-      storeMoreAddr: false,
-      invoiceData: {
-        // 发票数据
-        //receiptContent: "不开发票",
-      },
-      searchForm: {
+  {
+    value: "SELF_PICK_UP",
+    label: "自提",
+  },
+];
+const selectedDeliverMethod = ref('LOGISTICS');
+const addressList = ref([]); // 地址列表
+const selectedAddress = ref({}); // 所选地址
+const goodsList = ref([]); // 商品列表
+const skuList = ref([]); // 商品sku列表
+const priceDetailDTO = ref({}); // 商品价格
+const totalNum = ref(0); // 购买数量
+const addrId = ref(""); // 编辑地址传入的id
+const moreAddr = ref(false); // 更多地址
+const canUseCouponNum = ref(0); // 可用优惠券数量
+const couponList = ref([]); // 可用优惠券列表
+const usedCouponId = ref([]); // 已使用优惠券id
+const selectedCoupon = ref({}); // 已选优惠券对象
+const storeId = ref(''); //店铺Id
+const giftCardList = ref([]); // TradeDTO.canUseGiftCards
+const giftCardNoticeModal = ref(false);
+const giftCardDeductItems = ref([]); // 已选礼品卡抵扣明细（TradeDTO.giftCardDeductItems）
+const tradeGiftCardDeductTotal = ref(null); // TradeDTO.giftCardDeductTotal
+const selectedGiftCardCredentialIds = ref([]); // 已选凭证 id，与 deductItems 同步
+// 各店铺备注输入框组件实例，key 为 remarkKey(shop)
+const remarkInputRefs = {};
+
+const hasInvoiceInfo = computed(() => {
+  const title =
+    invoiceData.value.personalName ||
+    invoiceData.value.companyName ||
+    invoiceData.value.receiptTitle;
+  const content = invoiceData.value.receiptContent;
+  if (content && String(content).trim() === "不开发票") return false;
+  return Boolean(
+    (title && String(title).trim()) ||
+    (content && String(content).trim())
+  );
+});
+const invoiceDisplayTitle = computed(() => {
+  return (
+    invoiceData.value.personalName ||
+    invoiceData.value.companyName ||
+    invoiceData.value.receiptTitle ||
+    ""
+  );
+});
+const giftCardDeductAmount = computed(() => {
+  if (tradeGiftCardDeductTotal.value != null && Number(tradeGiftCardDeductTotal.value) > 0) {
+    return Number(tradeGiftCardDeductTotal.value);
+  }
+  const items = giftCardDeductItems.value || [];
+  let sum = 0;
+  items.forEach((it) => {
+    sum += Number(it.deductAmount || 0);
+  });
+  if (sum > 0) {
+    return sum;
+  }
+  const p = priceDetailDTO.value || {};
+  const n = Number(
+    p.giftCardPrice != null
+      ? p.giftCardPrice
+      : p.giftCardDiscountPrice != null
+        ? p.giftCardDiscountPrice
+        : p.memberCardPrice != null
+          ? p.memberCardPrice
+          : 0
+  );
+  return Number.isFinite(n) ? n : 0;
+});
+/** 电子卡券结算：免地址、隐藏发票；优惠券/礼品卡/促销明细可用（M-02） */
+const isECouponCheckout = computed(() => {
+  return isECoupon(goodsType.value);
+});
+/** 虚拟型结算（核销虚拟 + 电子卡券）：均不需要收货地址 */
+const isVirtualLikeCheckout = computed(() => {
+  return goodsType.value === "VIRTUAL_GOODS" || isECouponCheckout.value;
+});
+
+onMounted(() => {
+  init();
+});
+
+// 初始化数据
+function init() {
+  getGoodsDetail();
+  getDistribution();
+}
+function goAddressManage() {
+  // 跳转地址管理页面
+  router.push("/home/MyAddress");
+}
+function getAddress() {
+  // 获取收货地址列表
+  memberAddress(searchForm).then((res) => {
+    if (res.success) {
+      addressList.value = res.result?.records || [];
+      addressList.value.forEach((e, index) => {
+        if (e.id === selectedAddress.value.id && index > 2) {
+          moreAddr.value = true;
+        }
+      });
+    }
+  }).catch((err) => {
+    // 网络/登录异常已由 request 层统一提示，地址列表保持为空，可正常新增地址
+    console.warn("获取收货地址列表失败", err);
+  });
+}
+// 获取配送方式列表
+async function getDistribution() {
+  try {
+    let shopRes = await shippingMethodList({ way: route.query.way });
+    let shopList;
+    if (shopRes.success) {
+      shopList = shopRes.result || [];
+      let way = [];
+      shippingWay.forEach((item) => {
+        shopList.forEach((child) => {
+          if (item.value == child) {
+            way.push(item);
+          }
+        });
+      });
+      shippingMethod.value = way;
+    }
+  } catch (err) {
+    // 网络/登录异常已由 request 层统一提示，配送方式保持为空不影响页面其余模块
+    console.warn("获取配送方式列表失败", err);
+  }
+}
+
+async function getStoreAddressList() {
+  getStoreAddress(storeId.value, searchForm).then(res => {
+    if (res.success) {
+      storeAddressList.value = res.result?.records || []
+      storeAddressList.value.forEach((e, index) => {
+        if (e.id === selectedAddress.value.id && index > 2) {
+          storeMoreAddr.value = true;
+        }
+      });
+    }
+  }).catch((err) => {
+    // 网络/登录异常已由 request 层统一提示，自提点列表保持为空
+    console.warn("获取自提点列表失败", err);
+  })
+}
+function getGoodsDetail() {
+  // 订单商品详情
+  Spin.show();
+  cartGoodsPay({ way: route.query.way })
+    .then((res) => {
+      Spin.hide();
+      if (res.success) {
+        const result = res.result || {};
+        if (
+          !result.checkedSkuList ||
+          result.checkedSkuList.length === 0
+        ) {
+          const firstSku = result.skuList?.[0];
+          if (firstSku) {
+            Modal.warning({
+              title: "购物车存在无效商品！",
+              content:
+                "[" +
+                (firstSku.goodsSku?.goodsName || "") +
+                "]" +
+                (firstSku.errorMessage || ""),
+            });
+          }
+          router.push({
+            path: "/cart",
+            replace: true,
+          });
+          return;
+        }
+        goodsList.value = result.cartList || [];
+        priceDetailDTO.value = result.priceDetailDTO || {};
+        skuList.value = result.skuList || [];
+        if (skuList.value[0]?.goodsSku) {
+          goodsType.value = skuList.value[0].goodsSku.goodsType;
+        }
+        storeId.value = goodsList.value[0]?.storeId || ''
+        if (result.receiptVO) {
+          invoiceData.value = result.receiptVO;
+        }
+        let notSupArea = result.notSupportFreight;
+        selectedCoupon.value = {};
+        const platformCouponId = result.platformCoupon?.memberCoupon?.id;
+        if (platformCouponId)
+          selectedCoupon.value[platformCouponId] = result.platformCoupon;
+        if (
+          result.storeCoupons &&
+          Object.keys(result.storeCoupons)[0]
+        ) {
+          let storeMemberCouponsId = Object.keys(
+            result.storeCoupons
+          )[0];
+          let storeCouponId =
+            result.storeCoupons[storeMemberCouponsId]?.memberCoupon?.id;
+          if (storeCouponId)
+            selectedCoupon.value[storeCouponId] =
+              result.storeCoupons[storeMemberCouponsId];
+        }
+        if (notSupArea) {
+          let content = [];
+          let title = "";
+          notSupArea.forEach((e) => {
+            title = e.errorMessage;
+            content.push(e.goodsSku?.goodsName || "");
+          });
+          Modal.warning({
+            title: "以下商品超出配送区域" || title,
+            content: content.toString(),
+          });
+        }
+        if (result.memberAddress) {
+          selectedAddress.value = result.memberAddress;
+        }
+        getAddress();
+        getStoreAddressList();
+        totalNum.value = 0;
+        for (let i = 0; i < skuList.value.length; i++) {
+          totalNum.value += skuList.value[i].num || 0;
+        }
+        usedCouponId.value = [];
+        couponList.value = result.canUseCoupons || [];
+        const couponKeys = Object.keys(selectedCoupon.value);
+        if (couponKeys.length) {
+          couponList.value.forEach((e) => {
+            if (
+              selectedCoupon.value[e.id] &&
+              e.id === selectedCoupon.value[e.id]?.memberCoupon?.id
+            ) {
+              usedCouponId.value.push(e.id);
+            }
+          });
+          nextTick(() => {
+            instance.proxy.$forceUpdate();
+          });
+        }
+        giftCardDeductItems.value = Array.isArray(result.giftCardDeductItems)
+          ? result.giftCardDeductItems
+          : [];
+        tradeGiftCardDeductTotal.value =
+          result.giftCardDeductTotal != null && result.giftCardDeductTotal !== ""
+            ? Number(result.giftCardDeductTotal)
+            : null;
+        giftCardList.value = Array.isArray(result.canUseGiftCards) ? result.canUseGiftCards : [];
+        syncGiftCardSelectionFromCart(result);
+      }
+    })
+    .catch((err) => {
+      Spin.hide();
+      // 网络/登录异常已由 request 层统一提示；这里兜底 404 与返回数据结构异常
+      if (!err?.data || err?.data?.message) {
+        Message.error(err?.data?.message || "结算数据加载失败，请稍后重试");
+      }
+      console.warn("获取结算数据失败", err);
+    });
+}
+function syncGiftCardSelectionFromCart(result) {
+  if (!result) {
+    selectedGiftCardCredentialIds.value = [];
+    return;
+  }
+  const selectedIds = result.selectedGiftCardIds;
+  if (Array.isArray(selectedIds) && selectedIds.length) {
+    selectedGiftCardCredentialIds.value = selectedIds
+      .map((id) => (id != null && id !== "" ? String(id) : ""))
+      .filter(Boolean);
+    return;
+  }
+  const items = Array.isArray(result.giftCardDeductItems) ? result.giftCardDeductItems : [];
+  if (items.length) {
+    selectedGiftCardCredentialIds.value = items
+      .map((it) => (it.credentialId != null && it.credentialId !== "" ? String(it.credentialId) : ""))
+      .filter(Boolean);
+    return;
+  }
+  const pd = result.priceDetailDTO || {};
+  const id =
+    result.selectedGiftCardCredentialId ||
+    result.usedGiftCardCredentialId ||
+    pd.selectedGiftCardCredentialId ||
+    pd.usedGiftCardCredentialId ||
+    (result.selectedGiftCard && (result.selectedGiftCard.id || result.selectedGiftCard.credentialId)) ||
+    (result.giftCardCashSelected && result.giftCardCashSelected.id) ||
+    null;
+  selectedGiftCardCredentialIds.value =
+    id != null && id !== "" ? [String(id)] : [];
+}
+function formatGiftFaceValue(val) {
+  if (val == null || val === "") {
+    return "—";
+  }
+  const n = Number(val);
+  if (Number.isNaN(n)) {
+    return String(val);
+  }
+  return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.?0+$/, "");
+}
+function formatGiftExpire(row) {
+  const t = row && row.expireTime;
+  if (!t) {
+    return "长期有效";
+  }
+  const d = new Date(t);
+  if (Number.isNaN(d.getTime())) {
+    return "长期有效";
+  }
+  if (d.getFullYear() >= 2099) {
+    return "长期有效";
+  }
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day} 到期`;
+}
+function toggleGiftCard(item) {
+  if (!item || item.id == null || item.id === "") {
+    return;
+  }
+  if (isGiftCardSelected(item)) {
+    useGiftCard(item.id, false);
+  } else {
+    useGiftCard(item.id, true);
+  }
+}
+function isGiftCardSelected(item) {
+  if (!item || !selectedGiftCardCredentialIds.value.length) {
+    return false;
+  }
+  const id = item.id != null ? String(item.id) : "";
+  return id && selectedGiftCardCredentialIds.value.includes(id);
+}
+function useGiftCard(credentialId, used) {
+  const params = {
+    way: route.query.way,
+    used,
+  };
+  if (credentialId != null && credentialId !== "") {
+    params.credentialId = String(credentialId);
+  }
+  selectGiftCard(params).then((res) => {
+    if (res.success) {
+      init();
+    }
+  }).catch((err) => {
+    // 网络/登录异常已由 request 层统一提示
+    console.warn("选择礼品卡失败", err);
+  });
+}
+function getCouponNum() {
+  // 获取可用优惠券数量
+  couponNum({ way: route.query.way }).then((res) => {
+    canUseCouponNum.value = res.result;
+    if (res.result) {
+      let storeArr = [];
+      let skuArr = [];
+      goodsList.value.forEach((e) => {
+        storeArr.push(e.storeId);
+        e.skuList?.forEach((i) => {
+          skuArr.push(i.goodsSku?.id);
+        });
+      });
+      let params = {
         pageNumber: 1,
-        pageSize: 100
-      },
-      shippingMethod: [],
-      storeAddressList: [],
-      shippingWay: [
-        {
-          value: "LOGISTICS",
-          label: "物流",
-        },
-        {
-          value: "SELF_PICK_UP",
-          label: "自提",
-        },
-      ],
-      selectedDeliverMethod: 'LOGISTICS',
-      addressList: [], // 地址列表
-      selectedAddress: {}, // 所选地址
-      goodsList: [], // 商品列表
-      priceDetailDTO: {}, // 商品价格
-      totalNum: 0, // 购买数量
-      addrId: "", // 编辑地址传入的id
-      moreAddr: false, // 更多地址
-      canUseCouponNum: 0, // 可用优惠券数量
-      couponList: [], // 可用优惠券列表
-      usedCouponId: [], // 已使用优惠券id
-      selectedCoupon: {}, // 已选优惠券对象
-      storeId: '', //店铺Id
-      giftCardList: [], // TradeDTO.canUseGiftCards
-      giftCardNoticeModal: false,
-      giftCardDeductItems: [], // 已选礼品卡抵扣明细（TradeDTO.giftCardDeductItems）
-      tradeGiftCardDeductTotal: null, // TradeDTO.giftCardDeductTotal
-      selectedGiftCardCredentialIds: [], // 已选凭证 id，与 deductItems 同步
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    // 初始化数据
-    init() {
-      this.getGoodsDetail();
-      this.getDistribution();
-    },
-    goAddressManage() {
-      // 跳转地址管理页面
-      this.$router.push("/home/MyAddress");
-    },
-    getAddress() {
-      // 获取收货地址列表
-      memberAddress(this.searchForm).then((res) => {
-        if (res.success) {
-          this.addressList = res.result?.records || [];
-          this.addressList.forEach((e, index) => {
-            if (e.id === this.selectedAddress.id && index > 2) {
-              this.moreAddr = true;
+        pageSize: 100,
+        memberCouponStatus: "NEW",
+        scopeId: skuArr.toString(),
+        storeId: storeArr.toString(),
+        totalPrice: priceDetailDTO.value.goodsPrice,
+      };
+      canUseCouponList(params).then((res) => {
+        // 可用优惠券列表
+        if (res.success) couponList.value = res.result?.records || [];
+        const couponKeys = Object.keys(selectedCoupon.value);
+        usedCouponId.value = [];
+        if (couponKeys.length) {
+          couponList.value.forEach((e) => {
+            if (e.id === selectedCoupon.value[couponKeys]?.memberCoupon?.id) {
+              usedCouponId.value.push(e.id);
             }
+          });
+          nextTick(() => {
+            instance.proxy.$forceUpdate();
           });
         }
       }).catch((err) => {
-        // 网络/登录异常已由 request 层统一提示，地址列表保持为空，可正常新增地址
-        console.warn("获取收货地址列表失败", err);
+        // 网络/登录异常已由 request 层统一提示
+        console.warn("获取可用优惠券列表失败", err);
+      });
+    }
+  }).catch((err) => {
+    // 网络/登录异常已由 request 层统一提示
+    console.warn("获取可用优惠券数量失败", err);
+  });
+}
+function remarkKey(shop) {
+  return shop.storeId || shop.storeName;
+}
+function remarkInputRef(shop) {
+  return (el) => {
+    remarkInputRefs[remarkKey(shop)] = el;
+  };
+}
+function isRemarkOpen(shop) {
+  return !!remarkEditing.value[remarkKey(shop)];
+}
+function openRemark(shop) {
+  const key = remarkKey(shop);
+  remarkEditing.value = { ...remarkEditing.value, [key]: true };
+  nextTick(() => {
+    const input = remarkInputRefs[remarkKey(shop)];
+    const target = Array.isArray(input) ? input[0] : input;
+    target?.focus?.();
+  });
+}
+function closeRemark(shop) {
+  if (shop.remark) {
+    shop.remark = String(shop.remark).trim();
+  }
+  const key = remarkKey(shop);
+  remarkEditing.value = { ...remarkEditing.value, [key]: false };
+}
+function selectAddress(item) {
+  // 选择地址
+  let params = {
+    way: route.query.way,
+    shippingAddressId: item.id,
+  };
+  selectAddr(params).then((res) => {
+    if (res.success) {
+      Message.success("选择收货地址成功");
+      selectMethod.value = item;
+      getGoodsDetail();
+    }
+  }).catch((err) => {
+    // 网络/登录异常已由 request 层统一提示
+    console.warn("选择收货地址失败", err);
+  });
+}
+function selectStoreAddress(item) {
+  // 选择自提地址
+  setStoreAddressId(item.id, route.query.way).then((res) => {
+    if (res.success) {
+      Message.success("选择自提地址成功");
+      selectedStoreAddress.value = item;
+      getGoodsDetail();
+    }
+  }).catch((err) => {
+    // 网络/登录异常已由 request 层统一提示
+    console.warn("选择自提地址失败", err);
+  });
+}
+function selectDeliverMethod(item) {
+  let params = {
+    way: route.query.way,
+    shippingMethod: item.value,
+  };
+  setShipMethod(params).then((res) => {
+    if (res.success) {
+      selectedDeliverMethod.value = item.value;
+      getGoodsDetail();
+    }
+  }).catch((err) => {
+    // 网络/登录异常已由 request 层统一提示
+    console.warn("切换配送方式失败", err);
+  });
+}
+function editAddress(id) {
+  // 编辑地址
+  addrId.value = id;
+  address.value.show();
+}
+function addrChange() {
+  // 添加，编辑地址回显
+  getAddress();
+}
+function delAddress(item) {
+  // 删除地址
+  Modal.confirm({
+    title: "提示",
+    content: "你确定删除这个收货地址",
+    onOk: () => {
+      delMemberAddress(item.id).then((res) => {
+        if (res.success) {
+          Message.success("删除成功");
+          getAddress();
+        }
+      }).catch((err) => {
+        // 网络/登录异常已由 request 层统一提示
+        console.warn("删除收货地址失败", err);
       });
     },
-    // 获取配送方式列表
-    async getDistribution() {
-      try {
-        let shopRes = await shippingMethodList({ way: this.$route.query.way });
-        let shopList;
-        if (shopRes.success) {
-          shopList = shopRes.result || [];
-          let way = [];
-          this.shippingWay.forEach((item) => {
-            shopList.forEach((child) => {
-              if (item.value == child) {
-                way.push(item);
-              }
-            });
-          });
-          this.shippingMethod = way;
-        }
-      } catch (err) {
-        // 网络/登录异常已由 request 层统一提示，配送方式保持为空不影响页面其余模块
-        console.warn("获取配送方式列表失败", err);
-      }
-    },
+    onCancel: () => { },
+  });
+}
+function goGoodsDetail(skuId, goodsId) {
+  // 跳转商品详情
+  let routeUrl = router.resolve({
+    path: "/goodsDetail",
+    query: { skuId, goodsId },
+  });
+  window.open(routeUrl.href, "_blank");
+}
+// 跳转店铺首页
+function goShopPage(id) {
+  router.push({
+    path: "/merchant",
+    query: { id: id },
+  });
+}
+function useCoupon(id, used) {
+  // 使用优惠券
+  let params = {
+    way: route.query.way,
+    memberCouponId: id,
+    used: used, // true 为使用， false为弃用
+  };
+  selectCoupon(params).then((res) => {
+    if (res.success) init();
+  }).catch((err) => {
+    // 网络/登录异常已由 request 层统一提示
+    console.warn("使用优惠券失败", err);
+  });
+}
+function editInvoice() {
+  // 编辑发票信息
+  invModal.value.invoiceAvailable = true;
+}
+function getInvMsg(item) {
+  // 获取发票信息
+  if (item) {
+    init();
+    invModal.value.invoiceAvailable = false;
+  }
+}
 
-    async getStoreAddressList() {
-      getStoreAddress(this.storeId,this.searchForm).then(res => {
-        if (res.success) {
-          this.storeAddressList = res.result?.records || []
-          this.storeAddressList.forEach((e, index) => {
-            if (e.id === this.selectedAddress.id && index > 2) {
-              this.storeMoreAddr = true;
-            }
-          });
+function pay() {
+  // 结算
+  const params = {
+    client: "PC",
+    remark: [],
+    way: route.query.way,
+  };
+  goodsList.value.forEach((e) => {
+    if (e.remark) {
+      params.remark.push({
+        remark: e.remark,
+        storeId: e.storeId,
+      });
+    }
+  });
+
+  if (!params.remark.length) delete params.remark;
+
+  Spin.show();
+  createTrade(params)
+    .then((res) => {
+      Spin.hide();
+      if (res.success) {
+        const way = params.way;
+        if (shouldSkipPaymentPage(res.result, way)) {
+          router.push("/payDone");
+          return;
         }
-      }).catch((err) => {
-        // 网络/登录异常已由 request 层统一提示，自提点列表保持为空
-        console.warn("获取自提点列表失败", err);
-      })
-    },
-    getGoodsDetail() {
-      // 订单商品详情
-      Spin.show();
-      cartGoodsPay({ way: this.$route.query.way })
-        .then((res) => {
-          Spin.hide();
-          if (res.success) {
-            const result = res.result || {};
-            if (
-              !result.checkedSkuList ||
-              result.checkedSkuList.length === 0
-            ) {
-              const firstSku = result.skuList?.[0];
-              if (firstSku) {
-                Modal.warning({
-                  title: "购物车存在无效商品！",
-                  content:
-                    "[" +
-                    (firstSku.goodsSku?.goodsName || "") +
-                    "]" +
-                    (firstSku.errorMessage || ""),
-                });
-              }
-              this.$router.push({
-                path: "/cart",
-                replace: true,
-              });
-              return;
-            }
-            this.goodsList = result.cartList || [];
-            this.priceDetailDTO = result.priceDetailDTO || {};
-            this.skuList = result.skuList || [];
-            if (this.skuList[0]?.goodsSku) {
-              this.goodsType = this.skuList[0].goodsSku.goodsType;
-            }
-            this.storeId = this.goodsList[0]?.storeId || ''
-            if (result.receiptVO) {
-              this.invoiceData = result.receiptVO;
-            }
-            let notSupArea = result.notSupportFreight;
-            this.selectedCoupon = {};
-            const platformCouponId = result.platformCoupon?.memberCoupon?.id;
-            if (platformCouponId)
-              this.selectedCoupon[platformCouponId] = result.platformCoupon;
-            if (
-              result.storeCoupons &&
-              Object.keys(result.storeCoupons)[0]
-            ) {
-              let storeMemberCouponsId = Object.keys(
-                result.storeCoupons
-              )[0];
-              let storeCouponId =
-                result.storeCoupons[storeMemberCouponsId]?.memberCoupon?.id;
-              if (storeCouponId)
-                this.selectedCoupon[storeCouponId] =
-                  result.storeCoupons[storeMemberCouponsId];
-            }
-            if (notSupArea) {
-              let content = [];
-              let title = "";
-              notSupArea.forEach((e) => {
-                title = e.errorMessage;
-                content.push(e.goodsSku?.goodsName || "");
-              });
-              Modal.warning({
-                title: "以下商品超出配送区域" || title,
-                content: content.toString(),
-              });
-            }
-            if (result.memberAddress) {
-              this.selectedAddress = result.memberAddress;
-            }
-            this.getAddress();
-            this.getStoreAddressList();
-            this.totalNum = 0;
-            for (let i = 0; i < this.skuList.length; i++) {
-              this.totalNum += this.skuList[i].num || 0;
-            }
-            this.usedCouponId = [];
-            this.couponList = result.canUseCoupons || [];
-            const couponKeys = Object.keys(this.selectedCoupon);
-            if (couponKeys.length) {
-              this.couponList.forEach((e) => {
-                if (
-                  this.selectedCoupon[e.id] &&
-                  e.id === this.selectedCoupon[e.id]?.memberCoupon?.id
-                ) {
-                  this.usedCouponId.push(e.id);
-                }
-              });
-              this.$nextTick(() => {
-                this.$forceUpdate();
-              });
-            }
-            this.giftCardDeductItems = Array.isArray(result.giftCardDeductItems)
-              ? result.giftCardDeductItems
-              : [];
-            this.tradeGiftCardDeductTotal =
-              result.giftCardDeductTotal != null && result.giftCardDeductTotal !== ""
-                ? Number(result.giftCardDeductTotal)
-                : null;
-            this.giftCardList = Array.isArray(result.canUseGiftCards) ? result.canUseGiftCards : [];
-            this.syncGiftCardSelectionFromCart(result);
-          }
-        })
-        .catch((err) => {
-          Spin.hide();
-          // 网络/登录异常已由 request 层统一提示；这里兜底 404 与返回数据结构异常
-          if (!err?.data || err?.data?.message) {
-            Message.error(err?.data?.message || "结算数据加载失败，请稍后重试");
-          }
-          console.warn("获取结算数据失败", err);
+        router.push({
+          path: "/payment",
+          query: { orderType: "TRADE", sn: res.result.sn },
         });
-    },
-    syncGiftCardSelectionFromCart(result) {
-      if (!result) {
-        this.selectedGiftCardCredentialIds = [];
-        return;
+      } else if (res.message) {
+        Message.warning(res.message);
       }
-      const selectedIds = result.selectedGiftCardIds;
-      if (Array.isArray(selectedIds) && selectedIds.length) {
-        this.selectedGiftCardCredentialIds = selectedIds
-          .map((id) => (id != null && id !== "" ? String(id) : ""))
-          .filter(Boolean);
-        return;
+    })
+    .catch((err) => {
+      Spin.hide();
+      // 网络错误已由 request 层统一提示，这里兜底 404 与返回结构异常等未被提示的错误
+      if (!err?.data || err?.data?.message) {
+        Message.error(err?.data?.message || err?.message || "提交订单失败，请稍后重试");
       }
-      const items = Array.isArray(result.giftCardDeductItems) ? result.giftCardDeductItems : [];
-      if (items.length) {
-        this.selectedGiftCardCredentialIds = items
-          .map((it) => (it.credentialId != null && it.credentialId !== "" ? String(it.credentialId) : ""))
-          .filter(Boolean);
-        return;
-      }
-      const pd = result.priceDetailDTO || {};
-      const id =
-        result.selectedGiftCardCredentialId ||
-        result.usedGiftCardCredentialId ||
-        pd.selectedGiftCardCredentialId ||
-        pd.usedGiftCardCredentialId ||
-        (result.selectedGiftCard && (result.selectedGiftCard.id || result.selectedGiftCard.credentialId)) ||
-        (result.giftCardCashSelected && result.giftCardCashSelected.id) ||
-        null;
-      this.selectedGiftCardCredentialIds =
-        id != null && id !== "" ? [String(id)] : [];
-    },
-    formatGiftFaceValue(val) {
-      if (val == null || val === "") {
-        return "—";
-      }
-      const n = Number(val);
-      if (Number.isNaN(n)) {
-        return String(val);
-      }
-      return Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.?0+$/, "");
-    },
-    formatGiftExpire(row) {
-      const t = row && row.expireTime;
-      if (!t) {
-        return "长期有效";
-      }
-      const d = new Date(t);
-      if (Number.isNaN(d.getTime())) {
-        return "长期有效";
-      }
-      if (d.getFullYear() >= 2099) {
-        return "长期有效";
-      }
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day} 到期`;
-    },
-    toggleGiftCard(item) {
-      if (!item || item.id == null || item.id === "") {
-        return;
-      }
-      if (this.isGiftCardSelected(item)) {
-        this.useGiftCard(item.id, false);
-      } else {
-        this.useGiftCard(item.id, true);
-      }
-    },
-    isGiftCardSelected(item) {
-      if (!item || !this.selectedGiftCardCredentialIds.length) {
-        return false;
-      }
-      const id = item.id != null ? String(item.id) : "";
-      return id && this.selectedGiftCardCredentialIds.includes(id);
-    },
-    useGiftCard(credentialId, used) {
-      const params = {
-        way: this.$route.query.way,
-        used,
-      };
-      if (credentialId != null && credentialId !== "") {
-        params.credentialId = String(credentialId);
-      }
-      selectGiftCard(params).then((res) => {
-        if (res.success) {
-          this.init();
-        }
-      }).catch((err) => {
-        // 网络/登录异常已由 request 层统一提示
-        console.warn("选择礼品卡失败", err);
-      });
-    },
-    getCouponNum() {
-      // 获取可用优惠券数量
-      couponNum({ way: this.$route.query.way }).then((res) => {
-        this.canUseCouponNum = res.result;
-        if (res.result) {
-          let storeArr = [];
-          let skuArr = [];
-          this.goodsList.forEach((e) => {
-            storeArr.push(e.storeId);
-            e.skuList?.forEach((i) => {
-              skuArr.push(i.goodsSku?.id);
-            });
-          });
-          let params = {
-            pageNumber: 1,
-            pageSize: 100,
-            memberCouponStatus: "NEW",
-            scopeId: skuArr.toString(),
-            storeId: storeArr.toString(),
-            totalPrice: this.priceDetailDTO.goodsPrice,
-          };
-          canUseCouponList(params).then((res) => {
-            // 可用优惠券列表
-            if (res.success) this.couponList = res.result?.records || [];
-            const couponKeys = Object.keys(this.selectedCoupon);
-            this.usedCouponId = [];
-            if (couponKeys.length) {
-              this.couponList.forEach((e) => {
-                if (e.id === this.selectedCoupon[couponKeys]?.memberCoupon?.id) {
-                  this.usedCouponId.push(e.id);
-                }
-              });
-              this.$nextTick(() => {
-                this.$forceUpdate();
-              });
-            }
-          }).catch((err) => {
-            // 网络/登录异常已由 request 层统一提示
-            console.warn("获取可用优惠券列表失败", err);
-          });
-        }
-      }).catch((err) => {
-        // 网络/登录异常已由 request 层统一提示
-        console.warn("获取可用优惠券数量失败", err);
-      });
-    },
-    remarkKey(shop) {
-      return shop.storeId || shop.storeName;
-    },
-    remarkInputRef(shop) {
-      return "remarkInput" + this.remarkKey(shop);
-    },
-    isRemarkOpen(shop) {
-      return !!this.remarkEditing[this.remarkKey(shop)];
-    },
-    openRemark(shop) {
-      const key = this.remarkKey(shop);
-      this.remarkEditing = { ...this.remarkEditing, [key]: true };
-      this.$nextTick(() => {
-        const input = this.$refs[this.remarkInputRef(shop)];
-        const target = Array.isArray(input) ? input[0] : input;
-        target?.focus?.();
-      });
-    },
-    closeRemark(shop) {
-      if (shop.remark) {
-        shop.remark = String(shop.remark).trim();
-      }
-      const key = this.remarkKey(shop);
-      this.remarkEditing = { ...this.remarkEditing, [key]: false };
-    },
-    selectAddress(item) {
-      // 选择地址
-      let params = {
-        way: this.$route.query.way,
-        shippingAddressId: item.id,
-      };
-      selectAddr(params).then((res) => {
-        if (res.success) {
-          Message.success("选择收货地址成功");
-          this.selectMethod = item;
-          this.getGoodsDetail();
-        }
-      }).catch((err) => {
-        // 网络/登录异常已由 request 层统一提示
-        console.warn("选择收货地址失败", err);
-      });
-    },
-    selectStoreAddress(item) {
-      // 选择自提地址
-      setStoreAddressId(item.id,this.$route.query.way).then((res) => {
-        if (res.success) {
-          Message.success("选择自提地址成功");
-          this.selectedStoreAddress = item;
-          this.getGoodsDetail();
-        }
-      }).catch((err) => {
-        // 网络/登录异常已由 request 层统一提示
-        console.warn("选择自提地址失败", err);
-      });
-    },
-    selectDeliverMethod(item) {
-      let params = {
-        way: this.$route.query.way,
-        shippingMethod: item.value,
-      };
-      setShipMethod(params).then((res) => {
-        if (res.success) {
-          this.selectedDeliverMethod = item.value;
-          this.getGoodsDetail();
-        }
-      }).catch((err) => {
-        // 网络/登录异常已由 request 层统一提示
-        console.warn("切换配送方式失败", err);
-      });
-    },
-    editAddress(id) {
-      // 编辑地址
-      this.addrId = id;
-      this.$refs.address.show();
-    },
-    addrChange() {
-      // 添加，编辑地址回显
-      this.getAddress();
-    },
-    delAddress(item) {
-      // 删除地址
-      Modal.confirm({
-        title: "提示",
-        content: "你确定删除这个收货地址",
-        onOk: () => {
-          delMemberAddress(item.id).then((res) => {
-            if (res.success) {
-              Message.success("删除成功");
-              this.getAddress();
-            }
-          }).catch((err) => {
-            // 网络/登录异常已由 request 层统一提示
-            console.warn("删除收货地址失败", err);
-          });
-        },
-        onCancel: () => { },
-      });
-    },
-    goGoodsDetail(skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
-      });
-      window.open(routeUrl.href, "_blank");
-    },
-    // 跳转店铺首页
-    goShopPage(id) {
-      this.$router.push({
-        path: "/merchant",
-        query: { id: id },
-      });
-    },
-    useCoupon(id, used) {
-      // 使用优惠券
-      let params = {
-        way: this.$route.query.way,
-        memberCouponId: id,
-        used: used, // true 为使用， false为弃用
-      };
-      selectCoupon(params).then((res) => {
-        if (res.success) this.init();
-      }).catch((err) => {
-        // 网络/登录异常已由 request 层统一提示
-        console.warn("使用优惠券失败", err);
-      });
-    },
-    editInvoice() {
-      // 编辑发票信息
-      this.$refs.invModal.invoiceAvailable = true;
-    },
-    getInvMsg(item) {
-      // 获取发票信息
-      if (item) {
-        this.init();
-        this.$refs.invModal.invoiceAvailable = false;
-      }
-    },
-
-    pay() {
-      // 结算
-      const params = {
-        client: "PC",
-        remark: [],
-        way: this.$route.query.way,
-      };
-      this.goodsList.forEach((e) => {
-        if (e.remark) {
-          params.remark.push({
-            remark: e.remark,
-            storeId: e.storeId,
-          });
-        }
-      });
-
-      if (!params.remark.length) delete params.remark;
-
-      Spin.show();
-      createTrade(params)
-        .then((res) => {
-          Spin.hide();
-          if (res.success) {
-            const way = params.way;
-            if (shouldSkipPaymentPage(res.result, way)) {
-              this.$router.push("/payDone");
-              return;
-            }
-            this.$router.push({
-              path: "/payment",
-              query: { orderType: "TRADE", sn: res.result.sn },
-            });
-          } else if (res.message) {
-            Message.warning(res.message);
-          }
-        })
-        .catch((err) => {
-          Spin.hide();
-          // 网络错误已由 request 层统一提示，这里兜底 404 与返回结构异常等未被提示的错误
-          if (!err?.data || err?.data?.message) {
-            Message.error(err?.data?.message || err?.message || "提交订单失败，请稍后重试");
-          }
-          console.warn("提交订单失败", err);
-        });
-    },
-    // 优惠券可用范围
-    useScope(type, storeName) {
-      let shop = "平台";
-      let goods = "全部商品";
-      if (storeName !== "platform") shop = storeName;
-      switch (type) {
-        case "ALL":
-          goods = "全部商品";
-          break;
-        case "PORTION_GOODS":
-          goods = "部分商品";
-          break;
-        case "PORTION_GOODS_CATEGORY":
-          goods = "部分分类商品";
-          break;
-      }
-      return `${shop}${goods}可用`;
-    },
-  },
-};
+      console.warn("提交订单失败", err);
+    });
+}
+// 优惠券可用范围
+function useScope(type, storeName) {
+  let shop = "平台";
+  let goods = "全部商品";
+  if (storeName !== "platform") shop = storeName;
+  switch (type) {
+    case "ALL":
+      goods = "全部商品";
+      break;
+    case "PORTION_GOODS":
+      goods = "部分商品";
+      break;
+    case "PORTION_GOODS_CATEGORY":
+      goods = "部分分类商品";
+      break;
+  }
+  return `${shop}${goods}可用`;
+}
 </script>
 
 <style scoped lang="scss">

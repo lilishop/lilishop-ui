@@ -1,5 +1,5 @@
 <template>
-  <div class="login" @click="$refs.verify.show = false">
+  <div class="login" @click="hideVerify">
     <div class="login-hero">
       <img class="login-bg" :src="loginBg" alt="" />
       <div class="login-panel" @keyup.enter="submitLogin">
@@ -10,7 +10,7 @@
         <el-tabs v-model="loginType" class="login-tabs">
           <el-tab-pane label="账号登录" name="passwordLogin">
             <el-form
-              ref="usernameLoginForm"
+              ref="usernameLoginFormRef"
               :model="form"
               :rules="rules"
               class="form"
@@ -46,11 +46,11 @@
           </el-tab-pane>
           <el-tab-pane label="手机登录" name="mobileLogin">
             <el-form
-              ref="formSms"
+              ref="formSmsRef"
               :model="formSms"
               :rules="ruleInline"
               class="form"
-              @click.self="$refs.verify.show = false"
+              @click.self="hideVerify"
             >
               <el-form-item prop="mobile">
                 <el-input
@@ -105,7 +105,7 @@
         </el-button>
 
         <verify
-          ref="verify"
+          ref="verifyRef"
           class="verify-con"
           verifyType="LOGIN"
           @change="verifyChange"
@@ -117,215 +117,220 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { User, Lock, Iphone, Message } from "@element-plus/icons-vue";
 import * as RegExp from "@/utils/regular.js";
 import { sendSms } from "@/api/common.js";
 import { login, storeSmsLogin, userMsg } from "@/api/index";
 import util from "@/libs/util.js";
+import { setStore } from "@/libs/storage";
+import { Message as $Message } from "@/utils/message";
+import { md5 } from "@/utils/md5.js";
 import Footer from "@/views/main-components/footer";
 import Header from "@/views/main-components/header";
 import verify from "@/views/my-components/verify";
 import Cookies from "js-cookie";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  components: {
-    Header,
-    Footer,
-    verify,
-    User,
-    Lock,
-    Iphone,
-    Message,
-  },
-  data() {
-    return {
-      loginBg: require("@/assets/login-bg.jpg"),
-      loginLogo: require("@/assets/logo-lilishop.png"),
-      saveLogin: true,
-      sendCodeLoading: false,
-      loading: false,
-      verifyStatus: false,
-      smsCodeSent: false,
-      time: 60,
-      loginType: "passwordLogin",
-      form: {
-        username: "",
-        password: "",
-        mobile: "",
-        code: "",
-      },
-      formSms: {
-        mobile: "",
-        code: "",
-      },
-      rules: {
-        username: [{ required: true, message: "账号不能为空", trigger: "blur" }],
-        password: [{ required: true, message: "密码不能为空", trigger: "blur" }],
-      },
-      ruleInline: {
-        mobile: [
-          { required: true, message: "请输入手机号码" },
-          {
-            pattern: RegExp.mobile,
-            message: "请输入正确的手机号",
-          },
-        ],
-        code: [{ required: true, message: "请输入手机验证码" }],
-      },
-      codeMsg: "发送验证码",
-    };
-  },
-  computed: {
-    isMobileValid() {
-      return RegExp.mobile.test(this.formSms.mobile);
-    },
-    canSubmitLogin() {
-      if (this.loginType === "passwordLogin") {
-        return !!(this.form.username.trim() && this.form.password.trim());
-      }
-      return this.smsCodeSent;
-    },
-  },
-  watch: {
-    "formSms.mobile"() {
-      this.smsCodeSent = false;
-      this.verifyStatus = false;
-      this.formSms.code = "";
-    },
-  },
-  created() {
-    window.localStorage.setItem("menuData", "");
-  },
-  methods: {
-    afterLogin(res) {
-      const accessToken = res.result.accessToken;
-      this.setStore("accessToken", accessToken);
-      this.setStore("refreshToken", res.result.refreshToken);
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
 
-      userMsg()
-        .then((res) => {
-          if (res.success) {
-            this.setStore("saveLogin", this.saveLogin);
-            if (this.saveLogin) {
-              Cookies.set("userInfoSeller", JSON.stringify(res.result), {
-                expires: 7,
-              });
-            } else {
-              Cookies.set("userInfoSeller", JSON.stringify(res.result));
-            }
-
-            util.initRouter(this);
-            this.$store.commit("setAvatarPath", res.result.storeLogo);
-
-            const redirectRouter = this.$route.query.redirect;
-            this.$router.push({
-              path: redirectRouter || "/home",
-            });
-          } else {
-            this.loading = false;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    sendCode() {
-      if (!this.isMobileValid) {
-        this.$Message.warning("请输入正确的手机号");
-        return;
-      }
-      if (!this.verifyStatus) {
-        this.$refs.verify.init();
-        return;
-      }
-      if (this.time === 60) {
-        this.sendCodeLoading = true;
-        const params = {
-          mobile: this.formSms.mobile,
-          verificationEnums: "LOGIN",
-        };
-        sendSms(params)
-          .then((res) => {
-            if (res.success) {
-              this.smsCodeSent = true;
-              this.$Message.success("验证码发送成功");
-              const that = this;
-              this.interval = setInterval(() => {
-                that.time--;
-                if (that.time === 0) {
-                  this.sendCodeLoading = false;
-                  that.time = 60;
-                  that.codeMsg = "重新发送";
-                  that.verifyStatus = false;
-                  clearInterval(that.interval);
-                } else {
-                  that.codeMsg = that.time;
-                }
-              }, 1000);
-            } else {
-              this.$Message.warning(res.message);
-            }
-          })
-          .catch(() => {
-            this.sendCodeLoading = false;
-          });
-      }
-    },
-    submitLogin() {
-      if (!this.canSubmitLogin) return;
-
-      if (this.loginType === "passwordLogin") {
-        this.$refs.usernameLoginForm.validate((valid) => {
-          if (valid) {
-            this.$refs.verify.init();
-          }
-        });
-      } else if (this.loginType === "mobileLogin") {
-        this.$refs.formSms.validate((valid) => {
-          if (valid) {
-            this.loading = true;
-            storeSmsLogin(this.formSms)
-              .then((res) => {
-                this.loading = false;
-                if (res.success) {
-                  this.afterLogin(res);
-                }
-              })
-              .catch(() => {
-                this.loading = false;
-              });
-          }
-        });
-      }
-    },
-    verifyChange(con) {
-      if (!con.status) return;
-
-      if (this.loginType === "passwordLogin") {
-        this.loading = true;
-        const fd = new FormData();
-        fd.append("username", this.form.username);
-        fd.append("password", this.md5(this.form.password));
-        login(fd)
-          .then((res) => {
-            this.loading = false;
-            if (res && res.success) {
-              this.afterLogin(res);
-            }
-          })
-          .catch(() => {
-            this.loading = false;
-          });
-      } else {
-        this.verifyStatus = true;
-        this.sendCode();
-      }
-
-      this.$refs.verify.show = false;
-    },
-  },
+const loginBg = require("@/assets/login-bg.jpg");
+const loginLogo = require("@/assets/logo-lilishop.png");
+const saveLogin = ref(true);
+const sendCodeLoading = ref(false);
+const loading = ref(false);
+const verifyStatus = ref(false);
+const smsCodeSent = ref(false);
+const time = ref(60);
+const loginType = ref("passwordLogin");
+const form = reactive({
+  username: "",
+  password: "",
+  mobile: "",
+  code: "",
+});
+const formSms = reactive({
+  mobile: "",
+  code: "",
+});
+const rules = {
+  username: [{ required: true, message: "账号不能为空", trigger: "blur" }],
+  password: [{ required: true, message: "密码不能为空", trigger: "blur" }],
 };
+const ruleInline = {
+  mobile: [
+    { required: true, message: "请输入手机号码" },
+    {
+      pattern: RegExp.mobile,
+      message: "请输入正确的手机号",
+    },
+  ],
+  code: [{ required: true, message: "请输入手机验证码" }],
+};
+const codeMsg = ref("发送验证码");
+let interval = null;
+
+const usernameLoginFormRef = ref(null);
+const formSmsRef = ref(null);
+const verifyRef = ref(null);
+
+const isMobileValid = computed(() => {
+  return RegExp.mobile.test(formSms.mobile);
+});
+const canSubmitLogin = computed(() => {
+  if (loginType.value === "passwordLogin") {
+    return !!(form.username.trim() && form.password.trim());
+  }
+  return smsCodeSent.value;
+});
+
+watch(
+  () => formSms.mobile,
+  () => {
+    smsCodeSent.value = false;
+    verifyStatus.value = false;
+    formSms.code = "";
+  }
+);
+
+window.localStorage.setItem("menuData", "");
+
+function hideVerify() {
+  verifyRef.value.show = false;
+}
+
+function afterLogin(res) {
+  const accessToken = res.result.accessToken;
+  setStore("accessToken", accessToken);
+  setStore("refreshToken", res.result.refreshToken);
+
+  userMsg()
+    .then((res) => {
+      if (res.success) {
+        setStore("saveLogin", saveLogin.value);
+        if (saveLogin.value) {
+          Cookies.set("userInfoSeller", JSON.stringify(res.result), {
+            expires: 7,
+          });
+        } else {
+          Cookies.set("userInfoSeller", JSON.stringify(res.result));
+        }
+
+        util.initRouter();
+        appStore.setAvatarPath(res.result.storeLogo);
+
+        const redirectRouter = route.query.redirect;
+        router.push({
+          path: redirectRouter || "/home",
+        });
+      } else {
+        loading.value = false;
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+function sendCode() {
+  if (!isMobileValid.value) {
+    $Message.warning("请输入正确的手机号");
+    return;
+  }
+  if (!verifyStatus.value) {
+    verifyRef.value.init();
+    return;
+  }
+  if (time.value === 60) {
+    sendCodeLoading.value = true;
+    const params = {
+      mobile: formSms.mobile,
+      verificationEnums: "LOGIN",
+    };
+    sendSms(params)
+      .then((res) => {
+        if (res.success) {
+          smsCodeSent.value = true;
+          $Message.success("验证码发送成功");
+          interval = setInterval(() => {
+            time.value--;
+            if (time.value === 0) {
+              sendCodeLoading.value = false;
+              time.value = 60;
+              codeMsg.value = "重新发送";
+              verifyStatus.value = false;
+              clearInterval(interval);
+            } else {
+              codeMsg.value = time.value;
+            }
+          }, 1000);
+        } else {
+          $Message.warning(res.message);
+        }
+      })
+      .catch(() => {
+        sendCodeLoading.value = false;
+      });
+  }
+}
+
+function submitLogin() {
+  if (!canSubmitLogin.value) return;
+
+  if (loginType.value === "passwordLogin") {
+    usernameLoginFormRef.value.validate((valid) => {
+      if (valid) {
+        verifyRef.value.init();
+      }
+    });
+  } else if (loginType.value === "mobileLogin") {
+    formSmsRef.value.validate((valid) => {
+      if (valid) {
+        loading.value = true;
+        storeSmsLogin(formSms)
+          .then((res) => {
+            loading.value = false;
+            if (res.success) {
+              afterLogin(res);
+            }
+          })
+          .catch(() => {
+            loading.value = false;
+          });
+      }
+    });
+  }
+}
+
+function verifyChange(con) {
+  if (!con.status) return;
+
+  if (loginType.value === "passwordLogin") {
+    loading.value = true;
+    const fd = new FormData();
+    fd.append("username", form.username);
+    fd.append("password", md5(form.password));
+    login(fd)
+      .then((res) => {
+        loading.value = false;
+        if (res && res.success) {
+          afterLogin(res);
+        }
+      })
+      .catch(() => {
+        loading.value = false;
+      });
+  } else {
+    verifyStatus.value = true;
+    sendCode();
+  }
+
+  hideVerify();
+}
 </script>
 
 <style lang="scss" scoped>

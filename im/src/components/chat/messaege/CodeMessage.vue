@@ -20,44 +20,40 @@
     <pre class="lum-scrollbar" v-html="formatCode(code, lang)" />
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import Prism from 'prismjs'
 import 'prismjs/themes/prism-okaidia.css'
 
-export default {
-  name: 'CodeMessage',
-  props: {
-    code: {
-      type: [String, Number],
-      default: '',
-    },
-    lang: {
-      type: String,
-      default: '',
-    },
-    maxwidth: {
-      type: Boolean,
-      default: false,
-    },
+defineOptions({ name: 'CodeMessage' })
+
+const props = defineProps({
+  code: {
+    type: [String, Number],
+    default: '',
   },
-  data() {
-    return {
-      fullscreen: false,
-      lineNumber: 0,
-    }
+  lang: {
+    type: String,
+    default: '',
   },
-  created() {
-    this.lineNumber = this.code.split(/\n/).length
+  maxwidth: {
+    type: Boolean,
+    default: false,
   },
-  methods: {
-    formatCode(code, lang) {
-      try {
-        return Prism.highlight(code, Prism.languages[lang], lang) + '<br/>'
-      } catch (error) {
-        return code
-      }
-    },
-  },
+})
+
+const fullscreen = ref(false)
+const lineNumber = ref(0)
+
+// created
+lineNumber.value = props.code.split(/\n/).length
+
+function formatCode(code, lang) {
+  try {
+    return Prism.highlight(code, Prism.languages[lang], lang) + '<br/>'
+  } catch (error) {
+    return code
+  }
 }
 </script>
 <style lang="less" scoped>

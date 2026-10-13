@@ -19,20 +19,17 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    data: {
-      type: Object,
-      default: null
-    }
-  },
-  data () {
-    return {
-      options: this.data.options // 装修数据
-    };
+<script setup>
+import { ref } from 'vue';
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default: null
   }
-};
+});
+
+const options = ref(props.data.options); // 装修数据
 </script>
 <style lang="scss" scoped>
 .first-page-advert {

@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form" @keyup.enter="handleSearch">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="70px" class="search-form" @keyup.enter="handleSearch">
         <el-form-item label="账单编号" prop="sn">
           <el-input v-model="searchForm.sn" placeholder="请输入账单编号" clearable style="width: 240px" />
         </el-form-item>
@@ -77,118 +77,122 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import * as API_Shop from "@/api/shops";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { Message } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  name: "bill",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-      },
-      selectDate: null,
-      selectList: [],
-      selectCount: 0,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    billStatusText(v) {
-      const map = { OUT: "已出账", CHECK: "已对账", COMPLETE: "已付款" };
-      return map[v] || "已付款";
-    },
-    billStatusTagType(v) {
-      const map = { OUT: "primary", CHECK: "warning", COMPLETE: "success" };
-      return map[v] || "success";
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-      this.clearSelectAll();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    clearSelectAll() {
-      this.$refs.table?.clearSelection();
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
-      }
-    },
-    getDataList() {
-      this.loading = true;
-      if (this.searchForm.startTime) {
-        this.searchForm.startTime = this.$filters.unixToDate(this.searchForm.startTime / 1000);
-      }
-      if (this.searchForm.endTime) {
-        this.searchForm.endTime = this.$filters.unixToDate(this.searchForm.endTime / 1000);
-      }
-      this.searchForm.billStatus = "CHECK";
-      API_Shop.getBuyBillPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    detail(v) {
-      this.$router.push({
-        name: "bill-detail",
-        query: { id: v.id },
-      });
-    },
-    handleExportList() {
-      const params = { ...this.searchForm };
-      delete params.billStatus;
-      API_Finance.exportBillList(params).then((blob) => {
-        downloadBlob(blob, "结算单列表.xlsx");
-      });
-    },
-    handleBatchDownload() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("请先选择结算单");
-        return;
-      }
-      const billIds = this.selectList.map((item) => item.id);
-      API_Finance.batchDownloadBills(billIds).then((blob) => {
-        downloadBlob(blob, "结算单批量下载.zip");
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "bill" });
+
+const router = useRouter();
+
+const searchFormRef = ref(null);
+const table = ref(null);
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+});
+const selectDate = ref(null);
+const selectList = ref([]);
+const selectCount = ref(0);
+const data = ref([]);
+const total = ref(0);
+
+function billStatusText(v) {
+  const map = { OUT: "已出账", CHECK: "已对账", COMPLETE: "已付款" };
+  return map[v] || "已付款";
+}
+function billStatusTagType(v) {
+  const map = { OUT: "primary", CHECK: "warning", COMPLETE: "success" };
+  return map[v] || "success";
+}
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+  clearSelectAll();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function clearSelectAll() {
+  table.value?.clearSelection();
+}
+function changeSelect(e) {
+  selectList.value = e;
+  selectCount.value = e.length;
+}
+function selectDateRange(v) {
+  if (v && v.length === 2) {
+    searchForm.startDate = v[0];
+    searchForm.endDate = v[1];
+  } else {
+    searchForm.startDate = "";
+    searchForm.endDate = "";
+  }
+}
+function getDataList() {
+  loading.value = true;
+  if (searchForm.startTime) {
+    searchForm.startTime = unixToDate(searchForm.startTime / 1000);
+  }
+  if (searchForm.endTime) {
+    searchForm.endTime = unixToDate(searchForm.endTime / 1000);
+  }
+  searchForm.billStatus = "CHECK";
+  API_Shop.getBuyBillPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function detail(v) {
+  router.push({
+    name: "bill-detail",
+    query: { id: v.id },
+  });
+}
+function handleExportList() {
+  const params = { ...searchForm };
+  delete params.billStatus;
+  API_Finance.exportBillList(params).then((blob) => {
+    downloadBlob(blob, "结算单列表.xlsx");
+  });
+}
+function handleBatchDownload() {
+  if (selectCount.value <= 0) {
+    Message.warning("请先选择结算单");
+    return;
+  }
+  const billIds = selectList.value.map((item) => item.id);
+  API_Finance.batchDownloadBills(billIds).then((blob) => {
+    downloadBlob(blob, "结算单批量下载.zip");
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .link-text {

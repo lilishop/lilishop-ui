@@ -53,52 +53,48 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getProcurementOrderPage } from "@/api/procurement";
 import { PROCUREMENT_STATUS, procurementStatusText, procurementStatusTag, formatMoney } from "../constants";
 
-export default {
-  name: "manager-procurement-order-list",
-  data() {
-    return {
-      PROCUREMENT_STATUS,
-      loading: false,
-      data: [],
-      total: 0,
-      searchForm: { pageNumber: 1, pageSize: 10, orderSn: "", goodsName: "", status: "" },
-    };
-  },
-  mounted() {
-    const status = this.$route.query.status;
-    if (status) {
-      this.searchForm.status = status;
-    }
-    this.getDataList();
-  },
-  methods: {
-    procurementStatusText,
-    procurementStatusTag,
-    formatMoney,
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getProcurementOrderPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    goDetail(row) {
-      this.$router.push({ name: "manager-procurement-order-detail", query: { id: row.id } });
-    },
-  },
-};
+defineOptions({ name: "manager-procurement-order-list" });
+
+const route = useRoute();
+const router = useRouter();
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const searchForm = reactive({ pageNumber: 1, pageSize: 10, orderSn: "", goodsName: "", status: "" });
+
+onMounted(() => {
+  const status = route.query.status;
+  if (status) {
+    searchForm.status = status;
+  }
+  getDataList();
+});
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getProcurementOrderPage(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function goDetail(row) {
+  router.push({ name: "manager-procurement-order-detail", query: { id: row.id } });
+}
 </script>

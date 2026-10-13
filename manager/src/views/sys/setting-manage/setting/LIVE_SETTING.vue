@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <el-form
-      ref="formValidate"
+      ref="formValidateRef"
       label-width="180px"
       label-position="right"
       :model="formValidate"
@@ -51,13 +51,14 @@
       </el-form-item>
 
       <div class="label-btns">
-        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
+        <el-button type="primary" @click="submit('formValidateRef')">保存</el-button>
       </div>
     </el-form>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 
@@ -77,62 +78,61 @@ const DEFAULT_FORM = {
 
 const OPTIONAL_FIELDS = ["mpPushDomain", "callBackUrl"];
 
-export default {
-  props: ["res", "type"],
-  data() {
-    return {
-      ruleValidate: {},
-      formValidate: { ...DEFAULT_FORM },
-    };
-  },
-  created() {
-    this.init();
-  },
-  methods: {
-    init() {
-      const result = this.res ? JSON.parse(this.res) : {};
-      this.formValidate = { ...DEFAULT_FORM };
-      Object.keys(DEFAULT_FORM).forEach((field) => {
-        if (result[field] != null && result[field] !== undefined) {
-          this.formValidate[field] = result[field];
-        }
-      });
-      this.ruleValidate = {};
-      Object.keys(DEFAULT_FORM).forEach((item) => {
-        if (OPTIONAL_FIELDS.includes(item)) return;
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-        ];
-      });
-    },
-    submit(name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.setupSetting();
-        } else {
-          ElMessage.error("请正确填写内容!");
-        }
-      });
-    },
-    setupSetting() {
-      const payload = { ...DEFAULT_FORM };
-      Object.keys(DEFAULT_FORM).forEach((field) => {
-        payload[field] = this.formValidate[field] ?? "";
-      });
-      setSetting(this.type, payload).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-  },
-};
+const props = defineProps(["res", "type"]);
+
+const ruleValidate = ref({});
+const formValidate = ref({ ...DEFAULT_FORM });
+
+// 模板 ref 与 data 字段同名陷阱：模板 ref 改名为 formValidateRef，通过映射表支持 submit(name) 动态取值
+const formValidateRef = ref(null);
+const formRefs = { formValidateRef };
+
+function init() {
+  const result = props.res ? JSON.parse(props.res) : {};
+  formValidate.value = { ...DEFAULT_FORM };
+  Object.keys(DEFAULT_FORM).forEach((field) => {
+    if (result[field] != null && result[field] !== undefined) {
+      formValidate.value[field] = result[field];
+    }
+  });
+  ruleValidate.value = {};
+  Object.keys(DEFAULT_FORM).forEach((item) => {
+    if (OPTIONAL_FIELDS.includes(item)) return;
+    ruleValidate.value[item] = [
+      {
+        required: true,
+        message: "请填写必填项",
+        trigger: "blur",
+      },
+    ];
+  });
+}
+
+function submit(name) {
+  formRefs[name].value.validate((valid) => {
+    if (valid) {
+      setupSetting();
+    } else {
+      ElMessage.error("请正确填写内容!");
+    }
+  });
+}
+
+function setupSetting() {
+  const payload = { ...DEFAULT_FORM };
+  Object.keys(DEFAULT_FORM).forEach((field) => {
+    payload[field] = formValidate.value[field] ?? "";
+  });
+  setSetting(props.type, payload).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+
+init();
 </script>
 
 <style lang="scss" scoped>

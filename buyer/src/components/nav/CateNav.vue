@@ -90,138 +90,143 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getCategory } from "@/api/goods";
 import storage from "@/plugins/storage.js";
 import { ArrowRight } from "@element-plus/icons-vue";
-export default {
-  components: { ArrowRight },
-  name: "GoodsListNav",
-  props: {
-    showAlways: {
-      // 总是显示下拉分类
-      default: false,
-      type: Boolean,
-    },
-    showNavBar: {
-      // 显示全部商品分类右侧导航条
-      default: true,
-      type: Boolean,
-    },
-    hover: {
-      default: false,
-      type: Boolean,
-    },
-    large: {
-      // 是否更高的高度
-      default: false,
-      type: Boolean,
-    },
-    opacity: {
-      // 是否背景透明
-      default: false,
-      type: Boolean,
-    },
-    useClass:{
-      type:null,
-      default:''
+import { useAppStore } from "@/stores/app";
+
+defineOptions({ name: "GoodsListNav" });
+
+const props = defineProps({
+  showAlways: {
+    // 总是显示下拉分类
+    default: false,
+    type: Boolean,
+  },
+  showNavBar: {
+    // 显示全部商品分类右侧导航条
+    default: true,
+    type: Boolean,
+  },
+  hover: {
+    default: false,
+    type: Boolean,
+  },
+  large: {
+    // 是否更高的高度
+    default: false,
+    type: Boolean,
+  },
+  opacity: {
+    // 是否背景透明
+    default: false,
+    type: Boolean,
+  },
+  useClass: {
+    type: null,
+    default: '',
+  },
+});
+
+const router = useRouter();
+const appStore = useAppStore();
+
+const panel = ref(false); // 二级分类展示
+const panelIndex = ref(-1);
+const panelData = ref([]); // 二级分类数据
+const showFirstList = ref(false); // 始终展示一级列表
+const cateList = ref([]); // 商品分类
+
+// 导航列表
+const navList = computed(() => {
+  if (storage.getItem("navList")) {
+    return JSON.parse(storage.getItem("navList"));
+  }
+  return { list: [] };
+});
+
+function showFirstLists() {
+  showFirstList.value = true;
+  if (
+    localStorage.getItem("category") &&
+    localStorage.getItem("category_expiration_time")
+  ) {
+    // this.getCate();
+    // 如果缓存过期，则获取最新的信息
+    if (new Date() > localStorage.getItem("category_expiration_time")) {
+      getCate();
+      return;
     }
-  },
-  data() {
-    return {
-      panel: false, // 二级分类展示
-      panelIndex: -1,
-      panelData: [], // 二级分类数据
-      showFirstList: false, // 始终展示一级列表
-      cateList: [], // 商品分类
-    };
-  },
-  computed: {
-    navList() {
-      // 导航列表
-      if (storage.getItem("navList")) {
-        return JSON.parse(storage.getItem("navList"));
-      }
-      return { list: [] };
-    },
-  },
-  methods: {
-    showFirstLists(){
-      this.showFirstList = true;
-      if(
-      localStorage.getItem("category") &&
-      localStorage.getItem("category_expiration_time")
-    ) {
-      // this.getCate();
-      // 如果缓存过期，则获取最新的信息
-      if (new Date() > localStorage.getItem("category_expiration_time")) {
-        this.getCate();
-        return;
-      }
-      this.cateList = JSON.parse(localStorage.getItem("category"));
-      // Message.info(cateList)
-      }
-    },
-    getCate() {
-      // 获取分类数据
-      if (this.hover) return false;
-      getCategory(0).then((res) => {
-        if (res.success) {
-          this.cateList = res.result;
-          this.$store.commit("SET_CATEGORY", res.result);
-          // 过期时间
-          var expirationTime = new Date().setHours(new Date().getHours() + 1);
-          // 存放过期时间
-          localStorage.setItem("category_expiration_time", expirationTime);
-          // 存放分类信息
-          localStorage.setItem("category", JSON.stringify(res.result));
-        }
-      }).catch((err) => {
-        console.warn('获取分类失败', err);
-      });
-    },
-    showDetail(index) {
-      // 展示全部分类
-      this.panel = true;
-      this.panelIndex = index;
-      this.panelData = this.cateList[index].children;
-    },
-    closePanel() {
-      this.showFirstList = false;
-      this.panel = false;
-      this.panelIndex = -1;
-    },
-    goGoodsList(id, secondId, firstId) {
-      // 分类共有三级，传全部分类过去
-      const arr = [firstId, secondId, id];
-      if (!arr[1]) {
-        arr.splice(0, 2);
-      }
-      if (!arr[0]) {
-        arr.shift();
-      }
-      this.$router.push({
-        path: "/goodsList",
-        query: { categoryId: arr.toString() },
-      });
-    },
-  },
-  mounted() {
-    if (
-      localStorage.getItem("category") &&
-      localStorage.getItem("category_expiration_time")
-    ) {
-      // 如果缓存过期，则获取最新的信息
-      if (new Date() > localStorage.getItem("category_expiration_time")) {
-        this.getCate();
-        return;
-      }
-      this.cateList = JSON.parse(localStorage.getItem("category"));
-    } else {
-      this.getCate();
+    cateList.value = JSON.parse(localStorage.getItem("category"));
+    // Message.info(cateList)
+  }
+}
+
+function getCate() {
+  // 获取分类数据
+  if (props.hover) return false;
+  getCategory(0).then((res) => {
+    if (res.success) {
+      cateList.value = res.result;
+      appStore.setCategory(res.result);
+      // 过期时间
+      var expirationTime = new Date().setHours(new Date().getHours() + 1);
+      // 存放过期时间
+      localStorage.setItem("category_expiration_time", expirationTime);
+      // 存放分类信息
+      localStorage.setItem("category", JSON.stringify(res.result));
     }
-  },
-};
+  }).catch((err) => {
+    console.warn('获取分类失败', err);
+  });
+}
+
+function showDetail(index) {
+  // 展示全部分类
+  panel.value = true;
+  panelIndex.value = index;
+  panelData.value = cateList.value[index].children;
+}
+
+function closePanel() {
+  showFirstList.value = false;
+  panel.value = false;
+  panelIndex.value = -1;
+}
+
+function goGoodsList(id, secondId, firstId) {
+  // 分类共有三级，传全部分类过去
+  const arr = [firstId, secondId, id];
+  if (!arr[1]) {
+    arr.splice(0, 2);
+  }
+  if (!arr[0]) {
+    arr.shift();
+  }
+  router.push({
+    path: "/goodsList",
+    query: { categoryId: arr.toString() },
+  });
+}
+
+onMounted(() => {
+  if (
+    localStorage.getItem("category") &&
+    localStorage.getItem("category_expiration_time")
+  ) {
+    // 如果缓存过期，则获取最新的信息
+    if (new Date() > localStorage.getItem("category_expiration_time")) {
+      getCate();
+      return;
+    }
+    cateList.value = JSON.parse(localStorage.getItem("category"));
+  } else {
+    getCate();
+  }
+});
 </script>
 
 <style scoped lang="scss">

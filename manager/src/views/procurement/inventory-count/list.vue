@@ -28,39 +28,38 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getInventoryCountPage } from "@/api/procurement";
 
-export default {
-  name: "manager-inventory-count-list",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      searchForm: { pageNumber: 1, pageSize: 10 },
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    getDataList() {
-      this.loading = true;
-      getInventoryCountPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    goDetail(row) {
-      this.$router.push({ name: "manager-inventory-count-detail", query: { id: row.id, sn: row.sn } });
-    },
-  },
-};
+defineOptions({ name: "manager-inventory-count-list" });
+
+const router = useRouter();
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const searchForm = ref({ pageNumber: 1, pageSize: 10 });
+
+onMounted(() => {
+  getDataList();
+});
+
+function getDataList() {
+  loading.value = true;
+  getInventoryCountPage(searchForm.value)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function goDetail(row) {
+  router.push({ name: "manager-inventory-count-detail", query: { id: row.id, sn: row.sn } });
+}
 </script>

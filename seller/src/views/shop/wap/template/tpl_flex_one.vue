@@ -5,10 +5,8 @@
         </div>
     </div>
 </template>
-<script>
-export default {
-    props: ['res']
-}
+<script setup>
+defineProps(['res']);
 </script>
 <style lang="scss" scoped>
 @import './tpl.scss';

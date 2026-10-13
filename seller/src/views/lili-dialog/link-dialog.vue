@@ -8,7 +8,7 @@
         :key="i"
       >
         <component
-          ref="lili-component"
+          ref="liliComponentRef"
           :is="templateWay[item.name]"
           @selected="
             (val) => {
@@ -20,48 +20,43 @@
     </el-tabs>
   </div>
 </template>
-<script>
-import wap from "./wap.js";
+<script setup>
+import { nextTick, onMounted, ref, watch } from "vue";
+import wapList from "./wap.js";
 import goodsDialog from "./goods-dialog";
 import templateWay from "./template/index";
-export default {
-  emits: ["selectedLink"],
-  components: {
-    goodsDialog,
+
+const emit = defineEmits(["selectedLink"]);
+
+const changed = ref("");
+const selected = ref(0);
+const selectedLink = ref("");
+// wap 为共享的模块级数组，保持原 data 引用同一数组的行为
+const wap = ref(wapList);
+const activeTab = ref(wapList[0]?.title || "");
+// v-for 内模板 ref 收集为数组
+const liliComponentRef = ref([]);
+
+watch(
+  changed,
+  (val) => {
+    emit("selectedLink", val[0]);
   },
-  setup() {
-    return { templateWay };
-  },
-  data() {
-    return {
-      changed: "",
-      selected: 0,
-      selectedLink: "",
-      wap,
-      activeTab: wap[0]?.title || "",
-    };
-  },
-  watch: {
-    changed: {
-      handler(val) {
-        this.$emit("selectedLink", val[0]);
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.$nextTick(() => {
-      if (this.$refs["lili-component"]?.[0]) {
-        this.$refs["lili-component"][0].type = "single";
-      }
-    });
-    this.wap.forEach((item) => {
-      if (item) {
-        item.selected = false;
-      }
-    });
-  },
-};
+  { deep: true }
+);
+
+onMounted(() => {
+  nextTick(() => {
+    if (liliComponentRef.value?.[0]) {
+      liliComponentRef.value[0].type = "single";
+    }
+  });
+  wap.value.forEach((item) => {
+    if (item) {
+      item.selected = false;
+    }
+  });
+});
 </script>
 <style scoped lang="scss">
 @import "./style.scss";

@@ -70,89 +70,84 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
 import * as API_Statistics from "@/api/statistics";
 import { QuestionFilled } from "@element-plus/icons-vue";
 
-export default {
-  components: { QuestionFilled },
-  data() {
-    return {
-      overview: {},
-      distributionList: [],
-      sourceList: [],
-      identityList: [],
-      metricDefs: [
-        {
-          key: "totalIssued",
-          label: "累积发放积分",
-          isRate: false,
-          tip: "累积发放积分：历史累计发放给客户的积分总数",
-        },
-        {
-          key: "availablePoint",
-          label: "可用积分",
-          isRate: false,
-          tip: "可用积分：当前客户账户中尚未消耗的积分总和",
-        },
-        {
-          key: "usedPoint",
-          label: "累积消耗积分",
-          isRate: false,
-          tip: "累积消耗积分：历史累计已消耗的积分",
-        },
-        {
-          key: "usedRate",
-          label: "积分消耗率",
-          isRate: true,
-          tip: "积分消耗率：累积消耗积分 / 累积发放积分",
-        },
-      ],
-    };
+const overview = ref({});
+const distributionList = ref([]);
+const sourceList = ref([]);
+const identityList = ref([]);
+const metricDefs = ref([
+  {
+    key: "totalIssued",
+    label: "累积发放积分",
+    isRate: false,
+    tip: "累积发放积分：历史累计发放给客户的积分总数",
   },
-  computed: {
-    metricList() {
-      return this.metricDefs;
-    },
+  {
+    key: "availablePoint",
+    label: "可用积分",
+    isRate: false,
+    tip: "可用积分：当前客户账户中尚未消耗的积分总和",
   },
-  mounted() {
-    this.loadData();
+  {
+    key: "usedPoint",
+    label: "累积消耗积分",
+    isRate: false,
+    tip: "累积消耗积分：历史累计已消耗的积分",
   },
-  methods: {
-    formatNumber(val) {
-      if (val == null || val === "") return 0;
-      const num = Number(val);
-      if (Number.isNaN(num)) return val;
-      return Math.round(num * 100) / 100;
-    },
-    formatPercent(val) {
-      if (val == null || val === "") return "0%";
-      const num = Number(val);
-      if (Number.isNaN(num)) return val;
-      return `${num}%`;
-    },
-    async loadData() {
-      const [overviewRes, distributionRes, sourceRes, identityRes] = await Promise.all([
-        API_Statistics.getPointsOverview(),
-        API_Statistics.getPointsDistribution(),
-        API_Statistics.getPointsSourceDistribution(),
-        API_Statistics.getPointsIdentityStat(),
-      ]);
-      if (overviewRes && overviewRes.success) {
-        this.overview = overviewRes.result || {};
-      }
-      if (distributionRes && distributionRes.success) {
-        this.distributionList = distributionRes.result || [];
-      }
-      if (sourceRes && sourceRes.success) {
-        this.sourceList = sourceRes.result || [];
-      }
-      if (identityRes && identityRes.success) {
-        this.identityList = identityRes.result || [];
-      }
-    },
+  {
+    key: "usedRate",
+    label: "积分消耗率",
+    isRate: true,
+    tip: "积分消耗率：累积消耗积分 / 累积发放积分",
   },
-};
+]);
+
+const metricList = computed(() => {
+  return metricDefs.value;
+});
+
+onMounted(() => {
+  loadData();
+});
+
+function formatNumber(val) {
+  if (val == null || val === "") return 0;
+  const num = Number(val);
+  if (Number.isNaN(num)) return val;
+  return Math.round(num * 100) / 100;
+}
+
+function formatPercent(val) {
+  if (val == null || val === "") return "0%";
+  const num = Number(val);
+  if (Number.isNaN(num)) return val;
+  return `${num}%`;
+}
+
+async function loadData() {
+  const [overviewRes, distributionRes, sourceRes, identityRes] = await Promise.all([
+    API_Statistics.getPointsOverview(),
+    API_Statistics.getPointsDistribution(),
+    API_Statistics.getPointsSourceDistribution(),
+    API_Statistics.getPointsIdentityStat(),
+  ]);
+  if (overviewRes && overviewRes.success) {
+    overview.value = overviewRes.result || {};
+  }
+  if (distributionRes && distributionRes.success) {
+    distributionList.value = distributionRes.result || [];
+  }
+  if (sourceRes && sourceRes.success) {
+    sourceList.value = sourceRes.result || [];
+  }
+  if (identityRes && identityRes.success) {
+    identityList.value = identityRes.result || [];
+  }
+}
 </script>
 
 <style scoped lang="scss">

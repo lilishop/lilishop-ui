@@ -138,7 +138,7 @@
 
     <!-- 选择商品。链接 -->
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -150,119 +150,121 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, nextTick } from "vue";
 import left from "./mixs/mix-goods";
 import right from "./mixs/mix-brand";
 import ossManage from "@/views/sys/oss-manage/ossManage.vue";
+import { formatLinkType } from "@/utils/filters";
 
-export default {
-  name: "mixModel",
-  data() {
-    return {
-      showModal: false,
-      current: null, // 当前编辑的模块草稿
-      picModelFlag: false,
-      selectedData: "", //选中的数据
-      goodsIndex: 0, // 商品索引
-      align: "",
-      defaultCallbackImageType: "",
-    };
-  },
-  props: {
-    data: {
-      type: Object,
-      default: {},
-    },
-  },
-  components: {
-    left,
-    right,
-    ossManage,
-  },
-  mounted() {},
-  methods: {
-    cloneModule(module) {
-      return JSON.parse(JSON.stringify(module || {}));
-    },
-    handleSelectImg(type, index) {
-      this.defaultCallbackImageType = type;
-      this.goodsIndex = index;
-      // 选择图片
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
+defineOptions({ name: "mixModel" });
 
-    handleSelectGoods(val, index) {
-      this.$refs.liliDialog.open("goods");
-      this.$refs.liliDialog.singleGoods();
-      this.selectedData = val;
-      this.goodsIndex = index;
-    },
-    handleSelectLink(val, index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-      this.selectedData = val;
-      this.goodsIndex = index;
-    },
-    // 回显图片
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url || !this.current) return;
-      if (this.defaultCallbackImageType == "default") {
-        this.current.data.image.src = val.url;
-      } else {
-        this.current.data.list[this.goodsIndex].img = val.url;
-      }
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      if (!val?.length || !this.current) return;
-      const goods = val[0];
-      const item = this.current.data.list[this.goodsIndex];
-      item.img = goods.thumbnail;
-      item.title = goods.goodsName;
-      item.price = goods.price;
-      item.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      if (!this.current) return;
-      const formattedUrl = this.$filters.formatLinkType(val);
-      if (this.selectedData != "list") {
-        this.current.data[this.selectedData].url = formattedUrl;
-      }
-      if (this.selectedData == "list") {
-        this.current.data.list[this.goodsIndex].url = formattedUrl;
-      }
-    },
-    handleSelectModel(align) {
-      this.align = align;
-      this.current = this.cloneModule(this.data.options[align]);
-      this.showModal = true;
-    },
-    handleCancelModal() {
-      this.current = null;
-      this.showModal = false;
-    },
-    handleConfirmModal() {
-      if (this.current && this.align) {
-        this.data.options[this.align] = this.cloneModule(this.current);
-      }
-      this.current = null;
-      this.showModal = false;
-    },
+const props = defineProps({
+  data: {
+    type: Object,
+    default: {},
   },
-};
+});
+
+const showModal = ref(false);
+const current = ref(null); // 当前编辑的模块草稿
+const picModelFlag = ref(false);
+const selectedData = ref(""); //选中的数据
+const goodsIndex = ref(0); // 商品索引
+const align = ref("");
+const defaultCallbackImageType = ref("");
+
+const liliDialogRef = ref(null);
+const ossManageRef = ref(null);
+
+function cloneModule(module) {
+  return JSON.parse(JSON.stringify(module || {}));
+}
+
+function handleSelectImg(type, index) {
+  defaultCallbackImageType.value = type;
+  goodsIndex.value = index;
+  // 选择图片
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+
+function handleSelectGoods(val, index) {
+  liliDialogRef.value.open("goods");
+  liliDialogRef.value.singleGoods();
+  selectedData.value = val;
+  goodsIndex.value = index;
+}
+
+function handleSelectLink(val, index) {
+  // 调起选择链接弹窗
+  liliDialogRef.value.open("link");
+  selectedData.value = val;
+  goodsIndex.value = index;
+}
+
+// 回显图片
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url || !current.value) return;
+  if (defaultCallbackImageType.value == "default") {
+    current.value.data.image.src = val.url;
+  } else {
+    current.value.data.list[goodsIndex.value].img = val.url;
+  }
+}
+
+// 选择商品回调
+function selectedGoodsData(val) {
+  if (!val?.length || !current.value) return;
+  const goods = val[0];
+  const item = current.value.data.list[goodsIndex.value];
+  item.img = goods.thumbnail;
+  item.title = goods.goodsName;
+  item.price = goods.price;
+  item.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
+}
+
+// 选择链接回调
+function selectedLink(val) {
+  if (!current.value) return;
+  const formattedUrl = formatLinkType(val);
+  if (selectedData.value != "list") {
+    current.value.data[selectedData.value].url = formattedUrl;
+  }
+  if (selectedData.value == "list") {
+    current.value.data.list[goodsIndex.value].url = formattedUrl;
+  }
+}
+
+function handleSelectModel(type) {
+  align.value = type;
+  current.value = cloneModule(props.data.options[type]);
+  showModal.value = true;
+}
+
+function handleCancelModal() {
+  current.value = null;
+  showModal.value = false;
+}
+
+function handleConfirmModal() {
+  if (current.value && align.value) {
+    props.data.options[align.value] = cloneModule(current.value);
+  }
+  current.value = null;
+  showModal.value = false;
+}
 </script>
 
 <style scoped lang="scss">

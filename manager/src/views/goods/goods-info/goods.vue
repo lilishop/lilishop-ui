@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -216,7 +216,7 @@
     </el-card>
 
     <el-dialog v-model="modalVisible" title="下架操作" width="500px" :close-on-click-modal="false">
-      <el-form ref="underForm" :model="underForm" label-width="100px">
+      <el-form ref="underFormRef" :model="underForm" label-width="100px">
         <el-form-item label="下架原因" prop="reason">
           <el-input v-model="underForm.reason" clearable />
         </el-form-item>
@@ -255,7 +255,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="batchAuditForm" :model="batchAuditForm" label-width="100px">
+      <el-form ref="batchAuditFormRef" :model="batchAuditForm" label-width="100px">
         <el-form-item label="审核结果" prop="auth_flag">
           <el-radio-group v-model="batchAuditForm.auth_flag">
             <el-radio :value="1">审核通过</el-radio>
@@ -278,7 +278,7 @@
     </el-dialog>
 
     <el-dialog v-model="goodsGroupFlag" title="批量设置商品分组" width="420px">
-      <el-form ref="goodsGroupForm" :model="goodsGroupForm" :rules="goodsGroupRule" label-width="90px">
+      <el-form ref="goodsGroupFormRef" :model="goodsGroupForm" :rules="goodsGroupRule" label-width="90px">
         <el-form-item label="商品分组" prop="groupId">
           <el-select v-model="goodsGroupForm.groupId" clearable filterable style="width: 240px">
             <el-option
@@ -298,7 +298,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref } from "vue";
 import {
   getGoodsListData,
   getGoodsNumerData,
@@ -310,421 +311,423 @@ import {
 } from "@/api/goods";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
-export default {
-  name: "goods",
-  data() {
-    return {
-      id: "", //要操作的id
-      loading: true, // 表单加载状态
-      modalVisible: false, // 添加或编辑显示
-      searchForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20, // 页面大小
-        sort: "create_time", // 默认排序字段
-        order: "desc", // 默认排序方式
-        groupId: "",
-      },
-      underForm: {
-        // 下架原因
-        reason: "",
-      },
-      goodsAuditForm: {
-        // 商品审核表单
-        auth_flag: 1,
-      },
-      auditModalVisible: false, // 审核弹框显示状态
-      auditSubmitLoading: false,
-      currentAuditGoods: null, // 当前审核的商品
-      submitLoading: false, // 添加或编辑提交状态
-      data: [], // 表单数据
-      total: 0, // 表单数据总数
-      currentStatus: "ALL",
-      goodsNumerData: {},
-      selectedRows: [], // 选中的行数据
-      selectAll: false, // 全选状态
-      batchAuditModalVisible: false, // 批量审核弹框显示状态
-      batchAuditSubmitLoading: false,
-      batchAuditForm: {
-        auth_flag: 1,
-        reason: ''
-      },
-      goodsGroupFlag: false,
-      goodsGroupLoading: false,
-      goodsGroupList: [],
-      goodsGroupForm: {
-        groupId: ""
-      },
-      goodsGroupRule: {
-        groupId: [{ required: true, message: "请选择商品分组", trigger: "change" }]
-      }
+
+defineOptions({ name: "goods" });
+
+// 模板 ref（searchFormRef/underFormRef/batchAuditFormRef/goodsGroupFormRef 因与 data 同名改为 xxxRef）
+const searchFormRef = ref(null);
+const table = ref(null);
+const underFormRef = ref(null);
+const auditForm = ref(null);
+const batchAuditFormRef = ref(null);
+const goodsGroupFormRef = ref(null);
+
+const id = ref(""); //要操作的id
+const loading = ref(true); // 表单加载状态
+const modalVisible = ref(false); // 添加或编辑显示
+const searchForm = reactive({
+  // 搜索框初始化对象
+  pageNumber: 1, // 当前页数
+  pageSize: 20, // 页面大小
+  sort: "create_time", // 默认排序字段
+  order: "desc", // 默认排序方式
+  groupId: "",
+});
+const underForm = reactive({
+  // 下架原因
+  reason: "",
+});
+const goodsAuditForm = reactive({
+  // 商品审核表单
+  auth_flag: 1,
+});
+const auditModalVisible = ref(false); // 审核弹框显示状态
+const auditSubmitLoading = ref(false);
+const currentAuditGoods = ref(null); // 当前审核的商品
+const submitLoading = ref(false); // 添加或编辑提交状态
+const data = ref([]); // 表单数据
+const total = ref(0); // 表单数据总数
+const currentStatus = ref("ALL");
+const goodsNumerData = ref({});
+const selectedRows = ref([]); // 选中的行数据
+const selectAll = ref(false); // 全选状态
+const batchAuditModalVisible = ref(false); // 批量审核弹框显示状态
+const batchAuditSubmitLoading = ref(false);
+const batchAuditForm = ref({
+  auth_flag: 1,
+  reason: ''
+});
+const goodsGroupFlag = ref(false);
+const goodsGroupLoading = ref(false);
+const goodsGroupList = ref([]);
+const goodsGroupForm = ref({
+  groupId: ""
+});
+const goodsGroupRule = reactive({
+  groupId: [{ required: true, message: "请选择商品分组", trigger: "change" }]
+});
+
+const goodsStatusWithCount = computed(() => {
+  return [
+    {title: '全部', value: 'ALL'},
+    {title: `出售中${goodsNumerData.value.upperGoodsNum ? '(' + goodsNumerData.value.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
+    {title: `仓库中${goodsNumerData.value.downGoodsNum ? '(' + goodsNumerData.value.downGoodsNum + ')' : ''}`, value: 'DOWN'},
+    {title: `待审核${goodsNumerData.value.auditGoodsNum ? '(' + goodsNumerData.value.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
+    {title: `审核未通过${goodsNumerData.value.refuseGoodsNum ? '(' + goodsNumerData.value.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
+  ];
+});
+
+function clearTableSelection() {
+  table.value?.clearSelection?.();
+}
+function onStatusTabClick(tab) {
+  const status = tab.paneName ?? tab.props?.name;
+  goodsStatusClick(status);
+}
+function salesModelText(v) {
+  if (v === "RETAIL") return "零售";
+  if (v === "WHOLESALE") return "批发";
+  return "其他类型";
+}
+function goodsTypeText(v) {
+  if (v === "PHYSICAL_GOODS") return "实物商品";
+  if (v === "VIRTUAL_GOODS") return "虚拟商品";
+  if (v === "E_COUPON") return "电子卡券"; // 卡密商品
+  if (v === "APPOINTMENT_GOODS") return "预约商品";
+  return v || "—";
+}
+function marketEnableText(v) {
+  if (v === "DOWN") return "下架";
+  if (v === "UPPER") return "上架";
+  return "";
+}
+function authFlagText(v) {
+  if (v === "TOBEAUDITED") return "待审核";
+  if (v === "PASS") return "通过";
+  if (v === "REFUSE") return "拒绝";
+  return "";
+}
+// 初始化数据
+function init() {
+  getDataList();
+  getNumberData();
+  loadGoodsGroupList();
+}
+// 分页 改变页码
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+// 分页 改变页数
+function changePageSize(v) {
+  searchForm.pageSize = v;
+  getDataList();
+}
+// 搜索
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+  getNumberData();
+}
+// 获取数据
+function getDataList() {
+  loading.value = true;
+  getGoodsListData(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function getNumberData() {
+  // 创建一个不包含goodsStatus字段的搜索参数
+  const { goodsStatus, ...searchParams } = searchForm;
+  getGoodsNumerData(searchParams).then((res) => {
+    if (res.success) {
+      goodsNumerData.value = res.result;
+    }
+  })
+}
+// 编辑
+function edit(v) {
+  id.value = v.id;
+  if (v.underMessage) {
+    underForm.reason = v.underMessage;
+  } else {
+    underForm.reason = "";
+  }
+  modalVisible.value = true;
+}
+// 下架
+function lower() {
+  const reason = underForm.reason ? underForm.reason.trim() : "";
+  if (!reason) {
+    ElMessage.error("下架原因不能为空");
+    return;
+  }
+  let params = {
+    goodsId: id.value,
+    reason
+  };
+  lowGoods(params).then((res) => {
+    if (res.success) {
+      ElMessage.success("操作成功");
+      modalVisible.value = false;
+      getDataList();
+      getNumberData(); // 添加这行
+    }
+  });
+}
+// 上架
+function upper(v) {
+  ElMessageBox.confirm("您确认要上架 " + v.goodsName + " ?", "确认上架", { type: "warning" }).then(() => {
+    let params = {
+      goodsId: v.id
     };
-  },
-  computed: {
-    goodsStatusWithCount() {
-      return [
-        {title: '全部', value: 'ALL'},
-        {title: `出售中${this.goodsNumerData.upperGoodsNum ? '(' + this.goodsNumerData.upperGoodsNum + ')' : ''}`, value: 'UPPER'},
-        {title: `仓库中${this.goodsNumerData.downGoodsNum ? '(' + this.goodsNumerData.downGoodsNum + ')' : ''}`, value: 'DOWN'},
-        {title: `待审核${this.goodsNumerData.auditGoodsNum ? '(' + this.goodsNumerData.auditGoodsNum + ')' : ''}`, value: 'TOBEAUDITED'},
-        {title: `审核未通过${this.goodsNumerData.refuseGoodsNum ? '(' + this.goodsNumerData.refuseGoodsNum + ')' : ''}`, value: 'REFUSE'}
-      ];
+    return upGoods(params).then((res) => {
+      if (res.success) {
+        ElMessage.success("上架成功");
+        getDataList();
+        getNumberData(); // 添加这行
+      }
+    });
+  }).catch(() => {});
+}
+
+//查看商品详情
+function showDetail(v) {
+  customRouterPush({
+    name: "goods-detail",
+    query: { id: v.id },
+  });
+}
+
+// 商品状态筛选
+function goodsStatusClick(name) {
+  if (name === "ALL" || name === "" || name === undefined || name === null) {
+    delete searchForm.goodsStatus;
+    currentStatus.value = "ALL";
+  } else {
+    searchForm.goodsStatus = name;
+    currentStatus.value = name;
+  }
+  selectedRows.value = [];
+  clearTableSelection();
+  getDataList();
+}
+function examine(v, authFlag) {
+  // 审核商品
+  let examine = "通过";
+  goodsAuditForm.authFlag = "PASS";
+  if (authFlag != 1) {
+    examine = "拒绝";
+    goodsAuditForm.authFlag = "REFUSE";
+  }
+
+  ElMessageBox.confirm("您确认要审核" + examine + " " + v.goodsName + " ?", "确认审核", { type: "warning" }).then(() => {
+    goodsAuditForm.goodsIds=v.id;
+    let formData = new FormData();
+    formData.append('goodsIds', v.id);
+    formData.append('authFlag', goodsAuditForm.authFlag);
+
+    return authGoods(formData).then((res) => {
+      if (res.success) {
+        ElMessage.success("审核成功");
+        getDataList();
+        getNumberData();
+      }
+    });
+  }).catch(() => {});
+}
+
+// 打开审核弹框
+function openAuditModal(goods) {
+  currentAuditGoods.value = goods;
+  goodsAuditForm.auth_flag = 1;
+  goodsAuditForm.reason = '';
+  auditSubmitLoading.value = false;
+  auditModalVisible.value = true;
+}
+
+// 提交审核
+function submitAudit() {
+  if (!currentAuditGoods.value) {
+    return;
+  }
+  auditSubmitLoading.value = true;
+  const formData = new FormData();
+  formData.append('goodsIds', currentAuditGoods.value.id);
+  formData.append('authFlag', goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
+  authGoods(formData).then((res) => {
+    if (res.success) {
+      ElMessage.success('审核成功');
+      auditModalVisible.value = false;
+      getDataList();
+      getNumberData();
     }
-  },
-  methods: {
-    unitPrice,
-    clearTableSelection() {
-      this.$refs.table?.clearSelection?.();
-    },
-    onStatusTabClick(tab) {
-      const status = tab.paneName ?? tab.props?.name;
-      this.goodsStatusClick(status);
-    },
-    salesModelText(v) {
-      if (v === "RETAIL") return "零售";
-      if (v === "WHOLESALE") return "批发";
-      return "其他类型";
-    },
-    goodsTypeText(v) {
-      if (v === "PHYSICAL_GOODS") return "实物商品";
-      if (v === "VIRTUAL_GOODS") return "虚拟商品";
-      if (v === "E_COUPON") return "电子卡券"; // 卡密商品
-      if (v === "APPOINTMENT_GOODS") return "预约商品";
-      return v || "—";
-    },
-    marketEnableText(v) {
-      if (v === "DOWN") return "下架";
-      if (v === "UPPER") return "上架";
-      return "";
-    },
-    authFlagText(v) {
-      if (v === "TOBEAUDITED") return "待审核";
-      if (v === "PASS") return "通过";
-      if (v === "REFUSE") return "拒绝";
-      return "";
-    },
-    // 初始化数据
-    init() {
-      this.getDataList();
-      this.getNumberData();
-      this.loadGoodsGroupList();
-    },
-    // 分页 改变页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    // 分页 改变页数
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    // 搜索
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-      this.getNumberData();
-    },
-    // 获取数据
-    getDataList() {
-      this.loading = true;
-      getGoodsListData(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    getNumberData() {
-      // 创建一个不包含goodsStatus字段的搜索参数
-      const { goodsStatus, ...searchParams } = this.searchForm;
-      getGoodsNumerData(searchParams).then((res) => {
-        if (res.success) {
-          this.goodsNumerData = res.result;
-        }
-      })
-    },
-    // 编辑
-    edit(v) {
-      this.id = v.id;
-      if (v.underMessage) {
-        this.underForm.reason = v.underMessage;
-      } else {
-        this.underForm.reason = "";
+  }).finally(() => {
+    auditSubmitLoading.value = false;
+  });
+}
+
+function onSelectionChange(selection) {
+  selectedRows.value = selection;
+}
+
+// 批量上架
+function batchUpper() {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要上架的商品');
+    return;
+  }
+
+  const goodsNames = selectedRows.value.map(item => item.goodsName).join('、');
+  ElMessageBox.confirm(`您确认要上架以下商品吗？\n${goodsNames}`, "确认批量上架", { type: "warning" }).then(() => {
+    const goodsIds = selectedRows.value.map(item => item.id);
+    const params = {
+      goodsId: goodsIds
+    };
+
+    return upGoods(params).then((res) => {
+      if (res.success) {
+        ElMessage.success('批量上架成功');
+        selectedRows.value = [];
+        selectAll.value = false;
+        getDataList();
+        getNumberData();
       }
-      this.modalVisible = true;
-    },
-    // 下架
-    lower() {
-      const reason = this.underForm.reason ? this.underForm.reason.trim() : "";
-      if (!reason) {
-        ElMessage.error("下架原因不能为空");
-        return;
+    });
+  }).catch(() => {});
+}
+
+// 批量下架
+function batchLower() {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要下架的商品');
+    return;
+  }
+
+  const goodsNames = selectedRows.value.map(item => item.goodsName).join('、');
+  ElMessageBox.confirm(`您确认要下架以下商品吗？\n${goodsNames}`, "确认批量下架", { type: "warning" }).then(() => {
+    const goodsIds = selectedRows.value.map(item => item.id);
+    const params = {
+      goodsId: goodsIds,
+      reason: '批量下架操作'
+    };
+
+    return lowGoods(params).then((res) => {
+      if (res.success) {
+        ElMessage.success('批量下架成功');
+        selectedRows.value = [];
+        selectAll.value = false;
+        getDataList();
+        getNumberData();
       }
-      let params = {
-        goodsId: this.id,
-        reason
-      };
-      lowGoods(params).then((res) => {
-        if (res.success) {
-          ElMessage.success("操作成功");
-          this.modalVisible = false;
-          this.getDataList();
-          this.getNumberData(); // 添加这行
-        }
-      });
-    },
-    // 上架
-    upper(v) {
-      ElMessageBox.confirm("您确认要上架 " + v.goodsName + " ?", "确认上架", { type: "warning" }).then(() => {
-        let params = {
-          goodsId: v.id
-        };
-        return upGoods(params).then((res) => {
-          if (res.success) {
-            ElMessage.success("上架成功");
-            this.getDataList();
-            this.getNumberData(); // 添加这行
-          }
-        });
-      }).catch(() => {});
-    },
+    });
+  }).catch(() => {});
+}
 
-    //查看商品详情
-    showDetail(v) {
-      customRouterPush({
-        name: "goods-detail",
-        query: { id: v.id },
-      });
-    },
+// 批量审核
+function batchAudit() {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要审核的商品');
+    return;
+  }
 
-    // 商品状态筛选
-    goodsStatusClick(name) {
-      if (name === "ALL" || name === "" || name === undefined || name === null) {
-        delete this.searchForm.goodsStatus;
-        this.currentStatus = "ALL";
-      } else {
-        this.searchForm.goodsStatus = name;
-        this.currentStatus = name;
-      }
-      this.selectedRows = [];
-      this.clearTableSelection();
-      this.getDataList();
-    },
-    examine(v, authFlag) {
-      // 审核商品
-      let examine = "通过";
-      this.goodsAuditForm.authFlag = "PASS";
-      if (authFlag != 1) {
-        examine = "拒绝";
-        this.goodsAuditForm.authFlag = "REFUSE";
-      }
+  // 重置批量审核表单
+  batchAuditForm.value = {
+    auth_flag: 1,
+    reason: ''
+  };
+  batchAuditModalVisible.value = true;
+}
 
-      ElMessageBox.confirm("您确认要审核" + examine + " " + v.goodsName + " ?", "确认审核", { type: "warning" }).then(() => {
-        this.goodsAuditForm.goodsIds=v.id;
-        let formData = new FormData();
-        formData.append('goodsIds', v.id);
-        formData.append('authFlag', this.goodsAuditForm.authFlag);
+// 提交批量审核
+function submitBatchAudit() {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning('请先选择要审核的商品');
+    return;
+  }
 
-        return authGoods(formData).then((res) => {
-          if (res.success) {
-            ElMessage.success("审核成功");
-            this.getDataList();
-            this.getNumberData();
-          }
-        });
-      }).catch(() => {});
-    },
+  // 如果是拒绝审核，必须填写原因
+  if (batchAuditForm.value.auth_flag === 2 && !batchAuditForm.value.reason.trim()) {
+    ElMessage.warning('审核拒绝时必须填写拒绝原因');
+    return;
+  }
 
-    // 打开审核弹框
-    openAuditModal(goods) {
-      this.currentAuditGoods = goods;
-      this.goodsAuditForm.auth_flag = 1;
-      this.goodsAuditForm.reason = '';
-      this.auditSubmitLoading = false;
-      this.auditModalVisible = true;
-    },
+  const actionText = batchAuditForm.value.auth_flag === 1 ? '通过' : '拒绝';
+  const goodsIds = selectedRows.value.map(item => item.id);
+  const formData = new FormData();
+  formData.append('goodsIds', goodsIds.join(','));
+  formData.append('authFlag', batchAuditForm.value.auth_flag === 1 ? 'PASS' : 'REFUSE');
+  if (batchAuditForm.value.reason) {
+    formData.append('reason', batchAuditForm.value.reason);
+  }
 
-    // 提交审核
-    submitAudit() {
-      if (!this.currentAuditGoods) {
-        return;
-      }
-      this.auditSubmitLoading = true;
-      const formData = new FormData();
-      formData.append('goodsIds', this.currentAuditGoods.id);
-      formData.append('authFlag', this.goodsAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
-      authGoods(formData).then((res) => {
-        if (res.success) {
-          ElMessage.success('审核成功');
-          this.auditModalVisible = false;
-          this.getDataList();
-          this.getNumberData();
-        }
-      }).finally(() => {
-        this.auditSubmitLoading = false;
-      });
-    },
-
-    onSelectionChange(selection) {
-      this.selectedRows = selection;
-    },
-
-    // 批量上架
-    batchUpper() {
-      if (this.selectedRows.length === 0) {
-        ElMessage.warning('请先选择要上架的商品');
-        return;
-      }
-
-      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      ElMessageBox.confirm(`您确认要上架以下商品吗？\n${goodsNames}`, "确认批量上架", { type: "warning" }).then(() => {
-        const goodsIds = this.selectedRows.map(item => item.id);
-        const params = {
-          goodsId: goodsIds
-        };
-
-        return upGoods(params).then((res) => {
-          if (res.success) {
-            ElMessage.success('批量上架成功');
-            this.selectedRows = [];
-            this.selectAll = false;
-            this.getDataList();
-            this.getNumberData();
-          }
-        });
-      }).catch(() => {});
-    },
-
-    // 批量下架
-    batchLower() {
-      if (this.selectedRows.length === 0) {
-        ElMessage.warning('请先选择要下架的商品');
-        return;
-      }
-
-      const goodsNames = this.selectedRows.map(item => item.goodsName).join('、');
-      ElMessageBox.confirm(`您确认要下架以下商品吗？\n${goodsNames}`, "确认批量下架", { type: "warning" }).then(() => {
-        const goodsIds = this.selectedRows.map(item => item.id);
-        const params = {
-          goodsId: goodsIds,
-          reason: '批量下架操作'
-        };
-
-        return lowGoods(params).then((res) => {
-          if (res.success) {
-            ElMessage.success('批量下架成功');
-            this.selectedRows = [];
-            this.selectAll = false;
-            this.getDataList();
-            this.getNumberData();
-          }
-        });
-      }).catch(() => {});
-    },
-
-    // 批量审核
-    batchAudit() {
-      if (this.selectedRows.length === 0) {
-        ElMessage.warning('请先选择要审核的商品');
-        return;
-      }
-
-      // 重置批量审核表单
-      this.batchAuditForm = {
-        auth_flag: 1,
-        reason: ''
-      };
-      this.batchAuditModalVisible = true;
-    },
-
-    // 提交批量审核
-    submitBatchAudit() {
-      if (this.selectedRows.length === 0) {
-        ElMessage.warning('请先选择要审核的商品');
-        return;
-      }
-
-      // 如果是拒绝审核，必须填写原因
-      if (this.batchAuditForm.auth_flag === 2 && !this.batchAuditForm.reason.trim()) {
-        ElMessage.warning('审核拒绝时必须填写拒绝原因');
-        return;
-      }
-
-      const actionText = this.batchAuditForm.auth_flag === 1 ? '通过' : '拒绝';
-      const goodsIds = this.selectedRows.map(item => item.id);
-      const formData = new FormData();
-      formData.append('goodsIds', goodsIds.join(','));
-      formData.append('authFlag', this.batchAuditForm.auth_flag === 1 ? 'PASS' : 'REFUSE');
-      if (this.batchAuditForm.reason) {
-        formData.append('reason', this.batchAuditForm.reason);
-      }
-
-      this.batchAuditSubmitLoading = true;
-      authGoods(formData).then((res) => {
-        if (res.success) {
-          ElMessage.success(`批量审核${actionText}成功`);
-          this.selectedRows = [];
-          this.selectAll = false;
-          this.batchAuditModalVisible = false;
-          this.clearTableSelection();
-          this.getDataList();
-          this.getNumberData();
-        }
-      }).finally(() => {
-        this.batchAuditSubmitLoading = false;
-      });
-    },
-    loadGoodsGroupList() {
-      getGoodsGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
-        if (res && res.success && res.result) {
-          this.goodsGroupList = res.result.records || [];
-        }
-      });
-    },
-    openSetGoodsGroup() {
-      if (this.selectedRows.length === 0) {
-        ElMessage.warning("请先选择商品");
-        return;
-      }
-      this.goodsGroupFlag = true;
-      this.goodsGroupLoading = false;
-      this.goodsGroupForm = { groupId: "" };
-      this.$nextTick(() => {
-        if (this.$refs.goodsGroupForm) this.$refs.goodsGroupForm.resetFields();
-      });
-      this.loadGoodsGroupList();
-    },
-    submitSetGoodsGroup() {
-      this.$refs.goodsGroupForm.validate((valid) => {
-        if (!valid) return;
-        const goodsIds = this.selectedRows.map((item) => item.id);
-        this.goodsGroupLoading = true;
-        addGoodsGroupItems(this.goodsGroupForm.groupId, goodsIds).then((res) => {
-          this.goodsGroupLoading = false;
-          if (res && res.success) {
-            ElMessage.success("设置成功");
-            this.goodsGroupFlag = false;
-            this.selectedRows = [];
-            this.selectAll = false;
-            this.clearTableSelection();
-            this.getDataList();
-          } else if (res && res.message) {
-            ElMessage.error(res.message);
-          }
-        }).catch(() => {
-          this.goodsGroupLoading = false;
-          ElMessage.error("设置失败，请检查权限或后端接口");
-        });
-      });
+  batchAuditSubmitLoading.value = true;
+  authGoods(formData).then((res) => {
+    if (res.success) {
+      ElMessage.success(`批量审核${actionText}成功`);
+      selectedRows.value = [];
+      selectAll.value = false;
+      batchAuditModalVisible.value = false;
+      clearTableSelection();
+      getDataList();
+      getNumberData();
     }
-  },
-  mounted() {
-    this.init();
-  },
-};
+  }).finally(() => {
+    batchAuditSubmitLoading.value = false;
+  });
+}
+function loadGoodsGroupList() {
+  getGoodsGroupByPage({ pageNumber: 1, pageSize: 1000 }).then((res) => {
+    if (res && res.success && res.result) {
+      goodsGroupList.value = res.result.records || [];
+    }
+  });
+}
+function openSetGoodsGroup() {
+  if (selectedRows.value.length === 0) {
+    ElMessage.warning("请先选择商品");
+    return;
+  }
+  goodsGroupFlag.value = true;
+  goodsGroupLoading.value = false;
+  goodsGroupForm.value = { groupId: "" };
+  nextTick(() => {
+    if (goodsGroupFormRef.value) goodsGroupFormRef.value.resetFields();
+  });
+  loadGoodsGroupList();
+}
+function submitSetGoodsGroup() {
+  goodsGroupFormRef.value.validate((valid) => {
+    if (!valid) return;
+    const goodsIds = selectedRows.value.map((item) => item.id);
+    goodsGroupLoading.value = true;
+    addGoodsGroupItems(goodsGroupForm.value.groupId, goodsIds).then((res) => {
+      goodsGroupLoading.value = false;
+      if (res && res.success) {
+        ElMessage.success("设置成功");
+        goodsGroupFlag.value = false;
+        selectedRows.value = [];
+        selectAll.value = false;
+        clearTableSelection();
+        getDataList();
+      } else if (res && res.message) {
+        ElMessage.error(res.message);
+      }
+    }).catch(() => {
+      goodsGroupLoading.value = false;
+      ElMessage.error("设置失败，请检查权限或后端接口");
+    });
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 // Tab组件样式

@@ -50,125 +50,128 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { memberCouponList } from "@/api/member.js";
-export default {
-  name: "Coupons",
-  data() {
-    return {
-      statusNameList: [
-        // 优惠券状态
-        "未使用",
-        "已使用",
-        "已过期",
-      ],
-      statusList: ["NEW", "USED", "EXPIRE"], // 优惠券状态
-      loading: false, // 列表加载状态
-      params: {
-        // 请求参数
-        pageNumber: 1,
-        pageSize: 20,
-        memberCouponStatus: "NEW",
-      },
-      total: 0, // 优惠券总数
-      list: [], // 优惠券列表
-    };
-  },
-  computed: {
-    activeStatusIndex() {
-      const index = this.statusList.indexOf(this.params.memberCouponStatus);
-      return index > -1 ? index : 0;
-    },
-  },
-  methods: {
-    getList() {
-      // 获取优惠券列表
-      this.loading = true;
-      memberCouponList(this.params)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.list = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-          this.list = [];
-          this.total = 0;
-        });
-    },
-    // 切换优惠券状态
-    change(index) {
-      this.params.memberCouponStatus = this.statusList[index];
-      this.params.pageNumber = 1;
-      this.getList();
-    },
-    go(item) {
-      // 根据使用条件跳转商品列表页面
-      if (this.params.memberCouponStatus !== "NEW") return;
 
-      this.$router.push({
-        path: "/goodsList",
-        query: { promotionsId: item.couponId, promotionType: "COUPON" },
-      });
-    },
+defineOptions({ name: "Coupons" });
 
-    changePageNum(val) {
-      // 分页改变页码
-      this.params.pageNumber = val;
-      this.getList();
-    },
+const router = useRouter();
 
-    changePageSize(val) {
-      // 分页改变页数
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList();
-    },
+const statusNameList = ref([
+  // 优惠券状态
+  "未使用",
+  "已使用",
+  "已过期",
+]);
+const statusList = ref(["NEW", "USED", "EXPIRE"]); // 优惠券状态
+const loading = ref(false); // 列表加载状态
+const params = reactive({
+  // 请求参数
+  pageNumber: 1,
+  pageSize: 20,
+  memberCouponStatus: "NEW",
+});
+const total = ref(0); // 优惠券总数
+const list = ref([]); // 优惠券列表
 
-    useScope(type, storeName) {
-      // 根据字段返回 优惠券适用范围
-      let shop = "平台";
-      let goods = "全部商品";
-      if (storeName !== "platform") shop = storeName;
-      switch (type) {
-        case "ALL":
-          goods = "全部商品";
-          break;
-        case "PORTION_GOODS":
-          goods = "部分商品";
-          break;
-        case "PORTION_GOODS_CATEGORY":
-          goods = "部分分类商品";
-          break;
+const activeStatusIndex = computed(() => {
+  const index = statusList.value.indexOf(params.memberCouponStatus);
+  return index > -1 ? index : 0;
+});
+
+// 获取优惠券列表
+function getList() {
+  loading.value = true;
+  memberCouponList(params)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        list.value = res.result.records || [];
+        total.value = res.result.total || 0;
       }
-      return `${shop}${goods}可用`;
-    },
-    formatValidity(item) {
-      const start = this.formatCouponTime(item && item.startTime);
-      const end = this.formatCouponTime(item && item.endTime);
-      if (start && end) return `${start} 至 ${end}`;
-      if (end) return `至 ${end}`;
-      if (start) return `${start} 起`;
-      return "长期有效";
-    },
-    formatCouponTime(value) {
-      if (!value) return "";
-      const text = String(value).trim();
-      if (/^\d{4}-\d{2}-\d{2}/.test(text)) {
-        return text.slice(0, 16);
-      }
-      const date = new Date(text);
-      if (Number.isNaN(date.getTime())) return text;
-      const pad = (n) => String(n).padStart(2, "0");
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
-    },
-  },
-  mounted() {
-    this.getList();
-  },
-};
+    })
+    .catch(() => {
+      loading.value = false;
+      list.value = [];
+      total.value = 0;
+    });
+}
+
+// 切换优惠券状态
+function change(index) {
+  params.memberCouponStatus = statusList.value[index];
+  params.pageNumber = 1;
+  getList();
+}
+
+// 根据使用条件跳转商品列表页面
+function go(item) {
+  if (params.memberCouponStatus !== "NEW") return;
+
+  router.push({
+    path: "/goodsList",
+    query: { promotionsId: item.couponId, promotionType: "COUPON" },
+  });
+}
+
+// 分页改变页码
+function changePageNum(val) {
+  params.pageNumber = val;
+  getList();
+}
+
+// 分页改变页数
+function changePageSize(val) {
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList();
+}
+
+// 根据字段返回 优惠券适用范围
+function useScope(type, storeName) {
+  let shop = "平台";
+  let goods = "全部商品";
+  if (storeName !== "platform") shop = storeName;
+  switch (type) {
+    case "ALL":
+      goods = "全部商品";
+      break;
+    case "PORTION_GOODS":
+      goods = "部分商品";
+      break;
+    case "PORTION_GOODS_CATEGORY":
+      goods = "部分分类商品";
+      break;
+  }
+  return `${shop}${goods}可用`;
+}
+
+function formatValidity(item) {
+  const start = formatCouponTime(item && item.startTime);
+  const end = formatCouponTime(item && item.endTime);
+  if (start && end) return `${start} 至 ${end}`;
+  if (end) return `至 ${end}`;
+  if (start) return `${start} 起`;
+  return "长期有效";
+}
+
+function formatCouponTime(value) {
+  if (!value) return "";
+  const text = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(text)) {
+    return text.slice(0, 16);
+  }
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return text;
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+onMounted(() => {
+  getList();
+});
 </script>
 
 <style scoped lang="scss">

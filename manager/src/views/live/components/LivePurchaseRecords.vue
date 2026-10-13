@@ -76,142 +76,144 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
 import { DocumentCopy } from "@element-plus/icons-vue";
 import { queryLiveOrderPage } from "@/api/live";
+import { Message } from "@/utils/message";
+import { unixToDate, unitPrice } from "@/utils/filters";
 
-export default {
-  name: "LivePurchaseRecords",
-  components: { DocumentCopy },
-  props: {
-    liveId: {
-      type: String,
-      required: true,
-    },
+defineOptions({ name: "LivePurchaseRecords" });
+
+const props = defineProps({
+  liveId: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      loading: false,
-      orderList: [],
-      pagination: {
-        pageNumber: 1,
-        pageSize: 5,
-        total: 0,
+});
+
+const loading = ref(false);
+const orderList = ref([]);
+const pagination = reactive({
+  pageNumber: 1,
+  pageSize: 5,
+  total: 0,
+});
+
+watch(
+  () => props.liveId,
+  () => {
+    pagination.pageNumber = 1;
+    loadData();
+  }
+);
+
+onMounted(() => {
+  loadData();
+});
+
+function refresh() {
+  loadData();
+}
+function formatTime(time) {
+  if (!time) return "-";
+  if (typeof time === "string" && time.includes("-")) return time;
+  const ts = typeof time === "number" ? (time > 1e12 ? time / 1000 : time) : time;
+  return unixToDate(ts);
+}
+function formatPrice(val) {
+  return unitPrice(val, "￥");
+}
+function getOrderItems(order) {
+  if (order.orderItems?.length) return order.orderItems;
+  if (order.groupGoodsId) {
+    return [
+      {
+        image: order.groupImages,
+        name: order.groupName,
+        goodsPrice: order.groupGoodsPrice,
+        num: order.groupNum,
       },
-    };
-  },
-  watch: {
-    liveId() {
-      this.pagination.pageNumber = 1;
-      this.loadData();
-    },
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    refresh() {
-      this.loadData();
-    },
-    formatTime(time) {
-      if (!time) return "-";
-      if (typeof time === "string" && time.includes("-")) return time;
-      const ts = typeof time === "number" ? (time > 1e12 ? time / 1000 : time) : time;
-      return this.$filters.unixToDate(ts);
-    },
-    formatPrice(val) {
-      return this.$filters.unitPrice(val, "￥");
-    },
-    getOrderItems(order) {
-      if (order.orderItems?.length) return order.orderItems;
-      if (order.groupGoodsId) {
-        return [
-          {
-            image: order.groupImages,
-            name: order.groupName,
-            goodsPrice: order.groupGoodsPrice,
-            num: order.groupNum,
-          },
-        ];
+    ];
+  }
+  return [];
+}
+function clientTypeText(v) {
+  const map = { H5: "移动端", PC: "PC端", WECHAT_MP: "小程序端", APP: "移动应用端" };
+  return map[v] || v || "-";
+}
+function clientTypeDotClass(v) {
+  const map = { H5: "warning", PC: "primary", WECHAT_MP: "success", APP: "info" };
+  return map[v] || "info";
+}
+function orderPromotionText(v) {
+  const map = {
+    NORMAL: "普通订单",
+    PINTUAN: "拼团订单",
+    GIFT: "赠品订单",
+    POINTS: "积分订单",
+    KANJIA: "砍价订单",
+  };
+  return map[v] || v || "-";
+}
+function orderStatusText(v) {
+  const map = {
+    UNPAID: "未付款",
+    PAID: "已付款",
+    UNDELIVERED: "待发货",
+    STAY_PICKED_UP: "待自提",
+    PARTS_DELIVERED: "部分发货",
+    DELIVERED: "已发货",
+    COMPLETED: "已完成",
+    TAKE: "待核验",
+    CANCELLED: "已取消",
+  };
+  return map[v] || v || "-";
+}
+function orderStatusDotClass(v) {
+  const map = {
+    UNPAID: "danger",
+    PAID: "primary",
+    UNDELIVERED: "info",
+    STAY_PICKED_UP: "info",
+    PARTS_DELIVERED: "warning",
+    DELIVERED: "warning",
+    COMPLETED: "success",
+    TAKE: "warning",
+    CANCELLED: "danger",
+  };
+  return map[v] || "info";
+}
+function copySn(sn) {
+  if (!sn) return;
+  navigator.clipboard.writeText(sn);
+  Message.success("订单编号已复制");
+}
+function onPageSizeChange() {
+  pagination.pageNumber = 1;
+  loadData();
+}
+function loadData() {
+  if (!props.liveId) return;
+  loading.value = true;
+  queryLiveOrderPage({
+    liveRoomId: props.liveId,
+    pageNumber: pagination.pageNumber,
+    pageSize: pagination.pageSize,
+  })
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        orderList.value = res.result?.records || [];
+        pagination.total = res.result?.total || 0;
       }
-      return [];
-    },
-    clientTypeText(v) {
-      const map = { H5: "移动端", PC: "PC端", WECHAT_MP: "小程序端", APP: "移动应用端" };
-      return map[v] || v || "-";
-    },
-    clientTypeDotClass(v) {
-      const map = { H5: "warning", PC: "primary", WECHAT_MP: "success", APP: "info" };
-      return map[v] || "info";
-    },
-    orderPromotionText(v) {
-      const map = {
-        NORMAL: "普通订单",
-        PINTUAN: "拼团订单",
-        GIFT: "赠品订单",
-        POINTS: "积分订单",
-        KANJIA: "砍价订单",
-      };
-      return map[v] || v || "-";
-    },
-    orderStatusText(v) {
-      const map = {
-        UNPAID: "未付款",
-        PAID: "已付款",
-        UNDELIVERED: "待发货",
-        STAY_PICKED_UP: "待自提",
-        PARTS_DELIVERED: "部分发货",
-        DELIVERED: "已发货",
-        COMPLETED: "已完成",
-        TAKE: "待核验",
-        CANCELLED: "已取消",
-      };
-      return map[v] || v || "-";
-    },
-    orderStatusDotClass(v) {
-      const map = {
-        UNPAID: "danger",
-        PAID: "primary",
-        UNDELIVERED: "info",
-        STAY_PICKED_UP: "info",
-        PARTS_DELIVERED: "warning",
-        DELIVERED: "warning",
-        COMPLETED: "success",
-        TAKE: "warning",
-        CANCELLED: "danger",
-      };
-      return map[v] || "info";
-    },
-    copySn(sn) {
-      if (!sn) return;
-      navigator.clipboard.writeText(sn);
-      this.$Message.success("订单编号已复制");
-    },
-    onPageSizeChange() {
-      this.pagination.pageNumber = 1;
-      this.loadData();
-    },
-    loadData() {
-      if (!this.liveId) return;
-      this.loading = true;
-      queryLiveOrderPage({
-        liveRoomId: this.liveId,
-        pageNumber: this.pagination.pageNumber,
-        pageSize: this.pagination.pageSize,
-      })
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.orderList = res.result?.records || [];
-            this.pagination.total = res.result?.total || 0;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+defineExpose({ refresh });
 </script>
 
 <style lang="scss" scoped>

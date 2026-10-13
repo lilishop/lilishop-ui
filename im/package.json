@@ -20,6 +20,7 @@
     "js-audio-recorder": "^1.0.6",
     "js-base64": "^2.5.1",
     "nprogress": "^0.2.0",
+    "pinia": "^4.0.3",
     "prismjs": "^1.29.0",
     "qs": "^6.9.4",
     "svg-sprite-loader": "^5.0.0",
@@ -27,8 +28,7 @@
     "vue-cropper": "^1.1.1",
     "vue-prism-editor": "2.0.0-alpha.2",
     "vue-router": "^4.6.4",
-    "vue-virtual-scroller": "^3.0.4",
-    "vuex": "^4.1.0"
+    "vue-virtual-scroller": "^3.0.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^5.0.9",
@@ -58,7 +58,9 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {}
+    "rules": {
+      "vue/component-api-style": ["warn", ["script-setup"]]
+    }
   },
   "browserslist": [
     "> 1%",

@@ -23,52 +23,50 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { getInStoreSettings, saveInStoreSettings } from "@/api/appointment";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "appointmentInStoreSettings",
-  data() {
-    return {
-      loading: false,
-      saving: false,
-      form: {
-        userBooking: true,
-        workOrder: true,
-        endService: true,
-      },
-    };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    loadData() {
-      this.loading = true;
-      getInStoreSettings()
-        .then((res) => {
-          if (res.success && res.result) {
-            this.form = { ...this.form, ...res.result };
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    handleSave() {
-      this.saving = true;
-      saveInStoreSettings(this.form)
-        .then((res) => {
-          if (res.success) {
-            this.$message.success("保存成功");
-          }
-        })
-        .finally(() => {
-          this.saving = false;
-        });
-    },
-  },
-};
+defineOptions({ name: "appointmentInStoreSettings" });
+
+const loading = ref(false);
+const saving = ref(false);
+const form = ref({
+  userBooking: true,
+  workOrder: true,
+  endService: true,
+});
+
+onMounted(() => {
+  loadData();
+});
+
+function loadData() {
+  loading.value = true;
+  getInStoreSettings()
+    .then((res) => {
+      if (res.success && res.result) {
+        form.value = { ...form.value, ...res.result };
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function handleSave() {
+  saving.value = true;
+  saveInStoreSettings(form.value)
+    .then((res) => {
+      if (res.success) {
+        Message.success("保存成功");
+      }
+    })
+    .finally(() => {
+      saving.value = false;
+    });
+}
 </script>
 
 <style scoped>

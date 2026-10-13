@@ -10,35 +10,36 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { articleDetail } from "@/api/common.js";
 import config from "@/config/index";
-export default {
-  data() {
-    return {
-      config,
-      detail: "",
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    back() {
-      this.$router.push("/");
-    },
-    // 初始化文章
-    init() {
-      const id = this.$route.query.id;
 
-      articleDetail(id).then((res) => {
-        if (res.success) {
-          this.detail = res.result;
-        }
-      });
-    },
-  },
-};
+const route = useRoute();
+const router = useRouter();
+
+const configData = ref(config);
+const detail = ref("");
+
+function back() {
+  router.push("/");
+}
+
+// 初始化文章
+function init() {
+  const id = route.query.id;
+
+  articleDetail(id).then((res) => {
+    if (res.success) {
+      detail.value = res.result;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

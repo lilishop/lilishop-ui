@@ -1,5 +1,5 @@
 <template>
-  <div class="item-class-show">
+  <div class="item-class-show" ref="rootEl">
     <div class="head-bar">
       <!-- 有商品分类展示商品分类 -->
       <template v-if="$route.query.categoryId">
@@ -116,246 +116,253 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { ArrowDown, ArrowRight, ArrowUp, Close } from '@element-plus/icons-vue';
 import * as APIGoods from '@/api/goods';
-export default {
-  components: { ArrowDown, ArrowRight, ArrowUp, Close },
-  name: 'GoodsClassNav',
-  data () {
-    return {
-      tabBar: {
-        name: '',
-        children: [],
-        first: null,
-        second: null
-      },
-      showTagCount: 5, // 展示的搜索项数量
-      tagsContent: [
-        // 标签
-        {
-          key: '品牌',
-          more: false,
-          show: true,
-          values: []
-        }
-      ],
-      selectedItem: [], // 已选分类集合 顶部展示
-      brandIds: [], // 品牌id合集
-      params: {}, // 请求参数
-      rowOverflow: {} // 一行排不下时才显示更多
-    };
-  },
-  computed: {
-    cateList () { // 商品分类
-      return this.$store.state.category || []
-    }
-  },
-  watch: {
-    selectedItem: {
-      // 监听已选条件，来调用列表接口
-      handler (val) {
-        let classification = [];
-        this.params.brandId = ''
-        this.params.prop = ''
-        val.forEach((item) => {
-          if (item.type === '品牌') {
-            this.params.brandId = this.brandIds.join('@');
-          } else {
-            const nameArr = item.name.split('、');
-            nameArr.forEach((name) => {
-              classification.push(item.type + '_' + name);
-            });
-          }
-        });
-        this.params.prop = classification.join('@');
-        this.getFilterList(this.params);
-        this.$emit('getParams', this.params);
-      },
-      deep: true
-    },
-    '$route': { // 监听路由
-      handler (val, oVal) {
-        if (this.$route.query.categoryId) {
-          let cateId = this.$route.query.categoryId.split(',')
-          Object.assign(this.params, this.$route.query)
-          this.params.categoryId = cateId[cateId.length - 1]
-        } else {
-          Object.assign(this.params, this.$route.query)
-        }
-        this.getFilterList(this.params)
-        this.getNav()
-      },
-      deep: true
-    }
-  },
-  methods: {
-    getNav () { // 获取商品分类，分类下展示
-      if (!this.$route.query.categoryId) return
-      if (!this.cateList.length) { // 商品分类存储在localstorage，接口未调用成功前再次刷新数据
-        setTimeout(() => {
-          this.getNav()
-        }, 500)
-        return
-      }
-      const arr = this.$route.query.categoryId.split(',')
-      const source = this.cateList.find((e) => e.id === arr[0])
-      if (!source) return
-      const tabBar = {
-        id: source.id,
-        name: source.name,
-        parentId: source.parentId,
-        children: source.children || [],
-        first: null,
-        second: null,
-      }
-      if (arr.length > 1) {
-        tabBar.first = tabBar.children.find((e) => e.id === arr[1]) || null
-      }
-      if (arr.length > 2 && tabBar.first && tabBar.first.children) {
-        tabBar.second = tabBar.first.children.find((e) => e.id === arr[2]) || null
-      }
-      this.tabBar = tabBar
-    },
-    cateClick (item, index) { // 点选分类
-      switch (index) {
-        case 1:
-          this.$router.push({
-            path: '/goodsList',
-            query: {categoryId: item.id}
-          })
-          break;
-        case 2:
-          this.$router.push({
-            path: '/goodsList',
-            query: {categoryId: [item.parentId, item.id].toString()}
-          })
-          break;
-        case 3:
-          this.$router.push({
-            path: '/goodsList',
-            query: {categoryId: [this.tabBar.id, item.parentId, item.id].toString()}
-          })
-          break;
-      }
-    },
-    isGroupSelected (index) {
-      const group = this.tagsContent[index];
-      if (!group) return false;
-      return this.selectedItem.some((selected) => selected.type === group.key);
-    },
-    selectAll (index) {
-      const group = this.tagsContent[index];
-      if (!group) return;
-      const selectedIndex = this.selectedItem.findIndex((selected) => selected.type === group.key);
-      if (selectedIndex === -1) return;
-      this.cancelSelected(this.selectedItem[selectedIndex], selectedIndex);
-    },
-    selectBrand (item, index) {
-      const type = this.tagsContent[index].key;
-      if (this.selectedItem.some((selected) => selected.type === type)) {
-        return;
-      }
-      this.selectedItem.push({
-        type,
-        name: item
-      });
-      this.tagsContent[index].show = false;
-      if (index === 0) {
-        this.appendBrandIdsByNames([item]);
-      }
-    },
+import { useAppStore } from '@/stores/app';
 
-    cancelSelected (item, index) {
-      // 顶部栏 取消已选中的项
-      this.selectedItem.splice(index, 1);
+defineOptions({ name: 'GoodsClassNav' });
 
-      this.tagsContent.forEach((tag, index) => {
-        if (tag.key === item.type) {
-          tag.show = true;
-          tag.more = false;
-        }
-      });
-      if (item.type === '品牌') {
-        this.brandIds = [];
-      }
-    },
-    moreBrand (index) {
-      // 更多按钮
-      const flag = !this.tagsContent[index].more
-      this.tagsContent[index]['more'] = flag
-      this.$nextTick(() => this.measureRows())
-    },
-    measureRows () {
-      if (!this.$el) return
-      const next = {}
-      const brand = this.$el.querySelector('.brand ul')
-      if (brand && brand.offsetParent) {
-        next[0] = !!(this.tagsContent[0] && this.tagsContent[0].more) || brand.scrollHeight > brand.clientHeight + 1
-      }
-      this.$el.querySelectorAll('.other .list').forEach((list) => {
-        if (!list.offsetParent) return
-        const index = Number(list.dataset.index)
-        const tag = this.tagsContent[index]
-        next[index] = !!(tag && tag.more) || list.scrollHeight > list.clientHeight + 1
-      })
-      const prev = this.rowOverflow
-      const keys = new Set([...Object.keys(prev), ...Object.keys(next)])
-      const changed = [...keys].some((key) => !!prev[key] !== !!next[key])
-      if (changed) this.rowOverflow = next
-    },
-    appendBrandIdsByNames (names) {
-      const selectedNames = names || [];
-      const brands = this.tagsContent[0] && this.tagsContent[0].values ? this.tagsContent[0].values : [];
-      brands.forEach((val) => {
-        if (selectedNames.includes(val.name) && val.value && !this.brandIds.includes(val.value)) {
-          this.brandIds.push(val.value);
-        }
-      });
-    },
-    getFilterList (params) {
-      // 筛选、分类  列表
-      APIGoods.filterList(params).then((res) => {
-        if (res.success) {
-          const data = res.result;
-          const hiddenKeys = new Set(this.selectedItem.map((item) => item.type));
-          this.tagsContent = [{
-            key: '品牌',
-            more: false,
-            show: !hiddenKeys.has('品牌'),
-            values: data.brands || []
-          }].concat(data.paramOptions || []);
-          this.tagsContent.forEach((item) => {
-            item.show = !hiddenKeys.has(item.key);
-            item.more = false;
-          });
-          this.$nextTick(() => this.measureRows())
-        }
-      });
-    },
-    // 展示更多搜索项
-    moreOptions () {
-      this.showTagCount = this.showTagCount === 5 ? 100 : 5
-      this.$nextTick(() => this.measureRows())
-    }
-  },
-  mounted () {
-    // 有分类id就根据id搜索
-    if (this.$route.query.categoryId) {
-      let cateId = this.$route.query.categoryId.split(',')
-      Object.assign(this.params, this.$route.query)
-      this.params.categoryId = cateId[cateId.length - 1]
+const emit = defineEmits(['getParams']);
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const tabBar = ref({
+  name: '',
+  children: [],
+  first: null,
+  second: null
+});
+const showTagCount = ref(5); // 展示的搜索项数量
+const tagsContent = ref([
+  // 标签
+  {
+    key: '品牌',
+    more: false,
+    show: true,
+    values: []
+  }
+]);
+const selectedItem = ref([]); // 已选分类集合 顶部展示
+const brandIds = ref([]); // 品牌id合集
+const params = reactive({}); // 请求参数
+const rowOverflow = ref({}); // 一行排不下时才显示更多
+const rootEl = ref(null); // 根元素，用于测量行溢出
+
+const cateList = computed(() => appStore.category || []); // 商品分类
+
+// 监听已选条件，来调用列表接口
+watch(selectedItem, (val) => {
+  let classification = [];
+  params.brandId = ''
+  params.prop = ''
+  val.forEach((item) => {
+    if (item.type === '品牌') {
+      params.brandId = brandIds.value.join('@');
     } else {
-      Object.assign(this.params, this.$route.query)
+      const nameArr = item.name.split('、');
+      nameArr.forEach((name) => {
+        classification.push(item.type + '_' + name);
+      });
     }
-    this.getFilterList(this.params);
-    this.getNav();
-    window.addEventListener('resize', this.measureRows)
-  },
-  beforeUnmount () {
-    window.removeEventListener('resize', this.measureRows)
+  });
+  params.prop = classification.join('@');
+  getFilterList(params);
+  emit('getParams', params);
+}, { deep: true });
+
+// 监听路由
+watch(() => route.query, () => {
+  if (route.query.categoryId) {
+    let cateId = route.query.categoryId.split(',')
+    Object.assign(params, route.query)
+    params.categoryId = cateId[cateId.length - 1]
+  } else {
+    Object.assign(params, route.query)
+  }
+  getFilterList(params)
+  getNav()
+}, { deep: true });
+
+function getNav () { // 获取商品分类，分类下展示
+  if (!route.query.categoryId) return
+  if (!cateList.value.length) { // 商品分类存储在localstorage，接口未调用成功前再次刷新数据
+    setTimeout(() => {
+      getNav()
+    }, 500)
+    return
+  }
+  const arr = route.query.categoryId.split(',')
+  const source = cateList.value.find((e) => e.id === arr[0])
+  if (!source) return
+  const newTabBar = {
+    id: source.id,
+    name: source.name,
+    parentId: source.parentId,
+    children: source.children || [],
+    first: null,
+    second: null,
+  }
+  if (arr.length > 1) {
+    newTabBar.first = newTabBar.children.find((e) => e.id === arr[1]) || null
+  }
+  if (arr.length > 2 && newTabBar.first && newTabBar.first.children) {
+    newTabBar.second = newTabBar.first.children.find((e) => e.id === arr[2]) || null
+  }
+  tabBar.value = newTabBar
+}
+
+function cateClick (item, index) { // 点选分类
+  switch (index) {
+    case 1:
+      router.push({
+        path: '/goodsList',
+        query: {categoryId: item.id}
+      })
+      break;
+    case 2:
+      router.push({
+        path: '/goodsList',
+        query: {categoryId: [item.parentId, item.id].toString()}
+      })
+      break;
+    case 3:
+      router.push({
+        path: '/goodsList',
+        query: {categoryId: [tabBar.value.id, item.parentId, item.id].toString()}
+      })
+      break;
   }
 }
+
+function isGroupSelected (index) {
+  const group = tagsContent.value[index];
+  if (!group) return false;
+  return selectedItem.value.some((selected) => selected.type === group.key);
+}
+
+function selectAll (index) {
+  const group = tagsContent.value[index];
+  if (!group) return;
+  const selectedIndex = selectedItem.value.findIndex((selected) => selected.type === group.key);
+  if (selectedIndex === -1) return;
+  cancelSelected(selectedItem.value[selectedIndex], selectedIndex);
+}
+
+function selectBrand (item, index) {
+  const type = tagsContent.value[index].key;
+  if (selectedItem.value.some((selected) => selected.type === type)) {
+    return;
+  }
+  selectedItem.value.push({
+    type,
+    name: item
+  });
+  tagsContent.value[index].show = false;
+  if (index === 0) {
+    appendBrandIdsByNames([item]);
+  }
+}
+
+function cancelSelected (item, index) {
+  // 顶部栏 取消已选中的项
+  selectedItem.value.splice(index, 1);
+
+  tagsContent.value.forEach((tag, index) => {
+    if (tag.key === item.type) {
+      tag.show = true;
+      tag.more = false;
+    }
+  });
+  if (item.type === '品牌') {
+    brandIds.value = [];
+  }
+}
+
+function moreBrand (index) {
+  // 更多按钮
+  const flag = !tagsContent.value[index].more
+  tagsContent.value[index]['more'] = flag
+  nextTick(() => measureRows())
+}
+
+function measureRows () {
+  if (!rootEl.value) return
+  const next = {}
+  const brand = rootEl.value.querySelector('.brand ul')
+  if (brand && brand.offsetParent) {
+    next[0] = !!(tagsContent.value[0] && tagsContent.value[0].more) || brand.scrollHeight > brand.clientHeight + 1
+  }
+  rootEl.value.querySelectorAll('.other .list').forEach((list) => {
+    if (!list.offsetParent) return
+    const index = Number(list.dataset.index)
+    const tag = tagsContent.value[index]
+    next[index] = !!(tag && tag.more) || list.scrollHeight > list.clientHeight + 1
+  })
+  const prev = rowOverflow.value
+  const keys = new Set([...Object.keys(prev), ...Object.keys(next)])
+  const changed = [...keys].some((key) => !!prev[key] !== !!next[key])
+  if (changed) rowOverflow.value = next
+}
+
+function appendBrandIdsByNames (names) {
+  const selectedNames = names || [];
+  const brands = tagsContent.value[0] && tagsContent.value[0].values ? tagsContent.value[0].values : [];
+  brands.forEach((val) => {
+    if (selectedNames.includes(val.name) && val.value && !brandIds.value.includes(val.value)) {
+      brandIds.value.push(val.value);
+    }
+  });
+}
+
+function getFilterList (params) {
+  // 筛选、分类  列表
+  APIGoods.filterList(params).then((res) => {
+    if (res.success) {
+      const data = res.result;
+      const hiddenKeys = new Set(selectedItem.value.map((item) => item.type));
+      tagsContent.value = [{
+        key: '品牌',
+        more: false,
+        show: !hiddenKeys.has('品牌'),
+        values: data.brands || []
+      }].concat(data.paramOptions || []);
+      tagsContent.value.forEach((item) => {
+        item.show = !hiddenKeys.has(item.key);
+        item.more = false;
+      });
+      nextTick(() => measureRows())
+    }
+  });
+}
+
+// 展示更多搜索项
+function moreOptions () {
+  showTagCount.value = showTagCount.value === 5 ? 100 : 5
+  nextTick(() => measureRows())
+}
+
+onMounted(() => {
+  // 有分类id就根据id搜索
+  if (route.query.categoryId) {
+    let cateId = route.query.categoryId.split(',')
+    Object.assign(params, route.query)
+    params.categoryId = cateId[cateId.length - 1]
+  } else {
+    Object.assign(params, route.query)
+  }
+  getFilterList(params);
+  getNav();
+  window.addEventListener('resize', measureRows)
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', measureRows)
+});
 </script>
 
 <style scoped lang="scss">

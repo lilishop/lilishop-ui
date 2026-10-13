@@ -1,4 +1,4 @@
-import store from "@/store";
+import { useTalkStore } from "@/stores/talk";
 import router from "@/router";
 import { parseTime } from "@/utils/functions";
 import { ServeCreateTalkList } from "@/api/chat";
@@ -11,7 +11,7 @@ const KEY_INDEX_NAME = "send_message_index_name";
  * @param {String} index_name
  */
 export function findTalkIndex (index_name) {
-  return store.state.talks.items.findIndex(
+  return useTalkStore().items.findIndex(
     (item) => item.index_name == index_name
   );
 }
@@ -22,7 +22,7 @@ export function findTalkIndex (index_name) {
  * @param {String} index_name
  */
 export function findTalk (index_name) {
-  return store.state.talks.items.find((item) => item.index_name == index_name);
+  return useTalkStore().items.find((item) => item.index_name == index_name);
 }
 
 /**

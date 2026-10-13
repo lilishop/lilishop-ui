@@ -207,7 +207,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import defaultLogo from "@/assets/logo1.png";
 import { getSellerHomeData, getHomeNotice } from "@/api/index";
 import { getOrderOverView, goodsStatistics } from "@/api/goods";
@@ -217,6 +219,12 @@ import { getIMDetail } from "@/api/common";
 import { seeArticle } from "@/api/pages";
 import Cookies from "js-cookie";
 import { userMsg } from "@/api/index";
+import { Message } from "@/utils/message";
+import { getStore } from "@/libs/storage";
+
+defineOptions({ name: "home" });
+
+const router = useRouter();
 
 const HOME_ROUTE_TARGETS = {
   orderList: { name: "orderList", path: "/order/orderList" },
@@ -237,161 +245,153 @@ const HOME_ROUTE_TARGETS = {
 
 const AFTER_SALE_RETURN_GOODS_STATUSES = ["PASS", "BUYER_RETURN"];
 
-export default {
-  name: "home",
-  data() {
-    return {
-      defaultLogo,
-      noticeFlage: false,
-      homeData: {},
-      overviewToday: {},
-      overviewYesterday: {},
-      topGoodsData: [],
-      afterSaleNumData: {},
-      procurementStatusCount: {},
-      userData: {},
-      notices: "",
-      noticesDetail: {
-        title: "",
-      },
-      IMLink: "",
-      load: false,
-    };
-  },
-  methods: {
-    navigateAfterSale(serviceStatus) {
-      const routeKey = AFTER_SALE_RETURN_GOODS_STATUSES.includes(serviceStatus)
-        ? "returnGoodsOrder"
-        : "returnMoneyOrder";
-      this.navigateTo(routeKey, { serviceStatus });
-    },
-    navigateToProcurementAudit() {
-      this.navigateTo("procurementPurchaseOrderList", { status: "SUBMITTED" });
-    },
-    navigateTo(key, query) {
-      const target = HOME_ROUTE_TARGETS[key] || { name: key };
-      if (target.name && this.$router.hasRoute(target.name)) {
-        this.$router.push({ name: target.name, query });
-        return;
-      }
-      if (target.path) {
-        const resolved = this.$router.resolve({ path: target.path, query });
-        if (resolved.matched.length > 0) {
-          this.$router.push({ path: target.path, query });
-          return;
-        }
-      }
-      this.$Message.warning("暂无权限访问该页面");
-    },
-    compareText(today, yesterday) {
-      const t = Number(today) || 0;
-      const y = Number(yesterday) || 0;
-      if (y === 0) {
-        return t > 0 ? "↑ --" : "—";
-      }
-      const rate = (((t - y) / y) * 100).toFixed(1);
-      if (t > y) return `↑ ${rate}%`;
-      if (t < y) return `↓ ${Math.abs(rate)}%`;
-      return "—";
-    },
-    compareClass(today, yesterday) {
-      const t = Number(today) || 0;
-      const y = Number(yesterday) || 0;
-      if (t > y) return "compare-up";
-      if (t < y) return "compare-down";
-      return "compare-flat";
-    },
-    // ElProgress 的 percentage 必须是 0-100 的数字，评分缺失/异常时兜底为 0
-    scorePercent(score) {
-      const n = Number(score) * 20;
-      return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0;
-    },
-    async init() {
-      const userInfo = JSON.parse(Cookies.get("userInfoSeller"));
-      this.userData = userInfo;
+const noticeFlage = ref(false);
+const homeData = ref({});
+const overviewToday = ref({});
+const overviewYesterday = ref({});
+const topGoodsData = ref([]);
+const afterSaleNumData = ref({});
+const procurementStatusCount = ref({});
+const userData = ref({});
+const notices = ref("");
+const noticesDetail = ref({
+  title: "",
+});
+const IMLink = ref("");
+const load = ref(false);
 
-      const res = await getHomeNotice();
-      if (res.success) {
-        this.notices = res.result.records;
-      }
-    },
-    async clickLinkNotices(val) {
-      const res = await seeArticle(val.id);
-      if (res.success) {
-        this.noticesDetail = res.result;
-        this.noticeFlage = true;
-      }
-    },
-    async im() {
-      const accessToken = this.getStore("accessToken");
-      this.load = true;
-      await this.getIMDetailMethods();
-      const userInfo = await userMsg();
-      this.load = false;
-      if (userInfo.success && this.IMLink) {
-        window.open(`${this.IMLink}?token=` + accessToken);
-      } else {
-        this.$Message.error("请登录后再联系客服");
-      }
-    },
-    async getIMDetailMethods() {
-      const res = await getIMDetail();
-      if (res.success) {
-        this.IMLink = res.result;
-      }
-    },
-    async getHomeData() {
-      const res = await getSellerHomeData();
-      if (res.success) {
-        this.homeData = res.result;
-      }
-    },
-    async loadOverview() {
-      const year = new Date().getFullYear();
-      const [todayRes, yesterdayRes] = await Promise.all([
-        getOrderOverView({ searchType: "TODAY", year }),
-        getOrderOverView({ searchType: "YESTERDAY", year }),
-      ]);
-      if (todayRes.success) {
-        this.overviewToday = todayRes.result || {};
-      }
-      if (yesterdayRes.success) {
-        this.overviewYesterday = yesterdayRes.result || {};
-      }
-    },
-    async loadSalesRank() {
-      const year = new Date().getFullYear();
-      const res = await goodsStatistics({
-        searchType: "LAST_SEVEN",
-        year,
-        type: "NUM",
-      });
-      if (res.success && res.result) {
-        this.topGoodsData = res.result.slice(0, 10);
-      }
-    },
-    async loadAfterSaleNum() {
-      const res = await getAfterSaleNumVO({});
-      if (res.success) {
-        this.afterSaleNumData = res.result || {};
-      }
-    },
-    async loadProcurementStatusCount() {
-      const res = await getProcurementOrderStatusCount({});
-      if (res.success) {
-        this.procurementStatusCount = res.result || {};
-      }
-    },
-  },
-  mounted() {
-    this.init();
-    this.getHomeData();
-    this.loadOverview();
-    this.loadSalesRank();
-    this.loadAfterSaleNum();
-    this.loadProcurementStatusCount();
-  },
-};
+function navigateAfterSale(serviceStatus) {
+  const routeKey = AFTER_SALE_RETURN_GOODS_STATUSES.includes(serviceStatus)
+    ? "returnGoodsOrder"
+    : "returnMoneyOrder";
+  navigateTo(routeKey, { serviceStatus });
+}
+function navigateToProcurementAudit() {
+  navigateTo("procurementPurchaseOrderList", { status: "SUBMITTED" });
+}
+function navigateTo(key, query) {
+  const target = HOME_ROUTE_TARGETS[key] || { name: key };
+  if (target.name && router.hasRoute(target.name)) {
+    router.push({ name: target.name, query });
+    return;
+  }
+  if (target.path) {
+    const resolved = router.resolve({ path: target.path, query });
+    if (resolved.matched.length > 0) {
+      router.push({ path: target.path, query });
+      return;
+    }
+  }
+  Message.warning("暂无权限访问该页面");
+}
+function compareText(today, yesterday) {
+  const t = Number(today) || 0;
+  const y = Number(yesterday) || 0;
+  if (y === 0) {
+    return t > 0 ? "↑ --" : "—";
+  }
+  const rate = (((t - y) / y) * 100).toFixed(1);
+  if (t > y) return `↑ ${rate}%`;
+  if (t < y) return `↓ ${Math.abs(rate)}%`;
+  return "—";
+}
+function compareClass(today, yesterday) {
+  const t = Number(today) || 0;
+  const y = Number(yesterday) || 0;
+  if (t > y) return "compare-up";
+  if (t < y) return "compare-down";
+  return "compare-flat";
+}
+// ElProgress 的 percentage 必须是 0-100 的数字，评分缺失/异常时兜底为 0
+function scorePercent(score) {
+  const n = Number(score) * 20;
+  return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0;
+}
+async function init() {
+  const userInfo = JSON.parse(Cookies.get("userInfoSeller"));
+  userData.value = userInfo;
+
+  const res = await getHomeNotice();
+  if (res.success) {
+    notices.value = res.result.records;
+  }
+}
+async function clickLinkNotices(val) {
+  const res = await seeArticle(val.id);
+  if (res.success) {
+    noticesDetail.value = res.result;
+    noticeFlage.value = true;
+  }
+}
+async function im() {
+  const accessToken = getStore("accessToken");
+  load.value = true;
+  await getIMDetailMethods();
+  const userInfo = await userMsg();
+  load.value = false;
+  if (userInfo.success && IMLink.value) {
+    window.open(`${IMLink.value}?token=` + accessToken);
+  } else {
+    Message.error("请登录后再联系客服");
+  }
+}
+async function getIMDetailMethods() {
+  const res = await getIMDetail();
+  if (res.success) {
+    IMLink.value = res.result;
+  }
+}
+async function getHomeData() {
+  const res = await getSellerHomeData();
+  if (res.success) {
+    homeData.value = res.result;
+  }
+}
+async function loadOverview() {
+  const year = new Date().getFullYear();
+  const [todayRes, yesterdayRes] = await Promise.all([
+    getOrderOverView({ searchType: "TODAY", year }),
+    getOrderOverView({ searchType: "YESTERDAY", year }),
+  ]);
+  if (todayRes.success) {
+    overviewToday.value = todayRes.result || {};
+  }
+  if (yesterdayRes.success) {
+    overviewYesterday.value = yesterdayRes.result || {};
+  }
+}
+async function loadSalesRank() {
+  const year = new Date().getFullYear();
+  const res = await goodsStatistics({
+    searchType: "LAST_SEVEN",
+    year,
+    type: "NUM",
+  });
+  if (res.success && res.result) {
+    topGoodsData.value = res.result.slice(0, 10);
+  }
+}
+async function loadAfterSaleNum() {
+  const res = await getAfterSaleNumVO({});
+  if (res.success) {
+    afterSaleNumData.value = res.result || {};
+  }
+}
+async function loadProcurementStatusCount() {
+  const res = await getProcurementOrderStatusCount({});
+  if (res.success) {
+    procurementStatusCount.value = res.result || {};
+  }
+}
+
+onMounted(() => {
+  init();
+  getHomeData();
+  loadOverview();
+  loadSalesRank();
+  loadAfterSaleNum();
+  loadProcurementStatusCount();
+});
 </script>
 
 <style lang="scss" scoped>

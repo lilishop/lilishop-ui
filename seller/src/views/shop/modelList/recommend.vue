@@ -216,7 +216,7 @@
     </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -227,114 +227,111 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { nextTick, reactive, ref } from "vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
-export default {
-  props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
+import { formatLinkType } from "@/utils/filters";
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
   },
-  components: {
-    ossManage,
-  },
-  data() {
-    return {
-      msgLeft: this.data.options.contentLeft, // 左侧数据
-      msgRight: this.data.options.contentRight, // 右侧数据
-      showModal: false, // modal显隐
-      showModal1: false, // modal显隐
-      selected: {}, // 弹窗编辑草稿
-      editTarget: null, // 确定后写回的原数据
-      picModelFlag: false, // 图片选择
-    };
-  },
-  methods: {
-    cloneItem(item) {
-      return JSON.parse(JSON.stringify(item || {}));
-    },
-    // 编辑
-    handleSelectModel(item, type) {
-      this.editTarget = item;
-      this.selected = this.cloneItem(item);
-      if (type) {
-        this.showModal1 = true;
-      } else {
-        this.showModal = true;
-      }
-    },
-    handleSelectLink(item, index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-    },
-    handleSelectGoods(item) {
-      // 调起选择商品
-      this.$refs.liliDialog.open("goods", "single");
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      this.selected.url = this.$filters.formatLinkType(val);
-      this.selected.type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      console.log(val);
-      let goods = val[0];
-      this.selected.img = goods.thumbnail;
-      this.selected.price = goods.price;
-      this.selected.name = goods.goodsName;
-      this.selected.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
-    },
-    handleSelectImg() {
-      // 选择图片
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    // 选择图片回调
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url) return;
-      this.selected.img = val.url;
-    },
-    handleCancelModal() {
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal = false;
-    },
-    handleConfirmModal() {
-      if (this.editTarget) {
-        Object.assign(this.editTarget, this.cloneItem(this.selected));
-      }
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal = false;
-    },
-    handleCancelModal1() {
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal1 = false;
-    },
-    handleConfirmModal1() {
-      if (this.editTarget) {
-        Object.assign(this.editTarget, this.cloneItem(this.selected));
-      }
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal1 = false;
-    },
-  },
-};
+});
+
+const msgLeft = reactive(props.data.options.contentLeft); // 左侧数据
+const msgRight = reactive(props.data.options.contentRight); // 右侧数据
+const showModal = ref(false); // modal显隐
+const showModal1 = ref(false); // modal显隐
+const selected = ref({}); // 弹窗编辑草稿
+const editTarget = ref(null); // 确定后写回的原数据
+const picModelFlag = ref(false); // 图片选择
+
+const liliDialogRef = ref(null);
+const ossManageRef = ref(null);
+
+function cloneItem(item) {
+  return JSON.parse(JSON.stringify(item || {}));
+}
+// 编辑
+function handleSelectModel(item, type) {
+  editTarget.value = item;
+  selected.value = cloneItem(item);
+  if (type) {
+    showModal1.value = true;
+  } else {
+    showModal.value = true;
+  }
+}
+function handleSelectLink(item, index) {
+  // 调起选择链接弹窗
+  liliDialogRef.value.open("link");
+}
+function handleSelectGoods(item) {
+  // 调起选择商品
+  liliDialogRef.value.open("goods", "single");
+}
+// 选择链接回调
+function selectedLink(val) {
+  selected.value.url = formatLinkType(val);
+  selected.value.type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+}
+// 选择商品回调
+function selectedGoodsData(val) {
+  console.log(val);
+  let goods = val[0];
+  selected.value.img = goods.thumbnail;
+  selected.value.price = goods.price;
+  selected.value.name = goods.goodsName;
+  selected.value.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
+}
+function handleSelectImg() {
+  // 选择图片
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+// 选择图片回调
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url) return;
+  selected.value.img = val.url;
+}
+function handleCancelModal() {
+  editTarget.value = null;
+  selected.value = {};
+  showModal.value = false;
+}
+function handleConfirmModal() {
+  if (editTarget.value) {
+    Object.assign(editTarget.value, cloneItem(selected.value));
+  }
+  editTarget.value = null;
+  selected.value = {};
+  showModal.value = false;
+}
+function handleCancelModal1() {
+  editTarget.value = null;
+  selected.value = {};
+  showModal1.value = false;
+}
+function handleConfirmModal1() {
+  if (editTarget.value) {
+    Object.assign(editTarget.value, cloneItem(selected.value));
+  }
+  editTarget.value = null;
+  selected.value = {};
+  showModal1.value = false;
+}
 </script>
 <style lang="scss" scoped>
 @import "./setup-box.scss";

@@ -34,54 +34,49 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  title: "导航栏",
-  props: ["res"],
-  data() {
-    return { current: 0 };
-  },
-  computed: {
-    // 配置过样式字段才启用自定义样式/指示器，老数据保持原样
-    customIndicator() {
-      return this.res && this.res.indicatorStyle !== undefined;
-    },
-    cardMode() {
-      return this.res && this.res.swiperStyle === "card";
-    },
-    indicatorColor() {
-      return this.res.indicatorColorMode === "custom" && this.res.indicatorColor
-        ? this.res.indicatorColor
-        : "#409eff";
-    },
-    wrapperStyle() {
-      const res = this.res || {};
-      if (res.paddingTop === undefined) return {};
-      const bg =
-        !res.bgColor2 || res.bgColor1 === res.bgColor2
-          ? res.bgColor1
-          : `linear-gradient(180deg, ${res.bgColor1}, ${res.bgColor2})`;
-      // 画布 375px ≈ 750rpx，预览按一半像素呈现
-      const px = (v) => `${(Number(v) || 0) / 2}px`;
-      return {
-        padding: `${px(res.paddingTop)} ${px(res.paddingX)} ${px(res.paddingBottom)}`,
-        background: bg,
-        borderRadius: px(res.borderRadius),
-        marginBottom: px(res.pageGap),
-      };
-    },
-    boxStyle() {
-      const res = this.res || {};
-      if (res.imgRadius === undefined) return {};
-      return { borderRadius: `${(Number(res.imgRadius) || 0) / 2}px` };
-    },
-  },
-  methods: {
-    onChange(index) {
-      this.current = index;
-    },
-  },
-};
+<script setup>
+import { ref, computed } from "vue";
+
+defineOptions({ title: "导航栏" });
+const props = defineProps(["res"]);
+
+const current = ref(0);
+
+// 配置过样式字段才启用自定义样式/指示器，老数据保持原样
+const customIndicator = computed(
+  () => props.res && props.res.indicatorStyle !== undefined
+);
+const cardMode = computed(() => props.res && props.res.swiperStyle === "card");
+const indicatorColor = computed(() =>
+  props.res.indicatorColorMode === "custom" && props.res.indicatorColor
+    ? props.res.indicatorColor
+    : "#409eff"
+);
+const wrapperStyle = computed(() => {
+  const res = props.res || {};
+  if (res.paddingTop === undefined) return {};
+  const bg =
+    !res.bgColor2 || res.bgColor1 === res.bgColor2
+      ? res.bgColor1
+      : `linear-gradient(180deg, ${res.bgColor1}, ${res.bgColor2})`;
+  // 画布 375px ≈ 750rpx，预览按一半像素呈现
+  const px = (v) => `${(Number(v) || 0) / 2}px`;
+  return {
+    padding: `${px(res.paddingTop)} ${px(res.paddingX)} ${px(res.paddingBottom)}`,
+    background: bg,
+    borderRadius: px(res.borderRadius),
+    marginBottom: px(res.pageGap),
+  };
+});
+const boxStyle = computed(() => {
+  const res = props.res || {};
+  if (res.imgRadius === undefined) return {};
+  return { borderRadius: `${(Number(res.imgRadius) || 0) / 2}px` };
+});
+
+function onChange(index) {
+  current.value = index;
+}
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

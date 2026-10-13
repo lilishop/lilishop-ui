@@ -154,120 +154,117 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
 
-<script>
+<script setup>
+import { getCurrentInstance, nextTick, ref } from "vue";
 import left from "./mixs/mix-goods";
 import right from "./mixs/mix-brand";
 import ossManage from "@/views/sys/oss-manage/ossManage.vue";
+import { formatLinkType } from "@/utils/filters";
 
-export default {
-  name: "mixModel",
-  data() {
-    return {
-      showModal: false,
-      current: "", //当前选择的模块
-      picModelFlag: false,
-      selectedData: "", //选中的数据
-      goodsIndex: 0, // 商品索引
-      align: "",
-      defaultCallbackImageType: "",
-    };
-  },
-  props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  components: {
-    left,
-    right,
-    ossManage,
-  },
-  mounted() {},
-  methods: {
-    handleSelectImg(type, index) {
-      this.defaultCallbackImageType = type;
-      this.goodsIndex = index;
-      // 选择图片
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
+defineOptions({ name: "mixModel" });
 
-    handleSelectGoods(val, index) {
-      this.$refs.liliDialog.open("goods");
-      this.$refs.liliDialog.singleGoods();
-      this.selectedData = val;
-      this.goodsIndex = index;
-    },
-    handleSelectLink(val, index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-      this.selectedData = val;
-      this.goodsIndex = index;
-    },
-    // 回显图片
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (this.defaultCallbackImageType == "default") {
-        console.log(this.current.data.image);
-        this.current.data.image.src = val.url;
-      } else {
-        console.log(this.goodsIndex, this.data.options[this.align].data.list);
-        this.data.options[this.align].data.list[this.goodsIndex].img = val.url;
-
-        // this.data.options[this.align].data[this.selectedData][this.goodsIndex].url = val.img
-      }
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      console.log(val);
-      this.$nextTick(() => {
-        this.data.options[this.align].data.list[this.goodsIndex].img =
-          val[0].thumbnail;
-        this.data.options[this.align].data.list[this.goodsIndex].title =
-          val[0].goodsName;
-        this.data.options[this.align].data.list[this.goodsIndex].price =
-          val[0].price;
-        this.data.options[this.align].data.list[this.goodsIndex].url =
-          val[0].url;
-      });
-      console.log(this.data.options[this.align].data.list[this.goodsIndex]);
-      this.$forceUpdate();
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      if (this.selectedData != "list") {
-        this.data.options[this.align].data[this.selectedData].url = this.$filters.formatLinkType(val);
-        console.log(this.data.options[this.align].data[this.selectedData])
-      }
-      if (this.selectedData == "list") {
-         this.data.options[this.align].data[this.selectedData][this.goodsIndex]
-        .url = this.$filters.formatLinkType(val);
-      }
-    },
-    /*
-     * 点击不同模块进行编辑
-     * 判断也很简单，就是第一个第二个模块进行判断
-     *
-     * */
-    handleSelectModel(align) {
-      this.align = align;
-      this.current = this.data.options[align];
-      console.log(this.data.options[align]);
-      this.showModal = true;
-    },
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
   },
-};
+});
+
+const { proxy } = getCurrentInstance();
+
+const showModal = ref(false);
+const current = ref(""); //当前选择的模块
+const picModelFlag = ref(false);
+const selectedData = ref(""); //选中的数据
+const goodsIndex = ref(0); // 商品索引
+const align = ref("");
+const defaultCallbackImageType = ref("");
+
+const liliDialog = ref(null);
+// ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
+const ossManageRef = ref(null);
+
+function handleSelectImg(type, index) {
+  defaultCallbackImageType.value = type;
+  goodsIndex.value = index;
+  // 选择图片
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+
+function handleSelectGoods(val, index) {
+  liliDialog.value.open("goods");
+  liliDialog.value.singleGoods();
+  selectedData.value = val;
+  goodsIndex.value = index;
+}
+function handleSelectLink(val, index) {
+  // 调起选择链接弹窗
+  liliDialog.value.open("link");
+  selectedData.value = val;
+  goodsIndex.value = index;
+}
+// 回显图片
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (defaultCallbackImageType.value == "default") {
+    console.log(current.value.data.image);
+    current.value.data.image.src = val.url;
+  } else {
+    console.log(goodsIndex.value, props.data.options[align.value].data.list);
+    props.data.options[align.value].data.list[goodsIndex.value].img = val.url;
+
+    // props.data.options[align.value].data[selectedData.value][goodsIndex.value].url = val.img
+  }
+}
+// 选择商品回调
+function selectedGoodsData(val) {
+  console.log(val);
+  nextTick(() => {
+    props.data.options[align.value].data.list[goodsIndex.value].img =
+      val[0].thumbnail;
+    props.data.options[align.value].data.list[goodsIndex.value].title =
+      val[0].goodsName;
+    props.data.options[align.value].data.list[goodsIndex.value].price =
+      val[0].price;
+    props.data.options[align.value].data.list[goodsIndex.value].url =
+      val[0].url;
+  });
+  console.log(props.data.options[align.value].data.list[goodsIndex.value]);
+  proxy.$forceUpdate();
+}
+// 选择链接回调
+function selectedLink(val) {
+  if (selectedData.value != "list") {
+    props.data.options[align.value].data[selectedData.value].url = formatLinkType(val);
+    console.log(props.data.options[align.value].data[selectedData.value])
+  }
+  if (selectedData.value == "list") {
+     props.data.options[align.value].data[selectedData.value][goodsIndex.value]
+    .url = formatLinkType(val);
+  }
+}
+/*
+ * 点击不同模块进行编辑
+ * 判断也很简单，就是第一个第二个模块进行判断
+ *
+ * */
+function handleSelectModel(alignVal) {
+  align.value = alignVal;
+  current.value = props.data.options[alignVal];
+  console.log(props.data.options[alignVal]);
+  showModal.value = true;
+}
 </script>
 
 <style scoped lang="scss">

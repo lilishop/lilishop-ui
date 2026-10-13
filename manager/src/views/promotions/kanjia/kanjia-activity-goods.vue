@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -52,7 +52,7 @@
       </div>
 
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         border
         :data="data"
@@ -144,137 +144,146 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { getKanJiaGoodsList, delKanJiaGoods } from "@/api/promotion";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "kanjia-activity-goods",
-  data() {
-    return {
-      selectDate: [],
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        goodsName: "",
-        promotionStatus: "",
-      },
-      data: [],
-      total: 0,
-      selectList: [],
-      selectCoupon: [],
-    };
-  },
-  watch: {
-    $route(to) {
-      if (to.fullPath == "/promotions/manager-coupon") {
-        this.init();
+defineOptions({ name: "kanjia-activity-goods" });
+
+const emit = defineEmits(["selected"]);
+
+const route = useRoute();
+const router = useRouter();
+
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const selectDate = ref([]);
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  goodsName: "",
+  promotionStatus: "",
+});
+const data = ref([]);
+const total = ref(0);
+const selectList = ref([]);
+const selectCoupon = ref([]);
+
+watch(
+  () => route.fullPath,
+  (to) => {
+    // 历史遗留：该路径与本页（砍价商品）路由不符，原样保留
+    if (to == "/promotions/manager-coupon") {
+      init();
+    }
+  }
+);
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+function check() {
+  emit("selected", selectCoupon.value);
+}
+function init() {
+  getDataList();
+}
+function add() {
+  router.push({ name: "add-kanJia-activity-goods" });
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function changeSort({ prop, order }) {
+  if (!order) {
+    searchForm.sort = "createTime";
+    searchForm.order = "desc";
+  } else {
+    searchForm.sort = prop;
+    searchForm.order = order === "ascending" ? "asc" : "desc";
+  }
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.startTime = new Date(selectDate.value[0]).getTime();
+    searchForm.endTime = new Date(selectDate.value[1]).getTime();
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  getKanJiaGoodsList(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-    },
-  },
-  methods: {
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    check() {
-      this.$emit("selected", this.selectCoupon);
-    },
-    init() {
-      this.getDataList();
-    },
-    add() {
-      this.$router.push({ name: "add-kanJia-activity-goods" });
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    changeSort({ prop, order }) {
-      if (!order) {
-        this.searchForm.sort = "createTime";
-        this.searchForm.order = "desc";
-      } else {
-        this.searchForm.sort = prop;
-        this.searchForm.order = order === "ascending" ? "asc" : "desc";
-      }
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
-        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
-      }
-      getKanJiaGoodsList(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    edit(v, type) {
-      const data = { id: v.id };
-      if (type) data.onlyView = true;
-      this.$router.push({
-        name: "edit-kanJia-activity-goods",
-        query: data,
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function edit(v, type) {
+  const params = { id: v.id };
+  if (type) params.onlyView = true;
+  router.push({
+    name: "edit-kanJia-activity-goods",
+    query: params,
+  });
+}
+function delAll(row) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "确认需要删除此砍价商品",
+    loading: true,
+    onOk: () => {
+      delKanJiaGoods(row.id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("删除成功");
+          getDataList();
+        }
       });
     },
-    delAll(row) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "确认需要删除此砍价商品",
-        loading: true,
-        onOk: () => {
-          delKanJiaGoods(row.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

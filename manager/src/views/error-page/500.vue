@@ -17,20 +17,22 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "Error500",
-  methods: {
-    backPage() {
-      this.$router.go(-1);
-    },
-    goHome() {
-      this.$router.push({
-        name: "home_index",
-      });
-    },
-  },
-};
+<script setup>
+import { useRouter } from "vue-router";
+
+defineOptions({ name: "Error500" });
+
+const router = useRouter();
+
+function backPage() {
+  router.go(-1);
+}
+
+function goHome() {
+  router.push({
+    name: "home_index",
+  });
+}
 </script>
 
 <style lang="scss" scoped>

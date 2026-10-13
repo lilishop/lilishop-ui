@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -42,7 +42,7 @@
     </el-card>
 
     <el-card>
-      <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
+      <el-table v-loading="loading" border :data="data" ref="tableRef" class="mt_10" style="width: 100%">
         <el-table-column prop="memberName" label="会员名称" min-width="150" show-overflow-tooltip />
         <el-table-column prop="goodsName" label="商品名称" min-width="150" show-overflow-tooltip />
         <el-table-column prop="content" label="评价内容" min-width="300" show-overflow-tooltip />
@@ -88,7 +88,7 @@
     </el-card>
 
     <el-dialog v-model="modalVisible" :title="modalTitle" width="500px" :close-on-click-modal="false">
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="评价内容">
           <span v-if="!content">暂无评价</span>
           <el-input v-else v-model="content" type="textarea" maxlength="200" disabled :rows="4" style="width: 90%" />
@@ -126,127 +126,129 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Member from "@/api/member";
+import { Message } from "@/utils/message";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 
-export default {
-  name: "memberComment",
-  components: { uploadPicThumb },
-  data() {
-    return {
-      detailInfo: {},
-      image: [],
-      replyStatus: false,
-      modalVisible: false,
-      modalTitle: "",
-      loading: true,
-      content: "",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-        startTime: "",
-        endTime: "",
-      },
-      selectDate: null,
-      form: {
-        replyImage: [],
-        reply: "",
-      },
-      formValidate: {
-        reply: [{ required: true, message: "请输入回复内容", trigger: "blur" }],
-      },
-      submitLoading: false,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.getDataList();
-    },
-    handleReset() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-        startTime: "",
-        endTime: "",
-      };
-      this.selectDate = null;
-      this.getDataList();
-    },
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.searchForm.startTime = v[0];
-        this.searchForm.endTime = v[1];
-      } else {
-        this.searchForm.startTime = "";
-        this.searchForm.endTime = "";
-      }
-    },
-    getDataList() {
-      this.loading = true;
-      API_Member.getMemberReview(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          API_Member.replyMemberReview(this.form.id, this.form).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("回复成功");
-              this.getDataList();
-              this.modalVisible = false;
-            }
-          });
-        }
-      });
-    },
-    detail(v) {
-      this.form.replyImage = [];
-      this.loading = true;
-      API_Member.getMemberInfoReview(v.id).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.form.id = res.result.id;
-          this.content = res.result.content;
-          this.form.reply = res.result.reply;
-          this.replyStatus = res.result.replyStatus;
-          this.image = res.result.images ? (res.result.images || "").split(",") : [];
-          this.form.replyImage = res.result.replyImage ? (res.result.replyImage || "").split(",") : [];
-          this.detailInfo = res.result;
-          this.modalVisible = true;
-          this.modalTitle = "详细";
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
+defineOptions({ name: "memberComment" });
+
+const detailInfo = ref({});
+const image = ref([]);
+const replyStatus = ref(false);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const loading = ref(true);
+const content = ref("");
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  sort: "createTime",
+  order: "desc",
+  startTime: "",
+  endTime: "",
+});
+const selectDate = ref(null);
+const form = reactive({
+  replyImage: [],
+  reply: "",
+});
+const formValidate = {
+  reply: [{ required: true, message: "请输入回复内容", trigger: "blur" }],
 };
+const submitLoading = ref(false);
+const data = ref([]);
+const total = ref(0);
+
+// searchFormRef/tableRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+// formRef：模板 ref 改名避免与顶层变量 form 互相覆盖
+const formRef = ref(null);
+
+onMounted(() => {
+  init();
+});
+
+function init() {
+  getDataList();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 10;
+  getDataList();
+}
+function handleReset() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 10,
+    sort: "createTime",
+    order: "desc",
+    startTime: "",
+    endTime: "",
+  };
+  selectDate.value = null;
+  getDataList();
+}
+function selectDateRange(v) {
+  if (v && v.length === 2) {
+    searchForm.value.startTime = v[0];
+    searchForm.value.endTime = v[1];
+  } else {
+    searchForm.value.startTime = "";
+    searchForm.value.endTime = "";
+  }
+}
+function getDataList() {
+  loading.value = true;
+  API_Member.getMemberReview(searchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      API_Member.replyMemberReview(form.id, form).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("回复成功");
+          getDataList();
+          modalVisible.value = false;
+        }
+      });
+    }
+  });
+}
+function detail(v) {
+  form.replyImage = [];
+  loading.value = true;
+  API_Member.getMemberInfoReview(v.id).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      form.id = res.result.id;
+      content.value = res.result.content;
+      form.reply = res.result.reply;
+      replyStatus.value = res.result.replyStatus;
+      image.value = res.result.images ? (res.result.images || "").split(",") : [];
+      form.replyImage = res.result.replyImage ? (res.result.replyImage || "").split(",") : [];
+      detailInfo.value = res.result;
+      modalVisible.value = true;
+      modalTitle.value = "详细";
+    }
+  });
+}
 </script>
 
 <style lang="scss">

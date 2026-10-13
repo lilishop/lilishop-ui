@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -167,194 +167,193 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
 import * as API_Order from "@/api/order";
 import { unitPrice, customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "after-sale-order",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-        orderSn: "",
-        memberName: "",
-        serviceStatus: "",
-        storeName: "",
-        sn: "",
-        keywords: "",
-      },
-      selectDate: null,
-      data: [],
-      total: 0,
-      currentStatus: "",
-      afterSaleNumData: {},
-    };
-  },
-  computed: {
-    serviceStatusWithCount() {
-      return [
-        { title: "全部", value: "" },
-        {
-          title: `申请售后${this.afterSaleNumData.applyNum ? "(" + this.afterSaleNumData.applyNum + ")" : ""}`,
-          value: "APPLY",
-        },
-        {
-          title: `通过售后${this.afterSaleNumData.passNum ? "(" + this.afterSaleNumData.passNum + ")" : ""}`,
-          value: "PASS",
-        },
-        {
-          title: `拒绝售后${this.afterSaleNumData.refuseNum ? "(" + this.afterSaleNumData.refuseNum + ")" : ""}`,
-          value: "REFUSE",
-        },
-        {
-          title: `待收货${this.afterSaleNumData.buyerReturnNum ? "(" + this.afterSaleNumData.buyerReturnNum + ")" : ""}`,
-          value: "BUYER_RETURN",
-        },
-        {
-          title: `确认收货${this.afterSaleNumData.sellerConfirmNum ? "(" + this.afterSaleNumData.sellerConfirmNum + ")" : ""}`,
-          value: "SELLER_CONFIRM",
-        },
-        {
-          title: `完成售后${this.afterSaleNumData.completeNum ? "(" + this.afterSaleNumData.completeNum + ")" : ""}`,
-          value: "COMPLETE",
-        },
-        {
-          title: `卖家终止售后${this.afterSaleNumData.sellerTerminationNum ? "(" + this.afterSaleNumData.sellerTerminationNum + ")" : ""}`,
-          value: "SELLER_TERMINATION",
-        },
-        {
-          title: `买家取消售后${this.afterSaleNumData.buyerCancelNum ? "(" + this.afterSaleNumData.buyerCancelNum + ")" : ""}`,
-          value: "BUYER_CANCEL",
-        },
-        {
-          title: `等待平台退款${this.afterSaleNumData.waitRefundNum ? "(" + this.afterSaleNumData.waitRefundNum + ")" : ""}`,
-          value: "WAIT_REFUND",
-        },
-      ];
+defineOptions({ name: "after-sale-order" });
+
+// 模板 ref（模板 ref="searchForm" 与 data 同名，改名 searchFormRef 避免互相覆盖）
+const searchFormRef = ref(null);
+// 模板 ref="table"
+const table = ref(null);
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+  orderSn: "",
+  memberName: "",
+  serviceStatus: "",
+  storeName: "",
+  sn: "",
+  keywords: "",
+});
+const selectDate = ref(null);
+const data = ref([]);
+const total = ref(0);
+const currentStatus = ref("");
+const afterSaleNumData = ref({});
+
+const serviceStatusWithCount = computed(() => {
+  return [
+    { title: "全部", value: "" },
+    {
+      title: `申请售后${afterSaleNumData.value.applyNum ? "(" + afterSaleNumData.value.applyNum + ")" : ""}`,
+      value: "APPLY",
     },
-  },
-  methods: {
-    unitPrice,
-    serviceTypeText(type) {
-      const map = {
-        RETURN_MONEY: "退款",
-        RETURN_GOODS: "退货",
-        EXCHANGE_GOODS: "换货",
-      };
-      return map[type] || type || "-";
+    {
+      title: `通过售后${afterSaleNumData.value.passNum ? "(" + afterSaleNumData.value.passNum + ")" : ""}`,
+      value: "PASS",
     },
-    serviceTypeTagType(type) {
-      const map = {
-        RETURN_MONEY: "primary",
-        RETURN_GOODS: "warning",
-        EXCHANGE_GOODS: "success",
-      };
-      return map[type] || "info";
+    {
+      title: `拒绝售后${afterSaleNumData.value.refuseNum ? "(" + afterSaleNumData.value.refuseNum + ")" : ""}`,
+      value: "REFUSE",
     },
-    serviceStatusText(status) {
-      const map = {
-        APPLY: "申请中",
-        PASS: "通过售后",
-        REFUSE: "拒绝售后",
-        BUYER_RETURN: "买家退货，待卖家收货",
-        SELLER_CONFIRM: "卖家确认收货",
-        SELLER_TERMINATION: "卖家终止售后",
-        BUYER_CANCEL: "买家取消售后",
-        COMPLETE: "完成售后",
-        WAIT_REFUND: "待平台退款",
-      };
-      return map[status] || status || "-";
+    {
+      title: `待收货${afterSaleNumData.value.buyerReturnNum ? "(" + afterSaleNumData.value.buyerReturnNum + ")" : ""}`,
+      value: "BUYER_RETURN",
     },
-    serviceStatusTagType(status) {
-      const map = {
-        APPLY: "primary",
-        PASS: "info",
-        REFUSE: "warning",
-        BUYER_RETURN: "warning",
-        SELLER_CONFIRM: "",
-        SELLER_TERMINATION: "success",
-        BUYER_CANCEL: "danger",
-        COMPLETE: "success",
-        WAIT_REFUND: "primary",
-      };
-      return map[status] || "info";
+    {
+      title: `确认收货${afterSaleNumData.value.sellerConfirmNum ? "(" + afterSaleNumData.value.sellerConfirmNum + ")" : ""}`,
+      value: "SELLER_CONFIRM",
     },
-    init() {
-      this.getDataList();
-      this.getAfterSaleNumData();
+    {
+      title: `完成售后${afterSaleNumData.value.completeNum ? "(" + afterSaleNumData.value.completeNum + ")" : ""}`,
+      value: "COMPLETE",
     },
-    changePage() {
-      this.getDataList();
+    {
+      title: `卖家终止售后${afterSaleNumData.value.sellerTerminationNum ? "(" + afterSaleNumData.value.sellerTerminationNum + ")" : ""}`,
+      value: "SELLER_TERMINATION",
     },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
+    {
+      title: `买家取消售后${afterSaleNumData.value.buyerCancelNum ? "(" + afterSaleNumData.value.buyerCancelNum + ")" : ""}`,
+      value: "BUYER_CANCEL",
     },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-      this.getAfterSaleNumData();
+    {
+      title: `等待平台退款${afterSaleNumData.value.waitRefundNum ? "(" + afterSaleNumData.value.waitRefundNum + ")" : ""}`,
+      value: "WAIT_REFUND",
     },
-    selectDateRange(v) {
-      if (v) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
-      }
-    },
-    getDataList() {
-      this.loading = true;
-      API_Order.getAfterSaleOrderPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    getAfterSaleNumData() {
-      const { serviceStatus, ...searchParams } = this.searchForm;
-      API_Order.getAfterSaleNumVO(searchParams).then((res) => {
-        if (res.success) {
-          this.afterSaleNumData = res.result;
-        }
-      });
-    },
-    detail(v) {
-      const sn = v.sn;
-      customRouterPush({
-        name: "after-order-detail",
-        query: { sn: sn },
-      });
-    },
-    onStatusTabClick(tab) {
-      this.serviceStatusClick(tab.paneName);
-    },
-    serviceStatusClick(item) {
-      this.currentStatus = item;
-      if (item === "" || item === undefined) {
-        delete this.searchForm.serviceStatus;
-      } else {
-        this.searchForm.serviceStatus = item;
-      }
-      this.getDataList();
-      this.getAfterSaleNumData();
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  ];
+});
+
+function serviceTypeText(type) {
+  const map = {
+    RETURN_MONEY: "退款",
+    RETURN_GOODS: "退货",
+    EXCHANGE_GOODS: "换货",
+  };
+  return map[type] || type || "-";
+}
+function serviceTypeTagType(type) {
+  const map = {
+    RETURN_MONEY: "primary",
+    RETURN_GOODS: "warning",
+    EXCHANGE_GOODS: "success",
+  };
+  return map[type] || "info";
+}
+function serviceStatusText(status) {
+  const map = {
+    APPLY: "申请中",
+    PASS: "通过售后",
+    REFUSE: "拒绝售后",
+    BUYER_RETURN: "买家退货，待卖家收货",
+    SELLER_CONFIRM: "卖家确认收货",
+    SELLER_TERMINATION: "卖家终止售后",
+    BUYER_CANCEL: "买家取消售后",
+    COMPLETE: "完成售后",
+    WAIT_REFUND: "待平台退款",
+  };
+  return map[status] || status || "-";
+}
+function serviceStatusTagType(status) {
+  const map = {
+    APPLY: "primary",
+    PASS: "info",
+    REFUSE: "warning",
+    BUYER_RETURN: "warning",
+    SELLER_CONFIRM: "",
+    SELLER_TERMINATION: "success",
+    BUYER_CANCEL: "danger",
+    COMPLETE: "success",
+    WAIT_REFUND: "primary",
+  };
+  return map[status] || "info";
+}
+function init() {
+  getDataList();
+  getAfterSaleNumData();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+  getAfterSaleNumData();
+}
+function selectDateRange(v) {
+  if (v) {
+    searchForm.startDate = v[0];
+    searchForm.endDate = v[1];
+  } else {
+    searchForm.startDate = "";
+    searchForm.endDate = "";
+  }
+}
+function getDataList() {
+  loading.value = true;
+  API_Order.getAfterSaleOrderPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function getAfterSaleNumData() {
+  const { serviceStatus, ...searchParams } = searchForm;
+  API_Order.getAfterSaleNumVO(searchParams).then((res) => {
+    if (res.success) {
+      afterSaleNumData.value = res.result;
+    }
+  });
+}
+function detail(v) {
+  const sn = v.sn;
+  customRouterPush({
+    name: "after-order-detail",
+    query: { sn: sn },
+  });
+}
+function onStatusTabClick(tab) {
+  serviceStatusClick(tab.paneName);
+}
+function serviceStatusClick(item) {
+  currentStatus.value = item;
+  if (item === "" || item === undefined) {
+    delete searchForm.serviceStatus;
+  } else {
+    searchForm.serviceStatus = item;
+  }
+  getDataList();
+  getAfterSaleNumData();
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

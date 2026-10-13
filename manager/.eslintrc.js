@@ -25,6 +25,8 @@ module.exports = {
     "vue/multiline-html-element-content-newline":"off",
     "vue/name-property-casing": ["error", "PascalCase"],
     "vue/no-v-html": "off",
+    // 全端已完成 Options API → <script setup> 迁移，防止新代码回退
+    'vue/component-api-style': ['warn', ['script-setup']],
     'accessor-pairs': 2,
     'arrow-spacing': [2, {
       'before': true,

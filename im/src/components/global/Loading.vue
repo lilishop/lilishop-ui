@@ -12,16 +12,15 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Loading',
-  props: {
-    text: {
-      type: String,
-      default: '数据加载中 ...',
-    },
+<script setup>
+defineOptions({ name: 'Loading' })
+
+defineProps({
+  text: {
+    type: String,
+    default: '数据加载中 ...',
   },
-}
+})
 </script>
 <style lang="less" scoped>
 .loading-content {

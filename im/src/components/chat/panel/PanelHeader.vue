@@ -39,75 +39,89 @@
     </div>
   </el-header>
 </template>
-<script>
-export default {
-  props: {
-    data: {
-      type: Object,
-      default: () => {
-        return {
-          talk_type: 0,
-          receiver_id: 0,
-          params: 0,
-          nickname: '',
-        }
-      },
-    },
-    online: {
-      type: Boolean,
-      default: false,
-    },
-    keyboard: {
-      type: [Boolean, Number],
-      default: false,
-    },
-  },
-  data() {
-    return {
-      params: {
+<script setup>
+import { reactive, ref, watch } from 'vue'
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => {
+      return {
         talk_type: 0,
         receiver_id: 0,
         params: 0,
         nickname: '',
-      },
-      isOnline: false,
-      isKeyboard: false,
-      groupNum: 0,
-    }
-  },
-  created() {
-    this.setParamsData(this.data)
-    this.setOnlineStatus(this.online)
-  },
-  watch: {
-    data(value) {
-      this.setParamsData(value)
-    },
-    online(value) {
-      this.setOnlineStatus(value)
-    },
-    keyboard(value) {
-      this.isKeyboard = value
-      setTimeout(() => {
-        this.isKeyboard = false
-      }, 2000)
+      }
     },
   },
-  methods: {
-    setOnlineStatus(value) {
-      this.isOnline = value
-    },
-    setParamsData(object) {
-      Object.assign(this.params, object)
-    },
-    setGroupNum(value) {
-      this.groupNum = value
-    },
-    triggerEvent(event_name) {
-      this.$emit('event', event_name)
-    },
+  online: {
+    type: Boolean,
+    default: false,
   },
+  keyboard: {
+    type: [Boolean, Number],
+    default: false,
+  },
+})
+
+const emit = defineEmits(['event'])
+
+const params = reactive({
+  talk_type: 0,
+  receiver_id: 0,
+  params: 0,
+  nickname: '',
+})
+const isOnline = ref(false)
+const isKeyboard = ref(false)
+const groupNum = ref(0)
+
+// created 钩子
+setParamsData(props.data)
+setOnlineStatus(props.online)
+
+watch(
+  () => props.data,
+  (value) => {
+    setParamsData(value)
+  }
+)
+
+watch(
+  () => props.online,
+  (value) => {
+    setOnlineStatus(value)
+  }
+)
+
+watch(
+  () => props.keyboard,
+  (value) => {
+    isKeyboard.value = value
+    setTimeout(() => {
+      isKeyboard.value = false
+    }, 2000)
+  }
+)
+
+function setOnlineStatus(value) {
+  isOnline.value = value
 }
+
+function setParamsData(object) {
+  Object.assign(params, object)
+}
+
+function setGroupNum(value) {
+  groupNum.value = value
+}
+
+function triggerEvent(event_name) {
+  emit('event', event_name)
+}
+
+// 父组件 TalkPanel 通过 $refs.panelHeader.setGroupNum() 访问
+defineExpose({ setGroupNum })
 </script>
 <style lang="less" scoped>
 #panel-header {

@@ -15,24 +15,16 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue";
 import { cubeWrapperStyle, cubeImgStyle, cubeGapStyle } from "./cubeStyle";
 
-export default {
-  title: "左二右一",
-  props: ["res"],
-  computed: {
-    wrapperStyle() {
-      return cubeWrapperStyle(this.res);
-    },
-    imgStyle() {
-      return cubeImgStyle(this.res);
-    },
-    gapStyle() {
-      return cubeGapStyle(this.res);
-    },
-  },
-};
+defineOptions({ title: "左二右一" });
+const props = defineProps(["res"]);
+
+const wrapperStyle = computed(() => cubeWrapperStyle(props.res));
+const imgStyle = computed(() => cubeImgStyle(props.res));
+const gapStyle = computed(() => cubeGapStyle(props.res));
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

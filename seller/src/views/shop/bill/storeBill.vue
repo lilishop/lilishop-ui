@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -90,120 +90,121 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { onBeforeRouteLeave, useRoute } from "vue-router";
 import * as API_Shop from "@/api/shops";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "storeBill",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-      },
-      data: [],
-      total: 0,
-      currentStatus: "ALL",
-    };
-  },
-  computed: {
-    billStatusTabs() {
-      return [
-        { title: "全部", value: "ALL" },
-        { title: "已出账", value: "OUT" },
-        { title: "已对账", value: "CHECK" },
-        { title: "已完成", value: "COMPLETE" },
-      ];
-    },
-  },
-  methods: {
-    onStatusTabClick(tab) {
-      this.billStatusClick(tab.paneName);
-    },
-    billStatusClick(name) {
-      if (name === "ALL" || name === "" || name === undefined || name === null) {
-        delete this.searchForm.billStatus;
-        this.currentStatus = "ALL";
-      } else {
-        this.searchForm.billStatus = name;
-        this.currentStatus = name;
-      }
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.getDataList();
-    },
-    handleReset() {
-      const { billStatus } = this.searchForm;
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-      };
-      if (this.currentStatus !== "ALL") {
-        this.searchForm.billStatus = billStatus;
-      }
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      API_Shop.getBillPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    detail(v) {
-      this.$filters.customRouterPush({
-        name: "bill-detail",
-        query: { id: v.id },
-      });
-    },
-    handleExport() {
-      const params = { ...this.searchForm };
-      API_Finance.exportBillList(params).then((blob) => {
-        downloadBlob(blob, "结算单列表.xlsx");
-      });
-    },
-  },
-  mounted() {
-    const billStatus = this.$route.query.billStatus;
-    if (billStatus) {
-      this.currentStatus = billStatus;
-      this.searchForm.billStatus = billStatus;
+defineOptions({ name: "storeBill" });
+
+const route = useRoute();
+
+const searchFormRef = ref(null);
+
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+});
+const data = ref([]);
+const total = ref(0);
+const currentStatus = ref("ALL");
+
+const billStatusTabs = computed(() => {
+  return [
+    { title: "全部", value: "ALL" },
+    { title: "已出账", value: "OUT" },
+    { title: "已对账", value: "CHECK" },
+    { title: "已完成", value: "COMPLETE" },
+  ];
+});
+
+function onStatusTabClick(tab) {
+  billStatusClick(tab.paneName);
+}
+function billStatusClick(name) {
+  if (name === "ALL" || name === "" || name === undefined || name === null) {
+    delete searchForm.value.billStatus;
+    currentStatus.value = "ALL";
+  } else {
+    searchForm.value.billStatus = name;
+    currentStatus.value = name;
+  }
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function init() {
+  getDataList();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  searchForm.value.pageSize = 10;
+  getDataList();
+}
+function handleReset() {
+  const { billStatus } = searchForm.value;
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 10,
+    sort: "createTime",
+    order: "desc",
+    startDate: "",
+    endDate: "",
+  };
+  if (currentStatus.value !== "ALL") {
+    searchForm.value.billStatus = billStatus;
+  }
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  API_Shop.getBillPage(searchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
     }
-    this.init();
-  },
-  beforeRouteLeave(to, from, next) {
-    from.meta.keepAlive = false;
-    next();
-  },
-};
+  });
+}
+function detail(v) {
+  customRouterPush({
+    name: "bill-detail",
+    query: { id: v.id },
+  });
+}
+function handleExport() {
+  const params = { ...searchForm.value };
+  API_Finance.exportBillList(params).then((blob) => {
+    downloadBlob(blob, "结算单列表.xlsx");
+  });
+}
+
+onMounted(() => {
+  const billStatus = route.query.billStatus;
+  if (billStatus) {
+    currentStatus.value = billStatus;
+    searchForm.value.billStatus = billStatus;
+  }
+  init();
+});
+
+onBeforeRouteLeave((to, from) => {
+  from.meta.keepAlive = false;
+});
 </script>
 
 <style lang="scss" scoped>

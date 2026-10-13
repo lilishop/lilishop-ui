@@ -11,29 +11,25 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue';
 import ModelFormItem from './ModelFormItem.vue';
-export default {
-  name: 'modelForm',
-  components: {
-    ModelFormItem
-  },
-  props: ['data'],
-  computed: {
-    renderList() {
-      const list = this.data?.list || [];
-      return list.filter(
-        (el) => el && el.key && !this.isBuiltinModule(el.type)
-      );
-    }
-  },
-  methods: {
-    isBuiltinModule(type) {
-      // 顶部广告、快捷导航由 Index 页单独渲染
-      return type === 'topAdvert' || type === 'navBar';
-    }
-  }
-};
+
+defineOptions({ name: 'modelForm' });
+
+const props = defineProps(['data']);
+
+const renderList = computed(() => {
+  const list = props.data?.list || [];
+  return list.filter(
+    (el) => el && el.key && !isBuiltinModule(el.type)
+  );
+});
+
+function isBuiltinModule(type) {
+  // 顶部广告、快捷导航由 Index 页单独渲染
+  return type === 'topAdvert' || type === 'navBar';
+}
 </script>
 <style lang="scss" scoped>
 .model-form {

@@ -44,24 +44,19 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "forYour",
-  data() {
-    return {
-      current: "",
-    };
-  },
-  props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
+<script setup>
+import { ref } from 'vue'
 
-  mounted() {},
-  methods: {},
-};
+defineOptions({ name: 'forYour' })
+
+defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
+const current = ref('')
 </script>
 
 <style scoped lang="scss">

@@ -31,45 +31,43 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
 import { getWxChannelsThirdCategory } from "@/api/index";
 
-export default {
-  name: "WxChannelsCategoryTab",
-  data() {
-    return {
-      forceRefresh: false,
-      loading: false,
-      data: [],
-    };
-  },
-  mounted() {
-    this.loadThirdCategories();
-  },
-  methods: {
-    qualificationLabel(val) {
-      const map = { 0: "不需要", 1: "必填", 2: "选填" };
-      return map[val] || "-";
-    },
-    qualificationTagType(val) {
-      if (val === 1) return "danger";
-      if (val === 2) return "warning";
-      return "success";
-    },
-    loadThirdCategories() {
-      this.loading = true;
-      getWxChannelsThirdCategory({ forceRefresh: !!this.forceRefresh })
-        .then((res) => {
-          if (res && res.success) {
-            this.data = Array.isArray(res.result) ? res.result : [];
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+defineOptions({ name: "WxChannelsCategoryTab" });
+
+const forceRefresh = ref(false);
+const loading = ref(false);
+const data = ref([]);
+
+function qualificationLabel(val) {
+  const map = { 0: "不需要", 1: "必填", 2: "选填" };
+  return map[val] || "-";
+}
+
+function qualificationTagType(val) {
+  if (val === 1) return "danger";
+  if (val === 2) return "warning";
+  return "success";
+}
+
+function loadThirdCategories() {
+  loading.value = true;
+  getWxChannelsThirdCategory({ forceRefresh: !!forceRefresh.value })
+    .then((res) => {
+      if (res && res.success) {
+        data.value = Array.isArray(res.result) ? res.result : [];
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+onMounted(() => {
+  loadThirdCategories();
+});
 </script>
 
 <style scoped lang="scss">

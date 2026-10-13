@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+    <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
 
       <el-form-item label="平台" >
         <el-radio-group v-model="formValidate.type">
@@ -81,79 +81,78 @@
     </el-form>
   </div>
 </template>
-<script>
+<script setup>
+import { reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import {setSetting} from "@/api/index";
 import {handleSubmit} from "./validate";
 
-export default {
-  data() {
-    return {
-      ruleValidate: {}, // 验证规则
-      formValidate: { // 表单数据
-        type: "",
-        aliyunOSSAccessKeyId: "",
-        aliyunOSSAccessKeySecret: "",
-        aliyunOSSBucketName: "",
-        aliyunOSSEndPoint: "",
-        m_endpoint: "",
-        m_accessKey: "",
-        m_secretKey: "",
-        m_bucketName: "",
-        m_frontUrl: "",
-        huaweicloudOBSAccessKey: "",
-        huaweicloudOBSSecretKey: "",
-        huaweicloudOBSEndPoint: "",
-        huaweicloudOBSBucketName: "",
-        tencentCOSSecretId: "",
-        tencentCOSSecretKey: "",
-        tencentCOSRegion: "",
-        tencentCOSBucket: "",
-        tencentCOSEndPoint: "",
-      },
-      result:""
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    // 保存
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    // 保存设置
-    setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    // 实例化数据
-    init() {
-      this.result = JSON.parse(this.res);
+const props = defineProps(["res", "type"]);
 
-      this.formValidate = { ...this.result };
-      Object.keys(this.formValidate).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-        ];
-      });
-    },
-  },
-};
+const ruleValidate = reactive({}); // 验证规则
+const formValidate = ref({ // 表单数据
+  type: "",
+  aliyunOSSAccessKeyId: "",
+  aliyunOSSAccessKeySecret: "",
+  aliyunOSSBucketName: "",
+  aliyunOSSEndPoint: "",
+  m_endpoint: "",
+  m_accessKey: "",
+  m_secretKey: "",
+  m_bucketName: "",
+  m_frontUrl: "",
+  huaweicloudOBSAccessKey: "",
+  huaweicloudOBSSecretKey: "",
+  huaweicloudOBSEndPoint: "",
+  huaweicloudOBSBucketName: "",
+  tencentCOSSecretId: "",
+  tencentCOSSecretKey: "",
+  tencentCOSRegion: "",
+  tencentCOSBucket: "",
+  tencentCOSEndPoint: "",
+});
+const result = ref("");
+
+// 模板 ref：与 data 的 formValidate 同名会互相覆盖，改名 formValidateRef
+const formValidateRef = ref(null);
+
+// 保存
+function submit(name) {
+  // handleSubmit 依赖 vm.$refs，构造 $refs 映射保持其签名与行为不变
+  handleSubmit({ $refs: { [name]: formValidateRef.value } }, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+// 保存设置
+function setupSetting() {
+  setSetting(props.type, formValidate.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+// 实例化数据
+function init() {
+  result.value = JSON.parse(props.res);
+
+  formValidate.value = { ...result.value };
+  Object.keys(formValidate.value).forEach((item) => {
+    ruleValidate[item] = [
+      {
+        required: true,
+        message: "请填写必填项",
+        trigger: "blur",
+      },
+    ];
+  });
+}
+
+// 原 created 钩子
+init();
 </script>
 
 <style lang="scss" scoped>

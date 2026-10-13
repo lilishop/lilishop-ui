@@ -12,19 +12,19 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { Platform } from "@element-plus/icons-vue";
+import i18n from "@/locale";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "langSwitch",
-  components: { Platform },
-  methods: {
-    langChange(v) {
-      this.$i18n.locale = v;
-      this.$store.commit("switchLang", v);
-    },
-  },
-};
+defineOptions({ name: "langSwitch" });
+
+const appStore = useAppStore();
+
+function langChange(v) {
+  i18n.global.locale = v;
+  appStore.switchLang(v);
+}
 </script>
 
 <style lang="scss" scoped>

@@ -12,13 +12,14 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'PayDone',
-  mounted () {
-    document.querySelector('.pay-done').style.height = window.innerHeight + 'px'
-  }
-};
+<script setup>
+import { onMounted } from "vue";
+
+defineOptions({ name: 'PayDone' });
+
+onMounted(() => {
+  document.querySelector('.pay-done').style.height = window.innerHeight + 'px'
+});
 </script>
 
 <style scoped lang='scss'>

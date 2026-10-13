@@ -1,5 +1,5 @@
 <template>
-  <div class="navbar" :class="{'small-search-box': useClass == 'fixed-show'}">
+  <div class="navbar" ref="rootRef" :class="{'small-search-box': useClass == 'fixed-show'}">
     <template v-if="useClass == 'fixed-show'">
       <div class="search search-embedded">
         <el-input
@@ -30,7 +30,7 @@
     <template v-else>
       <div class="container width_1200_auto flex flex-a-c">
         <img
-          :src="$store.state.logoImg"
+          :src="logoImg"
           v-if="showLogo"
           class="logo-img"
           alt=""
@@ -80,11 +80,45 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import storage from '@/plugins/storage.js'
 import { goodsList, hotWords } from '@/api/goods.js'
 import { Search as SearchIcon } from '@element-plus/icons-vue'
 import SearchSuggest from '@/components/SearchSuggest.vue'
+import { useAppStore } from '@/stores/app'
+
+defineOptions({ name: 'search' })
+
+const props = defineProps({
+  showTag: {
+    type: Boolean,
+    default: true
+  },
+  showLogo: {
+    type: Boolean,
+    default: true
+  },
+  storeId: {
+    type: String,
+    default: ""
+  },
+  hover: {
+    type: Boolean,
+    default: false
+  },
+  useClass: {
+    type: null,
+    default: ''
+  }
+})
+
+const emit = defineEmits(['search'])
+
+const route = useRoute()
+const router = useRouter()
+const appStore = useAppStore()
 
 const HISTORY_KEY = 'buyerSearchHistory'
 const HISTORY_LIMIT = 10
@@ -112,179 +146,166 @@ function parseHotWords(raw) {
   return raw.split(',').map((item) => item.trim()).filter(Boolean)
 }
 
-export default {
-  name: 'search',
-  components: { SearchIcon, SearchSuggest },
-  props: {
-    showTag: {
-      type: Boolean,
-      default: true
-    },
-    showLogo: {
-      type: Boolean,
-      default: true
-    },
-    storeId: {
-      type: String,
-      default: ""
-    },
-    hover: {
-      type: Boolean,
-      default: false
-    },
-    useClass:{
-      type:null,
-      default:''
-    }
-  },
-  data() {
-    return {
-      searchData: '',
-      history: [],
-      panelVisible: false,
-      suggestions: [],
-      suggesting: false,
-      suggestTimer: null,
-      suggestSeq: 0,
-    };
-  },
-  methods: {
-    selectTags(item) {
-      this.searchData = item;
-      this.search();
-    },
-    remember(keyword) {
-      const next = [keyword, ...this.history.filter((item) => item !== keyword)].slice(0, HISTORY_LIMIT)
-      this.history = next
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(next))
-    },
-    clearHistory() {
-      this.history = []
-      localStorage.removeItem(HISTORY_KEY)
-    },
-    openPanel() {
-      this.panelVisible = true
-      if (this.trimmedKeyword) this.queueSuggest()
-    },
-    closePanel() {
-      this.panelVisible = false
-    },
-    onDocumentClick(event) {
-      if (this.$el && !this.$el.contains(event.target)) this.closePanel()
-    },
-    queueSuggest() {
-      this.panelVisible = true
-      clearTimeout(this.suggestTimer)
-      const keyword = this.trimmedKeyword
-      if (!keyword) {
-        this.suggestions = []
-        this.suggesting = false
-        return
-      }
-      this.suggesting = true
-      this.suggestTimer = setTimeout(() => this.fetchSuggest(keyword), 300)
-    },
-    fetchSuggest(keyword) {
-      const seq = ++this.suggestSeq
-      const params = { keyword, pageNumber: 1, pageSize: 8 }
-      if (this.storeId) params.storeId = this.storeId
-      goodsList(params).then((res) => {
-        if (seq !== this.suggestSeq || keyword !== this.trimmedKeyword) return
-        const records = res && res.success ? (res.result.records || []) : []
-        const seen = new Set()
-        const names = []
-        this.promotionTags.forEach((word) => {
-          if (word && String(word).toLowerCase().includes(keyword.toLowerCase()) && !seen.has(word)) {
-            seen.add(word)
-            names.push(word)
-          }
-        })
-        records.forEach((item) => {
-          const name = item && item.goodsName
-          if (name && !seen.has(name)) {
-            seen.add(name)
-            names.push(name)
-          }
-        })
-        this.suggestions = names.slice(0, 8)
-      }).catch(() => {
-        if (seq === this.suggestSeq) this.suggestions = []
-      }).finally(() => {
-        if (seq === this.suggestSeq) this.suggesting = false
-      })
-    },
-    search () {
-      const keyword = this.trimmedKeyword
-      this.searchData = keyword
-      this.closePanel()
-      if (keyword) this.remember(keyword)
-      const url = this.$route.path;
-      if(url == '/goodsList'){
-        this.$emit('search', keyword)
-      }else{
-        const pushData = {
-          path:'/goodsList',
-          query: { keyword },
-        }
-        if(this.storeId) pushData.query.storeId = this.storeId
+const rootRef = ref(null)
+const searchData = ref('')
+const history = ref([])
+const panelVisible = ref(false)
+const suggestions = ref([])
+const suggesting = ref(false)
+let suggestTimer = null
+let suggestSeq = 0
 
-        this.$router.push(pushData);
-      }
-    },
-    searchStore() {
-      this.$emit('search', this.trimmedKeyword)
-    },
-    applyHotWords(result) {
-      const list = parseHotWords(result)
-      this.$store.commit('SET_HOTWORDS', list)
-      storage.setItem('hotWordsList', JSON.stringify(list))
-    },
-    loadHotWords() {
-      hotWords({ count: 5 }).then((res) => {
-        if (res.success && res.result) this.applyHotWords(res.result)
-      }).catch(() => {
-        // 热词为可选数据，失败时沿用缓存或默认热词
-      })
-      storage.setItem('hotWordsReloadTime', new Date().getTime())
-    }
-  },
-  computed: {
-    trimmedKeyword() {
-      return (this.searchData || '').trim()
-    },
-    promotionTags() {
-      return parseHotWords(this.$store.state.hotWordsList)
-    },
-    showPanel() {
-      if (!this.panelVisible) return false
-      if (this.trimmedKeyword) return true
-      return this.history.length > 0 || this.promotionTags.length > 0
-    }
-  },
-  watch: {
-    '$route.query.keyword'(value) {
-      this.searchData = value || ''
-    }
-  },
-  created() {
-    this.searchData = this.$route.query.keyword || ''
-    this.history = readHistory()
+const logoImg = computed(() => appStore.logoImg)
 
-    if (!this.hover) {
-      const reloadTime = storage.getItem('hotWordsReloadTime')
-      const time = new Date().getTime() - 5 * 60 * 1000
-      if (!reloadTime || time > reloadTime) this.loadHotWords()
-    }
-  },
-  mounted() {
-    this.onDocumentClick = this.onDocumentClick.bind(this)
-    document.addEventListener('click', this.onDocumentClick)
-  },
-  beforeUnmount() {
-    clearTimeout(this.suggestTimer)
-    document.removeEventListener('click', this.onDocumentClick)
+const trimmedKeyword = computed(() => {
+  return (searchData.value || '').trim()
+})
+
+const promotionTags = computed(() => {
+  return parseHotWords(appStore.hotWordsList)
+})
+
+const showPanel = computed(() => {
+  if (!panelVisible.value) return false
+  if (trimmedKeyword.value) return true
+  return history.value.length > 0 || promotionTags.value.length > 0
+})
+
+watch(
+  () => route.query.keyword,
+  (value) => {
+    searchData.value = value || ''
   }
-};
+)
+
+function selectTags(item) {
+  searchData.value = item
+  search()
+}
+
+function remember(keyword) {
+  const next = [keyword, ...history.value.filter((item) => item !== keyword)].slice(0, HISTORY_LIMIT)
+  history.value = next
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(next))
+}
+
+function clearHistory() {
+  history.value = []
+  localStorage.removeItem(HISTORY_KEY)
+}
+
+function openPanel() {
+  panelVisible.value = true
+  if (trimmedKeyword.value) queueSuggest()
+}
+
+function closePanel() {
+  panelVisible.value = false
+}
+
+function onDocumentClick(event) {
+  if (rootRef.value && !rootRef.value.contains(event.target)) closePanel()
+}
+
+function queueSuggest() {
+  panelVisible.value = true
+  clearTimeout(suggestTimer)
+  const keyword = trimmedKeyword.value
+  if (!keyword) {
+    suggestions.value = []
+    suggesting.value = false
+    return
+  }
+  suggesting.value = true
+  suggestTimer = setTimeout(() => fetchSuggest(keyword), 300)
+}
+
+function fetchSuggest(keyword) {
+  const seq = ++suggestSeq
+  const params = { keyword, pageNumber: 1, pageSize: 8 }
+  if (props.storeId) params.storeId = props.storeId
+  goodsList(params).then((res) => {
+    if (seq !== suggestSeq || keyword !== trimmedKeyword.value) return
+    const records = res && res.success ? (res.result.records || []) : []
+    const seen = new Set()
+    const names = []
+    promotionTags.value.forEach((word) => {
+      if (word && String(word).toLowerCase().includes(keyword.toLowerCase()) && !seen.has(word)) {
+        seen.add(word)
+        names.push(word)
+      }
+    })
+    records.forEach((item) => {
+      const name = item && item.goodsName
+      if (name && !seen.has(name)) {
+        seen.add(name)
+        names.push(name)
+      }
+    })
+    suggestions.value = names.slice(0, 8)
+  }).catch(() => {
+    if (seq === suggestSeq) suggestions.value = []
+  }).finally(() => {
+    if (seq === suggestSeq) suggesting.value = false
+  })
+}
+
+function search() {
+  const keyword = trimmedKeyword.value
+  searchData.value = keyword
+  closePanel()
+  if (keyword) remember(keyword)
+  const url = route.path
+  if (url == '/goodsList') {
+    emit('search', keyword)
+  } else {
+    const pushData = {
+      path: '/goodsList',
+      query: { keyword },
+    }
+    if (props.storeId) pushData.query.storeId = props.storeId
+
+    router.push(pushData)
+  }
+}
+
+function searchStore() {
+  emit('search', trimmedKeyword.value)
+}
+
+function applyHotWords(result) {
+  const list = parseHotWords(result)
+  appStore.setHotWords(list)
+  storage.setItem('hotWordsList', JSON.stringify(list))
+}
+
+function loadHotWords() {
+  hotWords({ count: 5 }).then((res) => {
+    if (res.success && res.result) applyHotWords(res.result)
+  }).catch(() => {
+    // 热词为可选数据，失败时沿用缓存或默认热词
+  })
+  storage.setItem('hotWordsReloadTime', new Date().getTime())
+}
+
+// 初始化（原 created 钩子逻辑）
+searchData.value = route.query.keyword || ''
+history.value = readHistory()
+
+if (!props.hover) {
+  const reloadTime = storage.getItem('hotWordsReloadTime')
+  const time = new Date().getTime() - 5 * 60 * 1000
+  if (!reloadTime || time > reloadTime) loadHotWords()
+}
+
+onMounted(() => {
+  document.addEventListener('click', onDocumentClick)
+})
+
+onUnmounted(() => {
+  clearTimeout(suggestTimer)
+  document.removeEventListener('click', onDocumentClick)
+})
 </script>
 <style scoped lang="scss">
 .navbar {

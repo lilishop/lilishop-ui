@@ -30,119 +30,119 @@
 </template>
 
 <script>
-import { Message } from "@/utils/message";
-import Search from "@/components/Search";
-
-import ShowGoods from "@/components/goodsDetail/ShowGoods";
-import empty from "@/components/empty/Main";
-import ShowGoodsDetail from "@/components/goodsDetail/ShowGoodsDetail";
-import { goodsSkuDetail } from "@/api/goods";
-import { getGoodsDistribution } from "@/api/member";
 export default {
   name: "GoodsDetail",
   beforeRouteEnter (to, from, next) {
     window.scrollTo(0, 0);
     next();
   },
-  created () {
-    this.getGoodsDetail();
-  },
-  data () {
-    return {
-      goodsMsg: {}, // 商品信息
-      isLoading: false, // 加载状态
-      categoryBar: [], // 分类
-      takeDownSale:false, // 是否下架
-
-    };
-  },
-  methods: {
-    // 跳转首页或商品页面
-    target(url){
-      this.$router.push({path: url})
-
-    },
-    // 点击规格
-    targetClickSku (val) {
-      this.getGoodsDetail(val);
-    },
-    // 获取商品详情
-    getGoodsDetail (val) {
-      this.isLoading = true;
-      const params = val || this.$route.query;
-
-      // 分销员id
-      let distributionId =
-        params && params.distributionId
-          ? params.distributionId
-          : this.Cookies.getItem("distributionId");
-      // 如果有分销信息
-      if (distributionId) {
-        // 先存储
-        this.Cookies.setItem("distributionId", params.distributionId);
-        let _this = this;
-        // 绑定关系
-        getGoodsDistribution(params.distributionId).then((res) => {
-          // 绑定成功，则清除关系
-          if (res.success) {
-            _this.Cookies.removeItem("distributionId");
-          }
-        });
-      }
-
-      goodsSkuDetail(params)
-        .then((res) => {
-          this.isLoading = false;
-          if (res.success) {
-
-            const result = res.result;
-            const cateName = res.result.categoryName;
-            const cateId = result.data.categoryPath.split(",");
-            const cateArr = [];
-            cateId.forEach((e, index) => {
-              // 插入分类id和name
-              cateArr.push({
-                id: e,
-                name: cateName ? cateName[index] : "",
-              });
-            });
-            this.categoryBar = cateArr;
-            this["goodsMsg"] = res.result;
-            if (!this.goodsMsg.data.intro) {
-              this.goodsMsg.data.intro = ''
-            }
-          } else {
-            Message.error(res.message);
-            this.isLoading = false
-          }
-        })
-        .catch((e) => {
-          this.isLoading = false
-          if(e.code === 11001){
-            this.takeDownSale = true
-          }
-        });
-    },
-    goGoodsList (currIndex) {
-      // 跳转商品列表
-      const arr = [];
-      this.categoryBar.forEach((e, index) => {
-        if (index <= currIndex) {
-          arr.push(e.id);
-        }
-      });
-      return {
-        path: "/goodsList",
-        query: { categoryId: arr.toString() },
-      };
-    },
-  },
-  watch: {},
-  components: { Search,
-    ShowGoods,
-    ShowGoodsDetail,
-    empty },
 };
+</script>
+
+<script setup>
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Message } from "@/utils/message";
+import storage from "@/plugins/storage.js";
+import Search from "@/components/Search";
+import ShowGoods from "@/components/goodsDetail/ShowGoods";
+import empty from "@/components/empty/Main";
+import ShowGoodsDetail from "@/components/goodsDetail/ShowGoodsDetail";
+import { goodsSkuDetail } from "@/api/goods";
+import { getGoodsDistribution } from "@/api/member";
+
+const route = useRoute();
+const router = useRouter();
+
+const goodsMsg = ref({}); // 商品信息
+const isLoading = ref(false); // 加载状态
+const categoryBar = ref([]); // 分类
+const takeDownSale = ref(false); // 是否下架
+
+// 跳转首页或商品页面
+function target(url){
+  router.push({path: url})
+
+}
+
+// 点击规格
+function targetClickSku (val) {
+  getGoodsDetail(val);
+}
+
+// 获取商品详情
+function getGoodsDetail (val) {
+  isLoading.value = true;
+  const params = val || route.query;
+
+  // 分销员id
+  let distributionId =
+    params && params.distributionId
+      ? params.distributionId
+      : storage.getItem("distributionId");
+  // 如果有分销信息
+  if (distributionId) {
+    // 先存储
+    storage.setItem("distributionId", params.distributionId);
+    // 绑定关系
+    getGoodsDistribution(params.distributionId).then((res) => {
+      // 绑定成功，则清除关系
+      if (res.success) {
+        storage.removeItem("distributionId");
+      }
+    });
+  }
+
+  goodsSkuDetail(params)
+    .then((res) => {
+      isLoading.value = false;
+      if (res.success) {
+
+        const result = res.result;
+        const cateName = res.result.categoryName;
+        const cateId = result.data.categoryPath.split(",");
+        const cateArr = [];
+        cateId.forEach((e, index) => {
+          // 插入分类id和name
+          cateArr.push({
+            id: e,
+            name: cateName ? cateName[index] : "",
+          });
+        });
+        categoryBar.value = cateArr;
+        goodsMsg.value = res.result;
+        if (!goodsMsg.value.data.intro) {
+          goodsMsg.value.data.intro = ''
+        }
+      } else {
+        Message.error(res.message);
+        isLoading.value = false
+      }
+    })
+    .catch((e) => {
+      isLoading.value = false
+      if(e.code === 11001){
+        takeDownSale.value = true
+      }
+    });
+}
+
+function goGoodsList (currIndex) {
+  // 跳转商品列表
+  const arr = [];
+  categoryBar.value.forEach((e, index) => {
+    if (index <= currIndex) {
+      arr.push(e.id);
+    }
+  });
+  return {
+    path: "/goodsList",
+    query: { categoryId: arr.toString() },
+  };
+}
+
+// 初始化（原 created 钩子逻辑）
+getGoodsDetail();
 </script>
 <style scoped lang="scss">
 .goods-detail-page {

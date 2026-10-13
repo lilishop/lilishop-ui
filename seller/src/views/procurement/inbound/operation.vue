@@ -100,7 +100,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import {
   getProcurementOrderPage,
@@ -110,153 +112,146 @@ import {
   getProcurementInboundItems,
 } from "@/api/procurement";
 import { procurementStatusText, formatMoney } from "../constants";
+import { Message } from "@/utils/message";
+import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "procurement-inbound-operation",
-  components: { uploadPicThumb },
-  data() {
-    return {
-      readonly: false,
-      submitLoading: false,
-      form: {
-        procurementOrderId: "",
-        certificateImages: [],
-      },
-      orderOptions: [],
-      items: [],
-      detail: {},
-      inboundItems: [],
-      certificateImageList: [],
-    };
-  },
-  computed: {
-    pageTitle() {
-      return this.readonly ? "入库单详情" : "新建入库单";
-    },
-    totalInboundQuantity() {
-      return (this.inboundItems || []).reduce(
-        (sum, item) => sum + (Number(item.inboundQuantity) || 0),
-        0
-      );
-    },
-  },
-  mounted() {
-    this.readonly = this.$route.query.readonly === "1";
-    if (this.$route.query.id) {
-      this.loadInboundDetail(this.$route.query.id);
-    } else {
-      this.loadPendingOrders();
-      if (this.$route.query.procurementOrderId) {
-        this.form.procurementOrderId = this.$route.query.procurementOrderId;
-        this.onOrderChange(this.$route.query.procurementOrderId);
-      }
+defineOptions({ name: "procurement-inbound-operation" });
+
+const route = useRoute();
+
+const readonly = ref(false);
+const submitLoading = ref(false);
+const form = reactive({
+  procurementOrderId: "",
+  certificateImages: [],
+});
+const orderOptions = ref([]);
+const items = ref([]);
+const detail = ref({});
+const inboundItems = ref([]);
+const certificateImageList = ref([]);
+
+const pageTitle = computed(() => (readonly.value ? "入库单详情" : "新建入库单"));
+const totalInboundQuantity = computed(() =>
+  (inboundItems.value || []).reduce(
+    (sum, item) => sum + (Number(item.inboundQuantity) || 0),
+    0
+  )
+);
+
+onMounted(() => {
+  readonly.value = route.query.readonly === "1";
+  if (route.query.id) {
+    loadInboundDetail(route.query.id);
+  } else {
+    loadPendingOrders();
+    if (route.query.procurementOrderId) {
+      form.procurementOrderId = route.query.procurementOrderId;
+      onOrderChange(route.query.procurementOrderId);
     }
-  },
-  methods: {
-    procurementStatusText,
-    formatMoney,
-    remainQty(row) {
-      return (row.quantity || 0) - (row.receivedQuantity || 0);
-    },
-    onInboundQtyBlur(row) {
-      const max = this.remainQty(row);
-      const val = parseInt(row.inboundQuantity, 10);
-      if (Number.isNaN(val) || val < 0) {
-        row.inboundQuantity = 0;
-      } else if (val > max) {
-        row.inboundQuantity = max;
-      } else {
-        row.inboundQuantity = val;
+  }
+});
+
+function remainQty(row) {
+  return (row.quantity || 0) - (row.receivedQuantity || 0);
+}
+function onInboundQtyBlur(row) {
+  const max = remainQty(row);
+  const val = parseInt(row.inboundQuantity, 10);
+  if (Number.isNaN(val) || val < 0) {
+    row.inboundQuantity = 0;
+  } else if (val > max) {
+    row.inboundQuantity = max;
+  } else {
+    row.inboundQuantity = val;
+  }
+}
+function loadPendingOrders() {
+  getProcurementOrderPage({
+    pageNumber: 1,
+    pageSize: 100,
+    status: "",
+  }).then((res) => {
+    if (res.success) {
+      orderOptions.value = (res.result.records || []).filter((o) =>
+        ["PENDING_INBOUND", "PARTIAL_INBOUND"].includes(o.status)
+      );
+    }
+  });
+}
+function onOrderChange(orderId) {
+  if (!orderId) {
+    items.value = [];
+    return;
+  }
+  getProcurementOrderDetail(orderId).then((res) => {
+    if (res.success && res.result) {
+      items.value = (res.result.items || [])
+        .filter((item) => remainQty(item) > 0)
+        .map((item) => ({
+          ...item,
+          procurementOrderItemId: item.id,
+          inboundQuantity: remainQty(item),
+        }));
+    }
+  });
+}
+function loadInboundDetail(id) {
+  getProcurementInboundDetail(id).then((res) => {
+    if (res.success) {
+      detail.value = res.result || {};
+      certificateImageList.value = parseCertificateImages(detail.value.certificateImages);
+    }
+  });
+  getProcurementInboundItems(id).then((res) => {
+    if (res.success) inboundItems.value = res.result || [];
+  });
+}
+function parseCertificateImages(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  return String(val)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+function handleSubmit() {
+  if (!form.procurementOrderId) {
+    Message.warning("请选择采购单");
+    return;
+  }
+  const validItems = items.value.filter((item) => item.inboundQuantity > 0);
+  if (!validItems.length) {
+    Message.warning("请填写本次入库数量");
+    return;
+  }
+  submitLoading.value = true;
+  createProcurementInbound({
+    procurementOrderId: form.procurementOrderId,
+    certificateImages: Array.isArray(form.certificateImages)
+      ? form.certificateImages.join(",")
+      : form.certificateImages || "",
+    items: validItems.map((item) => ({
+      procurementOrderItemId: item.procurementOrderItemId || item.id,
+      goodsId: item.goodsId,
+      skuId: item.skuId,
+      goodsName: item.goodsName,
+      inboundQuantity: item.inboundQuantity,
+    })),
+  })
+    .then((res) => {
+      if (res.success) {
+        Message.success("入库成功");
+        goBack();
       }
-    },
-    loadPendingOrders() {
-      getProcurementOrderPage({
-        pageNumber: 1,
-        pageSize: 100,
-        status: "",
-      }).then((res) => {
-        if (res.success) {
-          this.orderOptions = (res.result.records || []).filter((o) =>
-            ["PENDING_INBOUND", "PARTIAL_INBOUND"].includes(o.status)
-          );
-        }
-      });
-    },
-    onOrderChange(orderId) {
-      if (!orderId) {
-        this.items = [];
-        return;
-      }
-      getProcurementOrderDetail(orderId).then((res) => {
-        if (res.success && res.result) {
-          this.items = (res.result.items || [])
-            .filter((item) => this.remainQty(item) > 0)
-            .map((item) => ({
-              ...item,
-              procurementOrderItemId: item.id,
-              inboundQuantity: this.remainQty(item),
-            }));
-        }
-      });
-    },
-    loadInboundDetail(id) {
-      getProcurementInboundDetail(id).then((res) => {
-        if (res.success) {
-          this.detail = res.result || {};
-          this.certificateImageList = this.parseCertificateImages(this.detail.certificateImages);
-        }
-      });
-      getProcurementInboundItems(id).then((res) => {
-        if (res.success) this.inboundItems = res.result || [];
-      });
-    },
-    parseCertificateImages(val) {
-      if (!val) return [];
-      if (Array.isArray(val)) return val.filter(Boolean);
-      return String(val)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    },
-    handleSubmit() {
-      if (!this.form.procurementOrderId) {
-        this.$Message.warning("请选择采购单");
-        return;
-      }
-      const validItems = this.items.filter((item) => item.inboundQuantity > 0);
-      if (!validItems.length) {
-        this.$Message.warning("请填写本次入库数量");
-        return;
-      }
-      this.submitLoading = true;
-      createProcurementInbound({
-        procurementOrderId: this.form.procurementOrderId,
-        certificateImages: Array.isArray(this.form.certificateImages)
-          ? this.form.certificateImages.join(",")
-          : this.form.certificateImages || "",
-        items: validItems.map((item) => ({
-          procurementOrderItemId: item.procurementOrderItemId || item.id,
-          goodsId: item.goodsId,
-          skuId: item.skuId,
-          goodsName: item.goodsName,
-          inboundQuantity: item.inboundQuantity,
-        })),
-      })
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("入库成功");
-            this.goBack();
-          }
-        })
-        .finally(() => {
-          this.submitLoading = false;
-        });
-    },
-    goBack() {
-      this.$filters.customRouterPush({ name: "procurementInboundList" });
-    },
-  },
-};
+    })
+    .finally(() => {
+      submitLoading.value = false;
+    });
+}
+function goBack() {
+  customRouterPush({ name: "procurementInboundList" });
+}
 </script>
 
 <style scoped>

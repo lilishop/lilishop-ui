@@ -34,24 +34,18 @@
   </div>
 </template>
 
-<script>
-export default {
-  data () {
-    return {
-      value: null,
-      colors: ['#99A9BF', '#F7BA2A', '#FF9900']
-    }
-  },
-  methods: {
-  },
-  props: {
-    storeInfo: {
-      type: Object,
-      default: null,
-    },
-  },
-}
+<script setup>
+import { ref } from "vue";
 
+defineProps({
+  storeInfo: {
+    type: Object,
+    default: null,
+  },
+});
+
+const value = ref(null);
+const colors = ref(['#99A9BF', '#F7BA2A', '#FF9900']);
 </script>
 
 <style scoped lang="less">

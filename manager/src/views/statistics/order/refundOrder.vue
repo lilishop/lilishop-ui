@@ -75,51 +75,50 @@
 
   </div>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      orderStatusList: { // 订单状态
-        UNDELIVERED: "待发货",
-        UNPAID: "未付款",
-        PAID: "已付款",
-        DELIVERED: "已发货",
-        CANCELLED: "已关闭",
-        COMPLETED: "已完成",
-        TAKE: "已完成",
-      },
-      // 售后类型
-      serviceTypeList: {
-        CANCEL: "取消",
-        RETURN_GOODS: "退货",
-        EXCHANGE_GOODS: "换货",
-        RETURN_MONEY: "退款",
-      },
-      serviceStatusList: {
-        APPLY: "申请售后",
-        PASS: "通过售后",
-        REFUSE: "拒绝售后",
-        BUYER_RETURN: "买家退货，待卖家收货",
-        SELLER_RE_DELIVERY: "商家换货/补发",
-        SELLER_CONFIRM: "卖家确认收货",
-        SELLER_TERMINATION: "卖家终止售后",
-        BUYER_CONFIRM: "买家确认收货",
-        BUYER_CANCEL: "买家取消售后",
-        WAIT_REFUND: "等待平台退款",
-        COMPLETE: "完成售后",
-      },
-    };
-  },
-  props: ["res"],
-  methods: {
-    handleClickGoods(id) {
-      this.$router.push({
-        query: { id },
-        path: "/goods/goods-info/goodsDetail",
-      });
-    },
-  }
-};
+<script setup>
+import { reactive } from "vue";
+import { useRouter } from "vue-router";
+
+defineProps(["res"]);
+
+const router = useRouter();
+
+const orderStatusList = reactive({ // 订单状态
+  UNDELIVERED: "待发货",
+  UNPAID: "未付款",
+  PAID: "已付款",
+  DELIVERED: "已发货",
+  CANCELLED: "已关闭",
+  COMPLETED: "已完成",
+  TAKE: "已完成",
+});
+// 售后类型
+const serviceTypeList = reactive({
+  CANCEL: "取消",
+  RETURN_GOODS: "退货",
+  EXCHANGE_GOODS: "换货",
+  RETURN_MONEY: "退款",
+});
+const serviceStatusList = reactive({
+  APPLY: "申请售后",
+  PASS: "通过售后",
+  REFUSE: "拒绝售后",
+  BUYER_RETURN: "买家退货，待卖家收货",
+  SELLER_RE_DELIVERY: "商家换货/补发",
+  SELLER_CONFIRM: "卖家确认收货",
+  SELLER_TERMINATION: "卖家终止售后",
+  BUYER_CONFIRM: "买家确认收货",
+  BUYER_CANCEL: "买家取消售后",
+  WAIT_REFUND: "等待平台退款",
+  COMPLETE: "完成售后",
+});
+
+function handleClickGoods(id) {
+  router.push({
+    query: { id },
+    path: "/goods/goods-info/goodsDetail",
+  });
+}
 </script>
 <style lang="scss" scoped>
 .shop {

@@ -237,9 +237,12 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
 import { getSetting, setSetting } from "@/api/index";
 import { ElMessage } from "element-plus";
+
+defineOptions({ name: "memberGradeExperienceSetting" });
 
 const RULE_OPTIONS = [
   { ruleKey: "CONSUME", ruleName: "消费" },
@@ -268,176 +271,169 @@ const defaultForm = () => ({
   description: "",
 });
 
-export default {
-  name: "memberGradeExperienceSetting",
-  data() {
-    return {
-      loading: false,
-      submitLoading: false,
-      form: defaultForm(),
+const loading = ref(false);
+const submitLoading = ref(false);
+const form = ref(defaultForm());
+
+function formatInputValue(v) {
+  return v == null ? "" : String(v);
+}
+function getRawInputValue(v) {
+  return v && v.target ? v.target.value : v;
+}
+function updateRuleEnabled(index, enabled) {
+  const item = form.value.items[index] || {};
+  form.value.items[index] = {
+    ...item,
+    enabled: !!enabled,
+  };
+}
+function updateRuleValue(index, v) {
+  const raw = getRawInputValue(v);
+  const next = Number(raw);
+  const item = form.value.items[index] || {};
+  form.value.items[index] = {
+    ...item,
+    value: Number.isFinite(next) ? next : null,
+  };
+}
+function commitRuleValue(index) {
+  const item = form.value.items[index] || {};
+  const next = Number(item.value);
+  let value = 1;
+  if (Number.isFinite(next)) {
+    if (next < 1) value = 1;
+    else if (next > 100) value = 100;
+    else value = Math.floor(next);
+  }
+  form.value.items[index] = {
+    ...item,
+    value,
+  };
+}
+function updateRuleMaxValue(index, v) {
+  const raw = getRawInputValue(v);
+  const item = form.value.items[index] || {};
+  if (raw == null || raw === "") {
+    form.value.items[index] = {
+      ...item,
+      maxValue: null,
     };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    formatInputValue(v) {
-      return v == null ? "" : String(v);
-    },
-    getRawInputValue(v) {
-      return v && v.target ? v.target.value : v;
-    },
-    updateRuleEnabled(index, enabled) {
-      const item = this.form.items[index] || {};
-      this.form.items[index] = {
-        ...item,
-        enabled: !!enabled,
-      };
-    },
-    updateRuleValue(index, v) {
-      const raw = this.getRawInputValue(v);
-      const next = Number(raw);
-      const item = this.form.items[index] || {};
-      this.form.items[index] = {
-        ...item,
-        value: Number.isFinite(next) ? next : null,
-      };
-    },
-    commitRuleValue(index) {
-      const item = this.form.items[index] || {};
-      const next = Number(item.value);
-      let value = 1;
-      if (Number.isFinite(next)) {
-        if (next < 1) value = 1;
-        else if (next > 100) value = 100;
-        else value = Math.floor(next);
-      }
-      this.form.items[index] = {
-        ...item,
-        value,
-      };
-    },
-    updateRuleMaxValue(index, v) {
-      const raw = this.getRawInputValue(v);
-      const item = this.form.items[index] || {};
-      if (raw == null || raw === "") {
-        this.form.items[index] = {
-          ...item,
-          maxValue: null,
-        };
-        return;
-      }
-      const next = Number(raw);
-      this.form.items[index] = {
-        ...item,
-        maxValue: Number.isFinite(next) ? next : null,
-      };
-    },
-    commitRuleMaxValue(index) {
-      const item = this.form.items[index] || {};
-      if (item.maxValue == null || item.maxValue === "") {
-        this.form.items[index] = {
-          ...item,
-          maxValue: null,
-        };
-        return;
-      }
-      const next = Number(item.maxValue);
-      this.form.items[index] = {
-        ...item,
-        maxValue: Number.isFinite(next) && next >= 1 ? Math.floor(next) : null,
-      };
-    },
-    normalizeConfig(val) {
-      if (!val) return {};
-      if (typeof val === "string") {
-        try {
-          return JSON.parse(val);
-        } catch (e) {
-          return {};
-        }
-      }
-      if (typeof val === "object") return val;
+    return;
+  }
+  const next = Number(raw);
+  form.value.items[index] = {
+    ...item,
+    maxValue: Number.isFinite(next) ? next : null,
+  };
+}
+function commitRuleMaxValue(index) {
+  const item = form.value.items[index] || {};
+  if (item.maxValue == null || item.maxValue === "") {
+    form.value.items[index] = {
+      ...item,
+      maxValue: null,
+    };
+    return;
+  }
+  const next = Number(item.maxValue);
+  form.value.items[index] = {
+    ...item,
+    maxValue: Number.isFinite(next) && next >= 1 ? Math.floor(next) : null,
+  };
+}
+function normalizeConfig(val) {
+  if (!val) return {};
+  if (typeof val === "string") {
+    try {
+      return JSON.parse(val);
+    } catch (e) {
       return {};
-    },
-    normalizeItems(items) {
-      const map = {};
-      if (Array.isArray(items)) {
-        items.forEach((item) => {
-          if (!item || !item.ruleKey) return;
-          map[item.ruleKey] = item;
-        });
-      }
-      return RULE_OPTIONS.map((rule) => {
-        const hit = map[rule.ruleKey] || {};
-        return {
-          ruleKey: rule.ruleKey,
-          ruleName: hit.ruleName || rule.ruleName,
-          enabled: !!hit.enabled,
-          value: Number(hit.value) > 0 ? Number(hit.value) : 1,
-          maxValue: hit.maxValue == null || hit.maxValue === "" ? null : Number(hit.maxValue),
+    }
+  }
+  if (typeof val === "object") return val;
+  return {};
+}
+function normalizeItems(items) {
+  const map = {};
+  if (Array.isArray(items)) {
+    items.forEach((item) => {
+      if (!item || !item.ruleKey) return;
+      map[item.ruleKey] = item;
+    });
+  }
+  return RULE_OPTIONS.map((rule) => {
+    const hit = map[rule.ruleKey] || {};
+    return {
+      ruleKey: rule.ruleKey,
+      ruleName: hit.ruleName || rule.ruleName,
+      enabled: !!hit.enabled,
+      value: Number(hit.value) > 0 ? Number(hit.value) : 1,
+      maxValue: hit.maxValue == null || hit.maxValue === "" ? null : Number(hit.maxValue),
+    };
+  });
+}
+function loadData() {
+  loading.value = true;
+  getSetting("EXPERIENCE_SETTING")
+    .then((res) => {
+      if (res && res.success) {
+        const cfg = normalizeConfig(res.result);
+        form.value = {
+          items: normalizeItems(cfg.items),
+          description: cfg.description || "",
         };
-      });
-    },
-    loadData() {
-      this.loading = true;
-      getSetting("EXPERIENCE_SETTING")
-        .then((res) => {
-          if (res && res.success) {
-            const cfg = this.normalizeConfig(res.result);
-            this.form = {
-              items: this.normalizeItems(cfg.items),
-              description: cfg.description || "",
-            };
-          } else {
-            this.form = defaultForm();
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    validateForm() {
-      const invalid = this.form.items.find((item) => {
-        const v = Number(item.value);
-        if (!Number.isInteger(v) || v < 1 || v > 100) return true;
-        if (item.maxValue != null && item.maxValue !== "") {
-          const m = Number(item.maxValue);
-          if (!Number.isInteger(m) || m < 1) return true;
-        }
-        return false;
-      });
-      if (invalid) {
-        ElMessage.error("请检查经验值配置，经验值范围为1-100，限额需为正整数");
-        return false;
+      } else {
+        form.value = defaultForm();
       }
-      return true;
-    },
-    submit() {
-      if (!this.validateForm()) return;
-      const payload = {
-        items: this.form.items.map((item) => ({
-          ruleKey: item.ruleKey,
-          ruleName: item.ruleName,
-          enabled: !!item.enabled,
-          value: Number(item.value),
-          maxValue: item.maxValue == null || item.maxValue === "" ? null : Number(item.maxValue),
-        })),
-        description: this.form.description || "",
-      };
-      this.submitLoading = true;
-      setSetting("EXPERIENCE_SETTING", payload)
-        .then((res) => {
-          if (res && res.success) {
-            ElMessage.success("保存成功");
-          }
-        })
-        .finally(() => {
-          this.submitLoading = false;
-        });
-    },
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function validateForm() {
+  const invalid = form.value.items.find((item) => {
+    const v = Number(item.value);
+    if (!Number.isInteger(v) || v < 1 || v > 100) return true;
+    if (item.maxValue != null && item.maxValue !== "") {
+      const m = Number(item.maxValue);
+      if (!Number.isInteger(m) || m < 1) return true;
+    }
+    return false;
+  });
+  if (invalid) {
+    ElMessage.error("请检查经验值配置，经验值范围为1-100，限额需为正整数");
+    return false;
+  }
+  return true;
+}
+function submit() {
+  if (!validateForm()) return;
+  const payload = {
+    items: form.value.items.map((item) => ({
+      ruleKey: item.ruleKey,
+      ruleName: item.ruleName,
+      enabled: !!item.enabled,
+      value: Number(item.value),
+      maxValue: item.maxValue == null || item.maxValue === "" ? null : Number(item.maxValue),
+    })),
+    description: form.value.description || "",
+  };
+  submitLoading.value = true;
+  setSetting("EXPERIENCE_SETTING", payload)
+    .then((res) => {
+      if (res && res.success) {
+        ElMessage.success("保存成功");
+      }
+    })
+    .finally(() => {
+      submitLoading.value = false;
+    });
+}
+
+onMounted(() => {
+  loadData();
+});
 </script>
 
 <style scoped lang="scss">

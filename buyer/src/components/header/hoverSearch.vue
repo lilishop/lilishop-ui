@@ -24,44 +24,40 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import Search from '@/components/Search.vue'
 import cateNav from '@/components/nav/CateNav.vue'
 import { cartCount } from '@/api/cart.js'
 import storage from '@/plugins/storage.js'
 import { ShoppingCart } from '@element-plus/icons-vue'
+import { useAppStore } from '@/stores/app'
 
-export default {
-  components: { ShoppingCart, Search, cateNav },
-  data() {
-    return {
-      userInfo: {}
-    }
-  },
-  computed: {
-    cartNum() {
-      return this.$store.state.cartNum
-    }
-  },
-  methods: {
-    goCartList() {
-      this.$router.push('/cart')
-    },
-    getCartList() {
-      if (storage.getItem('userInfo')) {
-        cartCount().then((res) => {
-          this.$store.commit('SET_CARTNUM', res.result)
-          this.Cookies.setItem('cartNum', res.result)
-        })
-      }
-    }
-  },
-  mounted() {
-    if (storage.getItem('userInfo')) {
-      this.userInfo = JSON.parse(storage.getItem('userInfo'))
-    }
+const router = useRouter()
+const appStore = useAppStore()
+
+const userInfo = ref({})
+const cartNum = computed(() => appStore.cartNum)
+
+function goCartList() {
+  router.push('/cart')
+}
+
+function getCartList() {
+  if (storage.getItem('userInfo')) {
+    cartCount().then((res) => {
+      appStore.setCartNum(res.result)
+      storage.setItem('cartNum', res.result)
+    })
   }
 }
+
+onMounted(() => {
+  if (storage.getItem('userInfo')) {
+    userInfo.value = JSON.parse(storage.getItem('userInfo'))
+  }
+})
 </script>
 <style lang="scss" scoped>
 $side-col-width: 263.2px;

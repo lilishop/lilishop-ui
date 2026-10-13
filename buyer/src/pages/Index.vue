@@ -32,7 +32,7 @@
     <div class="index-main">
       <!-- 商品分类 + 楼层装修（同一宽度容器，保证与分类栏左缘对齐） -->
       <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
-      <model-form ref="modelForm" :data="modelForm"></model-form>
+      <model-form :data="modelFormData"></model-form>
     </div>
     <!-- 底部栏 -->
     <BaseFooter></BaseFooter>
@@ -41,184 +41,179 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, onUnmounted, ref } from "vue";
 import Search from '@/components/Search';
 import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
 import fixedBar from '@/components/fixed/index';
 import storage from "@/plugins/storage";
-import { indexData,getAutoCoup } from '@/api/index.js';
-import {seckillByDay} from '@/api/promotion'
-export default {
-  name: 'Index',
-  mounted () {
-    this.getIndexData();
-    let that = this;
-    window.onscroll = function () {
-      let top = document.documentElement.scrollTop || document.body.scrollTop;
-      if (top > 300) {
-        that.topSearchShow = true;
-      } else {
-        that.topSearchShow = false;
-      }
-    };
-    if(storage.getItem('userInfo')){
-      this.getAutoCoup()
-    }
-  },
-  data () {
-    return {
-      autoCoupList:[],
-      showCpmodel:false,
-      modelForm: { list: [] }, // 楼层装修数据
-      topAdvert: {}, // 顶部广告
-      showNav: false, // 是否展示分类栏
-      topSearchShow: false, // 滚动后顶部搜索栏展示
-      carouselLarge: false, // 不同轮播分类尺寸
-      carouselOpacity: false // 不同轮播分类样式
-    };
-  },
-  props:{
-    pageData:{
-      type:null,
-      default:""
-    }
-  },
-  // created(){
+import { indexData, getAutoCoup } from '@/api/index.js';
+import { seckillByDay } from '@/api/promotion';
 
-  // },
-  methods: {
-    // 优惠券可用范围
-    useScope (type, storeName) {
-      let shop = '平台';
-      let goods = '全部商品'
-      if (storeName !== 'platform') shop = storeName
-      switch (type) {
-        case 'ALL':
-          goods = '全部商品'
-          break;
-        case 'PORTION_GOODS':
-          goods = '部分商品'
-          break;
-        case 'PORTION_GOODS_CATEGORY':
-          goods = '部分分类商品'
-          break;
+defineOptions({ name: "Index" });
+
+const props = defineProps({
+  pageData: {
+    type: null,
+    default: "",
+  },
+});
+
+const autoCoupList = ref([]);
+const showCpmodel = ref(false);
+const modelFormData = ref({ list: [] }); // 楼层装修数据
+const topAdvert = ref({}); // 顶部广告
+const showNav = ref(false); // 是否展示分类栏
+const topSearchShow = ref(false); // 滚动后顶部搜索栏展示
+const carouselLarge = ref(false); // 不同轮播分类尺寸
+const carouselOpacity = ref(false); // 不同轮播分类样式
+
+// 优惠券可用范围
+function useScope(type, storeName) {
+  let shop = '平台';
+  let goods = '全部商品';
+  if (storeName !== 'platform') shop = storeName;
+  switch (type) {
+    case 'ALL':
+      goods = '全部商品';
+      break;
+    case 'PORTION_GOODS':
+      goods = '部分商品';
+      break;
+    case 'PORTION_GOODS_CATEGORY':
+      goods = '部分分类商品';
+      break;
+  }
+  return `${shop}${goods}可用`;
+}
+
+function fetchAutoCoup() {
+  let data = new Date();
+  let datas = data.getDate();
+  let hours = data.getHours();
+  let flagCoup = storage.getItem('getTimes'); //缓存
+  if (flagCoup && flagCoup != undefined && flagCoup != null) {  //判断当前是否有缓存
+    if (Number(datas) > Number(flagCoup)) { //判断缓存是否小于当前天数
+      if (Number(hours) >= 6) { //超过或等于6时清楚缓存
+        storage.setItem('getTimes', datas); //存储缓存
+        getcps();
       }
-      return `${shop}${goods}可用`
-    },
-    getAutoCoup(){
-      let data = new Date()
-      let datas = data.getDate()
-      let hours = data.getHours()
-      let flagCoup = storage.getItem('getTimes') //缓存
-      if(flagCoup && flagCoup != undefined && flagCoup != null){  //判断当前是否有缓存
-        if(Number(datas) > Number(flagCoup)){ //判断缓存是否小于当前天数
-          if(Number(hours) >= 6){//超过或等于6时清楚缓存
-            storage.setItem('getTimes',datas)//存储缓存
-            this.getcps()
-          }
+    }
+  } else {
+    getcps();
+  }
+}
+
+function getcps() {
+  let data = new Date();
+  let datas = data.getDate();
+  getAutoCoup().then(res => { //调用自动发券
+    if (res.success) {
+      autoCoupList.value.push(...res.result);
+      let objs = {};
+      autoCoupList.value = autoCoupList.value.reduce((cur, next) => {
+        //对象去重
+        if (next.id != undefined) {
+          objs[next.id]
+            ? ""
+            : (objs[next.id] = true && cur.push(next));
         }
-      }else{
-        // window.localStorage.setItem('getTimes',datas)//存储缓存
-        this.getcps()
+        return cur;
+      }, []);
+      if (autoCoupList.value != '' && autoCoupList.value.length > 0) {
+        showCpmodel.value = true;
       }
-    },
-    getcps(){
-      let data = new Date()
-      let datas = data.getDate()
-      getAutoCoup().then(res=>{ //调用自动发券
-            if(res.success){
-              this.autoCoupList.push(...res.result);
-              let objs = {};
-              this.autoCoupList = this.autoCoupList.reduce((cur, next) => {
-                //对象去重
-                if (next.id != undefined) {
-                  objs[next.id]
-                    ? ""
-                    : (objs[next.id] = true && cur.push(next));
-                }
-                return cur;
-              }, []);
-              if(this.autoCoupList != '' && this.autoCoupList.length > 0){
-                this.showCpmodel = true;
-              }
-              storage.setItem('getTimes',datas)//存储缓存
-            }
-      }).catch((err) => {
-        console.warn('获取自动发券信息失败', err);
-      });
-    },
-    handleReachBottom(){
+      storage.setItem('getTimes', datas); //存储缓存
+    }
+  }).catch((err) => {
+    console.warn('获取自动发券信息失败', err);
+  });
+}
 
-    } ,
-    getIndexData () {
-      if(this.pageData){
-        this.parsePageData(JSON.stringify(this.pageData)).catch(() => {
+function handleReachBottom() {
+}
+
+function getIndexData() {
+  if (props.pageData) {
+    parsePageData(JSON.stringify(props.pageData)).catch(() => {
+      // 装修数据解析失败时保持默认空楼层
+    });
+  } else {
+    // 获取首页装修数据
+    indexData({ clientType: 'PC' }).then(async (res) => {
+      if (res.success && res.result?.pageData) {
+        try {
+          await parsePageData(res.result.pageData);
+        } catch {
           // 装修数据解析失败时保持默认空楼层
-        });
-      }
-      else{
-        // 获取首页装修数据
-        indexData({ clientType: 'PC' }).then(async (res) => {
-          if (res.success && res.result?.pageData) {
-            try {
-              await this.parsePageData(res.result.pageData);
-            } catch {
-              // 装修数据解析失败时保持默认空楼层
-            }
-          }
-        }).catch((err) => {
-          console.warn('获取首页装修数据失败', err);
-        });
-      }
-    },
-
-    async parsePageData(pageData){
-      const dataJson = typeof pageData === "string" ? JSON.parse(pageData) : pageData;
-      if (!dataJson?.list?.length) {
-        return;
-      }
-      // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
-      // 轮播图根据不同轮播，样式不同
-      for (let i = 0; i < dataJson.list.length; i++) {
-        let type = dataJson.list[i].type
-        if (type === 'carousel2') {
-          this.carouselLarge = true;
-        } else if (type === 'carousel1') {
-          this.carouselLarge = true
-          this.carouselOpacity = true
-        } else if (type === 'seckill') {
-          let seckill = await this.getListByDay()
-          dataJson.list[i].options.list = seckill
         }
       }
-      this.modelForm = dataJson;
-      if (dataJson.list[1]) {
-        storage.setItem('navList', dataJson.list[1])
-      }
-      this.showNav = true
-      if (dataJson.list[0]) {
-        this.topAdvert = dataJson.list[0];
-      }
-    },
+    }).catch((err) => {
+      console.warn('获取首页装修数据失败', err);
+    });
+  }
+}
 
-    async getListByDay () { // 当天秒杀活动
-      try {
-        const res = await seckillByDay()
-        if (res.success && res.result?.length) {
-          return res.result
-        }
-      } catch {
-        // 秒杀接口失败时不影响首页其他模块
-      }
-      return []
+async function parsePageData(pageData) {
+  const dataJson = typeof pageData === "string" ? JSON.parse(pageData) : pageData;
+  if (!dataJson?.list?.length) {
+    return;
+  }
+  // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
+  // 轮播图根据不同轮播，样式不同
+  for (let i = 0; i < dataJson.list.length; i++) {
+    let type = dataJson.list[i].type;
+    if (type === 'carousel2') {
+      carouselLarge.value = true;
+    } else if (type === 'carousel1') {
+      carouselLarge.value = true;
+      carouselOpacity.value = true;
+    } else if (type === 'seckill') {
+      let seckill = await getListByDay();
+      dataJson.list[i].options.list = seckill;
     }
-  },
-  components: { Search,
-    ModelForm,
-    HoverSearch,
-    fixedBar }
-};
+  }
+  modelFormData.value = dataJson;
+  if (dataJson.list[1]) {
+    storage.setItem('navList', dataJson.list[1]);
+  }
+  showNav.value = true;
+  if (dataJson.list[0]) {
+    topAdvert.value = dataJson.list[0];
+  }
+}
+
+async function getListByDay() { // 当天秒杀活动
+  try {
+    const res = await seckillByDay();
+    if (res.success && res.result?.length) {
+      return res.result;
+    }
+  } catch {
+    // 秒杀接口失败时不影响首页其他模块
+  }
+  return [];
+}
+
+function handleScroll() {
+  const top = document.documentElement.scrollTop || document.body.scrollTop;
+  topSearchShow.value = top > 300;
+}
+
+onMounted(() => {
+  getIndexData();
+  window.onscroll = handleScroll;
+  if (storage.getItem('userInfo')) {
+    fetchAutoCoup();
+  }
+});
+
+onUnmounted(() => {
+  if (window.onscroll === handleScroll) {
+    window.onscroll = null;
+  }
+});
 </script>
 
 <style scoped lang="scss">

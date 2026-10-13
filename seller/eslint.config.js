@@ -47,6 +47,8 @@ module.exports = [
       'vue/no-reserved-component-names': 'off',
       // 存量 49 处直接改 prop，先告警，逐步治理
       'vue/no-mutating-props': 'warn',
+      // 全端已完成 Options API → <script setup> 迁移，防止新代码回退（tpl_* 装修模板的自定义选项普通 script 块等有意保留的除外，故用 warn）
+      'vue/component-api-style': ['warn', ['script-setup']],
     },
   },
   {

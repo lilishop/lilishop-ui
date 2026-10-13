@@ -34,56 +34,57 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getHomeList } from "@/api/other.js";
-export default {
-  data() {
-    return {
-      loading: true,
-      index: 999,
-      data: [],
-      params: {
-        sort: "createTime",
-        order: "desc",
-        pageClientType: "H5",
-        pageNumber: 1,
-        pageSize: 20,
-        pageType: "SPECIAL",
-      },
-      total: 0,
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    selectRow(row, idx) {
-      this.index = idx;
-      const payload = { ...row, pageType: "special", ___type: "special" };
-      this.$emit("selected", [payload]);
-    },
-    changePageNum(val) {
-      this.params.pageNumber = val;
-      this.init();
-    },
-    changePageSize(val) {
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.init();
-    },
-    async init() {
-      this.params.pageClientType = this.$route.name === "renovation" ? "PC" : "H5";
-      const res = await getHomeList(this.params);
-      if (res.success) {
-        this.loading = false;
-        this.data = res.result.records;
-        this.total = res.result.total;
-      } else {
-        this.loading = false;
-      }
-    },
-  },
-};
+
+const emit = defineEmits(["selected"]);
+
+const route = useRoute();
+
+const loading = ref(true);
+const index = ref(999);
+const data = ref([]);
+const params = reactive({
+  sort: "createTime",
+  order: "desc",
+  pageClientType: "H5",
+  pageNumber: 1,
+  pageSize: 20,
+  pageType: "SPECIAL",
+});
+const total = ref(0);
+
+function selectRow(row, idx) {
+  index.value = idx;
+  const payload = { ...row, pageType: "special", ___type: "special" };
+  emit("selected", [payload]);
+}
+function changePageNum(val) {
+  params.pageNumber = val;
+  init();
+}
+function changePageSize(val) {
+  params.pageNumber = 1;
+  params.pageSize = val;
+  init();
+}
+async function init() {
+  params.pageClientType = route.name === "renovation" ? "PC" : "H5";
+  const res = await getHomeList(params);
+  if (res.success) {
+    loading.value = false;
+    data.value = res.result.records;
+    total.value = res.result.total;
+  } else {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 img {

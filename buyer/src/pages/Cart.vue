@@ -4,7 +4,7 @@
     <!-- LOGO 搜索 -->
     <div class="width_1200 logo">
       <div>
-        <router-link to="/"><img :src="$store.state.logoImg" /></router-link>
+        <router-link to="/"><img :src="logoImg" /></router-link>
         <div>
           购物车(<span>{{ goodsTotal }}</span>)
         </div>
@@ -242,264 +242,266 @@
 </template>
 
 <script>
-import { Message, Modal } from "@/utils/message";
-import Promotion from "@/components/goodsDetail/Promotion";
-import * as APICart from "@/api/cart";
-import * as APIMember from "@/api/member";
-import { isECoupon } from "@/constants/goodsType";
 export default {
   name: "Cart",
   beforeRouteEnter(to, from, next) {
     window.scrollTo(0, 0);
     next();
   },
-  components: {
-    Promotion,
-  },
-  data() {
-    return {
-      couponAvailable: false, // 展示优惠券
-      stepIndex: 0, // 当前处于哪一步，购物车==0，填写订单信息==1，成功提交订单==2
-      goodsTotal: 0, // 商品数量
-      checkedNum: 0, // 选中数量
-      allChecked: false, // 全选
-      loading: false, // 加载状态
-      cartList: [], // 购物车列表
-      couponList: [], // 优惠券列表
-      priceDetailDTO: {}, // 价格明细
-      skuList: [], // sku列表
-    };
-  },
-  methods: {
-    // 跳转商品详情
-    goGoodsDetail(skuId, goodsId) {
-      let routeUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
-      });
-      window.open(routeUrl.href, "_blank");
-    },
-    // 跳转店铺首页
-    goShopPage(id) {
-      this.$router.push({
-        path: "/merchant",
-        query: { id },
-      });
-    },
-    // 同步购物车商品收藏状态
-    async syncCartCollectionStatus() {
-      if (!this.Cookies.getItem("userInfo") || !this.cartList.length) return;
-      const skuIds = [];
-      this.cartList.forEach((shop) => {
-        (shop.skuList || []).forEach((goods) => {
-          goods.isCollected = false;
-          if (goods.goodsSku && goods.goodsSku.id) {
-            skuIds.push(goods.goodsSku.id);
-          }
-        });
-      });
-      const uniqueSkuIds = [...new Set(skuIds)];
-      await Promise.all(
-        uniqueSkuIds.map(async (skuId) => {
-          try {
-            const res = await APIMember.isCollection("GOODS", skuId);
-            if (res.success && res.result) {
-              this.cartList.forEach((shop) => {
-                (shop.skuList || []).forEach((goods) => {
-                  if (goods.goodsSku && goods.goodsSku.id === skuId) {
-                    goods.isCollected = true;
-                  }
-                });
-              });
-            }
-          } catch (e) {
-            // 单个查询失败不影响其他商品
-          }
-        })
-      );
-      this.$forceUpdate();
-    },
-    // 收藏 / 取消收藏商品
-    handleCollect(goods) {
-      const skuId = goods.goodsSku && goods.goodsSku.id;
-      if (!skuId) return;
-      if (goods.isCollected) {
-        Modal.confirm({
-          title: "取消收藏",
-          content: "确定取消收藏该商品吗？",
-          onOk: () => {
-            return APIMember.cancelCollect("GOODS", skuId).then((res) => {
-              if (res.success) {
-                goods.isCollected = false;
-                Message.success("取消收藏成功");
-                this.$forceUpdate();
+};
+</script>
+
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { Message, Modal } from "@/utils/message";
+import Promotion from "@/components/goodsDetail/Promotion";
+import * as APICart from "@/api/cart";
+import * as APIMember from "@/api/member";
+import { isECoupon } from "@/constants/goodsType";
+import storage from "@/plugins/storage.js";
+import { useAppStore } from "@/stores/app";
+
+const router = useRouter();
+const appStore = useAppStore();
+
+const logoImg = computed(() => appStore.logoImg);
+
+const couponAvailable = ref(false); // 展示优惠券
+const stepIndex = ref(0); // 当前处于哪一步，购物车==0，填写订单信息==1，成功提交订单==2
+const goodsTotal = ref(0); // 商品数量
+const checkedNum = ref(0); // 选中数量
+const allChecked = ref(false); // 全选
+const loading = ref(false); // 加载状态
+const cartList = ref([]); // 购物车列表
+const couponList = ref([]); // 优惠券列表
+const priceDetailDTO = ref({}); // 价格明细
+const skuList = ref([]); // sku列表
+
+// 跳转商品详情
+function goGoodsDetail(skuId, goodsId) {
+  let routeUrl = router.resolve({
+    path: "/goodsDetail",
+    query: { skuId, goodsId },
+  });
+  window.open(routeUrl.href, "_blank");
+}
+// 跳转店铺首页
+function goShopPage(id) {
+  router.push({
+    path: "/merchant",
+    query: { id },
+  });
+}
+// 同步购物车商品收藏状态
+async function syncCartCollectionStatus() {
+  if (!storage.getItem("userInfo") || !cartList.value.length) return;
+  const skuIds = [];
+  cartList.value.forEach((shop) => {
+    (shop.skuList || []).forEach((goods) => {
+      goods.isCollected = false;
+      if (goods.goodsSku && goods.goodsSku.id) {
+        skuIds.push(goods.goodsSku.id);
+      }
+    });
+  });
+  const uniqueSkuIds = [...new Set(skuIds)];
+  await Promise.all(
+    uniqueSkuIds.map(async (skuId) => {
+      try {
+        const res = await APIMember.isCollection("GOODS", skuId);
+        if (res.success && res.result) {
+          cartList.value.forEach((shop) => {
+            (shop.skuList || []).forEach((goods) => {
+              if (goods.goodsSku && goods.goodsSku.id === skuId) {
+                goods.isCollected = true;
               }
             });
-          },
-          onCancel: () => {},
-        });
-        return;
-      }
-      Modal.confirm({
-        title: "收藏",
-        content: "商品收藏后可在个人中心我的收藏查看",
-        onOk: () => {
-          return APIMember.collectGoods("GOODS", skuId).then((res) => {
-            if (res.success) {
-              goods.isCollected = true;
-              Message.success("收藏商品成功");
-              this.$forceUpdate();
-            }
           });
-        },
-        onCancel: () => {},
-      });
-    },
-    // 删除商品
-    delGoods(id) {
-      const idArr = [];
-      if (!id) {
-        const list = this.cartList;
-        list.forEach((shop) => {
-          shop.skuList.forEach((goods) => {
-            if (goods.checked) {
-              idArr.push(goods.goodsSku.id);
-            }
-          });
-        });
-      } else {
-        idArr.push(id);
-      }
-      Modal.confirm({
-        title: "删除",
-        content: "确定要删除该商品吗？",
-        onOk: () => {
-          APICart.delCartGoods({ skuIds: idArr.toString() }).then((res) => {
-            if (res.success) {
-              Message.success("删除成功");
-              this.getCartList();
-            } else {
-              Message.error(res.message);
-            }
-          });
-        },
-      });
-    },
-    // 清空购物车
-    clearCart() {
-      Modal.confirm({
-        title: "提示",
-        content: "确定要清空购物车吗？清空后不可恢复",
-        onOk: () => {
-          APICart.clearCart().then((res) => {
-            if (res.success) {
-              Message.success("清空购物车成功");
-              this.getCartList();
-            } else {
-              Message.error(res.message);
-            }
-          });
-        },
-      });
-    },
-    // 跳转支付页面
-    pay() {
-      if (!this.checkedNum) {
-        Message.warning("请至少选择一件商品");
-        return;
-      }
-      const hasECoupon = this.cartList.some((shop) =>
-        (shop.skuList || []).some(
-          (goods) => goods.checked && isECoupon(goods.goodsSku && goods.goodsSku.goodsType)
-        )
-      );
-      if (hasECoupon) {
-        Message.warning("电子卡券请使用立即购买，不可通过购物车结算");
-        return;
-      }
-      this.$router.push({ path: "/pay", query: { way: "CART" } });
-    },
-    // 展示优惠券
-    showCoupon(storeId, index) {
-      this.couponAvailable = index;
-    },
-    // 设置购买数量
-    changeNum(val, id) {
-      if (val) {
-        APICart.setCartGoodsNum({ skuId: id, num: val }).then((res) => {
-          if (res.success) {
-            this.getCartList();
-          }
-        });
-      }
-    },
-    // 设置商品选中状态
-    async changeChecked(status, type, id) {
-      const check = status ? 1 : 0;
-      if (type === "all") {
-        // 全选
-        await APICart.setCheckedAll({ checked: check });
-      } else if (type === "shop") {
-        // 选中店铺所有商品
-        await APICart.setCheckedSeller({ checked: check, storeId: id });
-      } else {
-        // 单个商品
-        await APICart.setCheckedGoods({ checked: check, skuId: id });
-      }
-
-      this.getCartList();
-    },
-    // 领取优惠券
-    async receiveShopCoupon(item) {
-      let res = await APIMember.receiveCoupon(item.id);
-      if (res.success) {
-        item["disabled"] = true;
-        Message.success("领取成功");
-      } else {
-        Message.error(res.message);
-      }
-    },
-    // 购物车列表
-    async getCartList() {
-      this.loading = true;
-      try {
-        let res = await APICart.cartGoodsAll();
-        this.loading = false;
-        if (res.success) {
-          this.cartList = res.result.cartList;
-          this.priceDetailDTO = res.result.priceDetailDTO;
-          this.skuList = res.result.skuList;
-          this.checkedNum = 0;
-          let allChecked = true;
-          for (let k = 0; k < this.cartList.length; k++) {
-            let shop = this.cartList[k];
-            let list = await APIMember.couponList({ storeId: shop.storeId });
-            shop.couponList.push(...list.result.records);
-          }
-          for (let i = 0; i < this.skuList.length; i++) {
-            if (this.skuList[i].checked) {
-              this.checkedNum += this.skuList[i].num;
-            } else {
-              allChecked = false;
-            }
-          }
-          this.$forceUpdate();
-          this.allChecked = allChecked;
-          this.syncCartCollectionStatus();
         }
-      } catch (error) {
-        this.loading = false;
+      } catch (e) {
+        // 单个查询失败不影响其他商品
       }
-    },
-  },
-  mounted() {
-    this.getCartList();
-    APICart.cartCount().then((res) => {
-      // 购物车商品数量
-      if (res.success) this.goodsTotal = res.result;
+    })
+  );
+}
+// 收藏 / 取消收藏商品
+function handleCollect(goods) {
+  const skuId = goods.goodsSku && goods.goodsSku.id;
+  if (!skuId) return;
+  if (goods.isCollected) {
+    Modal.confirm({
+      title: "取消收藏",
+      content: "确定取消收藏该商品吗？",
+      onOk: () => {
+        return APIMember.cancelCollect("GOODS", skuId).then((res) => {
+          if (res.success) {
+            goods.isCollected = false;
+            Message.success("取消收藏成功");
+          }
+        });
+      },
+      onCancel: () => {},
     });
-  },
-};
+    return;
+  }
+  Modal.confirm({
+    title: "收藏",
+    content: "商品收藏后可在个人中心我的收藏查看",
+    onOk: () => {
+      return APIMember.collectGoods("GOODS", skuId).then((res) => {
+        if (res.success) {
+          goods.isCollected = true;
+          Message.success("收藏商品成功");
+        }
+      });
+    },
+    onCancel: () => {},
+  });
+}
+// 删除商品
+function delGoods(id) {
+  const idArr = [];
+  if (!id) {
+    const list = cartList.value;
+    list.forEach((shop) => {
+      shop.skuList.forEach((goods) => {
+        if (goods.checked) {
+          idArr.push(goods.goodsSku.id);
+        }
+      });
+    });
+  } else {
+    idArr.push(id);
+  }
+  Modal.confirm({
+    title: "删除",
+    content: "确定要删除该商品吗？",
+    onOk: () => {
+      APICart.delCartGoods({ skuIds: idArr.toString() }).then((res) => {
+        if (res.success) {
+          Message.success("删除成功");
+          getCartList();
+        } else {
+          Message.error(res.message);
+        }
+      });
+    },
+  });
+}
+// 清空购物车
+function clearCart() {
+  Modal.confirm({
+    title: "提示",
+    content: "确定要清空购物车吗？清空后不可恢复",
+    onOk: () => {
+      APICart.clearCart().then((res) => {
+        if (res.success) {
+          Message.success("清空购物车成功");
+          getCartList();
+        } else {
+          Message.error(res.message);
+        }
+      });
+    },
+  });
+}
+// 跳转支付页面
+function pay() {
+  if (!checkedNum.value) {
+    Message.warning("请至少选择一件商品");
+    return;
+  }
+  const hasECoupon = cartList.value.some((shop) =>
+    (shop.skuList || []).some(
+      (goods) => goods.checked && isECoupon(goods.goodsSku && goods.goodsSku.goodsType)
+    )
+  );
+  if (hasECoupon) {
+    Message.warning("电子卡券请使用立即购买，不可通过购物车结算");
+    return;
+  }
+  router.push({ path: "/pay", query: { way: "CART" } });
+}
+// 展示优惠券
+function showCoupon(storeId, index) {
+  couponAvailable.value = index;
+}
+// 设置购买数量
+function changeNum(val, id) {
+  if (val) {
+    APICart.setCartGoodsNum({ skuId: id, num: val }).then((res) => {
+      if (res.success) {
+        getCartList();
+      }
+    });
+  }
+}
+// 设置商品选中状态
+async function changeChecked(status, type, id) {
+  const check = status ? 1 : 0;
+  if (type === "all") {
+    // 全选
+    await APICart.setCheckedAll({ checked: check });
+  } else if (type === "shop") {
+    // 选中店铺所有商品
+    await APICart.setCheckedSeller({ checked: check, storeId: id });
+  } else {
+    // 单个商品
+    await APICart.setCheckedGoods({ checked: check, skuId: id });
+  }
+
+  getCartList();
+}
+// 领取优惠券
+async function receiveShopCoupon(item) {
+  let res = await APIMember.receiveCoupon(item.id);
+  if (res.success) {
+    item["disabled"] = true;
+    Message.success("领取成功");
+  } else {
+    Message.error(res.message);
+  }
+}
+// 购物车列表
+async function getCartList() {
+  loading.value = true;
+  try {
+    let res = await APICart.cartGoodsAll();
+    loading.value = false;
+    if (res.success) {
+      cartList.value = res.result.cartList;
+      priceDetailDTO.value = res.result.priceDetailDTO;
+      skuList.value = res.result.skuList;
+      checkedNum.value = 0;
+      let allCheckedVal = true;
+      for (let k = 0; k < cartList.value.length; k++) {
+        let shop = cartList.value[k];
+        let list = await APIMember.couponList({ storeId: shop.storeId });
+        shop.couponList.push(...list.result.records);
+      }
+      for (let i = 0; i < skuList.value.length; i++) {
+        if (skuList.value[i].checked) {
+          checkedNum.value += skuList.value[i].num;
+        } else {
+          allCheckedVal = false;
+        }
+      }
+      allChecked.value = allCheckedVal;
+      syncCartCollectionStatus();
+    }
+  } catch (error) {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  getCartList();
+  APICart.cartCount().then((res) => {
+    // 购物车商品数量
+    if (res.success) goodsTotal.value = res.result;
+  });
+});
 </script>
 
 <style scoped lang="scss">

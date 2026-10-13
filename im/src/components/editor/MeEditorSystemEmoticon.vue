@@ -39,53 +39,52 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
 import { ServeFindSysEmoticon, ServeSetUserEmoticon } from '@/api/emoticon'
+import { useEmoticonStore } from '@/stores/emoticon'
 
-export default {
-  name: 'MeEditorSystemEmoticon',
-  data() {
-    return {
-      items: [],
-    }
-  },
-  created() {
-    this.loadSysEmoticon()
-  },
-  methods: {
-    closeBox() {
-      this.$emit('close')
-    },
+defineOptions({ name: 'MeEditorSystemEmoticon' })
 
-    // 获取系统表情包列表
-    loadSysEmoticon() {
-      ServeFindSysEmoticon().then(res => {
-        if (res.code == 200) {
-          this.items = res.data
-        }
-      })
-    },
+const emit = defineEmits(['close'])
 
-    setEmoticon(index, item, type) {
-      ServeSetUserEmoticon({
-        emoticon_id: item.id,
-        type: type,
-      }).then(res => {
-        if (res.code == 200) {
-          if (type == 1) {
-            this.items[index].status = 1
-            this.$store.commit('APPEND_SYS_EMOTICON', res.data)
-          } else {
-            this.items[index].status = 0
-            this.$store.commit('REMOVE_SYS_EMOTICON', {
-              emoticon_id: item.id,
-            })
-          }
-        }
-      })
-    },
-  },
+const emoticonStore = useEmoticonStore()
+
+const items = ref([])
+
+function closeBox() {
+  emit('close')
 }
+
+// 获取系统表情包列表
+function loadSysEmoticon() {
+  ServeFindSysEmoticon().then(res => {
+    if (res.code == 200) {
+      items.value = res.data
+    }
+  })
+}
+
+function setEmoticon(index, item, type) {
+  ServeSetUserEmoticon({
+    emoticon_id: item.id,
+    type: type,
+  }).then(res => {
+    if (res.code == 200) {
+      if (type == 1) {
+        items.value[index].status = 1
+        emoticonStore.APPEND_SYS_EMOTICON(res.data)
+      } else {
+        items.value[index].status = 0
+        emoticonStore.REMOVE_SYS_EMOTICON({
+          emoticon_id: item.id,
+        })
+      }
+    }
+  })
+}
+
+loadSysEmoticon()
 </script>
 <style lang="less" scoped>
 .lum-dialog-box {

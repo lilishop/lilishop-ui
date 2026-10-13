@@ -68,32 +68,29 @@
   </div>
 </template>
 
-<script>
-import config from '@/config';
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import config from '@/config'
 
-export default {
-  name: "Footer",
-  data() {
-    return {
-      config,
-      guideArr: [
-        // 导航链接
-        ["购物指南", "购物流程", "会员介绍", "生活旅行", "常见问题"],
-        ["配送方式", "上门自提", "配送查询", "收取标准", "物流规则"],
-        ["支付方式", "在线支付", "公司转账", "余额支付", "积分支付"],
-        ["售后服务", "售后政策", "退款说明", "返修/退货", "取消订单"],
-      ],
-      moreLink: ["关于我们", "联系我们", "联系客服", "商家帮助", "隐私政策"], // 更多链接
-      year: new Date().getFullYear(), // 当前年份
-    };
-  },
-  methods: {
-    goArticle() {
-      // 跳转文章页
-      this.$router.push("/article");
-    },
-  },
-};
+defineOptions({ name: 'Footer' })
+
+const router = useRouter()
+
+const guideArr = ref([
+  // 导航链接
+  ["购物指南", "购物流程", "会员介绍", "生活旅行", "常见问题"],
+  ["配送方式", "上门自提", "配送查询", "收取标准", "物流规则"],
+  ["支付方式", "在线支付", "公司转账", "余额支付", "积分支付"],
+  ["售后服务", "售后政策", "退款说明", "返修/退货", "取消订单"],
+])
+const moreLink = ref(["关于我们", "联系我们", "联系客服", "商家帮助", "隐私政策"]) // 更多链接
+const year = ref(new Date().getFullYear()) // 当前年份
+
+function goArticle() {
+  // 跳转文章页
+  router.push("/article")
+}
 </script>
 
 <style scoped lang="scss">

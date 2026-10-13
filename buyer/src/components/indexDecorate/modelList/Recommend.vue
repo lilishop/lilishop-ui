@@ -58,22 +58,18 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    data: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  data () {
-    return {
-      msgLeft: this.data.options.contentLeft, // 左侧数据
-      msgRight: this.data.options.contentRight // 右侧数据
-    };
-  },
-  methods: {}
-};
+<script setup>
+import { ref } from 'vue';
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default: () => ({})
+  }
+});
+
+const msgLeft = ref(props.data.options.contentLeft); // 左侧数据
+const msgRight = ref(props.data.options.contentRight); // 右侧数据
 </script>
 <style lang="scss" scoped>
 .recommend {

@@ -26,39 +26,39 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
 
-export default {
-  name: "finance-store-settlement",
-  data() {
-    return { loading: false, dateRange: [], data: [] };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    buildParams() {
-      const p = {};
-      if (this.dateRange?.length === 2) {
-        p.startDate = this.dateRange[0];
-        p.endDate = this.dateRange[1];
-      }
-      return p;
-    },
-    loadData() {
-      this.loading = true;
-      API_Finance.getStoreSettlementReport(this.buildParams()).then((res) => {
-        this.loading = false;
-        if (res.success) this.data = res.result || [];
-      });
-    },
-    handleExport() {
-      API_Finance.exportStoreSettlementReport(this.buildParams()).then((blob) => {
-        downloadBlob(blob, "店铺结算汇总.xlsx");
-      });
-    },
-  },
-};
+defineOptions({ name: "finance-store-settlement" });
+
+const loading = ref(false);
+const dateRange = ref([]);
+const data = ref([]);
+
+onMounted(() => {
+  loadData();
+});
+
+function buildParams() {
+  const p = {};
+  if (dateRange.value?.length === 2) {
+    p.startDate = dateRange.value[0];
+    p.endDate = dateRange.value[1];
+  }
+  return p;
+}
+function loadData() {
+  loading.value = true;
+  API_Finance.getStoreSettlementReport(buildParams()).then((res) => {
+    loading.value = false;
+    if (res.success) data.value = res.result || [];
+  });
+}
+function handleExport() {
+  API_Finance.exportStoreSettlementReport(buildParams()).then((blob) => {
+    downloadBlob(blob, "店铺结算汇总.xlsx");
+  });
+}
 </script>

@@ -204,88 +204,88 @@
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManageRef" />
     </el-dialog>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, nextTick, getCurrentInstance } from "vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
-export default {
-  name: "modelCarousel",
-  props: ["data"],
-  components: {
-    ossManage,
-  },
-  data() {
-    return {
-      showModal: false, // modal显隐
-      selected: null, // 已选数据
-      picModelFlag: false, // 选择图片modal
-      userInfo: {},
-      articleList: [
-        { title: "促销计算规则" },
-        { title: "商家申请开店" },
-        { title: "商家账号注册" },
-        { title: "促销计算规则" },
-      ],
-    };
-  },
+import { formatLinkType } from "@/utils/filters";
 
-  methods: {
-    handleSelectModel() {
-      // 编辑模块
-      this.showModal = true;
-    },
-    // 添加轮播
-    handleAdd() {
-      this.data.options.list.push({ img: "", url: "" });
-      this.$forceUpdate();
-    },
-    // 添加图片组
-    handleAddGroup() {
-      this.data.options.listRight.push([
-        { img: "", url: "" },
-        { img: "", url: "" },
-        { img: "", url: "" },
-      ]);
-    },
-    // 删除图片组
-    handleTabRemove(index) {
-      this.data.options.listRight.splice(index, 1);
-    },
-    // 打开图片链接
-    handleSelectLink(item) {
-      this.$refs.liliDialog.open("link");
-      this.selected = item;
-    },
-    callbackSelected(item) {
-      // 选择图片回调
-      this.picModelFlag = false;
-      this.selected.img = item.url;
-    },
-    // 删除图片
-    handleDel(index) {
-      this.data.options.list.splice(index, 1);
-    },
-    selectedLink(val) {
-      // 选择链接回调
-      this.selected.url = this.$filters.formatLinkType(val);
-      this.selected.type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
-    },
-    // 打开选择图片modal
-    handleSelectImg(item) {
-      this.selected = item;
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-  },
-};
+defineOptions({ name: "modelCarousel" });
+
+const props = defineProps(["data"]);
+
+const { proxy } = getCurrentInstance();
+
+const showModal = ref(false); // modal显隐
+const selected = ref(null); // 已选数据
+const picModelFlag = ref(false); // 选择图片modal
+const userInfo = reactive({});
+const articleList = ref([
+  { title: "促销计算规则" },
+  { title: "商家申请开店" },
+  { title: "商家账号注册" },
+  { title: "促销计算规则" },
+]);
+
+const liliDialog = ref(null);
+// ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
+const ossManageRef = ref(null);
+
+function handleSelectModel() {
+  // 编辑模块
+  showModal.value = true;
+}
+// 添加轮播
+function handleAdd() {
+  props.data.options.list.push({ img: "", url: "" });
+  proxy.$forceUpdate();
+}
+// 添加图片组
+function handleAddGroup() {
+  props.data.options.listRight.push([
+    { img: "", url: "" },
+    { img: "", url: "" },
+    { img: "", url: "" },
+  ]);
+}
+// 删除图片组
+function handleTabRemove(index) {
+  props.data.options.listRight.splice(index, 1);
+}
+// 打开图片链接
+function handleSelectLink(item) {
+  liliDialog.value.open("link");
+  selected.value = item;
+}
+function callbackSelected(item) {
+  // 选择图片回调
+  picModelFlag.value = false;
+  selected.value.img = item.url;
+}
+// 删除图片
+function handleDel(index) {
+  props.data.options.list.splice(index, 1);
+}
+function selectedLink(val) {
+  // 选择链接回调
+  selected.value.url = formatLinkType(val);
+  selected.value.type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+}
+// 打开选择图片modal
+function handleSelectImg(item) {
+  selected.value = item;
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
 </script>
 
 <style scoped lang="scss">

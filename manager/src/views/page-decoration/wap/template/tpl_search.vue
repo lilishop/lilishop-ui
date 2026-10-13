@@ -5,12 +5,10 @@
         </div>
     </div>
 </template>
-<script>
+<script setup>
 import { Search } from "@element-plus/icons-vue";
-export default {
-    components: { Search },
-    props: ['res']
-}
+
+defineProps(['res']);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

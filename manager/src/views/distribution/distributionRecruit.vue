@@ -177,18 +177,22 @@
         <el-button type="primary" :loading="planSaveLoading" @click="savePlan">保存</el-button>
       </el-form-item>
     </el-form>
-    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData" />
+    <sku-select ref="skuSelectRef" @selectedGoodsData="selectedGoodsData" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref, watch } from "vue";
 import {
   getCurrentRecruitPlan,
   saveRecruitPlan,
 } from "@/api/distribution";
+import { Message } from "@/utils/message";
 import uploadPicInput from "@/components/lili/upload-pic-input";
-import tinymec from "@/components/editor/index.vue";
+import editor from "@/components/editor/index.vue";
 import skuSelect from "@/components/lili-dialog";
+
+defineOptions({ name: "distributionRecruit" });
 
 const MAX_RECRUIT_FIELDS = 5;
 
@@ -231,228 +235,239 @@ const buildDefaultField = () => ({
   placeholder: "",
 });
 
-export default {
-  name: "distributionRecruit",
-  components: { uploadPicInput, editor: tinymec, skuSelect },
-  data() {
-    return {
-      planSaveLoading: false,
-      editorReady: true,
-      planForm: buildDefaultPlan(),
-      recruitFields: [],
-      recruitGoodsList: [],
-      fieldTypeOptions: FIELD_TYPE_OPTIONS,
-    };
-  },
-  mounted() {
-    this.loadPlan();
-  },
-  watch: {
-    "planForm.applyMode"(value) {
-      if (value !== "MANUAL") {
-        this.planForm.requireApplyInfo = false;
-        this.recruitFields = [];
-      }
-    },
-    "planForm.requireApplyInfo"(value) {
-      if (!value) {
-        this.recruitFields = [];
-      }
-    },
-    "planForm.joinConditionType"(value) {
-      if (value !== "CONDITIONAL") {
-        this.planForm.requirePurchaseGoods = false;
-        this.planForm.requireSelfPurchaseAmount = false;
-        this.planForm.requireConsumeCount = false;
-        this.recruitGoodsList = [];
-      }
-    },
-    "planForm.requirePurchaseGoods"(value) {
-      if (!value) {
-        this.recruitGoodsList = [];
-      }
-    },
-    "planForm.requireSelfPurchaseAmount"(value) {
-      if (value && (!this.planForm.minSelfPurchaseAmount || this.planForm.minSelfPurchaseAmount < 0.01)) {
-        this.planForm.minSelfPurchaseAmount = 0.01;
-      }
-    },
-    "planForm.requireConsumeCount"(value) {
-      if (value && (!this.planForm.minConsumeCount || this.planForm.minConsumeCount < 1)) {
-        this.planForm.minConsumeCount = 1;
-      }
-    },
-  },
-  methods: {
-    normalizeFields(fields) {
-      if (!fields || !fields.length) {
-        return [];
-      }
-      return fields.map((item, index) => ({
-        ...buildDefaultField(),
-        ...item,
-        _key: item._key || item.id || `field_${index}_${Date.now()}`,
-        required: item.required !== false,
-      }));
-    },
-    addRecruitField() {
-      if (this.recruitFields.length >= MAX_RECRUIT_FIELDS) {
-        this.$Message.warning("最多添加5个字段");
-        return;
-      }
-      this.recruitFields.push(buildDefaultField());
-    },
-    removeRecruitField(index) {
-      this.recruitFields.splice(index, 1);
-    },
-    validateRecruitFields() {
-      if (!this.planForm.requireApplyInfo) {
-        return true;
-      }
-      if (!this.recruitFields.length) {
-        this.$Message.warning("请至少添加一个申请字段");
-        return false;
-      }
-      for (let i = 0; i < this.recruitFields.length; i++) {
-        const field = this.recruitFields[i];
-        if (!field.fieldName || !field.fieldName.trim()) {
-          this.$Message.warning(`请填写字段${i + 1}名称`);
-          return false;
+const skuSelectRef = ref(null);
+
+const planSaveLoading = ref(false);
+const editorReady = ref(true);
+const planForm = ref(buildDefaultPlan());
+const recruitFields = ref([]);
+const recruitGoodsList = ref([]);
+const fieldTypeOptions = ref(FIELD_TYPE_OPTIONS);
+
+onMounted(() => {
+  loadPlan();
+});
+
+watch(
+  () => planForm.value.applyMode,
+  (value) => {
+    if (value !== "MANUAL") {
+      planForm.value.requireApplyInfo = false;
+      recruitFields.value = [];
+    }
+  }
+);
+watch(
+  () => planForm.value.requireApplyInfo,
+  (value) => {
+    if (!value) {
+      recruitFields.value = [];
+    }
+  }
+);
+watch(
+  () => planForm.value.joinConditionType,
+  (value) => {
+    if (value !== "CONDITIONAL") {
+      planForm.value.requirePurchaseGoods = false;
+      planForm.value.requireSelfPurchaseAmount = false;
+      planForm.value.requireConsumeCount = false;
+      recruitGoodsList.value = [];
+    }
+  }
+);
+watch(
+  () => planForm.value.requirePurchaseGoods,
+  (value) => {
+    if (!value) {
+      recruitGoodsList.value = [];
+    }
+  }
+);
+watch(
+  () => planForm.value.requireSelfPurchaseAmount,
+  (value) => {
+    if (value && (!planForm.value.minSelfPurchaseAmount || planForm.value.minSelfPurchaseAmount < 0.01)) {
+      planForm.value.minSelfPurchaseAmount = 0.01;
+    }
+  }
+);
+watch(
+  () => planForm.value.requireConsumeCount,
+  (value) => {
+    if (value && (!planForm.value.minConsumeCount || planForm.value.minConsumeCount < 1)) {
+      planForm.value.minConsumeCount = 1;
+    }
+  }
+);
+
+function normalizeFields(fields) {
+  if (!fields || !fields.length) {
+    return [];
+  }
+  return fields.map((item, index) => ({
+    ...buildDefaultField(),
+    ...item,
+    _key: item._key || item.id || `field_${index}_${Date.now()}`,
+    required: item.required !== false,
+  }));
+}
+function addRecruitField() {
+  if (recruitFields.value.length >= MAX_RECRUIT_FIELDS) {
+    Message.warning("最多添加5个字段");
+    return;
+  }
+  recruitFields.value.push(buildDefaultField());
+}
+function removeRecruitField(index) {
+  recruitFields.value.splice(index, 1);
+}
+function validateRecruitFields() {
+  if (!planForm.value.requireApplyInfo) {
+    return true;
+  }
+  if (!recruitFields.value.length) {
+    Message.warning("请至少添加一个申请字段");
+    return false;
+  }
+  for (let i = 0; i < recruitFields.value.length; i++) {
+    const field = recruitFields.value[i];
+    if (!field.fieldName || !field.fieldName.trim()) {
+      Message.warning(`请填写字段${i + 1}名称`);
+      return false;
+    }
+  }
+  return true;
+}
+function validateJoinConditions() {
+  if (planForm.value.joinConditionType !== "CONDITIONAL") {
+    return true;
+  }
+  const {
+    requirePurchaseGoods,
+    requireSelfPurchaseAmount,
+    requireConsumeCount,
+  } = planForm.value;
+  if (!requirePurchaseGoods && !requireSelfPurchaseAmount && !requireConsumeCount) {
+    Message.warning("请至少选择一个加入条件");
+    return false;
+  }
+  if (requirePurchaseGoods && !recruitGoodsList.value.length) {
+    Message.warning("请选择指定商品");
+    return false;
+  }
+  if (requireSelfPurchaseAmount && planForm.value.minSelfPurchaseAmount < 0.01) {
+    Message.warning("自购金额最低设置为0.01元");
+    return false;
+  }
+  if (requireConsumeCount && planForm.value.minConsumeCount < 1) {
+    Message.warning("消费笔数最低设置为1笔");
+    return false;
+  }
+  return true;
+}
+function openGoodsSelect() {
+  skuSelectRef.value.open("goods");
+  const data = recruitGoodsList.value.map((item) => ({
+    id: item.skuId,
+    goodsId: item.goodsId,
+    goodsName: item.goodsName,
+    sn: item.sn,
+    simpleSpecs: item.simpleSpecs,
+    price: item.price,
+    quantity: item.quantity,
+    small: item.thumbnail,
+  }));
+  skuSelectRef.value.goodsData = data;
+}
+function selectedGoodsData(items) {
+  recruitGoodsList.value = (items || []).map((item) => ({
+    skuId: item.id,
+    goodsId: item.goodsId,
+    goodsName: item.goodsName,
+    sn: item.sn || "",
+    simpleSpecs: item.simpleSpecs || "",
+    price: item.price,
+    quantity: item.quantity,
+    thumbnail: item.small || item.thumbnail || "",
+  }));
+}
+function removeRecruitGoods(index) {
+  recruitGoodsList.value.splice(index, 1);
+}
+function buildSavePayload() {
+  const fields = planForm.value.requireApplyInfo
+    ? recruitFields.value.map((field, index) => ({
+        id: field.id,
+        fieldName: field.fieldName.trim(),
+        fieldType: field.fieldType,
+        required: field.required !== false,
+        placeholder: field.placeholder || "",
+        sortOrder: index,
+      }))
+    : [];
+  return {
+    ...planForm.value,
+    id: planForm.value.id || undefined,
+    publishStatus: true,
+    posterEnabled: !!(planForm.value.posterBackground && planForm.value.posterBackground.trim()),
+    recruitGoods: planForm.value.requirePurchaseGoods
+      ? recruitGoodsList.value.map((item) => ({
+          goodsId: item.goodsId,
+          skuId: item.skuId,
+          goodsName: item.goodsName,
+          sn: item.sn,
+          simpleSpecs: item.simpleSpecs,
+          thumbnail: item.thumbnail,
+          price: item.price,
+        }))
+      : [],
+    goodsIds: planForm.value.requirePurchaseGoods
+      ? recruitGoodsList.value.map((item) => item.goodsId)
+      : [],
+    fields,
+  };
+}
+function applyPlanResult(result) {
+  planForm.value = { ...buildDefaultPlan(), ...result };
+  recruitFields.value = normalizeFields(result.fields);
+  recruitGoodsList.value = (result.recruitGoods || []).map((item) => ({
+    goodsId: item.goodsId,
+    skuId: item.skuId,
+    goodsName: item.goodsName,
+    sn: item.sn || "",
+    simpleSpecs: item.simpleSpecs || "",
+    thumbnail: item.thumbnail,
+    price: item.price,
+  }));
+}
+function loadPlan() {
+  getCurrentRecruitPlan().then((res) => {
+    if (res.success && res.result) {
+      applyPlanResult(res.result);
+    }
+  });
+}
+function savePlan() {
+  if (!validateRecruitFields() || !validateJoinConditions()) {
+    return;
+  }
+  planSaveLoading.value = true;
+  saveRecruitPlan(buildSavePayload())
+    .then((res) => {
+      if (res.success) {
+        Message.success("保存成功");
+        if (res.result) {
+          applyPlanResult(res.result);
+        } else {
+          loadPlan();
         }
       }
-      return true;
-    },
-    validateJoinConditions() {
-      if (this.planForm.joinConditionType !== "CONDITIONAL") {
-        return true;
-      }
-      const {
-        requirePurchaseGoods,
-        requireSelfPurchaseAmount,
-        requireConsumeCount,
-      } = this.planForm;
-      if (!requirePurchaseGoods && !requireSelfPurchaseAmount && !requireConsumeCount) {
-        this.$Message.warning("请至少选择一个加入条件");
-        return false;
-      }
-      if (requirePurchaseGoods && !this.recruitGoodsList.length) {
-        this.$Message.warning("请选择指定商品");
-        return false;
-      }
-      if (requireSelfPurchaseAmount && this.planForm.minSelfPurchaseAmount < 0.01) {
-        this.$Message.warning("自购金额最低设置为0.01元");
-        return false;
-      }
-      if (requireConsumeCount && this.planForm.minConsumeCount < 1) {
-        this.$Message.warning("消费笔数最低设置为1笔");
-        return false;
-      }
-      return true;
-    },
-    openGoodsSelect() {
-      this.$refs.skuSelect.open("goods");
-      const data = this.recruitGoodsList.map((item) => ({
-        id: item.skuId,
-        goodsId: item.goodsId,
-        goodsName: item.goodsName,
-        sn: item.sn,
-        simpleSpecs: item.simpleSpecs,
-        price: item.price,
-        quantity: item.quantity,
-        small: item.thumbnail,
-      }));
-      this.$refs.skuSelect.goodsData = data;
-    },
-    selectedGoodsData(items) {
-      this.recruitGoodsList = (items || []).map((item) => ({
-        skuId: item.id,
-        goodsId: item.goodsId,
-        goodsName: item.goodsName,
-        sn: item.sn || "",
-        simpleSpecs: item.simpleSpecs || "",
-        price: item.price,
-        quantity: item.quantity,
-        thumbnail: item.small || item.thumbnail || "",
-      }));
-    },
-    removeRecruitGoods(index) {
-      this.recruitGoodsList.splice(index, 1);
-    },
-    buildSavePayload() {
-      const fields = this.planForm.requireApplyInfo
-        ? this.recruitFields.map((field, index) => ({
-            id: field.id,
-            fieldName: field.fieldName.trim(),
-            fieldType: field.fieldType,
-            required: field.required !== false,
-            placeholder: field.placeholder || "",
-            sortOrder: index,
-          }))
-        : [];
-      return {
-        ...this.planForm,
-        id: this.planForm.id || undefined,
-        publishStatus: true,
-        posterEnabled: !!(this.planForm.posterBackground && this.planForm.posterBackground.trim()),
-        recruitGoods: this.planForm.requirePurchaseGoods
-          ? this.recruitGoodsList.map((item) => ({
-              goodsId: item.goodsId,
-              skuId: item.skuId,
-              goodsName: item.goodsName,
-              sn: item.sn,
-              simpleSpecs: item.simpleSpecs,
-              thumbnail: item.thumbnail,
-              price: item.price,
-            }))
-          : [],
-        goodsIds: this.planForm.requirePurchaseGoods
-          ? this.recruitGoodsList.map((item) => item.goodsId)
-          : [],
-        fields,
-      };
-    },
-    applyPlanResult(result) {
-      this.planForm = { ...buildDefaultPlan(), ...result };
-      this.recruitFields = this.normalizeFields(result.fields);
-      this.recruitGoodsList = (result.recruitGoods || []).map((item) => ({
-        goodsId: item.goodsId,
-        skuId: item.skuId,
-        goodsName: item.goodsName,
-        sn: item.sn || "",
-        simpleSpecs: item.simpleSpecs || "",
-        thumbnail: item.thumbnail,
-        price: item.price,
-      }));
-    },
-    loadPlan() {
-      getCurrentRecruitPlan().then((res) => {
-        if (res.success && res.result) {
-          this.applyPlanResult(res.result);
-        }
-      });
-    },
-    savePlan() {
-      if (!this.validateRecruitFields() || !this.validateJoinConditions()) {
-        return;
-      }
-      this.planSaveLoading = true;
-      saveRecruitPlan(this.buildSavePayload())
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("保存成功");
-            if (res.result) {
-              this.applyPlanResult(res.result);
-            } else {
-              this.loadPlan();
-            }
-          }
-        })
-        .finally(() => {
-          this.planSaveLoading = false;
-        });
-    },
-  },
-};
+    })
+    .finally(() => {
+      planSaveLoading.value = false;
+    });
+}
 </script>
 
 <style scoped lang="scss">

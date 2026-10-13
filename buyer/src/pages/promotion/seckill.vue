@@ -61,121 +61,127 @@
     <BaseFooter />
   </div>
 </template>
-<script>
+<script setup>
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { seckillByDay } from "@/api/promotion";
-export default {
-  data () {
-    return {
-      list: [], // 秒杀时段列表
-      goodsList: [], // 商品列表
-      interval: null, // 定时器
-      currIndex: 0, // 当前时间段的下标
-      currTime: 0, // 当前显示的倒计时
-      diffSeconds: 0, // 倒计时时间戳
-      nowHour: new Date().getHours(), // 当前小时数
-    };
-  },
-  beforeUnmount () {
-    clearInterval(this.interval);
-  },
-  watch: {
-    currIndex (val) {
-      clearInterval(this.interval);
-      this.interval = null;
-      this.nowHour = new Date().getHours();
-      this.countDown(val);
-      this.goodsList = this.list[val].seckillGoodsList;
-    },
-    diffSeconds (val) {
-      const hours = Math.floor(val / 3600);
-      // 当前秒数 / 60，向下取整
-      // 获取到所有分钟数 3600 / 60 = 60分钟
-      // 对60取模，超过小时数的分钟数
-      const minutes = Math.floor(val / 60) % 60;
-      // 当前的秒数 % 60，获取到 超过小时数、分钟数的秒数（秒数）
-      const seconds = val % 60;
-      this.currTime =
-        filteTime(hours) + ":" + filteTime(minutes) + ":" + filteTime(seconds);
-      if (val <= 0) {
-        clearInterval(this.interval);
-        this.interval = null;
-      }
-      function filteTime (time) {
-        if (time < 10) {
-          return "0" + time;
-        } else {
-          return time;
-        }
-      }
-    },
-  },
-  methods: {
-    getListByDay () {
-      // 当天秒杀活动
-      seckillByDay().then((res) => {
-        if (res.success) {
-          this.list = res.result;
-          this.goodsList = this.list[0].seckillGoodsList;
-          this.countDown(this.currIndex);
-        }
-      });
-    },
-    goGoodsDetail (skuId, goodsId) {
-      // 跳转商品详情
-      let routeUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
-      });
-      window.open(routeUrl.href, "_blank");
-    },
-    // 已售占比。没有库存时按售罄展示
-    salePercent (item) {
-      if (!item.quantity || item.quantity <= 0) return 100;
-      return Math.min(100, Math.ceil((item.salesNum / item.quantity) * 100));
-    },
-    // 场次已开始，且销量达到库存
-    isSoldOut (item) {
-      return this.nowHour >= this.list[this.currIndex].timeLine && item.quantity <= item.salesNum;
-    },
-    // 场次已开始且未售罄才可抢
-    canBuy (item) {
-      return this.nowHour >= this.list[this.currIndex].timeLine && !this.isSoldOut(item);
-    },
-    // 按钮文案：未开始 / 已售罄 / 立即抢购
-    buyText (item) {
-      if (this.nowHour < this.list[this.currIndex].timeLine) return "即将开始";
-      if (this.isSoldOut(item)) return "已售罄";
-      return "立即抢购";
-    },
-    countDown (currIndex) {
-      // 倒计时
-      // 0点时间戳
-      let zeroTime = new Date(new Date().toLocaleDateString()).getTime();
-      let currTime = new Date().getTime();
-      let actTime = 0;
-      let nowHour = new Date().getHours(); // 当前小时数
-      if (this.list[currIndex].timeLine > nowHour) {
-        // 活动未开始
-        actTime = zeroTime + this.list[currIndex].timeLine * 3600 * 1000;
-      } else if (this.list[currIndex].timeLine <= nowHour) {
-        // 活动进行中
-        if (currIndex === this.list.length - 1) {
-          // 如果是最后一个活动，直到24点结束
-          actTime = zeroTime + 24 * 3600 * 1000;
-        } else {
-          actTime = zeroTime + this.list[currIndex + 1].timeLine * 3600 * 1000;
-        }
-      }
-      this.diffSeconds = Math.floor((actTime - currTime) / 1000);
-      this.interval = setInterval(() => {
-        this.diffSeconds--;
-      }, 1000);
-    },
-  },
-  mounted () {
-    this.getListByDay();
-  },
-};
+
+const router = useRouter();
+
+const list = ref([]); // 秒杀时段列表
+const goodsList = ref([]); // 商品列表
+let interval = null; // 定时器
+const currIndex = ref(0); // 当前时间段的下标
+const currTime = ref(0); // 当前显示的倒计时
+const diffSeconds = ref(0); // 倒计时时间戳
+const nowHour = ref(new Date().getHours()); // 当前小时数
+
+watch(currIndex, (val) => {
+  clearInterval(interval);
+  interval = null;
+  nowHour.value = new Date().getHours();
+  countDown(val);
+  goodsList.value = list.value[val].seckillGoodsList;
+});
+
+watch(diffSeconds, (val) => {
+  const hours = Math.floor(val / 3600);
+  // 当前秒数 / 60，向下取整
+  // 获取到所有分钟数 3600 / 60 = 60分钟
+  // 对60取模，超过小时数的分钟数
+  const minutes = Math.floor(val / 60) % 60;
+  // 当前的秒数 % 60，获取到 超过小时数、分钟数的秒数（秒数）
+  const seconds = val % 60;
+  currTime.value =
+    filteTime(hours) + ":" + filteTime(minutes) + ":" + filteTime(seconds);
+  if (val <= 0) {
+    clearInterval(interval);
+    interval = null;
+  }
+  function filteTime (time) {
+    if (time < 10) {
+      return "0" + time;
+    } else {
+      return time;
+    }
+  }
+});
+
+function getListByDay () {
+  // 当天秒杀活动
+  seckillByDay().then((res) => {
+    if (res.success) {
+      list.value = res.result;
+      goodsList.value = list.value[0].seckillGoodsList;
+      countDown(currIndex.value);
+    }
+  });
+}
+
+function goGoodsDetail (skuId, goodsId) {
+  // 跳转商品详情
+  let routeUrl = router.resolve({
+    path: "/goodsDetail",
+    query: { skuId, goodsId },
+  });
+  window.open(routeUrl.href, "_blank");
+}
+
+// 已售占比。没有库存时按售罄展示
+function salePercent (item) {
+  if (!item.quantity || item.quantity <= 0) return 100;
+  return Math.min(100, Math.ceil((item.salesNum / item.quantity) * 100));
+}
+
+// 场次已开始，且销量达到库存
+function isSoldOut (item) {
+  return nowHour.value >= list.value[currIndex.value].timeLine && item.quantity <= item.salesNum;
+}
+
+// 场次已开始且未售罄才可抢
+function canBuy (item) {
+  return nowHour.value >= list.value[currIndex.value].timeLine && !isSoldOut(item);
+}
+
+// 按钮文案：未开始 / 已售罄 / 立即抢购
+function buyText (item) {
+  if (nowHour.value < list.value[currIndex.value].timeLine) return "即将开始";
+  if (isSoldOut(item)) return "已售罄";
+  return "立即抢购";
+}
+
+function countDown (currIndex) {
+  // 倒计时
+  // 0点时间戳
+  let zeroTime = new Date(new Date().toLocaleDateString()).getTime();
+  let currTime = new Date().getTime();
+  let actTime = 0;
+  let nowHour = new Date().getHours(); // 当前小时数
+  if (list.value[currIndex].timeLine > nowHour) {
+    // 活动未开始
+    actTime = zeroTime + list.value[currIndex].timeLine * 3600 * 1000;
+  } else if (list.value[currIndex].timeLine <= nowHour) {
+    // 活动进行中
+    if (currIndex === list.value.length - 1) {
+      // 如果是最后一个活动，直到24点结束
+      actTime = zeroTime + 24 * 3600 * 1000;
+    } else {
+      actTime = zeroTime + list.value[currIndex + 1].timeLine * 3600 * 1000;
+    }
+  }
+  diffSeconds.value = Math.floor((actTime - currTime) / 1000);
+  interval = setInterval(() => {
+    diffSeconds.value--;
+  }, 1000);
+}
+
+onMounted(() => {
+  getListByDay();
+});
+
+onBeforeUnmount(() => {
+  clearInterval(interval);
+});
 </script>
 <style lang="scss" scoped>
 @import "../../assets/styles/goodsList.scss";

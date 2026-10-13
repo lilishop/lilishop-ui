@@ -28,8 +28,12 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { getSetting, setSetting } from "@/api/index";
+import { Message } from "@/utils/message";
+
+defineOptions({ name: "WxChannelsSettingTab" });
 
 const defaultConfig = () => ({
   appId: "",
@@ -38,71 +42,67 @@ const defaultConfig = () => ({
   tokenUrl: "",
 });
 
-export default {
-  name: "WxChannelsSettingTab",
-  data() {
-    return {
-      loading: false,
-      submitLoading: false,
-      configObject: defaultConfig(),
-    };
-  },
-  mounted() {
-    this.reloadConfig();
-  },
-  methods: {
-    normalizeConfig(val) {
-      if (!val) return {};
-      if (typeof val === "string") {
-        try {
-          return JSON.parse(val);
-        } catch (e) {
-          return {};
-        }
-      }
-      if (typeof val === "object") return val;
+const loading = ref(false);
+const submitLoading = ref(false);
+const configObject = ref(defaultConfig());
+
+function normalizeConfig(val) {
+  if (!val) return {};
+  if (typeof val === "string") {
+    try {
+      return JSON.parse(val);
+    } catch (e) {
       return {};
-    },
-    pickConfigFields(val) {
-      const next = defaultConfig();
-      if (!val || typeof val !== "object") return next;
-      Object.keys(next).forEach((k) => {
-        if (val[k] !== undefined && val[k] !== null) {
-          next[k] = val[k];
-        }
-      });
-      return next;
-    },
-    reloadConfig() {
-      this.loading = true;
-      getSetting("WX_CHANNELS")
-        .then((res) => {
-          if (res && res.success) {
-            const raw = this.normalizeConfig(res.result);
-            this.configObject = this.pickConfigFields(raw);
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    submit() {
-      this.submitLoading = true;
-      setSetting("WX_CHANNELS", this.configObject)
-        .then((res) => {
-          if (res && res.success) {
-            this.$Message.success("保存成功");
-            this.reloadConfig();
-          } else {
-            this.$Message.error("保存失败");
-          }
-        })
-        .finally(() => {
-          this.submitLoading = false;
-        });
-    },
-  },
-};
+    }
+  }
+  if (typeof val === "object") return val;
+  return {};
+}
+
+function pickConfigFields(val) {
+  const next = defaultConfig();
+  if (!val || typeof val !== "object") return next;
+  Object.keys(next).forEach((k) => {
+    if (val[k] !== undefined && val[k] !== null) {
+      next[k] = val[k];
+    }
+  });
+  return next;
+}
+
+function reloadConfig() {
+  loading.value = true;
+  getSetting("WX_CHANNELS")
+    .then((res) => {
+      if (res && res.success) {
+        const raw = normalizeConfig(res.result);
+        configObject.value = pickConfigFields(raw);
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function submit() {
+  submitLoading.value = true;
+  setSetting("WX_CHANNELS", configObject.value)
+    .then((res) => {
+      if (res && res.success) {
+        Message.success("保存成功");
+        reloadConfig();
+      } else {
+        Message.error("保存失败");
+      }
+    })
+    .finally(() => {
+      submitLoading.value = false;
+    });
+}
+
+onMounted(() => {
+  reloadConfig();
+});
 </script>
 
 <style scoped lang="scss">

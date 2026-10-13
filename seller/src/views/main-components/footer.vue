@@ -32,18 +32,11 @@
   </div>
 </template>
 
-<script>
-const config = require("@/config/index");
+<script setup>
+import config from "@/config/index";
+import zhizhaoImg from "@/assets/images/zhizhao.jpg";
 
-export default {
-  data() {
-    return {
-      config,
-      zhizhaoImg: require("@/assets/images/zhizhao.jpg"),
-      year: new Date().getFullYear(),
-    };
-  },
-};
+const year = new Date().getFullYear();
 </script>
 
 <style lang="scss" scoped>

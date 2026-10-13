@@ -42,48 +42,47 @@
     </UserCenterLayout>
   </div>
 </template>
-<script>
-import {memberPoint, memberPointHistory} from '@/api/member.js'
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { memberPoint, memberPointHistory } from '@/api/member.js'
 
-export default {
-  name: 'Point',
-  data () {
-    return {
-      logData: {}, // 积分日志
-      pointObj: {}, // 积分明细
-      loading: false, // 请求接口加载框
-      params: { // 积分列表请求参数
-        pageNumber: 1,
-        pageSize: 20
-      },
-    }
-  },
-  mounted () {
-    this.getHistory()
-    this.getPoint()
-  },
-  methods: {
-    getHistory () { // 获取积分历史
-      memberPointHistory(this.params).then(res => {
-        this.logData = res.result;
-      })
-    },
-    getPoint () { // 获取积分详情
-      memberPoint().then(res => {
-        if (res.success) this.pointObj = res.result
-      })
-    },
-    changePage (val) { // 修改页码
-      this.params.pageNumber = val
-      this.getHistory()
-    },
-    changePageSize (val) { // 修改页数
-      this.params.pageSize = val
-      this.params.pageNumber = 1
-      this.getHistory()
-    }
-  }
+defineOptions({ name: "Point" });
+
+const logData = ref({}); // 积分日志
+const pointObj = ref({}); // 积分明细
+const loading = ref(false); // 请求接口加载框
+const params = reactive({ // 积分列表请求参数
+  pageNumber: 1,
+  pageSize: 20
+});
+
+function getHistory() { // 获取积分历史
+  memberPointHistory(params).then(res => {
+    logData.value = res.result;
+  })
 }
+
+function getPoint() { // 获取积分详情
+  memberPoint().then(res => {
+    if (res.success) pointObj.value = res.result
+  })
+}
+
+function changePage(val) { // 修改页码
+  params.pageNumber = val
+  getHistory()
+}
+
+function changePageSize(val) { // 修改页数
+  params.pageSize = val
+  params.pageNumber = 1
+  getHistory()
+}
+
+onMounted(() => {
+  getHistory()
+  getPoint()
+});
 </script>
 <style lang="scss" scoped>
 h3 {

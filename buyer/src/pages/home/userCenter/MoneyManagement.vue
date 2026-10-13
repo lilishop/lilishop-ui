@@ -23,7 +23,7 @@
       </p></template>
       <div>
         <el-form
-          ref="formData"
+          ref="formDataRef"
           label-width="100px"
           :model="formData"
           :rules="formValidate"
@@ -47,7 +47,7 @@
       </p></template>
       <div>
         <el-form
-          ref="withdrawApplyFormData"
+          ref="withdrawApplyFormDataRef"
           label-width="120px"
           :model="withdrawApplyFormData"
           :rules="withdrawApplyFormValidate"
@@ -180,229 +180,230 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { Message } from "@/utils/message";
-import {getDepositLog, getMembersWallet, getRecharge, getWithdrawApply, recharge, withdrawalApply} from '@/api/member';
+import {getDepositLog, getMembersWallet, getRecharge, getWithdrawApply, recharge as apiRecharge, withdrawalApply as apiWithdrawalApply} from '@/api/member';
 import {withdrawalSettingVO} from "@/api/pay";
 import { Edit } from '@element-plus/icons-vue';
 
-export default {
-  name: 'MoneyManagement',
-  components: { Edit },
-  data() {
-    return {
-      activeWalletTab: "log",
-      frozenDeposit: 0, // 冻结余额
-      memberDeposit: 0, // 余额
+defineOptions({ name: 'MoneyManagement' });
 
-      modal: false, // 余额充值
-      withdrawApplyModal: false, // 提现申请
-      formData: {
-        // 充值金额
-        price: 1
-      },
-      // 提现金额
-      withdrawApplyFormData: {
-        price: 1,
-        minPrice: 1,
-        type: '',
-        realName: '',
-        connectNumber: '',
-      },
-      // 余额日志
-      walletForm: {
-        // 搜索框初始化对象
-        pageNumber: 1,
-        pageSize: 20
-      },
-      // 充值记录
-      rechargeForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20 // 页面大小
-      },
-      // 提现记录
-      withdrawApplyForm: {
-        // 搜索框初始化对象
-        pageNumber: 1, // 当前页数
-        pageSize: 20 // 页面大小
-      },
-      // 提现申请校验
-      withdrawApplyFormValidate: {
-        price: [
-          {required: true, message: '请输入大于0小于9999的合法提现金额'},
-          {
-            pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
-            message: '请输入大于0小于9999的合法提现金额',
-            trigger: 'change'
-          }
-        ],
-        realName: [
-          {required: true, message: '请输入真实姓名'},
-        ],
-        connectNumber: [
-          {required: true, message: '请输入第三方登录账号'},
-        ],
-      },
-      formValidate: {
-        price: [
-          {required: true, message: '请输入大于等于1小于9999的合法充值金额'},
-          {
-            pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
-            message: '请输入大于等于1小于9999的合法充值金额',
-            trigger: 'change'
-          }
-        ]
-      },
-      logColumnsData: {},
-      rechargeListData: {},
-      withdrawApplyColumnsListData: {}
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    // 初始化数据
-    init() {
-      getMembersWallet().then((res) => {
-        this.frozenDeposit = res.result.memberFrozenWallet;
-        this.memberDeposit = res.result.memberWallet;
-      });
-      getDepositLog(this.walletForm).then((res) => {
+const router = useRouter();
+
+const formDataRef = ref(null);
+const withdrawApplyFormDataRef = ref(null);
+
+const activeWalletTab = ref("log");
+const frozenDeposit = ref(0); // 冻结余额
+const memberDeposit = ref(0); // 余额
+
+const modal = ref(false); // 余额充值
+const withdrawApplyModal = ref(false); // 提现申请
+const formData = reactive({
+  // 充值金额
+  price: 1
+});
+// 提现金额
+const withdrawApplyFormData = reactive({
+  price: 1,
+  minPrice: 1,
+  type: '',
+  realName: '',
+  connectNumber: '',
+});
+// 余额日志
+const walletForm = reactive({
+  // 搜索框初始化对象
+  pageNumber: 1,
+  pageSize: 20
+});
+// 充值记录
+const rechargeForm = reactive({
+  // 搜索框初始化对象
+  pageNumber: 1, // 当前页数
+  pageSize: 20 // 页面大小
+});
+// 提现记录
+const withdrawApplyForm = reactive({
+  // 搜索框初始化对象
+  pageNumber: 1, // 当前页数
+  pageSize: 20 // 页面大小
+});
+// 提现申请校验
+const withdrawApplyFormValidate = {
+  price: [
+    {required: true, message: '请输入大于0小于9999的合法提现金额'},
+    {
+      pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
+      message: '请输入大于0小于9999的合法提现金额',
+      trigger: 'change'
+    }
+  ],
+  realName: [
+    {required: true, message: '请输入真实姓名'},
+  ],
+  connectNumber: [
+    {required: true, message: '请输入第三方登录账号'},
+  ],
+};
+const formValidate = {
+  price: [
+    {required: true, message: '请输入大于等于1小于9999的合法充值金额'},
+    {
+      pattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
+      message: '请输入大于等于1小于9999的合法充值金额',
+      trigger: 'change'
+    }
+  ]
+};
+const logColumnsData = ref({});
+const rechargeListData = ref({});
+const withdrawApplyColumnsListData = ref({});
+
+onMounted(() => {
+  init();
+});
+
+// 初始化数据
+function init() {
+  getMembersWallet().then((res) => {
+    frozenDeposit.value = res.result.memberFrozenWallet;
+    memberDeposit.value = res.result.memberWallet;
+  });
+  getDepositLog(walletForm).then((res) => {
+    if (res.message === 'success') {
+      logColumnsData.value = res.result;
+    }
+  });
+}
+function tabPaneChange(v) {
+  activeWalletTab.value = v;
+  if (v === 'recharge') {
+    getRechargeData();
+  }
+  if (v === 'log') {
+    init();
+  }
+  if (v === 'withdrawApply') {
+    getWithdrawApplyData();
+  }
+}
+// 充值记录
+function getRechargeData() {
+  getRecharge(rechargeForm).then((res) => {
+    if (res.message === 'success') {
+      rechargeListData.value = res.result;
+    }
+  });
+}
+// 提现记录
+function getWithdrawApplyData() {
+  getWithdrawApply(withdrawApplyForm).then((res) => {
+    if (res.message === 'success') {
+      withdrawApplyColumnsListData.value = res.result;
+    }
+  });
+}
+function rechargeStatusText (status) {
+  const map = { PAID: '已付款', UNPAID: '未付款', CANCEL: '已取消' }
+  return map[status] || status || '—'
+}
+function rechargeWayText (way) {
+  const map = { ALIPAY: '支付宝', WECHAT: '微信', BANK_TRANSFER: '线下转账' }
+  return map[way] || way || '—'
+}
+function withdrawStatusText (status) {
+  const map = {
+    APPLY: '申请中',
+    VIA_AUDITING: '审核通过',
+    SUCCESS: '提现成功',
+    ERROR: '提现失败'
+  }
+  return map[status] || '审核拒绝'
+}
+// 余额日志
+function changePage(v) {
+  walletForm.pageNumber = v;
+  init();
+}
+function changePageSize(v) {
+  walletForm.pageNumber = 1;
+  walletForm.pageSize = v;
+  init();
+}
+// 充值记录
+function rechargeChangePage(v) {
+  rechargeForm.pageNumber = v;
+  getRechargeData();
+}
+function rechargeChangePageSize(v) {
+  rechargeForm.pageNumber = 1;
+  rechargeForm.pageSize = v;
+  getRechargeData();
+}
+// 提现记录
+function withdrawChangePage(v) {
+  withdrawApplyForm.pageNumber = v;
+  getWithdrawApplyData();
+}
+function withdrawChangePageSize(v) {
+  withdrawApplyForm.pageNumber = 1;
+  withdrawApplyForm.pageSize = v;
+  getWithdrawApplyData();
+}
+// 弹出在线充值框
+function recharge() {
+  formData.price = 1;
+  modal.value = true;
+}
+// 在线充值
+function rechargePrice() {
+  formDataRef.value.validate((valid) => {
+    if (valid) {
+      apiRecharge(formData).then((res) => {
         if (res.message === 'success') {
-          this.logColumnsData = res.result;
-        }
-      });
-    },
-    tabPaneChange(v) {
-      this.activeWalletTab = v;
-      if (v === 'recharge') {
-        this.getRechargeData();
-      }
-      if (v === 'log') {
-        this.init();
-      }
-      if (v === 'withdrawApply') {
-        this.getWithdrawApplyData();
-      }
-    },
-    // 充值记录
-    getRechargeData() {
-      getRecharge(this.rechargeForm).then((res) => {
-        if (res.message === 'success') {
-          this.rechargeListData = res.result;
-        }
-      });
-    },
-    // 提现记录
-    getWithdrawApplyData() {
-      getWithdrawApply(this.withdrawApplyForm).then((res) => {
-        if (res.message === 'success') {
-          this.withdrawApplyColumnsListData = res.result;
-        }
-      });
-    },
-    rechargeStatusText (status) {
-      const map = { PAID: '已付款', UNPAID: '未付款', CANCEL: '已取消' }
-      return map[status] || status || '—'
-    },
-    rechargeWayText (way) {
-      const map = { ALIPAY: '支付宝', WECHAT: '微信', BANK_TRANSFER: '线下转账' }
-      return map[way] || way || '—'
-    },
-    withdrawStatusText (status) {
-      const map = {
-        APPLY: '申请中',
-        VIA_AUDITING: '审核通过',
-        SUCCESS: '提现成功',
-        ERROR: '提现失败'
-      }
-      return map[status] || '审核拒绝'
-    },
-    // 余额日志
-    changePage(v) {
-      this.walletForm.pageNumber = v;
-      this.init();
-    },
-    changePageSize(v) {
-      this.walletForm.pageNumber = 1;
-      this.walletForm.pageSize = v;
-      this.init();
-    },
-    // 充值记录
-    rechargeChangePage(v) {
-      this.rechargeForm.pageNumber = v;
-      this.getRechargeData();
-    },
-    rechargeChangePageSize(v) {
-      this.rechargeForm.pageNumber = 1;
-      this.rechargeForm.pageSize = v;
-      this.getRechargeData();
-    },
-    // 提现记录
-    withdrawChangePage(v) {
-      this.withdrawApplyForm.pageNumber = v;
-      this.getWithdrawApplyData();
-    },
-    withdrawChangePageSize(v) {
-      this.withdrawApplyForm.pageNumber = 1;
-      this.withdrawApplyForm.pageSize = v;
-      this.getWithdrawApplyData();
-    },
-    // 弹出在线充值框
-    recharge() {
-      this.formData.price = 1;
-      this.modal = true;
-    },
-    // 在线充值
-    rechargePrice() {
-      this.$refs['formData'].validate((valid) => {
-        if (valid) {
-          recharge(this.formData).then((res) => {
-            if (res.message === 'success') {
-              this.$router.push({
-                path: '/payment',
-                query: {orderType: 'RECHARGE', sn: res.result.rechargeSn}
-              });
-            }
-          });
-        }
-      });
-    },
-    // 申请提现弹出框
-    withdrawalApply() {
-      this.withdrawApplyModal = true;
-      this.withdrawApplyFormData.minPrice = 1;
-      this.withdrawApplyFormData.price = 1;
-      this.withdrawApplyFormData.type = '';
-      this.withdrawApplyFormData.realName = '';
-      this.withdrawApplyFormData.connectNumber = '';
-      withdrawalSettingVO().then((res) => {
-        if (res.code === 200) {
-          this.withdrawApplyFormData.minPrice = res.result.minPrice;
-          this.withdrawApplyFormData.type = res.result.type;
-          this.withdrawApplyFormData.price = 1;
-        }
-      });
-    },
-    // 提现
-    withdrawal() {
-      this.$refs['withdrawApplyFormData'].validate((valid) => {
-        if (valid) {
-          withdrawalApply(this.withdrawApplyFormData).then((res) => {
-            if (res && res.success) {
-              Message.success('提现申请成功，关注提现状态');
-              this.withdrawApplyModal = false;
-              this.init(); // 余额查询
-              this.getWithdrawApplyData(); // 提现记录
-            }
+          router.push({
+            path: '/payment',
+            query: {orderType: 'RECHARGE', sn: res.result.rechargeSn}
           });
         }
       });
     }
-  }
-};
+  });
+}
+// 申请提现弹出框
+function withdrawalApply() {
+  withdrawApplyModal.value = true;
+  withdrawApplyFormData.minPrice = 1;
+  withdrawApplyFormData.price = 1;
+  withdrawApplyFormData.type = '';
+  withdrawApplyFormData.realName = '';
+  withdrawApplyFormData.connectNumber = '';
+  withdrawalSettingVO().then((res) => {
+    if (res.code === 200) {
+      withdrawApplyFormData.minPrice = res.result.minPrice;
+      withdrawApplyFormData.type = res.result.type;
+      withdrawApplyFormData.price = 1;
+    }
+  });
+}
+// 提现
+function withdrawal() {
+  withdrawApplyFormDataRef.value.validate((valid) => {
+    if (valid) {
+      apiWithdrawalApply(withdrawApplyFormData).then((res) => {
+        if (res && res.success) {
+          Message.success('提现申请成功，关注提现状态');
+          withdrawApplyModal.value = false;
+          init(); // 余额查询
+          getWithdrawApplyData(); // 提现记录
+        }
+      });
+    }
+  });
+}
 </script>
 
 <style lang="scss" scoped>

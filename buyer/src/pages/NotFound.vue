@@ -11,10 +11,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "NotFound",
-};
+<script setup>
+defineOptions({ name: "NotFound" });
 </script>
 
 <style scoped lang="scss">

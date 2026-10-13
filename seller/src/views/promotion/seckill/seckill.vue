@@ -2,7 +2,7 @@
   <div class="search seckill">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -108,92 +108,102 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { seckillList } from "@/api/promotion";
 
-export default {
-  name: "seckill",
-  data() {
-    return {
-      selectDate: [],
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    view(v) {
-      this.$router.push({ name: "seckill-goods", query: { id: v.id, mode: "view" } });
-    },
-    manage(v) {
-      this.$router.push({ name: "seckill-goods", query: { id: v.id } });
-    },
-    getDataList() {
-      this.loading = true;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
-        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
+defineOptions({ name: "seckill" });
+
+const router = useRouter();
+
+const selectDate = ref([]);
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const data = ref([]);
+const total = ref(0);
+
+// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+
+onMounted(() => {
+  init();
+});
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+
+function init() {
+  getDataList();
+}
+
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function view(v) {
+  router.push({ name: "seckill-goods", query: { id: v.id, mode: "view" } });
+}
+
+function manage(v) {
+  router.push({ name: "seckill-goods", query: { id: v.id } });
+}
+
+function getDataList() {
+  loading.value = true;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.startTime = new Date(selectDate.value[0]).getTime();
+    searchForm.endTime = new Date(selectDate.value[1]).getTime();
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  seckillList(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-      seckillList(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
 </script>
 
 <style lang="scss" scoped>

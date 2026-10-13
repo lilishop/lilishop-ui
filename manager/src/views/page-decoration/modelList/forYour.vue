@@ -174,117 +174,115 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, nextTick } from "vue";
 import ossManage from "@/views/sys/oss-manage/ossManage.vue";
+import { formatLinkType } from "@/utils/filters";
 
-export default {
+defineOptions({
   name: "forYour",
-  data() {
-    return {
-      showModal: false,
-      draftOptions: null,
-      picModelFlag: false,
-      selectedData: "", //选中的数据
-      goodsIndex: 0, // 商品索引
-      defaultCallbackImageType: "",
-    };
-  },
-  props: {
-    data: {
-      type: Object,
-      default: {},
-    },
-  },
-  components: {
-    ossManage,
-  },
-  mounted() {
-   },
-  methods: {
-    cloneOptions(options) {
-      return JSON.parse(JSON.stringify(options || {}));
-    },
-    handleSelectImg(type, index) {
-      this.defaultCallbackImageType = type;
-      this.goodsIndex = index;
-      // 选择图片
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
+});
 
-    handleSelectGoods(val, index) {
-      this.$refs.liliDialog.open("goods");
-      this.$refs.liliDialog.singleGoods();
-      this.selectedData = val;
-      this.goodsIndex = index;
-    },
-    handleSelectLink(val, index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-      this.selectedData = val;
-
-      this.goodsIndex = index;
-    },
-    // 回显图片
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url || !this.draftOptions) return;
-      if (this.defaultCallbackImageType == "image") {
-        this.draftOptions.data.image.src = val.url;
-      } else {
-        this.draftOptions.data[this.defaultCallbackImageType][
-          this.goodsIndex
-        ].img = val.url;
-      }
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      if (!val?.length || !this.draftOptions) return;
-      const item = this.draftOptions.data.hot.list[this.goodsIndex];
-      item.img = val[0].thumbnail;
-      item.title = val[0].goodsName;
-      item.price = val[0].price;
-      item.url = this.$filters.formatLinkType(val[0]);
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      if (!this.draftOptions) return;
-      if (this.selectedData == "image") {
-        this.draftOptions.data.image.url = this.$filters.formatLinkType(val);
-      } else {
-        this.draftOptions.data.list[this.goodsIndex].url =
-          this.$filters.formatLinkType(val);
-      }
-    },
-    handleSelectModel() {
-      this.draftOptions = this.cloneOptions(this.data.options);
-      this.showModal = true;
-    },
-    handleCancelModal() {
-      this.draftOptions = null;
-      this.showModal = false;
-    },
-    handleConfirmModal() {
-      if (this.draftOptions) {
-        const saved = this.cloneOptions(this.draftOptions);
-        this.data.options.title = saved.title;
-        this.data.options.data = saved.data;
-      }
-      this.draftOptions = null;
-      this.showModal = false;
-    },
+const props = defineProps({
+  data: {
+    type: Object,
+    default: {},
   },
-};
+});
+
+const showModal = ref(false);
+const draftOptions = ref(null);
+const picModelFlag = ref(false);
+const selectedData = ref(""); //选中的数据
+const goodsIndex = ref(0); // 商品索引
+const defaultCallbackImageType = ref("");
+
+const liliDialog = ref(null);
+// ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
+const ossManageRef = ref(null);
+
+function cloneOptions(options) {
+  return JSON.parse(JSON.stringify(options || {}));
+}
+function handleSelectImg(type, index) {
+  defaultCallbackImageType.value = type;
+  goodsIndex.value = index;
+  // 选择图片
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+
+function handleSelectGoods(val, index) {
+  liliDialog.value.open("goods");
+  liliDialog.value.singleGoods();
+  selectedData.value = val;
+  goodsIndex.value = index;
+}
+function handleSelectLink(val, index) {
+  // 调起选择链接弹窗
+  liliDialog.value.open("link");
+  selectedData.value = val;
+
+  goodsIndex.value = index;
+}
+// 回显图片
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url || !draftOptions.value) return;
+  if (defaultCallbackImageType.value == "image") {
+    draftOptions.value.data.image.src = val.url;
+  } else {
+    draftOptions.value.data[defaultCallbackImageType.value][
+      goodsIndex.value
+    ].img = val.url;
+  }
+}
+// 选择商品回调
+function selectedGoodsData(val) {
+  if (!val?.length || !draftOptions.value) return;
+  const item = draftOptions.value.data.hot.list[goodsIndex.value];
+  item.img = val[0].thumbnail;
+  item.title = val[0].goodsName;
+  item.price = val[0].price;
+  item.url = formatLinkType(val[0]);
+}
+// 选择链接回调
+function selectedLink(val) {
+  if (!draftOptions.value) return;
+  if (selectedData.value == "image") {
+    draftOptions.value.data.image.url = formatLinkType(val);
+  } else {
+    draftOptions.value.data.list[goodsIndex.value].url =
+      formatLinkType(val);
+  }
+}
+function handleSelectModel() {
+  draftOptions.value = cloneOptions(props.data.options);
+  showModal.value = true;
+}
+function handleCancelModal() {
+  draftOptions.value = null;
+  showModal.value = false;
+}
+function handleConfirmModal() {
+  if (draftOptions.value) {
+    const saved = cloneOptions(draftOptions.value);
+    props.data.options.title = saved.title;
+    props.data.options.data = saved.data;
+  }
+  draftOptions.value = null;
+  showModal.value = false;
+}
 </script>
 
 <style scoped lang="scss">

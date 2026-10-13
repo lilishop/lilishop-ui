@@ -29,94 +29,97 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    data: Object,
-  },
-  data() {
-    return {
-      list: [],
-      goodsList: [],
-      actStatus: 0,
-      actName: "限时秒杀",
-      currIndex: 0,
-      currHour: "00",
-      diffSeconds: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-      interval: null,
-    };
-  },
-  watch: {
-    currIndex(val) {
-      clearInterval(this.interval);
-      this.interval = null;
-      this.countDown(val);
-      this.goodsList = this.list[val]?.seckillGoodsList || [];
-    },
-    diffSeconds(val) {
-      const hours = Math.floor(val / 3600);
-      const minutes = Math.floor(val / 60) % 60;
-      const seconds = val % 60;
-      this.hours = filteTime(hours);
-      this.minutes = filteTime(minutes);
-      this.seconds = filteTime(seconds);
-      if (val <= 0) {
-        clearInterval(this.interval);
-        this.interval = null;
-      }
-      function filteTime(time) {
-        return time < 10 ? "0" + time : time;
-      }
-    },
-  },
-  beforeUnmount() {
-    clearInterval(this.interval);
-  },
-  mounted() {
-    this.getListByDay();
-  },
-  methods: {
-    goToSeckill() {
-      this.$router.push("/seckill");
-    },
-    countDown(currIndex) {
-      const zeroTime = new Date(new Date().toLocaleDateString()).getTime();
-      const currTime = new Date().getTime();
-      let actTime = 0;
-      const nowHour = new Date().getHours();
-      if (this.list[currIndex].timeLine > nowHour) {
-        this.actStatus = 0;
-        actTime = zeroTime + this.list[currIndex].timeLine * 3600 * 1000;
-      } else if (this.list[currIndex].timeLine <= nowHour) {
-        this.actStatus = 1;
-        if (currIndex === this.list.length - 1) {
-          actTime = zeroTime + 24 * 3600 * 1000;
-        } else {
-          actTime = zeroTime + this.list[currIndex + 1].timeLine * 3600 * 1000;
-        }
-      }
-      this.currHour = this.list[this.currIndex].timeLine;
-      this.diffSeconds = Math.floor((actTime - currTime) / 1000);
-      this.interval = setInterval(() => {
-        this.diffSeconds--;
-      }, 1000);
-    },
-    getListByDay() {
-      this.list = this.data?.options?.list || [];
-      if (!this.list.length) {
-        this.goodsList = [];
-        return;
-      }
-      this.goodsList = this.list[0]?.seckillGoodsList || [];
-      if (this.goodsList.length) {
-        this.countDown(this.currIndex);
-      }
-    },
-  },
-};
+<script setup>
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+
+const props = defineProps({
+  data: Object,
+});
+
+const router = useRouter();
+
+const list = ref([]);
+const goodsList = ref([]);
+const actStatus = ref(0);
+const actName = ref("限时秒杀");
+const currIndex = ref(0);
+const currHour = ref("00");
+const diffSeconds = ref(0);
+const hours = ref(0);
+const minutes = ref(0);
+const seconds = ref(0);
+const interval = ref(null);
+
+watch(currIndex, (val) => {
+  clearInterval(interval.value);
+  interval.value = null;
+  countDown(val);
+  goodsList.value = list.value[val]?.seckillGoodsList || [];
+});
+
+watch(diffSeconds, (val) => {
+  const h = Math.floor(val / 3600);
+  const m = Math.floor(val / 60) % 60;
+  const s = val % 60;
+  hours.value = filteTime(h);
+  minutes.value = filteTime(m);
+  seconds.value = filteTime(s);
+  if (val <= 0) {
+    clearInterval(interval.value);
+    interval.value = null;
+  }
+  function filteTime(time) {
+    return time < 10 ? "0" + time : time;
+  }
+});
+
+onBeforeUnmount(() => {
+  clearInterval(interval.value);
+});
+
+onMounted(() => {
+  getListByDay();
+});
+
+function goToSeckill() {
+  router.push("/seckill");
+}
+
+function countDown(index) {
+  const zeroTime = new Date(new Date().toLocaleDateString()).getTime();
+  const currTime = new Date().getTime();
+  let actTime = 0;
+  const nowHour = new Date().getHours();
+  if (list.value[index].timeLine > nowHour) {
+    actStatus.value = 0;
+    actTime = zeroTime + list.value[index].timeLine * 3600 * 1000;
+  } else if (list.value[index].timeLine <= nowHour) {
+    actStatus.value = 1;
+    if (index === list.value.length - 1) {
+      actTime = zeroTime + 24 * 3600 * 1000;
+    } else {
+      actTime = zeroTime + list.value[index + 1].timeLine * 3600 * 1000;
+    }
+  }
+  currHour.value = list.value[currIndex.value].timeLine;
+  diffSeconds.value = Math.floor((actTime - currTime) / 1000);
+  interval.value = setInterval(() => {
+    diffSeconds.value--;
+  }, 1000);
+}
+
+function getListByDay() {
+  list.value = props.data?.options?.list || [];
+  if (!list.value.length) {
+    goodsList.value = [];
+    return;
+  }
+  goodsList.value = list.value[0]?.seckillGoodsList || [];
+  if (goodsList.value.length) {
+    countDown(currIndex.value);
+  }
+}
 </script>
 <style lang="scss" scoped>
 .seckill {

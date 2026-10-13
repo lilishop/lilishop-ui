@@ -19,52 +19,48 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { getAppointmentOrderSettings, saveAppointmentOrderSettings } from "@/api/appointment";
 import { ElMessage } from "element-plus";
 
-export default {
-  name: "appointmentOrderSettings",
-  data() {
-    return {
-      loading: false,
-      saving: false,
-      form: {
-        serviceStartRemindMemberHours: 2,
-        inStoreNoShowAutoCompleteHours: 24,
-      },
-    };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    loadData() {
-      this.loading = true;
-      getAppointmentOrderSettings()
-        .then((res) => {
-          if (res.success && res.result) {
-            this.form = { ...this.form, ...res.result };
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    handleSave() {
-      this.saving = true;
-      saveAppointmentOrderSettings(this.form)
-        .then((res) => {
-          if (res.success) {
-            ElMessage.success("保存成功");
-          }
-        })
-        .finally(() => {
-          this.saving = false;
-        });
-    },
-  },
-};
+defineOptions({ name: "appointmentOrderSettings" });
+
+const loading = ref(false);
+const saving = ref(false);
+const form = ref({
+  serviceStartRemindMemberHours: 2,
+  inStoreNoShowAutoCompleteHours: 24,
+});
+
+onMounted(() => {
+  loadData();
+});
+
+function loadData() {
+  loading.value = true;
+  getAppointmentOrderSettings()
+    .then((res) => {
+      if (res.success && res.result) {
+        form.value = { ...form.value, ...res.result };
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function handleSave() {
+  saving.value = true;
+  saveAppointmentOrderSettings(form.value)
+    .then((res) => {
+      if (res.success) {
+        ElMessage.success("保存成功");
+      }
+    })
+    .finally(() => {
+      saving.value = false;
+    });
+}
 </script>
 
 <style scoped>

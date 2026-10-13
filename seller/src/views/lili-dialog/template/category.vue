@@ -26,91 +26,91 @@
   </div>
 
 </template>
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import { getCategoryTree } from "@/api/goods.js";
 
-export default {
-  data() {
-    return {
-      parentIndex: '', // 分类父级下标
-      secondIndex: '', // 分类二级下标
-      thirdIndex: '', // 分类三级下标
-      categoryList: [], // 分类列表一级数据
-      secondLevel: [], // 分类列表二级数据
-      thirdLevel: [], // 分类列表三级数据
-      selectedData: "", // 已选分类数据
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    loadCategoryFromCache() {
-      try {
-        const raw = localStorage.getItem("category");
-        if (!raw) {
-          return null;
-        }
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : null;
-      } catch {
-        return null;
-      }
-    },
-    applyCategoryList(category) {
-      if (!Array.isArray(category)) {
-        this.categoryList = [];
-        return;
-      }
-      category.forEach((item) => {
-        item.___type = "category";
-      });
-      this.categoryList = category;
-    },
-    // 点击一级
-    handleClickChild(item, index) {
-      this.parentIndex = index;
-      this.secondLevel = item.children || [];
-      item.___type = "category";
-      item.allId = item.id;
+const emit = defineEmits(["selected"]);
 
-      this.secondIndex = '';
-      this.thirdIndex = '';
-      this.thirdLevel = []
-      this.$emit("selected", [item]);
-    },
-    // 点击二级
-    handleClickSecondChild(second, index) {
-      second.___type = "category";
-      second.allId = `${second.parentId},${second.id}`
+// 无 defineExpose：grep seller/src 全量确认无外部 ref/$refs/$parent 访问本组件成员
+// （link-dialog.vue 的 $refs["lili-component"][0].type 写入指向首个 tab 的 goods-dialog，与本组件无关；
+//   shop/wap/decorate.vue 仅通过 @selected 事件交互）
+const parentIndex = ref(''); // 分类父级下标
+const secondIndex = ref(''); // 分类二级下标
+const thirdIndex = ref(''); // 分类三级下标
+const categoryList = ref([]); // 分类列表一级数据
+const secondLevel = ref([]); // 分类列表二级数据
+const thirdLevel = ref([]); // 分类列表三级数据
+const selectedData = ref(""); // 已选分类数据
 
-      this.secondIndex = index;
-      this.thirdLevel = second.children || [];
-      this.thirdIndex = '';
-      this.$emit("selected", [second]);
-    },
-    // 点击三级
-    handleClickthirdChild(item, index) {
-      item.___type = "category";
-      item.allId = `${this.categoryList[this.parentIndex].id},${item.parentId},${item.id}`
-      this.$emit("selected", [item]);
-      this.thirdIndex = index;
-    },
-    init() {
-      const cached = this.loadCategoryFromCache();
-      if (cached) {
-        this.applyCategoryList(cached);
-        return;
-      }
-      getCategoryTree().then((res) => {
-        if (res.success && Array.isArray(res.result)) {
-          localStorage.setItem("category", JSON.stringify(res.result));
-          this.applyCategoryList(res.result);
-        }
-      });
-    },
-  },
-};
+function loadCategoryFromCache() {
+  try {
+    const raw = localStorage.getItem("category");
+    if (!raw) {
+      return null;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+function applyCategoryList(category) {
+  if (!Array.isArray(category)) {
+    categoryList.value = [];
+    return;
+  }
+  category.forEach((item) => {
+    item.___type = "category";
+  });
+  categoryList.value = category;
+}
+// 点击一级
+function handleClickChild(item, index) {
+  parentIndex.value = index;
+  secondLevel.value = item.children || [];
+  item.___type = "category";
+  item.allId = item.id;
+
+  secondIndex.value = '';
+  thirdIndex.value = '';
+  thirdLevel.value = []
+  emit("selected", [item]);
+}
+// 点击二级
+function handleClickSecondChild(second, index) {
+  second.___type = "category";
+  second.allId = `${second.parentId},${second.id}`
+
+  secondIndex.value = index;
+  thirdLevel.value = second.children || [];
+  thirdIndex.value = '';
+  emit("selected", [second]);
+}
+// 点击三级
+function handleClickthirdChild(item, index) {
+  item.___type = "category";
+  item.allId = `${categoryList.value[parentIndex.value].id},${item.parentId},${item.id}`
+  emit("selected", [item]);
+  thirdIndex.value = index;
+}
+function init() {
+  const cached = loadCategoryFromCache();
+  if (cached) {
+    applyCategoryList(cached);
+    return;
+  }
+  getCategoryTree().then((res) => {
+    if (res.success && Array.isArray(res.result)) {
+      localStorage.setItem("category", JSON.stringify(res.result));
+      applyCategoryList(res.result);
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .list {

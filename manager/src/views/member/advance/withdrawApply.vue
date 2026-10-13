@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -169,168 +169,169 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import { getUserWithdrawApply, withdrawApply } from "@/api/member";
 import { ElMessage } from "element-plus";
 
-export default {
-  name: "withdrawApply",
-  data() {
-    return {
-      modalTitle: "",
-      loading: true,
-      audit: "",
-      roleModalVisible: false,
-      queryModalVisible: false,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        startDate: "",
-        endDate: "",
-        memberName: "",
-        applyStatus: "",
-      },
-      selectDate: null,
-      submitLoading: false,
-      selectList: [],
-      selectCount: 0,
-      showList: {},
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    paramTypeFilter(val) {
-      if (val === "APPLY") return "申请中";
-      if (val === "VIA_AUDITING") return "审核通过(提现成功)";
-      if (val === "WAIT_USER_CONFIRM") return "用户确认";
-      if (val === "FAIL_AUDITING") return "审核拒绝";
-      if (val === "SUCCESS") return "提现成功";
-      if (val === "ERROR") return "提现失败";
-      return "未知状态";
-    },
-    applyStatusText(status) {
-      if (status === "APPLY") return "申请中";
-      if (status === "VIA_AUDITING") return "审核通过";
-      if (status === "WAIT_USER_CONFIRM") return "用户确认";
-      if (status === "SUCCESS") return "提现成功";
-      if (status === "ERROR") return "提现失败";
-      return "审核拒绝";
-    },
-    applyStatusTagType(status) {
-      if (status === "APPLY") return "warning";
-      if (status === "VIA_AUDITING") return "success";
-      if (status === "WAIT_USER_CONFIRM") return "warning";
-      if (status === "SUCCESS") return "primary";
-      if (status === "ERROR") return "primary";
-      return "danger";
-    },
-    openAudit(row) {
-      this.showList = { ...row };
-      this.audit = "";
-      this.roleModalVisible = true;
-    },
-    openQuery(row) {
-      this.showList = { ...row };
-      this.modalTitle = "查看";
-      this.queryModalVisible = true;
-    },
-    submitRole(res) {
-      const params = {};
-      params.applyId = this.showList.id;
-      params.result = res;
-      params.remark = this.audit;
-      if (res === false && params.remark === "") {
-        ElMessage.error("审核备注不能为空");
-        return;
+defineOptions({ name: "withdrawApply" });
+
+// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
+const searchFormRef = ref(null);
+// 模板 el-table 的 ref
+const table = ref(null);
+
+const modalTitle = ref("");
+const loading = ref(true);
+const audit = ref("");
+const roleModalVisible = ref(false);
+const queryModalVisible = ref(false);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  startDate: "",
+  endDate: "",
+  memberName: "",
+  applyStatus: "",
+});
+const selectDate = ref(null);
+const submitLoading = ref(false);
+const selectList = ref([]);
+const selectCount = ref(0);
+const showList = ref({});
+const data = ref([]);
+const total = ref(0);
+
+function paramTypeFilter(val) {
+  if (val === "APPLY") return "申请中";
+  if (val === "VIA_AUDITING") return "审核通过(提现成功)";
+  if (val === "WAIT_USER_CONFIRM") return "用户确认";
+  if (val === "FAIL_AUDITING") return "审核拒绝";
+  if (val === "SUCCESS") return "提现成功";
+  if (val === "ERROR") return "提现失败";
+  return "未知状态";
+}
+function applyStatusText(status) {
+  if (status === "APPLY") return "申请中";
+  if (status === "VIA_AUDITING") return "审核通过";
+  if (status === "WAIT_USER_CONFIRM") return "用户确认";
+  if (status === "SUCCESS") return "提现成功";
+  if (status === "ERROR") return "提现失败";
+  return "审核拒绝";
+}
+function applyStatusTagType(status) {
+  if (status === "APPLY") return "warning";
+  if (status === "VIA_AUDITING") return "success";
+  if (status === "WAIT_USER_CONFIRM") return "warning";
+  if (status === "SUCCESS") return "primary";
+  if (status === "ERROR") return "primary";
+  return "danger";
+}
+function openAudit(row) {
+  showList.value = { ...row };
+  audit.value = "";
+  roleModalVisible.value = true;
+}
+function openQuery(row) {
+  showList.value = { ...row };
+  modalTitle.value = "查看";
+  queryModalVisible.value = true;
+}
+function submitRole(res) {
+  const params = {};
+  params.applyId = showList.value.id;
+  params.result = res;
+  params.remark = audit.value;
+  if (res === false && params.remark === "") {
+    ElMessage.error("审核备注不能为空");
+    return;
+  }
+  submitLoading.value = true;
+  withdrawApply(params)
+    .then((result) => {
+      const success = result === true || (result && result.success === true);
+      if (success) {
+        ElMessage.success("操作成功");
+        roleModalVisible.value = false;
+        queryModalVisible.value = false;
+        audit.value = "";
+        showList.value = {};
+        getDataList();
       }
-      this.submitLoading = true;
-      withdrawApply(params)
-        .then((result) => {
-          const success = result === true || (result && result.success === true);
-          if (success) {
-            ElMessage.success("操作成功");
-            this.roleModalVisible = false;
-            this.queryModalVisible = false;
-            this.audit = "";
-            this.showList = {};
-            this.getDataList();
-          }
-        })
-        .finally(() => {
-          this.submitLoading = false;
-        });
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-      this.clearSelectAll();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    handleReset() {
-      this.$refs.searchForm.resetFields();
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.selectDate = null;
-      this.searchForm.startDate = "";
-      this.searchForm.endDate = "";
-      this.searchForm.memberName = "";
-      this.getDataList();
-    },
-    changeSort(e) {
-      this.searchForm.sort = e.prop || e.key;
-      this.searchForm.order = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
-      if (!e.order) {
-        this.searchForm.order = "";
-      }
-      this.getDataList();
-    },
-    clearSelectAll() {
-      if (this.$refs.table) {
-        this.$refs.table.clearSelection();
-      }
-    },
-    changeSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    selectDateRange(v) {
-      if (v && v.length === 2) {
-        this.searchForm.startDate = v[0];
-        this.searchForm.endDate = v[1];
-      } else {
-        this.searchForm.startDate = "";
-        this.searchForm.endDate = "";
-      }
-    },
-    getDataList() {
-      this.loading = true;
-      getUserWithdrawApply(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .finally(() => {
+      submitLoading.value = false;
+    });
+}
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+  clearSelectAll();
+}
+function changePageSize(v) {
+  searchForm.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function handleReset() {
+  searchFormRef.value.resetFields();
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  selectDate.value = null;
+  searchForm.startDate = "";
+  searchForm.endDate = "";
+  searchForm.memberName = "";
+  getDataList();
+}
+function changeSort(e) {
+  searchForm.sort = e.prop || e.key;
+  searchForm.order = e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
+  if (!e.order) {
+    searchForm.order = "";
+  }
+  getDataList();
+}
+function clearSelectAll() {
+  if (table.value) {
+    table.value.clearSelection();
+  }
+}
+function changeSelect(e) {
+  selectList.value = e;
+  selectCount.value = e.length;
+}
+function selectDateRange(v) {
+  if (v && v.length === 2) {
+    searchForm.startDate = v[0];
+    searchForm.endDate = v[1];
+  } else {
+    searchForm.startDate = "";
+    searchForm.endDate = "";
+  }
+}
+function getDataList() {
+  loading.value = true;
+  getUserWithdrawApply(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .ops a {

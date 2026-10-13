@@ -22,81 +22,76 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { Chart } from "@antv/g2";
 import { getHotWordsHistory } from "@/api/index";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  data() {
-    return {
-      params: {
-        date: "",
-      },
-      hotWordsChart: null,
-      hotWordsData: [],
-      hasData: true,
-      endMonth: null,
-    };
-  },
-  created() {
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    this.params.date = this.$filters.unixToDate(Math.floor(yesterday.getTime() / 1000), "yyyy-MM-dd");
-  },
-  methods: {
-    disabledDate(date) {
-      if (this.endMonth) {
-        const endDate = this.getDate(this.endMonth);
-        return (date && date > endDate) || date > new Date();
-      }
-      return date && date > new Date();
+const params = reactive({
+  date: "",
+});
+const hotWordsChart = ref(null);
+const hotWordsData = ref([]);
+const hasData = ref(true);
+const endMonth = ref(null);
+
+const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+params.date = unixToDate(Math.floor(yesterday.getTime() / 1000), "yyyy-MM-dd");
+
+function disabledDate(date) {
+  if (endMonth.value) {
+    const endDate = getDate(endMonth.value);
+    return (date && date > endDate) || date > new Date();
+  }
+  return date && date > new Date();
+}
+function getDate(monthStr) {
+  const [year, month] = monthStr.split("-");
+  return new Date(year, month, 0);
+}
+async function search(val) {
+  if (val) {
+    params.date = val;
+  }
+  const res = await getHotWordsHistory(params);
+  if (res.success) {
+    hotWordsData.value = res.result || [];
+    hasData.value = hotWordsData.value.length > 0;
+    if (hasData.value && hotWordsChart.value) {
+      hotWordsChart.value.changeData(hotWordsData.value);
+      hotWordsChart.value.render();
+    }
+  }
+}
+function init() {
+  const chart = new Chart({
+    container: "container",
+    autoFit: true,
+    height: 500,
+    padding: [50, 20, 50, 20],
+  });
+  chart.scale("score", {
+    alias: "搜索次数",
+  });
+  chart.axis("keywords", {
+    tickLine: {
+      alignTick: false,
     },
-    getDate(monthStr) {
-      const [year, month] = monthStr.split("-");
-      return new Date(year, month, 0);
-    },
-    async search(val) {
-      if (val) {
-        this.params.date = val;
-      }
-      const res = await getHotWordsHistory(this.params);
-      if (res.success) {
-        this.hotWordsData = res.result || [];
-        this.hasData = this.hotWordsData.length > 0;
-        if (this.hasData && this.hotWordsChart) {
-          this.hotWordsChart.changeData(this.hotWordsData);
-          this.hotWordsChart.render();
-        }
-      }
-    },
-    init() {
-      const chart = new Chart({
-        container: "container",
-        autoFit: true,
-        height: 500,
-        padding: [50, 20, 50, 20],
-      });
-      chart.scale("score", {
-        alias: "搜索次数",
-      });
-      chart.axis("keywords", {
-        tickLine: {
-          alignTick: false,
-        },
-      });
-      chart.axis("score", false);
-      chart.tooltip({
-        showMarkers: false,
-      });
-      chart.interval().position("keywords*score").color("#f59b99");
-      chart.interaction("element-active");
-      this.hotWordsChart = chart;
-      this.search();
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+  chart.axis("score", false);
+  chart.tooltip({
+    showMarkers: false,
+  });
+  chart.interval().position("keywords*score").color("#f59b99");
+  chart.interaction("element-active");
+  hotWordsChart.value = chart;
+  search();
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -26,7 +26,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 import {
   ArrowRight,
   DataAnalysis,
@@ -34,6 +36,10 @@ import {
   Goods,
   TrendCharts,
 } from "@element-plus/icons-vue";
+
+defineOptions({ name: "seller-data-report" });
+
+const router = useRouter();
 
 const REPORT_MODULES = [
   {
@@ -62,26 +68,11 @@ const REPORT_MODULES = [
   },
 ];
 
-export default {
-  name: "seller-data-report",
-  components: {
-    ArrowRight,
-    TrendCharts,
-    DataAnalysis,
-    Document,
-    Goods,
-  },
-  data() {
-    return {
-      modules: REPORT_MODULES,
-    };
-  },
-  methods: {
-    goReport(name) {
-      this.$router.push({ name });
-    },
-  },
-};
+const modules = ref(REPORT_MODULES);
+
+function goReport(name) {
+  router.push({ name });
+}
 </script>
 
 <style scoped lang="scss">

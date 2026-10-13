@@ -4,33 +4,36 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted } from "vue";
 import Cookies from "js-cookie";
 import util from "@/libs/util";
+import { getStore } from "@/libs/storage";
 import { getCategoryTree } from "@/api/goods.js";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "App",
-  mounted() {
-    const loggedIn =
-      this.getStore("accessToken") || Cookies.get("userInfoSeller");
-    if (loggedIn) {
-      util.bootstrapDynamicRoutesFromCache();
-      util.initRouter(this);
-      this.$store.commit("setOpenedList");
-      this.$store.commit("initCachepage");
-      if (!localStorage.getItem("category")) {
-        getCategoryTree()
-          .then((res) => {
-            if (res.success && Array.isArray(res.result)) {
-              localStorage.setItem("category", JSON.stringify(res.result));
-            }
-          })
-          .catch(() => {});
-      }
+defineOptions({ name: "App" });
+
+const appStore = useAppStore();
+
+onMounted(() => {
+  const loggedIn = getStore("accessToken") || Cookies.get("userInfoSeller");
+  if (loggedIn) {
+    util.bootstrapDynamicRoutesFromCache();
+    util.initRouter();
+    appStore.setOpenedList();
+    appStore.initCachepage();
+    if (!localStorage.getItem("category")) {
+      getCategoryTree()
+        .then((res) => {
+          if (res.success && Array.isArray(res.result)) {
+            localStorage.setItem("category", JSON.stringify(res.result));
+          }
+        })
+        .catch(() => {});
     }
-  },
-};
+  }
+});
 </script>
 
 <style>

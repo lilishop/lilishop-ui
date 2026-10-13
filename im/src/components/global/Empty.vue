@@ -7,27 +7,23 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { noOncallImage } from "@/assets/images";
 
-export default {
+defineOptions({
   name: 'Empty',
-  props: {
-    text: {
-      type: String,
-      default: '数据为空...',
-    },
-    src: {
-      type: String,
-      default: noOncallImage,
-    },
+})
+
+defineProps({
+  text: {
+    type: String,
+    default: '数据为空...',
   },
-  data() {
-    return {}
+  src: {
+    type: String,
+    default: noOncallImage,
   },
-  created() {},
-  methods: {},
-}
+})
 </script>
 <style lang="less" scoped>
 .empty-content {

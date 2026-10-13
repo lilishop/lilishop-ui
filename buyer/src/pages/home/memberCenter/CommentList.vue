@@ -50,52 +50,55 @@
   </div>
 </template>
 
-<script>
-import {evolutionList} from '@/api/order.js';
-export default {
-  name: 'CommentList',
-  data () {
-    return {
-      commentWay: [`待评价`, `待追评`, `已评价`], // 评价分类
-      loading: false, // 加载状态
-      list: [], // 评价列表
-      total: 0, // 评价总数
-      params: { // 请求参数
-        pageNumber: 1,
-        pageSize: 20
-      }
-    };
-  },
-  mounted () {
-    this.getList()
-  },
-  methods: {
-    getList () { // 获取评价列表
-      evolutionList(this.params).then(res => {
-        if (res.success) {
-          const list = res.result.records;
-          list.forEach(element => {
-            element.descriptionScore = Number(element.descriptionScore)
-          });
-          this.list = list;
-          this.total = res.result.total
-        }
-      })
-    },
-    changePageNum (val) { // 修改页码
-      this.params.pageNumber = val;
-      this.getList()
-    },
-    changePageSize (val) { // 修改页数
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList()
-    },
-    evaluateDetail (id) { // 跳转评价详情
-      this.$router.push({path: '/home/evalDetail', query: { id }})
+<script setup>
+import { reactive, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { evolutionList } from '@/api/order.js';
+
+defineOptions({ name: 'CommentList' });
+
+const router = useRouter();
+
+const commentWay = ref([`待评价`, `待追评`, `已评价`]); // 评价分类
+const loading = ref(false); // 加载状态
+const list = ref([]); // 评价列表
+const total = ref(0); // 评价总数
+const params = reactive({ // 请求参数
+  pageNumber: 1,
+  pageSize: 20
+});
+
+function getList () { // 获取评价列表
+  evolutionList(params).then(res => {
+    if (res.success) {
+      const records = res.result.records;
+      records.forEach(element => {
+        element.descriptionScore = Number(element.descriptionScore)
+      });
+      list.value = records;
+      total.value = res.result.total
     }
-  }
-};
+  })
+}
+
+function changePageNum (val) { // 修改页码
+  params.pageNumber = val;
+  getList()
+}
+
+function changePageSize (val) { // 修改页数
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList()
+}
+
+function evaluateDetail (id) { // 跳转评价详情
+  router.push({path: '/home/evalDetail', query: { id }})
+}
+
+onMounted(() => {
+  getList()
+});
 </script>
 
 <style scoped lang="scss">

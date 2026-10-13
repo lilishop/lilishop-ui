@@ -77,150 +77,146 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from "vue";
 import * as API_Statistics from "@/api/statistics";
 import affixTime from "@/components/affix-time";
 import { QuestionFilled } from "@element-plus/icons-vue";
 
-export default {
-  components: { affixTime, QuestionFilled },
-  data() {
-    return {
-      params: {
-        searchType: "LAST_SEVEN",
-        year: "",
-        month: "",
-        storeId: "",
-      },
-      overview: {},
-      refundRank: [],
-      salesRank: [],
-      categoryRank: [],
-      metricDefs: [
-        {
-          key: "netSalesAmount",
-          label: "商品净销售金额",
-          isCount: false,
-          tip: "商品净销售金额=商品销售金额-商品退款金额（扣除退款，不包含储值充值、商品返现，运费）",
-        },
-        {
-          key: "salePriceAmount",
-          label: "商品售价金额",
-          isCount: false,
-          tip: "商品售价金额=商品净销售金额+商品优惠金额，统计时间范围内销售商品折前金额（扣除退款，不包含储值充值、商品返现，运费）",
-        },
-        {
-          key: "discountAmount",
-          label: "商品优惠金额",
-          isCount: false,
-          tip: "统计时间范围内，商品销售时的优惠金额（扣除退款，不包含储值充值、商品返现，运费）",
-        },
-        {
-          key: "salesAmount",
-          label: "商品销售金额",
-          isCount: false,
-          tip: "统计时间范围内，商品折扣后支付金额（不扣除退款，不包含储值充值、商品返现，运费）",
-        },
-        {
-          key: "refundAmount",
-          label: "商品退款金额",
-          isCount: false,
-          tip: "统计时间范围内，商品成功退款金额（不包含储值充值、商品返现，运费）",
-        },
-        {
-          key: "netSalesNum",
-          label: "商品净销售数量",
-          isCount: true,
-          tip: "商品净销售数量=商品销售数量-商品退货数量（含退款，不包含储值充值、商品返现，运费）",
-        },
-        {
-          key: "salesNum",
-          label: "商品销售数量",
-          isCount: true,
-          tip: "按客户支付完成时间统计的订单商品销售数量（包含商品下单，不包含储值充值）",
-        },
-        {
-          key: "refundNum",
-          label: "商品退货数量",
-          isCount: true,
-          tip: "按商家同意退款时间统计的退款单商品退货数量（不包含储值退款、商品返现，运费）",
-        },
-      ],
-    };
+const params = ref({
+  searchType: "LAST_SEVEN",
+  year: "",
+  month: "",
+  storeId: "",
+});
+const overview = ref({});
+const refundRank = ref([]);
+const salesRank = ref([]);
+const categoryRank = ref([]);
+const metricDefs = ref([
+  {
+    key: "netSalesAmount",
+    label: "商品净销售金额",
+    isCount: false,
+    tip: "商品净销售金额=商品销售金额-商品退款金额（扣除退款，不包含储值充值、商品返现，运费）",
   },
-  computed: {
-    metricList() {
-      return this.metricDefs.map((def) => ({
-        ...def,
-        metric: this.overview[def.key] || {},
-      }));
-    },
+  {
+    key: "salePriceAmount",
+    label: "商品售价金额",
+    isCount: false,
+    tip: "商品售价金额=商品净销售金额+商品优惠金额，统计时间范围内销售商品折前金额（扣除退款，不包含储值充值、商品返现，运费）",
   },
-  watch: {
-    params: {
-      handler() {
-        this.loadData();
-      },
-      deep: true,
-      immediate: true,
-    },
+  {
+    key: "discountAmount",
+    label: "商品优惠金额",
+    isCount: false,
+    tip: "统计时间范围内，商品销售时的优惠金额（扣除退款，不包含储值充值、商品返现，运费）",
   },
-  methods: {
-    clickBreadcrumb(item) {
-      this.params = {
-        searchType: item.searchType || "",
-        year: item.year || "",
-        month: item.month || "",
-        storeId: item.storeId || "",
-        startTime: item.startTime || "",
-        endTime: item.endTime || "",
-      };
-    },
-    metricCurrent(metric) {
-      if (!metric || metric.current == null) return 0;
-      return Number(metric.current) || 0;
-    },
-    formatCount(metric) {
-      return Math.round(this.metricCurrent(metric));
-    },
-    rateText(metric) {
-      if (!metric || !metric.rate) return "0%";
-      return metric.rate;
-    },
-    rateClass(metric) {
-      const trend = metric && metric.trend;
-      if (trend === "UP") return "up";
-      if (trend === "DOWN") return "down";
-      return "flat";
-    },
-    async loadData() {
-      const query = { ...this.params };
-      const categoryQuery = { ...query, type: "PRICE" };
-      const [overviewRes, refundRes, salesRes, categoryRes] = await Promise.all([
-        API_Statistics.getGoodsOverview(query),
-        API_Statistics.getGoodsRefundRank(query),
-        API_Statistics.getGoodsSalesRank(query),
-        API_Statistics.getGoodsCategoryRank(categoryQuery),
-      ]);
-      if (overviewRes && overviewRes.success) {
-        this.overview = overviewRes.result || {};
-      }
-      if (refundRes && refundRes.success) {
-        this.refundRank = refundRes.result || [];
-      }
-      if (salesRes && salesRes.success) {
-        this.salesRank = salesRes.result || [];
-      }
-      if (categoryRes && categoryRes.success) {
-        const list = categoryRes.result || [];
-        this.categoryRank = list.map((item, index) => ({
-          ...item,
-          rank: index + 1,
-        }));
-      }
-    },
+  {
+    key: "salesAmount",
+    label: "商品销售金额",
+    isCount: false,
+    tip: "统计时间范围内，商品折扣后支付金额（不扣除退款，不包含储值充值、商品返现，运费）",
   },
-};
+  {
+    key: "refundAmount",
+    label: "商品退款金额",
+    isCount: false,
+    tip: "统计时间范围内，商品成功退款金额（不包含储值充值、商品返现，运费）",
+  },
+  {
+    key: "netSalesNum",
+    label: "商品净销售数量",
+    isCount: true,
+    tip: "商品净销售数量=商品销售数量-商品退货数量（含退款，不包含储值充值、商品返现，运费）",
+  },
+  {
+    key: "salesNum",
+    label: "商品销售数量",
+    isCount: true,
+    tip: "按客户支付完成时间统计的订单商品销售数量（包含商品下单，不包含储值充值）",
+  },
+  {
+    key: "refundNum",
+    label: "商品退货数量",
+    isCount: true,
+    tip: "按商家同意退款时间统计的退款单商品退货数量（不包含储值退款、商品返现，运费）",
+  },
+]);
+
+const metricList = computed(() =>
+  metricDefs.value.map((def) => ({
+    ...def,
+    metric: overview.value[def.key] || {},
+  }))
+);
+
+watch(
+  params,
+  () => {
+    loadData();
+  },
+  { deep: true, immediate: true }
+);
+
+function clickBreadcrumb(item) {
+  params.value = {
+    searchType: item.searchType || "",
+    year: item.year || "",
+    month: item.month || "",
+    storeId: item.storeId || "",
+    startTime: item.startTime || "",
+    endTime: item.endTime || "",
+  };
+}
+
+function metricCurrent(metric) {
+  if (!metric || metric.current == null) return 0;
+  return Number(metric.current) || 0;
+}
+
+function formatCount(metric) {
+  return Math.round(metricCurrent(metric));
+}
+
+function rateText(metric) {
+  if (!metric || !metric.rate) return "0%";
+  return metric.rate;
+}
+
+function rateClass(metric) {
+  const trend = metric && metric.trend;
+  if (trend === "UP") return "up";
+  if (trend === "DOWN") return "down";
+  return "flat";
+}
+
+async function loadData() {
+  const query = { ...params.value };
+  const categoryQuery = { ...query, type: "PRICE" };
+  const [overviewRes, refundRes, salesRes, categoryRes] = await Promise.all([
+    API_Statistics.getGoodsOverview(query),
+    API_Statistics.getGoodsRefundRank(query),
+    API_Statistics.getGoodsSalesRank(query),
+    API_Statistics.getGoodsCategoryRank(categoryQuery),
+  ]);
+  if (overviewRes && overviewRes.success) {
+    overview.value = overviewRes.result || {};
+  }
+  if (refundRes && refundRes.success) {
+    refundRank.value = refundRes.result || [];
+  }
+  if (salesRes && salesRes.success) {
+    salesRank.value = salesRes.result || [];
+  }
+  if (categoryRes && categoryRes.success) {
+    const list = categoryRes.result || [];
+    categoryRank.value = list.map((item, index) => ({
+      ...item,
+      rank: index + 1,
+    }));
+  }
+}
 </script>
 
 <style scoped lang="scss">

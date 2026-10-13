@@ -1,6 +1,10 @@
 const path = require("path");
 const configs = require("./src/config");
 const CompressionPlugin = require("compression-webpack-plugin");
+const Components = require("unplugin-vue-components/webpack").default;
+const {
+  ElementPlusResolver,
+} = require("unplugin-vue-components/resolvers");
 
 const resolve = (dir) => path.join(__dirname, dir);
 
@@ -54,14 +58,25 @@ module.exports = {
   },
   productionSourceMap: false,
   configureWebpack: {
-    plugins: enableProduction
-      ? [
-          new CompressionPlugin({
-            test: /\.js$|\.html$|\.css/,
-            threshold: 10240,
-          }),
-        ]
-      : [],
+    plugins: [
+      // Element Plus 组件按需引入（模板中的 el-* 自动解析为对应组件的具名导入）
+      // importStyle: false —— 样式仍由 plugins/element.js 的全量 CSS 提供，避免分包后自定义样式覆盖顺序变化
+      Components({
+        resolvers: [ElementPlusResolver({ importStyle: false })],
+        dts: false,
+        // 仅用 resolver（无 dirs 目录扫描），关闭文件监听，
+        // 规避 0.27.x 与被提升的 minimatch 版本不兼容导致的 dev 崩溃
+        watch: false,
+      }),
+      ...(enableProduction
+        ? [
+            new CompressionPlugin({
+              test: /\.js$|\.html$|\.css/,
+              threshold: 10240,
+            }),
+          ]
+        : []),
+    ],
     optimization: {
       runtimeChunk: "single",
       splitChunks: {

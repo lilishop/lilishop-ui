@@ -44,78 +44,92 @@
     <BaseFooter></BaseFooter>
   </div>
 </template>
-<script>
-import {pointGoods, pointGoodsCategory} from '@/api/promotion.js'
-export default {
-  data () {
-    return {
-      goodsList: [], // 积分商品列表
-      cateList: [{ // 商品分类
-        name: '全部分类',
-        id: 0
-      }], // 积分分类列表
-      params: { // 商品列表请求参数
-        pageNumber: 1,
-        pageSize: 20,
-        pointsGoodsCategoryId: ''
-      },
-      total: 0, // 商品总数
-      cateId: '' // 店铺分类id
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { pointGoods, pointGoodsCategory } from "@/api/promotion.js";
+
+const route = useRoute();
+const router = useRouter();
+
+const goodsList = ref([]); // 积分商品列表
+const cateList = ref([{ // 商品分类
+  name: "全部分类",
+  id: 0,
+}]); // 积分分类列表
+// 商品列表请求参数
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  pointsGoodsCategoryId: "",
+});
+const total = ref(0); // 商品总数
+const cateId = ref(""); // 店铺分类id
+
+onMounted(() => {
+  params.pointsGoodsCategoryId = route.query.categoryId || "";
+  cateId.value = route.query.categoryId || 0;
+  getList();
+  getCate();
+});
+
+/** 列表 API 返回 PointsGoods（thumbnail/goodsName 在顶层）；详情 API 才有 goodsSku */
+function itemThumbnail(item) {
+  return item?.goodsSku?.thumbnail || item?.thumbnail || "";
+}
+
+function itemGoodsName(item) {
+  return item?.goodsSku?.goodsName || item?.goodsName || "";
+}
+
+// 获取列表
+function getList() {
+  pointGoods(params).then((res) => {
+    if (res.success) {
+      goodsList.value = res.result.records;
+      total.value = res.result.total;
     }
-  },
-  mounted () {
-    this.params.pointsGoodsCategoryId = this.$route.query.categoryId || ''
-    this.cateId = this.$route.query.categoryId || 0
-    this.getList()
-    this.getCate()
-  },
-  methods: {
-    /** 列表 API 返回 PointsGoods（thumbnail/goodsName 在顶层）；详情 API 才有 goodsSku */
-    itemThumbnail (item) {
-      return item?.goodsSku?.thumbnail || item?.thumbnail || ''
-    },
-    itemGoodsName (item) {
-      return item?.goodsSku?.goodsName || item?.goodsName || ''
-    },
-    getList () { // 获取列表
-      pointGoods(this.params).then(res => {
-        if (res.success) {
-          this.goodsList = res.result.records
-          this.total = res.result.total
-        }
-      })
-    },
-    getCate () { // 获取分类
-      pointGoodsCategory(this.params).then(res => {
-        if (res.success) {
-          this.cateList.push(...res.result.records)
-        }
-      })
-    },
-    selectCate (item) { // 选择商品分类
-      let cateId = item.value === 0 ? '' : item.value
-      this.params.pointsGoodsCategoryId = cateId
-      this.getList()
-      this.$router.push({query: {categoryId: cateId}})
-    },
-    goGoodsDetail (id) { // 跳转商品详情
-      this.$router.push({path: '/pointGoodsDetail', query: {id}})
-      // let routerUrl = this.$router.resolve({
-      //   path: '/pointGoodsDetail',
-      //   query: {id}
-      // })
-      // window.open(routerUrl.href, '_blank')
-    },
-    changePageNum (val) { // 修改页码
-      this.params.pageNumber = val;
-      this.getList()
-    },
-    changePageSize (val) { // 修改页数
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList()
+  });
+}
+
+// 获取分类
+function getCate() {
+  pointGoodsCategory(params).then((res) => {
+    if (res.success) {
+      cateList.value.push(...res.result.records);
     }
-  }
+  });
+}
+
+// 选择商品分类
+function selectCate(item) {
+  let cateId = item.value === 0 ? "" : item.value;
+  params.pointsGoodsCategoryId = cateId;
+  getList();
+  router.push({ query: { categoryId: cateId } });
+}
+
+// 跳转商品详情
+function goGoodsDetail(id) {
+  router.push({ path: "/pointGoodsDetail", query: { id } });
+  // let routerUrl = router.resolve({
+  //   path: '/pointGoodsDetail',
+  //   query: {id}
+  // })
+  // window.open(routerUrl.href, '_blank')
+}
+
+// 修改页码
+function changePageNum(val) {
+  params.pageNumber = val;
+  getList();
+}
+
+// 修改页数
+function changePageSize(val) {
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList();
 }
 </script>
 <style lang="scss" scoped>

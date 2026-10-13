@@ -104,197 +104,205 @@
 </template>
 
 <script>
-import { Message } from "@/utils/message";
-import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
-import GoodsClassNav from "@/components/nav/GoodsClassNav";
-import GoodsThumb from "@/components/goods/GoodsThumb.vue";
-import * as apiGoods from "@/api/goods";
 export default {
   name: "GoodsList",
   beforeRouteEnter(to, from, next) {
     window.scrollTo(0, 0);
     next();
   },
-  data() {
-    return {
-      sortIndex: 0, // 排序状态
-      priceSortIndex: 4,
-      sortPriceIndex: false, // 判断价格升序还是降序
-      searched: false,
-      recommendList: [],
-      goodsTool: [
-        // 排序类型
-        { title: "综合", en: "" },
-        { title: "销量", en: "buyCount" },
-        { title: "评论数", en: "commentNum" },
-        { title: "新品", en: "releaseTime" },
-      ],
-      goodsList: [], // 商品列表
-      loading: false, // 加载状态
-      total: 0, // 列表总数
-      params: {
-        // 请求参数
-        pageNumber: 1,
-        pageSize: 20,
-        categoryId: "",
-      },
-    };
-  },
-  watch: {
-    $route() {
-      const { keyword, categoryId, promotionType, promotionsId } = this.$route.query;
-      if (categoryId) {
-        const cateId = categoryId.split(",");
-        Object.assign(this.params, this.$route.query);
-        this.params.categoryId = cateId[cateId.length - 1];
-      }
-      if (promotionType) {
-        this.params.promotionType = promotionType;
-      }
-      if (promotionsId) {
-        this.params.promotionsId = promotionsId;
-      }
-      if (keyword) {
-        // handleSearch 内部会调 getGoodsList，此处不再重复请求
-        this.handleSearch(keyword);
-      } else {
-        this.params.keyword = "";
-        this.getGoodsList();
-      }
-    },
-  },
-  computed: {
-    displayGoods() {
-      if (this.goodsList.length) return this.goodsList;
-      return this.searched && !this.loading ? this.recommendList : [];
-    },
-    emptyTitle() {
-      const keyword = this.params.keyword;
-      return keyword ? `没有找到与“${keyword}”相关的商品` : "暂无商品";
-    },
-  },
-  methods: {
-    // 搜索
-    handleSearch(key) {
-      this.params.keyword = key;
-      this.$route.query.keyword = key
-      this.params.pageNumber = 1;
-      this.getGoodsList();
-    },
-    orderBy(data, index) {
-      // 排序
-      this.sortIndex = index;
-      this.params.sort = data;
-      this.params.order = "desc";
-      if (data === "price") {
-        if (!this.sortPriceIndex) {
-          this.sortPriceIndex = "asc";
-        } else {
-          this.sortPriceIndex === "desc"
-            ? (this.sortPriceIndex = "asc")
-            : (this.sortPriceIndex = "desc");
-        }
-        this.params.order = this.sortPriceIndex;
-      } else {
-        this.sortPriceIndex = false;
-      }
-      this.getGoodsList();
-    },
-    formatGrade(grade) {
-      if (grade === null || grade === undefined || grade === "") {
-        return 100;
-      }
-      const num = Number(grade);
-      if (Number.isNaN(num)) {
-        return 100;
-      }
-      const fixed = Number(num.toFixed(1));
-      return fixed % 1 === 0 ? fixed.toFixed(0) : String(fixed);
-    },
-    goGoodsDetail(skuId, goodsId) {
-      const location = {
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
-      };
-      window.open(this.$router.resolve(location).href, "_blank");
-    },
-    goShopPage(id) {
-      if (!id) {
-        Message.warning("店铺信息不存在");
-        return;
-      }
-      this.$router.push({
-        path: "/merchant",
-        query: { id },
-      });
-    },
-    // 分页 修改页码
-    changePageNum(val) {
-      this.params.pageNumber = val;
-      this.getGoodsList();
-    },
-    // 分页 修改页数
-    changePageSize(val) {
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getGoodsList();
-    },
-
-    // 获取商品列表
-    getGoodsList() {
-      this.loading = true;
-      apiGoods
-        .goodsList(this.params)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.goodsList = res.result.records || [];
-            this.total = res.result.total;
-            if (!this.goodsList.length) this.loadRecommend();
-          }
-        })
-        .catch(() => {
-          this.goodsList = [];
-        })
-        .finally(() => {
-          this.loading = false;
-          this.searched = true;
-        });
-    },
-    loadRecommend() {
-      if (this.recommendList.length) return;
-      apiGoods
-        .goodsList({ pageNumber: 1, pageSize: 10, sort: "buyCount", order: "desc" })
-        .then((res) => {
-          if (res.success) this.recommendList = res.result.records || [];
-        })
-        .catch(() => {
-          // 推荐列表为可选数据，加载失败不阻塞搜索页
-        });
-    },
-    getParams(val) {
-      // 筛选条件回显
-      Object.assign(this.params, val);
-      this.getGoodsList();
-    },
-  },
-  created() {
-    if (this.$route.query.categoryId) {
-      let cateId = this.$route.query.categoryId.split(",");
-      Object.assign(this.params, this.$route.query);
-      this.params.categoryId = cateId[cateId.length - 1];
-    } else {
-      Object.assign(this.params, this.$route.query);
-    }
-    this.getGoodsList();
-  },
-  components: {
-    GoodsClassNav,
-    GoodsThumb,
-    ArrowDown,
-    ArrowUp,
-  },
 };
+</script>
+
+<script setup>
+import { computed, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Message } from "@/utils/message";
+import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
+import GoodsClassNav from "@/components/nav/GoodsClassNav";
+import GoodsThumb from "@/components/goods/GoodsThumb.vue";
+import * as apiGoods from "@/api/goods";
+
+const route = useRoute();
+const router = useRouter();
+
+const sortIndex = ref(0); // 排序状态
+const priceSortIndex = ref(4);
+const sortPriceIndex = ref(false); // 判断价格升序还是降序
+const searched = ref(false);
+const recommendList = ref([]);
+// 排序类型
+const goodsTool = [
+  { title: "综合", en: "" },
+  { title: "销量", en: "buyCount" },
+  { title: "评论数", en: "commentNum" },
+  { title: "新品", en: "releaseTime" },
+];
+const goodsList = ref([]); // 商品列表
+const loading = ref(false); // 加载状态
+const total = ref(0); // 列表总数
+// 请求参数
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  categoryId: "",
+});
+
+const displayGoods = computed(() => {
+  if (goodsList.value.length) return goodsList.value;
+  return searched.value && !loading.value ? recommendList.value : [];
+});
+
+const emptyTitle = computed(() => {
+  const keyword = params.keyword;
+  return keyword ? `没有找到与“${keyword}”相关的商品` : "暂无商品";
+});
+
+watch(
+  () => route.query,
+  (query) => {
+    const { keyword, categoryId, promotionType, promotionsId } = query;
+    if (categoryId) {
+      const cateId = categoryId.split(",");
+      Object.assign(params, query);
+      params.categoryId = cateId[cateId.length - 1];
+    }
+    if (promotionType) {
+      params.promotionType = promotionType;
+    }
+    if (promotionsId) {
+      params.promotionsId = promotionsId;
+    }
+    if (keyword) {
+      // handleSearch 内部会调 getGoodsList，此处不再重复请求
+      handleSearch(keyword);
+    } else {
+      params.keyword = "";
+      getGoodsList();
+    }
+  }
+);
+
+// 搜索
+function handleSearch(key) {
+  params.keyword = key;
+  route.query.keyword = key;
+  params.pageNumber = 1;
+  getGoodsList();
+}
+
+// 排序
+function orderBy(data, index) {
+  sortIndex.value = index;
+  params.sort = data;
+  params.order = "desc";
+  if (data === "price") {
+    if (!sortPriceIndex.value) {
+      sortPriceIndex.value = "asc";
+    } else {
+      sortPriceIndex.value === "desc"
+        ? (sortPriceIndex.value = "asc")
+        : (sortPriceIndex.value = "desc");
+    }
+    params.order = sortPriceIndex.value;
+  } else {
+    sortPriceIndex.value = false;
+  }
+  getGoodsList();
+}
+
+function formatGrade(grade) {
+  if (grade === null || grade === undefined || grade === "") {
+    return 100;
+  }
+  const num = Number(grade);
+  if (Number.isNaN(num)) {
+    return 100;
+  }
+  const fixed = Number(num.toFixed(1));
+  return fixed % 1 === 0 ? fixed.toFixed(0) : String(fixed);
+}
+
+function goGoodsDetail(skuId, goodsId) {
+  const location = {
+    path: "/goodsDetail",
+    query: { skuId, goodsId },
+  };
+  window.open(router.resolve(location).href, "_blank");
+}
+
+function goShopPage(id) {
+  if (!id) {
+    Message.warning("店铺信息不存在");
+    return;
+  }
+  router.push({
+    path: "/merchant",
+    query: { id },
+  });
+}
+
+// 分页 修改页码
+function changePageNum(val) {
+  params.pageNumber = val;
+  getGoodsList();
+}
+
+// 分页 修改页数
+function changePageSize(val) {
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getGoodsList();
+}
+
+// 获取商品列表
+function getGoodsList() {
+  loading.value = true;
+  apiGoods
+    .goodsList(params)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        goodsList.value = res.result.records || [];
+        total.value = res.result.total;
+        if (!goodsList.value.length) loadRecommend();
+      }
+    })
+    .catch(() => {
+      goodsList.value = [];
+    })
+    .finally(() => {
+      loading.value = false;
+      searched.value = true;
+    });
+}
+
+function loadRecommend() {
+  if (recommendList.value.length) return;
+  apiGoods
+    .goodsList({ pageNumber: 1, pageSize: 10, sort: "buyCount", order: "desc" })
+    .then((res) => {
+      if (res.success) recommendList.value = res.result.records || [];
+    })
+    .catch(() => {
+      // 推荐列表为可选数据，加载失败不阻塞搜索页
+    });
+}
+
+// 筛选条件回显
+function getParams(val) {
+  Object.assign(params, val);
+  getGoodsList();
+}
+
+// 初始化（原 created 钩子逻辑）
+if (route.query.categoryId) {
+  const cateId = route.query.categoryId.split(",");
+  Object.assign(params, route.query);
+  params.categoryId = cateId[cateId.length - 1];
+} else {
+  Object.assign(params, route.query);
+}
+getGoodsList();
 </script>
 
 <style scoped lang="scss">

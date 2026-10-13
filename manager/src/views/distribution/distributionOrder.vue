@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -159,135 +159,140 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, watch, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { getDistributionOrder } from "@/api/distribution";
 import { orderStatusList } from "./dataJson";
 import { getShopListData } from "@/api/shops";
+import { unixToDate, unitPrice } from "@/utils/filters";
 
-export default {
-  name: "distributionOrder",
-  data() {
-    return {
-      timeRange: [],
-      orderStatusList,
-      shopList: [],
-      distributionId: this.$route.query.id,
-      currentStatus: "ALL",
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "create_time",
-        order: "desc",
-        distributionOrderStatus: "",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  watch: {
-    $route(e) {
-      this.distributionId = e.query.id ? e.query.id : undefined;
-      this.getDataList();
-    },
-  },
-  methods: {
-    init() {
-      this.getDataList();
-      this.getShopList();
-    },
-    onStatusTabChange(name) {
-      this.currentStatus = name;
-      this.searchForm.distributionOrderStatus = name === "ALL" ? "" : name;
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      if (this.distributionId) {
-        this.searchForm.distributionId = this.distributionId;
-      } else {
-        delete this.searchForm.distributionId;
-      }
-      this.loading = true;
-      if (this.timeRange && this.timeRange[0] && this.timeRange[1]) {
-        const startTime = new Date(this.timeRange[0]).getTime();
-        const endTime = new Date(this.timeRange[1]).getTime();
-        this.searchForm.startTime = this.$filters.unixToDate(startTime / 1000);
-        this.searchForm.endTime = this.$filters.unixToDate(endTime / 1000);
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
-      }
-      getDistributionOrder(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    getShopList(val) {
-      const params = {
-        pageNumber: 1,
-        pageSize: 20,
-        storeName: val || "",
-      };
-      getShopListData(params).then((res) => {
-        this.shopList = res.result.records;
-      });
-    },
-    searchChange(val) {
-      this.getShopList(val);
-    },
-    filterStatus(status) {
-      const arr = [
-        { status: "NO_COMPLETED", title: "未完成" },
-        { status: "COMPLETE", title: "完成" },
-        { status: "REFUND", title: "退款" },
-      ];
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i].status === status) {
-          return arr[i].title;
-        }
-      }
-      return "未完成";
-    },
-    filterStatusTagType(status) {
-      const arr = [
-        { status: "NO_COMPLETED", type: "warning" },
-        { status: "COMPLETE", type: "success" },
-        { status: "REFUND", type: "danger" },
-      ];
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i].status === status) {
-          return arr[i].type;
-        }
-      }
-      return "warning";
-    },
-    formatCommission(amount) {
-      if (amount === null || amount === undefined || amount === "") {
-        return "-";
-      }
-      return this.$filters.unitPrice(amount, "￥");
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "distributionOrder" });
+
+const route = useRoute();
+
+// 模板 el-form / el-table 的 ref（原 ref="searchForm" 与 data 同名会互相覆盖，改名为 searchFormRef）
+const searchFormRef = ref(null);
+const table = ref(null);
+
+const timeRange = ref([]);
+const shopList = ref([]);
+const distributionId = ref(route.query.id);
+const currentStatus = ref("ALL");
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "create_time",
+  order: "desc",
+  distributionOrderStatus: "",
+});
+const data = ref([]);
+const total = ref(0);
+
+watch(
+  () => route.query,
+  (query) => {
+    distributionId.value = query.id ? query.id : undefined;
+    getDataList();
+  }
+);
+
+function init() {
+  getDataList();
+  getShopList();
+}
+function onStatusTabChange(name) {
+  currentStatus.value = name;
+  searchForm.distributionOrderStatus = name === "ALL" ? "" : name;
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function getDataList() {
+  if (distributionId.value) {
+    searchForm.distributionId = distributionId.value;
+  } else {
+    delete searchForm.distributionId;
+  }
+  loading.value = true;
+  if (timeRange.value && timeRange.value[0] && timeRange.value[1]) {
+    const startTime = new Date(timeRange.value[0]).getTime();
+    const endTime = new Date(timeRange.value[1]).getTime();
+    searchForm.startTime = unixToDate(startTime / 1000);
+    searchForm.endTime = unixToDate(endTime / 1000);
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  getDistributionOrder(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function getShopList(val) {
+  const params = {
+    pageNumber: 1,
+    pageSize: 20,
+    storeName: val || "",
+  };
+  getShopListData(params).then((res) => {
+    shopList.value = res.result.records;
+  });
+}
+function searchChange(val) {
+  getShopList(val);
+}
+function filterStatus(status) {
+  const arr = [
+    { status: "NO_COMPLETED", title: "未完成" },
+    { status: "COMPLETE", title: "完成" },
+    { status: "REFUND", title: "退款" },
+  ];
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].status === status) {
+      return arr[i].title;
+    }
+  }
+  return "未完成";
+}
+function filterStatusTagType(status) {
+  const arr = [
+    { status: "NO_COMPLETED", type: "warning" },
+    { status: "COMPLETE", type: "success" },
+    { status: "REFUND", type: "danger" },
+  ];
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i].status === status) {
+      return arr[i].type;
+    }
+  }
+  return "warning";
+}
+function formatCommission(amount) {
+  if (amount === null || amount === undefined || amount === "") {
+    return "-";
+  }
+  return unitPrice(amount, "￥");
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style scoped lang="scss">

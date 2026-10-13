@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="70px" class="search-form">
         <el-form-item label="店员名称">
           <el-input
             type="text"
@@ -37,7 +37,7 @@
       </div>
       <br>
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         border
         :data="data"
@@ -178,9 +178,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref } from "vue";
 import {
-  checkClerk,
+  checkClerk as fetchCheckClerk,
   getUserListData,
   getAllRoleList,
   addUser,
@@ -190,442 +191,441 @@ import {
   resetPassword,
   getClerk
 } from "@/api/index";
-import {validateMobile} from "@/libs/validate";
+import { validateMobile } from "@/libs/validate";
 import { Search } from "@element-plus/icons-vue";
+import { Message, Modal } from "@/utils/message";
+import { md5 } from "@/utils/md5.js";
 import departmentChoose from "@/views/my-components/lili/department-choose";
 import departmentTreeChoose from "@/views/my-components/lili/department-tree-choose";
 
-export default {
-  name: "clerk-manage",
-  components: {
-    Search,
-    departmentChoose,
-    departmentTreeChoose,
-  },
-  data() {
-    return {
-      open:0,
-      loading: true, // 加载状态
-      selectCount: 0, // 已选数量
-      selectList: [], // 已选数据列表
-      searchForm: { // 请求参数
-        clerkName: "",
-        departmentId: "",
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc"
-      },
-      modalType: 0, // 新增编辑标识
-      userModalVisible: false, // 用户modal显隐
-      userEditModalVisible:false,
-      modalTitle: "", // modal标题
-      form: { // 表单
-        username: "",
-        mobile: 0,
-        sex: "",
-        isSuper: 0,
-        roles: [],
-        departmentId: "",
-        departmentTitle: ""
-      },
+defineOptions({ name: "clerk-manage" });
 
-      editForm: { // 表单
-        isSuper: 0,
-        roles: [],
-        departmentId: "",
-        departmentTitle: ""
-      },
-      mobile: "",
-      clerkName: "",
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+const dep = ref(null);
+const editFormRef = ref(null);
+const editDepTree = ref(null);
+const addForm = ref(null);
+const addDepTree = ref(null);
 
-      newMember: false,
-      oldMember: false,
-      memberCheck: false,
-      roleList: [], // 角色列表
-      errorPass: "", // 错误提示
-      formValidate: { // 验证规则
-        username: [
-          {required: true, message: "用户名不能为空", trigger: "blur"}
-        ],
-        password: [
-          {required: true, message: "密码不能为空", trigger: "blur"}
-        ],
-        mobile: [
-          {required: true, message: "手机号不能为空", trigger: "blur"},
-          {validator: validateMobile, trigger: "blur"}
-        ]
-      },
-      submitLoading: false, // 提交状态
-      data: [], // 用户数据
-      total: 0, // 总数
-    };
-  },
-  computed: {
-    addFormRules() {
-      const rules = {
-        username: this.formValidate.username,
-        mobile: this.formValidate.mobile,
-      };
-      if (this.newMember) {
-        rules.password = this.formValidate.password;
-      }
-      return rules;
-    },
-  },
-  methods: {
-    // 初始化数据
-    init() {
-      this.getUserList();
-    },
-    checkClerks() {
-      this.open = this.form.mobile.length;
+const open = ref(0);
+const loading = ref(true); // 加载状态
+const selectCount = ref(0); // 已选数量
+const selectList = ref([]); // 已选数据列表
+const searchForm = reactive({ // 请求参数
+  clerkName: "",
+  departmentId: "",
+  pageNumber: 1,
+  pageSize: 10,
+  sort: "createTime",
+  order: "desc"
+});
+const modalType = ref(0); // 新增编辑标识
+const userModalVisible = ref(false); // 用户modal显隐
+const userEditModalVisible = ref(false);
+const modalTitle = ref(""); // modal标题
+const form = ref({ // 表单
+  username: "",
+  mobile: 0,
+  sex: "",
+  isSuper: 0,
+  roles: [],
+  departmentId: "",
+  departmentTitle: ""
+});
 
-      if(this.open == 11 ){
-        this.checkClerk();
-      }
-      if(this.open < 11){
-        this.checkAgainClerk()
-      }
-    },
-    // 选择部门回调
-    handleSelectDepTree(v) {
-      if (v) {
-        this.form.departmentId = v.departmentId;
-        this.form.departmentTitle = v.departmentTitle;
-      } else {
-        this.form.departmentId = "";
-        this.form.departmentTitle = "";
-      }
-    },
-    // 选择部门回调
-    handleEditSelectDepTree(v) {
-      if (v) {
-        this.editForm.departmentId = v.departmentId;
-        this.editForm.departmentTitle = v.departmentTitle;
-      } else {
-        this.editForm.departmentId = "";
-        this.editForm.departmentTitle = "";
-      }
-    },
-    //重新校验会员
-    checkAgainClerk() {
-      this.memberCheck = false;
-      this.newMember = false;
-      this.oldMember = false;
-      this.form.username = "";
-      this.form.password = "";
-      this.form.isSuper = 0;
-      this.form.roles = [];
-      this.errorPass = "";
-    },
-    // 检测当前手机号对应会员：无 id 为新建会员，有 id 为已有会员
-    checkClerk() {
-      if (!this.form.mobile) {
-        return;
-      }
-      this.newMember = false;
-      this.oldMember = false;
-      this.form.username = "";
-      this.form.password = "";
-      this.errorPass = "";
-      checkClerk(this.form.mobile).then((res) => {
-        if (!res.success) {
-          return;
-        }
-        if (!res.result || !res.result.id) {
-          // 平台无此会员，需新建账号并设置密码
-          this.newMember = true;
-          this.oldMember = false;
-        } else {
-          // 已有会员，仅绑定为店员，不需要也不应展示/回填密码
-          this.newMember = false;
-          this.oldMember = true;
-          this.form.username = res.result.username || "";
-          this.form.password = "";
-        }
-        this.form.isSuper = 0;
-        this.memberCheck = true;
+const editForm = reactive({ // 表单
+  isSuper: 0,
+  roles: [],
+  departmentId: "",
+  departmentTitle: ""
+});
+const mobile = ref("");
+const clerkName = ref("");
+
+const newMember = ref(false);
+const oldMember = ref(false);
+const memberCheck = ref(false);
+const roleList = ref([]); // 角色列表
+const errorPass = ref(""); // 错误提示
+const formValidate = { // 验证规则
+  username: [
+    {required: true, message: "用户名不能为空", trigger: "blur"}
+  ],
+  password: [
+    {required: true, message: "密码不能为空", trigger: "blur"}
+  ],
+  mobile: [
+    {required: true, message: "手机号不能为空", trigger: "blur"},
+    {validator: validateMobile, trigger: "blur"}
+  ]
+};
+const submitLoading = ref(false); // 提交状态
+const data = ref([]); // 用户数据
+const total = ref(0); // 总数
+
+const addFormRules = computed(() => {
+  const rules = {
+    username: formValidate.username,
+    mobile: formValidate.mobile,
+  };
+  if (newMember.value) {
+    rules.password = formValidate.password;
+  }
+  return rules;
+});
+
+// 初始化数据
+function init() {
+  getUserList();
+}
+function checkClerks() {
+  open.value = form.value.mobile.length;
+
+  if (open.value == 11) {
+    checkClerk();
+  }
+  if (open.value < 11) {
+    checkAgainClerk();
+  }
+}
+// 选择部门回调
+function handleSelectDepTree(v) {
+  if (v) {
+    form.value.departmentId = v.departmentId;
+    form.value.departmentTitle = v.departmentTitle;
+  } else {
+    form.value.departmentId = "";
+    form.value.departmentTitle = "";
+  }
+}
+// 选择部门回调
+function handleEditSelectDepTree(v) {
+  if (v) {
+    editForm.departmentId = v.departmentId;
+    editForm.departmentTitle = v.departmentTitle;
+  } else {
+    editForm.departmentId = "";
+    editForm.departmentTitle = "";
+  }
+}
+//重新校验会员
+function checkAgainClerk() {
+  memberCheck.value = false;
+  newMember.value = false;
+  oldMember.value = false;
+  form.value.username = "";
+  form.value.password = "";
+  form.value.isSuper = 0;
+  form.value.roles = [];
+  errorPass.value = "";
+}
+// 检测当前手机号对应会员：无 id 为新建会员，有 id 为已有会员
+function checkClerk() {
+  if (!form.value.mobile) {
+    return;
+  }
+  newMember.value = false;
+  oldMember.value = false;
+  form.value.username = "";
+  form.value.password = "";
+  errorPass.value = "";
+  fetchCheckClerk(form.value.mobile).then((res) => {
+    if (!res.success) {
+      return;
+    }
+    if (!res.result || !res.result.id) {
+      // 平台无此会员，需新建账号并设置密码
+      newMember.value = true;
+      oldMember.value = false;
+    } else {
+      // 已有会员，仅绑定为店员，不需要也不应展示/回填密码
+      newMember.value = false;
+      oldMember.value = true;
+      form.value.username = res.result.username || "";
+      form.value.password = "";
+    }
+    form.value.isSuper = 0;
+    memberCheck.value = true;
+  });
+}
+// 搜索项部门选择
+function handleSelectDep(v) {
+  searchForm.departmentId = v;
+}
+// 分页 修改页码
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getUserList();
+  clearSelectAll();
+}
+// 分页 修改页数
+function changePageSize(v) {
+  searchForm.pageSize = v;
+  searchForm.pageNumber = 1;
+  getUserList();
+}
+function getUserList() {
+  // 多条件搜索用户列表
+  loading.value = true;
+  getUserListData(searchForm).then(res => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+// 搜索
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 10;
+  getUserList();
+}
+// 排序
+function changeSort(e) {
+  searchForm.sort = e.prop;
+  searchForm.order =
+    e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
+  getUserList();
+}
+// 获取角色列表
+function getRoleList() {
+  let params = {
+    pageSize: 100
+  }
+  getAllRoleList(params).then(res => {
+    if (res.success) {
+      roleList.value = res.result.records;
+    }
+  });
+}
+// 重置密码
+function resetPass() {
+  if (selectCount.value == 0) {
+    Message.warning('请选中数据后重试!');
+    return
+  }
+  Modal.confirm({
+    title: "确认重置",
+    content:
+      "您确认要重置所选的 " +
+      selectCount.value +
+      " 条用户数据密码为【123456】?",
+    loading: true,
+    onOk: () => {
+      let ids = "";
+      selectList.value.forEach(function (e) {
+        ids += e.id + ",";
       });
-    },
-    // 搜索项部门选择
-    handleSelectDep(v) {
-      this.searchForm.departmentId = v;
-    },
-    // 分页 修改页码
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getUserList();
-      this.clearSelectAll();
-    },
-    // 分页 修改页数
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.searchForm.pageNumber = 1;
-      this.getUserList();
-    },
-    getUserList() {
-      // 多条件搜索用户列表
-      this.loading = true;
-      getUserListData(this.searchForm).then(res => {
-        this.loading = false;
+      ids = ids.substring(0, ids.length - 1);
+
+      resetPassword(ids).then(res => {
+        Modal.remove();
         if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    // 搜索
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 10;
-      this.getUserList();
-    },
-    // 排序
-    changeSort(e) {
-      this.searchForm.sort = e.prop;
-      this.searchForm.order =
-        e.order === "ascending" ? "asc" : e.order === "descending" ? "desc" : "";
-      this.getUserList();
-    },
-    // 获取角色列表
-    getRoleList() {
-      let params = {
-        pageSize: 100
-      }
-      getAllRoleList(params).then(res => {
-        if (res.success) {
-          this.roleList = res.result.records;
-        }
-      });
-    },
-    // 重置密码
-    resetPass() {
-      if (this.selectCount == 0) {
-        this.$Message.warning('请选中数据后重试!');
-        return
-      }
-      this.$Modal.confirm({
-        title: "确认重置",
-        content:
-          "您确认要重置所选的 " +
-          this.selectCount +
-          " 条用户数据密码为【123456】?",
-        loading: true,
-        onOk: () => {
-          let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
-          ids = ids.substring(0, ids.length - 1);
-
-          resetPassword(ids).then(res => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.clearSelectAll();
-              this.getUserList();
-            }
-          });
-        }
-      });
-    },
-    updateSubmit(){
-      this.submitLoading = true;
-
-      editOtherUser(this.editForm.id,this.editForm).then(res => {
-        this.submitLoading = false;
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.getUserList();
-          this.userEditModalVisible = false;
-        }
-      });
-    },
-    // 确认提交
-    submitUser() {
-      this.$refs.addForm?.validate(valid => {
-        if (valid) {
-          const params = JSON.parse(JSON.stringify(this.form));
-          delete params.id;
-          delete params.status;
-          if (this.newMember) {
-            if (params.password == "" || params.password == undefined) {
-              this.errorPass = "密码不能为空";
-              return;
-            }
-            if (params.password.length < 6) {
-              this.errorPass = "密码长度不得少于6位";
-              return;
-            }
-            params.password = this.md5(params.password);
-          } else if (this.oldMember) {
-            // 后端 ClerkAddDTO 对 username/password 有 @NotEmpty 校验；
-            // 已有会员走 findByMobile 分支，不会使用该 password，仅用于通过参数校验
-            params.username = this.form.username;
-            params.password = params.password || "000000";
-          }
-          this.submitLoading = true;
-          addUser(params).then(res => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getUserList();
-              this.userModalVisible = false;
-            }
-          });
-        }
-      });
-    },
-    // 添加用户
-    add() {
-      this.modalType = 0;
-      this.modalTitle = "添加店员";
-      this.form = {
-        username: "",
-        mobile: "",
-        password: "",
-        isSuper: 0,
-        roles: [],
-        departmentId: "",
-        departmentTitle: "",
-      };
-      this.oldMember = false;
-      this.newMember = false;
-      this.memberCheck = false;
-      this.userModalVisible = true;
-      this.$nextTick(() => {
-        this.$refs.addForm?.resetFields();
-        this.$refs.addDepTree?.clearSelect?.();
-      });
-    },
-    // 编辑用户
-    edit(v) {
-      getClerk(v.id).then(res => {
-        if (!res.success || !res.result) {
-          return;
-        }
-        this.mobile = res.result.mobile;
-        this.clerkName = res.result.clerkName;
-        this.editForm.isSuper = res.result.isSuper ? 1 : 0;
-        this.editForm.id = res.result.id;
-        this.editForm.departmentId = res.result.departmentId;
-        const selectRolesId = [];
-        if (res.result.roles) {
-          res.result.roles.forEach(function (e) {
-            selectRolesId.push(e.id);
-          });
-        }
-        this.editForm.roles = selectRolesId;
-        this.modalTitle = "修改店员";
-        this.userEditModalVisible = true;
-        this.$nextTick(() => {
-          this.$refs.editDepTree?.setData(
-            res.result.departmentId,
-            res.result.departmentTitle
-          );
-        });
-      });
-    },
-    // 启用
-    enable(v) {
-      let params = {
-        status: true
-      }
-      this.$Modal.confirm({
-        title: "确认启用",
-        content: "您确认要启用用户 " + v.clerkName + " ?",
-        loading: true,
-        onOk: () => {
-          enableClerk(v.id, params).then(res => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getUserList();
-            }
-          });
-        }
-      });
-    },
-    // 禁用
-    disable(v) {
-      let params = {
-        status: false
-      }
-      this.$Modal.confirm({
-        title: "确认禁用",
-        content: "您确认要禁用用户 " + v.clerkName + " ?",
-        loading: true,
-        onOk: () => {
-          enableClerk(v.id, params).then(res => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getUserList();
-            }
-          });
-        }
-      });
-    },
-    // 删除用户
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除用户 " + v.clerkName + " ?",
-        loading: true,
-        onOk: () => {
-          deleteClerk(v.id).then(res => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.getUserList();
-            }
-          });
-        }
-      });
-    },
-    // 选中状态
-    showSelect(e) {
-      this.selectList = e;
-      this.selectCount = e.length;
-    },
-    // 清除选中状态
-    clearSelectAll() {
-      this.$refs.table?.clearSelection();
-    },
-    // 批量删除
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未选择要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除所选的 " + this.selectCount + " 条店员?",
-        loading: true,
-        onOk: () => {
-          let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
-          ids = ids.substring(0, ids.length - 1);
-          deleteClerk(ids).then(res => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.clearSelectAll();
-              this.getUserList();
-            }
-          });
+          Message.success("操作成功");
+          clearSelectAll();
+          getUserList();
         }
       });
     }
-  },
-  mounted() {
-    this.init();
-    this.getRoleList();
+  });
+}
+function updateSubmit() {
+  submitLoading.value = true;
+
+  editOtherUser(editForm.id, editForm).then(res => {
+    submitLoading.value = false;
+    if (res.success) {
+      Message.success("操作成功");
+      getUserList();
+      userEditModalVisible.value = false;
+    }
+  });
+}
+// 确认提交
+function submitUser() {
+  addForm.value?.validate(valid => {
+    if (valid) {
+      const params = JSON.parse(JSON.stringify(form.value));
+      delete params.id;
+      delete params.status;
+      if (newMember.value) {
+        if (params.password == "" || params.password == undefined) {
+          errorPass.value = "密码不能为空";
+          return;
+        }
+        if (params.password.length < 6) {
+          errorPass.value = "密码长度不得少于6位";
+          return;
+        }
+        params.password = md5(params.password);
+      } else if (oldMember.value) {
+        // 后端 ClerkAddDTO 对 username/password 有 @NotEmpty 校验；
+        // 已有会员走 findByMobile 分支，不会使用该 password，仅用于通过参数校验
+        params.username = form.value.username;
+        params.password = params.password || "000000";
+      }
+      submitLoading.value = true;
+      addUser(params).then(res => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("操作成功");
+          getUserList();
+          userModalVisible.value = false;
+        }
+      });
+    }
+  });
+}
+// 添加用户
+function add() {
+  modalType.value = 0;
+  modalTitle.value = "添加店员";
+  form.value = {
+    username: "",
+    mobile: "",
+    password: "",
+    isSuper: 0,
+    roles: [],
+    departmentId: "",
+    departmentTitle: "",
+  };
+  oldMember.value = false;
+  newMember.value = false;
+  memberCheck.value = false;
+  userModalVisible.value = true;
+  nextTick(() => {
+    addForm.value?.resetFields();
+    addDepTree.value?.clearSelect?.();
+  });
+}
+// 编辑用户
+function edit(v) {
+  getClerk(v.id).then(res => {
+    if (!res.success || !res.result) {
+      return;
+    }
+    mobile.value = res.result.mobile;
+    clerkName.value = res.result.clerkName;
+    editForm.isSuper = res.result.isSuper ? 1 : 0;
+    editForm.id = res.result.id;
+    editForm.departmentId = res.result.departmentId;
+    const selectRolesId = [];
+    if (res.result.roles) {
+      res.result.roles.forEach(function (e) {
+        selectRolesId.push(e.id);
+      });
+    }
+    editForm.roles = selectRolesId;
+    modalTitle.value = "修改店员";
+    userEditModalVisible.value = true;
+    nextTick(() => {
+      editDepTree.value?.setData(
+        res.result.departmentId,
+        res.result.departmentTitle
+      );
+    });
+  });
+}
+// 启用
+function enable(v) {
+  let params = {
+    status: true
   }
-};
+  Modal.confirm({
+    title: "确认启用",
+    content: "您确认要启用用户 " + v.clerkName + " ?",
+    loading: true,
+    onOk: () => {
+      enableClerk(v.id, params).then(res => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getUserList();
+        }
+      });
+    }
+  });
+}
+// 禁用
+function disable(v) {
+  let params = {
+    status: false
+  }
+  Modal.confirm({
+    title: "确认禁用",
+    content: "您确认要禁用用户 " + v.clerkName + " ?",
+    loading: true,
+    onOk: () => {
+      enableClerk(v.id, params).then(res => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getUserList();
+        }
+      });
+    }
+  });
+}
+// 删除用户
+function remove(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除用户 " + v.clerkName + " ?",
+    loading: true,
+    onOk: () => {
+      deleteClerk(v.id).then(res => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("删除成功");
+          getUserList();
+        }
+      });
+    }
+  });
+}
+// 选中状态
+function showSelect(e) {
+  selectList.value = e;
+  selectCount.value = e.length;
+}
+// 清除选中状态
+function clearSelectAll() {
+  tableRef.value?.clearSelection();
+}
+// 批量删除
+function delAll() {
+  if (selectCount.value <= 0) {
+    Message.warning("您还未选择要删除的数据");
+    return;
+  }
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除所选的 " + selectCount.value + " 条店员?",
+    loading: true,
+    onOk: () => {
+      let ids = "";
+      selectList.value.forEach(function (e) {
+        ids += e.id + ",";
+      });
+      ids = ids.substring(0, ids.length - 1);
+      deleteClerk(ids).then(res => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("删除成功");
+          clearSelectAll();
+          getUserList();
+        }
+      });
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+  getRoleList();
+});
 </script>
 
 <style scoped lang="scss">

@@ -14,117 +14,112 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, watch } from 'vue';
 import { Message } from "@/utils/message";
 import { Refresh, ArrowRight } from '@element-plus/icons-vue';
 import { getVerifyImg, postVerifyImg } from './verify.js';
-export default {
-  components: { Refresh, ArrowRight },
-  props: {
-    // 传入数据，判断是登录、注册、修改密码
-    verifyType: {
-      defalut: 'LOGIN',
-      type: String
-    }
-  },
-  data () {
-    return {
-      show: false, // 验证码显隐
-      type: 'LOGIN', // 请求类型
-      data: { // 验证码数据
-        backImage: '',
-        slidingImage: '',
-        originalHeight: 150,
-        originalWidth: 300,
-        sliderWidth: 60,
-        sliderHeight: 60
-      },
-      distance: 0, // 拼图移动距离
-      flag: false, // 判断滑块是否按下
-      downX: 0, // 鼠标按下位置
-      bgColor: '#04ad11', // 滑动背景颜色
-      verifyText: '拖动滑块解锁' // 文字提示
-    };
-  },
-  methods: {
-    // 鼠标按下事件，开始拖动滑块
-    mouseDown (e) {
-      this.downX = e.clientX;
-      this.flag = true;
-    },
-    // 鼠标移动事件，计算距离
-    mouseMove (e) {
-      if (this.flag) {
-        let offset = e.clientX - this.downX;
 
-        if (offset > this.data.originalWidth - 43) {
-          this.distance = this.data.originalWidth - 43;
-        } else if (offset < 0) {
-          this.distance = 0;
-        } else {
-          this.distance = offset;
-        }
-      }
-    },
-    // 鼠标抬起事件，验证是否正确
-    mouseUp () {
-      if (!this.flag) return false;
-      this.flag = false;
-      let params = {
-        verificationEnums: this.type,
-        xPos: this.distance
-      };
-      postVerifyImg(params).then(res => {
-        if (res.success) {
-          if (res.result) {
-            this.bgColor = 'green';
-            this.verifyText = '解锁成功';
-            this.$emit('change', { status: true, distance: this.distance });
-          } else {
-            this.bgColor = 'red';
-            this.verifyText = '解锁失败';
-            let that = this;
-            setTimeout(() => {
-              that.init();
-            }, 1000);
-            this.$emit('change', { status: false, distance: this.distance });
-          }
-        } else {
-          this.init()
-        }
-        
-      }).catch(()=>{
-        this.init()
-      });
-    },
-    close () {
-      this.show = false;
-    },
-    init () { // 初始化数据
-      this.flag = false;
-      this.downX = 0;
-      this.distance = 0;
-      this.bgColor = '#04ad11';
-      this.verifyText = '拖动滑块解锁';
-      getVerifyImg(this.type).then(res => {
-        if (res.result) {
-          this.data = res.result;
-          this.show = true;
-        } else {
-          Message.warning('请求失败请重试！')
-        }
-      });
-    }
-  },
-  watch: {
-    verifyType: {
-      immediate: true,
-      handler: function (v) {
-        this.type = v;
-      }
+const props = defineProps({
+  // 传入数据，判断是登录、注册、修改密码
+  verifyType: {
+    defalut: 'LOGIN',
+    type: String
+  }
+});
+
+const emit = defineEmits(['change']);
+
+const show = ref(false); // 验证码显隐
+const type = ref('LOGIN'); // 请求类型
+const data = ref({ // 验证码数据
+  backImage: '',
+  slidingImage: '',
+  originalHeight: 150,
+  originalWidth: 300,
+  sliderWidth: 60,
+  sliderHeight: 60
+});
+const distance = ref(0); // 拼图移动距离
+const flag = ref(false); // 判断滑块是否按下
+const downX = ref(0); // 鼠标按下位置
+const bgColor = ref('#04ad11'); // 滑动背景颜色
+const verifyText = ref('拖动滑块解锁'); // 文字提示
+
+// 鼠标按下事件，开始拖动滑块
+function mouseDown (e) {
+  downX.value = e.clientX;
+  flag.value = true;
+}
+// 鼠标移动事件，计算距离
+function mouseMove (e) {
+  if (flag.value) {
+    let offset = e.clientX - downX.value;
+
+    if (offset > data.value.originalWidth - 43) {
+      distance.value = data.value.originalWidth - 43;
+    } else if (offset < 0) {
+      distance.value = 0;
+    } else {
+      distance.value = offset;
     }
   }
-};
+}
+// 鼠标抬起事件，验证是否正确
+function mouseUp () {
+  if (!flag.value) return false;
+  flag.value = false;
+  let params = {
+    verificationEnums: type.value,
+    xPos: distance.value
+  };
+  postVerifyImg(params).then(res => {
+    if (res.success) {
+      if (res.result) {
+        bgColor.value = 'green';
+        verifyText.value = '解锁成功';
+        emit('change', { status: true, distance: distance.value });
+      } else {
+        bgColor.value = 'red';
+        verifyText.value = '解锁失败';
+        setTimeout(() => {
+          init();
+        }, 1000);
+        emit('change', { status: false, distance: distance.value });
+      }
+    } else {
+      init()
+    }
+
+  }).catch(()=>{
+    init()
+  });
+}
+function close () {
+  show.value = false;
+}
+function init () { // 初始化数据
+  flag.value = false;
+  downX.value = 0;
+  distance.value = 0;
+  bgColor.value = '#04ad11';
+  verifyText.value = '拖动滑块解锁';
+  getVerifyImg(type.value).then(res => {
+    if (res.result) {
+      data.value = res.result;
+      show.value = true;
+    } else {
+      Message.warning('请求失败请重试！')
+    }
+  });
+}
+
+// 父组件通过 ref 调用 init/close
+defineExpose({ init, close });
+
+watch(() => props.verifyType, (v) => {
+  type.value = v;
+}, { immediate: true });
 </script>
 <style lang="scss" scoped>
 .verify-content{

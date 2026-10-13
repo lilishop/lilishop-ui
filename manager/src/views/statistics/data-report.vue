@@ -26,8 +26,9 @@
   </div>
 </template>
 
-<script>
-import { markRaw } from "vue";
+<script setup>
+import { markRaw, ref } from "vue";
+import { useRouter } from "vue-router";
 import {
   ArrowRight,
   DataAnalysis,
@@ -35,6 +36,8 @@ import {
   Goods,
   TrendCharts,
 } from "@element-plus/icons-vue";
+
+defineOptions({ name: "data-report" });
 
 const REPORT_MODULES = [
   {
@@ -63,26 +66,13 @@ const REPORT_MODULES = [
   },
 ];
 
-export default {
-  name: "data-report",
-  components: {
-    ArrowRight,
-    TrendCharts,
-    DataAnalysis,
-    Document,
-    Goods,
-  },
-  data() {
-    return {
-      modules: REPORT_MODULES,
-    };
-  },
-  methods: {
-    goReport(name) {
-      this.$router.push({ name });
-    },
-  },
-};
+const router = useRouter();
+
+const modules = ref(REPORT_MODULES);
+
+function goReport(name) {
+  router.push({ name });
+}
 </script>
 
 <style scoped lang="scss">

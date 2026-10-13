@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form ref="form" :model="form" label-width="120px" :rules="formRule">
+      <el-form ref="formRef" :model="form" label-width="120px" :rules="formRule">
         <div class="base-info-item">
           <div class="form-item-view">
             <h4>商品信息</h4>
@@ -97,205 +97,216 @@
         </div>
       </el-form>
     </el-card>
-    <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
+    <sku-select ref="skuSelectRef" @selectedGoodsData="selectedGoodsData"></sku-select>
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { saveKanJiaActivityGoods } from "@/api/promotion";
 import { regular } from "@/utils";
 import skuSelect from "@/components/lili-dialog";
 import { isECoupon } from "@/constants/goodsType";
+import { Message as $Message } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "add-kanjia-activity-goods",
-  components: {
-    skuSelect,
-  },
-  data() {
-    return {
-      modalType: 0,
-      form: {
-        promotionGoodsList: [],
-        rangeTime: [],
-      },
-      id: this.$route.query.id,
-      submitLoading: false,
-      selectedGoods: [],
-      promotionGoodsList: [],
-      formRule: {
-        promotionGoodsList: [
-          {
-            type: "array",
-            required: true,
-            min: 1,
-            message: "请至少选择一个商品",
-            trigger: "change",
-          },
-        ],
-        rangeTime: [
-          {
-            type: "array",
-            required: true,
-            message: "请选择活动时间",
-            trigger: "change",
-          },
-        ],
-      },
-      options: {
-        disabledDate(date) {
-          return date && date.valueOf() < Date.now() - 86400000;
-        },
-      },
-    };
-  },
-  async mounted() {
-    if (this.id) {
-      this.getCoupon();
-      this.modalType = 1;
-    }
-  },
-  methods: {
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) {
-          return;
-        }
-        if (!this.form.promotionGoodsList.length) {
-          this.$Message.warning("请至少选择一个商品");
-          return;
-        }
+defineOptions({ name: "add-kanjia-activity-goods" });
 
-        const params = JSON.parse(JSON.stringify(this.form));
-        const [start, end] = this.form.rangeTime || [];
-        const startDate = start instanceof Date ? start : new Date(start);
-        const endDate = end instanceof Date ? end : new Date(end);
-        params.startTime = this.$filters.unixToDate(startDate.getTime() / 1000);
-        params.endTime = this.$filters.unixToDate(endDate.getTime() / 1000);
-        delete params.rangeTime;
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
 
-        let checkResult = true;
-        this.form.promotionGoodsList.forEach((res) => {
-          const eCoupon = isECoupon(res.goodsType);
-          if (res.stock <= 0 || res.stock > res.quantity) {
-            checkResult = false;
-            this.$Message.error("活动库存不能为0且不能超过商品库存");
-            return;
-          }
-
-          if (!regular.money.test(res.settlementPrice)) {
-            checkResult = false;
-            this.$Message.error("结算价格金额格式不正确");
-            return;
-          }
-          if (
-            (eCoupon ? res.settlementPrice < 0 : res.settlementPrice <= 0) ||
-            res.settlementPrice > res.price
-          ) {
-            checkResult = false;
-            this.$Message.error(
-              eCoupon
-                ? "结算价格不能小于0且不能超过商品价格"
-                : "结算价格金额不能为0且不能超过商品价格"
-            );
-            return;
-          }
-          if (!regular.money.test(res.highestPrice)) {
-            checkResult = false;
-            this.$Message.error("最高可砍金额格式错误");
-            return;
-          }
-          if (res.highestPrice <= 0 || res.highestPrice > res.price) {
-            checkResult = false;
-            this.$Message.error("最高可砍金额不能为0且不能超过商品价格");
-            return;
-          }
-          if (!regular.money.test(res.lowestPrice)) {
-            checkResult = false;
-            this.$Message.error("最低可砍金额格式错误");
-            return;
-          }
-          if (res.lowestPrice < 0 || (!eCoupon && res.lowestPrice <= 0) || res.lowestPrice > res.price) {
-            checkResult = false;
-            this.$Message.error(eCoupon ? "最低可砍金额不能小于0" : "最低可砍金额不能为0");
-            return;
-          }
-          if (parseInt(res.lowestPrice) > parseInt(res.highestPrice)) {
-            checkResult = false;
-            this.$Message.error("最低砍价金额不能大于最高砍价金额");
-            return;
-          }
-        });
-
-        if (!checkResult) {
-          return;
-        }
-        this.submitLoading = true;
-        saveKanJiaActivityGoods(params).then((res) => {
-          this.submitLoading = false;
-          if (res.success) {
-            this.$Message.success(
-              this.modalType === 1 ? "砍价活动修改成功" : "砍价活动添加成功"
-            );
-            this.closeCurrentPage();
-          }
-        });
-      });
+const modalType = ref(0);
+const form = reactive({
+  promotionGoodsList: [],
+  rangeTime: [],
+});
+const id = ref(route.query.id);
+const submitLoading = ref(false);
+const selectedGoods = ref([]);
+const promotionGoodsList = ref([]);
+const formRule = {
+  promotionGoodsList: [
+    {
+      type: "array",
+      required: true,
+      min: 1,
+      message: "请至少选择一个商品",
+      trigger: "change",
     },
-    closeCurrentPage() {
-      this.$store.commit("removeTag", "add-kan-jia-goods");
-      localStorage.pageOpenedList = JSON.stringify(this.$store.state.app.pageOpenedList);
-      this.$router.go(-1);
+  ],
+  rangeTime: [
+    {
+      type: "array",
+      required: true,
+      message: "请选择活动时间",
+      trigger: "change",
     },
-    openSkuList() {
-      this.$refs.skuSelect.open("goods");
-      let data = JSON.parse(JSON.stringify(this.form.promotionGoodsList));
-      data.forEach((e) => {
-        e.id = e.skuId;
-      });
-      this.$refs.skuSelect.goodsData = data;
-    },
-    changeSelect(e) {
-      this.selectedGoods = e;
-    },
-    delGoods(index) {
-      this.form.promotionGoodsList.splice(index, 1);
-      this.touchPromotionGoodsValidate();
-    },
-    touchPromotionGoodsValidate() {
-      this.$nextTick(() => {
-        const form = this.$refs.form;
-        if (form && typeof form.validateField === "function") {
-          form.validateField("promotionGoodsList", () => {});
-        }
-      });
-    },
-    selectedGoodsData(item) {
-      let list = [];
-      item.forEach((e) => {
-        list.push({
-          settlementPrice: e.settlementPrice || 0,
-          purchasePrice: 0,
-          lowestPrice: e.lowestPrice || 0,
-          highestPrice: e.highestPrice || 0,
-          stock: e.stock || 0,
-          goodsName: e.goodsName,
-          price: e.price,
-          originalPrice: e.price,
-          quantity: e.quantity,
-          storeId: e.storeId,
-          storeName: e.storeName,
-          skuId: e.id,
-          goodsId: e.goodsId,
-          thumbnail: e.thumbnail || "",
-          goodsType: e.goodsType,
-        });
-      });
-      this.form.promotionGoodsList = list;
-      this.touchPromotionGoodsValidate();
-    },
+  ],
+};
+const options = {
+  disabledDate(date) {
+    return date && date.valueOf() < Date.now() - 86400000;
   },
 };
+
+const formRef = ref(null);
+const skuSelectRef = ref(null);
+
+onMounted(async () => {
+  if (id.value) {
+    // 历史遗留：原代码调用了未定义的 getCoupon 方法，此处原样保留
+    getCoupon();
+    modalType.value = 1;
+  }
+});
+
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (!valid) {
+      return;
+    }
+    if (!form.promotionGoodsList.length) {
+      $Message.warning("请至少选择一个商品");
+      return;
+    }
+
+    const params = JSON.parse(JSON.stringify(form));
+    const [start, end] = form.rangeTime || [];
+    const startDate = start instanceof Date ? start : new Date(start);
+    const endDate = end instanceof Date ? end : new Date(end);
+    params.startTime = unixToDate(startDate.getTime() / 1000);
+    params.endTime = unixToDate(endDate.getTime() / 1000);
+    delete params.rangeTime;
+
+    let checkResult = true;
+    form.promotionGoodsList.forEach((res) => {
+      const eCoupon = isECoupon(res.goodsType);
+      if (res.stock <= 0 || res.stock > res.quantity) {
+        checkResult = false;
+        $Message.error("活动库存不能为0且不能超过商品库存");
+        return;
+      }
+
+      if (!regular.money.test(res.settlementPrice)) {
+        checkResult = false;
+        $Message.error("结算价格金额格式不正确");
+        return;
+      }
+      if (
+        (eCoupon ? res.settlementPrice < 0 : res.settlementPrice <= 0) ||
+        res.settlementPrice > res.price
+      ) {
+        checkResult = false;
+        $Message.error(
+          eCoupon
+            ? "结算价格不能小于0且不能超过商品价格"
+            : "结算价格金额不能为0且不能超过商品价格"
+        );
+        return;
+      }
+      if (!regular.money.test(res.highestPrice)) {
+        checkResult = false;
+        $Message.error("最高可砍金额格式错误");
+        return;
+      }
+      if (res.highestPrice <= 0 || res.highestPrice > res.price) {
+        checkResult = false;
+        $Message.error("最高可砍金额不能为0且不能超过商品价格");
+        return;
+      }
+      if (!regular.money.test(res.lowestPrice)) {
+        checkResult = false;
+        $Message.error("最低可砍金额格式错误");
+        return;
+      }
+      if (res.lowestPrice < 0 || (!eCoupon && res.lowestPrice <= 0) || res.lowestPrice > res.price) {
+        checkResult = false;
+        $Message.error(eCoupon ? "最低可砍金额不能小于0" : "最低可砍金额不能为0");
+        return;
+      }
+      if (parseInt(res.lowestPrice) > parseInt(res.highestPrice)) {
+        checkResult = false;
+        $Message.error("最低砍价金额不能大于最高砍价金额");
+        return;
+      }
+    });
+
+    if (!checkResult) {
+      return;
+    }
+    submitLoading.value = true;
+    saveKanJiaActivityGoods(params).then((res) => {
+      submitLoading.value = false;
+      if (res.success) {
+        $Message.success(
+          modalType.value === 1 ? "砍价活动修改成功" : "砍价活动添加成功"
+        );
+        closeCurrentPage();
+      }
+    });
+  });
+}
+
+function closeCurrentPage() {
+  appStore.removeTag("add-kan-jia-goods");
+  localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
+  router.go(-1);
+}
+
+function openSkuList() {
+  skuSelectRef.value.open("goods");
+  let data = JSON.parse(JSON.stringify(form.promotionGoodsList));
+  data.forEach((e) => {
+    e.id = e.skuId;
+  });
+  skuSelectRef.value.goodsData = data;
+}
+
+function changeSelect(e) {
+  selectedGoods.value = e;
+}
+
+function delGoods(index) {
+  form.promotionGoodsList.splice(index, 1);
+  touchPromotionGoodsValidate();
+}
+
+function touchPromotionGoodsValidate() {
+  nextTick(() => {
+    const form = formRef.value;
+    if (form && typeof form.validateField === "function") {
+      form.validateField("promotionGoodsList", () => {});
+    }
+  });
+}
+
+function selectedGoodsData(item) {
+  let list = [];
+  item.forEach((e) => {
+    list.push({
+      settlementPrice: e.settlementPrice || 0,
+      purchasePrice: 0,
+      lowestPrice: e.lowestPrice || 0,
+      highestPrice: e.highestPrice || 0,
+      stock: e.stock || 0,
+      goodsName: e.goodsName,
+      price: e.price,
+      originalPrice: e.price,
+      quantity: e.quantity,
+      storeId: e.storeId,
+      storeName: e.storeName,
+      skuId: e.id,
+      goodsId: e.goodsId,
+      thumbnail: e.thumbnail || "",
+      goodsType: e.goodsType,
+    });
+  });
+  form.promotionGoodsList = list;
+  touchPromotionGoodsValidate();
+}
 </script>
 
 <style lang="scss" scoped>

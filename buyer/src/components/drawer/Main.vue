@@ -20,81 +20,81 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Modal } from "@/utils/message";
-import Storage from '@/plugins/storage.js';
+import storage from '@/plugins/storage.js';
 import Configuration from './config';
 import drawerPage from './Drawer'
 import {cartCount} from '@/api/cart.js'
 import { resolveIcon } from '@/utils/iconMap'
-export default {
-  name: 'Main',
-  data () {
-    return {
-      resetConfig: Configuration, // 菜单项
-      handleDrawer: false, // 是否可展开
-      drawerData: '' // 菜单基础数据
-    }
-  },
-  components: {drawerPage},
-  computed: {
-    // 用户信息
-    userInfo () {
-      return Storage.getItem('userInfo');
-    },
-    // 购物车商品数量
-    cartNum () {
-      return this.$store.state.cartNum
-    }
-  },
-  methods: {
-    resolveIcon,
-    showCartNum (item) { // 获取购物车数量
-      if (this.userInfo && item.title === '购物车') {
-        this.getCartList()
-      }
-    },
-    clickBar (val) { // tabbar点击操作
-      if (!this.userInfo) {
-        Modal.confirm({
-          title: '请登录',
-          content: '请登录后执行此操作',
-          okText: '立即登录',
-          cancelText: '继续浏览',
-          onOk: () => {
-            this.$router.push({
-              path: '/login',
-              query: {
-                rePath: this.$route.path,
-                query: JSON.stringify(this.$route.query || {}),
-              },
-            });
-          }
+import { useAppStore } from '@/stores/app'
+
+defineOptions({ name: 'Main' })
+
+const route = useRoute()
+const router = useRouter()
+const appStore = useAppStore()
+
+const resetConfig = ref(Configuration) // 菜单项
+const handleDrawer = ref(false) // 是否可展开
+const drawerData = ref('') // 菜单基础数据
+
+// 用户信息
+const userInfo = computed(() => {
+  return storage.getItem('userInfo');
+})
+
+// 购物车商品数量
+const cartNum = computed(() => appStore.cartNum)
+
+function showCartNum (item) { // 获取购物车数量
+  if (userInfo.value && item.title === '购物车') {
+    getCartList()
+  }
+}
+
+function clickBar (val) { // tabbar点击操作
+  if (!userInfo.value) {
+    Modal.confirm({
+      title: '请登录',
+      content: '请登录后执行此操作',
+      okText: '立即登录',
+      cancelText: '继续浏览',
+      onOk: () => {
+        router.push({
+          path: '/login',
+          query: {
+            rePath: route.path,
+            query: JSON.stringify(route.query || {}),
+          },
         });
-      } else {
-        if (val.display) {
-          this.handleDrawer = true
-          this.drawerData = val
-        } else {
-          this.handleDrawer = false
-          switch (val.title) {
-            case '会员中心':
-              this.$router.push('/home')
-              break;
-            case '我的资产':
-              this.$router.push('/home/MoneyManagement')
-              break;
-          }
-        }
       }
-    },
-    getCartList () { // 获取购物车列表
-      cartCount().then(res => {
-        this.$store.commit('SET_CARTNUM', res.result)
-        this.Cookies.setItem('cartNum', res.result)
-      })
+    });
+  } else {
+    if (val.display) {
+      handleDrawer.value = true
+      drawerData.value = val
+    } else {
+      handleDrawer.value = false
+      switch (val.title) {
+        case '会员中心':
+          router.push('/home')
+          break;
+        case '我的资产':
+          router.push('/home/MoneyManagement')
+          break;
+      }
     }
   }
+}
+
+function getCartList () { // 获取购物车列表
+  cartCount().then(res => {
+    appStore.setCartNum(res.result)
+    storage.setItem('cartNum', res.result)
+  })
 }
 </script>
 

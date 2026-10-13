@@ -1,7 +1,7 @@
 <template>
   <div class="company-msg">
     <el-form
-      ref="firstForm"
+      ref="firstFormRef"
       :model="form"
       :rules="rules"
       label-width="140px"
@@ -190,7 +190,8 @@
     <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
-<script>
+<script setup>
+import { onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
 import { Message, Notice } from "@/utils/message";
 import { Delete, View } from '@element-plus/icons-vue';
 import { applyFirst } from '@/api/shopentry';
@@ -200,261 +201,259 @@ import storage from '@/plugins/storage';
 import { buyerUrl } from '@/plugins/request.js';
 const FIRST_APPLY_DRAFT_KEY = 'shopEntryFirstDraft';
 
-export default {
-  components: { multipleMap, View, Delete },
-  emits: ['change'],
-  props: {
-    content: {
-      default: () => ({}),
-      type: Object
-    }
-  },
-  data () {
-    return {
-      action: buyerUrl + '/buyer/common/upload/file', // 上传地址
-      accessToken: {}, // 验证token
-      visible: false, // 预览图片
-      loading: false, // 加载状态
-
-      previewPicture: '', // 预览图片url
-      form: { // 表单数据
-        companyName: '',
-        companyAddressIdPath: '',
-        companyAddressPath: '',
-        companyAddress: '',
-        employeeNum: '',
-        companyPhone: '',
-        registeredCapital: '',
-        linkName: '',
-        linkPhone: '',
-        companyEmail: '',
-        licenseNum: '',
-        scope: '',
-        legalName: '',
-        legalId: '',
-        legalPhoto: [],
-        licencePhoto: []
-      },
-      rules: { // 验证规则
-        companyName: [{ required: true, message: '请填写公司信息' }],
-        companyAddressIdPath: [{ required: true, message: '请选择公司所在地' }],
-        companyAddress: [{ required: true, message: '请填写公司详细地址' }],
-        employeeNum: [
-          { required: true, message: '请填写公司员工总数' },
-          { pattern: RegExp.integer, message: '只能填写正整数' }
-        ],
-        registeredCapital: [
-          { required: true, message: '请填写公司注册资金' },
-          { pattern: RegExp.integer, message: '只能填写正整数' }
-        ],
-        linkName: [{ required: true, message: '请填写联系人姓名' }],
-        linkPhone: [
-          { required: true, message: '请填写联系人电话' },
-          { pattern: RegExp.mobile, message: '请填写正确的号码' }
-        ],
-        companyPhone: [
-          { required: true, message: '请填写公司电话' },
-          { pattern: RegExp.mobile, message: '请填写正确的号码' }
-        ],
-        companyEmail: [
-          { required: true, message: '请填写电子邮箱' },
-          { type: 'email', message: '请输入正确的邮箱' }
-        ],
-        licenseNum: [
-          { required: true, message: '请填写营业执照号' },
-          { pattern: RegExp.licenseNum, message: '请输入正确的营业执照号' }
-        ],
-        scope: [{ required: true, message: '请填写营业执照所示经营范围' }],
-        legalPhoto: [{ required: true, message: '请上传法人身份证照片' }],
-        licencePhoto: [{ required: true, message: '请上传营业执照' }],
-        legalName: [{ required: true, message: '请输入法人姓名' }],
-        legalId: [
-          { required: true, message: '请输入法人证件号' },
-          { pattern: RegExp.IDCard, message: '请输入正确的证件号' }
-        ]
-      },
-      uploadLoading1: false, // 上传loading
-      uploadLoading: false, // 上传loading
-      contentInitialized: false
-    };
-  },
-  methods: {
-    // 获取店铺地址
-    getAddress(val){
-      if(val.type === 'select'){
-        const paths = val.data.map(item => item.name).join(',')
-        const ids = val.data.map(item => item.id).join(',')
-        this.form['companyAddressIdPath'] = ids
-        this.form['companyAddressPath'] = paths
-      }else{
-        this.form['companyAddressIdPath'] = val.data.addrId
-        this.form['companyAddressPath'] = val.data.addr
-      }
-    },
-
-    // 下一步
-    next () {
-      this.$refs.firstForm.validate((valid) => {
-        if (valid) {
-          this.loading = true;
-          let params = JSON.parse(JSON.stringify(this.form));
-          params.legalPhoto = this.form.legalPhoto.toString();
-          params.licencePhoto = this.normalizeLicencePhoto(this.form.licencePhoto);
-          applyFirst(params)
-            .then((res) => {
-              this.loading = false;
-              if (res.success) {
-                sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
-                this.$emit('change', 1);
-              }
-            })
-            .catch(() => {
-              this.loading = false;
-            });
-        }
-      });
-    },
-
-    // 上传之前
-    beforeUpload (file) {
-      this.uploadLoading = true;
-      if (this.form.licencePhoto.length >= 1) {
-        Message.warning('最多上传一张图片')
-        this.uploadLoading = false;
-        return false;
-      }
-      return this.validateUploadFile(file);
-    },
-    // 上传之前
-    beforeUpload1 (file) {
-      this.uploadLoading1 = true;
-      if (this.form.legalPhoto.length >= 2) {
-        Message.warning('最多上传两张图片')
-        this.uploadLoading1 = false;
-        return false;
-      }
-      return this.validateUploadFile(file);
-    },
-    validateUploadFile (file) {
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-      const isAllowedType = allowedTypes.includes(file.type);
-      const isLt2M = file.size / 1024 / 1024 < 2;
-      if (!isAllowedType) {
-        this.uploadLoading = false;
-        this.uploadLoading1 = false;
-        Message.warning('上传文件格式不正确');
-        return false;
-      }
-      if (!isLt2M) {
-        this.uploadLoading = false;
-        this.uploadLoading1 = false;
-        Message.warning('文件大小不能超过2M');
-        return false;
-      }
-      return true;
-    },
-    // 上传成功回调
-    handleSuccess (res, file) {
-      this.uploadLoading = false;
-      this.form.licencePhoto = [res.result];
-    },
-    // 上传成功回调
-    handleSuccess1 (res, file) {
-      this.uploadLoading1 = false;
-      this.form.legalPhoto.push(res.result);
-    },
-    // 上传失败
-    uploadErr () {
-      this.uploadLoading = false;
-      this.uploadLoading1 = false;
-    },
-    // 上传失败回调
-    handleFormatError (file) {
-      this.uploadLoading = false;
-      this.uploadLoading1 = false;
-      Notice.warning({
-        title: 'The file format is incorrect',
-        desc: '上传文件格式不正确'
-      });
-    },
-    // 上传大小限制
-    handleMaxSize (file) {
-      this.uploadLoading = false;
-      this.uploadLoading1 = false;
-      Notice.warning({
-        title: 'Exceeding file size limit',
-        desc: '文件大小不能超过2M'
-      });
-    },
-    // 图片查看
-    handleView (item) {
-      this.previewPicture = item;
-      this.visible = true;
-    },
-    // 删除图片
-    handleRemove (index, listName) {
-      this.form[listName].splice(index, 1);
-    },
-    normalizeLicencePhoto (value) {
-      if (Array.isArray(value)) {
-        return value.length ? value[0] : '';
-      }
-      return value ? String(value).split(',').filter(Boolean)[0] || '' : '';
-    },
-    initFormFromContent(content) {
-      if (!content || !Object.keys(content).length) return;
-      this.form = JSON.parse(JSON.stringify(content));
-      this.form.legalPhoto = content.legalPhoto
-        ? String(content.legalPhoto).split(',').filter(Boolean)
-        : [];
-      this.form.licencePhoto = content.licencePhoto
-        ? String(content.licencePhoto).split(',').filter(Boolean).slice(0, 1)
-        : [];
-      this.contentInitialized = true;
-    },
-    restoreDraft() {
-      const draft = sessionStorage.getItem(FIRST_APPLY_DRAFT_KEY);
-      if (!draft) return;
-      try {
-        const parsed = JSON.parse(draft);
-        this.form = {
-          legalPhoto: [],
-          licencePhoto: [],
-          ...parsed,
-        };
-        this.form.legalPhoto = Array.isArray(parsed.legalPhoto) ? parsed.legalPhoto : [];
-        this.form.licencePhoto = Array.isArray(parsed.licencePhoto)
-          ? parsed.licencePhoto.slice(0, 1)
-          : [];
-      } catch (e) {
-        sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
-      }
-    },
-    saveDraft() {
-      sessionStorage.setItem(FIRST_APPLY_DRAFT_KEY, JSON.stringify(this.form));
-    }
-  },
-  watch: {
-    content: {
-      immediate: true,
-      handler(val) {
-        if (this.contentInitialized || !val || !Object.keys(val).length) return;
-        this.initFormFromContent(val);
-      }
-    }
-  },
-  mounted () {
-    this.accessToken.accessToken = storage.getItem('accessToken');
-    if (Object.keys(this.content).length) {
-      this.initFormFromContent(this.content);
-    } else {
-      this.restoreDraft();
-    }
-  },
-  beforeUnmount() {
-    this.saveDraft();
+const emit = defineEmits(['change']);
+const props = defineProps({
+  content: {
+    default: () => ({}),
+    type: Object
   }
+});
+
+const firstFormRef = ref(null);
+const map = ref(null);
+
+const action = buyerUrl + '/buyer/common/upload/file'; // 上传地址
+const accessToken = reactive({}); // 验证token
+const visible = ref(false); // 预览图片
+const loading = ref(false); // 加载状态
+
+const previewPicture = ref(''); // 预览图片url
+const form = ref({ // 表单数据
+  companyName: '',
+  companyAddressIdPath: '',
+  companyAddressPath: '',
+  companyAddress: '',
+  employeeNum: '',
+  companyPhone: '',
+  registeredCapital: '',
+  linkName: '',
+  linkPhone: '',
+  companyEmail: '',
+  licenseNum: '',
+  scope: '',
+  legalName: '',
+  legalId: '',
+  legalPhoto: [],
+  licencePhoto: []
+});
+const rules = { // 验证规则
+  companyName: [{ required: true, message: '请填写公司信息' }],
+  companyAddressIdPath: [{ required: true, message: '请选择公司所在地' }],
+  companyAddress: [{ required: true, message: '请填写公司详细地址' }],
+  employeeNum: [
+    { required: true, message: '请填写公司员工总数' },
+    { pattern: RegExp.integer, message: '只能填写正整数' }
+  ],
+  registeredCapital: [
+    { required: true, message: '请填写公司注册资金' },
+    { pattern: RegExp.integer, message: '只能填写正整数' }
+  ],
+  linkName: [{ required: true, message: '请填写联系人姓名' }],
+  linkPhone: [
+    { required: true, message: '请填写联系人电话' },
+    { pattern: RegExp.mobile, message: '请填写正确的号码' }
+  ],
+  companyPhone: [
+    { required: true, message: '请填写公司电话' },
+    { pattern: RegExp.mobile, message: '请填写正确的号码' }
+  ],
+  companyEmail: [
+    { required: true, message: '请填写电子邮箱' },
+    { type: 'email', message: '请输入正确的邮箱' }
+  ],
+  licenseNum: [
+    { required: true, message: '请填写营业执照号' },
+    { pattern: RegExp.licenseNum, message: '请输入正确的营业执照号' }
+  ],
+  scope: [{ required: true, message: '请填写营业执照所示经营范围' }],
+  legalPhoto: [{ required: true, message: '请上传法人身份证照片' }],
+  licencePhoto: [{ required: true, message: '请上传营业执照' }],
+  legalName: [{ required: true, message: '请输入法人姓名' }],
+  legalId: [
+    { required: true, message: '请输入法人证件号' },
+    { pattern: RegExp.IDCard, message: '请输入正确的证件号' }
+  ]
 };
+const uploadLoading1 = ref(false); // 上传loading
+const uploadLoading = ref(false); // 上传loading
+const contentInitialized = ref(false);
+
+// 获取店铺地址
+function getAddress(val){
+  if(val.type === 'select'){
+    const paths = val.data.map(item => item.name).join(',')
+    const ids = val.data.map(item => item.id).join(',')
+    form.value['companyAddressIdPath'] = ids
+    form.value['companyAddressPath'] = paths
+  }else{
+    form.value['companyAddressIdPath'] = val.data.addrId
+    form.value['companyAddressPath'] = val.data.addr
+  }
+}
+
+// 下一步
+function next () {
+  firstFormRef.value.validate((valid) => {
+    if (valid) {
+      loading.value = true;
+      let params = JSON.parse(JSON.stringify(form.value));
+      params.legalPhoto = form.value.legalPhoto.toString();
+      params.licencePhoto = normalizeLicencePhoto(form.value.licencePhoto);
+      applyFirst(params)
+        .then((res) => {
+          loading.value = false;
+          if (res.success) {
+            sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
+            emit('change', 1);
+          }
+        })
+        .catch(() => {
+          loading.value = false;
+        });
+    }
+  });
+}
+
+// 上传之前
+function beforeUpload (file) {
+  uploadLoading.value = true;
+  if (form.value.licencePhoto.length >= 1) {
+    Message.warning('最多上传一张图片')
+    uploadLoading.value = false;
+    return false;
+  }
+  return validateUploadFile(file);
+}
+// 上传之前
+function beforeUpload1 (file) {
+  uploadLoading1.value = true;
+  if (form.value.legalPhoto.length >= 2) {
+    Message.warning('最多上传两张图片')
+    uploadLoading1.value = false;
+    return false;
+  }
+  return validateUploadFile(file);
+}
+function validateUploadFile (file) {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+  const isAllowedType = allowedTypes.includes(file.type);
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isAllowedType) {
+    uploadLoading.value = false;
+    uploadLoading1.value = false;
+    Message.warning('上传文件格式不正确');
+    return false;
+  }
+  if (!isLt2M) {
+    uploadLoading.value = false;
+    uploadLoading1.value = false;
+    Message.warning('文件大小不能超过2M');
+    return false;
+  }
+  return true;
+}
+// 上传成功回调
+function handleSuccess (res, file) {
+  uploadLoading.value = false;
+  form.value.licencePhoto = [res.result];
+}
+// 上传成功回调
+function handleSuccess1 (res, file) {
+  uploadLoading1.value = false;
+  form.value.legalPhoto.push(res.result);
+}
+// 上传失败
+function uploadErr () {
+  uploadLoading.value = false;
+  uploadLoading1.value = false;
+}
+// 上传失败回调
+function handleFormatError (file) {
+  uploadLoading.value = false;
+  uploadLoading1.value = false;
+  Notice.warning({
+    title: 'The file format is incorrect',
+    desc: '上传文件格式不正确'
+  });
+}
+// 上传大小限制
+function handleMaxSize (file) {
+  uploadLoading.value = false;
+  uploadLoading1.value = false;
+  Notice.warning({
+    title: 'Exceeding file size limit',
+    desc: '文件大小不能超过2M'
+  });
+}
+// 图片查看
+function handleView (item) {
+  previewPicture.value = item;
+  visible.value = true;
+}
+// 删除图片
+function handleRemove (index, listName) {
+  form.value[listName].splice(index, 1);
+}
+function normalizeLicencePhoto (value) {
+  if (Array.isArray(value)) {
+    return value.length ? value[0] : '';
+  }
+  return value ? String(value).split(',').filter(Boolean)[0] || '' : '';
+}
+function initFormFromContent(content) {
+  if (!content || !Object.keys(content).length) return;
+  form.value = JSON.parse(JSON.stringify(content));
+  form.value.legalPhoto = content.legalPhoto
+    ? String(content.legalPhoto).split(',').filter(Boolean)
+    : [];
+  form.value.licencePhoto = content.licencePhoto
+    ? String(content.licencePhoto).split(',').filter(Boolean).slice(0, 1)
+    : [];
+  contentInitialized.value = true;
+}
+function restoreDraft() {
+  const draft = sessionStorage.getItem(FIRST_APPLY_DRAFT_KEY);
+  if (!draft) return;
+  try {
+    const parsed = JSON.parse(draft);
+    form.value = {
+      legalPhoto: [],
+      licencePhoto: [],
+      ...parsed,
+    };
+    form.value.legalPhoto = Array.isArray(parsed.legalPhoto) ? parsed.legalPhoto : [];
+    form.value.licencePhoto = Array.isArray(parsed.licencePhoto)
+      ? parsed.licencePhoto.slice(0, 1)
+      : [];
+  } catch (e) {
+    sessionStorage.removeItem(FIRST_APPLY_DRAFT_KEY);
+  }
+}
+function saveDraft() {
+  sessionStorage.setItem(FIRST_APPLY_DRAFT_KEY, JSON.stringify(form.value));
+}
+
+watch(
+  () => props.content,
+  (val) => {
+    if (contentInitialized.value || !val || !Object.keys(val).length) return;
+    initFormFromContent(val);
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  accessToken.accessToken = storage.getItem('accessToken');
+  if (Object.keys(props.content).length) {
+    initFormFromContent(props.content);
+  } else {
+    restoreDraft();
+  }
+});
+
+onBeforeUnmount(() => {
+  saveDraft();
+});
 </script>
 <style lang="scss" scoped>
 h4 {

@@ -55,49 +55,48 @@
   </div>
 </template>
 
-<script>
-
-import {articleList} from '@/api/common.js'
+<script setup>
+import { onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { articleList as getArticleListApi } from '@/api/common.js'
 import storage from '@/plugins/storage';
 import { User } from '@element-plus/icons-vue';
 import config from '@/config';
-export default {
-  components: { User },
-  name: 'modelCarousel2',
-  props: ['data'],
-  data () {
-    return {
-      config,
-      userInfo: {}, // 用户信息
-      articleList: [], // 常见问题
-      params: { // 请求常见问题参数
-        pageNumber: 1,
-        pageSize: 10,
-        type: 'ANNOUNCEMENT',
-        sort: 'sort'
-      }
-    };
-  },
-  methods: {
-    getArticleList () { // 获取常见问题列表
-      articleList(this.params).then(res => {
-        if (res.success) {
-          this.articleList = res.result.records
-        }
-      })
-    },
-    goArticle (id) { // 跳转文章详情
-      this.$router.push({
-        path: '/article',
-        query: {id}
-      });
+
+defineOptions({ name: 'modelCarousel2' })
+
+defineProps(['data'])
+
+const router = useRouter()
+
+const userInfo = ref({}) // 用户信息
+const articleList = ref([]) // 常见问题
+const params = reactive({ // 请求常见问题参数
+  pageNumber: 1,
+  pageSize: 10,
+  type: 'ANNOUNCEMENT',
+  sort: 'sort'
+})
+
+function getArticleList () { // 获取常见问题列表
+  getArticleListApi(params).then(res => {
+    if (res.success) {
+      articleList.value = res.result.records
     }
-  },
-  mounted () {
-    if (storage.getItem('userInfo')) this.userInfo = JSON.parse(storage.getItem('userInfo'));
-    this.getArticleList()
-  }
-};
+  })
+}
+
+function goArticle (id) { // 跳转文章详情
+  router.push({
+    path: '/article',
+    query: {id}
+  });
+}
+
+onMounted(() => {
+  if (storage.getItem('userInfo')) userInfo.value = JSON.parse(storage.getItem('userInfo'));
+  getArticleList()
+})
 </script>
 
 <style scoped lang="scss">

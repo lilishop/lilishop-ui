@@ -16,21 +16,20 @@
     </el-image>
   </div>
 </template>
-<script>
+<script setup>
 import { imgZoom } from '@/utils/functions'
-export default {
-  name: 'ImageMessage',
-  props: {
-    src: {
-      type: String,
-      default: '',
-    },
+
+defineOptions({ name: 'ImageMessage' })
+
+defineProps({
+  src: {
+    type: String,
+    default: '',
   },
-  methods: {
-    getImgStyle(url) {
-      return imgZoom(url, 200)
-    },
-  },
+})
+
+function getImgStyle(url) {
+  return imgZoom(url, 200)
 }
 </script>
 <style lang="less" scoped>

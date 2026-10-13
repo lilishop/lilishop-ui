@@ -40,7 +40,7 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="名称" prop="addressName">
           <el-input v-model="form.addressName" clearable style="width: 90%" />
         </el-form-item>
@@ -61,156 +61,154 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
 import * as API_Shop from "@/api/shops";
 import { validateMobile } from "@/libs/validate";
+import { Message, Modal } from "@/utils/message";
 import multipleMap from "@/views/my-components/map/multiple-map";
 
-export default {
-  name: "shopAddress",
-  components: { multipleMap },
-  data() {
-    return {
-      loading: true,
-      modalType: 0,
-      modalVisible: false,
-      modalTitle: "",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-      },
-      form: {
-        addressName: "",
-        center: "",
-        address: "",
-        mobile: "",
-      },
-      formValidate: {
-        addressName: [{ required: true, message: "请输入地址名称", trigger: "blur" }],
-        longitude: [{ required: true, message: "请输入地址经度", trigger: "blur" }],
-        latitude: [{ required: true, message: "请输入地址纬度", trigger: "blur" }],
-        mobile: [
-          { required: true, message: "请输入联系电话号", trigger: "blur" },
-          { validator: validateMobile, trigger: "blur" },
-        ],
-        address: [{ required: true, message: " ", trigger: "blur" }],
-      },
-      submitLoading: false,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    getAddress(val) {
-      if (val.type === "select") {
-        const paths = val.data.map((item) => item.name).join(",");
-        this.form.address = paths;
-        this.form.center = val.data[val.data.length - 1].center;
-      } else {
-        this.form.address = val.data.addr;
-        this.form.address = val.data.address;
-        this.form.center = val.data.position.lng + "," + val.data.position.lat;
-      }
-    },
-    getDataList() {
-      this.loading = true;
-      API_Shop.getShopAddress(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    resetForm() {
-      this.form = {
-        addressName: "",
-        center: "",
-        address: "",
-        mobile: "",
-      };
-    },
-    add() {
-      this.modalType = 0;
-      this.modalTitle = "添加自提地址";
-      this.resetForm();
-      this.modalVisible = true;
-      this.$nextTick(() => {
-        this.$refs.form?.resetFields();
-      });
-    },
-    edit(v) {
-      this.modalType = 1;
-      this.modalVisible = true;
-      this.modalTitle = "修改自提地址";
-      this.form.id = v.id;
-      this.form.address = v.address;
-      this.form.addressName = v.addressName;
-      this.form.mobile = v.mobile;
-      this.form.center = v.center;
-      this.form.longitude = v.center.split(",")[0];
-      this.form.latitude = v.center.split(",")[1];
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          if (this.modalType == 0) {
-            const params = { ...this.form };
-            delete params.id;
-            API_Shop.addShopAddress(params).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("添加成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          } else {
-            API_Shop.editShopAddress(this.form.id, this.form).then((res) => {
-              this.submitLoading = false;
-              if (res.success) {
-                this.$Message.success("修改成功");
-                this.getDataList();
-                this.modalVisible = false;
-              }
-            });
-          }
-        }
-      });
-    },
-    deleteSubmit(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "确认删除自提地址么？",
-        loading: true,
-        onOk: () => {
-          API_Shop.deleteShopAddress(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("此自自提地址已删除");
-              this.init();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
+defineOptions({ name: "shopAddress" });
+
+const formRef = ref(null);
+
+const loading = ref(true);
+const modalType = ref(0);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+});
+const form = ref({
+  addressName: "",
+  center: "",
+  address: "",
+  mobile: "",
+});
+const formValidate = {
+  addressName: [{ required: true, message: "请输入地址名称", trigger: "blur" }],
+  longitude: [{ required: true, message: "请输入地址经度", trigger: "blur" }],
+  latitude: [{ required: true, message: "请输入地址纬度", trigger: "blur" }],
+  mobile: [
+    { required: true, message: "请输入联系电话号", trigger: "blur" },
+    { validator: validateMobile, trigger: "blur" },
+  ],
+  address: [{ required: true, message: " ", trigger: "blur" }],
 };
+const submitLoading = ref(false);
+const data = ref([]);
+const total = ref(0);
+
+function init() {
+  getDataList();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.pageSize = v;
+  getDataList();
+}
+function getAddress(val) {
+  if (val.type === "select") {
+    const paths = val.data.map((item) => item.name).join(",");
+    form.value.address = paths;
+    form.value.center = val.data[val.data.length - 1].center;
+  } else {
+    form.value.address = val.data.addr;
+    form.value.address = val.data.address;
+    form.value.center = val.data.position.lng + "," + val.data.position.lat;
+  }
+}
+function getDataList() {
+  loading.value = true;
+  API_Shop.getShopAddress(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function resetForm() {
+  form.value = {
+    addressName: "",
+    center: "",
+    address: "",
+    mobile: "",
+  };
+}
+function add() {
+  modalType.value = 0;
+  modalTitle.value = "添加自提地址";
+  resetForm();
+  modalVisible.value = true;
+  nextTick(() => {
+    formRef.value?.resetFields();
+  });
+}
+function edit(v) {
+  modalType.value = 1;
+  modalVisible.value = true;
+  modalTitle.value = "修改自提地址";
+  form.value.id = v.id;
+  form.value.address = v.address;
+  form.value.addressName = v.addressName;
+  form.value.mobile = v.mobile;
+  form.value.center = v.center;
+  form.value.longitude = v.center.split(",")[0];
+  form.value.latitude = v.center.split(",")[1];
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      if (modalType.value == 0) {
+        const params = { ...form.value };
+        delete params.id;
+        API_Shop.addShopAddress(params).then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            Message.success("添加成功");
+            getDataList();
+            modalVisible.value = false;
+          }
+        });
+      } else {
+        API_Shop.editShopAddress(form.value.id, form.value).then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            Message.success("修改成功");
+            getDataList();
+            modalVisible.value = false;
+          }
+        });
+      }
+    }
+  });
+}
+function deleteSubmit(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "确认删除自提地址么？",
+    loading: true,
+    onOk: () => {
+      API_Shop.deleteShopAddress(v.id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("此自自提地址已删除");
+          init();
+        }
+      });
+    },
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style scoped>
 .link-text {

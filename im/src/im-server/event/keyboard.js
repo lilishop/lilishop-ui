@@ -1,4 +1,5 @@
 import Base from './base'
+import { useNotifyStore } from '@/stores/notify'
 
 /**
  * 键盘输入事件
@@ -38,9 +39,7 @@ class Keyboard extends Base {
       return false
     }
 
-    let store = this.getStoreInstance()
-
-    store.commit('UPDATE_KEYBOARD_EVENT')
+    useNotifyStore().UPDATE_KEYBOARD_EVENT()
   }
 }
 

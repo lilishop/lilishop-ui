@@ -21,35 +21,32 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { openLink } from "@/utils/buyerLogin";
 
-export default {
-  name: "onlyGoodsList",
-  props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
-  },
-  data() {
-    return {
-      flag:false,
-      tabIndex:0,
-      current: 0,
-      showModal: false,
-      selected: {}, // 已选数据
-      picModelFlag: false,
-    };
-  },
-  mounted(){
+defineOptions({ name: "onlyGoodsList" });
 
+defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
   },
-  methods: {
-    handleClick(val){
-      this.linkTo(val.url)
-    },
-  },
-};
+});
+
+const router = useRouter();
+
+const flag = ref(false);
+const tabIndex = ref(0);
+const current = ref(0);
+const showModal = ref(false);
+const selected = ref({}); // 已选数据
+const picModelFlag = ref(false);
+
+function handleClick(val) {
+  openLink(val.url, router);
+}
 </script>
 
 <style scoped lang="scss">

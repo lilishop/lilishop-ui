@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+    <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
       <el-form-item label="消费1元赠送积分" prop="consumer">
         <el-input type="number" v-model="formValidate.consumer">
           <template #append>积分</template>
@@ -51,87 +51,85 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "./validate";
 
-export default {
-  data() {
-    return {
-      ruleValidate: {},
-      formValidate: {},
-      result: "",
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    delSign(item, index) {
-      this.formValidate.pointSettingItems.splice(index, 1);
-    },
-    addSign() {
-      if (this.formValidate.pointSettingItems.length >= 4) {
-        ElMessage.error("最多设置4项签到设置",
-        );
-        return false;
-      }
-      this.formValidate.pointSettingItems.push({
-        point: "0",
-        day: this.formValidate.pointSettingItems.length,
-      });
-    },
-    init() {
-      this.result = JSON.parse(this.res);
-      Object.keys(this.result).map((item) => {
-        if (item == "pointSettingItems") {
-          return false;
-        }
-        this.result[item] += "";
-      });
+const props = defineProps(["res", "type"]);
 
-      this.formValidate = { ...this.result };
+const ruleValidate = reactive({});
+const formValidate = ref({});
+const result = ref("");
 
-      Object.keys(this.formValidate).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-          {
-            validator: (rule, value, callback) => {
-              if (value < 0) {
-                callback(new Error("不能输入负数！"));
-              } else {
-                callback();
-              }
-            },
-            trigger: "change",
-          },
-        ];
-      });
-    },
-  },
-};
+// 模板 ref 与 data 同名会互相覆盖，改名 formValidateRef
+const formValidateRef = ref(null);
+
+function submit(name) {
+  // validate.js 的 handleSubmit 未去 vm 化，仍按 that.$refs[name] 取值，此处用表单 ref 构造同构对象
+  handleSubmit({ $refs: { [name]: formValidateRef.value } }, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+function setupSetting() {
+  setSetting(props.type, formValidate.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+function delSign(item, index) {
+  formValidate.value.pointSettingItems.splice(index, 1);
+}
+function addSign() {
+  if (formValidate.value.pointSettingItems.length >= 4) {
+    ElMessage.error("最多设置4项签到设置",
+    );
+    return false;
+  }
+  formValidate.value.pointSettingItems.push({
+    point: "0",
+    day: formValidate.value.pointSettingItems.length,
+  });
+}
+function init() {
+  result.value = JSON.parse(props.res);
+  Object.keys(result.value).map((item) => {
+    if (item == "pointSettingItems") {
+      return false;
+    }
+    result.value[item] += "";
+  });
+
+  formValidate.value = { ...result.value };
+
+  Object.keys(formValidate.value).forEach((item) => {
+    ruleValidate[item] = [
+      {
+        required: true,
+        message: "请填写必填项",
+        trigger: "blur",
+      },
+      {
+        validator: (rule, value, callback) => {
+          if (value < 0) {
+            callback(new Error("不能输入负数！"));
+          } else {
+            callback();
+          }
+        },
+        trigger: "change",
+      },
+    ];
+  });
+}
+
+init();
 </script>
 
 <style lang="scss" scoped>

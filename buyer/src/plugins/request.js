@@ -3,7 +3,7 @@ import { ElLoading } from "element-plus";
 import { Message, Modal } from "@/utils/message";
 import Storage from "./storage";
 import { router } from "../router/index.js";
-import store from "../vuex/store";
+import { useAppStore } from "@/stores/app";
 import { handleRefreshToken } from "@/api/index";
 import { v4 as uuidv4 } from "uuid";
 
@@ -125,7 +125,7 @@ async function refresh(error) {
   Storage.removeItem("refreshToken");
   Storage.removeItem("userInfo");
   Storage.setItem("cartNum", 0);
-  store.commit("SET_CARTNUM", 0);
+  useAppStore().setCartNum(0);
   const currentRoute = router.currentRoute.value;
   Modal.confirm({
     title: "请登录",

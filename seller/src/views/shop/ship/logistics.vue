@@ -79,137 +79,136 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref, watch } from "vue";
 import * as API_Shop from "@/api/shops";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "logistics",
-  data() {
-    return {
-      row: {},
-      openModal: false,
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-      },
-      openModalTitle: "开启信息",
-      ruleValidate: {},
-      faceSheetForm: {
-        faceSheetFlag: false,
-        customerName: "",
-        payType: "1",
-        expType: "1",
-        customerPwd: "",
-        monthCode: "",
-        sendSite: "",
-        sendStaff: "",
-      },
-      data: [],
-      openText: false,
-      logisticsId: "",
-    };
-  },
-  watch: {
-    "faceSheetForm.faceSheetFlag"(val) {
-      this.openText = !!val;
-    },
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      API_Shop.getLogistics().then((res) => {
-        this.loading = false;
+defineOptions({ name: "logistics" });
+
+const row = ref({});
+const openModal = ref(false);
+const loading = ref(true);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  sort: "createTime",
+  order: "desc",
+});
+const openModalTitle = ref("开启信息");
+const ruleValidate = ref({});
+const faceSheetForm = ref({
+  faceSheetFlag: false,
+  customerName: "",
+  payType: "1",
+  expType: "1",
+  customerPwd: "",
+  monthCode: "",
+  sendSite: "",
+  sendStaff: "",
+});
+const data = ref([]);
+const openText = ref(false);
+const logisticsId = ref("");
+
+watch(
+  () => faceSheetForm.value.faceSheetFlag,
+  (val) => {
+    openText.value = !!val;
+  }
+);
+
+function init() {
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  API_Shop.getLogistics().then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result;
+    }
+  });
+}
+function open(v) {
+  row.value = v;
+  openModal.value = true;
+  openModalTitle.value = "开启信息";
+  openText.value = false;
+  faceSheetForm.value.faceSheetFlag = false;
+}
+function getFaceSheetInfo(v) {
+  row.value = v;
+  logisticsId.value = v.logisticsId;
+  openModalTitle.value = "修改信息";
+  API_Shop.getIsCheck(logisticsId.value).then((res) => {
+    if (res.success) {
+      faceSheetForm.value.faceSheetFlag = res.result.faceSheetFlag;
+      openText.value = !!faceSheetForm.value.faceSheetFlag;
+      faceSheetForm.value.customerName = res.result.customerName;
+      faceSheetForm.value.customerPwd = res.result.customerPwd;
+      faceSheetForm.value.monthCode = res.result.monthCode;
+      faceSheetForm.value.sendSite = res.result.sendSite;
+      faceSheetForm.value.sendStaff = res.result.sendStaff;
+      faceSheetForm.value.payType = res.result.payType;
+      faceSheetForm.value.expType = res.result.expType;
+    }
+  });
+  openModal.value = true;
+}
+function frontDownload(val) {
+  const a = document.createElement("a");
+  if (val === "use") {
+    a.href = "static/instructions.xlsx";
+    a.download = "使用说明.xlsx";
+  } else if (val === "type") {
+    a.href = "static/logisticsType.xlsx";
+    a.download = "快递类型.xlsx";
+  }
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+function submit() {
+  if (!row.value.selected) {
+    API_Shop.logisticsChecked(row.value.logisticsId, faceSheetForm.value).then((res) => {
+      openModal.value = false;
+      if (res.success) {
+        Message.success("物流公司开启成功");
+        init();
+      }
+    });
+  } else {
+    API_Shop.editChecked(logisticsId.value, faceSheetForm.value).then((res) => {
+      if (res.success) {
+        Message.success("修改成功");
+        openModal.value = false;
+        init();
+      }
+    });
+  }
+}
+function close(v) {
+  Modal.confirm({
+    title: "确认关闭",
+    content: "您确认关闭此物流公司?",
+    loading: true,
+    onOk: () => {
+      API_Shop.logisticsUnChecked(v.logisticsId).then((res) => {
+        Modal.remove();
         if (res.success) {
-          this.data = res.result;
+          Message.success("物流公司关闭成功");
+          init();
         }
       });
     },
-    open(v) {
-      this.row = v;
-      this.openModal = true;
-      this.openModalTitle = "开启信息";
-      this.openText = false;
-      this.faceSheetForm.faceSheetFlag = false;
-    },
-    getFaceSheetInfo(v) {
-      this.row = v;
-      this.logisticsId = v.logisticsId;
-      this.openModalTitle = "修改信息";
-      API_Shop.getIsCheck(this.logisticsId).then((res) => {
-        if (res.success) {
-          this.faceSheetForm.faceSheetFlag = res.result.faceSheetFlag;
-          this.openText = !!this.faceSheetForm.faceSheetFlag;
-          this.faceSheetForm.customerName = res.result.customerName;
-          this.faceSheetForm.customerPwd = res.result.customerPwd;
-          this.faceSheetForm.monthCode = res.result.monthCode;
-          this.faceSheetForm.sendSite = res.result.sendSite;
-          this.faceSheetForm.sendStaff = res.result.sendStaff;
-          this.faceSheetForm.payType = res.result.payType;
-          this.faceSheetForm.expType = res.result.expType;
-        }
-      });
-      this.openModal = true;
-    },
-    frontDownload(val) {
-      const a = document.createElement("a");
-      if (val === "use") {
-        a.href = "static/instructions.xlsx";
-        a.download = "使用说明.xlsx";
-      } else if (val === "type") {
-        a.href = "static/logisticsType.xlsx";
-        a.download = "快递类型.xlsx";
-      }
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    },
-    submit() {
-      if (!this.row.selected) {
-        API_Shop.logisticsChecked(this.row.logisticsId, this.faceSheetForm).then((res) => {
-          this.openModal = false;
-          if (res.success) {
-            this.$Message.success("物流公司开启成功");
-            this.init();
-          }
-        });
-      } else {
-        API_Shop.editChecked(this.logisticsId, this.faceSheetForm).then((res) => {
-          if (res.success) {
-            this.$Message.success("修改成功");
-            this.openModal = false;
-            this.init();
-          }
-        });
-      }
-    },
-    close(v) {
-      this.$Modal.confirm({
-        title: "确认关闭",
-        content: "您确认关闭此物流公司?",
-        loading: true,
-        onOk: () => {
-          API_Shop.logisticsUnChecked(v.logisticsId).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("物流公司关闭成功");
-              this.init();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

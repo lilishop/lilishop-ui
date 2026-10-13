@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="80px" class="search-form">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="80px" class="search-form">
         <el-form-item label="单据编号">
           <el-input v-model="searchForm.orderSn" placeholder="采购单号" clearable style="width: 200px" />
         </el-form-item>
@@ -94,7 +94,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import {
   getProcurementOrderPage,
   getProcurementOrderStatusCount,
@@ -108,187 +110,199 @@ import {
   procurementStatusTag,
   formatMoney,
 } from "../constants";
+import { customRouterPush } from "@/utils/filters";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "procurement-purchase-order-list",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      createRange: [],
-      currentStatus: "ALL",
-      statusCountData: {},
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        orderSn: "",
-        goodsName: "",
-        status: "",
-        sort: "createTime",
-        order: "desc",
-      },
-    };
-  },
-  computed: {
-    statusTabs() {
-      const tabs = [{ title: "全部", value: "ALL" }];
-      Object.keys(PROCUREMENT_STATUS).forEach((key) => {
-        const count = this.statusCountData[key];
-        const label = PROCUREMENT_STATUS[key];
-        tabs.push({
-          title: count ? `${label}（${count}）` : label,
-          value: key,
-        });
-      });
-      return tabs;
-    },
-  },
-  mounted() {
-    const status = this.$route.query.status;
-    if (status) {
-      this.currentStatus = status;
-      this.searchForm.status = status;
+defineOptions({ name: "procurement-purchase-order-list" });
+
+const route = useRoute();
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const createRange = ref([]);
+const currentStatus = ref("ALL");
+const statusCountData = ref({});
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  orderSn: "",
+  goodsName: "",
+  status: "",
+  sort: "createTime",
+  order: "desc",
+});
+
+// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+
+const statusTabs = computed(() => {
+  const tabs = [{ title: "全部", value: "ALL" }];
+  Object.keys(PROCUREMENT_STATUS).forEach((key) => {
+    const count = statusCountData.value[key];
+    const label = PROCUREMENT_STATUS[key];
+    tabs.push({
+      title: count ? `${label}（${count}）` : label,
+      value: key,
+    });
+  });
+  return tabs;
+});
+
+onMounted(() => {
+  const status = route.query.status;
+  if (status) {
+    currentStatus.value = status;
+    searchForm.value.status = status;
+  }
+  init();
+});
+
+function init() {
+  getStatusCount();
+  getDataList();
+}
+
+function buildSearchParams(includeStatus = true) {
+  const params = { ...searchForm.value };
+  if (!includeStatus) {
+    delete params.status;
+  }
+  if (createRange.value && createRange.value.length === 2) {
+    params.startCreateTime = createRange.value[0];
+    params.endCreateTime = createRange.value[1];
+  }
+  return params;
+}
+
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getStatusCount();
+  getDataList();
+}
+
+function resetSearch() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 10,
+    orderSn: "",
+    goodsName: "",
+    status: "",
+    sort: "createTime",
+    order: "desc",
+  };
+  createRange.value = [];
+  currentStatus.value = "ALL";
+  getStatusCount();
+  getDataList();
+}
+
+function onStatusTabClick(tab) {
+  statusClick(tab.paneName);
+}
+
+function statusClick(name) {
+  if (name === "ALL" || name === "" || name === undefined) {
+    searchForm.value.status = "";
+    currentStatus.value = "ALL";
+  } else {
+    searchForm.value.status = name;
+    currentStatus.value = name;
+  }
+  searchForm.value.pageNumber = 1;
+  getDataList();
+}
+
+function getStatusCount() {
+  getProcurementOrderStatusCount(buildSearchParams(false)).then((res) => {
+    if (res.success) {
+      statusCountData.value = res.result || {};
     }
-    this.init();
-  },
-  methods: {
-    procurementStatusText,
-    procurementStatusTag,
-    formatMoney,
-    init() {
-      this.getStatusCount();
-      this.getDataList();
-    },
-    buildSearchParams(includeStatus = true) {
-      const params = { ...this.searchForm };
-      if (!includeStatus) {
-        delete params.status;
+  });
+}
+
+function getDataList() {
+  loading.value = true;
+  getProcurementOrderPage(buildSearchParams(true))
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
       }
-      if (this.createRange && this.createRange.length === 2) {
-        params.startCreateTime = this.createRange[0];
-        params.endCreateTime = this.createRange[1];
-      }
-      return params;
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getStatusCount();
-      this.getDataList();
-    },
-    resetSearch() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 10,
-        orderSn: "",
-        goodsName: "",
-        status: "",
-        sort: "createTime",
-        order: "desc",
-      };
-      this.createRange = [];
-      this.currentStatus = "ALL";
-      this.getStatusCount();
-      this.getDataList();
-    },
-    onStatusTabClick(tab) {
-      this.statusClick(tab.paneName);
-    },
-    statusClick(name) {
-      if (name === "ALL" || name === "" || name === undefined) {
-        this.searchForm.status = "";
-        this.currentStatus = "ALL";
-      } else {
-        this.searchForm.status = name;
-        this.currentStatus = name;
-      }
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getStatusCount() {
-      getProcurementOrderStatusCount(this.buildSearchParams(false)).then((res) => {
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function refreshList() {
+  getStatusCount();
+  getDataList();
+}
+
+function goCreate() {
+  customRouterPush({ name: "procurement-purchase-order-operation" });
+}
+
+function goDetail(row) {
+  customRouterPush({
+    name: "procurement-purchase-order-operation",
+    query: { id: row.id, readonly: 1 },
+  });
+}
+
+function goInbound(row) {
+  customRouterPush({
+    name: "procurement-inbound-operation",
+    query: { procurementOrderId: row.id },
+  });
+}
+
+function handleSubmit(row) {
+  Modal.confirm({
+    title: "确认提交",
+    content: "提交后采购单将进入审核流程，是否继续？",
+    onOk: () => {
+      submitProcurementOrder(row.id).then((res) => {
         if (res.success) {
-          this.statusCountData = res.result || {};
+          Message.success("提交成功");
+          refreshList();
         }
       });
     },
-    getDataList() {
-      this.loading = true;
-      getProcurementOrderPage(this.buildSearchParams(true))
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    refreshList() {
-      this.getStatusCount();
-      this.getDataList();
-    },
-    goCreate() {
-      this.$filters.customRouterPush({ name: "procurement-purchase-order-operation" });
-    },
-    goDetail(row) {
-      this.$filters.customRouterPush({
-        name: "procurement-purchase-order-operation",
-        query: { id: row.id, readonly: 1 },
+  });
+}
+
+function handleAudit(row, pass) {
+  const title = pass ? "审核通过" : "审核驳回";
+  Modal.confirm({
+    title,
+    content: pass ? "确认通过该采购单？" : "确认驳回该采购单？",
+    onOk: () => {
+      auditProcurementOrder(row.id, { pass, remark: "" }).then((res) => {
+        if (res.success) {
+          Message.success("操作成功");
+          refreshList();
+        }
       });
     },
-    goInbound(row) {
-      this.$filters.customRouterPush({
-        name: "procurement-inbound-operation",
-        query: { procurementOrderId: row.id },
+  });
+}
+
+function handleClose(row) {
+  Modal.confirm({
+    title: "关闭采购单",
+    content: "关闭后不可继续入库，是否继续？",
+    onOk: () => {
+      closeProcurementOrder(row.id).then((res) => {
+        if (res.success) {
+          Message.success("已关闭");
+          refreshList();
+        }
       });
     },
-    handleSubmit(row) {
-      this.$Modal.confirm({
-        title: "确认提交",
-        content: "提交后采购单将进入审核流程，是否继续？",
-        onOk: () => {
-          submitProcurementOrder(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("提交成功");
-              this.refreshList();
-            }
-          });
-        },
-      });
-    },
-    handleAudit(row, pass) {
-      const title = pass ? "审核通过" : "审核驳回";
-      this.$Modal.confirm({
-        title,
-        content: pass ? "确认通过该采购单？" : "确认驳回该采购单？",
-        onOk: () => {
-          auditProcurementOrder(row.id, { pass, remark: "" }).then((res) => {
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.refreshList();
-            }
-          });
-        },
-      });
-    },
-    handleClose(row) {
-      this.$Modal.confirm({
-        title: "关闭采购单",
-        content: "关闭后不可继续入库，是否继续？",
-        onOk: () => {
-          closeProcurementOrder(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("已关闭");
-              this.refreshList();
-            }
-          });
-        },
-      });
-    },
-  },
-};
+  });
+}
 </script>
 
 <style scoped>

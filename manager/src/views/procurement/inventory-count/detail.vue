@@ -35,56 +35,55 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getInventoryCountItemsPage, exportInventoryCountItems } from "@/api/procurement";
 import { downloadBlob } from "@/utils/downloadBlob";
 
-export default {
-  name: "manager-inventory-count-detail",
-  data() {
-    return {
-      loading: false,
-      exporting: false,
-      data: [],
-      total: 0,
-      sn: "",
-      searchForm: { pageNumber: 1, pageSize: 20 },
-    };
-  },
-  mounted() {
-    this.sn = this.$route.query.sn || "";
-    this.getDataList();
-  },
-  methods: {
-    getDataList() {
-      const id = this.$route.query.id;
-      if (!id) return;
-      this.loading = true;
-      getInventoryCountItemsPage(id, this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    handleExport() {
-      const id = this.$route.query.id;
-      if (!id) return;
-      this.exporting = true;
-      exportInventoryCountItems(id)
-        .then((blob) => {
-          downloadBlob(blob, `盘点单_${this.sn || id}.xlsx`);
-        })
-        .finally(() => {
-          this.exporting = false;
-        });
-    },
-  },
-};
+defineOptions({ name: "manager-inventory-count-detail" });
+
+const route = useRoute();
+
+const loading = ref(false);
+const exporting = ref(false);
+const data = ref([]);
+const total = ref(0);
+const sn = ref("");
+const searchForm = reactive({ pageNumber: 1, pageSize: 20 });
+
+onMounted(() => {
+  sn.value = route.query.sn || "";
+  getDataList();
+});
+
+function getDataList() {
+  const id = route.query.id;
+  if (!id) return;
+  loading.value = true;
+  getInventoryCountItemsPage(id, searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function handleExport() {
+  const id = route.query.id;
+  if (!id) return;
+  exporting.value = true;
+  exportInventoryCountItems(id)
+    .then((blob) => {
+      downloadBlob(blob, `盘点单_${sn.value || id}.xlsx`);
+    })
+    .finally(() => {
+      exporting.value = false;
+    });
+}
 </script>
 
 <style scoped>

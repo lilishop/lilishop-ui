@@ -27,24 +27,21 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: ["res"],
-  computed: {
-    title() {
-      return (this.res.list && this.res.list[0] && this.res.list[0].title) || "积分商城";
-    },
-    wrapperStyle() {
-      return {
-        background: this.res.bgColor || "#FFFFFF",
-        padding: `0 ${this.res.paddingX || 0}px`,
-        marginBottom: `${this.res.pageGap !== undefined ? this.res.pageGap : 10}px`,
-        borderRadius: `${this.res.borderRadius || 0}px`,
-        overflow: "hidden",
-      };
-    },
-  },
-};
+<script setup>
+import { computed } from "vue";
+
+const props = defineProps(["res"]);
+
+const title = computed(
+  () => (props.res.list && props.res.list[0] && props.res.list[0].title) || "积分商城"
+);
+const wrapperStyle = computed(() => ({
+  background: props.res.bgColor || "#FFFFFF",
+  padding: `0 ${props.res.paddingX || 0}px`,
+  marginBottom: `${props.res.pageGap !== undefined ? props.res.pageGap : 10}px`,
+  borderRadius: `${props.res.borderRadius || 0}px`,
+  overflow: "hidden",
+}));
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

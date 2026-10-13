@@ -17,29 +17,23 @@
   </div>
 </template>
 
-<script>
-export default {
-  components: {},
-  props: {
-    params: {
-      type: Object,
-      default() {},
-    },
+<script setup>
+import { ref } from 'vue'
+
+const props = defineProps({
+  params: {
+    type: Object,
+    default() {},
   },
-  data() {
-    return {
-      avatar:
-        'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',
-      talk_type: 1,
-      nickname: '阿萨纳斯卡',
-      content: '阿斯纳俺家你卡萨啊看看番按实际开发n',
-      datetime: '2021-06-18 23:15:12',
-    }
-  },
-  computed: {},
-  methods: {},
-  created() {},
-}
+})
+
+const avatar = ref(
+  'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
+)
+const talk_type = ref(1)
+const nickname = ref('阿萨纳斯卡')
+const content = ref('阿斯纳俺家你卡萨啊看看番按实际开发n')
+const datetime = ref('2021-06-18 23:15:12')
 </script>
 <style lang="less" scoped>
 .notify-box {

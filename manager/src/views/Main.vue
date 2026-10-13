@@ -76,7 +76,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { UserFilled } from "@element-plus/icons-vue";
 import shrinkableMenu from "./main-parts/shrinkable-menu/shrinkable-menu.vue";
 import tagsPageOpened from "./main-parts/tags-page-opened.vue";
@@ -87,123 +89,108 @@ import util from "@/libs/util.js";
 import { getNoticePage, logout } from "@/api/index";
 import config from "@/config/index.js";
 import defaultLogo from "@/assets/logo.png";
+import { setStore } from "@/libs/storage";
+import { useAppStore } from "@/stores/app";
+import { useUserStore } from "@/stores/user";
+import { useSettingStore } from "@/stores/setting";
 
-export default {
-  components: {
-    UserFilled,
-    shrinkableMenu,
-    tagsPageOpened,
-    messageTip,
-    circleLoading,
-  },
-  data() {
-    return {
-      config,
-      sliceNum: 5,
-      userInfo: "",
-      tipsMessage: "",
-      defaultLogo,
-      domainLogo: "",
-    };
-  },
-  computed: {
-    setting() {
-      return this.$store.state.setting.setting;
-    },
-    loading() {
-      return this.$store.state.app.loading;
-    },
-    menuList() {
-      return this.$store.state.app.menuList || [];
-    },
-    pageTagsList() {
-      return this.$store.state.app.pageOpenedList;
-    },
-    avatarPath() {
-      return localStorage.avatorImgPath;
-    },
-  },
-  methods: {
-    init() {
-      const userInfo = JSON.parse(Cookies.get("userInfoManager"));
-      this.userInfo = userInfo;
-      this.checkTag(this.$route.name);
-      this.domainLogo = localStorage.getItem("icon") || this.defaultLogo;
-      const link =
-        document.querySelector("link[rel*='icon']") ||
-        document.createElement("link");
-      link.type = "image/x-icon";
-      link.href = localStorage.getItem("domainIcon");
-      link.rel = "shortcut icon";
-      document.getElementsByTagName("head")[0].appendChild(link);
-      window.document.title = localStorage.getItem("title") + " - 运营后台";
-      getNoticePage({}).then((res) => {
-        if (res.success) {
-          this.tipsMessage = res.result;
-          this.$store.state.notices = res.result;
-        }
-      });
-    },
-    handleClickUserDropdown(name) {
-      if (name === "personalCenter") {
-        util.openNewPage(this, "personal-center");
-        this.$router.push({ name: "personal-center" });
-      } else if (name === "changePass") {
-        util.openNewPage(this, "change-password");
-        this.$router.push({ name: "change_password" });
-      } else if (name === "loginOut") {
-        logout().then(() => {
-          this.$store.commit("logout", this);
-          this.$store.commit("setAdded", false);
-          this.setStore("accessToken", "");
-          this.setStore("refreshToken", "");
-          this.$router.push({ path: "/login" });
-        });
-      }
-    },
-    checkTag(name) {
-      const openpageHasTag = util.findOpenedPageIndex(
-        this.pageTagsList,
-        name,
-        this.$route.path
-      ) >= 0;
-      if (!openpageHasTag) {
-        util.openNewPage(
-          this,
-          name,
-          this.$route.params || {},
-          this.$route.query || {}
-        );
-      }
-    },
-    resize() {
-      const currWidth = document.body.clientWidth;
-      const count = currWidth / 300;
-      this.sliceNum = count > 6 ? 6 : count;
-    },
-    onLogoError(e) {
-      if (e?.target && e.target.src !== this.defaultLogo) {
-        e.target.src = this.defaultLogo;
-      }
-    },
-  },
-  watch: {
-    $route(to) {
-      this.checkTag(to.name);
-      localStorage.currentPageName = to.name;
-    },
-  },
-  mounted() {
-    this.init();
-    this.resize();
-    window.addEventListener("resize", this.resize);
-    this.$store.commit("setOpenedList");
-  },
-  beforeUnmount() {
-    window.removeEventListener("resize", this.resize);
-  },
-  created() {
-    this.$store.commit("setOpenedList");
-  },
-};
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+const userStore = useUserStore();
+const settingStore = useSettingStore();
+
+const sliceNum = ref(5);
+const userInfo = ref("");
+const tipsMessage = ref("");
+const domainLogo = ref("");
+
+const setting = computed(() => settingStore.setting);
+const loading = computed(() => appStore.loading);
+const menuList = computed(() => appStore.menuList || []);
+const pageTagsList = computed(() => appStore.pageOpenedList);
+const avatarPath = computed(() => localStorage.avatorImgPath);
+
+function init() {
+  const userInfoData = JSON.parse(Cookies.get("userInfoManager"));
+  userInfo.value = userInfoData;
+  checkTag(route.name);
+  domainLogo.value = localStorage.getItem("icon") || defaultLogo;
+  const link =
+    document.querySelector("link[rel*='icon']") ||
+    document.createElement("link");
+  link.type = "image/x-icon";
+  link.href = localStorage.getItem("domainIcon");
+  link.rel = "shortcut icon";
+  document.getElementsByTagName("head")[0].appendChild(link);
+  window.document.title = localStorage.getItem("title") + " - 运营后台";
+  getNoticePage({}).then((res) => {
+    if (res.success) {
+      tipsMessage.value = res.result;
+      appStore.notices = res.result;
+    }
+  });
+}
+
+function handleClickUserDropdown(name) {
+  if (name === "personalCenter") {
+    util.openNewPage("personal-center");
+    router.push({ name: "personal-center" });
+  } else if (name === "changePass") {
+    util.openNewPage("change-password");
+    router.push({ name: "change_password" });
+  } else if (name === "loginOut") {
+    logout().then(() => {
+      userStore.logout();
+      appStore.setAdded(false);
+      setStore("accessToken", "");
+      setStore("refreshToken", "");
+      router.push({ path: "/login" });
+    });
+  }
+}
+
+function checkTag(name) {
+  const openpageHasTag = util.findOpenedPageIndex(
+    pageTagsList.value,
+    name,
+    route.path
+  ) >= 0;
+  if (!openpageHasTag) {
+    util.openNewPage(name, route.params || {}, route.query || {});
+  }
+}
+
+function resize() {
+  const currWidth = document.body.clientWidth;
+  const count = currWidth / 300;
+  sliceNum.value = count > 6 ? 6 : count;
+}
+
+function onLogoError(e) {
+  if (e?.target && e.target.src !== defaultLogo) {
+    e.target.src = defaultLogo;
+  }
+}
+
+watch(
+  () => route.name,
+  (name) => {
+    checkTag(name);
+    localStorage.currentPageName = name;
+  }
+);
+
+appStore.setOpenedList();
+
+onMounted(() => {
+  init();
+  resize();
+  window.addEventListener("resize", resize);
+  appStore.setOpenedList();
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", resize);
+});
 </script>

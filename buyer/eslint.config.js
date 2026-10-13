@@ -29,6 +29,8 @@ module.exports = [
       'vue/multi-word-component-names': 'off',
       // 存量代码大量使用与 HTML 保留名同名的组件（element-plus 图标 Search/View/Camera/Link 及全局注册的 empty/drawer 等），重命名成本高，暂不启用
       'vue/no-reserved-component-names': 'off',
+      // 全端已完成 Options API → <script setup> 迁移，防止新代码回退（路由守卫的普通 script 块等有意保留的除外，故用 warn）
+      'vue/component-api-style': ['warn', ['script-setup']],
     },
   },
 ]

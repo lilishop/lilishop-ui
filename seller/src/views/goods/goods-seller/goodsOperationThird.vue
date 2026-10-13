@@ -16,18 +16,19 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  methods: {
-     // 跳转商品列表
-    gotoGoodsList() {
-      this.$router.push({name: "goods"});
-    },
-    // 刷新页面
-    gotoBack() {
-      this.$router.go();
-    },
-  }
+<script setup>
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+// 跳转商品列表
+function gotoGoodsList() {
+  router.push({name: "goods"});
+}
+
+// 刷新页面
+function gotoBack() {
+  router.go();
 }
 </script>
 <style lang="scss" scoped>

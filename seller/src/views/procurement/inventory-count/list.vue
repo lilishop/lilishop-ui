@@ -33,67 +33,67 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { createInventoryCount, getInventoryCountPage } from "@/api/procurement";
+import { Message, Modal } from "@/utils/message";
+import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "procurement-inventory-count-list",
-  data() {
-    return {
-      loading: false,
-      creating: false,
-      data: [],
-      total: 0,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-      },
-    };
-  },
-  mounted() {
-    this.getDataList();
-  },
-  methods: {
-    getDataList() {
-      this.loading = true;
-      getInventoryCountPage(this.searchForm)
+defineOptions({ name: "procurement-inventory-count-list" });
+
+const loading = ref(false);
+const creating = ref(false);
+const data = ref([]);
+const total = ref(0);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+});
+
+onMounted(() => {
+  getDataList();
+});
+
+function getDataList() {
+  loading.value = true;
+  getInventoryCountPage(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function handleCreate() {
+  Modal.confirm({
+    title: "生成盘点单",
+    content: "将快照当前店铺全部 SKU 库存，是否继续？",
+    onOk: () => {
+      creating.value = true;
+      createInventoryCount()
         .then((res) => {
           if (res.success) {
-            this.data = res.result.records || [];
-            this.total = res.result.total || 0;
+            Message.success("盘点单已生成");
+            getDataList();
           }
         })
         .finally(() => {
-          this.loading = false;
+          creating.value = false;
         });
     },
-    handleCreate() {
-      this.$Modal.confirm({
-        title: "生成盘点单",
-        content: "将快照当前店铺全部 SKU 库存，是否继续？",
-        onOk: () => {
-          this.creating = true;
-          createInventoryCount()
-            .then((res) => {
-              if (res.success) {
-                this.$Message.success("盘点单已生成");
-                this.getDataList();
-              }
-            })
-            .finally(() => {
-              this.creating = false;
-            });
-        },
-      });
-    },
-    goDetail(row) {
-      this.$filters.customRouterPush({
-        name: "procurement-inventory-count-detail",
-        query: { id: row.id, sn: row.sn },
-      });
-    },
-  },
-};
+  });
+}
+
+function goDetail(row) {
+  customRouterPush({
+    name: "procurement-inventory-count-detail",
+    query: { id: row.id, sn: row.sn },
+  });
+}
 </script>
 
 <style scoped>

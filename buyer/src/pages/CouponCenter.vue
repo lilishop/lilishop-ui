@@ -43,126 +43,126 @@
     <BaseFooter></BaseFooter>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Modal } from "@/utils/message";
 import storage from "@/plugins/storage";
 import { couponList, receiveCoupon } from "@/api/member.js";
-export default {
-  data() {
-    return {
-      list: [], // 优惠券列表
-      total: 0, // 优惠券总数
-      loading: false,
-      params: {
-        // 请求参数
-        getType: "FREE",
-        pageNumber: 1,
-        pageSize: 20,
-      },
-    };
-  },
-  methods: {
-    getList() {
-      if (this.loading) return;
-      this.loading = true;
-      couponList(this.params)
-        .then((res) => {
-          if (res && res.success && res.result) {
-            this.list = res.result.records || [];
-            this.total = res.result.total || 0;
-          } else {
-            this.list = [];
-            this.total = 0;
-          }
-        })
-        .catch(() => {
-          this.list = [];
-          this.total = 0;
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    // 分页 改变页码
-    changePageNum(val) {
-      this.params.pageNumber = val;
-      this.getList();
-    },
-    // 分页 改变每页数
-    changePageSize(val) {
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList();
-    },
-    // 领取优惠券
-    receive(item) {
-      if (this.isFinished(item)) return;
-      const userInfo = storage.getItem("userInfo");
-      const isLogin = userInfo && JSON.parse(userInfo).username;
-      if (!isLogin) {
-        Modal.confirm({
-          title: "温馨提示",
-          content: "请登录后执行此操作",
-          okText: "立即登录",
-          cancelText: "取消",
-          onOk: () => {
-            this.$router.push({
-              path: "/login",
-              query: {
-                rePath: this.$route.path,
-                query: JSON.stringify(this.$route.query),
-              },
-            });
+
+const route = useRoute();
+const router = useRouter();
+
+const list = ref([]); // 优惠券列表
+const total = ref(0); // 优惠券总数
+const loading = ref(false);
+const params = reactive({
+  // 请求参数
+  getType: "FREE",
+  pageNumber: 1,
+  pageSize: 20,
+});
+
+function getList() {
+  if (loading.value) return;
+  loading.value = true;
+  couponList(params)
+    .then((res) => {
+      if (res && res.success && res.result) {
+        list.value = res.result.records || [];
+        total.value = res.result.total || 0;
+      } else {
+        list.value = [];
+        total.value = 0;
+      }
+    })
+    .catch(() => {
+      list.value = [];
+      total.value = 0;
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+// 分页 改变页码
+function changePageNum(val) {
+  params.pageNumber = val;
+  getList();
+}
+// 分页 改变每页数
+function changePageSize(val) {
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList();
+}
+// 领取优惠券
+function receive(item) {
+  if (isFinished(item)) return;
+  const userInfo = storage.getItem("userInfo");
+  const isLogin = userInfo && JSON.parse(userInfo).username;
+  if (!isLogin) {
+    Modal.confirm({
+      title: "温馨提示",
+      content: "请登录后执行此操作",
+      okText: "立即登录",
+      cancelText: "取消",
+      onOk: () => {
+        router.push({
+          path: "/login",
+          query: {
+            rePath: route.path,
+            query: JSON.stringify(route.query),
           },
         });
-        return;
-      }
-      receiveCoupon(item.id)
-        .then((res) => {
-          if (!res || !res.success) return;
-          Modal.confirm({
-            title: "领取优惠券",
-            content: "优惠券领取成功，可到我的优惠券页面查看",
-            okText: "我的优惠券",
-            cancelText: "立即使用",
-            closable: true,
-            onOk: () => {
-              this.$router.push("/home/Coupons");
-            },
-            onCancel: () => {
-              this.$router.push({
-                path: "/goodsList",
-                query: { promotionsId: item.id, promotionType: "COUPON" },
-              });
-            },
+      },
+    });
+    return;
+  }
+  receiveCoupon(item.id)
+    .then((res) => {
+      if (!res || !res.success) return;
+      Modal.confirm({
+        title: "领取优惠券",
+        content: "优惠券领取成功，可到我的优惠券页面查看",
+        okText: "我的优惠券",
+        cancelText: "立即使用",
+        closable: true,
+        onOk: () => {
+          router.push("/home/Coupons");
+        },
+        onCancel: () => {
+          router.push({
+            path: "/goodsList",
+            query: { promotionsId: item.id, promotionType: "COUPON" },
           });
-        })
-        .catch((err) => {
-          console.warn('领取优惠券失败', err);
-        });
-    },
-    // 发行量已领完
-    isFinished(item) {
-      return Number(item.publishNum) > 0 && Number(item.receivedNum) >= Number(item.publishNum);
-    },
-    // 使用门槛文案
-    thresholdText(item) {
-      const threshold = Number(item.consumeThreshold);
-      if (!threshold) return "无使用门槛";
-      return `满${item.consumeThreshold}元可用`;
-    },
-    // 券范围。店铺名为 platform 时是平台通用券
-    scopeTag(type, storeName) {
-      if (type === "PORTION_GOODS") return "商品券";
-      if (type === "PORTION_GOODS_CATEGORY") return "分类券";
-      if (storeName && storeName !== "platform") return "店铺券";
-      return "通用券";
-    },
-  },
-  mounted() {
-    this.getList();
-  },
-};
+        },
+      });
+    })
+    .catch((err) => {
+      console.warn('领取优惠券失败', err);
+    });
+}
+// 发行量已领完
+function isFinished(item) {
+  return Number(item.publishNum) > 0 && Number(item.receivedNum) >= Number(item.publishNum);
+}
+// 使用门槛文案
+function thresholdText(item) {
+  const threshold = Number(item.consumeThreshold);
+  if (!threshold) return "无使用门槛";
+  return `满${item.consumeThreshold}元可用`;
+}
+// 券范围。店铺名为 platform 时是平台通用券
+function scopeTag(type, storeName) {
+  if (type === "PORTION_GOODS") return "商品券";
+  if (type === "PORTION_GOODS_CATEGORY") return "分类券";
+  if (storeName && storeName !== "platform") return "店铺券";
+  return "通用券";
+}
+
+onMounted(() => {
+  getList();
+});
 </script>
 <style lang="scss" scoped>
 @import "../assets/styles/coupon.scss";

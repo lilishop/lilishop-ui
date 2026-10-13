@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <el-form
-      ref="formValidate"
+      ref="formRef"
       label-width="150px"
       label-position="right"
       :model="formValidate"
@@ -49,65 +49,60 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import { setSetting, getSetting } from "@/api/index";
+import { Message } from "@/utils/message";
 
-export default {
-  data() {
-    return {
-      ruleValidate: {},
-      formValidate: {
-        saveNum: 1,
-        hotWordsSettingItems: [
-          {
-            keywords: "",
-            score: 1,
-          },
-        ],
-      },
-    };
-  },
-  created() {
-    this.init();
-  },
-  methods: {
-    addSetItem() {
-      if (this.formValidate.hotWordsSettingItems.length >= 5) {
-        this.$Message.error("最多5个热词项");
-      } else {
-        this.formValidate.hotWordsSettingItems.push({
-          keywords: "",
-          score: 1,
-        });
-      }
+const formRef = ref(null);
+const ruleValidate = ref({});
+const formValidate = ref({
+  saveNum: 1,
+  hotWordsSettingItems: [
+    {
+      keywords: "",
+      score: 1,
     },
-    submit(name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.setupSetting();
-        } else {
-          this.$Message.error("请正确填写内容!");
-        }
-      });
-    },
-    setupSetting() {
-      setSetting("HOT_WORDS", this.formValidate).then((res) => {
-        if (res.success) {
-          this.$Message.success("保存成功!");
-        } else {
-          this.$Message.error("保存失败!");
-        }
-        this.init();
-      });
-    },
-    async init() {
-      const res = await getSetting("HOT_WORDS");
-      if (res.success && res.result) {
-        this.formValidate = res.result;
-      }
-    },
-  },
-};
+  ],
+});
+
+init();
+
+function addSetItem() {
+  if (formValidate.value.hotWordsSettingItems.length >= 5) {
+    Message.error("最多5个热词项");
+  } else {
+    formValidate.value.hotWordsSettingItems.push({
+      keywords: "",
+      score: 1,
+    });
+  }
+}
+function submit(name) {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      setupSetting();
+    } else {
+      Message.error("请正确填写内容!");
+    }
+  });
+}
+function setupSetting() {
+  setSetting("HOT_WORDS", formValidate.value).then((res) => {
+    if (res.success) {
+      Message.success("保存成功!");
+    } else {
+      Message.error("保存失败!");
+    }
+    init();
+  });
+}
+async function init() {
+  const res = await getSetting("HOT_WORDS");
+  if (res.success && res.result) {
+    formValidate.value = res.result;
+  }
+}
 </script>
 
 <style lang="scss" scoped>

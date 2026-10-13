@@ -222,9 +222,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from "vue";
 import { getSetting, setSetting } from "@/api/index";
 import { QuestionFilled } from "@element-plus/icons-vue";
+import { Message } from "@/utils/message";
+
+defineOptions({ name: "theme-setting" });
 
 const SETTING_KEY = "THEME_SETTING";
 
@@ -242,111 +246,103 @@ const PRESET_THEMES = [
   { themeColor: "#000000", aiderLightColor: "#434343", paleColor: "#F5F5F5" },
 ];
 
-export default {
-  name: "theme-setting",
-  components: { QuestionFilled },
-  data() {
-    return {
-      loading: false,
-      saveLoading: false,
-      presetThemes: PRESET_THEMES,
-      form: {
-        mode: "custom",
-        themeColor: "#ff3c2a",
-        aiderLightColor: "#ff9f28",
-      },
-    };
-  },
-  computed: {
-    // 与移动端一致：提交订单等按钮为 主题色(91deg)→辅助色 渐变
-    // 见 lilishop-uniapp/pages/order/fillorder.vue .tabbar-right
-    gradient() {
-      return `linear-gradient(91deg, ${this.form.themeColor} 1%, ${this.form.aiderLightColor} 99%)`;
-    },
-    // 与移动端 --theme-primary-10 一致：主题色 10% 透明度浅底
-    tint() {
-      const hex = this.form.themeColor.replace("#", "");
-      if (hex.length !== 6) return "rgba(0,0,0,0.04)";
-      const r = parseInt(hex.slice(0, 2), 16);
-      const g = parseInt(hex.slice(2, 4), 16);
-      const b = parseInt(hex.slice(4, 6), 16);
-      return `rgba(${r}, ${g}, ${b}, 0.1)`;
-    },
-    // 标签 / 规格选中态：主题色文字 + 主题色描边 + 10% 浅底
-    tagStyle() {
-      return {
-        color: this.form.themeColor,
-        borderColor: this.form.themeColor,
-        background: this.tint,
-      };
-    },
-    // 小标签（满减/券/自营）：白底 + 主题色描边
-    outlineTagStyle() {
-      return {
-        color: this.form.themeColor,
-        borderColor: this.form.themeColor,
-        background: "#fff",
-      };
-    },
-  },
-  mounted() {
-    this.loadSetting();
-  },
-  methods: {
-    isActivePreset(item) {
-      return (
-        this.form.themeColor.toLowerCase() === item.themeColor.toLowerCase() &&
-        this.form.aiderLightColor.toLowerCase() === item.aiderLightColor.toLowerCase()
-      );
-    },
-    selectPreset(item) {
-      this.form.themeColor = item.themeColor;
-      this.form.aiderLightColor = item.aiderLightColor;
-    },
-    loadSetting() {
-      this.loading = true;
-      getSetting(SETTING_KEY)
-        .then((res) => {
-          if (res.success && res.result) {
-            const data = res.result;
-            this.form = {
-              mode: data.mode || "custom",
-              themeColor: data.themeColor || this.form.themeColor,
-              aiderLightColor: data.aiderLightColor || this.form.aiderLightColor,
-            };
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    submit() {
-      if (!this.form.themeColor || !this.form.aiderLightColor) {
-        this.$Message.error("请选择主题色和辅助色");
-        return;
+const loading = ref(false);
+const saveLoading = ref(false);
+const presetThemes = ref(PRESET_THEMES);
+// form 在 loadSetting 中被整体替换，使用 ref
+const form = ref({
+  mode: "custom",
+  themeColor: "#ff3c2a",
+  aiderLightColor: "#ff9f28",
+});
+
+// 与移动端一致：提交订单等按钮为 主题色(91deg)→辅助色 渐变
+// 见 lilishop-uniapp/pages/order/fillorder.vue .tabbar-right
+const gradient = computed(() => {
+  return `linear-gradient(91deg, ${form.value.themeColor} 1%, ${form.value.aiderLightColor} 99%)`;
+});
+// 与移动端 --theme-primary-10 一致：主题色 10% 透明度浅底
+const tint = computed(() => {
+  const hex = form.value.themeColor.replace("#", "");
+  if (hex.length !== 6) return "rgba(0,0,0,0.04)";
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, 0.1)`;
+});
+// 标签 / 规格选中态：主题色文字 + 主题色描边 + 10% 浅底
+const tagStyle = computed(() => {
+  return {
+    color: form.value.themeColor,
+    borderColor: form.value.themeColor,
+    background: tint.value,
+  };
+});
+// 小标签（满减/券/自营）：白底 + 主题色描边
+const outlineTagStyle = computed(() => {
+  return {
+    color: form.value.themeColor,
+    borderColor: form.value.themeColor,
+    background: "#fff",
+  };
+});
+
+onMounted(() => {
+  loadSetting();
+});
+
+function isActivePreset(item) {
+  return (
+    form.value.themeColor.toLowerCase() === item.themeColor.toLowerCase() &&
+    form.value.aiderLightColor.toLowerCase() === item.aiderLightColor.toLowerCase()
+  );
+}
+function selectPreset(item) {
+  form.value.themeColor = item.themeColor;
+  form.value.aiderLightColor = item.aiderLightColor;
+}
+function loadSetting() {
+  loading.value = true;
+  getSetting(SETTING_KEY)
+    .then((res) => {
+      if (res.success && res.result) {
+        const data = res.result;
+        form.value = {
+          mode: data.mode || "custom",
+          themeColor: data.themeColor || form.value.themeColor,
+          aiderLightColor: data.aiderLightColor || form.value.aiderLightColor,
+        };
       }
-      this.saveLoading = true;
-      // lightColor（价格文字、进度条高亮）与主题色保持一致
-      const payload = {
-        mode: this.form.mode,
-        themeColor: this.form.themeColor,
-        lightColor: this.form.themeColor,
-        aiderLightColor: this.form.aiderLightColor,
-      };
-      setSetting(SETTING_KEY, payload)
-        .then((res) => {
-          if (res.success) {
-            this.$Message.success("保存成功");
-          } else {
-            this.$Message.error("保存失败");
-          }
-        })
-        .finally(() => {
-          this.saveLoading = false;
-        });
-    },
-  },
-};
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function submit() {
+  if (!form.value.themeColor || !form.value.aiderLightColor) {
+    Message.error("请选择主题色和辅助色");
+    return;
+  }
+  saveLoading.value = true;
+  // lightColor（价格文字、进度条高亮）与主题色保持一致
+  const payload = {
+    mode: form.value.mode,
+    themeColor: form.value.themeColor,
+    lightColor: form.value.themeColor,
+    aiderLightColor: form.value.aiderLightColor,
+  };
+  setSetting(SETTING_KEY, payload)
+    .then((res) => {
+      if (res.success) {
+        Message.success("保存成功");
+      } else {
+        Message.error("保存失败");
+      }
+    })
+    .finally(() => {
+      saveLoading.value = false;
+    });
+}
 </script>
 
 <style scoped lang="scss">

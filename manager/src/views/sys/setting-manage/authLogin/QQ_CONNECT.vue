@@ -21,7 +21,7 @@
             <div class="pay-list">
               <el-form
                 style="width: 100%"
-                ref="formValidate"
+                ref="formValidateRef"
                 :model="formValidate"
                 :rules="ruleValidate"
                 label-width="80px"
@@ -41,7 +41,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { getCurrentInstance, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
@@ -51,54 +52,53 @@ const DEFAULT_QQ_CONNECT_ITEMS = [
   { clientType: "H5", appId: "", appKey: "" },
 ];
 
-export default {
-  data() {
-    return {
-      ruleValidate: {},
-      way: {
-        APP: "移动应用端",
-        H5: "移动端",
-        WECHAT_MP: "小程序端",
-        PC: "PC端",
-      },
-      formValidate: {},
-    };
-  },
-  props: ["res", "type"],
-  created() {
-    this.init();
-  },
-  methods: {
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    setupSetting() {
-      setSetting(this.type, {
-        qqConnectSettingItemList: this.formValidate,
-      }).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-          } else {
-          ElMessage.error("保存失败!");
-          }
-      });
-    },
-    init() {
-      const setting = JSON.parse(this.res || "{}");
-      const items = setting.qqConnectSettingItemList;
-      this.formValidate =
-        Array.isArray(items) && items.length ? items : DEFAULT_QQ_CONNECT_ITEMS;
-      this.ruleValidate = {
-        appId: [{ required: true, message: "请填写必填项", trigger: "blur" }],
-        appKey: [{ required: true, message: "请填写必填项", trigger: "blur" }],
-      };
-    },
-  },
+const props = defineProps(["res", "type"]);
+
+// handleSubmit 通过组件实例的 $refs 查询表单
+const { proxy } = getCurrentInstance();
+
+const ruleValidate = ref({});
+const way = {
+  APP: "移动应用端",
+  H5: "移动端",
+  WECHAT_MP: "小程序端",
+  PC: "PC端",
 };
+const formValidate = ref({});
+
+// 模板 ref 原名 formValidate，与 data 字段重名会互相覆盖，改名避免冲突
+const formValidateRef = ref(null);
+
+function submit(name) {
+  handleSubmit(proxy, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+function setupSetting() {
+  setSetting(props.type, {
+    qqConnectSettingItemList: formValidate.value,
+  }).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+      } else {
+      ElMessage.error("保存失败!");
+      }
+  });
+}
+function init() {
+  const setting = JSON.parse(props.res || "{}");
+  const items = setting.qqConnectSettingItemList;
+  formValidate.value =
+    Array.isArray(items) && items.length ? items : DEFAULT_QQ_CONNECT_ITEMS;
+  ruleValidate.value = {
+    appId: [{ required: true, message: "请填写必填项", trigger: "blur" }],
+    appKey: [{ required: true, message: "请填写必填项", trigger: "blur" }],
+  };
+}
+
+init();
 </script>
 
 <style lang="scss" scoped>

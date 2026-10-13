@@ -41,7 +41,7 @@
           <div
             v-if="item.emoticon_id == 0"
             class="emoji-item custom-emoji"
-            @click="$refs.fileCustomEmoji.click()"
+            @click="fileCustomEmoji.click()"
           >
             <legacy-el-icon name="el-icon-picture" />
             <span>自定义</span>
@@ -93,96 +93,91 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from "vue";
 import MeEditorSystemEmoticon from "@/components/editor/MeEditorSystemEmoticon";
 import { emojiList as emoji } from "@/utils/emojis";
-import { mapState } from "vuex";
+import { useEmoticonStore } from "@/stores/emoticon";
 
-export default {
-  name: "MeEditorEmoticon",
-  components: {
-    MeEditorSystemEmoticon,
-  },
-  computed: {
-    ...mapState({
-      emojiItem: (state) => state.emoticon.items,
-    }),
-    showItems() {
-      let start = (this.page - 1) * this.pageSize;
-      let end = start + this.pageSize;
-      return this.emojiItem.slice(start, end);
-    },
-    pageTotal() {
-      return this.emojiItem.length / this.pageSize;
-    },
-  },
-  data() {
-    return {
-      emoji,
+defineOptions({ name: "MeEditorEmoticon" });
 
-      // 系统表情包套弹出窗
-      systemEmojiBox: false,
+const emit = defineEmits(["selected"]);
 
-      showEmoticonId: -1,
-      showTitle: "QQ表情/符号表情",
+const emoticonStore = useEmoticonStore();
 
-      page: 1,
-      pageSize: 13,
-    };
-  },
-  created() {
-    this.$store.commit("LOAD_USER_EMOTICON");
-  },
-  methods: {
-    // 表情包导航翻页
-    turnPage(type) {
-      if (type == 1) {
-        if (this.page == 1) return false;
-        this.page--;
-      } else {
-        if (this.page >= this.pageTotal) return false;
-        this.page++;
-      }
-    },
+const fileCustomEmoji = ref(null);
 
-    // 点击表情包导航
-    triggerItem(item) {
-      this.showEmoticonId = item.emoticon_id;
-      this.showTitle = item.name;
-    },
+// 系统表情包套弹出窗
+const systemEmojiBox = ref(false);
 
-    // 选中表情
-    clickEmoticon(emoji) {
-      this.callback({
-        type: 1,
-        value: emoji,
-      });
-    },
+const showEmoticonId = ref(-1);
+const showTitle = ref("QQ表情/符号表情");
 
-    // 发送图片表情包
-    clickImageEmoticon(item) {
-      this.callback({
-        type: 2,
-        value: item.media_id,
-      });
-    },
+const page = ref(1);
+const pageSize = ref(13);
 
-    callback(data) {
-      this.$emit("selected", data);
-    },
+const emojiItem = computed(() => emoticonStore.items);
 
-    // 自定义上传表情
-    customUploadEmoji(e) {
-      if (e.target.files.length == 0) {
-        return false;
-      }
+const showItems = computed(() => {
+  let start = (page.value - 1) * pageSize.value;
+  let end = start + pageSize.value;
+  return emojiItem.value.slice(start, end);
+});
 
-      this.$store.commit("UPLOAD_USER_EMOTICON", {
-        file: e.target.files[0],
-      });
-    },
-  },
-};
+const pageTotal = computed(() => {
+  return emojiItem.value.length / pageSize.value;
+});
+
+// 原 created 钩子
+emoticonStore.LOAD_USER_EMOTICON();
+
+// 表情包导航翻页
+function turnPage(type) {
+  if (type == 1) {
+    if (page.value == 1) return false;
+    page.value--;
+  } else {
+    if (page.value >= pageTotal.value) return false;
+    page.value++;
+  }
+}
+
+// 点击表情包导航
+function triggerItem(item) {
+  showEmoticonId.value = item.emoticon_id;
+  showTitle.value = item.name;
+}
+
+// 选中表情
+function clickEmoticon(emoji) {
+  callback({
+    type: 1,
+    value: emoji,
+  });
+}
+
+// 发送图片表情包
+function clickImageEmoticon(item) {
+  callback({
+    type: 2,
+    value: item.media_id,
+  });
+}
+
+function callback(data) {
+  emit("selected", data);
+}
+
+// 自定义上传表情
+function customUploadEmoji(e) {
+  if (e.target.files.length == 0) {
+    return false;
+  }
+
+  emoticonStore.UPLOAD_USER_EMOTICON({
+    file: e.target.files[0],
+  });
+}
 </script>
 <style lang="less" scoped>
 .container {

@@ -35,8 +35,11 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
 import { getServiceCalendarMonth, getServiceCalendarDay } from "@/api/appointment";
+
+defineOptions({ name: "appointmentServiceCalendar" });
 
 function formatMonth(date) {
   const y = date.getFullYear();
@@ -44,72 +47,62 @@ function formatMonth(date) {
   return `${y}-${m}`;
 }
 
-export default {
-  name: "appointmentServiceCalendar",
-  data() {
-    return {
-      loading: false,
-      currentMonth: formatMonth(new Date()),
-      monthDays: [],
-      dayVisible: false,
-      dayLoading: false,
-      activeDate: "",
-      dayStatus: "ALL",
-      dayRows: [],
-    };
-  },
-  computed: {
-    monthLabel() {
-      return this.currentMonth;
-    },
-  },
-  mounted() {
-    this.loadMonth();
-  },
-  methods: {
-    goToday() {
-      this.currentMonth = formatMonth(new Date());
-      this.loadMonth();
-    },
-    changeMonth(delta) {
-      const [y, m] = this.currentMonth.split("-").map(Number);
-      const date = new Date(y, m - 1 + delta, 1);
-      this.currentMonth = formatMonth(date);
-      this.loadMonth();
-    },
-    loadMonth() {
-      this.loading = true;
-      getServiceCalendarMonth(this.currentMonth)
-        .then((res) => {
-          if (res.success) {
-            this.monthDays = res.result?.days || res.result || [];
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    openDay(date) {
-      this.activeDate = date;
-      this.dayStatus = "ALL";
-      this.dayVisible = true;
-      this.loadDay();
-    },
-    loadDay() {
-      if (!this.activeDate) return;
-      this.dayLoading = true;
-      getServiceCalendarDay({ date: this.activeDate, status: this.dayStatus })
-        .then((res) => {
-          if (res.success) {
-            this.dayRows = res.result?.records || res.result || [];
-          }
-        })
-        .finally(() => {
-          this.dayLoading = false;
-        });
-    },
-  },
-};
+const loading = ref(false);
+const currentMonth = ref(formatMonth(new Date()));
+const monthDays = ref([]);
+const dayVisible = ref(false);
+const dayLoading = ref(false);
+const activeDate = ref("");
+const dayStatus = ref("ALL");
+const dayRows = ref([]);
+
+const monthLabel = computed(() => currentMonth.value);
+
+onMounted(() => {
+  loadMonth();
+});
+
+function goToday() {
+  currentMonth.value = formatMonth(new Date());
+  loadMonth();
+}
+function changeMonth(delta) {
+  const [y, m] = currentMonth.value.split("-").map(Number);
+  const date = new Date(y, m - 1 + delta, 1);
+  currentMonth.value = formatMonth(date);
+  loadMonth();
+}
+function loadMonth() {
+  loading.value = true;
+  getServiceCalendarMonth(currentMonth.value)
+    .then((res) => {
+      if (res.success) {
+        monthDays.value = res.result?.days || res.result || [];
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function openDay(date) {
+  activeDate.value = date;
+  dayStatus.value = "ALL";
+  dayVisible.value = true;
+  loadDay();
+}
+function loadDay() {
+  if (!activeDate.value) return;
+  dayLoading.value = true;
+  getServiceCalendarDay({ date: activeDate.value, status: dayStatus.value })
+    .then((res) => {
+      if (res.success) {
+        dayRows.value = res.result?.records || res.result || [];
+      }
+    })
+    .finally(() => {
+      dayLoading.value = false;
+    });
+}
 </script>
 
 <style scoped>

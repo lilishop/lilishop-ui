@@ -76,116 +76,115 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from "vuex";
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useTalkStore } from "@/stores/talk";
+import { useUserStore } from "@/stores/user";
 
-export default {
-  data () {
-    return {
-      noMoreList:{
-        'goods':{title:'暂无最近浏览',value:false},
-        'orders':{title:'暂无订单信息',value:false},
-      },
-      activeName: 'goods',
-      btnHide: undefined,
-      hide: true,
-      col: {
-        CANCELLED: 'danger',
-        PAID: 'danger',
-        TAKE: '',
-        COMPLETED: 'success',
-        DELIVERED: 'danger',
-        UNDELIVERED: 'warning',
-        UNPAID: '',
-        STAY_PICKED_UP: ''
-      },
-    }
-  },
-  computed: {
-    ...mapGetters(["talkItems"]),
-    ...mapState({
-      id: (state) => state.user.id,
-      toUser: (state) => state.user.toUser,
-    }),
-  },
-  methods: {
-    //跳转订单列表
+const talkStore = useTalkStore();
+const userStore = useUserStore();
 
-    scrollBottom (e) {
-      const { scrollTop, scrollHeight, clientHeight } = e.srcElement
-      if (scrollTop + clientHeight >= scrollHeight) {
-        this.$emit('loadMore')
-      }
-    },
-    loadMore () {
+const emit = defineEmits(["loadMore", "sendMessage"]);
 
-    },
-    // 发送消息回调事件
-    submitSendGoodsMessage (item) {
-      const context = {
-        id: item.id,
-        goodsId: item.goodsId,
-        thumbnail: item.thumbnail,
-        price: item.price,
-        goodsName: item.goodsName
-      }
-      const record = {
-        operation_type: "MESSAGE",
-        to: this.toUser.userId,
-        from: this.id,
-        message_type: "GOODS",
-        context: context,
-        talk_id: this.toUser.id,
-      };
-      this.$emit('sendMessage', record, context, 'GOODS');
-      localStorage.setItem(item.goodsId, 0)
-      item.btnHide = 0
-    },
-    // 发送订单列表
-    submitSendOrderMessage (item, index) {
-      console.log(item, 'item');
-    
-      const context = {
-        sn: item.sn,
-        groupImages: item.groupImages,
-        paymentTime: item.paymentTime,
-        groupName: item.groupName,
-        flowPrice: item.flowPrice,
-        orderItems:item.orderItems,
-        orderStatus: item.orderStatus
-      }
-      const record = {
-        operation_type: "MESSAGE",
-        to: this.toUser.userId,
-        from: this.id,
-        message_type: "ORDER",
-        context: context,
-        talk_id: this.toUser.id,
-      };
-      this.$emit('sendMessage', record, context, 'ORDER');
-      localStorage.setItem(item.goodsId, 0)
-      item.btnHide = 0
-    },
-    handleClick (tab, event) {
-      
-    }
+const props = defineProps({
+  list: {
+    type: Array,
+    default: () => [],
   },
-  props: {
-    list: {
-      type: Array,
-      default: () => [],
-    },
-    orderList: {
-      type: Array,
-      default: () => [],
-    },
+  orderList: {
+    type: Array,
+    default: () => [],
   },
-  mounted () {
-    //  state.user.toUser
-    // console.log(this.orderList, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
-    this.btnHide = localStorage.getItem('btnHide')
+});
+
+const noMoreList = ref({
+  'goods': { title: '暂无最近浏览', value: false },
+  'orders': { title: '暂无订单信息', value: false },
+});
+const activeName = ref('goods');
+const btnHide = ref(undefined);
+const hide = ref(true);
+const col = ref({
+  CANCELLED: 'danger',
+  PAID: 'danger',
+  TAKE: '',
+  COMPLETED: 'success',
+  DELIVERED: 'danger',
+  UNDELIVERED: 'warning',
+  UNPAID: '',
+  STAY_PICKED_UP: ''
+});
+
+const talkItems = computed(() => talkStore.talkItems);
+const id = computed(() => userStore.id);
+const toUser = computed(() => userStore.toUser);
+
+//跳转订单列表
+
+function scrollBottom (e) {
+  const { scrollTop, scrollHeight, clientHeight } = e.srcElement
+  if (scrollTop + clientHeight >= scrollHeight) {
+    emit('loadMore')
   }
 }
+function loadMore () {
+
+}
+// 发送消息回调事件
+function submitSendGoodsMessage (item) {
+  const context = {
+    id: item.id,
+    goodsId: item.goodsId,
+    thumbnail: item.thumbnail,
+    price: item.price,
+    goodsName: item.goodsName
+  }
+  const record = {
+    operation_type: "MESSAGE",
+    to: toUser.value.userId,
+    from: id.value,
+    message_type: "GOODS",
+    context: context,
+    talk_id: toUser.value.id,
+  };
+  emit('sendMessage', record, context, 'GOODS');
+  localStorage.setItem(item.goodsId, 0)
+  item.btnHide = 0
+}
+// 发送订单列表
+function submitSendOrderMessage (item, index) {
+  console.log(item, 'item');
+
+  const context = {
+    sn: item.sn,
+    groupImages: item.groupImages,
+    paymentTime: item.paymentTime,
+    groupName: item.groupName,
+    flowPrice: item.flowPrice,
+    orderItems:item.orderItems,
+    orderStatus: item.orderStatus
+  }
+  const record = {
+    operation_type: "MESSAGE",
+    to: toUser.value.userId,
+    from: id.value,
+    message_type: "ORDER",
+    context: context,
+    talk_id: toUser.value.id,
+  };
+  emit('sendMessage', record, context, 'ORDER');
+  localStorage.setItem(item.goodsId, 0)
+  item.btnHide = 0
+}
+function handleClick (tab, event) {
+
+}
+
+onMounted(() => {
+  //  state.user.toUser
+  // console.log(this.orderList, '  this.$store.state.user.toUser  this.$store.state.user.toUser  this.$store.state.user.toUser');
+  btnHide.value = localStorage.getItem('btnHide')
+});
 
 </script>
 

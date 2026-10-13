@@ -29,7 +29,7 @@
       append-to-body
       destroy-on-close
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="热词" prop="keywords">
           <el-input v-model="form.keywords" clearable style="width: 100%" />
         </el-form-item>
@@ -45,86 +45,84 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { Close } from "@element-plus/icons-vue";
 import { getHotWords, setHotWords, deleteHotWords } from "@/api/index";
 import { regular } from "@/utils";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "HOTWORDS_TODAY",
-  components: { Close },
-  data() {
-    return {
-      submitLoading: false,
-      modalTitle: "",
-      loading: true,
-      modalVisible: false,
-      form: {
-        keywords: "",
-        point: 0,
-      },
-      data: [],
-      formValidate: {
-        keywords: [regular.REQUIRED, regular.VARCHAR20],
-        point: [regular.REQUIRED, regular.NUMBER],
-      },
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getHotWords().then((res) => {
-        this.loading = false;
+defineOptions({ name: "HOTWORDS_TODAY" });
+
+const formRef = ref(null);
+
+const submitLoading = ref(false);
+const modalTitle = ref("");
+const loading = ref(true);
+const modalVisible = ref(false);
+const form = ref({
+  keywords: "",
+  point: 0,
+});
+const data = ref([]);
+const formValidate = reactive({
+  keywords: [regular.REQUIRED, regular.VARCHAR20],
+  point: [regular.REQUIRED, regular.NUMBER],
+});
+
+function init() {
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getHotWords().then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result;
+    }
+  });
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      setHotWords(form.value).then((res) => {
+        submitLoading.value = false;
         if (res.success) {
-          this.data = res.result;
+          Message.success("操作成功");
+          getDataList();
+          modalVisible.value = false;
+        }
+      });
+    }
+  });
+}
+function add(words) {
+  modalTitle.value = "设置热词";
+  form.value.keywords = words || "";
+  form.value.point = 1;
+  modalVisible.value = true;
+}
+function deleteWords(words) {
+  Modal.confirm({
+    title: "是否确定删除热词",
+    content: "您确定要删除此热词吗？",
+    okText: "确定",
+    cancelText: "取消",
+    onOk: () => {
+      deleteHotWords({ words }).then((res) => {
+        if (res.success) {
+          Message.success("删除成功");
+          getDataList();
         }
       });
     },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          setHotWords(this.form).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-              this.modalVisible = false;
-            }
-          });
-        }
-      });
-    },
-    add(words) {
-      this.modalTitle = "设置热词";
-      this.form.keywords = words || "";
-      this.form.point = 1;
-      this.modalVisible = true;
-    },
-    deleteWords(words) {
-      this.$Modal.confirm({
-        title: "是否确定删除热词",
-        content: "您确定要删除此热词吗？",
-        okText: "确定",
-        cancelText: "取消",
-        onOk: () => {
-          deleteHotWords({ words }).then((res) => {
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

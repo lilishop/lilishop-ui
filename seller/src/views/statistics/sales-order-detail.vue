@@ -67,85 +67,82 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Statistics from "@/api/statistics";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { unitPrice } from "@/utils/filters";
 
-export default {
-  name: "seller-sales-order-detail-report",
-  data() {
-    return {
-      loading: false,
-      dateRange: [],
-      defaultTime: [new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)],
-      params: {
-        pageNumber: 1,
-        pageSize: 20,
-        orderSn: "",
-        memberName: "",
-        keyword: "",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  mounted() {
-    this.initDefaultRange();
-    this.loadData();
-  },
-  methods: {
-    initDefaultRange() {
-      const end = new Date();
-      const start = new Date();
-      start.setDate(start.getDate() - 6);
-      this.dateRange = [this.formatDate(start, true), this.formatDate(end, false)];
-    },
-    formatDate(date, startOfDay) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
-      return startOfDay ? `${y}-${m}-${d} 00:00:00` : `${y}-${m}-${d} 23:59:59`;
-    },
-    buildParams() {
-      const p = { ...this.params };
-      if (this.dateRange && this.dateRange.length === 2) {
-        p.startTime = this.dateRange[0];
-        p.endTime = this.dateRange[1];
-      }
-      return p;
-    },
-    handleSearch() {
-      this.params.pageNumber = 1;
-      this.loadData();
-    },
-    loadData() {
-      this.loading = true;
-      API_Statistics.getSalesOrderDetailReport(this.buildParams()).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records || [];
-          this.total = res.result.total || 0;
-        }
-      });
-    },
-    handleExport() {
-      API_Statistics.exportSalesOrderDetailReport(this.buildParams()).then((blob) => {
-        downloadBlob(blob, "销售订单明细报表.xlsx");
-      });
-    },
-    formatMoney(val) {
-      return this.$filters.unitPrice(val, "￥");
-    },
-    clientTypeText(val) {
-      const map = {
-        H5: "移动端",
-        PC: "PC端",
-        WECHAT_MP: "小程序",
-        APP: "移动应用端",
-        UNKNOWN: "未知",
-      };
-      return map[val] || val || "";
-    },
-  },
-};
+defineOptions({ name: "seller-sales-order-detail-report" });
+
+const loading = ref(false);
+const dateRange = ref([]);
+const defaultTime = ref([new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)]);
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  orderSn: "",
+  memberName: "",
+  keyword: "",
+});
+const data = ref([]);
+const total = ref(0);
+
+onMounted(() => {
+  initDefaultRange();
+  loadData();
+});
+
+function initDefaultRange() {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 6);
+  dateRange.value = [formatDate(start, true), formatDate(end, false)];
+}
+function formatDate(date, startOfDay) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return startOfDay ? `${y}-${m}-${d} 00:00:00` : `${y}-${m}-${d} 23:59:59`;
+}
+function buildParams() {
+  const p = { ...params };
+  if (dateRange.value && dateRange.value.length === 2) {
+    p.startTime = dateRange.value[0];
+    p.endTime = dateRange.value[1];
+  }
+  return p;
+}
+function handleSearch() {
+  params.pageNumber = 1;
+  loadData();
+}
+function loadData() {
+  loading.value = true;
+  API_Statistics.getSalesOrderDetailReport(buildParams()).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records || [];
+      total.value = res.result.total || 0;
+    }
+  });
+}
+function handleExport() {
+  API_Statistics.exportSalesOrderDetailReport(buildParams()).then((blob) => {
+    downloadBlob(blob, "销售订单明细报表.xlsx");
+  });
+}
+function formatMoney(val) {
+  return unitPrice(val, "￥");
+}
+function clientTypeText(val) {
+  const map = {
+    H5: "移动端",
+    PC: "PC端",
+    WECHAT_MP: "小程序",
+    APP: "移动应用端",
+    UNKNOWN: "未知",
+  };
+  return map[val] || val || "";
+}
 </script>

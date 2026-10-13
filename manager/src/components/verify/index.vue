@@ -37,107 +37,106 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from "vue";
 import { Refresh, DArrowRight } from "@element-plus/icons-vue";
 import { getVerifyImg, postVerifyImg } from "./verify.js";
+import { Message } from "@/utils/message";
 
-export default {
-  components: { Refresh, DArrowRight },
-  props: {
-    verifyType: {
-      default: "LOGIN",
-      type: String,
-    },
+const props = defineProps({
+  verifyType: {
+    default: "LOGIN",
+    type: String,
   },
-  data() {
-    return {
-      show: false,
-      type: "LOGIN",
-      data: {
-        backImage: "",
-        slidingImage: "",
-        originalHeight: 150,
-        originalWidth: 300,
-        sliderWidth: 60,
-        sliderHeight: 60,
-      },
-      distance: 0,
-      flag: false,
-      downX: 0,
-      bgColor: "#04ad11",
-      verifyText: "拖动滑块解锁",
-    };
+});
+const emit = defineEmits(["change"]);
+
+const show = ref(false);
+const type = ref("LOGIN");
+const data = ref({
+  backImage: "",
+  slidingImage: "",
+  originalHeight: 150,
+  originalWidth: 300,
+  sliderWidth: 60,
+  sliderHeight: 60,
+});
+const distance = ref(0);
+const flag = ref(false);
+const downX = ref(0);
+const bgColor = ref("#04ad11");
+const verifyText = ref("拖动滑块解锁");
+
+watch(
+  () => props.verifyType,
+  (v) => {
+    type.value = v;
   },
-  methods: {
-    mouseDown(e) {
-      this.downX = e.clientX;
-      this.flag = true;
-    },
-    mouseMove(e) {
-      if (this.flag) {
-        const offset = e.clientX - this.downX;
-        if (offset > this.data.originalWidth - 43) {
-          this.distance = this.data.originalWidth - 43;
-        } else if (offset < 0) {
-          this.distance = 0;
-        } else {
-          this.distance = offset;
-        }
-      }
-    },
-    mouseUp() {
-      if (!this.flag) return false;
-      this.flag = false;
-      const params = {
-        verificationEnums: this.type,
-        xPos: this.distance,
-      };
-      postVerifyImg(params)
-        .then((res) => {
-          if (res.success) {
-            if (res.result) {
-              this.bgColor = "green";
-              this.verifyText = "解锁成功";
-              this.$emit("change", { status: true, distance: this.distance });
-            } else {
-              this.bgColor = "red";
-              this.verifyText = "解锁失败";
-              setTimeout(() => this.init(), 1000);
-              this.$emit("change", { status: false, distance: this.distance });
-            }
-          } else {
-            this.init();
-          }
-        })
-        .catch(() => {
-          this.init();
-        });
-    },
-    init() {
-      this.flag = false;
-      this.downX = 0;
-      this.distance = 0;
-      this.bgColor = "#04ad11";
-      this.verifyText = "拖动滑块解锁";
-      getVerifyImg(this.type).then((res) => {
+  { immediate: true }
+);
+
+function mouseDown(e) {
+  downX.value = e.clientX;
+  flag.value = true;
+}
+function mouseMove(e) {
+  if (flag.value) {
+    const offset = e.clientX - downX.value;
+    if (offset > data.value.originalWidth - 43) {
+      distance.value = data.value.originalWidth - 43;
+    } else if (offset < 0) {
+      distance.value = 0;
+    } else {
+      distance.value = offset;
+    }
+  }
+}
+function mouseUp() {
+  if (!flag.value) return false;
+  flag.value = false;
+  const params = {
+    verificationEnums: type.value,
+    xPos: distance.value,
+  };
+  postVerifyImg(params)
+    .then((res) => {
+      if (res.success) {
         if (res.result) {
-          this.data = res.result;
-          this.show = true;
+          bgColor.value = "green";
+          verifyText.value = "解锁成功";
+          emit("change", { status: true, distance: distance.value });
         } else {
-          this.$Message.warning("请求失败请重试！");
+          bgColor.value = "red";
+          verifyText.value = "解锁失败";
+          setTimeout(() => init(), 1000);
+          emit("change", { status: false, distance: distance.value });
         }
-      });
-    },
-  },
-  watch: {
-    verifyType: {
-      immediate: true,
-      handler(v) {
-        this.type = v;
-      },
-    },
-  },
-};
+      } else {
+        init();
+      }
+    })
+    .catch(() => {
+      init();
+    });
+}
+function init() {
+  flag.value = false;
+  downX.value = 0;
+  distance.value = 0;
+  bgColor.value = "#04ad11";
+  verifyText.value = "拖动滑块解锁";
+  getVerifyImg(type.value).then((res) => {
+    if (res.result) {
+      data.value = res.result;
+      show.value = true;
+    } else {
+      Message.warning("请求失败请重试！");
+    }
+  });
+}
+
+// login.vue 通过 verifyRef.value.show = false 关闭、verifyRef.value.init() 打开
+defineExpose({ show, init });
 </script>
 
 <style lang="scss" scoped>

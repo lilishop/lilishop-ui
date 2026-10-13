@@ -33,7 +33,7 @@
       append-to-body
       destroy-on-close
     >
-      <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="热词" prop="keywords">
           <el-input v-model="form.keywords" clearable style="width: 100%" />
         </el-form-item>
@@ -49,85 +49,91 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { getHotWords, setHotWords, deleteHotWords } from "@/api/index";
 import { regular } from "@/utils";
+import { Message, Modal } from "@/utils/message";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "todayHotWords",
-  data() {
-    return {
-      submitLoading: false,
-      modalTitle: "",
-      loading: true,
-      modalVisible: false,
-      form: {
-        keywords: "",
-        point: 0,
-      },
-      data: [],
-      formValidate: {
-        keywords: [regular.REQUIRED, regular.VARCHAR20],
-        point: [regular.REQUIRED, regular.NUMBER],
-      },
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getHotWords().then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result;
-          this.$store.state.app.hotWords = this.data;
-        }
-      });
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          setHotWords(this.form).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-              this.modalVisible = false;
-            }
-          });
-        }
-      });
-    },
-    add(words) {
-      this.modalTitle = "设置热词";
-      this.form.keywords = words || "";
-      this.form.point = 1;
-      this.modalVisible = true;
-    },
-    deleteWords(words) {
-      this.$Modal.confirm({
-        title: "是否确定删除热词",
-        content: "您确定要删除此热词吗？",
-        okText: "确定",
-        cancelText: "取消",
-        onOk: () => {
-          deleteHotWords({ words }).then((res) => {
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
+defineOptions({ name: "todayHotWords" });
+
+const appStore = useAppStore();
+
+const submitLoading = ref(false);
+const modalTitle = ref("");
+const loading = ref(true);
+const modalVisible = ref(false);
+const form = reactive({
+  keywords: "",
+  point: 0,
+});
+const data = ref([]);
+const formValidate = {
+  keywords: [regular.REQUIRED, regular.VARCHAR20],
+  point: [regular.REQUIRED, regular.NUMBER],
 };
+
+const formRef = ref(null);
+
+function init() {
+  getDataList();
+}
+
+function getDataList() {
+  loading.value = true;
+  getHotWords().then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result;
+      appStore.hotWords = data.value;
+    }
+  });
+}
+
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      setHotWords(form).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+          modalVisible.value = false;
+        }
+      });
+    }
+  });
+}
+
+function add(words) {
+  modalTitle.value = "设置热词";
+  form.keywords = words || "";
+  form.point = 1;
+  modalVisible.value = true;
+}
+
+function deleteWords(words) {
+  Modal.confirm({
+    title: "是否确定删除热词",
+    content: "您确定要删除此热词吗？",
+    okText: "确定",
+    cancelText: "取消",
+    onOk: () => {
+      deleteHotWords({ words }).then((res) => {
+        if (res.success) {
+          Message.success("删除成功");
+          getDataList();
+        }
+      });
+    },
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

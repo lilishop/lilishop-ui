@@ -84,136 +84,144 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Modal } from "@/utils/message";
 import { collectList, cancelCollect, storeCollectList, cancelStoreCollect } from '@/api/member.js'
-export default {
-  name: 'Favorites',
-  props: {
-    homePage: {
-      type: Boolean,
-      default: false
-    }
-  },
-  data() {
-    return {
-      favoriteWay: ['收藏商品', '收藏店铺'], // 收藏分类
-      list: [], // 收藏列表
-      total: 0, // 收藏总数
-      params: { // 请求参数
-        pageNumber: 1,
-        pageSize: 100,
-        type: this.$route.query.type || 'GOODS'
-      },
-      spinShow: false // 加载状态
-    };
-  },
-  computed: {
-    activeTabIndex() {
-      return this.params.type === 'STORE' ? 1 : 0;
-    },
-  },
 
-  methods: {
-    loadFavorites() {
-      if (this.params.type === 'STORE') {
-        this.getStoreList();
-      } else {
-        this.getList();
-      }
-    },
-    getList() { // 获取商品收藏列表
-      this.spinShow = true
-      collectList(this.params).then(res => {
-        if (res.success && res.result) {
-          this.list = res.result.records || [];
-        }
-      }).catch(() => {
-        this.list = [];
-      }).finally(() => {
-        this.spinShow = false
-      })
-    },
-    getStoreList() { // 获取店铺收藏列表
-      this.spinShow = true
-      storeCollectList(this.params).then(res => {
-        if (res.success && res.result) {
-          this.list = res.result.records || [];
-        }
-      }).catch(() => {
-        this.list = [];
-      }).finally(() => {
-        this.spinShow = false
-      })
-    },
-    change(index) { // tab栏切换
-      if (index === 0) { this.params.type = 'GOODS', this.getList() }
-      if (index === 1) { this.params.type = 'STORE', this.getStoreList() }
-    },
-    cancel(id) { // 取消收藏
-      let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
-      Modal.confirm({
-        title: '取消收藏',
-        content: `确定取消收藏该${typeName}吗？`,
-        onOk: () => {
-          cancelCollect(this.params.type, id).then(res => {
-            if (res.success) {
-              this.getList();
-            }
-          })
-        }
-      });
-    },
-    cancelStore(id) { // 取消收藏
-      let typeName = this.params.type === 'GOODS' ? '商品' : '店铺'
-      Modal.confirm({
-        title: '取消收藏',
-        content: `确定取消收藏该${typeName}吗？`,
-        onOk: () => {
-          cancelStoreCollect(this.params.type, id).then(res => {
-            if (res.success) {
-              this.getStoreList();
-            }
-          })
-        }
-      });
-    },
-    openItem (item) {
-      if (this.params.type === 'STORE') {
-        this.goShop(item.id)
-        return
-      }
-      this.buynow(item.skuId, item.goodsId)
-    },
-    buynow(skuId, goodsId,storeId) { // 跳转详情
-      let url
-      if (this.params.type === 'STORE') {
-        url = this.$router.resolve({
-          path: '/merchant',
-          query: { 'id': storeId }
-        })
-      } else {
-        url = this.$router.resolve({
-          path: '/goodsDetail',
-          query: { skuId, goodsId }
-        })
+defineOptions({ name: 'Favorites' });
 
-      }
-      window.open(url.href, '_blank')
-
-    },
-    goShop(id) { // 跳转店铺页面
-      this.$router.push({
-        path: '/merchant',
-        query: { id }
-      })
-    }
-  },
-  mounted() {
-    if (this.homePage) this.params.pageSize = 5;
-    this.loadFavorites();
+const props = defineProps({
+  homePage: {
+    type: Boolean,
+    default: false
   }
-};
+});
+
+const route = useRoute();
+const router = useRouter();
+
+const favoriteWay = ref(['收藏商品', '收藏店铺']); // 收藏分类
+const list = ref([]); // 收藏列表
+const total = ref(0); // 收藏总数
+const params = reactive({ // 请求参数
+  pageNumber: 1,
+  pageSize: 100,
+  type: route.query.type || 'GOODS'
+});
+const spinShow = ref(false); // 加载状态
+
+const activeTabIndex = computed(() => {
+  return params.type === 'STORE' ? 1 : 0;
+});
+
+function loadFavorites() {
+  if (params.type === 'STORE') {
+    getStoreList();
+  } else {
+    getList();
+  }
+}
+
+function getList() { // 获取商品收藏列表
+  spinShow.value = true
+  collectList(params).then(res => {
+    if (res.success && res.result) {
+      list.value = res.result.records || [];
+    }
+  }).catch(() => {
+    list.value = [];
+  }).finally(() => {
+    spinShow.value = false
+  })
+}
+
+function getStoreList() { // 获取店铺收藏列表
+  spinShow.value = true
+  storeCollectList(params).then(res => {
+    if (res.success && res.result) {
+      list.value = res.result.records || [];
+    }
+  }).catch(() => {
+    list.value = [];
+  }).finally(() => {
+    spinShow.value = false
+  })
+}
+
+function change(index) { // tab栏切换
+  if (index === 0) { params.type = 'GOODS', getList() }
+  if (index === 1) { params.type = 'STORE', getStoreList() }
+}
+
+function cancel(id) { // 取消收藏
+  let typeName = params.type === 'GOODS' ? '商品' : '店铺'
+  Modal.confirm({
+    title: '取消收藏',
+    content: `确定取消收藏该${typeName}吗？`,
+    onOk: () => {
+      cancelCollect(params.type, id).then(res => {
+        if (res.success) {
+          getList();
+        }
+      })
+    }
+  });
+}
+
+function cancelStore(id) { // 取消收藏
+  let typeName = params.type === 'GOODS' ? '商品' : '店铺'
+  Modal.confirm({
+    title: '取消收藏',
+    content: `确定取消收藏该${typeName}吗？`,
+    onOk: () => {
+      cancelStoreCollect(params.type, id).then(res => {
+        if (res.success) {
+          getStoreList();
+        }
+      })
+    }
+  });
+}
+
+function openItem (item) {
+  if (params.type === 'STORE') {
+    goShop(item.id)
+    return
+  }
+  buynow(item.skuId, item.goodsId)
+}
+
+function buynow(skuId, goodsId, storeId) { // 跳转详情
+  let url
+  if (params.type === 'STORE') {
+    url = router.resolve({
+      path: '/merchant',
+      query: { 'id': storeId }
+    })
+  } else {
+    url = router.resolve({
+      path: '/goodsDetail',
+      query: { skuId, goodsId }
+    })
+
+  }
+  window.open(url.href, '_blank')
+
+}
+
+function goShop(id) { // 跳转店铺页面
+  router.push({
+    path: '/merchant',
+    query: { id }
+  })
+}
+
+onMounted(() => {
+  if (props.homePage) params.pageSize = 5;
+  loadFavorites();
+});
 </script>
 
 <style scoped lang="scss">

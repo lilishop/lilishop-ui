@@ -70,137 +70,136 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
 import * as API_Member from "@/api/member.js";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-export default {
-  name: "memberGroup",
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      data: [],
-      total: 0,
-      addFlag: false,
-      editFlag: false,
-      submitAddLoading: false,
-      submitEditLoading: false,
-      formAdd: {
-        groupName: "",
-        description: "",
-      },
-      formEdit: {
-        id: "",
-        groupName: "",
-        description: "",
-      },
-      rulesAdd: {
-        groupName: [{ required: true, message: "请输入分组名称", trigger: "blur" }],
-      },
-      rulesEdit: {
-        groupName: [{ required: true, message: "请输入分组名称", trigger: "blur" }],
-      },
-    };
-  },
-  methods: {
-    init() {
-      this.getData();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getData();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getData();
-    },
-    getData() {
-      this.loading = true;
-      API_Member.getMemberGroupByPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res && res.success && res.result) {
-          this.data = res.result.records || [];
-          this.total = res.result.total || 0;
-        }
-      });
-    },
-    openAdd() {
-      this.addFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.addForm) this.$refs.addForm.resetFields();
-        this.formAdd = { groupName: "", description: "" };
-      });
-    },
-    submitAdd() {
-      this.$refs.addForm.validate((valid) => {
-        if (!valid) return;
-        this.submitAddLoading = true;
-        API_Member.addMemberGroup(this.formAdd).then((res) => {
-          this.submitAddLoading = false;
-          if (res && res.success) {
-            ElMessage.success("添加成功");
-            this.addFlag = false;
-            this.getData();
-          }
-        });
-      });
-    },
-    openEdit(row) {
-      this.editFlag = true;
-      this.submitEditLoading = false;
-      API_Member.getMemberGroup(row.id).then((res) => {
-        if (res && res.success && res.result) {
-          this.formEdit = {
-            id: res.result.id,
-            groupName: res.result.groupName || "",
-            description: res.result.description || "",
-          };
-        } else {
-          this.formEdit = {
-            id: row.id,
-            groupName: row.groupName || "",
-            description: row.description || "",
-          };
-        }
-      });
-    },
-    submitEdit() {
-      this.$refs.editForm.validate((valid) => {
-        if (!valid) return;
-        this.submitEditLoading = true;
-        const { id, groupName, description } = this.formEdit;
-        API_Member.updateMemberGroup(id, { groupName, description }).then((res) => {
-          this.submitEditLoading = false;
-          if (res && res.success) {
-            ElMessage.success("修改成功");
-            this.editFlag = false;
-            this.getData();
-          }
-        });
-      });
-    },
-    remove(row) {
-      ElMessageBox.confirm("确定删除该分组？", "提示", { type: "warning" }).then(() => {
-        API_Member.deleteMemberGroup(row.id).then((res) => {
-          if (res && res.success) {
-            ElMessage.success("删除成功");
-            this.getData();
-          } else if (res && res.message) {
-            ElMessage.error(res.message);
-          }
-        });
-      }).catch(() => {});
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "memberGroup" });
+
+const addForm = ref(null);
+const editForm = ref(null);
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const data = ref([]);
+const total = ref(0);
+const addFlag = ref(false);
+const editFlag = ref(false);
+const submitAddLoading = ref(false);
+const submitEditLoading = ref(false);
+const formAdd = ref({
+  groupName: "",
+  description: "",
+});
+const formEdit = ref({
+  id: "",
+  groupName: "",
+  description: "",
+});
+const rulesAdd = reactive({
+  groupName: [{ required: true, message: "请输入分组名称", trigger: "blur" }],
+});
+const rulesEdit = reactive({
+  groupName: [{ required: true, message: "请输入分组名称", trigger: "blur" }],
+});
+
+function init() {
+  getData();
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getData();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getData();
+}
+function getData() {
+  loading.value = true;
+  API_Member.getMemberGroupByPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res && res.success && res.result) {
+      data.value = res.result.records || [];
+      total.value = res.result.total || 0;
+    }
+  });
+}
+function openAdd() {
+  addFlag.value = true;
+  nextTick(() => {
+    if (addForm.value) addForm.value.resetFields();
+    formAdd.value = { groupName: "", description: "" };
+  });
+}
+function submitAdd() {
+  addForm.value.validate((valid) => {
+    if (!valid) return;
+    submitAddLoading.value = true;
+    API_Member.addMemberGroup(formAdd.value).then((res) => {
+      submitAddLoading.value = false;
+      if (res && res.success) {
+        ElMessage.success("添加成功");
+        addFlag.value = false;
+        getData();
+      }
+    });
+  });
+}
+function openEdit(row) {
+  editFlag.value = true;
+  submitEditLoading.value = false;
+  API_Member.getMemberGroup(row.id).then((res) => {
+    if (res && res.success && res.result) {
+      formEdit.value = {
+        id: res.result.id,
+        groupName: res.result.groupName || "",
+        description: res.result.description || "",
+      };
+    } else {
+      formEdit.value = {
+        id: row.id,
+        groupName: row.groupName || "",
+        description: row.description || "",
+      };
+    }
+  });
+}
+function submitEdit() {
+  editForm.value.validate((valid) => {
+    if (!valid) return;
+    submitEditLoading.value = true;
+    const { id, groupName, description } = formEdit.value;
+    API_Member.updateMemberGroup(id, { groupName, description }).then((res) => {
+      submitEditLoading.value = false;
+      if (res && res.success) {
+        ElMessage.success("修改成功");
+        editFlag.value = false;
+        getData();
+      }
+    });
+  });
+}
+function remove(row) {
+  ElMessageBox.confirm("确定删除该分组？", "提示", { type: "warning" }).then(() => {
+    API_Member.deleteMemberGroup(row.id).then((res) => {
+      if (res && res.success) {
+        ElMessage.success("删除成功");
+        getData();
+      } else if (res && res.message) {
+        ElMessage.error(res.message);
+      }
+    });
+  }).catch(() => {});
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style scoped>

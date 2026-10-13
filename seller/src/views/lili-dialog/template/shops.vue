@@ -56,53 +56,50 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { reactive, ref } from "vue";
 import { getShopListData } from "@/api/shops.js";
-export default {
-  data() {
-    return {
-      loading: false,
-      total: 0,
-      params: {
-        pageNumber: 1,
-        pageSize: 12,
-        storeDisable: "OPEN",
-        storeName: "",
-      },
-      shopsData: [],
-      selected: 9999999999,
-    };
-  },
-  created() {
-    this.init();
-  },
-  methods: {
-    resetSearch() {
-      this.shopsData = [];
-      this.params.pageNumber = 1;
-      this.init();
-    },
-    changePageSize(v) {
-      this.params.pageNumber = v;
-      this.init();
-    },
-    init() {
-      this.loading = true;
-      getShopListData(this.params).then((res) => {
-        if (res.success) {
-          this.total = res.result.total;
-          this.shopsData = res.result.records;
-        }
-        this.loading = false;
-      });
-    },
-    clickShop(val, i) {
-      this.selected = i;
-      val = { ...val, ___type: "shops" };
-      this.$emit("selected", [val]);
-    },
-  },
-};
+
+const emit = defineEmits(["selected"]);
+
+const loading = ref(false);
+const total = ref(0);
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 12,
+  storeDisable: "OPEN",
+  storeName: "",
+});
+const shopsData = ref([]);
+const selected = ref(9999999999);
+
+// created
+init();
+
+function resetSearch() {
+  shopsData.value = [];
+  params.pageNumber = 1;
+  init();
+}
+function changePageSize(v) {
+  params.pageNumber = v;
+  init();
+}
+function init() {
+  loading.value = true;
+  getShopListData(params).then((res) => {
+    if (res.success) {
+      total.value = res.result.total;
+      shopsData.value = res.result.records;
+    }
+    loading.value = false;
+  });
+}
+function clickShop(val, i) {
+  selected.value = i;
+  val = { ...val, ___type: "shops" };
+  emit("selected", [val]);
+}
 </script>
 <style lang="scss" scoped>
 @import "../style.scss";

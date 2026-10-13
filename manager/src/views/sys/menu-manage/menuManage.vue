@@ -9,19 +9,10 @@
   </el-tabs>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import managerMenu from "./menu";
 import storeMenu from "./storeMenu";
 
-export default {
-  components: {
-    managerMenu,
-    storeMenu,
-  },
-  data() {
-    return {
-      activeTab: "platform",
-    };
-  },
-};
+const activeTab = ref("platform");
 </script>

@@ -78,227 +78,228 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { Message, Modal } from "@/utils/message";
 import { Delete } from '@element-plus/icons-vue';
 import {cartGoodsAll, delCartGoods, addCartGoods, cartCount} from '@/api/cart.js'
-import { getOrderList } from '@/api/order';
-import {couponList, receiveCoupon, tracksList, collectList, cancelCollect} from '@/api/member.js'
-export default {
-  components: { Delete },
-  name: 'Drawer',
-  props: {
-    title: {
-      default: '',
-      type: String
-    }
-  },
-  watch: {
-    title (val) {
-      switch (val) {
-        case '购物车':
-          this.getCartList()
-          break;
-        case '我的订单':
-          this.getOrderList()
-          break;
-        case '我的足迹':
-          this.getTracksList()
-          break;
-        case '优惠券':
-          this.getCouponList()
-          break;
-        case '我的收藏':
-          this.getCollectList()
-          break;
-      }
-    }
-  },
-  data () {
-    return {
-      loading: false, // 控制spin显隐
-      cartList: [], // 购物车列表
-      couponList: [], // 优惠券列表
-      orderList: [], // 订单列表
-      collectList: [], // 收藏列表
-      tracksList: [], // 足迹列表
-      orderStatusList: [ // 订单状态
-        {
-          name: '未付款',
-          status: 'UNPAID'
-        },
-        {
-          name: '已付款',
-          status: 'PAID'
-        },
-        {
-          name: '待发货',
-          status: 'UNDELIVERED'
-        },
-        {
-          name: '已发货',
-          status: 'DELIVERED'
-        },
-        {
-          name: '已完成',
-          status: 'COMPLETED'
-        },
-        {
-          name: '待核验',
-          status: 'TAKE'
-        },
-        {
-          name: '已取消',
-          status: 'CANCELLED'
-        }
-      ]
-    };
-  },
-  methods: {
-    getCartList () { // 获取购物车列表
-      this.loading = true
-      cartGoodsAll().then(res => {
-        this.loading = false
-        this.cartList = res.result.skuList
-      })
-    },
-    // 删除商品
-    delGoods (id) {
-      delCartGoods({ skuIds: id }).then((res) => {
-        if (res.success) {
-          Message.success('删除成功');
-          this.getCartList();
-          cartCount().then(res => {
-            this.$store.commit('SET_CARTNUM', res.result)
-            this.Cookies.setItem('cartNum', res.result)
-          })
-        } else {
-          Message.error(res.message);
-        }
-      });
-    },
-    filterOrderStatus (status) { // 获取订单状态中文
-      const ob = this.orderStatusList.filter(e => { return e.status === status });
-      return ob[0].name
-    },
-    receive (item) { // 领取优惠券
-      receiveCoupon(item.id).then(res => {
-        if (res.success) {
-          Modal.confirm({
-            title: '领取优惠券',
-            content: '<p>优惠券领取成功，可到我的优惠券页面查看</p>',
-            okText: '我的优惠券',
-            cancelText: '立即使用',
-            onOk: () => {
-              this.$router.push('/home/Coupons')
-            },
-            onCancel: () => {
-              if (item.storeId !== '0') {
-                this.$router.push({path: '/merchant', query: {id: item.storeId}})
-              } else {
-                if (item.scopeType === 'PORTION_GOODS_CATEGORY') {
-                  this.$router.push({path: '/goodsList', query: {categoryId: item.scopeId}})
-                } else {
-                  this.$router.push({path: '/goodsList'})
-                }
-              }
-            }
-          });
-        }
-      })
-    },
-    useScope (type, storeName) { // 判断优惠券使用范围
-      let shop = '平台';
-      let goods = '全部商品'
-      if (storeName !== 'platform') shop = storeName
-      switch (type) {
-        case 'ALL':
-          goods = '全部商品'
-          break;
-        case 'PORTION_GOODS':
-          goods = '部分商品'
-          break;
-        case 'PORTION_GOODS_CATEGORY':
-          goods = '部分分类商品'
-          break;
-      }
-      return `${shop}${goods}可用`
-    },
-    addToCart (id) { // 添加商品到购物车
-      const params = {
-        num: 1,
-        skuId: id
-      }
-      this.loading = true;
-      addCartGoods(params).then(res => {
-        this.loading = false;
-        if (res.success) {
-          Message.success('商品已成功添加到购物车')
-        } else {
-          Message.warning(res.message);
-        }
-      }).catch(() => { this.loading = false });
-    },
-    getCouponList () { // 获取优惠券列表
-      // this.loading = true;
-      const params = {
-        pageNumber: 1,
-        pageSize: 10
-      }
-      couponList(params).then(res => {
-        this.loading = false
-        if (res.success) {
-          this.couponList = res.result.records
-        }
-      }).catch(() => { this.loading = false })
-    },
-    getOrderList () { // 获取订单列表
-      this.loading = true
-      const params = {
-        pageNumber: 1,
-        pageSize: 10,
-        tag: 'ALL'
-      }
-      getOrderList(params).then(res => {
-        this.loading = false
-        if (res.success) {
-          this.orderList = res.result.records;
-        }
-      });
-    },
-    getCollectList () { // 获取收藏列表
-      const params = {
-        pageNumber: 1,
-        pageSize: 10,
-        type: 'GOODS'
-      }
-      this.loading = true
-      collectList(params).then(res => {
-        this.loading = false
-        this.collectList = res.result.records
-      })
-    },
-    cancelCollect (id) { // 取消商品收藏
-      cancelCollect('GOODS', id).then(res => {
-        if (res.success) {
-          Message.success('取消收藏成功')
-          this.getCollectList();
-        }
-      })
-    },
-    getTracksList () { // 获取足迹列表
-      const params = {
-        pageNumber: 1,
-        pageSize: 20
-      }
-      this.loading = true
-      tracksList(params).then(res => {
-        this.tracksList = res.result.records
-        this.loading = false
-      }).catch(() => { this.loading = false })
-    }
+import { getOrderList as fetchOrderList } from '@/api/order';
+import {couponList as fetchCouponList, receiveCoupon, tracksList as fetchTracksList, collectList as fetchCollectList, cancelCollect as apiCancelCollect} from '@/api/member.js'
+import storage from '@/plugins/storage.js'
+import { useAppStore } from '@/stores/app'
+
+defineOptions({ name: 'Drawer' })
+
+const props = defineProps({
+  title: {
+    default: '',
+    type: String
   }
-};
+})
+
+const router = useRouter()
+const appStore = useAppStore()
+
+const loading = ref(false) // 控制spin显隐
+const cartList = ref([]) // 购物车列表
+const couponList = ref([]) // 优惠券列表
+const orderList = ref([]) // 订单列表
+const collectList = ref([]) // 收藏列表
+const tracksList = ref([]) // 足迹列表
+const orderStatusList = ref([ // 订单状态
+  {
+    name: '未付款',
+    status: 'UNPAID'
+  },
+  {
+    name: '已付款',
+    status: 'PAID'
+  },
+  {
+    name: '待发货',
+    status: 'UNDELIVERED'
+  },
+  {
+    name: '已发货',
+    status: 'DELIVERED'
+  },
+  {
+    name: '已完成',
+    status: 'COMPLETED'
+  },
+  {
+    name: '待核验',
+    status: 'TAKE'
+  },
+  {
+    name: '已取消',
+    status: 'CANCELLED'
+  }
+])
+
+watch(() => props.title, (val) => {
+  switch (val) {
+    case '购物车':
+      getCartList()
+      break;
+    case '我的订单':
+      getOrderList()
+      break;
+    case '我的足迹':
+      getTracksList()
+      break;
+    case '优惠券':
+      getCouponList()
+      break;
+    case '我的收藏':
+      getCollectList()
+      break;
+  }
+})
+
+function getCartList () { // 获取购物车列表
+  loading.value = true
+  cartGoodsAll().then(res => {
+    loading.value = false
+    cartList.value = res.result.skuList
+  })
+}
+// 删除商品
+function delGoods (id) {
+  delCartGoods({ skuIds: id }).then((res) => {
+    if (res.success) {
+      Message.success('删除成功');
+      getCartList();
+      cartCount().then(res => {
+        appStore.setCartNum(res.result)
+        storage.setItem('cartNum', res.result)
+      })
+    } else {
+      Message.error(res.message);
+    }
+  });
+}
+function filterOrderStatus (status) { // 获取订单状态中文
+  const ob = orderStatusList.value.filter(e => { return e.status === status });
+  return ob[0].name
+}
+function receive (item) { // 领取优惠券
+  receiveCoupon(item.id).then(res => {
+    if (res.success) {
+      Modal.confirm({
+        title: '领取优惠券',
+        content: '<p>优惠券领取成功，可到我的优惠券页面查看</p>',
+        okText: '我的优惠券',
+        cancelText: '立即使用',
+        onOk: () => {
+          router.push('/home/Coupons')
+        },
+        onCancel: () => {
+          if (item.storeId !== '0') {
+            router.push({path: '/merchant', query: {id: item.storeId}})
+          } else {
+            if (item.scopeType === 'PORTION_GOODS_CATEGORY') {
+              router.push({path: '/goodsList', query: {categoryId: item.scopeId}})
+            } else {
+              router.push({path: '/goodsList'})
+            }
+          }
+        }
+      });
+    }
+  })
+}
+function useScope (type, storeName) { // 判断优惠券使用范围
+  let shop = '平台';
+  let goods = '全部商品'
+  if (storeName !== 'platform') shop = storeName
+  switch (type) {
+    case 'ALL':
+      goods = '全部商品'
+      break;
+    case 'PORTION_GOODS':
+      goods = '部分商品'
+      break;
+    case 'PORTION_GOODS_CATEGORY':
+      goods = '部分分类商品'
+      break;
+  }
+  return `${shop}${goods}可用`
+}
+function addToCart (id) { // 添加商品到购物车
+  const params = {
+    num: 1,
+    skuId: id
+  }
+  loading.value = true;
+  addCartGoods(params).then(res => {
+    loading.value = false;
+    if (res.success) {
+      Message.success('商品已成功添加到购物车')
+    } else {
+      Message.warning(res.message);
+    }
+  }).catch(() => { loading.value = false });
+}
+function getCouponList () { // 获取优惠券列表
+  // loading.value = true;
+  const params = {
+    pageNumber: 1,
+    pageSize: 10
+  }
+  fetchCouponList(params).then(res => {
+    loading.value = false
+    if (res.success) {
+      couponList.value = res.result.records
+    }
+  }).catch(() => { loading.value = false })
+}
+function getOrderList () { // 获取订单列表
+  loading.value = true
+  const params = {
+    pageNumber: 1,
+    pageSize: 10,
+    tag: 'ALL'
+  }
+  fetchOrderList(params).then(res => {
+    loading.value = false
+    if (res.success) {
+      orderList.value = res.result.records;
+    }
+  });
+}
+function getCollectList () { // 获取收藏列表
+  const params = {
+    pageNumber: 1,
+    pageSize: 10,
+    type: 'GOODS'
+  }
+  loading.value = true
+  fetchCollectList(params).then(res => {
+    loading.value = false
+    collectList.value = res.result.records
+  })
+}
+function cancelCollect (id) { // 取消商品收藏
+  apiCancelCollect('GOODS', id).then(res => {
+    if (res.success) {
+      Message.success('取消收藏成功')
+      getCollectList();
+    }
+  })
+}
+function getTracksList () { // 获取足迹列表
+  const params = {
+    pageNumber: 1,
+    pageSize: 20
+  }
+  loading.value = true
+  fetchTracksList(params).then(res => {
+    tracksList.value = res.result.records
+    loading.value = false
+  }).catch(() => { loading.value = false })
+}
 </script>
 
 <style scoped lang="scss">

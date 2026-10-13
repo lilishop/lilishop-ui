@@ -113,135 +113,131 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref } from "vue";
 import { confirmVerification, getVerificationRecords, previewVerification } from "@/api/order";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "orderVerification",
-  data() {
-    return {
-      activeTab: "verify",
-      code: "",
-      lookingUp: false,
-      submitting: false,
-      confirmVisible: false,
-      preview: {
-        code: "",
-        orderSn: "",
-        goods: [],
-      },
-      loading: false,
-      records: [],
-      total: 0,
-      pageNumber: 1,
-      pageSize: 20,
-      verifiedRange: null,
-      recordQuery: {
-        goodsName: "",
-        verifierName: "",
-      },
-    };
-  },
-  methods: {
-    specText(specs) {
-      if (!specs) return "";
-      try {
-        const obj = typeof specs === "string" ? JSON.parse(specs) : specs;
-        if (!obj || typeof obj !== "object") return "";
-        return Object.keys(obj)
-          .filter((key) => key !== "images")
-          .map((key) => `${key}：${obj[key]}`)
-          .join(" ");
-      } catch (e) {
-        return "";
+defineOptions({ name: "orderVerification" });
+
+const activeTab = ref("verify");
+const code = ref("");
+const lookingUp = ref(false);
+const submitting = ref(false);
+const confirmVisible = ref(false);
+const preview = ref({
+  code: "",
+  orderSn: "",
+  goods: [],
+});
+const loading = ref(false);
+const records = ref([]);
+const total = ref(0);
+const pageNumber = ref(1);
+const pageSize = ref(20);
+const verifiedRange = ref(null);
+const recordQuery = reactive({
+  goodsName: "",
+  verifierName: "",
+});
+
+function specText(specs) {
+  if (!specs) return "";
+  try {
+    const obj = typeof specs === "string" ? JSON.parse(specs) : specs;
+    if (!obj || typeof obj !== "object") return "";
+    return Object.keys(obj)
+      .filter((key) => key !== "images")
+      .map((key) => `${key}：${obj[key]}`)
+      .join(" ");
+  } catch (e) {
+    return "";
+  }
+}
+function confirmVerify() {
+  const inputCode = (code.value || "").trim();
+  if (!inputCode) {
+    Message.warning("请输入核销码");
+    return;
+  }
+  lookingUp.value = true;
+  previewVerification(inputCode)
+    .then((res) => {
+      lookingUp.value = false;
+      if (res.success && res.result) {
+        preview.value = {
+          code: res.result.code || inputCode,
+          orderSn: res.result.orderSn || "",
+          goods: res.result.goods || [],
+        };
+        confirmVisible.value = true;
       }
-    },
-    confirmVerify() {
-      const code = (this.code || "").trim();
-      if (!code) {
-        this.$Message.warning("请输入核销码");
-        return;
+    })
+    .catch(() => {
+      lookingUp.value = false;
+    });
+}
+function submitVerify() {
+  const submitCode = (preview.value.code || "").trim();
+  if (!submitCode) {
+    Message.warning("请输入核销码");
+    return;
+  }
+  submitting.value = true;
+  confirmVerification(submitCode)
+    .then((res) => {
+      submitting.value = false;
+      if (res.success) {
+        Message.success(res.result || "核销成功");
+        confirmVisible.value = false;
+        code.value = "";
+        preview.value = { code: "", orderSn: "", goods: [] };
+        pageNumber.value = 1;
+        loadRecords();
       }
-      this.lookingUp = true;
-      previewVerification(code)
-        .then((res) => {
-          this.lookingUp = false;
-          if (res.success && res.result) {
-            this.preview = {
-              code: res.result.code || code,
-              orderSn: res.result.orderSn || "",
-              goods: res.result.goods || [],
-            };
-            this.confirmVisible = true;
-          }
-        })
-        .catch(() => {
-          this.lookingUp = false;
-        });
-    },
-    submitVerify() {
-      const code = (this.preview.code || "").trim();
-      if (!code) {
-        this.$Message.warning("请输入核销码");
-        return;
+    })
+    .catch(() => {
+      submitting.value = false;
+    });
+}
+function onTabChange(name) {
+  if (name === "records") {
+    loadRecords();
+  }
+}
+function onSizeChange() {
+  pageNumber.value = 1;
+  loadRecords();
+}
+function searchRecords() {
+  pageNumber.value = 1;
+  loadRecords();
+}
+function loadRecords() {
+  loading.value = true;
+  const range = verifiedRange.value;
+  const params = {
+    pageNumber: pageNumber.value,
+    pageSize: pageSize.value,
+    goodsName: (recordQuery.goodsName || "").trim(),
+    verifierName: (recordQuery.verifierName || "").trim(),
+  };
+  if (range && range.length === 2) {
+    params.startTime = range[0];
+    params.endTime = range[1];
+  }
+  getVerificationRecords(params)
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        records.value = res.result.records || [];
+        total.value = res.result.total || 0;
       }
-      this.submitting = true;
-      confirmVerification(code)
-        .then((res) => {
-          this.submitting = false;
-          if (res.success) {
-            this.$Message.success(res.result || "核销成功");
-            this.confirmVisible = false;
-            this.code = "";
-            this.preview = { code: "", orderSn: "", goods: [] };
-            this.pageNumber = 1;
-            this.loadRecords();
-          }
-        })
-        .catch(() => {
-          this.submitting = false;
-        });
-    },
-    onTabChange(name) {
-      if (name === "records") {
-        this.loadRecords();
-      }
-    },
-    onSizeChange() {
-      this.pageNumber = 1;
-      this.loadRecords();
-    },
-    searchRecords() {
-      this.pageNumber = 1;
-      this.loadRecords();
-    },
-    loadRecords() {
-      this.loading = true;
-      const range = this.verifiedRange;
-      const params = {
-        pageNumber: this.pageNumber,
-        pageSize: this.pageSize,
-        goodsName: (this.recordQuery.goodsName || "").trim(),
-        verifierName: (this.recordQuery.verifierName || "").trim(),
-      };
-      if (range && range.length === 2) {
-        params.startTime = range[0];
-        params.endTime = range[1];
-      }
-      getVerificationRecords(params)
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.records = res.result.records || [];
-            this.total = res.result.total || 0;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
 </script>
 
 <style lang="scss" scoped>

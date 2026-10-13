@@ -72,145 +72,146 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getCouponActivityList, closeActivity } from "@/api/promotion";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "coupon-activity",
-  props: {
-    checked: {
-      type: Boolean,
-      default: false,
-    },
+defineOptions({ name: "coupon-activity" });
+
+defineProps({
+  checked: {
+    type: Boolean,
+    default: false,
   },
-  data() {
-    return {
-      loading: true,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      data: [],
-      total: 0,
-      selectDate: [],
-    };
-  },
-  methods: {
-    activityTypeText(type) {
-      const map = {
-        REGISTERED: "注册赠券",
-        AUTO_COUPON: "自动发券",
-      };
-      return map[type] || "精确发券";
-    },
-    activityScopeText(scope) {
-      return scope === "DESIGNATED" ? "指定会员" : "全部会员";
-    },
-    couponFrequencyText(freq) {
-      const map = {
-        DAY: "每日",
-        WEEK: "每周",
-        MONTH: "每月",
-      };
-      return map[freq] || "/";
-    },
-    formatActivityTime(row) {
-      if (row.startTime && row.endTime) {
-        return `${row.startTime}<br/>${row.endTime}`;
+});
+
+const router = useRouter();
+
+const loading = ref(true);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const data = ref([]);
+const total = ref(0);
+const selectDate = ref([]);
+
+function activityTypeText(type) {
+  const map = {
+    REGISTERED: "注册赠券",
+    AUTO_COUPON: "自动发券",
+  };
+  return map[type] || "精确发券";
+}
+function activityScopeText(scope) {
+  return scope === "DESIGNATED" ? "指定会员" : "全部会员";
+}
+function couponFrequencyText(freq) {
+  const map = {
+    DAY: "每日",
+    WEEK: "每周",
+    MONTH: "每月",
+  };
+  return map[freq] || "/";
+}
+function formatActivityTime(row) {
+  if (row.startTime && row.endTime) {
+    return `${row.startTime}<br/>${row.endTime}`;
+  }
+  return "/";
+}
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+function init() {
+  getDataList();
+}
+function add() {
+  router.push({ name: "add-coupon-activity" });
+}
+function info(v) {
+  router.push({ name: "coupon-activity-info", query: { id: v.id } });
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.startTime = new Date(selectDate.value[0]).getTime();
+    searchForm.endTime = new Date(selectDate.value[1]).getTime();
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  getCouponActivityList(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
       }
-      return "/";
-    },
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    init() {
-      this.getDataList();
-    },
-    add() {
-      this.$router.push({ name: "add-coupon-activity" });
-    },
-    info(v) {
-      this.$router.push({ name: "coupon-activity-info", query: { id: v.id } });
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = new Date(this.selectDate[0]).getTime();
-        this.searchForm.endTime = new Date(this.selectDate[1]).getTime();
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
-      }
-      getCouponActivityList(this.searchForm)
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function edit(v) {
+  router.push({ name: "edit-platform-coupon", query: { id: v.id } });
+}
+function remove(v) {
+  Modal.confirm({
+    title: "确认关闭",
+    content: "确认要关闭此优惠券活动么?关闭活动只能重新创建",
+    loading: true,
+    onOk: () => {
+      closeActivity(v.id)
         .then((res) => {
           if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
+            Message.success("优惠券活动已关闭");
+            getDataList();
           }
+          Modal.remove();
         })
-        .finally(() => {
-          this.loading = false;
+        .catch(() => {
+          Modal.remove();
         });
     },
-    edit(v) {
-      this.$router.push({ name: "edit-platform-coupon", query: { id: v.id } });
-    },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认关闭",
-        content: "确认要关闭此优惠券活动么?关闭活动只能重新创建",
-        loading: true,
-        onOk: () => {
-          closeActivity(v.id)
-            .then((res) => {
-              if (res.success) {
-                this.$Message.success("优惠券活动已关闭");
-                this.getDataList();
-              }
-              this.$Modal.remove();
-            })
-            .catch(() => {
-              this.$Modal.remove();
-            });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style scoped>

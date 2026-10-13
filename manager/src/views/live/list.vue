@@ -2,7 +2,7 @@
   <div class="live-list search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="90px"
@@ -135,202 +135,206 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { queryLivePage, startLive, endLive } from "@/api/live";
 import { getSetting } from "@/api/index";
+import { Message, Modal } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 import config from "@/config";
 
-export default {
-  name: "live-list",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      activeStatus: "",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        title: "",
-        storeName: "",
-      },
-      shareVisible: false,
-      shareTitle: "",
-      shareH5Url: "",
-      wapUrl: "",
-    };
-  },
-  mounted() {
-    this.loadWapSetting();
-    this.getData();
-  },
-  methods: {
-    formatTime(time) {
-      if (!time) return "-";
-      return this.$filters.unixToDate(time);
-    },
-    liveStatusText(status) {
-      const map = { NEW: "未开始", LIVING: "直播中", ENDED: "已结束" };
-      return map[status] || "未知";
-    },
-    liveStatusTagType(status) {
-      const map = { NEW: "info", LIVING: "success", ENDED: "warning" };
-      return map[status] || "info";
-    },
-    buildParams() {
-      const params = {
-        pageNumber: this.searchForm.pageNumber,
-        pageSize: this.searchForm.pageSize,
-      };
-      if (this.searchForm.title) params.title = this.searchForm.title;
-      if (this.searchForm.storeName) params.storeName = this.searchForm.storeName;
-      if (this.activeStatus) params.liveStatus = this.activeStatus;
-      return params;
-    },
-    getData() {
-      this.loading = true;
-      queryLivePage(this.buildParams())
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result?.records || [];
-            this.total = res.result?.total || 0;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    handleReset() {
-      this.searchForm.title = "";
-      this.searchForm.storeName = "";
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    handleTabChange() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    handleAdd() {
-      this.$router.push({ path: "/live-add" });
-    },
-    handleView(row) {
-      this.$router.push({ path: "/live-manage-detail", query: { id: row.id } });
-    },
-    handleEdit(row) {
-      this.$router.push({ path: "/live-edit", query: { id: row.id } });
-    },
-    handleControl(row) {
-      const route = this.$router.resolve({
-        path: "/live-control-panel",
-        query: { id: row.id },
-      });
-      window.open(route.href, "_blank");
-    },
-    buildH5ShareUrl(liveId) {
-      const base = (this.wapUrl || BASE?.WAP_URL || config.website || "").replace(/\/?$/, "/");
-      return `${base}pages/promotion/live/room?id=${liveId}`;
-    },
-    handleShare(row) {
-      this.shareTitle = row.title || "";
-      this.shareH5Url = this.buildH5ShareUrl(row.id);
-      this.shareVisible = true;
-    },
-    copyShareUrl() {
-      if (!this.shareH5Url) return;
-      this.copyText(this.shareH5Url);
-    },
-    copyText(text) {
-      const onSuccess = () => this.$Message.success("链接已复制");
-      const onFail = () => this.$Message.error("复制失败，请手动复制");
+defineOptions({ name: "live-list" });
 
-      if (navigator.clipboard?.writeText) {
-        navigator.clipboard
-          .writeText(text)
-          .then(onSuccess)
-          .catch(() => {
-            this.copyTextFallback(text) ? onSuccess() : onFail();
-          });
-        return;
-      }
+const router = useRouter();
 
-      this.copyTextFallback(text) ? onSuccess() : onFail();
-    },
-    copyTextFallback(text) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-9999px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      let ok = false;
-      try {
-        ok = document.execCommand("copy");
-      } catch (e) {
-        ok = false;
+const searchFormRef = ref(null);
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const activeStatus = ref("");
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  title: "",
+  storeName: "",
+});
+const shareVisible = ref(false);
+const shareTitle = ref("");
+const shareH5Url = ref("");
+const wapUrl = ref("");
+
+onMounted(() => {
+  loadWapSetting();
+  getData();
+});
+
+function formatTime(time) {
+  if (!time) return "-";
+  return unixToDate(time);
+}
+function liveStatusText(status) {
+  const map = { NEW: "未开始", LIVING: "直播中", ENDED: "已结束" };
+  return map[status] || "未知";
+}
+function liveStatusTagType(status) {
+  const map = { NEW: "info", LIVING: "success", ENDED: "warning" };
+  return map[status] || "info";
+}
+function buildParams() {
+  const params = {
+    pageNumber: searchForm.pageNumber,
+    pageSize: searchForm.pageSize,
+  };
+  if (searchForm.title) params.title = searchForm.title;
+  if (searchForm.storeName) params.storeName = searchForm.storeName;
+  if (activeStatus.value) params.liveStatus = activeStatus.value;
+  return params;
+}
+function getData() {
+  loading.value = true;
+  queryLivePage(buildParams())
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        data.value = res.result?.records || [];
+        total.value = res.result?.total || 0;
       }
-      document.body.removeChild(textArea);
-      return ok;
-    },
-    handleStart(row) {
-      if (row.liveStatus === "LIVING") {
-        this.$Message.warning("直播间已在直播中");
-        return;
-      }
-      if (row.liveStatus === "ENDED") {
-        this.$Message.warning("直播已结束，无法开播");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认开播",
-        content: "确定要开始该直播吗？",
-        onOk: () => {
-          return startLive(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("开播成功");
-              this.getData();
-            }
-          });
-        },
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getData();
+}
+function handleReset() {
+  searchForm.title = "";
+  searchForm.storeName = "";
+  searchForm.pageNumber = 1;
+  getData();
+}
+function handleTabChange() {
+  searchForm.pageNumber = 1;
+  getData();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getData();
+}
+function handleAdd() {
+  router.push({ path: "/live-add" });
+}
+function handleView(row) {
+  router.push({ path: "/live-manage-detail", query: { id: row.id } });
+}
+function handleEdit(row) {
+  router.push({ path: "/live-edit", query: { id: row.id } });
+}
+function handleControl(row) {
+  const route = router.resolve({
+    path: "/live-control-panel",
+    query: { id: row.id },
+  });
+  window.open(route.href, "_blank");
+}
+function buildH5ShareUrl(liveId) {
+  // 历史遗留：BASE 未定义，wapUrl 为空时会抛 ReferenceError，保持原样
+  const base = (wapUrl.value || BASE?.WAP_URL || config.website || "").replace(/\/?$/, "/");
+  return `${base}pages/promotion/live/room?id=${liveId}`;
+}
+function handleShare(row) {
+  shareTitle.value = row.title || "";
+  shareH5Url.value = buildH5ShareUrl(row.id);
+  shareVisible.value = true;
+}
+function copyShareUrl() {
+  if (!shareH5Url.value) return;
+  copyText(shareH5Url.value);
+}
+function copyText(text) {
+  const onSuccess = () => Message.success("链接已复制");
+  const onFail = () => Message.error("复制失败，请手动复制");
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard
+      .writeText(text)
+      .then(onSuccess)
+      .catch(() => {
+        copyTextFallback(text) ? onSuccess() : onFail();
+      });
+    return;
+  }
+
+  copyTextFallback(text) ? onSuccess() : onFail();
+}
+function copyTextFallback(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-9999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  let ok = false;
+  try {
+    ok = document.execCommand("copy");
+  } catch (e) {
+    ok = false;
+  }
+  document.body.removeChild(textArea);
+  return ok;
+}
+function handleStart(row) {
+  if (row.liveStatus === "LIVING") {
+    Message.warning("直播间已在直播中");
+    return;
+  }
+  if (row.liveStatus === "ENDED") {
+    Message.warning("直播已结束，无法开播");
+    return;
+  }
+  Modal.confirm({
+    title: "确认开播",
+    content: "确定要开始该直播吗？",
+    onOk: () => {
+      return startLive(row.id).then((res) => {
+        if (res.success) {
+          Message.success("开播成功");
+          getData();
+        }
       });
     },
-    handleEnd(row) {
-      if (row.liveStatus !== "LIVING") {
-        this.$Message.warning("仅直播中的直播间可以结束");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认结束",
-        content: "确定要结束该直播吗？",
-        onOk: () => {
-          return endLive(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("直播已结束");
-              this.getData();
-            }
-          });
-        },
+  });
+}
+function handleEnd(row) {
+  if (row.liveStatus !== "LIVING") {
+    Message.warning("仅直播中的直播间可以结束");
+    return;
+  }
+  Modal.confirm({
+    title: "确认结束",
+    content: "确定要结束该直播吗？",
+    onOk: () => {
+      return endLive(row.id).then((res) => {
+        if (res.success) {
+          Message.success("直播已结束");
+          getData();
+        }
       });
     },
-    loadWapSetting() {
-      getSetting("BASE_SETTING")
-        .then((res) => {
-          if (res.success && res.result?.buyerDomain) {
-            this.wapUrl = res.result.buyerDomain;
-          }
-        });
-    },
-  },
-};
+  });
+}
+function loadWapSetting() {
+  getSetting("BASE_SETTING")
+    .then((res) => {
+      if (res.success && res.result?.buyerDomain) {
+        wapUrl.value = res.result.buyerDomain;
+      }
+    });
+}
 </script>
 
 <style lang="scss" scoped>

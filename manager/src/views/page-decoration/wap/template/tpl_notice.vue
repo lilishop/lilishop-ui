@@ -9,28 +9,27 @@
   </div>
 </template>
 
-<script>
-  export default {
-    title: "公告",
-    props: ["res"],
-    data() {
-      return {
-        index: 0,
-        context:  "",
+<script setup>
+  import { ref, onMounted } from "vue";
+
+  defineOptions({ title: "公告" });
+  const props = defineProps(["res"]);
+
+  const index = ref(0);
+  const context = ref("");
+
+  onMounted(() => {
+    context.value = props.res.list[0].title[index.value].context;
+    // 历史遗留：定时器未在卸载时清理，保持原行为
+    setInterval(() => {
+      context.value = props.res.list[0].title[index.value].context;
+      if (index.value < props.res.list[0].title.length - 1) {
+        index.value++;
+      } else {
+        index.value = 0;
       }
-    },
-    mounted() {
-      this.context = this.res.list[0].title[this.index].context;
-      setInterval(() => {
-        this.context = this.res.list[0].title[this.index].context;
-        if (this.index < this.res.list[0].title.length - 1) {
-          this.index++;
-        } else {
-          this.index = 0;
-        }
-      }, 3000);
-    },
-  };
+    }, 3000);
+  });
 </script>
 <style lang="scss" scoped>
   @import "./tpl.scss";

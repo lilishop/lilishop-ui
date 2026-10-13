@@ -141,162 +141,174 @@
         <el-button type="primary" @click="handleConfirmNavModal">确定</el-button>
       </template>
     </el-dialog>
-    <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
+    <liliDialog ref="liliDialogRef" @selectedLink="selectedLink"></liliDialog>
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, nextTick, onMounted } from "vue";
 import { ShoppingCart } from "@element-plus/icons-vue";
 import Draggable from "vuedraggable";
 import ModelFormItem from "./modelFormItem.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import logoImg from "@/assets/logo.png";
-export default {
-  name: "modelForm",
-  components: {
-    Draggable,
-    ModelFormItem,
-    ossManage,
-    ShoppingCart,
-  },
-  props: ["data"],
-  data() {
-    return {
-      logoImg,
-      picModelFlag: false,
-      showModal: false,
-      showModalNav: false,
-      navListBackup: null,
-      draftTopAdvert: null,
-      selectedNav: null,
-      promotionTags: ["买2免1", "领200神券", "199减100", "母婴5折抢", "充100送20"],
-      topAdvert: {
-        type: "topAdvert",
-        img: "",
-        url: "",
-        bgColor: "#de000d",
-        size: "1200*80",
-      },
-      currentIndex: 0,
-      navList: {
-        type: "navBar",
-        list: [
-          { name: "秒杀", url: "", title: "" },
-          { name: "闪购", url: "", title: "" },
-          { name: "优惠券", url: "", title: "" },
-          { name: "拍卖", url: "", title: "" },
-          { name: "服装城", url: "", title: "" },
-        ],
-      },
-    };
-  },
-  mounted() {
-    document.body.ondrop = function (event) {
-      let isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
-      if (isFirefox) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    };
-  },
-  methods: {
-    getModelItemKey(element) {
-      return element.model || element.key || element.type;
+import { formatLinkType } from "@/utils/filters";
+
+defineOptions({ name: "modelForm" });
+
+const props = defineProps(["data"]);
+
+const picModelFlag = ref(false);
+const showModal = ref(false);
+const showModalNav = ref(false);
+const navListBackup = ref(null);
+const draftTopAdvert = ref(null);
+const selectedNav = ref(null);
+const promotionTags = ref(["买2免1", "领200神券", "199减100", "母婴5折抢", "充100送20"]);
+const topAdvert = ref({
+  type: "topAdvert",
+  img: "",
+  url: "",
+  bgColor: "#de000d",
+  size: "1200*80",
+});
+const currentIndex = ref(0);
+const navList = ref({
+  type: "navBar",
+  list: [
+    { name: "秒杀", url: "", title: "" },
+    { name: "闪购", url: "", title: "" },
+    { name: "优惠券", url: "", title: "" },
+    { name: "拍卖", url: "", title: "" },
+    { name: "服装城", url: "", title: "" },
+  ],
+});
+
+const liliDialogRef = ref(null);
+const ossManageRef = ref(null);
+
+// 父组件 renovation.vue 通过 $refs.modelForm 读取并整体赋值 navList / topAdvert
+defineExpose({ navList, topAdvert });
+
+onMounted(() => {
+  document.body.ondrop = function (event) {
+    let isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
+    if (isFirefox) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+});
+
+function getModelItemKey(element) {
+  return element.model || element.key || element.type;
+}
+
+function handleSelectLink(item, index) {
+  if (item) selectedNav.value = item;
+  liliDialogRef.value.open("link");
+  currentIndex.value = index;
+}
+
+function selectedLink(val) {
+  if (showModalNav.value) {
+    selectedNav.value.url = formatLinkType(val);
+    selectedNav.value.type = val.___type === "other" && val.url === "" ? "link" : "other";
+    navList.value.list[currentIndex.value].title = val.title;
+  } else if (showModal.value && draftTopAdvert.value) {
+    draftTopAdvert.value.url = formatLinkType(val);
+    draftTopAdvert.value.type = val.___type === "other" && val.url === "" ? "link" : "other";
+  }
+}
+
+function handleDelNav(index) {
+  navList.value.list.splice(index, 1);
+}
+
+function handleAddNav() {
+  navList.value.list.push({ name: "", url: "", title: "" });
+}
+
+function handleMoveEnd({ newIndex, oldIndex }) {}
+
+function handleModel(type) {
+  if (type == "topAdvert") {
+    draftTopAdvert.value = JSON.parse(JSON.stringify(topAdvert.value));
+    showModal.value = true;
+  } else {
+    navListBackup.value = JSON.parse(JSON.stringify(navList.value));
+    showModalNav.value = true;
+  }
+}
+
+function handleCancelTopAdvertModal() {
+  draftTopAdvert.value = null;
+  showModal.value = false;
+}
+
+function handleConfirmTopAdvertModal() {
+  if (draftTopAdvert.value) {
+    Object.assign(topAdvert.value, JSON.parse(JSON.stringify(draftTopAdvert.value)));
+  }
+  draftTopAdvert.value = null;
+  showModal.value = false;
+}
+
+function handleCancelNavModal() {
+  showModalNav.value = false;
+}
+
+function handleConfirmNavModal() {
+  navListBackup.value = null;
+  showModalNav.value = false;
+}
+
+function handleNavDialogClose() {
+  if (navListBackup.value) {
+    navList.value = JSON.parse(JSON.stringify(navListBackup.value));
+    navListBackup.value = null;
+  }
+}
+
+function handleSelectImg() {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+
+function callbackSelected(item) {
+  picModelFlag.value = false;
+  if (!item?.url || !draftTopAdvert.value) return;
+  draftTopAdvert.value.img = item.url;
+}
+
+function handleModelAdd(evt) {
+  const newIndex = evt.newIndex;
+  const current = props.data.list[newIndex];
+  if (!current || current.key) {
+    return;
+  }
+  const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+  props.data.list[newIndex] = {
+    ...JSON.parse(JSON.stringify(current)),
+    options: {
+      ...current.options,
     },
-    handleSelectLink(item, index) {
-      if (item) this.selectedNav = item;
-      this.$refs.liliDialog.open("link");
-      this.currentIndex = index;
-    },
-    selectedLink(val) {
-      if (this.showModalNav) {
-        this.selectedNav.url = this.$filters.formatLinkType(val);
-        this.selectedNav.type = val.___type === "other" && val.url === "" ? "link" : "other";
-        this.navList.list[this.currentIndex].title = val.title;
-      } else if (this.showModal && this.draftTopAdvert) {
-        this.draftTopAdvert.url = this.$filters.formatLinkType(val);
-        this.draftTopAdvert.type = val.___type === "other" && val.url === "" ? "link" : "other";
-      }
-    },
-    handleDelNav(index) {
-      this.navList.list.splice(index, 1);
-    },
-    handleAddNav() {
-      this.navList.list.push({ name: "", url: "", title: "" });
-    },
-    handleMoveEnd({ newIndex, oldIndex }) {},
-    handleModel(type) {
-      if (type == "topAdvert") {
-        this.draftTopAdvert = JSON.parse(JSON.stringify(this.topAdvert));
-        this.showModal = true;
-      } else {
-        this.navListBackup = JSON.parse(JSON.stringify(this.navList));
-        this.showModalNav = true;
-      }
-    },
-    handleCancelTopAdvertModal() {
-      this.draftTopAdvert = null;
-      this.showModal = false;
-    },
-    handleConfirmTopAdvertModal() {
-      if (this.draftTopAdvert) {
-        Object.assign(this.topAdvert, JSON.parse(JSON.stringify(this.draftTopAdvert)));
-      }
-      this.draftTopAdvert = null;
-      this.showModal = false;
-    },
-    handleCancelNavModal() {
-      this.showModalNav = false;
-    },
-    handleConfirmNavModal() {
-      this.navListBackup = null;
-      this.showModalNav = false;
-    },
-    handleNavDialogClose() {
-      if (this.navListBackup) {
-        this.navList = JSON.parse(JSON.stringify(this.navListBackup));
-        this.navListBackup = null;
-      }
-    },
-    handleSelectImg() {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    callbackSelected(item) {
-      this.picModelFlag = false;
-      if (!item?.url || !this.draftTopAdvert) return;
-      this.draftTopAdvert.img = item.url;
-    },
-    handleModelAdd(evt) {
-      const newIndex = evt.newIndex;
-      const current = this.data.list[newIndex];
-      if (!current || current.key) {
-        return;
-      }
-      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
-      this.data.list[newIndex] = {
-        ...JSON.parse(JSON.stringify(current)),
-        options: {
-          ...current.options,
-        },
-        key,
-        model: current.type + "_" + key,
-      };
-    },
-  },
-};
+    key,
+    model: current.type + "_" + key,
+  };
+}
 </script>
 <style lang="scss" scoped>
 @import "./modelList/setup-box.scss";

@@ -1,4 +1,4 @@
-import store from "@/store";
+import { useAppStore } from "@/stores/app";
 import config from "@/config/config";
 import WsSocket from "@/plugins/ws-socket";
 import { getToken } from "@/utils/auth";
@@ -100,7 +100,7 @@ class SocketInstance {
    * @param {Boolean} status 连接状态
    */
   updateSocketStatus (status) {
-    store.commit("UPDATE_SOCKET_STATUS", status);
+    useAppStore().UPDATE_SOCKET_STATUS(status);
   }
 
   /**

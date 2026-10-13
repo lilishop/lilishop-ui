@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="80px" @keyup.enter="handleSearch">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="80px" @keyup.enter="handleSearch">
         <el-form-item label="员工姓名" prop="staffName">
           <el-input v-model="searchForm.staffName" clearable placeholder="模糊搜索" style="width: 220px" />
         </el-form-item>
@@ -90,8 +90,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { ElMessageBox } from "element-plus";
+import { Message } from "@/utils/message";
 import { getUserListData } from "@/api/index";
 import {
   getServiceStaffPage,
@@ -101,163 +103,172 @@ import {
   deleteServiceStaff,
 } from "@/api/appointment";
 
-export default {
-  name: "appointmentServiceStaffList",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        staffName: "",
-        status: "",
-      },
-      createVisible: false,
-      createLoading: false,
-      clerkLoading: false,
-      clerkOptions: [],
-      createForm: {
-        id: "",
-        clerkUserId: "",
-        staffName: "",
-        contactPhone: "",
-        sortOrder: 0,
-        status: "ENABLED",
-      },
-    };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.loadData();
-    },
-    loadData() {
-      this.loading = true;
-      getServiceStaffPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result?.records || [];
-            this.total = res.result?.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    emptyForm() {
-      return {
-        id: "",
-        clerkUserId: "",
-        staffName: "",
-        contactPhone: "",
-        sortOrder: 0,
-        status: "ENABLED",
-      };
-    },
-    openCreate() {
-      this.createForm = this.emptyForm();
-      this.createVisible = true;
-      this.loadClerks();
-    },
-    openEdit(row) {
-      this.createForm = {
-        id: row.id,
-        clerkUserId: row.clerkUserId || "",
-        staffName: row.staffName || "",
-        contactPhone: row.contactPhone || "",
-        sortOrder: row.sortOrder == null ? 0 : row.sortOrder,
-        status: row.status || "ENABLED",
-      };
-      this.createVisible = true;
-      this.loadClerks();
-    },
-    loadClerks() {
-      this.clerkLoading = true;
-      getUserListData({ pageNumber: 1, pageSize: 200 })
-        .then((res) => {
-          if (res.success) {
-            const records = res.result?.records || [];
-            const usedIds = new Set(
-              (this.data || [])
-                .filter((staff) => staff.id !== this.createForm.id)
-                .map((staff) => staff.clerkUserId)
-                .filter(Boolean)
-            );
-            const options = records.filter(
-              (clerk) => clerk.memberId && clerk.status !== false && !usedIds.has(clerk.memberId)
-            );
-            const currentId = this.createForm.clerkUserId;
-            if (currentId && !options.some((clerk) => clerk.memberId === currentId)) {
-              options.unshift({
-                memberId: currentId,
-                clerkName: this.createForm.staffName || "当前店员",
-              });
-            }
-            this.clerkOptions = options;
-          }
-        })
-        .finally(() => {
-          this.clerkLoading = false;
-        });
-    },
-    clerkOptionLabel(clerk) {
-      return clerk.clerkName || "未命名店员";
-    },
-    onClerkChange(memberId) {
-      const clerk = this.clerkOptions.find((item) => item.memberId === memberId);
-      if (!clerk) {
-        return;
+defineOptions({ name: "appointmentServiceStaffList" });
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  staffName: "",
+  status: "",
+});
+const createVisible = ref(false);
+const createLoading = ref(false);
+const clerkLoading = ref(false);
+const clerkOptions = ref([]);
+const createForm = ref({
+  id: "",
+  clerkUserId: "",
+  staffName: "",
+  contactPhone: "",
+  sortOrder: 0,
+  status: "ENABLED",
+});
+
+// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖（原 ref="searchForm" 在 script 中未被使用）
+const searchFormRef = ref(null);
+
+onMounted(() => {
+  loadData();
+});
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  loadData();
+}
+
+function loadData() {
+  loading.value = true;
+  getServiceStaffPage(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result?.records || [];
+        total.value = res.result?.total || 0;
       }
-      this.createForm.staffName = clerk.clerkName || "";
-      this.createForm.contactPhone = clerk.mobile || "";
-    },
-    submitCreate() {
-      if (!this.createForm.clerkUserId) {
-        this.$message.warning("请选择店员");
-        return;
-      }
-      if (!this.createForm.staffName) {
-        this.$message.warning("请填写员工姓名");
-        return;
-      }
-      const editing = !!this.createForm.id;
-      const request = editing ? updateServiceStaff(this.createForm.id, this.createForm) : createServiceStaff(this.createForm);
-      this.createLoading = true;
-      request
-        .then((res) => {
-          if (res.success) {
-            this.$message.success(editing ? "已保存" : "创建成功");
-            this.createVisible = false;
-            this.loadData();
-          }
-        })
-        .finally(() => {
-          this.createLoading = false;
-        });
-    },
-    handleDelete(row) {
-      ElMessageBox.confirm(`确认删除服务人员「${row.staffName || ""}」？`, "提示", { type: "warning" })
-        .then(() => deleteServiceStaff(row.id))
-        .then((res) => {
-          if (res && res.success) {
-            this.$message.success("已删除");
-            this.loadData();
-          }
-        })
-        .catch(() => {});
-    },
-    toggleStatus(row, enabled) {
-      updateServiceStaffStatus(row.id, enabled ? "ENABLED" : "DISABLED").then((res) => {
-        if (res.success) {
-          row.status = enabled ? "ENABLED" : "DISABLED";
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function emptyForm() {
+  return {
+    id: "",
+    clerkUserId: "",
+    staffName: "",
+    contactPhone: "",
+    sortOrder: 0,
+    status: "ENABLED",
+  };
+}
+
+function openCreate() {
+  createForm.value = emptyForm();
+  createVisible.value = true;
+  loadClerks();
+}
+
+function openEdit(row) {
+  createForm.value = {
+    id: row.id,
+    clerkUserId: row.clerkUserId || "",
+    staffName: row.staffName || "",
+    contactPhone: row.contactPhone || "",
+    sortOrder: row.sortOrder == null ? 0 : row.sortOrder,
+    status: row.status || "ENABLED",
+  };
+  createVisible.value = true;
+  loadClerks();
+}
+
+function loadClerks() {
+  clerkLoading.value = true;
+  getUserListData({ pageNumber: 1, pageSize: 200 })
+    .then((res) => {
+      if (res.success) {
+        const records = res.result?.records || [];
+        const usedIds = new Set(
+          (data.value || [])
+            .filter((staff) => staff.id !== createForm.value.id)
+            .map((staff) => staff.clerkUserId)
+            .filter(Boolean)
+        );
+        const options = records.filter(
+          (clerk) => clerk.memberId && clerk.status !== false && !usedIds.has(clerk.memberId)
+        );
+        const currentId = createForm.value.clerkUserId;
+        if (currentId && !options.some((clerk) => clerk.memberId === currentId)) {
+          options.unshift({
+            memberId: currentId,
+            clerkName: createForm.value.staffName || "当前店员",
+          });
         }
-      });
-    },
-  },
-};
+        clerkOptions.value = options;
+      }
+    })
+    .finally(() => {
+      clerkLoading.value = false;
+    });
+}
+
+function clerkOptionLabel(clerk) {
+  return clerk.clerkName || "未命名店员";
+}
+
+function onClerkChange(memberId) {
+  const clerk = clerkOptions.value.find((item) => item.memberId === memberId);
+  if (!clerk) {
+    return;
+  }
+  createForm.value.staffName = clerk.clerkName || "";
+  createForm.value.contactPhone = clerk.mobile || "";
+}
+
+function submitCreate() {
+  if (!createForm.value.clerkUserId) {
+    // 原代码 this.$message 小写，全局仅注册了 $Message，此处按作者意图修正
+    Message.warning("请选择店员");
+    return;
+  }
+  if (!createForm.value.staffName) {
+    Message.warning("请填写员工姓名");
+    return;
+  }
+  const editing = !!createForm.value.id;
+  const request = editing ? updateServiceStaff(createForm.value.id, createForm.value) : createServiceStaff(createForm.value);
+  createLoading.value = true;
+  request
+    .then((res) => {
+      if (res.success) {
+        Message.success(editing ? "已保存" : "创建成功");
+        createVisible.value = false;
+        loadData();
+      }
+    })
+    .finally(() => {
+      createLoading.value = false;
+    });
+}
+
+function handleDelete(row) {
+  ElMessageBox.confirm(`确认删除服务人员「${row.staffName || ""}」？`, "提示", { type: "warning" })
+    .then(() => deleteServiceStaff(row.id))
+    .then((res) => {
+      if (res && res.success) {
+        Message.success("已删除");
+        loadData();
+      }
+    })
+    .catch(() => {});
+}
+
+function toggleStatus(row, enabled) {
+  updateServiceStaffStatus(row.id, enabled ? "ENABLED" : "DISABLED").then((res) => {
+    if (res.success) {
+      row.status = enabled ? "ENABLED" : "DISABLED";
+    }
+  });
+}
 </script>

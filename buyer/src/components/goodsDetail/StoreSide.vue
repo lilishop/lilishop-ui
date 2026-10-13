@@ -65,149 +65,217 @@
   </aside>
 </template>
 
-<script>
-import { Message } from "@/utils/message";
+<script setup>
+import { computed, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Message, Modal } from "@/utils/message";
 import { goodsList } from "@/api/goods";
 import { getStoreById } from "@/api/shopentry";
 import { cancelStoreCollect, collectStore, isStoreCollection } from "@/api/member";
-import imTalk from "@/components/mixes/talkIm";
+import { getIMDetail } from "@/api/common";
+import { getMemberMsg } from "@/api/login";
+import storage from "@/plugins/storage.js";
 
-export default {
-  name: "StoreSide",
-  mixins: [imTalk],
-  props: {
-    storeId: {
-      type: [String, Number],
-      default: "",
-    },
-    goodsId: {
-      type: [String, Number],
-      default: "",
-    },
-    skuId: {
-      type: [String, Number],
-      default: "",
-    },
-    storeNameFallback: {
-      type: String,
-      default: "",
-    },
+defineOptions({ name: "StoreSide" });
+
+const props = defineProps({
+  storeId: {
+    type: [String, Number],
+    default: "",
   },
-  data() {
-    return {
-      store: {},
-      logoError: false,
-      collected: false,
-      recommends: [],
-    };
+  goodsId: {
+    type: [String, Number],
+    default: "",
   },
-  computed: {
-    storeName() {
-      return this.store.storeName || this.storeNameFallback || "店铺";
-    },
-    storeInitial() {
-      return this.storeName.slice(0, 1);
-    },
-    // 自营标记后端可能是 true、1 或 "1"
-    isSelfOperated() {
-      const flag = this.store.selfOperated;
-      return flag === true || flag === 1 || flag === "1";
-    },
+  skuId: {
+    type: [String, Number],
+    default: "",
   },
-  watch: {
-    storeId: {
-      immediate: true,
-      handler(id) {
-        if (!id) return;
-        this.logoError = false;
-        this.loadStore(id);
-        this.loadRecommend(id);
-        this.loadCollected(id);
+  storeNameFallback: {
+    type: String,
+    default: "",
+  },
+});
+
+const route = useRoute();
+const router = useRouter();
+
+const store = ref({});
+const logoError = ref(false);
+const collected = ref(false);
+const recommends = ref([]);
+// 原 talkIm mixin 的 IM 链接
+const IMLink = ref("");
+
+const storeName = computed(() => {
+  return store.value.storeName || props.storeNameFallback || "店铺";
+});
+const storeInitial = computed(() => {
+  return storeName.value.slice(0, 1);
+});
+// 自营标记后端可能是 true、1 或 "1"
+const isSelfOperated = computed(() => {
+  const flag = store.value.selfOperated;
+  return flag === true || flag === 1 || flag === "1";
+});
+
+watch(
+  () => props.storeId,
+  (id) => {
+    if (!id) return;
+    logoError.value = false;
+    loadStore(id);
+    loadRecommend(id);
+    loadCollected(id);
+  },
+  { immediate: true }
+);
+
+// 没有评分或小于等于 0 时按满分展示
+function formatScore(value) {
+  const score = Number(value);
+  if (!Number.isFinite(score) || score <= 0) return "5.00";
+  return score.toFixed(2);
+}
+
+function loadStore(id) {
+  getStoreById(id).then((res) => {
+    if (res.success && res.result) store.value = res.result;
+  }).catch((err) => {
+    console.warn('获取店铺信息失败', err);
+  });
+}
+
+// 按销量取店内商品，去掉当前商品，最多 4 个
+function loadRecommend(id) {
+  goodsList({
+    storeId: id,
+    pageNumber: 1,
+    pageSize: 8,
+    sort: "buyCount",
+    order: "desc",
+  }).then((res) => {
+    const records = (res.success && res.result && res.result.records) || [];
+    recommends.value = records
+      .filter((item) => String(item.goodsId) !== String(props.goodsId))
+      .slice(0, 4);
+  }).catch(() => {
+    // 推荐商品为可选数据，加载失败时静默
+  });
+}
+
+// 同时有 token 和用户信息才查收藏，避免残留 userInfo 触发登录跳转
+function loadCollected(id) {
+  if (!storage.getItem("accessToken") || !storage.getItem("userInfo")) return;
+  isStoreCollection("STORE", id).then((res) => {
+    if (res.success && res.result) collected.value = true;
+  }).catch(() => {
+    // 收藏状态为可选数据，失败时静默
+  });
+}
+
+function goStore() {
+  router.push({ path: "/merchant", query: { id: props.storeId } });
+}
+
+// 推荐商品新开详情页，店铺页仍在当前页打开
+function goGoods(item) {
+  const href = router.resolve({
+    path: "/goodsDetail",
+    query: { skuId: item.id, goodsId: item.goodsId },
+  }).href;
+  window.open(href, "_blank");
+}
+
+// 原 talkIm mixin 的登录提示
+function promptLogin() {
+  Modal.confirm({
+    title: "温馨提示",
+    content: "请登录后执行此操作",
+    okText: "立即登录",
+    cancelText: "取消",
+    onOk: () => {
+      router.push({
+        path: "/login",
+        query: {
+          rePath: route.path,
+          query: JSON.stringify(route.query || {}),
+        },
+      });
+    },
+  });
+}
+
+// 获取im信息（原 talkIm mixin）
+async function getIMDetailMethods() {
+  let res = await getIMDetail();
+  if (res.success) {
+    IMLink.value = res.result;
+  }
+}
+
+// 跳转im客服（原 talkIm mixin；本组件无 storeMsg，mixin 的 storeMsg?.storeId 兜底恒为 undefined，等价于直接用传入的 id）
+async function IMService(id, goodsId, skuId) {
+  if (!storage.getItem("accessToken")) {
+    promptLogin();
+    return;
+  }
+
+  try {
+    await getIMDetailMethods();
+    const userInfo = await getMemberMsg();
+    if (!userInfo.success) {
+      promptLogin();
+      return;
+    }
+
+    const accessToken = storage.getItem("accessToken");
+    const storeId = id;
+    const baseUrl = `${IMLink.value}?token=${accessToken}&id=${storeId}`;
+
+    if (goodsId && skuId) {
+      window.open(`${baseUrl}&goodsId=${goodsId}&skuId=${skuId}`);
+    } else {
+      window.open(baseUrl);
+    }
+  } catch {
+    // token 过期等场景由 request 拦截器处理；未登录时避免未捕获异常
+    if (!storage.getItem("accessToken")) {
+      promptLogin();
+    }
+  }
+}
+
+function contact() {
+  IMService(props.storeId, props.goodsId, props.skuId);
+}
+
+// 未登录先去登录，并带回当前商品页
+async function toggleCollect() {
+  if (!storage.getItem("accessToken") || !storage.getItem("userInfo")) {
+    router.push({
+      path: "/login",
+      query: {
+        rePath: route.path,
+        query: JSON.stringify(route.query || {}),
       },
-    },
-  },
-  methods: {
-    // 没有评分或小于等于 0 时按满分展示
-    formatScore(value) {
-      const score = Number(value);
-      if (!Number.isFinite(score) || score <= 0) return "5.00";
-      return score.toFixed(2);
-    },
-    loadStore(id) {
-      getStoreById(id).then((res) => {
-        if (res.success && res.result) this.store = res.result;
-      }).catch((err) => {
-        console.warn('获取店铺信息失败', err);
-      });
-    },
-    // 按销量取店内商品，去掉当前商品，最多 4 个
-    loadRecommend(id) {
-      goodsList({
-        storeId: id,
-        pageNumber: 1,
-        pageSize: 8,
-        sort: "buyCount",
-        order: "desc",
-      }).then((res) => {
-        const records = (res.success && res.result && res.result.records) || [];
-        this.recommends = records
-          .filter((item) => String(item.goodsId) !== String(this.goodsId))
-          .slice(0, 4);
-      }).catch(() => {
-        // 推荐商品为可选数据，加载失败时静默
-      });
-    },
-    // 同时有 token 和用户信息才查收藏，避免残留 userInfo 触发登录跳转
-    loadCollected(id) {
-      if (!this.Cookies.getItem("accessToken") || !this.Cookies.getItem("userInfo")) return;
-      isStoreCollection("STORE", id).then((res) => {
-        if (res.success && res.result) this.collected = true;
-      }).catch(() => {
-        // 收藏状态为可选数据，失败时静默
-      });
-    },
-    goStore() {
-      this.$router.push({ path: "/merchant", query: { id: this.storeId } });
-    },
-    // 推荐商品新开详情页，店铺页仍在当前页打开
-    goGoods(item) {
-      const href = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId: item.id, goodsId: item.goodsId },
-      }).href;
-      window.open(href, "_blank");
-    },
-    contact() {
-      this.IMService(this.storeId, this.goodsId, this.skuId);
-    },
-    // 未登录先去登录，并带回当前商品页
-    async toggleCollect() {
-      if (!this.Cookies.getItem("accessToken") || !this.Cookies.getItem("userInfo")) {
-        this.$router.push({
-          path: "/login",
-          query: {
-            rePath: this.$route.path,
-            query: JSON.stringify(this.$route.query || {}),
-          },
-        });
-        return;
-      }
-      if (this.collected) {
-        const cancel = await cancelStoreCollect("STORE", this.storeId);
-        if (cancel.success) {
-          this.collected = false;
-          Message.success("已取消收藏");
-        }
-        return;
-      }
-      const collect = await collectStore("STORE", this.storeId);
-      if (collect.code === 200) {
-        this.collected = true;
-        Message.success("收藏店铺成功，可以前往个人中心我的收藏查看");
-      }
-    },
-  },
-};
+    });
+    return;
+  }
+  if (collected.value) {
+    const cancel = await cancelStoreCollect("STORE", props.storeId);
+    if (cancel.success) {
+      collected.value = false;
+      Message.success("已取消收藏");
+    }
+    return;
+  }
+  const collect = await collectStore("STORE", props.storeId);
+  if (collect.code === 200) {
+    collected.value = true;
+    Message.success("收藏店铺成功，可以前往个人中心我的收藏查看");
+  }
+}
 </script>
 
 <style scoped lang="scss">

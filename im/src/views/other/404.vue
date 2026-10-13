@@ -16,39 +16,34 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { SvgNotFount } from '@/core/icons'
 
-export default {
-  name: 'NotFoundPage',
-  components: {
-    SvgNotFount,
-  },
-  data() {
-    return {
-      second: 10,
-      setInterval: null,
-    }
-  },
-  created() {
-    this.setInterval = setInterval(() => {
-      this.second--
-      if (this.second == 0) {
-        clearInterval(this.setInterval)
-        this.toHome()
-      }
-    }, 1000)
-  },
-  beforeUnmount() {
-    clearInterval(this.setInterval)
-  },
-  methods: {
-    toHome() {
-      this.$router.push({
-        path: '/',
-      })
-    },
-  },
+defineOptions({ name: 'NotFoundPage' })
+
+const router = useRouter()
+
+const second = ref(10)
+let timer = null
+
+timer = setInterval(() => {
+  second.value--
+  if (second.value == 0) {
+    clearInterval(timer)
+    toHome()
+  }
+}, 1000)
+
+onBeforeUnmount(() => {
+  clearInterval(timer)
+})
+
+function toHome() {
+  router.push({
+    path: '/',
+  })
 }
 </script>
 <style lang="less" scoped>

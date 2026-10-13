@@ -72,7 +72,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="form" :model="form" :rules="formValidate" label-width="100px">
+      <el-form ref="formRef" :model="form" :rules="formValidate" label-width="100px">
         <el-form-item label="名称" prop="name">
           <el-input
             v-model="form.name"
@@ -101,7 +101,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import * as API_Setting from "@/api/setting";
 import uploadPicInput from "@/components/lili/upload-pic-input";
@@ -112,133 +113,133 @@ const defaultForm = () => ({
   type: "RESOURCE",
 });
 
-export default {
-  components: {
-    uploadPicInput,
-  },
-  data() {
-    return {
-      modalVisible: false,
-      modalTitle: "",
-      loading: true,
-      modalType: 0,
-      submitLoading: false,
-      form: defaultForm(),
-      formValidate: {
-        name: [
-          {
-            required: true,
-            message: "请输入名称",
-            trigger: "blur",
-          },
-        ],
-        resource: [
-          {
-            required: true,
-            message: "请上传图片",
-            trigger: "blur",
-          },
-        ],
-      },
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        type: "RESOURCE",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    changePage() {
-      this.getDataList();
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const loading = ref(true);
+const modalType = ref(0);
+const submitLoading = ref(false);
+const form = ref(defaultForm());
+const formValidate = reactive({
+  name: [
+    {
+      required: true,
+      message: "请输入名称",
+      trigger: "blur",
     },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
+  ],
+  resource: [
+    {
+      required: true,
+      message: "请上传图片",
+      trigger: "blur",
     },
-    handleClickType(tab) {
-      this.searchForm.type = tab.paneName;
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      API_Setting.verificationPage(this.searchForm).then((res) => {
-        this.loading = false;
+  ],
+});
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  type: "RESOURCE",
+});
+const data = ref([]);
+const total = ref(0);
+
+const formRef = ref(null);
+
+function changePage() {
+  getDataList();
+}
+
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function handleClickType(tab) {
+  searchForm.type = tab.paneName;
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function getDataList() {
+  loading.value = true;
+  API_Setting.verificationPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+
+function add() {
+  form.value = defaultForm();
+  form.value.type = searchForm.type;
+  modalType.value = 0;
+  modalTitle.value = "添加验证码源";
+  modalVisible.value = true;
+  nextTick(() => {
+    formRef.value?.resetFields();
+  });
+}
+
+function edit(v) {
+  form.value = {
+    id: v.id,
+    name: v.name,
+    resource: v.resource,
+    type: v.type,
+  };
+  modalType.value = 1;
+  modalVisible.value = true;
+  modalTitle.value = "修改验证码源";
+}
+
+function handleSubmit() {
+  form.value.type = searchForm.type;
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+    if (modalType.value === 0) {
+      const payload = { ...form.value };
+      delete payload.id;
+      API_Setting.addVerification(payload).then((res) => {
+        submitLoading.value = false;
         if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
+          ElMessage.success("添加成功");
+          getDataList();
+          modalVisible.value = false;
         }
       });
-    },
-    add() {
-      this.form = defaultForm();
-      this.form.type = this.searchForm.type;
-      this.modalType = 0;
-      this.modalTitle = "添加验证码源";
-      this.modalVisible = true;
-      this.$nextTick(() => {
-        this.$refs.form?.resetFields();
-      });
-    },
-    edit(v) {
-      this.form = {
-        id: v.id,
-        name: v.name,
-        resource: v.resource,
-        type: v.type,
-      };
-      this.modalType = 1;
-      this.modalVisible = true;
-      this.modalTitle = "修改验证码源";
-    },
-    handleSubmit() {
-      this.form.type = this.searchForm.type;
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        if (this.modalType === 0) {
-          const payload = { ...this.form };
-          delete payload.id;
-          API_Setting.addVerification(payload).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              ElMessage.success("添加成功");
-              this.getDataList();
-              this.modalVisible = false;
-            }
-          });
-        } else {
-          API_Setting.editVerification(this.form.id, this.form).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              ElMessage.success("修改成功");
-              this.getDataList();
-              this.modalVisible = false;
-            }
-          });
+    } else {
+      API_Setting.editVerification(form.value.id, form.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          ElMessage.success("修改成功");
+          getDataList();
+          modalVisible.value = false;
         }
       });
-    },
-    remove(v) {
-      ElMessageBox.confirm("确认要删除此验证码源?", "确认删除", { type: "warning" }).then(() => {
-          return API_Setting.delVerification(v.id).then((res) => {
-            if (res.success) {
-              ElMessage.success("验证码源已删除");
-              this.getDataList();
-            }
-          });
-      }).catch(() => {});
-    },
-  },
-  mounted() {
-    this.getDataList();
-  },
-};
+    }
+  });
+}
+
+function remove(v) {
+  ElMessageBox.confirm("确认要删除此验证码源?", "确认删除", { type: "warning" }).then(() => {
+      return API_Setting.delVerification(v.id).then((res) => {
+        if (res.success) {
+          ElMessage.success("验证码源已删除");
+          getDataList();
+        }
+      });
+  }).catch(() => {});
+}
+
+onMounted(() => {
+  getDataList();
+});
 </script>
 
 <style scoped>

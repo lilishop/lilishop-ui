@@ -24,6 +24,7 @@
     "hls.js": "^1.6.16",
     "js-cookie": "^2.2.1",
     "nprogress": "^0.2.0",
+    "pinia": "^4.0.3",
     "sass": "^1.63.6",
     "sass-loader": "^10.4.1",
     "sockjs-client": "^1.4.0",
@@ -34,7 +35,6 @@
     "vue-qr": "^5.0.3",
     "vue-router": "^4.6.4",
     "vuedraggable": "^4.1.0",
-    "vuex": "^4.1.0",
     "xss": "^1.0.7"
   },
   "devDependencies": {

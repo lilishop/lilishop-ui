@@ -1,78 +1,82 @@
 <template>
-  <div class="goods-thumb" :class="{ 'is-loaded': loaded, 'is-error': error }">
+  <div class="goods-thumb" ref="rootEl" :class="{ 'is-loaded': loaded, 'is-error': error }">
     <img v-if="currentSrc" :src="currentSrc" :alt="alt" @load="loaded = true" @error="onError" />
   </div>
 </template>
 
-<script>
-export default {
-  name: "GoodsThumb",
-  props: {
-    src: {
-      type: String,
-      default: "",
-    },
-    alt: {
-      type: String,
-      default: "",
-    },
+<script setup>
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+
+defineOptions({ name: "GoodsThumb" });
+
+const props = defineProps({
+  src: {
+    type: String,
+    default: "",
   },
-  data() {
-    return {
-      currentSrc: "",
-      loaded: false,
-      error: false,
-      observer: null,
-    };
+  alt: {
+    type: String,
+    default: "",
   },
-  watch: {
-    src() {
-      this.observe();
+});
+
+const rootEl = ref(null);
+const currentSrc = ref("");
+const loaded = ref(false);
+const error = ref(false);
+let observer = null;
+
+watch(
+  () => props.src,
+  () => {
+    observe();
+  }
+);
+
+function disconnect() {
+  if (observer) {
+    observer.disconnect();
+    observer = null;
+  }
+}
+
+function observe() {
+  disconnect();
+  currentSrc.value = "";
+  loaded.value = false;
+  error.value = false;
+  if (!props.src) {
+    error.value = true;
+    return;
+  }
+  if (typeof IntersectionObserver === "undefined") {
+    currentSrc.value = props.src;
+    return;
+  }
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      currentSrc.value = props.src;
+      disconnect();
     },
-  },
-  mounted() {
-    this.observe();
-  },
-  beforeUnmount() {
-    this.disconnect();
-  },
-  methods: {
-    disconnect() {
-      if (this.observer) {
-        this.observer.disconnect();
-        this.observer = null;
-      }
-    },
-    observe() {
-      this.disconnect();
-      this.currentSrc = "";
-      this.loaded = false;
-      this.error = false;
-      if (!this.src) {
-        this.error = true;
-        return;
-      }
-      if (typeof IntersectionObserver === "undefined") {
-        this.currentSrc = this.src;
-        return;
-      }
-      this.observer = new IntersectionObserver(
-        (entries) => {
-          if (!entries.some((entry) => entry.isIntersecting)) return;
-          this.currentSrc = this.src;
-          this.disconnect();
-        },
-        { rootMargin: "160px 0px" }
-      );
-      this.observer.observe(this.$el);
-    },
-    onError() {
-      this.error = true;
-      this.loaded = false;
-      this.currentSrc = "";
-    },
-  },
-};
+    { rootMargin: "160px 0px" }
+  );
+  observer.observe(rootEl.value);
+}
+
+function onError() {
+  error.value = true;
+  loaded.value = false;
+  currentSrc.value = "";
+}
+
+onMounted(() => {
+  observe();
+});
+
+onBeforeUnmount(() => {
+  disconnect();
+});
 </script>
 
 <style scoped lang="scss">

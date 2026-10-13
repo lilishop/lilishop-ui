@@ -136,11 +136,15 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import * as API_Statistics from "@/api/statistics";
 import { getShopListData } from "@/api/shops";
 import { getBrandListData, getCategoryTree } from "@/api/goods";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { unitPrice } from "@/utils/filters";
+
+defineOptions({ name: "goods-comparison-report" });
 
 const CLIENT_TYPE_OPTIONS = [
   { label: "移动端", value: "H5" },
@@ -150,122 +154,115 @@ const CLIENT_TYPE_OPTIONS = [
   { label: "未知", value: "UNKNOWN" },
 ];
 
-export default {
-  name: "goods-comparison-report",
-  data() {
-    return {
-      loading: false,
-      dateType: "DAY",
-      queryDate: "",
-      dateRange: [],
-      defaultTime: [new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)],
-      params: {
-        pageNumber: 1,
-        pageSize: 20,
-        storeId: "",
-        categoryId: "",
-        brandId: "",
-        clientType: "",
-        keyword: "",
-        sortType: "PRICE",
-      },
-      categoryList: [],
-      categoryProps: { value: "id", label: "name", children: "children", checkStrictly: true, emitPath: false },
-      brandList: [],
-      clientTypeOptions: CLIENT_TYPE_OPTIONS,
-      data: [],
-      total: 0,
-      shops: [],
-    };
-  },
-  mounted() {
-    this.initDefaultRange();
-    this.loadOptions();
-    this.loadData();
-  },
-  methods: {
-    initDefaultRange() {
-      const today = new Date();
-      this.queryDate = this.formatDay(today);
-      const end = new Date();
-      const start = new Date();
-      start.setDate(start.getDate() - 6);
-      this.dateRange = [this.formatDate(start, true), this.formatDate(end, false)];
-    },
-    formatDay(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    },
-    onDateTypeChange() {
-      if (this.dateType === "DAY" && !this.queryDate) {
-        this.queryDate = this.formatDay(new Date());
-      }
-    },
-    loadOptions() {
-      getCategoryTree().then((res) => {
-        if (res.success) this.categoryList = res.result || [];
-      });
-      getBrandListData().then((res) => {
-        if (res.success) this.brandList = res.result || [];
-      });
-      getShopListData({ pageNumber: 1, pageSize: 200 }).then((res) => {
-        if (res.success) this.shops = res.result.records || [];
-      });
-    },
-    formatDate(date, startOfDay) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, "0");
-      const d = String(date.getDate()).padStart(2, "0");
-      return startOfDay ? `${y}-${m}-${d} 00:00:00` : `${y}-${m}-${d} 23:59:59`;
-    },
-    buildParams() {
-      const p = { ...this.params, reportDateType: this.dateType };
-      if (this.dateType === "DAY") {
-        if (this.queryDate) {
-          p.queryDate = `${this.queryDate} 00:00:00`;
-        }
-      } else if (this.dateRange && this.dateRange.length === 2) {
-        p.startTime = this.dateRange[0];
-        p.endTime = this.dateRange[1];
-      }
-      return p;
-    },
-    handleSearch() {
-      this.params.pageNumber = 1;
-      this.loadData();
-    },
-    loadData() {
-      this.loading = true;
-      API_Statistics.getGoodsComparisonReport(this.buildParams()).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records || [];
-          this.total = res.result.total || 0;
-        }
-      });
-    },
-    handleExport() {
-      API_Statistics.exportGoodsComparisonReport(this.buildParams()).then((blob) => {
-        downloadBlob(blob, "商品同比环比报表.xlsx");
-      });
-    },
-    formatMoney(val) {
-      return this.$filters.unitPrice(val, "￥");
-    },
-    formatPercent(val) {
-      if (val == null || val === "") return "0%";
-      return `${Number(val).toFixed(2)}%`;
-    },
-    rateClass(rate) {
-      if (!rate) return "";
-      if (rate.startsWith("+")) return "trend-up";
-      if (rate.startsWith("-") && rate !== "0%") return "trend-down";
-      return "";
-    },
-  },
-};
+const loading = ref(false);
+const dateType = ref("DAY");
+const queryDate = ref("");
+const dateRange = ref([]);
+const defaultTime = ref([new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)]);
+const params = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  storeId: "",
+  categoryId: "",
+  brandId: "",
+  clientType: "",
+  keyword: "",
+  sortType: "PRICE",
+});
+const categoryList = ref([]);
+const categoryProps = ref({ value: "id", label: "name", children: "children", checkStrictly: true, emitPath: false });
+const brandList = ref([]);
+const clientTypeOptions = ref(CLIENT_TYPE_OPTIONS);
+const data = ref([]);
+const total = ref(0);
+const shops = ref([]);
+
+onMounted(() => {
+  initDefaultRange();
+  loadOptions();
+  loadData();
+});
+
+function initDefaultRange() {
+  const today = new Date();
+  queryDate.value = formatDay(today);
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 6);
+  dateRange.value = [formatDate(start, true), formatDate(end, false)];
+}
+function formatDay(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+function onDateTypeChange() {
+  if (dateType.value === "DAY" && !queryDate.value) {
+    queryDate.value = formatDay(new Date());
+  }
+}
+function loadOptions() {
+  getCategoryTree().then((res) => {
+    if (res.success) categoryList.value = res.result || [];
+  });
+  getBrandListData().then((res) => {
+    if (res.success) brandList.value = res.result || [];
+  });
+  getShopListData({ pageNumber: 1, pageSize: 200 }).then((res) => {
+    if (res.success) shops.value = res.result.records || [];
+  });
+}
+function formatDate(date, startOfDay) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return startOfDay ? `${y}-${m}-${d} 00:00:00` : `${y}-${m}-${d} 23:59:59`;
+}
+function buildParams() {
+  const p = { ...params, reportDateType: dateType.value };
+  if (dateType.value === "DAY") {
+    if (queryDate.value) {
+      p.queryDate = `${queryDate.value} 00:00:00`;
+    }
+  } else if (dateRange.value && dateRange.value.length === 2) {
+    p.startTime = dateRange.value[0];
+    p.endTime = dateRange.value[1];
+  }
+  return p;
+}
+function handleSearch() {
+  params.pageNumber = 1;
+  loadData();
+}
+function loadData() {
+  loading.value = true;
+  API_Statistics.getGoodsComparisonReport(buildParams()).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records || [];
+      total.value = res.result.total || 0;
+    }
+  });
+}
+function handleExport() {
+  API_Statistics.exportGoodsComparisonReport(buildParams()).then((blob) => {
+    downloadBlob(blob, "商品同比环比报表.xlsx");
+  });
+}
+function formatMoney(val) {
+  return unitPrice(val, "￥");
+}
+function formatPercent(val) {
+  if (val == null || val === "") return "0%";
+  return `${Number(val).toFixed(2)}%`;
+}
+function rateClass(rate) {
+  if (!rate) return "";
+  if (rate.startsWith("+")) return "trend-up";
+  if (rate.startsWith("-") && rate !== "0%") return "trend-down";
+  return "";
+}
 </script>
 
 <style scoped>

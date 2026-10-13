@@ -15,11 +15,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  title: "左二右一",
-  props: ["res"]
-};
+<script setup>
+defineProps(["res"]);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";

@@ -1,5 +1,5 @@
 import Base from './base'
-import store from '@/store'
+import { useDialogueStore } from '@/stores/dialogue'
 
 /**
  * 好友邀请消息处理
@@ -32,7 +32,7 @@ class Revoke extends Base {
       return false
     }
 
-    store.commit('UPDATE_DIALOGUE', {
+    useDialogueStore().UPDATE_DIALOGUE({
       id: this.resource.record_id,
       is_revoke: 1,
     })

@@ -88,7 +88,15 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue";
+
+defineOptions({ name: "SystemFormFieldPreview" });
+
+const props = defineProps({
+  field: { type: Object, required: true },
+});
+
 function pad(n) {
   return String(n).padStart(2, "0");
 }
@@ -103,88 +111,80 @@ function nowTimeText() {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export default {
-  name: "SystemFormFieldPreview",
-  props: {
-    field: { type: Object, required: true },
-  },
-  computed: {
-    isInlineOptions() {
-      return [
-        "CHECKBOX",
-        "RADIO",
-        "CITY",
-        "DATE",
-        "DATE_RANGE",
-        "SELECT",
-        "TEXT",
-        "TIME",
-        "TIME_RANGE",
-      ].includes(this.field.field_type);
-    },
-    imageSlotCount() {
-      const n = Number(this.field.max_upload_count);
-      return Math.min(10, Math.max(1, Number.isFinite(n) ? n : 1));
-    },
-    optionListStacked() {
-      // 一行放不下两个选项时改为纵向堆叠
-      const labels = (this.field.options || []).map((item) => item.label || "");
-      if (labels.length < 2) return false;
-      const itemWidth = (text) => 24 + Array.from(text).length * 14;
-      const available = 230;
-      for (let i = 0; i < labels.length; i += 2) {
-        const next = labels[i + 1];
-        if (next == null) break;
-        if (itemWidth(labels[i]) + 12 + itemWidth(next) > available) {
-          return true;
-        }
-      }
-      return false;
-    },
-    showDefault() {
-      return this.field.default_visibility === "SHOW";
-    },
-    singleDefault() {
-      if (!this.showDefault) return "";
-      if (this.field.field_type === "DATE") {
-        return this.field.default_date_mode === "SPECIFIED_DATE"
-          ? this.field.default_date
-          : todayText();
-      }
-      return this.field.default_time_mode === "SPECIFIED_TIME"
-        ? this.field.default_time
-        : nowTimeText();
-    },
-    dateRangeText() {
-      if (this.rangeStart && this.rangeEnd) {
-        return `${this.rangeStart} - ${this.rangeEnd}`;
-      }
-      return this.field.hint_text || "请选择";
-    },
-    rangeStart() {
-      if (!this.showDefault) return "";
-      if (this.field.field_type === "DATE_RANGE") {
-        return this.field.default_date_mode === "SPECIFIED_DATE"
-          ? this.field.default_date_start
-          : todayText();
-      }
-      return this.field.default_time_mode === "SPECIFIED_TIME"
-        ? this.field.default_time_start
-        : nowTimeText();
-    },
-    rangeEnd() {
-      if (!this.showDefault) return "";
-      if (this.field.field_type === "DATE_RANGE") {
-        return this.field.default_date_mode === "SPECIFIED_DATE"
-          ? this.field.default_date_end
-          : todayText();
-      }
-      return this.field.default_time_mode === "SPECIFIED_TIME"
-        ? this.field.default_time_end
-        : nowTimeText();
-    },
-  },
-};
+const isInlineOptions = computed(() => {
+  return [
+    "CHECKBOX",
+    "RADIO",
+    "CITY",
+    "DATE",
+    "DATE_RANGE",
+    "SELECT",
+    "TEXT",
+    "TIME",
+    "TIME_RANGE",
+  ].includes(props.field.field_type);
+});
+const imageSlotCount = computed(() => {
+  const n = Number(props.field.max_upload_count);
+  return Math.min(10, Math.max(1, Number.isFinite(n) ? n : 1));
+});
+const optionListStacked = computed(() => {
+  // 一行放不下两个选项时改为纵向堆叠
+  const labels = (props.field.options || []).map((item) => item.label || "");
+  if (labels.length < 2) return false;
+  const itemWidth = (text) => 24 + Array.from(text).length * 14;
+  const available = 230;
+  for (let i = 0; i < labels.length; i += 2) {
+    const next = labels[i + 1];
+    if (next == null) break;
+    if (itemWidth(labels[i]) + 12 + itemWidth(next) > available) {
+      return true;
+    }
+  }
+  return false;
+});
+const showDefault = computed(() => {
+  return props.field.default_visibility === "SHOW";
+});
+const singleDefault = computed(() => {
+  if (!showDefault.value) return "";
+  if (props.field.field_type === "DATE") {
+    return props.field.default_date_mode === "SPECIFIED_DATE"
+      ? props.field.default_date
+      : todayText();
+  }
+  return props.field.default_time_mode === "SPECIFIED_TIME"
+    ? props.field.default_time
+    : nowTimeText();
+});
+const dateRangeText = computed(() => {
+  if (rangeStart.value && rangeEnd.value) {
+    return `${rangeStart.value} - ${rangeEnd.value}`;
+  }
+  return props.field.hint_text || "请选择";
+});
+const rangeStart = computed(() => {
+  if (!showDefault.value) return "";
+  if (props.field.field_type === "DATE_RANGE") {
+    return props.field.default_date_mode === "SPECIFIED_DATE"
+      ? props.field.default_date_start
+      : todayText();
+  }
+  return props.field.default_time_mode === "SPECIFIED_TIME"
+    ? props.field.default_time_start
+    : nowTimeText();
+});
+const rangeEnd = computed(() => {
+  if (!showDefault.value) return "";
+  if (props.field.field_type === "DATE_RANGE") {
+    return props.field.default_date_mode === "SPECIFIED_DATE"
+      ? props.field.default_date_end
+      : todayText();
+  }
+  return props.field.default_time_mode === "SPECIFIED_TIME"
+    ? props.field.default_time_end
+    : nowTimeText();
+});
 </script>
 
 <style scoped>

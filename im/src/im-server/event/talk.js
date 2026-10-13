@@ -5,6 +5,9 @@ import NewMessageNotify from "@/components/notify/NewMessageNotify";
 import { ServeClearTalkUnreadNum, ServeCreateTalkList } from "@/api/chat";
 import { formatTalkItem, findTalkIndex, toTalk } from "@/utils/talk";
 import { parseTime } from "@/utils/functions";
+import { useTalkStore } from "@/stores/talk";
+import { useNotifyStore } from "@/stores/notify";
+import { useDialogueStore } from "@/stores/dialogue";
 
 import mixin from '@/mixins/main-mixin'
 /**
@@ -44,9 +47,9 @@ class Talk extends Base {
 
     this.resource = resource;
 
-    // 判断发送者消息是否在当前用户列表中 
+    // 判断发送者消息是否在当前用户列表中
     const bridge = getAppBridge();
-    if (this.sender_id && !bridge.$store.state.talks.items.find(item => {
+    if (this.sender_id && !useTalkStore().items.find(item => {
       return item.userId == this.sender_id
     })) {
       bridge.loadUserSetting('update')
@@ -108,11 +111,10 @@ class Talk extends Base {
   }
 
   handle () {
-    let store = this.getStoreInstance();
     // console.log("触发handle");
     // 判断当前是否在聊天页面
     if (!this.isTalkPage()) {
-      store.commit("INCR_UNREAD_NUM");
+      useNotifyStore().INCR_UNREAD_NUM();
 
       // 判断消息是否来自于我自己，否则会提示消息通知
       return !this.isCurrSender() && this.showMessageNocice();
@@ -181,7 +183,7 @@ class Talk extends Base {
 
     ServeCreateTalkList(receiver_id).then(({ code, data }) => {
       if (code == 200) {
-        this.getStoreInstance().commit("PUSH_TALK_ITEM", formatTalkItem(data));
+        useTalkStore().PUSH_TALK_ITEM(formatTalkItem(data));
       }
     });
   }
@@ -190,13 +192,14 @@ class Talk extends Base {
    * 插入对话记录
    */
   insertTalkRecord () {
-    let store = this.getStoreInstance();
+    const talkStore = useTalkStore();
+    const dialogueStore = useDialogueStore();
     let record = this.resource;
     // console.log("插入谈话记录", record);
 
     record.float = this.getFloatType();
 
-    store.commit("PUSH_DIALOGUE", record);
+    dialogueStore.PUSH_DIALOGUE(record);
 
     // 获取聊天面板元素节点
     let el = document.getElementById("lumenChatPanel");
@@ -214,14 +217,14 @@ class Talk extends Base {
       });
     } else {
       // console.log("%c SET_TLAK_UNREAD_MESSAGE %c", "color:red");
-      store.commit("SET_TLAK_UNREAD_MESSAGE", {
+      talkStore.SET_TLAK_UNREAD_MESSAGE({
         content: this.getTalkText(),
         nickname: record.name,
       });
     }
     // console.log("%c 准备更新...UPDATE_TALK_ITEM ", "color:red");
 
-    store.commit("UPDATE_TALK_ITEM", {
+    talkStore.UPDATE_TALK_ITEM({
       index_name: this.getIndexName(),
       msg_text: this.getTalkText() || record.text,
       updated_at: parseTime(new Date()),
@@ -240,11 +243,9 @@ class Talk extends Base {
    * 更新对话列表记录
    */
   updateTalkItem () {
-    let store = this.getStoreInstance();
+    useNotifyStore().INCR_UNREAD_NUM();
 
-    store.commit("INCR_UNREAD_NUM");
-
-    store.commit("UPDATE_TALK_MESSAGE", {
+    useTalkStore().UPDATE_TALK_MESSAGE({
       index_name: this.getIndexName(),
       msg_text: this.getTalkText(),
       updated_at: parseTime(new Date()),

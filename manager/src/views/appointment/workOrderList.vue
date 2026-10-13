@@ -43,8 +43,14 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import { getManagerWorkOrderPage } from "@/api/appointment";
+
+defineOptions({ name: "managerAppointmentWorkOrders" });
+
+const route = useRoute();
 
 const STATUS_OPTIONS = [
   { label: "未完成", value: "OPEN" },
@@ -57,52 +63,45 @@ const STATUS_OPTIONS = [
   { label: "逾期未到店", value: "NO_SHOW" },
 ];
 
-export default {
-  name: "managerAppointmentWorkOrders",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      statusOptions: STATUS_OPTIONS,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        orderSn: "",
-        workOrderSn: "",
-        serviceStatus: "",
-      },
-    };
-  },
-  mounted() {
-    const status = this.$route.query.serviceStatus;
-    if (status) {
-      this.searchForm.serviceStatus = status;
-    }
-    this.getData();
-  },
-  methods: {
-    statusText(value) {
-      const found = STATUS_OPTIONS.find((item) => item.value === value);
-      return found ? found.label : value || "—";
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    getData() {
-      this.loading = true;
-      getManagerWorkOrderPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result?.records || [];
-            this.total = res.result?.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-  },
-};
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const statusOptions = ref(STATUS_OPTIONS);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  orderSn: "",
+  workOrderSn: "",
+  serviceStatus: "",
+});
+
+onMounted(() => {
+  const status = route.query.serviceStatus;
+  if (status) {
+    searchForm.value.serviceStatus = status;
+  }
+  getData();
+});
+
+function statusText(value) {
+  const found = STATUS_OPTIONS.find((item) => item.value === value);
+  return found ? found.label : value || "—";
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getData();
+}
+function getData() {
+  loading.value = true;
+  getManagerWorkOrderPage(searchForm.value)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result?.records || [];
+        total.value = res.result?.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
 </script>

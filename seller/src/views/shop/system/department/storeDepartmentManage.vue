@@ -37,7 +37,7 @@
           </div>
         </el-col>
         <el-col :md="15" :lg="13" :xl="9" style="margin-left: 10px">
-          <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+          <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
             <el-form-item label="部门名称" prop="title">
               <el-input v-model="form.title" />
             </el-form-item>
@@ -84,7 +84,7 @@
       width="500px"
       :close-on-click-modal="false"
     >
-      <el-form ref="formAdd" :model="formAdd" label-width="85px" :rules="formValidate">
+      <el-form ref="formAddRef" :model="formAdd" label-width="85px" :rules="formValidate">
         <div v-if="showParent">
           <el-form-item label="上级部门：">{{ form.title }}</el-form-item>
         </div>
@@ -105,7 +105,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import {
   initDepartment,
   addDepartment,
@@ -115,266 +116,266 @@ import {
   getRoleList,
   updateDepartmentRole,
 } from "@/api/index";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "store-department-manage",
-  data() {
-    return {
-      loading: true,
-      maxHeight: "500px",
-      strict: true,
-      userLoading: false,
-      loadingEdit: false,
-      modalVisible: false,
-      selectList: [],
-      selectCount: 0,
-      showParent: false,
-      modalTitle: "",
-      editTitle: "",
-      selectedRole: [],
-      searchKey: "",
-      currentNodeKey: null,
-      treeProps: {
-        label: "title",
-        children: "children",
-        isLeaf: "isLeaf",
-      },
-      form: {
-        id: "",
-        title: "",
-        parentId: "",
-        parentTitle: "",
-        sortOrder: 0,
-        status: 0,
-      },
-      formAdd: {},
-      formValidate: {
-        title: [{ required: true, message: "名称不能为空", trigger: "blur" }],
-        sortOrder: [
-          {
-            required: true,
-            type: "number",
-            message: "排序值不能为空",
-            trigger: "blur",
-          },
-        ],
-      },
-      submitLoading: false,
-      data: [],
-      dataEdit: [],
-      users: [],
-    };
-  },
-  methods: {
-    init() {
-      this.getParentList();
-    },
-    getParentList() {
-      this.loading = true;
-      initDepartment().then((res) => {
-        this.loading = false;
-        if (res.success) {
-          const list = Array.isArray(res.result) ? res.result : [];
-          this.data = this.bubbleSort(this.normalizeDepartmentTree(list));
-        }
-      });
-    },
-    normalizeDepartmentTree(list) {
-      return list.map((item) => {
-        const node = { ...item };
-        if (Array.isArray(node.children) && node.children.length > 0) {
-          node.children = this.normalizeDepartmentTree(node.children);
-        } else {
-          delete node.children;
-        }
-        return node;
-      });
-    },
-    onNodeClick(data) {
-      if (!data) {
-        this.cancelSelect();
-        return;
-      }
-      const row = JSON.parse(JSON.stringify(data));
-      for (const attr in row) {
-        if (row[attr] == null) {
-          row[attr] = "";
-        }
-      }
-      this.editTitle = row.title;
-      this.currentNodeKey = row.id;
-      this.userLoading = true;
+defineOptions({ name: "store-department-manage" });
 
-      getUserByDepartmentId(row.id).then((res) => {
-        const way = [];
-        res.result &&
-          res.result.forEach((item) => {
-            way.push(item.roleId);
-          });
-        this.selectedRole = way;
-      });
+const treeRef = ref(null);
+const formRef = ref(null);
+const formAddRef = ref(null);
 
-      getRoleList({
-        pageNumber: 1,
-        pageSize: 10000,
-      }).then((res) => {
-        this.userLoading = false;
-        if (res.success) {
-          this.users = res.result.records;
-          this.form = row;
-        }
-      });
-    },
-    onCheckChange(_data, { checkedNodes }) {
-      this.selectList = checkedNodes;
-      this.selectCount = checkedNodes.length;
-    },
-    bubbleSort(array) {
-      if (!Array.isArray(array)) return [];
-      const len = array.length;
-      if (len < 2) return array;
-      for (let i = 0; i < len; i++) {
-        for (let j = 0; j < i; j++) {
-          if (array[j].sortOrder > array[i].sortOrder) {
-            const temp = array[j];
-            array[j] = array[i];
-            array[i] = temp;
-          }
-        }
-      }
-      return array;
-    },
-    cancelSelect() {
-      this.$refs.treeRef?.setCurrentKey(null);
-      this.currentNodeKey = null;
-      this.$refs.form.resetFields();
-      delete this.form.id;
-      this.editTitle = "";
-      this.selectedRole = [];
-    },
-    selectTreeEdit(v) {
-      if (v.length > 0) {
-        for (const attr in v[0]) {
-          if (v[0][attr] == null) {
-            v[0][attr] = "";
-          }
-        }
-        const data = JSON.parse(JSON.stringify(v[0]));
-        this.form.parentId = data.id;
-        this.form.parentTitle = data.title;
-      }
-    },
-    cancelAdd() {
-      this.modalVisible = false;
-    },
-    handleReset() {
-      this.$refs.form.resetFields();
-      this.form.status = 0;
-    },
-    submitEdit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          if (!this.form.id) {
-            this.$Message.warning("请先点击选择要修改的部门");
-            return;
-          }
-          const roleWay = [];
-          this.selectedRole.forEach((item) => {
-            roleWay.push({
-              departmentId: this.form.id,
-              roleId: item,
-            });
-          });
-
-          Promise.all([
-            editDepartment(this.form.id, this.form),
-            updateDepartmentRole(this.form.id, roleWay),
-          ]).then((res) => {
-            this.submitLoading = false;
-            if (res[0].success) {
-              this.$Message.success("编辑成功");
-              this.init();
-              this.modalVisible = false;
-            }
-          });
-        }
-      });
-    },
-    submitAdd() {
-      this.$refs.formAdd.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          addDepartment(this.formAdd).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("添加成功");
-              this.init();
-              this.modalVisible = false;
-            }
-          });
-        }
-      });
-    },
-    add() {
-      if (this.form.id == "" || this.form.id == null) {
-        this.$Message.warning("请先点击选择一个部门");
-        return;
-      }
-      this.modalTitle = "添加子部门";
-      this.showParent = true;
-      this.formAdd = {
-        parentId: this.form.id,
-        sortOrder: 0,
-        status: 0,
-      };
-      this.modalVisible = true;
-    },
-    addRoot() {
-      this.modalTitle = "添加一级部门";
-      this.showParent = false;
-      this.formAdd = {
-        parentId: 0,
-        sortOrder: 0,
-        status: 0,
-      };
-      this.modalVisible = true;
-    },
-    delAll() {
-      if (this.selectCount <= 0) {
-        this.$Message.warning("您还未勾选要删除的数据");
-        return;
-      }
-      this.$Modal.confirm({
-        title: "确认删除",
-        content:
-          "您确认要删除所选的 " + this.selectCount + " 条数据及其下级所有数据?",
-        loading: true,
-        onOk: () => {
-          let ids = "";
-          this.selectList.forEach(function (e) {
-            ids += e.id + ",";
-          });
-          ids = ids.substring(0, ids.length - 1);
-          deleteDepartment(ids).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("删除成功");
-              this.selectList = [];
-              this.selectCount = 0;
-              this.cancelSelect();
-              this.init();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    const height = document.documentElement.clientHeight;
-    this.maxHeight = Number(height - 287) + "px";
-    this.init();
-  },
+const loading = ref(true);
+const maxHeight = ref("500px");
+const strict = ref(true);
+const userLoading = ref(false);
+const loadingEdit = ref(false);
+const modalVisible = ref(false);
+const selectList = ref([]);
+const selectCount = ref(0);
+const showParent = ref(false);
+const modalTitle = ref("");
+const editTitle = ref("");
+const selectedRole = ref([]);
+const searchKey = ref("");
+const currentNodeKey = ref(null);
+const treeProps = {
+  label: "title",
+  children: "children",
+  isLeaf: "isLeaf",
 };
+const form = ref({
+  id: "",
+  title: "",
+  parentId: "",
+  parentTitle: "",
+  sortOrder: 0,
+  status: 0,
+});
+const formAdd = ref({});
+const formValidate = {
+  title: [{ required: true, message: "名称不能为空", trigger: "blur" }],
+  sortOrder: [
+    {
+      required: true,
+      type: "number",
+      message: "排序值不能为空",
+      trigger: "blur",
+    },
+  ],
+};
+const submitLoading = ref(false);
+const data = ref([]);
+const dataEdit = ref([]);
+const users = ref([]);
+
+function init() {
+  getParentList();
+}
+function getParentList() {
+  loading.value = true;
+  initDepartment().then((res) => {
+    loading.value = false;
+    if (res.success) {
+      const list = Array.isArray(res.result) ? res.result : [];
+      data.value = bubbleSort(normalizeDepartmentTree(list));
+    }
+  });
+}
+function normalizeDepartmentTree(list) {
+  return list.map((item) => {
+    const node = { ...item };
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      node.children = normalizeDepartmentTree(node.children);
+    } else {
+      delete node.children;
+    }
+    return node;
+  });
+}
+function onNodeClick(data) {
+  if (!data) {
+    cancelSelect();
+    return;
+  }
+  const row = JSON.parse(JSON.stringify(data));
+  for (const attr in row) {
+    if (row[attr] == null) {
+      row[attr] = "";
+    }
+  }
+  editTitle.value = row.title;
+  currentNodeKey.value = row.id;
+  userLoading.value = true;
+
+  getUserByDepartmentId(row.id).then((res) => {
+    const way = [];
+    res.result &&
+      res.result.forEach((item) => {
+        way.push(item.roleId);
+      });
+    selectedRole.value = way;
+  });
+
+  getRoleList({
+    pageNumber: 1,
+    pageSize: 10000,
+  }).then((res) => {
+    userLoading.value = false;
+    if (res.success) {
+      users.value = res.result.records;
+      form.value = row;
+    }
+  });
+}
+function onCheckChange(_data, { checkedNodes }) {
+  selectList.value = checkedNodes;
+  selectCount.value = checkedNodes.length;
+}
+function bubbleSort(array) {
+  if (!Array.isArray(array)) return [];
+  const len = array.length;
+  if (len < 2) return array;
+  for (let i = 0; i < len; i++) {
+    for (let j = 0; j < i; j++) {
+      if (array[j].sortOrder > array[i].sortOrder) {
+        const temp = array[j];
+        array[j] = array[i];
+        array[i] = temp;
+      }
+    }
+  }
+  return array;
+}
+function cancelSelect() {
+  treeRef.value?.setCurrentKey(null);
+  currentNodeKey.value = null;
+  formRef.value.resetFields();
+  delete form.value.id;
+  editTitle.value = "";
+  selectedRole.value = [];
+}
+function selectTreeEdit(v) {
+  if (v.length > 0) {
+    for (const attr in v[0]) {
+      if (v[0][attr] == null) {
+        v[0][attr] = "";
+      }
+    }
+    const data = JSON.parse(JSON.stringify(v[0]));
+    form.value.parentId = data.id;
+    form.value.parentTitle = data.title;
+  }
+}
+function cancelAdd() {
+  modalVisible.value = false;
+}
+function handleReset() {
+  formRef.value.resetFields();
+  form.value.status = 0;
+}
+function submitEdit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      if (!form.value.id) {
+        Message.warning("请先点击选择要修改的部门");
+        return;
+      }
+      const roleWay = [];
+      selectedRole.value.forEach((item) => {
+        roleWay.push({
+          departmentId: form.value.id,
+          roleId: item,
+        });
+      });
+
+      Promise.all([
+        editDepartment(form.value.id, form.value),
+        updateDepartmentRole(form.value.id, roleWay),
+      ]).then((res) => {
+        submitLoading.value = false;
+        if (res[0].success) {
+          Message.success("编辑成功");
+          init();
+          modalVisible.value = false;
+        }
+      });
+    }
+  });
+}
+function submitAdd() {
+  formAddRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      addDepartment(formAdd.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("添加成功");
+          init();
+          modalVisible.value = false;
+        }
+      });
+    }
+  });
+}
+function add() {
+  if (form.value.id == "" || form.value.id == null) {
+    Message.warning("请先点击选择一个部门");
+    return;
+  }
+  modalTitle.value = "添加子部门";
+  showParent.value = true;
+  formAdd.value = {
+    parentId: form.value.id,
+    sortOrder: 0,
+    status: 0,
+  };
+  modalVisible.value = true;
+}
+function addRoot() {
+  modalTitle.value = "添加一级部门";
+  showParent.value = false;
+  formAdd.value = {
+    parentId: 0,
+    sortOrder: 0,
+    status: 0,
+  };
+  modalVisible.value = true;
+}
+function delAll() {
+  if (selectCount.value <= 0) {
+    Message.warning("您还未勾选要删除的数据");
+    return;
+  }
+  Modal.confirm({
+    title: "确认删除",
+    content:
+      "您确认要删除所选的 " + selectCount.value + " 条数据及其下级所有数据?",
+    loading: true,
+    onOk: () => {
+      let ids = "";
+      selectList.value.forEach(function (e) {
+        ids += e.id + ",";
+      });
+      ids = ids.substring(0, ids.length - 1);
+      deleteDepartment(ids).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("删除成功");
+          selectList.value = [];
+          selectCount.value = 0;
+          cancelSelect();
+          init();
+        }
+      });
+    },
+  });
+}
+
+onMounted(() => {
+  const height = document.documentElement.clientHeight;
+  maxHeight.value = Number(height - 287) + "px";
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

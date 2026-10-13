@@ -4,7 +4,6 @@ import "nprogress/nprogress.css";
 import Util from "../libs/util";
 import { setRouter } from "../libs/router-holder";
 import Cookies from "js-cookie";
-import store from "@/store";
 import { routers } from "./router";
 
 NProgress.configure({ showSpinner: false });
@@ -43,7 +42,7 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to) => {
-  Util.openNewPage({ $store: store }, to.name, to.params, to.query);
+  Util.openNewPage(to.name, to.params, to.query);
   NProgress.done();
   window.scrollTo(0, 0);
 });

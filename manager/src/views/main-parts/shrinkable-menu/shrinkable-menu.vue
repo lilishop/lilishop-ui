@@ -31,88 +31,90 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useAppStore } from "@/stores/app";
+import { setStore } from "@/libs/storage";
+import { Message } from "@/utils/message";
 import util from "@/libs/util.js";
 
-export default {
-  name: "shrinkableMenu",
-  computed: {
-    menuList() {
-      return this.$store.state.app.menuList;
-    },
-    navList() {
-      return this.$store.state.app.navList;
-    },
-    currNav() {
-      return this.$store.state.app.currNav;
-    },
-    activeMenuName() {
-      const route = this.$route;
-      const routePath = util.normalizeRoutePath(route.path);
-      for (const item of this.menuList) {
-        for (const menu of item.children || []) {
-          const menuPath = util.normalizeRoutePath(menu.path);
-          if (menu.name === route.name || (menuPath && menuPath === routePath)) {
-            return menu.name;
-          }
-        }
+defineOptions({ name: "shrinkableMenu" });
+
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
+
+const menuList = computed(() => appStore.menuList);
+const navList = computed(() => appStore.navList);
+const currNav = computed(() => appStore.currNav);
+const activeMenuName = computed(() => {
+  const routePath = util.normalizeRoutePath(route.path);
+  for (const item of menuList.value) {
+    for (const menu of item.children || []) {
+      const menuPath = util.normalizeRoutePath(menu.path);
+      if (menu.name === route.name || (menuPath && menuPath === routePath)) {
+        return menu.name;
       }
-      return route.name;
-    },
-  },
-  watch: {
-    $route(val) {
-      if (
-        val.meta.firstRouterName &&
-        val.meta.firstRouterName !== this.currNav
-      ) {
-        this.selectNav(val.meta.firstRouterName);
+    }
+  }
+  return route.name;
+});
+
+watch(
+  () => route.fullPath,
+  () => {
+    if (
+      route.meta.firstRouterName &&
+      route.meta.firstRouterName !== currNav.value
+    ) {
+      selectNav(route.meta.firstRouterName);
+    }
+  }
+);
+
+const changeMenu = (name) => {
+  if (!name) return;
+  if (router.hasRoute(name)) {
+    router.push({ name });
+    return;
+  }
+  const menu = findMenuByName(name);
+  if (menu?.path) {
+    const path = menu.path.startsWith("/") ? menu.path : `/${menu.path}`;
+    router.push({ path });
+    return;
+  }
+  util.initRouter();
+  nextTick(() => {
+    if (router.hasRoute(name)) {
+      router.push({ name });
+    } else {
+      Message.warning("菜单路由未就绪，请刷新页面后重试");
+    }
+  });
+};
+
+const findMenuByName = (name) => {
+  for (const item of menuList.value) {
+    for (const menu of item.children || []) {
+      if (menu.name === name) {
+        return menu;
       }
-    },
-  },
-  methods: {
-    changeMenu(name) {
-      if (!name) return;
-      if (this.$router.hasRoute(name)) {
-        this.$router.push({ name });
-        return;
-      }
-      const menu = this.findMenuByName(name);
-      if (menu?.path) {
-        const path = menu.path.startsWith("/") ? menu.path : `/${menu.path}`;
-        this.$router.push({ path });
-        return;
-      }
-      util.initRouter(this);
-      this.$nextTick(() => {
-        if (this.$router.hasRoute(name)) {
-          this.$router.push({ name });
-        } else {
-          this.$Message.warning("菜单路由未就绪，请刷新页面后重试");
-        }
-      });
-    },
-    findMenuByName(name) {
-      for (const item of this.menuList) {
-        for (const menu of item.children || []) {
-          if (menu.name === name) {
-            return menu;
-          }
-        }
-      }
-      return null;
-    },
-    selectNav(name) {
-      this.$store.commit("setCurrNav", name);
-      this.setStore("currNav", name);
-      if (name === 'home_index') {
-        this.$store.commit("updateMenulist", []);
-        this.$router.push({ name: 'home_index' });
-        return;
-      }
-      util.initRouter(this);
-    },
-  },
+    }
+  }
+  return null;
+};
+
+const selectNav = (name) => {
+  appStore.setCurrNav(name);
+  setStore("currNav", name);
+  if (name === 'home_index') {
+    appStore.updateMenulist([]);
+    router.push({ name: 'home_index' });
+    return;
+  }
+  util.initRouter();
 };
 </script>
 

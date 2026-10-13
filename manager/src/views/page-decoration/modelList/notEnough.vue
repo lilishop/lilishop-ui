@@ -96,118 +96,116 @@
         ></liliDialog>
     </div>
 </template>
-<script>
-export default {
-    props:{
-        data:{
-            type: Object,
-            default: null
-        }
-    },
-    data() {
-        return {
-            currentIndex:0,
-            conData:this.data,
-            selected:{},
-            editTarget: null,
-            showModal:false,
-            showGoodsModal: false,
-            showContent:true,
-            draftNavList: [],
-            draftGoodsList: [],
-        }
-    },
-    watch:{
-        data:function(val){
-            this.conData = val
-        },
-        conData:function(val){
-            this.$emit('content',val)
-        }
-    },
-    methods:{
-        cloneList(list) {
-            return JSON.parse(JSON.stringify(list || []));
-        },
-        cloneItem(item) {
-            return JSON.parse(JSON.stringify(item || {}));
-        },
-        changeCurr(index){
-            this.currentIndex = index;
-        },
-        handleSelectModel () {
-            this.draftNavList = this.cloneList(this.conData.options.navList);
-            this.draftGoodsList = this.cloneList(this.conData.options.list);
-            this.showModal = true;
-        },
-        handleSelectGoods(item) {
-            this.editTarget = item;
-            this.selected = this.cloneItem(item);
-            this.showGoodsModal = true;
-        },
-        handleOpenGoodsPicker() {
-            this.$refs.liliDialog.open('goods', 'single');
-            setTimeout(() => {
-                this.$refs.liliDialog.goodsData = [this.selected];
-            }, 500);
-        },
-        selectedGoodsData(val){
-            if (!val?.length) return;
-            const goods = val[0];
-            this.selected.img = goods.thumbnail;
-            this.selected.price = goods.price;
-            this.selected.name = goods.goodsName;
-            this.selected.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
-        },
-        handleDelNav(index){
-            this.draftNavList.splice(index,1);
-            this.draftGoodsList.splice(index,1);
-        },
-        handleAddNav(){
-            this.draftNavList.push({ title:'', desc:'' });
-            this.draftGoodsList.push([
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-                { img:'', name:'', price:0, url:'' },
-            ]);
-        },
-        handleCancelModal() {
-            this.draftNavList = [];
-            this.draftGoodsList = [];
-            this.showModal = false;
-        },
-        handleConfirmModal() {
-            this.conData.options.navList = this.cloneList(this.draftNavList);
-            this.conData.options.list = this.cloneList(this.draftGoodsList);
-            this.draftNavList = [];
-            this.draftGoodsList = [];
-            this.showContent = false;
-            this.$nextTick(() => {
-                this.showContent = true;
-            });
-            this.showModal = false;
-        },
-        handleCancelGoodsModal() {
-            this.editTarget = null;
-            this.selected = {};
-            this.showGoodsModal = false;
-        },
-        handleConfirmGoodsModal() {
-            if (this.editTarget) {
-                Object.assign(this.editTarget, this.cloneItem(this.selected));
-            }
-            this.editTarget = null;
-            this.selected = {};
-            this.showGoodsModal = false;
-        },
+<script setup>
+import { ref, watch, nextTick } from "vue";
+
+const props = defineProps({
+    data:{
+        type: Object,
+        default: null
     }
+});
+const emit = defineEmits(['content']);
+
+const currentIndex = ref(0);
+const conData = ref(props.data);
+const selected = ref({});
+const editTarget = ref(null);
+const showModal = ref(false);
+const showGoodsModal = ref(false);
+const showContent = ref(true);
+const draftNavList = ref([]);
+const draftGoodsList = ref([]);
+
+const liliDialog = ref(null);
+
+watch(() => props.data, function(val){
+    conData.value = val
+});
+watch(conData, function(val){
+    emit('content', val)
+});
+
+function cloneList(list) {
+    return JSON.parse(JSON.stringify(list || []));
+}
+function cloneItem(item) {
+    return JSON.parse(JSON.stringify(item || {}));
+}
+function changeCurr(index){
+    currentIndex.value = index;
+}
+function handleSelectModel () {
+    draftNavList.value = cloneList(conData.value.options.navList);
+    draftGoodsList.value = cloneList(conData.value.options.list);
+    showModal.value = true;
+}
+function handleSelectGoods(item) {
+    editTarget.value = item;
+    selected.value = cloneItem(item);
+    showGoodsModal.value = true;
+}
+function handleOpenGoodsPicker() {
+    liliDialog.value.open('goods', 'single');
+    setTimeout(() => {
+        liliDialog.value.goodsData = [selected.value];
+    }, 500);
+}
+function selectedGoodsData(val){
+    if (!val?.length) return;
+    const goods = val[0];
+    selected.value.img = goods.thumbnail;
+    selected.value.price = goods.price;
+    selected.value.name = goods.goodsName;
+    selected.value.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
+}
+function handleDelNav(index){
+    draftNavList.value.splice(index,1);
+    draftGoodsList.value.splice(index,1);
+}
+function handleAddNav(){
+    draftNavList.value.push({ title:'', desc:'' });
+    draftGoodsList.value.push([
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+        { img:'', name:'', price:0, url:'' },
+    ]);
+}
+function handleCancelModal() {
+    draftNavList.value = [];
+    draftGoodsList.value = [];
+    showModal.value = false;
+}
+function handleConfirmModal() {
+    conData.value.options.navList = cloneList(draftNavList.value);
+    conData.value.options.list = cloneList(draftGoodsList.value);
+    draftNavList.value = [];
+    draftGoodsList.value = [];
+    showContent.value = false;
+    nextTick(() => {
+        showContent.value = true;
+    });
+    showModal.value = false;
+}
+function handleCancelGoodsModal() {
+    editTarget.value = null;
+    selected.value = {};
+    showGoodsModal.value = false;
+}
+function handleConfirmGoodsModal() {
+    if (editTarget.value) {
+        Object.assign(editTarget.value, cloneItem(selected.value));
+    }
+    editTarget.value = null;
+    selected.value = {};
+    showGoodsModal.value = false;
 }
 </script>
 <style lang="scss" scoped>

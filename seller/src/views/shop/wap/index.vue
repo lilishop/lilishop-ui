@@ -74,162 +74,158 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, watch, onMounted, nextTick } from "vue";
+import { useRoute } from "vue-router";
 import { CircleClose } from "@element-plus/icons-vue";
 import templates from "./template/index";
 import Draggable from "vuedraggable";
 import { modelData } from "./config";
 import decorate from "./decorate";
 import * as API_Other from "@/api/other";
-export default {
-  components: {
-    Draggable,
-    decorate,
-    CircleClose,
+import { getStore } from "@/libs/storage";
+import { Modal } from "@/utils/message";
+import { useAppStore } from "@/stores/app";
+
+const route = useRoute();
+const appStore = useAppStore();
+
+// templates: 模板类型，modelData: 装修模型，均为 import 常量，模板中直接使用
+const qrcode = ref(""); // 二维码
+const selected = ref(0); // 已选下标
+const contentData = ref({
+  // 总数据
+  list: [],
+});
+const decorateData = ref(""); // 装修数据
+const decoratePromotionsData = ref(""); // 装修数据
+
+watch(
+  contentData,
+  (val) => {
+    appStore.styleStore = val;
   },
-  data() {
-    return {
-      templates, // 模板类型
-      modelData, // 装修模型
-      qrcode: "", // 二维码
-      selected: 0, // 已选下标
-      contentData: {
-        // 总数据
-        list: [],
-      },
-      decorateData: "", // 装修数据
-      decoratePromotionsData: "", // 装修数据
-    };
-  },
-  watch: {
-    contentData: {
-      handler(val) {
-        this.$store.state.styleStore = val;
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.init();
-  },
+  { deep: true }
+);
 
-  methods: {
-    getModelKey(model) {
-      return model.type || model.name;
-    },
-    getContentItemKey(element) {
-      return element.key || element.model || element.type;
-    },
-    cloneModel(model) {
-      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
-      const cloned = JSON.parse(JSON.stringify(model));
-      return {
-        ...cloned,
-        key,
-        model: cloned.type + "_" + key,
-      };
-    },
-    // 初始化数据
-    init() {
-      // 先读缓存，如果缓存有值则读缓存。
-      const cache = this.getStore('managerMobilePageCache')
-        if(cache){
-          this.$Modal.confirm({
-          title: '提示',
-          content: '获取到本地有缓存数据，是否使用缓存数据？',
-          okText: '使用',
-          cancelText: '取消',
-          onOk: () => {
-            const data = JSON.parse(cache);
-            this.contentData = data;
-          }
-        });
+onMounted(() => {
+  init();
+});
 
-        }
-      if (!this.$route.query.id) return false;
+function getModelKey(model) {
+  return model.type || model.name;
+}
+function getContentItemKey(element) {
+  return element.key || element.model || element.type;
+}
+function cloneModel(model) {
+  const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+  const cloned = JSON.parse(JSON.stringify(model));
+  return {
+    ...cloned,
+    key,
+    model: cloned.type + "_" + key,
+  };
+}
+// 初始化数据
+function init() {
+  // 先读缓存，如果缓存有值则读缓存。
+  const cache = getStore('managerMobilePageCache')
+    if(cache){
+      Modal.confirm({
+      title: '提示',
+      content: '获取到本地有缓存数据，是否使用缓存数据？',
+      okText: '使用',
+      cancelText: '取消',
+      onOk: () => {
+        const data = JSON.parse(cache);
+        contentData.value = data;
+      }
+    });
 
-      API_Other.getHomeData(this.$route.query.id).then((res) => {
-        this.contentData = JSON.parse(res.result.pageData);
+    }
+  if (!route.query.id) return false;
 
-        this.handleComponent(this.contentData.list[0], 0);
-      });
+  API_Other.getHomeData(route.query.id).then((res) => {
+    contentData.value = JSON.parse(res.result.pageData);
 
+    handleComponent(contentData.value.list[0], 0);
+  });
+
+}
+
+// 中间组件拖动，右侧数据绑定不变
+function handleContentlEnd(evt) {
+  const { newIndex } = evt;
+  handleComponent(contentData.value.list[newIndex], newIndex);
+}
+
+// 关闭楼层装修
+function closeComponent(index) {
+  nextTick(() => {
+    decorateData.value = "";
+
+    // 如果当前楼层不为一
+    if (contentData.value.list.length > 1) {
+      // 如果当前最底层 给下一层赋值
+
+      if (index - 1 == -1) {
+        handleComponent(contentData.value.list[index], index);
+      } else {
+        // 如果不是最底层给上一层赋值
+        handleComponent(contentData.value.list[index - 1], index - 1);
+      }
+      contentData.value.list.splice(index, 1);
+    } else {
+      contentData.value.list.splice(index, 1);
+    }
+  });
+}
+
+// 点击楼层装修
+function handleComponent(val, index) {
+  selected.value = index;
+  decorateData.value = val;
+}
+// 右侧栏回调
+function handleDrawer(val) {
+  const newIndex = selected.value;
+  decorateData.value = "";
+  contentData.value.list[newIndex] = {
+    ...val,
+    options: {
+      ...val.options,
     },
+    model: val.type,
+  };
+  contentData.value = JSON.parse(JSON.stringify(contentData.value));
+  decorateData.value = contentData.value.list[newIndex];
+}
 
-    // 中间组件拖动，右侧数据绑定不变
-    handleContentlEnd(evt) {
-      const { newIndex } = evt;
-      this.handleComponent(this.contentData.list[newIndex], newIndex);
+// 封装拖拽参数（原名 package，ESM 严格模式下为保留字，改名 packageModel）
+function packageModel(val, newIndex) {
+  contentData.value.list[newIndex] = "";
+  val = JSON.parse(JSON.stringify(val));
+  const key = val.key || Date.now() + "_" + Math.ceil(Math.random() * 99999);
+  contentData.value.list[newIndex] = {
+    ...val,
+    options: {
+      ...val.options,
     },
+    key,
+    model: val.model || val.type + "_" + key,
+  };
+}
+// 拖动
+function handleContentlAdd(evt) {
+  const { newIndex } = evt;
 
-    // 关闭楼层装修
-    closeComponent(index) {
-      this.$nextTick(() => {
-        this.decorateData = "";
-
-        // 如果当前楼层不为一
-        if (this.contentData.list.length > 1) {
-          // 如果当前最底层 给下一层赋值
-
-          if (index - 1 == -1) {
-            this.handleComponent(this.contentData.list[index], index);
-          } else {
-            // 如果不是最底层给上一层赋值
-            this.handleComponent(this.contentData.list[index - 1], index - 1);
-          }
-          this.contentData.list.splice(index, 1);
-        } else {
-          this.contentData.list.splice(index, 1);
-        }
-      });
-    },
-
-    // 点击楼层装修
-    handleComponent(val, index) {
-      this.selected = index;
-      this["decorateData"] = val;
-    },
-    // 右侧栏回调
-    handleDrawer(val) {
-      const newIndex = this.selected;
-      this.decorateData = "";
-      this.contentData.list[newIndex] = {
-        ...val,
-        options: {
-          ...val.options,
-        },
-        model: val.type,
-      };
-      this.contentData.list = JSON.parse(JSON.stringify(this.contentData.list));
-      this.decorateData = this.contentData.list[newIndex];
-    },
-
-    // 封装拖拽参数
-    package(val, newIndex) {
-      this.contentData.list[newIndex] = "";
-      val = JSON.parse(JSON.stringify(val));
-      const key = val.key || Date.now() + "_" + Math.ceil(Math.random() * 99999);
-      this.contentData.list[newIndex] = {
-        ...val,
-        options: {
-          ...val.options,
-        },
-        key,
-        model: val.model || val.type + "_" + key,
-      };
-    },
-    // 拖动
-    handleContentlAdd(evt) {
-      const { newIndex } = evt;
-
-      this.package(this.contentData.list[newIndex], newIndex);
-      this.handleComponent(this.contentData.list[newIndex], newIndex);
-    },
-    handleMove() {
-      return true;
-    },
-  },
-};
+  packageModel(contentData.value.list[newIndex], newIndex);
+  handleComponent(contentData.value.list[newIndex], newIndex);
+}
+function handleMove() {
+  return true;
+}
 </script>
 <style scoped lang="scss">
 @import "./style.scss";

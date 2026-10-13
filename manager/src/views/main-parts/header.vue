@@ -6,50 +6,46 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from "vue";
 import { getBaseSite } from "@/api/common.js";
 
-export default {
-  data() {
-    return {
-      domainLogo: "",
-    };
-  },
-  methods: {
-    applyFavicon(href) {
-      if (!href) return;
-      let link =
-        document.querySelector("link[rel*='icon']") ||
-        document.createElement("link");
-      link.type = "image/x-icon";
-      link.href = href;
-      link.rel = "shortcut icon";
-      document.getElementsByTagName("head")[0].appendChild(link);
-    },
-    getSite() {
-      getBaseSite().then((res) => {
-        if (res.success && res.result && res.result.settingValue) {
-          const { domainLogo, domainIcon, siteName } = JSON.parse(
-            res.result.settingValue
-          );
-          this.domainLogo = domainLogo || "";
-          const expirationTime = new Date().setHours(new Date().getHours() + 1);
-          localStorage.setItem("icontitle_expiration_time", expirationTime);
-          localStorage.setItem("icon", domainLogo || "");
-          localStorage.setItem("domainIcon", domainIcon || "");
-          localStorage.setItem("title", siteName || "");
-          this.applyFavicon(domainIcon || domainLogo);
-          if (siteName) {
-            window.document.title = siteName + " - 运营后台";
-          }
-        }
-      });
-    },
-  },
-  mounted() {
-    this.getSite();
-  },
-};
+const domainLogo = ref("");
+
+function applyFavicon(href) {
+  if (!href) return;
+  let link =
+    document.querySelector("link[rel*='icon']") ||
+    document.createElement("link");
+  link.type = "image/x-icon";
+  link.href = href;
+  link.rel = "shortcut icon";
+  document.getElementsByTagName("head")[0].appendChild(link);
+}
+
+function getSite() {
+  getBaseSite().then((res) => {
+    if (res.success && res.result && res.result.settingValue) {
+      const { domainLogo: logo, domainIcon, siteName } = JSON.parse(
+        res.result.settingValue
+      );
+      domainLogo.value = logo || "";
+      const expirationTime = new Date().setHours(new Date().getHours() + 1);
+      localStorage.setItem("icontitle_expiration_time", expirationTime);
+      localStorage.setItem("icon", logo || "");
+      localStorage.setItem("domainIcon", domainIcon || "");
+      localStorage.setItem("title", siteName || "");
+      applyFavicon(domainIcon || logo);
+      if (siteName) {
+        window.document.title = siteName + " - 运营后台";
+      }
+    }
+  });
+}
+
+onMounted(() => {
+  getSite();
+});
 </script>
 
 <style lang="scss" scoped>

@@ -149,11 +149,13 @@
       </template>
     </el-card>
 
-    <liliDialog ref="liliDialog" @selectedGoodsData="onGoodsSelected" />
+    <liliDialog ref="liliDialogRef" @selectedGoodsData="onGoodsSelected" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import liliDialog from "@/views/lili-dialog";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import {
@@ -164,179 +166,170 @@ import {
   submitDamageReport,
 } from "@/api/procurement";
 import { damageStatusText, damageStatusTag, formatMoney } from "../constants";
+import { Message } from "@/utils/message";
+import { customRouterPush } from "@/utils/filters";
 
-export default {
-  name: "procurement-damage-report-operation",
-  components: { liliDialog, uploadPicThumb },
-  data() {
-    return {
-      readonly: false,
-      submitLoading: false,
-      form: {
-        damageDate: "",
-        damageReasonId: "",
-        remark: "",
-        evidence: [],
-      },
-      items: [],
-      detail: {},
-      reasonOptions: [],
-      evidenceImageList: [],
-    };
-  },
-  computed: {
-    pageTitle() {
-      return this.readonly ? "报损单详情" : "新建报损单";
-    },
-    reasonText() {
-      const reason = this.reasonOptions.find((item) => item.id === this.detail.damageReasonId);
-      return reason ? reason.reason : "-";
-    },
-    totalQuantity() {
-      return this.items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-    },
-    totalAmount() {
-      return this.items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-    },
-  },
-  mounted() {
-    this.readonly = this.$route.query.readonly === "1" || !!this.$route.query.id;
-    this.loadReasons();
-    if (this.$route.query.id) {
-      this.loadDetail(this.$route.query.id);
+defineOptions({ name: "procurement-damage-report-operation" });
+
+const route = useRoute();
+
+const readonly = ref(false);
+const submitLoading = ref(false);
+const form = reactive({
+  damageDate: "",
+  damageReasonId: "",
+  remark: "",
+  evidence: [],
+});
+const items = ref([]);
+const detail = ref({});
+const reasonOptions = ref([]);
+const evidenceImageList = ref([]);
+const liliDialogRef = ref(null);
+
+const pageTitle = computed(() => (readonly.value ? "报损单详情" : "新建报损单"));
+const reasonText = computed(() => {
+  const reason = reasonOptions.value.find((item) => item.id === detail.value.damageReasonId);
+  return reason ? reason.reason : "-";
+});
+const totalQuantity = computed(() =>
+  items.value.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
+);
+const totalAmount = computed(() =>
+  items.value.reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
+);
+
+onMounted(() => {
+  readonly.value = route.query.readonly === "1" || !!route.query.id;
+  loadReasons();
+  if (route.query.id) {
+    loadDetail(route.query.id);
+  }
+});
+
+function loadReasons() {
+  getStockReasonList({ category: "DAMAGE", pageNumber: 1, pageSize: 100 }).then((res) => {
+    if (res.success) {
+      reasonOptions.value = res.result.records || [];
     }
-  },
-  methods: {
-    damageStatusText,
-    damageStatusTag,
-    formatMoney,
-    loadReasons() {
-      getStockReasonList({ category: "DAMAGE", pageNumber: 1, pageSize: 100 }).then((res) => {
-        if (res.success) {
-          this.reasonOptions = res.result.records || [];
-        }
-      });
-    },
-    recalcRow(row) {
-      row.amount = (Number(row.unitPrice) || 0) * (Number(row.quantity) || 0);
-    },
-    onQuantityBlur(row) {
-      const val = parseInt(row.quantity, 10);
-      row.quantity = Number.isNaN(val) || val < 1 ? 1 : val;
-      this.recalcRow(row);
-    },
-    onUnitPriceBlur(row) {
-      const val = parseFloat(row.unitPrice);
-      row.unitPrice = Number.isNaN(val) || val < 0 ? 0 : Math.round(val * 100) / 100;
-      this.recalcRow(row);
-    },
-    loadDetail(id) {
-      getDamageReportDetail(id).then((res) => {
-        if (res.success && res.result) {
-          this.detail = res.result;
-          this.form.damageDate = res.result.damageDate;
-          this.form.damageReasonId = res.result.damageReasonId;
-          this.form.remark = res.result.remark;
-          this.form.evidence = res.result.evidence;
-          this.evidenceImageList = this.parseEvidenceImages(res.result.evidence);
-        }
-      });
-      getDamageReportItems(id).then((res) => {
-        if (res.success) {
-          this.items = res.result || [];
-        }
-      });
-    },
-    parseEvidenceImages(val) {
-      if (!val) return [];
-      if (Array.isArray(val)) return val.filter(Boolean);
-      return String(val)
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    },
-    openSkuPicker() {
-      this.$refs.liliDialog.goodsData = this.items.map((item) => ({
-        id: item.skuId,
-        goodsId: item.goodsId,
-        goodsName: item.goodsName,
-        price: item.unitPrice,
-        cost: item.unitPrice,
-      }));
-      this.$refs.liliDialog.open("goods");
-    },
-    onGoodsSelected(selected) {
-      const map = new Map(this.items.map((item) => [item.skuId, item]));
-      this.items = selected.map((sku) => {
-        const existed = map.get(sku.id);
-        if (existed) return existed;
-        const unitPrice = sku.cost || sku.price || 0;
-        return {
-          goodsId: sku.goodsId,
-          skuId: sku.id,
-          goodsName: sku.goodsName,
-          quantity: 1,
-          unitPrice,
-          amount: unitPrice,
-        };
-      });
-    },
-    removeItem(index) {
-      this.items.splice(index, 1);
-    },
-    validateForm() {
-      if (!this.form.damageReasonId) {
-        this.$Message.warning("请选择报损原因");
-        return false;
-      }
-      if (!this.items.length) {
-        this.$Message.warning("请添加报损商品");
-        return false;
-      }
-      return true;
-    },
-    handleSave(andSubmit) {
-      if (!this.validateForm()) return;
-      this.submitLoading = true;
-      const payload = {
-        damageDate: this.form.damageDate || undefined,
-        damageReasonId: this.form.damageReasonId,
-        remark: this.form.remark,
-        evidence: Array.isArray(this.form.evidence)
-          ? this.form.evidence.join(",")
-          : this.form.evidence || "",
-        items: this.items.map((item) => ({
-          goodsId: item.goodsId,
-          skuId: item.skuId,
-          goodsName: item.goodsName,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-        })),
-      };
-      createDamageReport(payload)
-        .then((res) => {
-          if (!res.success) return;
-          const reportId = res.result.id;
-          if (andSubmit) {
-            return submitDamageReport(reportId).then((subRes) => {
-              if (subRes.success) {
-                this.$Message.success("保存并提交成功");
-                this.goBack();
-              }
-            });
+  });
+}
+function recalcRow(row) {
+  row.amount = (Number(row.unitPrice) || 0) * (Number(row.quantity) || 0);
+}
+function onQuantityBlur(row) {
+  const val = parseInt(row.quantity, 10);
+  row.quantity = Number.isNaN(val) || val < 1 ? 1 : val;
+  recalcRow(row);
+}
+function onUnitPriceBlur(row) {
+  const val = parseFloat(row.unitPrice);
+  row.unitPrice = Number.isNaN(val) || val < 0 ? 0 : Math.round(val * 100) / 100;
+  recalcRow(row);
+}
+function loadDetail(id) {
+  getDamageReportDetail(id).then((res) => {
+    if (res.success && res.result) {
+      detail.value = res.result;
+      form.damageDate = res.result.damageDate;
+      form.damageReasonId = res.result.damageReasonId;
+      form.remark = res.result.remark;
+      form.evidence = res.result.evidence;
+      evidenceImageList.value = parseEvidenceImages(res.result.evidence);
+    }
+  });
+  getDamageReportItems(id).then((res) => {
+    if (res.success) {
+      items.value = res.result || [];
+    }
+  });
+}
+function parseEvidenceImages(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  return String(val)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+function openSkuPicker() {
+  liliDialogRef.value.goodsData = items.value.map((item) => ({
+    id: item.skuId,
+    goodsId: item.goodsId,
+    goodsName: item.goodsName,
+    price: item.unitPrice,
+    cost: item.unitPrice,
+  }));
+  liliDialogRef.value.open("goods");
+}
+function onGoodsSelected(selected) {
+  const map = new Map(items.value.map((item) => [item.skuId, item]));
+  items.value = selected.map((sku) => {
+    const existed = map.get(sku.id);
+    if (existed) return existed;
+    const unitPrice = sku.cost || sku.price || 0;
+    return {
+      goodsId: sku.goodsId,
+      skuId: sku.id,
+      goodsName: sku.goodsName,
+      quantity: 1,
+      unitPrice,
+      amount: unitPrice,
+    };
+  });
+}
+function removeItem(index) {
+  items.value.splice(index, 1);
+}
+function validateForm() {
+  if (!form.damageReasonId) {
+    Message.warning("请选择报损原因");
+    return false;
+  }
+  if (!items.value.length) {
+    Message.warning("请添加报损商品");
+    return false;
+  }
+  return true;
+}
+function handleSave(andSubmit) {
+  if (!validateForm()) return;
+  submitLoading.value = true;
+  const payload = {
+    damageDate: form.damageDate || undefined,
+    damageReasonId: form.damageReasonId,
+    remark: form.remark,
+    evidence: Array.isArray(form.evidence) ? form.evidence.join(",") : form.evidence || "",
+    items: items.value.map((item) => ({
+      goodsId: item.goodsId,
+      skuId: item.skuId,
+      goodsName: item.goodsName,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+    })),
+  };
+  createDamageReport(payload)
+    .then((res) => {
+      if (!res.success) return;
+      const reportId = res.result.id;
+      if (andSubmit) {
+        return submitDamageReport(reportId).then((subRes) => {
+          if (subRes.success) {
+            Message.success("保存并提交成功");
+            goBack();
           }
-          this.$Message.success("保存成功");
-          this.goBack();
-        })
-        .finally(() => {
-          this.submitLoading = false;
         });
-    },
-    goBack() {
-      this.$filters.customRouterPush({ name: "procurementDamageReportList" });
-    },
-  },
-};
+      }
+      Message.success("保存成功");
+      goBack();
+    })
+    .finally(() => {
+      submitLoading.value = false;
+    });
+}
+function goBack() {
+  customRouterPush({ name: "procurementDamageReportList" });
+}
 </script>
 
 <style scoped>

@@ -84,76 +84,77 @@
     <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManage" />
+      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManageRef" />
     </el-dialog>
   </div>
 </template>
 
-<script>
+<script setup>
+import { getCurrentInstance, nextTick, onMounted, ref } from "vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
-export default {
-  name: "modelCarousel",
-  props: ["data"],
-  components: {
-    ossManage,
-  },
-  data() {
-    return {
-      showModal: false, // modal显隐
-      selected: null, // 已选数据
-      picModelFlag: false, // 选择图片modal
-      bgColor: "#fff", // 轮播背景色
-    };
-  },
-  mounted() {
-    this.bgColor = this.data.options.list[0].bgColor;
-  },
-  methods: {
-    handleSelectModel() {
-      // 编辑模块
-      this.showModal = true;
-    },
-    // 自动切换时改变背景色
-    autoChange(oVal, val) {
-      this.bgColor = this.data.options.list[val].bgColor;
-    },
-    // 添加轮播图片和链接
-    handleAdd() {
-      this.data.options.list.push({ img: "", url: "", bgColor: "#fff" });
-      this.$forceUpdate();
-    },
-    // 打开选择链接modal
-    handleSelectLink(item) {
-      this.$refs.liliDialog.open("link");
-      this.selected = item;
-    },
-    callbackSelected(item) {
-      // 选择图片回调
-      this.picModelFlag = false;
-      this.selected.img = item.url;
-    },
-    // 删除图片
-    handleDel(index) {
-      this.data.options.list.splice(index, 1);
-    },
-    selectedLink(val) {
-      // 选择链接回调
-      this.selected.url = this.$filters.formatLinkType(val);
-      this.selected.type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
-    },
-    // 打开选择图片modal
-    handleSelectImg(item) {
-      this.selected = item;
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-  },
-};
+import { formatLinkType } from "@/utils/filters";
+
+defineOptions({ name: "modelCarousel" });
+
+const props = defineProps(["data"]);
+
+const { proxy } = getCurrentInstance();
+
+const showModal = ref(false); // modal显隐
+const selected = ref(null); // 已选数据
+const picModelFlag = ref(false); // 选择图片modal
+const bgColor = ref("#fff"); // 轮播背景色
+
+const liliDialog = ref(null);
+const ossManageRef = ref(null);
+
+onMounted(() => {
+  bgColor.value = props.data.options.list[0].bgColor;
+});
+
+// 编辑模块
+function handleSelectModel() {
+  showModal.value = true;
+}
+// 自动切换时改变背景色
+function autoChange(oVal, val) {
+  bgColor.value = props.data.options.list[val].bgColor;
+}
+// 添加轮播图片和链接
+function handleAdd() {
+  props.data.options.list.push({ img: "", url: "", bgColor: "#fff" });
+  proxy.$forceUpdate();
+}
+// 打开选择链接modal
+function handleSelectLink(item) {
+  liliDialog.value.open("link");
+  selected.value = item;
+}
+// 选择图片回调
+function callbackSelected(item) {
+  picModelFlag.value = false;
+  selected.value.img = item.url;
+}
+// 删除图片
+function handleDel(index) {
+  props.data.options.list.splice(index, 1);
+}
+// 选择链接回调
+function selectedLink(val) {
+  selected.value.url = formatLinkType(val);
+  selected.value.type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+}
+// 打开选择图片modal
+function handleSelectImg(item) {
+  selected.value = item;
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
 </script>
 
 <style scoped lang="scss">

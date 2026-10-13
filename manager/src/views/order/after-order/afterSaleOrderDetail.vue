@@ -332,185 +332,184 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import * as API_Order from "@/api/order";
 import vueQr from "vue-qr";
 import { ElMessage, ElMessageBox } from "element-plus";
-export default {
-  components: {
-    "vue-qr": vueQr,
-  },
-  name: "orderDetail",
-  data() {
-    return {
-      sn: "", // 订单号
-      logisticsModal: false, //查询物流模态框
 
-      logisticsInfo: {}, //物流信息
-      afterSaleInfo: {}, // 售后信息
-      afterSaleImage: [], //会员申诉图片
-      submitLoading: false, // 添加或编辑提交状态
-      storeMsg: {}, // 商家地址信息
-      //商家处理意见
-      params: {
-        serviceStatus: "PASS",
-        remark: "",
-      },
-      //平台退款
-      refundPriceForm: {
-        remark: "",
-      },
-      afterSaleStatusList: [
-        // 售后状态列表
-        {
-          name: "申请中",
-          status: "APPLY",
-        },
-        {
-          name: "通过售后",
-          status: "PASS",
-        },
-        {
-          name: "拒绝售后",
-          status: "REFUSE",
-        },
-        {
-          name: "买家退货，待卖家收货",
-          status: "BUYER_RETURN",
-        },
-        {
-          name: "卖家确认收货",
-          status: "SELLER_CONFIRM",
-        },
-        {
-          name: "卖家终止售后",
-          status: "SELLER_TERMINATION",
-        },
-        {
-          name: "买家取消售后",
-          status: "BUYER_CANCEL",
-        },
-        {
-          name: "完成售后",
-          status: "COMPLETE",
-        },
-        {
-          name: "待平台退款",
-          status: "WAIT_REFUND",
-        },
-      ],
-    };
+defineOptions({ name: "orderDetail" });
+
+const route = useRoute();
+
+const sn = ref(""); // 订单号
+const logisticsModal = ref(false); //查询物流模态框
+
+const logisticsInfo = ref({}); //物流信息
+const afterSaleInfo = ref({}); // 售后信息
+const afterSaleImage = ref([]); //会员申诉图片
+const submitLoading = ref(false); // 添加或编辑提交状态
+const storeMsg = ref({}); // 商家地址信息
+// 原代码未在 data 声明、直接挂 this 上的字段，补声明避免 ReferenceError
+let loading = false;
+//商家处理意见
+const params = reactive({
+  serviceStatus: "PASS",
+  remark: "",
+});
+//平台退款
+const refundPriceForm = reactive({
+  remark: "",
+});
+const afterSaleStatusList = ref([
+  // 售后状态列表
+  {
+    name: "申请中",
+    status: "APPLY",
   },
-  methods: {
-    // 获取售后详情
-    getDetail() {
-      this.loading = true;
-      API_Order.getAfterSaleOrderDetail(this.sn).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.afterSaleInfo = res.result;
-          this.afterSaleInfo.showDelivery = this.showDelivery(
-            this.afterSaleInfo.serviceStatus
-          );
-          this.afterSaleInfo.serviceName = this.filterOrderStatus(
-            this.afterSaleInfo.serviceStatus
-          );
-          this.afterSaleImage = (res.result.afterSaleImage || "").split(",");
-          //退货地址去掉逗号
-          if (this.afterSaleInfo.mconsigneeAddressPath)
-            this.afterSaleInfo.mconsigneeAddressPath = this.afterSaleInfo.mconsigneeAddressPath.replaceAll(
+  {
+    name: "通过售后",
+    status: "PASS",
+  },
+  {
+    name: "拒绝售后",
+    status: "REFUSE",
+  },
+  {
+    name: "买家退货，待卖家收货",
+    status: "BUYER_RETURN",
+  },
+  {
+    name: "卖家确认收货",
+    status: "SELLER_CONFIRM",
+  },
+  {
+    name: "卖家终止售后",
+    status: "SELLER_TERMINATION",
+  },
+  {
+    name: "买家取消售后",
+    status: "BUYER_CANCEL",
+  },
+  {
+    name: "完成售后",
+    status: "COMPLETE",
+  },
+  {
+    name: "待平台退款",
+    status: "WAIT_REFUND",
+  },
+]);
+
+// 获取售后详情
+function getDetail() {
+  loading = true;
+  API_Order.getAfterSaleOrderDetail(sn.value).then((res) => {
+    loading = false;
+    if (res.success) {
+      afterSaleInfo.value = res.result;
+      afterSaleInfo.value.showDelivery = showDelivery(
+        afterSaleInfo.value.serviceStatus
+      );
+      afterSaleInfo.value.serviceName = filterOrderStatus(
+        afterSaleInfo.value.serviceStatus
+      );
+      afterSaleImage.value = (res.result.afterSaleImage || "").split(",");
+      //退货地址去掉逗号
+      if (afterSaleInfo.value.mconsigneeAddressPath)
+        afterSaleInfo.value.mconsigneeAddressPath = afterSaleInfo.value.mconsigneeAddressPath.replaceAll(
+          ",",
+          " "
+        );
+
+      params.actualRefundPrice = afterSaleInfo.value.applyRefundPrice;
+      // 如果显示物流信息，展示商家地址
+      if (afterSaleInfo.value.showDelivery) {
+        API_Order.storeAddress(sn.value).then((resu) => {
+          if (resu.success) {
+            const obj = resu.result;
+            obj.salesConsigneeAddressPath = obj.salesConsigneeAddressPath.replaceAll(
               ",",
-              " "
+              ""
             );
-
-          this.params.actualRefundPrice = this.afterSaleInfo.applyRefundPrice;
-          // 如果显示物流信息，展示商家地址
-          if (this.afterSaleInfo.showDelivery) {
-            API_Order.storeAddress(this.sn).then((resu) => {
-              if (resu.success) {
-                const obj = resu.result;
-                obj.salesConsigneeAddressPath = obj.salesConsigneeAddressPath.replaceAll(
-                  ",",
-                  ""
-                );
-                this.storeMsg = obj;
-              }
-            });
-          }
-        }
-      });
-    },
-    //平台退款
-    refundPriceSubmit() {
-      if (this.refundPriceForm.remark == "") {
-        ElMessage.error("请输入退款备注");
-        return;
-      }
-      ElMessageBox.confirm("请确认退款？", "确认退款", { type: "warning" }).then(() => {
-        API_Order.refundPrice(this.sn, this.refundPriceForm).then((res) => {
-          if (res.success) {
-            ElMessage.success("收款成功");
-            this.getDetail();
+            storeMsg.value = obj;
           }
         });
-      }).catch(() => {});
-    },
-    //查询物流
-    logisticsSeller() {
-      this.logisticsModal = true;
-      API_Order.getAfterSaleTraces(this.sn).then((res) => {
-        if (res.success && res.result != null) {
-          this.logisticsInfo = res.result;
-        }
-      });
-    },
-    //关闭物流弹出框
-    logisticsClose() {
-      this.logisticsModal = false;
-    },
-    //回复
-    handleSubmit() {
-      if (this.params.remark == "") {
-        ElMessage.error("请输入备注信息");
-        return;
       }
-      if (this.params.actualRefundPrice == "") {
-        ElMessage.error("请输入退款金额");
-        return;
+    }
+  });
+}
+//平台退款
+function refundPriceSubmit() {
+  if (refundPriceForm.remark == "") {
+    ElMessage.error("请输入退款备注");
+    return;
+  }
+  ElMessageBox.confirm("请确认退款？", "确认退款", { type: "warning" }).then(() => {
+    API_Order.refundPrice(sn.value, refundPriceForm).then((res) => {
+      if (res.success) {
+        ElMessage.success("收款成功");
+        getDetail();
       }
-      API_Order.afterSaleSellerReview(this.sn, this.params).then((res) => {
-        this.submitLoading = false;
-        if (res.success) {
-          ElMessage.success("审核成功");
-          this.params.remark = "";
-          this.getDetail();
-        }
-      });
-    },
-    filterOrderStatus(status) {
-      // 获取订单状态中文
-      const ob = this.afterSaleStatusList.filter((e) => {
-        return e.status === status;
-      });
-      return ob.length > 0 ? ob[0].name : status;
-    },
-    // 根据订单状态判断是否显示物流信息
-    showDelivery(status) {
-      let flag = false;
-      this.afterSaleStatusList.forEach((e, index) => {
-        // 订单为买家退货，待卖家收货之后的状态，并且不是买家取消售后，展示物流信息
-        if (e.status === status && index >= 3 && index !== 6) {
-          flag = true;
-        }
-      });
-      return flag;
-    },
-  },
-  mounted() {
-    this.sn = this.$route.query.sn;
-    this.getDetail();
-  },
-};
+    });
+  }).catch(() => {});
+}
+//查询物流
+function logisticsSeller() {
+  logisticsModal.value = true;
+  API_Order.getAfterSaleTraces(sn.value).then((res) => {
+    if (res.success && res.result != null) {
+      logisticsInfo.value = res.result;
+    }
+  });
+}
+//关闭物流弹出框
+function logisticsClose() {
+  logisticsModal.value = false;
+}
+//回复
+function handleSubmit() {
+  if (params.remark == "") {
+    ElMessage.error("请输入备注信息");
+    return;
+  }
+  if (params.actualRefundPrice == "") {
+    ElMessage.error("请输入退款金额");
+    return;
+  }
+  API_Order.afterSaleSellerReview(sn.value, params).then((res) => {
+    submitLoading.value = false;
+    if (res.success) {
+      ElMessage.success("审核成功");
+      params.remark = "";
+      getDetail();
+    }
+  });
+}
+function filterOrderStatus(status) {
+  // 获取订单状态中文
+  const ob = afterSaleStatusList.value.filter((e) => {
+    return e.status === status;
+  });
+  return ob.length > 0 ? ob[0].name : status;
+}
+// 根据订单状态判断是否显示物流信息
+function showDelivery(status) {
+  let flag = false;
+  afterSaleStatusList.value.forEach((e, index) => {
+    // 订单为买家退货，待卖家收货之后的状态，并且不是买家取消售后，展示物流信息
+    if (e.status === status && index >= 3 && index !== 6) {
+      flag = true;
+    }
+  });
+  return flag;
+}
+
+onMounted(() => {
+  sn.value = route.query.sn;
+  getDetail();
+});
 </script>
 <style lang="scss">
 .main-content {

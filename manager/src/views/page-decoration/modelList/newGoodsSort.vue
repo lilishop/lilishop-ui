@@ -242,125 +242,123 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, nextTick } from "vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
-export default {
-  props: {
-    data: {
-      type: Object,
-      default: null,
-    },
+import { formatLinkType } from "@/utils/filters";
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default: null,
   },
-  components: {
-    ossManage,
-  },
-  data() {
-    return {
-      options: this.data.options, // 当前数据
-      showModal: false, // modal显隐
-      showModal1: false, // modal显隐
-      selected: {}, // 弹窗编辑草稿
-      editTarget: null, // 确认后写回的原数据
-      picModelFlag: false, // 选择图片modal
-    };
-  },
-  methods: {
-    cloneItem(item) {
-      return JSON.parse(JSON.stringify(item || {}));
-    },
-    // 装修modal
-    handleSelectModel(item, type) {
-      this.editTarget = item;
-      this.selected = this.cloneItem(item);
-      if (type) {
-        this.showModal1 = true;
-      } else {
-        this.showModal = true;
-      }
-    },
-    handleSelectLink() {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-    },
-    handleSelectGoods(item) {
-      if (item) {
-        this.editTarget = item;
-        this.selected = this.cloneItem(item);
-      }
-      this.$refs.liliDialog.open("goods", "single");
-      setTimeout(() => {
-        this.$refs.liliDialog.goodsData = [this.selected];
-      }, 500);
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      if (!this.selected) return;
-      this.selected.url = this.$filters.formatLinkType(val);
-      this.selected.type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      if (!val?.length || !this.selected) return;
-      const goods = val[0];
-      this.selected.img = goods.thumbnail;
-      this.selected.price = goods.price;
-      this.selected.name = goods.goodsName;
-      this.selected.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
-      if (this.editTarget && !this.showModal && !this.showModal1) {
-        Object.assign(this.editTarget, this.cloneItem(this.selected));
-        this.editTarget = null;
-        this.selected = {};
-      }
-    },
-    handleSelectImg() {
-      // 选择图片
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    // 选择图片回显
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url) return;
-      this.selected.img = val.url;
-    },
-    handleCancelModal() {
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal = false;
-    },
-    handleConfirmModal() {
-      if (this.editTarget) {
-        Object.assign(this.editTarget, this.cloneItem(this.selected));
-      }
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal = false;
-    },
-    handleCancelModal1() {
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal1 = false;
-    },
-    handleConfirmModal1() {
-      if (this.editTarget) {
-        Object.assign(this.editTarget, this.cloneItem(this.selected));
-      }
-      this.editTarget = null;
-      this.selected = {};
-      this.showModal1 = false;
-    },
-  },
-};
+});
+
+const options = ref(props.data.options); // 当前数据
+const showModal = ref(false); // modal显隐
+const showModal1 = ref(false); // modal显隐
+const selected = ref({}); // 弹窗编辑草稿
+const editTarget = ref(null); // 确认后写回的原数据
+const picModelFlag = ref(false); // 选择图片modal
+
+// ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
+const liliDialog = ref(null);
+const ossManageRef = ref(null);
+
+function cloneItem(item) {
+  return JSON.parse(JSON.stringify(item || {}));
+}
+// 装修modal
+function handleSelectModel(item, type) {
+  editTarget.value = item;
+  selected.value = cloneItem(item);
+  if (type) {
+    showModal1.value = true;
+  } else {
+    showModal.value = true;
+  }
+}
+function handleSelectLink() {
+  // 调起选择链接弹窗
+  liliDialog.value.open("link");
+}
+function handleSelectGoods(item) {
+  if (item) {
+    editTarget.value = item;
+    selected.value = cloneItem(item);
+  }
+  liliDialog.value.open("goods", "single");
+  setTimeout(() => {
+    liliDialog.value.goodsData = [selected.value];
+  }, 500);
+}
+// 选择链接回调
+function selectedLink(val) {
+  if (!selected.value) return;
+  selected.value.url = formatLinkType(val);
+  selected.value.type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+}
+// 选择商品回调
+function selectedGoodsData(val) {
+  if (!val?.length || !selected.value) return;
+  const goods = val[0];
+  selected.value.img = goods.thumbnail;
+  selected.value.price = goods.price;
+  selected.value.name = goods.goodsName;
+  selected.value.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
+  if (editTarget.value && !showModal.value && !showModal1.value) {
+    Object.assign(editTarget.value, cloneItem(selected.value));
+    editTarget.value = null;
+    selected.value = {};
+  }
+}
+function handleSelectImg() {
+  // 选择图片
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+// 选择图片回显
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url) return;
+  selected.value.img = val.url;
+}
+function handleCancelModal() {
+  editTarget.value = null;
+  selected.value = {};
+  showModal.value = false;
+}
+function handleConfirmModal() {
+  if (editTarget.value) {
+    Object.assign(editTarget.value, cloneItem(selected.value));
+  }
+  editTarget.value = null;
+  selected.value = {};
+  showModal.value = false;
+}
+function handleCancelModal1() {
+  editTarget.value = null;
+  selected.value = {};
+  showModal1.value = false;
+}
+function handleConfirmModal1() {
+  if (editTarget.value) {
+    Object.assign(editTarget.value, cloneItem(selected.value));
+  }
+  editTarget.value = null;
+  selected.value = {};
+  showModal1.value = false;
+}
 </script>
 <style lang="scss" scoped>
 @import "./setup-box.scss";

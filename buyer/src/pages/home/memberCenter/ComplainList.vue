@@ -58,72 +58,75 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
-import {complainList, clearComplain} from '@/api/member.js';
-export default {
-  name: 'ComplainList',
-  data () {
-    return {
-      loading: false, // 加载状态
-      list: [], // 投诉列表
-      statusLabel: { // 投诉状态
-        NO_APPLY: '未申请',
-        APPLYING: '申请中',
-        COMPLETE: '已完成',
-        EXPIRED: '已失效',
-        CANCEL: '已取消',
-        NEW: '新订单'
-      },
-      total: 0, // 投诉总数
-      params: { // 请求参数
-        pageNumber: 1,
-        pageSize: 20
-      }
-    };
-  },
-  mounted () {
-    this.getList()
-  },
-  methods: {
-    getList () { // 获取投诉列表
-      complainList(this.params).then(res => {
+import { complainList, clearComplain } from '@/api/member.js';
+
+defineOptions({ name: 'ComplainList' });
+
+const router = useRouter();
+
+const loading = ref(false); // 加载状态
+const list = ref([]); // 投诉列表
+const statusLabel = { // 投诉状态
+  NO_APPLY: '未申请',
+  APPLYING: '申请中',
+  COMPLETE: '已完成',
+  EXPIRED: '已失效',
+  CANCEL: '已取消',
+  NEW: '新订单'
+};
+const total = ref(0); // 投诉总数
+const params = reactive({ // 请求参数
+  pageNumber: 1,
+  pageSize: 20
+});
+
+function getList() { // 获取投诉列表
+  complainList(params).then(res => {
+    if (res.success) {
+      list.value = res.result.records;
+      total.value = res.result.total
+    }
+  })
+}
+
+function changePageNum(val) { // 改变页码
+  params.pageNumber = val;
+  getList()
+}
+
+function changePageSize(val) { // 改变页数
+  params.pageNumber = 1;
+  params.pageSize = val;
+  getList()
+}
+
+function cancel(id) { // 取消投诉
+  Modal.confirm({
+    title: '取消投诉',
+    content: '确定取消投诉吗？',
+    onOk: () => {
+      clearComplain(id).then((res) => {
         if (res.success) {
-          const list = res.result.records;
-          this.list = list;
-          this.total = res.result.total
+          Message.success('取消投诉成功');
+          getList();
         }
-      })
-    },
-    changePageNum (val) { // 改变页码
-      this.params.pageNumber = val;
-      this.getList()
-    },
-    changePageSize (val) { // 改变页数
-      this.params.pageNumber = 1;
-      this.params.pageSize = val;
-      this.getList()
-    },
-    cancel (id) { // 取消投诉
-      Modal.confirm({
-        title: '取消投诉',
-        content: '确定取消投诉吗？',
-        onOk: () => {
-          clearComplain(id).then((res) => {
-            if (res.success) {
-              Message.success('取消投诉成功');
-              this.getList();
-            }
-          });
-        },
-        onCancel: () => { }
       });
     },
-    goDetail (id) { // 跳转投诉详情
-      this.$router.push({path: '/home/complainDetail', query: { id }})
-    }
-  }
-};
+    onCancel: () => { }
+  });
+}
+
+function goDetail(id) { // 跳转投诉详情
+  router.push({ path: '/home/complainDetail', query: { id } })
+}
+
+onMounted(() => {
+  getList()
+});
 </script>
 
 <style scoped lang="scss">

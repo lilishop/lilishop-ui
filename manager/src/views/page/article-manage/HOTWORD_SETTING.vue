@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <el-form
-      ref="formValidate"
+      ref="formValidateRef"
       label-width="150px"
       label-position="right"
       :model="formValidate"
@@ -42,68 +42,67 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import { setSetting } from "@/api/index";
+import { Message } from "@/utils/message";
 
-export default {
-  props: ["res", "type"],
-  data() {
-    return {
-      ruleValidate: {},
-      formValidate: {
-        saveNum: 1,
-        hotWordsSettingItems: [
-          {
-            keywords: "",
-            score: 1,
-          },
-        ],
-      },
-    };
-  },
-  created() {
-    this.init();
-  },
-  methods: {
-    addSetItem() {
-      if (this.formValidate.hotWordsSettingItems.length >= 5) {
-        this.$Message.error("最多5个热词项");
-      } else {
-        this.formValidate.hotWordsSettingItems.push({
-          keywords: "",
-          score: 1,
-        });
-      }
+const props = defineProps(["res", "type"]);
+
+const formValidateRef = ref(null);
+// 动态 $refs[name] 查找的映射表
+const formRefs = { formValidate: formValidateRef };
+
+const ruleValidate = ref({});
+const formValidate = ref({
+  saveNum: 1,
+  hotWordsSettingItems: [
+    {
+      keywords: "",
+      score: 1,
     },
-    submit(name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          this.setupSetting();
-        } else {
-          this.$Message.error("请正确填写内容!");
-        }
-      });
-    },
-    setupSetting() {
-      setSetting(this.type || "HOT_WORDS", this.formValidate).then((res) => {
-        if (res.success) {
-          this.$Message.success("保存成功!");
-        } else {
-          this.$Message.error("保存失败!");
-        }
-      });
-    },
-    init() {
-      if (!this.res) {
-        return;
-      }
-      const parsed = typeof this.res === "string" ? JSON.parse(this.res) : this.res;
-      if (parsed.hotWordsSettingItems) {
-        this.formValidate = { ...parsed };
-      }
-    },
-  },
-};
+  ],
+});
+
+init();
+
+function addSetItem() {
+  if (formValidate.value.hotWordsSettingItems.length >= 5) {
+    Message.error("最多5个热词项");
+  } else {
+    formValidate.value.hotWordsSettingItems.push({
+      keywords: "",
+      score: 1,
+    });
+  }
+}
+function submit(name) {
+  formRefs[name].value.validate((valid) => {
+    if (valid) {
+      setupSetting();
+    } else {
+      Message.error("请正确填写内容!");
+    }
+  });
+}
+function setupSetting() {
+  setSetting(props.type || "HOT_WORDS", formValidate.value).then((res) => {
+    if (res.success) {
+      Message.success("保存成功!");
+    } else {
+      Message.error("保存失败!");
+    }
+  });
+}
+function init() {
+  if (!props.res) {
+    return;
+  }
+  const parsed = typeof props.res === "string" ? JSON.parse(props.res) : props.res;
+  if (parsed.hotWordsSettingItems) {
+    formValidate.value = { ...parsed };
+  }
+}
 </script>
 
 <style lang="scss" scoped>

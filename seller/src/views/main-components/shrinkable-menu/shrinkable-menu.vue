@@ -33,71 +33,77 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import util, { HOME_NAV_NAME, HOME_NAV_ITEM } from "@/libs/util.js";
+import { setStore } from "@/libs/storage";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "shrinkableMenu",
-  computed: {
-    menuList() {
-      return this.$store.state.app.menuList;
-    },
-    navList() {
-      return this.$store.state.app.navList;
-    },
-    currNav() {
-      return this.$store.state.app.currNav;
-    },
-  },
-  watch: {
-    $route(val) {
-      this.syncRouteMenu(val);
-    },
-  },
-  methods: {
-    syncRouteMenu(route) {
-      if (!route?.name) {
-        return;
-      }
-      if (route.name === "home_index") {
-        this.activateHomeNav();
-        return;
-      }
-      const firstRouterName =
-        route.meta?.firstRouterName || util.getFirstRouterName(route.name);
-      if (firstRouterName && firstRouterName !== this.currNav) {
-        this.selectNav(firstRouterName);
-      }
-    },
-    activateHomeNav() {
-      this.$store.commit("setCurrNav", HOME_NAV_NAME);
-      this.$store.commit("setCurrNavTitle", HOME_NAV_ITEM.title);
-      this.setStore("currNav", HOME_NAV_NAME);
-      this.$store.commit("updateMenulist", []);
-    },
-    changeMenu(name) {
-      if (!name) return;
-      this.$router.push({ name });
-    },
-    selectNav(name) {
-      this.$store.commit("childrenMenu", this.$refs.childrenMenu);
-      this.$store.commit("setCurrNav", name);
-      this.setStore("currNav", name);
-      if (name === HOME_NAV_NAME) {
-        this.$store.commit("updateMenulist", []);
-        this.$store.commit("setCurrNavTitle", HOME_NAV_ITEM.title);
-        if (this.$route.name !== "home_index") {
-          this.$router.push({ name: "home_index" });
-        }
-        return;
-      }
-      util.initRouter(this);
-    },
-  },
-  mounted() {
-    this.syncRouteMenu(this.$route);
-  },
-};
+defineOptions({ name: "shrinkableMenu" });
+
+const appStore = useAppStore();
+const route = useRoute();
+const router = useRouter();
+
+const childrenMenu = ref(null);
+
+const menuList = computed(() => appStore.menuList);
+const navList = computed(() => appStore.navList);
+const currNav = computed(() => appStore.currNav);
+
+watch(
+  () => route.name,
+  () => {
+    syncRouteMenu(route);
+  }
+);
+
+function syncRouteMenu(route) {
+  if (!route?.name) {
+    return;
+  }
+  if (route.name === "home_index") {
+    activateHomeNav();
+    return;
+  }
+  const firstRouterName =
+    route.meta?.firstRouterName || util.getFirstRouterName(route.name);
+  if (firstRouterName && firstRouterName !== currNav.value) {
+    selectNav(firstRouterName);
+  }
+}
+
+function activateHomeNav() {
+  appStore.setCurrNav(HOME_NAV_NAME);
+  appStore.setCurrNavTitle(HOME_NAV_ITEM.title);
+  setStore("currNav", HOME_NAV_NAME);
+  appStore.updateMenulist([]);
+}
+
+function changeMenu(name) {
+  if (!name) return;
+  router.push({ name });
+}
+
+function selectNav(name) {
+  appStore.childrenMenu(childrenMenu.value);
+  appStore.setCurrNav(name);
+  setStore("currNav", name);
+  if (name === HOME_NAV_NAME) {
+    appStore.updateMenulist([]);
+    appStore.setCurrNavTitle(HOME_NAV_ITEM.title);
+    if (route.name !== "home_index") {
+      router.push({ name: "home_index" });
+    }
+    return;
+  }
+  util.initRouter();
+}
+
+onMounted(() => {
+  syncRouteMenu(route);
+});
 </script>
 
 <style lang="scss" scoped>

@@ -27,65 +27,61 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getTimedTaskList, triggerTimedTask } from "@/api/timedTask.js";
 
-export default {
-  name: "timed-task-manage",
-  data() {
-    return {
-      loading: false,
-      activeTab: "每日任务",
-      taskList: [],
-    };
-  },
-  computed: {
-    currentTasks() {
-      return this.taskList.filter((t) => t.group === this.activeTab);
-    },
-  },
-  methods: {
-    init() {
-      this.loading = true;
-      getTimedTaskList()
+defineOptions({ name: "timed-task-manage" });
+
+const loading = ref(false);
+const activeTab = ref("每日任务");
+const taskList = ref([]);
+
+const currentTasks = computed(() => {
+  return taskList.value.filter((t) => t.group === activeTab.value);
+});
+
+function init() {
+  loading.value = true;
+  getTimedTaskList()
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        taskList.value = res.result.map((t) => ({ ...t, triggering: false }));
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+function handleTrigger(row) {
+  ElMessageBox.confirm(`确认要手动触发 "${row.name}" 吗？`, "提示", {
+    confirmButtonText: "确认",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      row.triggering = true;
+      triggerTimedTask(row.id)
         .then((res) => {
-          this.loading = false;
+          row.triggering = false;
           if (res.success) {
-            this.taskList = res.result.map((t) => ({ ...t, triggering: false }));
+            ElMessage.success(`"${row.name}" 已触发执行`);
+          } else {
+            ElMessage.error(res.message || "触发失败");
           }
         })
         .catch(() => {
-          this.loading = false;
+          row.triggering = false;
+          ElMessage.error("触发失败");
         });
-    },
-    handleTrigger(row) {
-      ElMessageBox.confirm(`确认要手动触发 "${row.name}" 吗？`, "提示", {
-        confirmButtonText: "确认",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          row.triggering = true;
-          triggerTimedTask(row.id)
-            .then((res) => {
-              row.triggering = false;
-              if (res.success) {
-                ElMessage.success(`"${row.name}" 已触发执行`);
-              } else {
-                ElMessage.error(res.message || "触发失败");
-              }
-            })
-            .catch(() => {
-              row.triggering = false;
-              ElMessage.error("触发失败");
-            });
-        })
-        .catch(() => {});
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .catch(() => {});
+}
+
+onMounted(() => {
+  init();
+});
 </script>

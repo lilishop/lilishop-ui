@@ -12,7 +12,7 @@
           <div class="title">{{ currMenu }}</div>
           <div>
             <div v-show="currMenu=='基本信息'">
-              <el-form ref="userForm" :model="userForm" label-width="90px" label-position="left">
+              <el-form ref="userFormRef" :model="userForm" label-width="90px" label-position="left">
                 <el-form-item label="用户头像：">
                   <upload-pic-thumb
                     v-model="userForm.avatar"
@@ -55,78 +55,81 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import {
   userInfoEdit,
 } from "@/api/index";
 import uploadPicThumb from "@/components/lili/upload-pic-thumb";
 import Cookies from "js-cookie";
 import util from "@/libs/util";
+import { Message } from "@/utils/message";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  components: {
-    uploadPicThumb
-  },
-  name: "personal-enter",
-  data() {
-    return {
-      activeName: "基本信息", // 激活的tab
-      userForm: { // 用户信息
-        avatar: "",
-        nickname: ""
-      },
-      saveLoading:false,//loading 状态
-      currMenu: "基本信息" // 当前菜单
-    };
-  },
-  methods: {
-    // 初始化数据
-    init() {
-      let v = JSON.parse(Cookies.get("userInfoManager"));
-      // 转换null为""
-      for (let attr in v) {
-        if (v[attr] == null) {
-          v[attr] = "";
-        }
-      }
-      let userInfo = JSON.parse(JSON.stringify(v));
-      this.userForm = userInfo;
-    },
-    // 跳转修改密码页面
-    changePassword() {
-      util.openNewPage(this, "change-password");
-      this.$router.push({
-        name: "change_password"
-      });
-    },
-    // 左侧菜单点击
-    changeMenu(v) {
-      this.currMenu = v;
-    },
-    // 保存
-    saveEdit() {
-      this.saveLoading = true;
-      let params = this.userForm;
-      userInfoEdit(params).then(res => {
-        this.saveLoading = false;
-        if (res.success) {
-          this.$Message.success("保存成功");
-          // 更新用户信息
-          Cookies.set("userInfoManager", JSON.stringify(this.userForm));
-          // 更新头像
-          this.$store.commit("setAvatarPath", this.userForm.avatar);
-          setTimeout(()=>{
-            this.$router.go(0)
-          },500)
+defineOptions({ name: "personal-enter" });
 
-        }
-      });
-    },
-  },
-  mounted() {
-    this.init();
+const router = useRouter();
+const appStore = useAppStore();
+
+const userFormRef = ref(null);
+const activeName = ref("基本信息"); // 激活的tab
+const userForm = ref({ // 用户信息
+  avatar: "",
+  nickname: ""
+});
+const saveLoading = ref(false); //loading 状态
+const currMenu = ref("基本信息"); // 当前菜单
+
+// 初始化数据
+function init() {
+  let v = JSON.parse(Cookies.get("userInfoManager"));
+  // 转换null为""
+  for (let attr in v) {
+    if (v[attr] == null) {
+      v[attr] = "";
+    }
   }
-};
+  let userInfo = JSON.parse(JSON.stringify(v));
+  userForm.value = userInfo;
+}
+
+// 跳转修改密码页面
+function changePassword() {
+  util.openNewPage("change-password");
+  router.push({
+    name: "change_password"
+  });
+}
+
+// 左侧菜单点击
+function changeMenu(v) {
+  currMenu.value = v;
+}
+
+// 保存
+function saveEdit() {
+  saveLoading.value = true;
+  let params = userForm.value;
+  userInfoEdit(params).then(res => {
+    saveLoading.value = false;
+    if (res.success) {
+      Message.success("保存成功");
+      // 更新用户信息
+      Cookies.set("userInfoManager", JSON.stringify(userForm.value));
+      // 更新头像
+      appStore.setAvatarPath(userForm.value.avatar);
+      setTimeout(()=>{
+        router.go(0)
+      },500)
+
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
   .own-space {

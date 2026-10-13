@@ -27,45 +27,44 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
 
-export default {
-  name: "shop-finance-summary",
-  data() {
-    return {
-      dateRange: [],
-      summary: null,
-    };
-  },
-  mounted() {
-    this.loadData();
-  },
-  methods: {
-    buildParams() {
-      const p = {};
-      if (this.dateRange?.length === 2) {
-        p.startDate = this.dateRange[0];
-        p.endDate = this.dateRange[1];
-      }
-      return p;
-    },
-    loadData() {
-      API_Finance.getStoreSummary(this.buildParams()).then((res) => {
-        if (res.success) this.summary = res.result;
-      });
-    },
-    handleExport() {
-      API_Finance.exportStoreSummary(this.buildParams()).then((blob) => {
-        downloadBlob(blob, "店铺周期汇总.xlsx");
-      });
-    },
-    exportFlow() {
-      API_Finance.exportStoreFlow(this.buildParams()).then((blob) => {
-        downloadBlob(blob, "店铺流水.xlsx");
-      });
-    },
-  },
-};
+defineOptions({ name: "shop-finance-summary" });
+
+const dateRange = ref([]);
+const summary = ref(null);
+
+onMounted(() => {
+  loadData();
+});
+
+function buildParams() {
+  const p = {};
+  if (dateRange.value?.length === 2) {
+    p.startDate = dateRange.value[0];
+    p.endDate = dateRange.value[1];
+  }
+  return p;
+}
+
+function loadData() {
+  API_Finance.getStoreSummary(buildParams()).then((res) => {
+    if (res.success) summary.value = res.result;
+  });
+}
+
+function handleExport() {
+  API_Finance.exportStoreSummary(buildParams()).then((blob) => {
+    downloadBlob(blob, "店铺周期汇总.xlsx");
+  });
+}
+
+function exportFlow() {
+  API_Finance.exportStoreFlow(buildParams()).then((blob) => {
+    downloadBlob(blob, "店铺流水.xlsx");
+  });
+}
 </script>

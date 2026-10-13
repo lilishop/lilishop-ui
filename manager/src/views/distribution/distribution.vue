@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="100px"
@@ -420,7 +420,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, watch, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import {
   auditDistribution,
   batchUpdateDistributionGrade,
@@ -436,469 +438,478 @@ import {
   updateDistributionMember,
 } from "@/api/distribution";
 import { downloadBlob } from "@/utils/downloadBlob";
+import { Message, Modal } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
+
+defineOptions({ name: "distribution" });
 
 const MOBILE_PATTERN = /^1[3-9]\d{9}$/;
 
-export default {
-  name: "distribution",
-  data() {
-    return {
-      loading: true,
-      currentDistributionStatus: "ALL",
-      joinTimeRange: [],
-      gradeOptions: [],
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        id: "",
-        mobile: "",
-        inviterMobile: "",
-        gradeId: "",
-        nickname: "",
-      },
-      data: [],
-      total: 0,
-      detailVisible: false,
-      detailLoading: false,
-      detail: null,
-      editVisible: false,
-      editLoading: false,
-      editForm: {
-        id: "",
-        mobile: "",
-        nickname: "",
-        inviterMobile: "",
-        gradeId: "",
-      },
-      editRules: {
-        nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
-        gradeId: [{ required: true, message: "请选择分销等级", trigger: "change" }],
-      },
-      createVisible: false,
-      createLoading: false,
-      createForm: {
-        nickname: "",
-        mobile: "",
-        inviterMobile: "",
-        gradeId: "",
-      },
-      createRules: {
-        nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
-        mobile: [
-          { required: true, message: "请输入手机号", trigger: "blur" },
-          { pattern: MOBILE_PATTERN, message: "手机号格式有误", trigger: "blur" },
-        ],
-        gradeId: [{ required: true, message: "请选择分销等级", trigger: "change" }],
-      },
-      selectedRows: [],
-      batchGradeVisible: false,
-      batchGradeLoading: false,
-      exportLoading: false,
-      templateLoading: false,
-      importVisible: false,
-      importLoading: false,
-      importFile: null,
-      importFileName: "",
-      batchGradeForm: {
-        gradeId: "",
-      },
-      batchGradeRules: {
-        gradeId: [{ required: true, message: "请选择分销等级", trigger: "change" }],
-      },
-    };
-  },
-  mounted() {
-    this.loadGradeOptions();
-    this.applyRouteQuery();
-    this.getDataList();
-  },
-  watch: {
-    $route() {
-      this.applyRouteQuery();
-      this.getDataList();
+const route = useRoute();
+const router = useRouter();
+
+// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
+const searchFormRef = ref(null);
+const table = ref(null);
+const editFormRef = ref(null);
+const createFormRef = ref(null);
+const batchGradeFormRef = ref(null);
+
+const loading = ref(true);
+const currentDistributionStatus = ref("ALL");
+const joinTimeRange = ref([]);
+const gradeOptions = ref([]);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  id: "",
+  mobile: "",
+  inviterMobile: "",
+  gradeId: "",
+  nickname: "",
+});
+const data = ref([]);
+const total = ref(0);
+const detailVisible = ref(false);
+const detailLoading = ref(false);
+const detail = ref(null);
+const editVisible = ref(false);
+const editLoading = ref(false);
+const editForm = ref({
+  id: "",
+  mobile: "",
+  nickname: "",
+  inviterMobile: "",
+  gradeId: "",
+});
+const editRules = {
+  nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
+  gradeId: [{ required: true, message: "请选择分销等级", trigger: "change" }],
+};
+const createVisible = ref(false);
+const createLoading = ref(false);
+const createForm = ref({
+  nickname: "",
+  mobile: "",
+  inviterMobile: "",
+  gradeId: "",
+});
+const createRules = {
+  nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
+  mobile: [
+    { required: true, message: "请输入手机号", trigger: "blur" },
+    { pattern: MOBILE_PATTERN, message: "手机号格式有误", trigger: "blur" },
+  ],
+  gradeId: [{ required: true, message: "请选择分销等级", trigger: "change" }],
+};
+const selectedRows = ref([]);
+const batchGradeVisible = ref(false);
+const batchGradeLoading = ref(false);
+const exportLoading = ref(false);
+const templateLoading = ref(false);
+const importVisible = ref(false);
+const importLoading = ref(false);
+const importFile = ref(null);
+const importFileName = ref("");
+const batchGradeForm = reactive({
+  gradeId: "",
+});
+const batchGradeRules = {
+  gradeId: [{ required: true, message: "请选择分销等级", trigger: "change" }],
+};
+
+watch(
+  () => route.query,
+  () => {
+    applyRouteQuery();
+    getDataList();
+  }
+);
+
+function applyRouteQuery() {
+  const query = route.query || {};
+  searchForm.inviterMobile = query.inviterMobile ? String(query.inviterMobile) : "";
+}
+function openCustomerRelationPage() {
+  if (!detail.value) return;
+  const resolved = router.resolve({
+    path: "/distributionCustomerRelation",
+    query: {
+      distributionId: detail.value.id,
+      distributionMobile: detail.value.mobile || "",
     },
-  },
-  methods: {
-    applyRouteQuery() {
-      const query = this.$route.query || {};
-      this.searchForm.inviterMobile = query.inviterMobile ? String(query.inviterMobile) : "";
+  });
+  window.open(resolved.href, "_blank");
+}
+function openInviteeDistributionPage() {
+  if (!detail.value) return;
+  const resolved = router.resolve({
+    path: "/distribution",
+    query: {
+      inviterMobile: detail.value.mobile || "",
     },
-    openCustomerRelationPage() {
-      if (!this.detail) return;
-      const route = this.$router.resolve({
-        path: "/distributionCustomerRelation",
-        query: {
-          distributionId: this.detail.id,
-          distributionMobile: this.detail.mobile || "",
-        },
-      });
-      window.open(route.href, "_blank");
-    },
-    openInviteeDistributionPage() {
-      if (!this.detail) return;
-      const route = this.$router.resolve({
-        path: "/distribution",
-        query: {
-          inviterMobile: this.detail.mobile || "",
-        },
-      });
-      window.open(route.href, "_blank");
-    },
-    loadGradeOptions() {
-      getDistributionGrades().then((res) => {
+  });
+  window.open(resolved.href, "_blank");
+}
+function loadGradeOptions() {
+  getDistributionGrades().then((res) => {
+    if (res.success) {
+      gradeOptions.value = (res.result || []).slice().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    }
+  });
+}
+function statusLabel(status) {
+  const map = {
+    PASS: "审核通过",
+    APPLY: "待审核",
+    RETREAT: "已清退",
+    REFUSE: "审核拒绝",
+  };
+  return map[status] || status || "-";
+}
+function formatMoney(value) {
+  const num = Number(value);
+  if (Number.isNaN(num)) return "0.00";
+  return num.toFixed(2);
+}
+function onStatusTabChange() {
+  searchForm.pageNumber = 1;
+  clearSelectAll();
+  getDataList();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  clearSelectAll();
+  getDataList();
+}
+function changeSelect(selection) {
+  selectedRows.value = selection || [];
+}
+function clearSelectAll() {
+  selectedRows.value = [];
+  table.value?.clearSelection();
+}
+function openBatchGrade() {
+  if (!selectedRows.value.length) {
+    Message.warning("请先选择分销员");
+    return;
+  }
+  batchGradeForm.gradeId = "";
+  batchGradeVisible.value = true;
+}
+function resetBatchGradeForm() {
+  batchGradeLoading.value = false;
+  batchGradeForm.gradeId = "";
+  batchGradeFormRef.value?.clearValidate();
+}
+function submitBatchGrade() {
+  batchGradeFormRef.value.validate((valid) => {
+    if (!valid) return;
+    batchGradeLoading.value = true;
+    batchUpdateDistributionGrade({
+      ids: selectedRows.value.map((item) => item.id),
+      gradeId: batchGradeForm.gradeId,
+    })
+      .then((res) => {
+        batchGradeLoading.value = false;
         if (res.success) {
-          this.gradeOptions = (res.result || []).slice().sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+          Message.success("设置成功");
+          batchGradeVisible.value = false;
+          clearSelectAll();
+          getDataList();
+        }
+      })
+      .catch(() => {
+        batchGradeLoading.value = false;
+      });
+  });
+}
+function handleExport() {
+  exportLoading.value = true;
+  const params = buildParams();
+  delete params.pageNumber;
+  delete params.pageSize;
+  exportDistributionMembers(params)
+    .then((blob) => {
+      if (blob && blob.type && blob.type.includes("application/json")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const result = JSON.parse(reader.result);
+            Message.error(result.message || "导出失败");
+          } catch (e) {
+            Message.error("导出失败");
+          }
+        };
+        reader.readAsText(blob);
+        return;
+      }
+      downloadBlob(blob, `分销员列表_${Date.now()}.xlsx`);
+      Message.success("导出成功");
+    })
+    .catch(() => {
+      Message.error("导出失败");
+    })
+    .finally(() => {
+      exportLoading.value = false;
+    });
+}
+function downloadImportTemplate() {
+  templateLoading.value = true;
+  downloadDistributionImportTemplate()
+    .then((blob) => {
+      downloadBlob(blob, "分销员批量导入模板.xlsx");
+      Message.success("模板已下载");
+    })
+    .catch(() => {
+      Message.error("模板下载失败");
+    })
+    .finally(() => {
+      templateLoading.value = false;
+    });
+}
+function openImportDialog() {
+  importVisible.value = true;
+}
+function resetImportDialog() {
+  importLoading.value = false;
+  importFile.value = null;
+  importFileName.value = "";
+}
+function onImportBeforeUpload(file) {
+  importFile.value = file;
+  importFileName.value = file.name;
+  return false;
+}
+function submitImport() {
+  if (!importFile.value) {
+    Message.warning("请先选择文件");
+    return;
+  }
+  const fd = new FormData();
+  fd.append("file", importFile.value);
+  importLoading.value = true;
+  importDistributionMembers(fd)
+    .then((res) => {
+      importLoading.value = false;
+      if (res.success) {
+        const result = res.result || {};
+        Message.success(
+          `导入完成：成功 ${result.successCount || 0} 条，失败 ${result.failCount || 0} 条`
+        );
+        importVisible.value = false;
+        getDataList();
+      }
+    })
+    .catch(() => {
+      importLoading.value = false;
+    });
+}
+function goImportRecord() {
+  router.push({
+    path: "/distributionImportRecord",
+  });
+}
+function buildParams() {
+  const params = {
+    pageNumber: searchForm.pageNumber,
+    pageSize: searchForm.pageSize,
+  };
+  if (currentDistributionStatus.value && currentDistributionStatus.value !== "ALL") {
+    params.distributionStatus = currentDistributionStatus.value;
+  }
+  if (searchForm.id) params.id = searchForm.id.trim();
+  if (searchForm.mobile) params.mobile = searchForm.mobile;
+  if (searchForm.inviterMobile) params.inviterMobile = searchForm.inviterMobile;
+  if (searchForm.gradeId) params.gradeId = searchForm.gradeId;
+  if (searchForm.nickname) params.nickname = searchForm.nickname;
+  if (joinTimeRange.value && joinTimeRange.value[0] && joinTimeRange.value[1]) {
+    const startTime = new Date(joinTimeRange.value[0]).getTime();
+    const endTime = new Date(joinTimeRange.value[1]).getTime();
+    params.joinTimeStart = unixToDate(startTime / 1000);
+    params.joinTimeEnd = unixToDate(endTime / 1000);
+  }
+  return params;
+}
+function getDataList() {
+  loading.value = true;
+  getDistributionMemberPage(buildParams())
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        data.value = res.result.records;
+        total.value = res.result.total;
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+function openDetail(row) {
+  detailVisible.value = true;
+  detailLoading.value = true;
+  detail.value = null;
+  getDistributionMemberDetail(row.id)
+    .then((res) => {
+      detailLoading.value = false;
+      if (res.success) {
+        detail.value = res.result;
+      }
+    })
+    .catch(() => {
+      detailLoading.value = false;
+    });
+}
+function openCreate() {
+  createForm.value = {
+    nickname: "",
+    mobile: "",
+    inviterMobile: "",
+    gradeId: "",
+  };
+  createVisible.value = true;
+}
+function resetCreateForm() {
+  createLoading.value = false;
+  createForm.value = {
+    nickname: "",
+    mobile: "",
+    inviterMobile: "",
+    gradeId: "",
+  };
+  createFormRef.value?.clearValidate();
+}
+function submitCreate() {
+  createFormRef.value.validate((valid) => {
+    if (!valid) return;
+    createLoading.value = true;
+    createDistributionMember({
+      nickname: createForm.value.nickname,
+      mobile: createForm.value.mobile,
+      inviterMobile: createForm.value.inviterMobile || "",
+      gradeId: createForm.value.gradeId,
+    })
+      .then((res) => {
+        createLoading.value = false;
+        if (res.success) {
+          Message.success("新增成功");
+          createVisible.value = false;
+          getDataList();
+        }
+      })
+      .catch(() => {
+        createLoading.value = false;
+      });
+  });
+}
+function openEdit(row) {
+  editForm.value = {
+    id: row.id,
+    mobile: row.mobile || "",
+    nickname: row.nickname || "",
+    inviterMobile: row.inviterMobile || "",
+    gradeId: resolveGradeOptionId(row.gradeId),
+  };
+  editVisible.value = true;
+}
+function resolveGradeOptionId(gradeRef) {
+  if (!gradeRef || !gradeOptions.value.length) return gradeRef || "";
+  const direct = gradeOptions.value.find((item) => item.id === gradeRef);
+  if (direct) return direct.id;
+  const bySort = gradeOptions.value.find((item) => String(item.sortOrder) === String(gradeRef));
+  return bySort ? bySort.id : gradeRef;
+}
+function resetEditForm() {
+  editLoading.value = false;
+  editForm.value = {
+    id: "",
+    mobile: "",
+    nickname: "",
+    inviterMobile: "",
+    gradeId: "",
+  };
+  editFormRef.value?.clearValidate();
+}
+function submitEdit() {
+  editFormRef.value.validate((valid) => {
+    if (!valid) return;
+    editLoading.value = true;
+    updateDistributionMember(editForm.value.id, {
+      nickname: editForm.value.nickname,
+      inviterMobile: editForm.value.inviterMobile || "",
+      gradeId: editForm.value.gradeId,
+    })
+      .then((res) => {
+        editLoading.value = false;
+        if (res.success) {
+          Message.success("保存成功");
+          editVisible.value = false;
+          getDataList();
+        }
+      })
+      .catch(() => {
+        editLoading.value = false;
+      });
+  });
+}
+function audit(row, status) {
+  const text = status === "PASS" ? "通过" : "拒绝";
+  Modal.confirm({
+    title: "审核确认",
+    content: `确认${text}该分销员申请？`,
+    loading: true,
+    onOk: () => {
+      auditDistribution(row.id, { status }).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
         }
       });
     },
-    statusLabel(status) {
-      const map = {
-        PASS: "审核通过",
-        APPLY: "待审核",
-        RETREAT: "已清退",
-        REFUSE: "审核拒绝",
-      };
-      return map[status] || status || "-";
-    },
-    formatMoney(value) {
-      const num = Number(value);
-      if (Number.isNaN(num)) return "0.00";
-      return num.toFixed(2);
-    },
-    onStatusTabChange() {
-      this.searchForm.pageNumber = 1;
-      this.clearSelectAll();
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.clearSelectAll();
-      this.getDataList();
-    },
-    changeSelect(selection) {
-      this.selectedRows = selection || [];
-    },
-    clearSelectAll() {
-      this.selectedRows = [];
-      this.$refs.table?.clearSelection();
-    },
-    openBatchGrade() {
-      if (!this.selectedRows.length) {
-        this.$Message.warning("请先选择分销员");
-        return;
-      }
-      this.batchGradeForm.gradeId = "";
-      this.batchGradeVisible = true;
-    },
-    resetBatchGradeForm() {
-      this.batchGradeLoading = false;
-      this.batchGradeForm.gradeId = "";
-      this.$refs.batchGradeFormRef?.clearValidate();
-    },
-    submitBatchGrade() {
-      this.$refs.batchGradeFormRef.validate((valid) => {
-        if (!valid) return;
-        this.batchGradeLoading = true;
-        batchUpdateDistributionGrade({
-          ids: this.selectedRows.map((item) => item.id),
-          gradeId: this.batchGradeForm.gradeId,
-        })
-          .then((res) => {
-            this.batchGradeLoading = false;
-            if (res.success) {
-              this.$Message.success("设置成功");
-              this.batchGradeVisible = false;
-              this.clearSelectAll();
-              this.getDataList();
-            }
-          })
-          .catch(() => {
-            this.batchGradeLoading = false;
-          });
+  });
+}
+function retreat(row) {
+  Modal.confirm({
+    title: "清退确认",
+    content: "确认清退该分销员？清退后将停止后续计佣。",
+    onOk: () => {
+      retreatDistribution(row.id).then((res) => {
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
       });
     },
-    handleExport() {
-      this.exportLoading = true;
-      const params = this.buildParams();
-      delete params.pageNumber;
-      delete params.pageSize;
-      exportDistributionMembers(params)
-        .then((blob) => {
-          if (blob && blob.type && blob.type.includes("application/json")) {
-            const reader = new FileReader();
-            reader.onload = () => {
-              try {
-                const result = JSON.parse(reader.result);
-                this.$Message.error(result.message || "导出失败");
-              } catch (e) {
-                this.$Message.error("导出失败");
-              }
-            };
-            reader.readAsText(blob);
-            return;
-          }
-          downloadBlob(blob, `分销员列表_${Date.now()}.xlsx`);
-          this.$Message.success("导出成功");
-        })
-        .catch(() => {
-          this.$Message.error("导出失败");
-        })
-        .finally(() => {
-          this.exportLoading = false;
-        });
-    },
-    downloadImportTemplate() {
-      this.templateLoading = true;
-      downloadDistributionImportTemplate()
-        .then((blob) => {
-          downloadBlob(blob, "分销员批量导入模板.xlsx");
-          this.$Message.success("模板已下载");
-        })
-        .catch(() => {
-          this.$Message.error("模板下载失败");
-        })
-        .finally(() => {
-          this.templateLoading = false;
-        });
-    },
-    openImportDialog() {
-      this.importVisible = true;
-    },
-    resetImportDialog() {
-      this.importLoading = false;
-      this.importFile = null;
-      this.importFileName = "";
-    },
-    onImportBeforeUpload(file) {
-      this.importFile = file;
-      this.importFileName = file.name;
-      return false;
-    },
-    submitImport() {
-      if (!this.importFile) {
-        this.$Message.warning("请先选择文件");
-        return;
-      }
-      const fd = new FormData();
-      fd.append("file", this.importFile);
-      this.importLoading = true;
-      importDistributionMembers(fd)
-        .then((res) => {
-          this.importLoading = false;
-          if (res.success) {
-            const result = res.result || {};
-            this.$Message.success(
-              `导入完成：成功 ${result.successCount || 0} 条，失败 ${result.failCount || 0} 条`
-            );
-            this.importVisible = false;
-            this.getDataList();
-          }
-        })
-        .catch(() => {
-          this.importLoading = false;
-        });
-    },
-    goImportRecord() {
-      this.$router.push({
-        path: "/distributionImportRecord",
+  });
+}
+function resume(row) {
+  Modal.confirm({
+    title: "恢复确认",
+    content: "确认恢复该分销员？",
+    onOk: () => {
+      resumeDistribution(row.id).then((res) => {
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+        }
       });
     },
-    buildParams() {
-      const params = {
-        pageNumber: this.searchForm.pageNumber,
-        pageSize: this.searchForm.pageSize,
-      };
-      if (this.currentDistributionStatus && this.currentDistributionStatus !== "ALL") {
-        params.distributionStatus = this.currentDistributionStatus;
-      }
-      if (this.searchForm.id) params.id = this.searchForm.id.trim();
-      if (this.searchForm.mobile) params.mobile = this.searchForm.mobile;
-      if (this.searchForm.inviterMobile) params.inviterMobile = this.searchForm.inviterMobile;
-      if (this.searchForm.gradeId) params.gradeId = this.searchForm.gradeId;
-      if (this.searchForm.nickname) params.nickname = this.searchForm.nickname;
-      if (this.joinTimeRange && this.joinTimeRange[0] && this.joinTimeRange[1]) {
-        const startTime = new Date(this.joinTimeRange[0]).getTime();
-        const endTime = new Date(this.joinTimeRange[1]).getTime();
-        params.joinTimeStart = this.$filters.unixToDate(startTime / 1000);
-        params.joinTimeEnd = this.$filters.unixToDate(endTime / 1000);
-      }
-      return params;
-    },
-    getDataList() {
-      this.loading = true;
-      getDistributionMemberPage(this.buildParams())
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            this.data = res.result.records;
-            this.total = res.result.total;
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    openDetail(row) {
-      this.detailVisible = true;
-      this.detailLoading = true;
-      this.detail = null;
-      getDistributionMemberDetail(row.id)
-        .then((res) => {
-          this.detailLoading = false;
-          if (res.success) {
-            this.detail = res.result;
-          }
-        })
-        .catch(() => {
-          this.detailLoading = false;
-        });
-    },
-    openCreate() {
-      this.createForm = {
-        nickname: "",
-        mobile: "",
-        inviterMobile: "",
-        gradeId: "",
-      };
-      this.createVisible = true;
-    },
-    resetCreateForm() {
-      this.createLoading = false;
-      this.createForm = {
-        nickname: "",
-        mobile: "",
-        inviterMobile: "",
-        gradeId: "",
-      };
-      this.$refs.createFormRef?.clearValidate();
-    },
-    submitCreate() {
-      this.$refs.createFormRef.validate((valid) => {
-        if (!valid) return;
-        this.createLoading = true;
-        createDistributionMember({
-          nickname: this.createForm.nickname,
-          mobile: this.createForm.mobile,
-          inviterMobile: this.createForm.inviterMobile || "",
-          gradeId: this.createForm.gradeId,
-        })
-          .then((res) => {
-            this.createLoading = false;
-            if (res.success) {
-              this.$Message.success("新增成功");
-              this.createVisible = false;
-              this.getDataList();
-            }
-          })
-          .catch(() => {
-            this.createLoading = false;
-          });
-      });
-    },
-    openEdit(row) {
-      this.editForm = {
-        id: row.id,
-        mobile: row.mobile || "",
-        nickname: row.nickname || "",
-        inviterMobile: row.inviterMobile || "",
-        gradeId: this.resolveGradeOptionId(row.gradeId),
-      };
-      this.editVisible = true;
-    },
-    resolveGradeOptionId(gradeRef) {
-      if (!gradeRef || !this.gradeOptions.length) return gradeRef || "";
-      const direct = this.gradeOptions.find((item) => item.id === gradeRef);
-      if (direct) return direct.id;
-      const bySort = this.gradeOptions.find((item) => String(item.sortOrder) === String(gradeRef));
-      return bySort ? bySort.id : gradeRef;
-    },
-    resetEditForm() {
-      this.editLoading = false;
-      this.editForm = {
-        id: "",
-        mobile: "",
-        nickname: "",
-        inviterMobile: "",
-        gradeId: "",
-      };
-      this.$refs.editFormRef?.clearValidate();
-    },
-    submitEdit() {
-      this.$refs.editFormRef.validate((valid) => {
-        if (!valid) return;
-        this.editLoading = true;
-        updateDistributionMember(this.editForm.id, {
-          nickname: this.editForm.nickname,
-          inviterMobile: this.editForm.inviterMobile || "",
-          gradeId: this.editForm.gradeId,
-        })
-          .then((res) => {
-            this.editLoading = false;
-            if (res.success) {
-              this.$Message.success("保存成功");
-              this.editVisible = false;
-              this.getDataList();
-            }
-          })
-          .catch(() => {
-            this.editLoading = false;
-          });
-      });
-    },
-    audit(row, status) {
-      const text = status === "PASS" ? "通过" : "拒绝";
-      this.$Modal.confirm({
-        title: "审核确认",
-        content: `确认${text}该分销员申请？`,
-        loading: true,
-        onOk: () => {
-          auditDistribution(row.id, { status }).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    retreat(row) {
-      this.$Modal.confirm({
-        title: "清退确认",
-        content: "确认清退该分销员？清退后将停止后续计佣。",
-        onOk: () => {
-          retreatDistribution(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    resume(row) {
-      this.$Modal.confirm({
-        title: "恢复确认",
-        content: "确认恢复该分销员？",
-        onOk: () => {
-          resumeDistribution(row.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-};
+  });
+}
+
+onMounted(() => {
+  loadGradeOptions();
+  applyRouteQuery();
+  getDataList();
+});
 </script>
 
 <style scoped lang="scss">

@@ -1,7 +1,7 @@
 <template>
   <div class="revoke-message">
     <div class="content">
-      <span v-if="$store.state.user.id == item.user_id">
+      <span v-if="userStore.id == item.user_id">
         你撤回了一条消息 | {{ sendTime(item.created_at) }}
       </span>
       <span v-else-if="item.talk_type == 1">
@@ -13,20 +13,21 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { useUserStore } from "@/stores/user";
 import { formatTime as sendTime } from "@/utils/functions";
 
-export default {
+defineOptions({
   name: "RevokeMessage",
-  props: {
-    item: {
-      type: Object,
-    },
+});
+
+const userStore = useUserStore();
+
+defineProps({
+  item: {
+    type: Object,
   },
-  methods: {
-    sendTime,
-  },
-};
+});
 </script>
 <style lang="less" scoped>
 .revoke-message {

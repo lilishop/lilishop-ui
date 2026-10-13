@@ -4,22 +4,21 @@
   </el-icon>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue";
 import { resolveLegacyIcon } from "@/core/legacy-icon-map";
 
-export default {
+defineOptions({
   name: "LegacyElIcon",
   inheritAttrs: false,
-  props: {
-    name: {
-      type: String,
-      default: "",
-    },
+});
+
+const props = defineProps({
+  name: {
+    type: String,
+    default: "",
   },
-  computed: {
-    iconComponent() {
-      return resolveLegacyIcon(this.name);
-    },
-  },
-};
+});
+
+const iconComponent = computed(() => resolveLegacyIcon(props.name));
 </script>

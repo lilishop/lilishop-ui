@@ -2,15 +2,10 @@
   <div class="reply-message">这是回复的消息[预留]</div>
 </template>
 
-<script>
-export default {
+<script setup>
+defineOptions({
   name: 'ReplyMessage',
-  data() {
-    return {}
-  },
-  created() {},
-  methods: {},
-}
+})
 </script>
 <style lang="less" scoped>
 .reply-message {

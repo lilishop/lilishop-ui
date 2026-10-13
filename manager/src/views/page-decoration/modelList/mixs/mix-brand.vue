@@ -24,19 +24,17 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ArrowRight } from "@element-plus/icons-vue";
 
-export default {
-  name: "mix-brand",
-  components: { ArrowRight },
-  props: {
-    data: {
-      type: Object,
-      default: () => ({}),
-    },
+defineOptions({ name: "mix-brand" });
+
+defineProps({
+  data: {
+    type: Object,
+    default: () => ({}),
   },
-};
+});
 </script>
 
 <style scoped lang="scss">

@@ -140,168 +140,166 @@
     </el-container>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onBeforeUnmount, ref } from 'vue'
 import Recorder from 'js-audio-recorder'
 
-export default {
+defineOptions({
   name: 'MeEditorRecorder',
-  data() {
-    return {
-      // 录音实例
-      recorder: null,
+})
 
-      // 录音时长
-      duration: 0,
+const emit = defineEmits(['close'])
 
-      // 播放时长
-      playTime: 0,
+// 录音实例
+let recorder = null
 
-      animation: false,
+// 录音时长
+const duration = ref(0)
 
-      // 当前状态
-      recorderStatus: 0, //0:未开始录音 1:正在录音 2:暂停录音 3:结束录音 4:播放录音 5:停止播放 6:播放结束
+// 播放时长
+const playTime = ref(0)
 
-      playTimeout: null,
+const animation = ref(false)
+
+// 当前状态
+const recorderStatus = ref(0) //0:未开始录音 1:正在录音 2:暂停录音 3:结束录音 4:播放录音 5:停止播放 6:播放结束
+
+let playTimeout = null
+
+const datetime = computed(() => {
+  let hour = parseInt((duration.value / 60 / 60) % 24) //小时
+  let minute = parseInt((duration.value / 60) % 60) //分钟
+  let seconds = parseInt(duration.value % 60) //秒
+
+  if (hour < 10) hour = `0${hour}`
+  if (minute < 10) minute = `0${minute}`
+  if (seconds < 10) seconds = `0${seconds}`
+
+  return `${hour}:${minute}:${seconds}`
+})
+const formatPlayTime = computed(() => {
+  let hour = parseInt((playTime.value / 60 / 60) % 24) //小时
+  let minute = parseInt((playTime.value / 60) % 60) //分钟
+  let seconds = parseInt(playTime.value % 60) //秒
+
+  if (hour < 10) hour = `0${hour}`
+  if (minute < 10) minute = `0${minute}`
+  if (seconds < 10) seconds = `0${seconds}`
+
+  return `${hour}:${minute}:${seconds}`
+})
+
+onBeforeUnmount(() => {
+  if (recorder) {
+    destroyRecorder()
+  }
+})
+
+const closeBox = () => {
+  if (recorder == null) {
+    emit('close', false)
+    return
+  }
+
+  if (recorderStatus.value == 1) {
+    stopRecorder()
+  } else if (recorderStatus.value == 4) {
+    pausePlayRecorder()
+  }
+
+  // 销毁录音后关闭窗口
+  destroyRecorder(() => {
+    emit('close', false)
+  })
+}
+
+// 开始录音
+const startRecorder = () => {
+  // http://recorder.api.zhuyuntao.cn/Recorder/event.html
+  // https://blog.csdn.net/qq_41619796/article/details/107865602
+  recorder = new Recorder()
+  recorder.onprocess = d => {
+    d = parseInt(d)
+    duration.value = d
+  }
+
+  recorder.start().then(
+    () => {
+      recorderStatus.value = 1
+      animation.value = true
+    },
+    error => {
+      console.log(`${error.name} : ${error.message}`)
     }
-  },
-  computed: {
-    datetime() {
-      let hour = parseInt((this.duration / 60 / 60) % 24) //小时
-      let minute = parseInt((this.duration / 60) % 60) //分钟
-      let seconds = parseInt(this.duration % 60) //秒
-
-      if (hour < 10) hour = `0${hour}`
-      if (minute < 10) minute = `0${minute}`
-      if (seconds < 10) seconds = `0${seconds}`
-
-      return `${hour}:${minute}:${seconds}`
-    },
-    formatPlayTime() {
-      let hour = parseInt((this.playTime / 60 / 60) % 24) //小时
-      let minute = parseInt((this.playTime / 60) % 60) //分钟
-      let seconds = parseInt(this.playTime % 60) //秒
-
-      if (hour < 10) hour = `0${hour}`
-      if (minute < 10) minute = `0${minute}`
-      if (seconds < 10) seconds = `0${seconds}`
-
-      return `${hour}:${minute}:${seconds}`
-    },
-  },
-  beforeUnmount() {
-    if (this.recorder) {
-      this.destroyRecorder()
+  )
+}
+// 暂停录音
+const pauseRecorder = () => {
+  recorder.pause()
+  recorderStatus.value = 2
+  animation.value = false
+}
+// 继续录音
+const resumeRecorder = () => {
+  recorderStatus.value = 1
+  recorder.resume()
+  animation.value = true
+}
+// 结束录音
+const stopRecorder = () => {
+  recorderStatus.value = 3
+  recorder.stop()
+  animation.value = false
+}
+// 录音播放
+const playRecorder = () => {
+  recorderStatus.value = 4
+  recorder.play()
+  playTimeouts()
+  animation.value = true
+}
+// 暂停录音播放
+const pausePlayRecorder = () => {
+  recorderStatus.value = 5
+  recorder.pausePlay()
+  clearInterval(playTimeout)
+  animation.value = false
+}
+// 恢复录音播放
+const resumePlayRecorder = () => {
+  recorderStatus.value = 4
+  recorder.resumePlay()
+  playTimeouts()
+  animation.value = true
+}
+// 销毁录音
+const destroyRecorder = callBack => {
+  recorder.destroy().then(() => {
+    recorder = null
+    if (callBack) {
+      callBack()
     }
-  },
-  methods: {
-    closeBox() {
-      if (this.recorder == null) {
-        this.$emit('close', false)
-        return
-      }
+  })
+}
+// 获取录音文件大小（单位：字节）
+const recorderSize = () => {
+  return recorder.fileSize
+}
 
-      if (this.recorderStatus == 1) {
-        this.stopRecorder()
-      } else if (this.recorderStatus == 4) {
-        this.pausePlayRecorder()
-      }
+const playTimeouts = () => {
+  playTimeout = setInterval(() => {
+    let time = parseInt(recorder.getPlayTime())
+    playTime.value = time
+    if (time == duration.value) {
+      clearInterval(playTimeout)
+      animation.value = false
+      recorderStatus.value = 6
+    }
+  }, 100)
+}
 
-      // 销毁录音后关闭窗口
-      this.destroyRecorder(() => {
-        this.$emit('close', false)
-      })
-    },
-
-    // 开始录音
-    startRecorder() {
-      let _this = this
-      // http://recorder.api.zhuyuntao.cn/Recorder/event.html
-      // https://blog.csdn.net/qq_41619796/article/details/107865602
-      this.recorder = new Recorder()
-      this.recorder.onprocess = duration => {
-        duration = parseInt(duration)
-        _this.duration = duration
-      }
-
-      this.recorder.start().then(
-        () => {
-          this.recorderStatus = 1
-          this.animation = true
-        },
-        error => {
-          console.log(`${error.name} : ${error.message}`)
-        }
-      )
-    },
-    // 暂停录音
-    pauseRecorder() {
-      this.recorder.pause()
-      this.recorderStatus = 2
-      this.animation = false
-    },
-    // 继续录音
-    resumeRecorder() {
-      this.recorderStatus = 1
-      this.recorder.resume()
-      this.animation = true
-    },
-    // 结束录音
-    stopRecorder() {
-      this.recorderStatus = 3
-      this.recorder.stop()
-      this.animation = false
-    },
-    // 录音播放
-    playRecorder() {
-      this.recorderStatus = 4
-      this.recorder.play()
-      this.playTimeouts()
-      this.animation = true
-    },
-    // 暂停录音播放
-    pausePlayRecorder() {
-      this.recorderStatus = 5
-      this.recorder.pausePlay()
-      clearInterval(this.playTimeout)
-      this.animation = false
-    },
-    // 恢复录音播放
-    resumePlayRecorder() {
-      this.recorderStatus = 4
-      this.recorder.resumePlay()
-      this.playTimeouts()
-      this.animation = true
-    },
-    // 销毁录音
-    destroyRecorder(callBack) {
-      this.recorder.destroy().then(() => {
-        this.recorder = null
-        if (callBack) {
-          callBack()
-        }
-      })
-    },
-    // 获取录音文件大小（单位：字节）
-    recorderSize() {
-      return this.recorder.fileSize
-    },
-
-    playTimeouts() {
-      this.playTimeout = setInterval(() => {
-        let time = parseInt(this.recorder.getPlayTime())
-        this.playTime = time
-        if (time == this.duration) {
-          clearInterval(this.playTimeout)
-          this.animation = false
-          this.recorderStatus = 6
-        }
-      }, 100)
-    },
-
-    submit() {
-      alert('功能研发中,敬请期待...')
-    },
-  },
+const submit = () => {
+  alert('功能研发中,敬请期待...')
 }
 </script>
 <style lang="less" scoped>

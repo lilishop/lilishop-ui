@@ -1,5 +1,6 @@
-﻿import lazyLoading from "./lazyLoading.js";
+import lazyLoading from "./lazyLoading.js";
 import { getRouter } from "./router-holder";
+import { useAppStore } from "@/stores/app";
 import Cookies from "js-cookie";
 
 let util = {};
@@ -176,22 +177,21 @@ util.oneOf = function(ele, targetArr) {
 };
 
 // 打开新的页面
-util.openNewPage = function(vm, name, argu, query) {
-  if (!vm.$store) {
-    return;
-  }
-  let pageOpenedList = vm.$store.state.app.pageOpenedList;
-  const currentPath = vm.$route ? vm.$route.path : "";
+util.openNewPage = function(name, argu, query) {
+  const appStore = useAppStore();
+  let pageOpenedList = appStore.pageOpenedList;
+  const router = getRouter();
+  const currentPath = router ? router.currentRoute.value.path : "";
   const openedIndex = util.findOpenedPageIndex(pageOpenedList, name, currentPath);
   if (openedIndex >= 0) {
-    vm.$store.commit("pageOpenedList", {
+    appStore.updateOpenedList({
       index: openedIndex,
       argu: argu,
       query: query
     });
     return;
   }
-  let tag = vm.$store.state.app.tagsList.filter(item => {
+  let tag = appStore.tagsList.filter(item => {
     if (item.children) {
       return name == item.children[0].name;
     } else {
@@ -200,7 +200,7 @@ util.openNewPage = function(vm, name, argu, query) {
   });
   tag = tag[0];
   if (!tag) {
-    tag = vm.$store.state.app.tagsList.find((item) => {
+    tag = appStore.tagsList.find((item) => {
       const candidate = item.children ? item.children[0] : item;
       return util.isSameRoutePage(candidate, { name, path: currentPath });
     });
@@ -217,7 +217,7 @@ util.openNewPage = function(vm, name, argu, query) {
     if (query) {
       tagObj.query = query;
     }
-    vm.$store.commit("increateTag", tagObj);
+    appStore.increateTag(tagObj);
   }
 };
 
@@ -245,8 +245,9 @@ util.toDefaultPage = function(routers, name, route, next) {
   }
 };
 
-util.initRouter = function(vm) {
+util.initRouter = function() {
   // 初始化路由
+  const appStore = useAppStore();
   const constRoutes = [];
   const otherRoutes = [];
 
@@ -267,7 +268,7 @@ util.initRouter = function(vm) {
     // 未登录
     return;
   }
-  if (!vm.$store.state.app.added) {
+  if (!appStore.added) {
     // 第一次加载 读取数据
     // 加载菜单
     import("@/api/index").then(({ getCurrentPermissionList }) => {
@@ -293,26 +294,25 @@ util.initRouter = function(vm) {
       }
       util.initAllMenuData(constRoutes, menuData);
       util.registerDynamicRoutes(menuData);
-      vm.$store.commit(
-        "updateAppRouter",
+      appStore.updateAppRouter(
         constRoutes.filter((item) => item.children && item.children.length > 0)
       );
-      util.initMenuData(vm, menuData);
+      util.initMenuData(menuData);
       // 缓存数据 修改加载标识
       window.localStorage.setItem("menuData", JSON.stringify(menuData));
-      vm.$store.commit("setAdded", true);
+      appStore.setAdded(true);
       });
     });
   } else {
     // 读取缓存数据
     let data = window.localStorage.getItem("menuData");
     if (!data) {
-      vm.$store.commit("setAdded", false);
+      appStore.setAdded(false);
       return;
     }
     let menuData = JSON.parse(data);
     util.registerDynamicRoutes(menuData);
-    util.initMenuData(vm, menuData);
+    util.initMenuData(menuData);
   }
 };
 
@@ -330,7 +330,8 @@ util.initAllMenuData = function(constRoutes, data) {
 };
 
 // 生成菜单格式数据
-util.initMenuData = function(vm, data) {
+util.initMenuData = function(data) {
+  const appStore = useAppStore();
   const menuRoutes = [];
   let menuData = data;
   // 顶部菜单 —— 首页固定置顶
@@ -345,26 +346,26 @@ util.initMenuData = function(vm, data) {
   if (navList.length < 1) {
     return;
   }
-  // 存入vuex
-  vm.$store.commit("setNavList", navList);
+  // 存入pinia
+  appStore.setNavList(navList);
   let currNav = window.localStorage.getItem("currNav");
   if (currNav) {
     // 读取缓存title
     for (var item of navList) {
       if (item.name == currNav) {
-        vm.$store.commit("setCurrNavTitle", item.title);
+        appStore.setCurrNavTitle(item.title);
         break;
       }
     }
   } else {
     // 默认首页
     currNav = 'home_index';
-    vm.$store.commit("setCurrNavTitle", '首页');
+    appStore.setCurrNavTitle('首页');
   }
-  vm.$store.commit("setCurrNav", currNav);
+  appStore.setCurrNav(currNav);
   // 首页不需要二级菜单
   if (currNav === 'home_index') {
-    vm.$store.commit("updateMenulist", []);
+    appStore.updateMenulist([]);
     return;
   }
   for (let item of menuData) {
@@ -376,20 +377,19 @@ util.initMenuData = function(vm, data) {
   }
   util.initRouterNode(menuRoutes, menuData);
   // 刷新界面菜单
-  vm.$store.commit(
-    "updateMenulist",
+  appStore.updateMenulist(
     menuRoutes.filter(item => item.children.length > 0)
   );
 
   let tagsList = [];
-  vm.$store.state.app.routers.map(item => {
+  appStore.routers.map(item => {
     if (item.children.length <= 1) {
       tagsList.push(item.children[0]);
     } else {
       tagsList.push(...item.children);
     }
   });
-  vm.$store.commit("setTagsList", tagsList);
+  appStore.setTagsList(tagsList);
 };
 
 // 生成路由节点

@@ -3,7 +3,7 @@
     <el-card style="margin-left: 10px">
       <el-tabs v-model="type" @click="handleClickType">
         <el-tab-pane label="基本信息" name="INFO">
-          <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+          <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
             <el-form-item label="店铺名称">
               <el-input v-model="storeName" disabled clearable style="width: 20%" />
             </el-form-item>
@@ -35,7 +35,7 @@
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="发货地址">
-          <el-form ref="addressGoods" :model="addressGoods" label-width="120px" :rules="addressGoodsValidate" class="shop-setting-form">
+          <el-form ref="addressGoodsRef" :model="addressGoods" label-width="120px" :rules="addressGoodsValidate" class="shop-setting-form">
             <el-form-item label="发货人姓名" prop="salesConsignorName">
               <el-input v-model="addressGoods.salesConsignorName" maxlength="11" clearable style="width: 20%">
               </el-input>
@@ -65,7 +65,7 @@
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="退货地址" name="REFUND_GOODS_ADDRESS">
-          <el-form ref="addressForm" :model="addressForm" label-width="100px" :rules="afterFormValidate">
+          <el-form ref="addressFormRef" :model="addressForm" label-width="100px" :rules="afterFormValidate">
             <el-form-item label="收货人" prop="salesConsigneeName">
               <el-input v-model="addressForm.salesConsigneeName" maxlength="11" clearable style="width: 20%" />
             </el-form-item>
@@ -116,325 +116,327 @@
       </el-tabs>
     </el-card>
 
-    <multipleMap ref="map" @callback="callbackAddress" />
+    <multipleMap ref="mapRef" @callback="callbackAddress" />
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import * as API_Shop from "@/api/shops";
 import { validateMobile } from "@/libs/validate";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
-
 import multipleMap from "@/views/my-components/map/multiple-map";
 import * as RegExp from "@/libs/RegExp.js";
 import Cookies from "js-cookie";
-export default {
-  name: "shopSetting",
-  components: {
-    uploadPicThumb,
+import { Message } from "@/utils/message";
 
-    multipleMap
-  },
-  data() {
-    return {
-      currentKey: "", //存储当前点击地址的key
-      showMap: false, // 是否展示地图
-      type: "INFO",
+defineOptions({ name: "shopSetting" });
 
-      storeName: "", //店铺名称
+const currentKey = ref(""); //存储当前点击地址的key
+const showMap = ref(false); // 是否展示地图
+const type = ref("INFO");
 
-      regionId: [], // 地区id
-      addressForm: {
-        // 退货地址
-        salesConsigneeName: "", // 收货人姓名
-        salesConsigneeMobile: "", // 收货人电话
-        salesConsigneeAddressId: "", // 售后地址id,逗号分割
-        salesConsigneeAddressPath: "", // 售后地址，逗号分割
-        salesConsigneeDetail: "", // 详细地址
-      },
-      //im form
-      udeskForm: {
-        merchantEuid: "",
-      },
-      udeskFormValidate: {
-        merchantEuid: [
-          { required: true, message: "请输入店铺坐席ID", trigger: "blur" },
-        ],
-      },
-      afterFormValidate: {
-        salesConsigneeMobile: [
-          { required: true, message: "手机号不能为空", trigger: "blur" },
-          {
-            pattern: RegExp.mobile,
-            trigger: "blur",
-            message: "请输入正确的手机号",
-          },
-        ],
-        salesConsigneeName: [
-          { required: true, message: "请输入收货人", trigger: "blur" },
-        ],
-        salesConsigneeDetail: [
-          { required: true, message: "请输入详细地址", trigger: "blur" },
-        ],
-      },
-      form: {
-        // 添加或编辑表单对象初始化数据
-        storeAddressPath: "", // 店铺地址中文
-        storeCenter: "", // 经度 + 纬度
-        longitude: "", //经度
-        latitude: "", //纬度
-        storeAddressDetail: "", //详细地址
-        storeAddressIdPath: "", //地址
-        storeDesc: "", // 店铺描述
-        pageShow: false,
-        selfPickFlag: false,
-      },
+const storeName = ref(""); //店铺名称
 
-      // 表单验证规则
-      formValidate: {
-        addressName: [
-          {
-            required: true,
-            message: "请输入地址名称",
-            trigger: "blur",
-          },
-        ],
-        longitude: [
-          {
-            required: true,
-            message: "请输入地址经度",
-            trigger: "blur",
-          },
-        ],
-        latitude: [
-          {
-            required: true,
-            message: "请输入地址纬度",
-            trigger: "blur",
-          },
-        ],
-        mobile: [
-          {
-            required: true,
-            message: "请输入地址纬度",
-            trigger: "blur",
-          },
-          {
-            validator: validateMobile,
-            trigger: "blur",
-          },
-        ],
-        storeAddressDetail: [
-          {
-            required: true,
-            message: "请输入详细地址",
-            trigger: "blur",
-          },
-        ],
-      },
-      submitLoading: false, // 添加或编辑提交状态
-      //发货地址
-      addressGoods: {
-        salesConsignorName: " ",
-        salesConsignorMobile: " ",
-        salesConsignorAddressId: " ",
-        salesConsignorAddressPath: " ",
-        salesConsignorDetail: " ",
-      },
-
-      addressGoodsValidate: {
-        salesConsignorName: [
-          { required: true, message: "请输入发货人姓名", trigger: "blur" },
-        ],
-        salesConsignorMobile: [
-          { required: true, message: "手机号不能为空", trigger: "blur" },
-          {
-            pattern: RegExp.mobile,
-            trigger: "blur",
-            message: "请输入正确的手机号",
-          },
-        ],
-        salesConsignorDetail: [
-          { required: true, message: "请输入详细地址", trigger: "blur" },
-        ],
-      },
-    };
-  },
-  methods: {
-    // 回调地址
-    callbackAddress(val) {
-      if (val.type === 'select') {
-        const paths = val.data.map(item => item.name).join(',')
-
-        const ids = val.data.map(item => item.id).join(',')
-
-        if (this.currentKey === 'storeAddress') {
-          this.form.storeAddressPath = paths
-          this.form.storeAddressIdPath = ids
-          this.form.storeCenter = val.data[val.data.length - 1].center
-        }
-        if (this.currentKey === 'addressGoods') {
-          this.addressGoods.salesConsignorAddressPath = paths
-          this.addressGoods.salesConsignorAddressId = ids
-        }
-        if (this.currentKey === 'salesConsigneeAddressPath') {
-          this.addressForm.salesConsigneeAddressPath = paths
-          this.addressForm.salesConsigneeAddressId = ids
-        }
-
-      }
-      else {
-        if (this.currentKey === 'storeAddressstoreAddress') {
-          this.form.storeAddressPath = val.data.addr;
-          this.form.storeAddressIdPath = val.data.addrId;
-          this.form.storeCenter = val.data.position.lng + "," + val.data.position.lat;
-        }
-        if (this.currentKey === 'addressGoods') {
-          this.addressGoods.salesConsignorAddressPath = val.data.addr;
-          this.addressGoods.salesConsignorAddressId = val.data.addrId;
-        }
-        if (this.currentKey === 'salesConsigneeAddressPath') {
-          this.addressForm.salesConsigneeAddressPath = val.data.addr;
-          this.addressForm.salesConsigneeAddressId = val.data.addrId;
-        }
-      }
+const regionId = ref([]); // 地区id
+// 历史遗留：loading、regionGoods、regionIdS 未在原 data 中声明，仅在方法内赋值，保持原行为
+let loading = false;
+let regionGoods = null;
+let regionIdS = null;
+const addressForm = ref({
+  // 退货地址
+  salesConsigneeName: "", // 收货人姓名
+  salesConsigneeMobile: "", // 收货人电话
+  salesConsigneeAddressId: "", // 售后地址id,逗号分割
+  salesConsigneeAddressPath: "", // 售后地址，逗号分割
+  salesConsigneeDetail: "", // 详细地址
+});
+//im form
+const udeskForm = ref({
+  merchantEuid: "",
+});
+const udeskFormValidate = {
+  merchantEuid: [
+    { required: true, message: "请输入店铺坐席ID", trigger: "blur" },
+  ],
+};
+const afterFormValidate = {
+  salesConsigneeMobile: [
+    { required: true, message: "手机号不能为空", trigger: "blur" },
+    {
+      pattern: RegExp.mobile,
+      trigger: "blur",
+      message: "请输入正确的手机号",
     },
-    // 修改地址
-    handleChangeAddress(key) {
-      this.currentKey = key
-      this.$refs.map.open();
+  ],
+  salesConsigneeName: [
+    { required: true, message: "请输入收货人", trigger: "blur" },
+  ],
+  salesConsigneeDetail: [
+    { required: true, message: "请输入详细地址", trigger: "blur" },
+  ],
+};
+const form = ref({
+  // 添加或编辑表单对象初始化数据
+  storeAddressPath: "", // 店铺地址中文
+  storeCenter: "", // 经度 + 纬度
+  longitude: "", //经度
+  latitude: "", //纬度
+  storeAddressDetail: "", //详细地址
+  storeAddressIdPath: "", //地址
+  storeDesc: "", // 店铺描述
+  pageShow: false,
+  selfPickFlag: false,
+});
+
+// 表单验证规则
+const formValidate = {
+  addressName: [
+    {
+      required: true,
+      message: "请输入地址名称",
+      trigger: "blur",
     },
-    // 初始化数据
-    init() {
-      this.getShopInfo();
-      this.getDeliverAddress()
+  ],
+  longitude: [
+    {
+      required: true,
+      message: "请输入地址经度",
+      trigger: "blur",
     },
+  ],
+  latitude: [
+    {
+      required: true,
+      message: "请输入地址纬度",
+      trigger: "blur",
+    },
+  ],
+  mobile: [
+    {
+      required: true,
+      message: "请输入地址纬度",
+      trigger: "blur",
+    },
+    {
+      validator: validateMobile,
+      trigger: "blur",
+    },
+  ],
+  storeAddressDetail: [
+    {
+      required: true,
+      message: "请输入详细地址",
+      trigger: "blur",
+    },
+  ],
+};
+const submitLoading = ref(false); // 添加或编辑提交状态
+//发货地址
+const addressGoods = ref({
+  salesConsignorName: " ",
+  salesConsignorMobile: " ",
+  salesConsignorAddressId: " ",
+  salesConsignorAddressPath: " ",
+  salesConsignorDetail: " ",
+});
+
+const addressGoodsValidate = {
+  salesConsignorName: [
+    { required: true, message: "请输入发货人姓名", trigger: "blur" },
+  ],
+  salesConsignorMobile: [
+    { required: true, message: "手机号不能为空", trigger: "blur" },
+    {
+      pattern: RegExp.mobile,
+      trigger: "blur",
+      message: "请输入正确的手机号",
+    },
+  ],
+  salesConsignorDetail: [
+    { required: true, message: "请输入详细地址", trigger: "blur" },
+  ],
+};
+
+const formRef = ref(null);
+const addressGoodsRef = ref(null);
+const addressFormRef = ref(null);
+const udeskFormRef = ref(null);
+const mapRef = ref(null);
+
+// 回调地址
+function callbackAddress(val) {
+  if (val.type === 'select') {
+    const paths = val.data.map(item => item.name).join(',')
+
+    const ids = val.data.map(item => item.id).join(',')
+
+    if (currentKey.value === 'storeAddress') {
+      form.value.storeAddressPath = paths
+      form.value.storeAddressIdPath = ids
+      form.value.storeCenter = val.data[val.data.length - 1].center
+    }
+    if (currentKey.value === 'addressGoods') {
+      addressGoods.value.salesConsignorAddressPath = paths
+      addressGoods.value.salesConsignorAddressId = ids
+    }
+    if (currentKey.value === 'salesConsigneeAddressPath') {
+      addressForm.value.salesConsigneeAddressPath = paths
+      addressForm.value.salesConsigneeAddressId = ids
+    }
+
+  }
+  else {
+    if (currentKey.value === 'storeAddressstoreAddress') {
+      form.value.storeAddressPath = val.data.addr;
+      form.value.storeAddressIdPath = val.data.addrId;
+      form.value.storeCenter = val.data.position.lng + "," + val.data.position.lat;
+    }
+    if (currentKey.value === 'addressGoods') {
+      addressGoods.value.salesConsignorAddressPath = val.data.addr;
+      addressGoods.value.salesConsignorAddressId = val.data.addrId;
+    }
+    if (currentKey.value === 'salesConsigneeAddressPath') {
+      addressForm.value.salesConsigneeAddressPath = val.data.addr;
+      addressForm.value.salesConsigneeAddressId = val.data.addrId;
+    }
+  }
+}
+// 修改地址
+function handleChangeAddress(key) {
+  currentKey.value = key
+  mapRef.value.open();
+}
+// 初始化数据
+function init() {
+  getShopInfo();
+  getDeliverAddress()
+}
 
 
-    setAddressGoods() {
-      console.log(this.$refs.addressGoods)
+function setAddressGoods() {
+  console.log(addressGoodsRef.value)
 
-      this.$refs.addressGoods.validate((valid) => {
-        if (valid) {
-          API_Shop.editDeliverAddress(this.addressGoods).then(res => {
-            if (res.success) {
-              this.$Message.success("修改成功")
-            }
-          })
-        }
-      });
-    },
-    //获取店铺信息
-    getShopInfo() {
-      this.loading = true;
-      API_Shop.getShopInfo().then((res) => {
-        this.loading = false;
+  addressGoodsRef.value.validate((valid) => {
+    if (valid) {
+      API_Shop.editDeliverAddress(addressGoods.value).then(res => {
         if (res.success) {
-          this.form = res.result;
-
-          this.storeName = res.result.storeName;
-          this.form.storeCenter = res.result.storeCenter;
-          Cookies.set("userInfoSeller", JSON.stringify(res.result));
-          if (res.result.merchantEuid) {
-            //赋予坐席id
-            this.udeskForm.merchantEuid = res.result.merchantEuid;
-          }
-        }
-      });
-    },
-    pageShow(type) {
-      this.form.pageShow = type
-    },
-    changeSelfPickFlag(item) {
-      if (item) {
-        this.form.selfPickFlag = item
-      }
-    },
-    getDeliverAddress() {
-      API_Shop.getDeliverAddress().then(res => {
-        if (res.success) {
-          if (res.result != '' && res.result != null) {
-            this.addressGoods = res.result;
-            this.regionGoods = res.result.salesConsignorAddressPath;
-            this.regionIdS = res.result.salesConsignorAddressId;
-          }
+          Message.success("修改成功")
         }
       })
-    },
+    }
+  });
+}
+//获取店铺信息
+function getShopInfo() {
+  loading = true;
+  API_Shop.getShopInfo().then((res) => {
+    loading = false;
+    if (res.success) {
+      form.value = res.result;
 
-    //重置
-    handleReset() {
-      this.$refs.form.resetFields();
-    },
-    //提交保存
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          API_Shop.saveShopInfo(this.form).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("修改成功");
-              this.getShopInfo();
-            }
-          });
-        }
-      });
-    },
-    merchantSubmit() {
-      this.$refs.udeskForm.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          API_Shop.updatEmerchantId(this.udeskForm).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("修改成功");
-              this.getShopInfo();
-            }
-          });
-        }
-      });
-    },
+      storeName.value = res.result.storeName;
+      form.value.storeCenter = res.result.storeCenter;
+      Cookies.set("userInfoSeller", JSON.stringify(res.result));
+      if (res.result.merchantEuid) {
+        //赋予坐席id
+        udeskForm.value.merchantEuid = res.result.merchantEuid;
+      }
+    }
+  });
+}
+function pageShow(type) {
+  form.value.pageShow = type
+}
+function changeSelfPickFlag(item) {
+  if (item) {
+    form.value.selfPickFlag = item
+  }
+}
+function getDeliverAddress() {
+  API_Shop.getDeliverAddress().then(res => {
+    if (res.success) {
+      if (res.result != '' && res.result != null) {
+        addressGoods.value = res.result;
+        regionGoods = res.result.salesConsignorAddressPath;
+        regionIdS = res.result.salesConsignorAddressId;
+      }
+    }
+  })
+}
 
-    //tab切换
-    handleClickType(v) {
-      //退款
-      if (v == "INFO") {
-        this.getShopInfo();
-      }
-      //退货
-      if (v == "REFUND_GOODS_ADDRESS") {
-        this.getRefundGoodsAddress();
-      }
-    },
-    //获取商家退货地址
-    getRefundGoodsAddress() {
-      API_Shop.getRefundGoodsAddress().then((res) => {
-        if (res.result != null) {
-          this.addressForm = res.result;
+//重置
+function handleReset() {
+  formRef.value.resetFields();
+}
+//提交保存
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      API_Shop.saveShopInfo(form.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("修改成功");
+          getShopInfo();
         }
       });
-    },
-    //提交保存
-    afterHandleSubmit() {
-      this.$refs.addressForm.validate((valid) => {
-        if (valid) {
-          this.submitLoading = true;
-          API_Shop.saveRefundGoodsAddress(this.addressForm).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("修改成功");
-              this.getRefundGoodsAddress();
-            }
-          });
+    }
+  });
+}
+function merchantSubmit() {
+  udeskFormRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      API_Shop.updatEmerchantId(udeskForm.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("修改成功");
+          getShopInfo();
         }
       });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    }
+  });
+}
+
+//tab切换
+function handleClickType(v) {
+  //退款
+  if (v == "INFO") {
+    getShopInfo();
+  }
+  //退货
+  if (v == "REFUND_GOODS_ADDRESS") {
+    getRefundGoodsAddress();
+  }
+}
+//获取商家退货地址
+function getRefundGoodsAddress() {
+  API_Shop.getRefundGoodsAddress().then((res) => {
+    if (res.result != null) {
+      addressForm.value = res.result;
+    }
+  });
+}
+//提交保存
+function afterHandleSubmit() {
+  addressFormRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      API_Shop.saveRefundGoodsAddress(addressForm.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("修改成功");
+          getRefundGoodsAddress();
+        }
+      });
+    }
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style scoped lang="scss">
 .desc {

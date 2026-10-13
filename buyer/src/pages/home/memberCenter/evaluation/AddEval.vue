@@ -74,119 +74,125 @@
     </UserCenterLayout>
   </div>
 </template>
-<script>
+<script setup>
+import { getCurrentInstance, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Message, Notice } from "@/utils/message";
 import { Camera, Delete, View } from '@element-plus/icons-vue';
 import { orderDetail } from '@/api/order.js';
 import { addEvaluation } from '@/api/member.js';
 import { buyerUrl } from '@/plugins/request.js';
 import storage from '@/plugins/storage';
-export default {
-  components: { Camera, Delete, View },
-  data () {
-    return {
-      order: {}, // 订单详情
-      orderGoods: {}, // 订单商品
-      form: { // 评分展示
-        deliveryScore: 5,
-        serviceScore: 5,
-        descriptionScore: 5
-      }, // 表单
-      visible: false, // 图片预览
-      action: buyerUrl + '/buyer/common/upload/file', // 上传地址
-      accessToken: {}, // 验证token
-      previewImage: '', // 预览图片地址
-      loading: false, // 提交加载状态
-      // el-rate SVG 通过 colors 写入 fill-color，跟随平台主题色
-      rateThemeColors: ['var(--theme-color)', 'var(--theme-color)', 'var(--theme-color)']
+
+const route = useRoute();
+const router = useRouter();
+const instance = getCurrentInstance();
+
+const order = ref({}); // 订单详情
+const orderGoods = ref({}); // 订单商品
+const form = reactive({ // 评分展示
+  deliveryScore: 5,
+  serviceScore: 5,
+  descriptionScore: 5
+}); // 表单
+const visible = ref(false); // 图片预览
+const action = buyerUrl + '/buyer/common/upload/file'; // 上传地址
+const accessToken = reactive({}); // 验证token
+const previewImage = ref(''); // 预览图片地址
+const loading = ref(false); // 提交加载状态
+// el-rate SVG 通过 colors 写入 fill-color，跟随平台主题色
+const rateThemeColors = ['var(--theme-color)', 'var(--theme-color)', 'var(--theme-color)'];
+
+function getOrderDetail () { // 获取订单详情
+  orderDetail(route.query.sn).then(res => {
+    order.value = res.result
+    orderGoods.value = res.result.orderItems[route.query.index]
+    orderGoods.value['grade'] = 'GOOD'
+    orderGoods.value.uploadList = []
+  })
+}
+
+function save () { // 保存评价
+  if (!form.serviceScore || !form.deliveryScore) {
+    Message.warning('物流服务评价不能为空')
+    return false;
+  }
+
+  if (!form.descriptionScore) {
+    Message.warning('描述评价不能为空')
+    return false;
+  }
+
+  if (!orderGoods.value.content || !String(orderGoods.value.content).trim()) {
+    Message.warning('评论内容不能为空')
+    return false;
+  }
+
+  loading.value = true;
+  let goods = orderGoods.value
+  let params = {
+    goodsId: goods.goodsId,
+    orderItemSn: goods.sn,
+    skuId: goods.skuId,
+    descriptionScore: form.descriptionScore,
+    serviceScore: form.serviceScore,
+    deliveryScore: form.deliveryScore,
+    grade: goods.grade,
+    content: goods.content.trim(),
+    images: goods.uploadList.length ? goods.uploadList.join(',') : ''
+  }
+  addEvaluation(params).then(res => {
+    loading.value = false
+    if (res.success) {
+      Message.success('评价成功')
+      router.push('/home/CommentList')
+    } else {
+      Message.error(res.message || '评价失败，请稍后重试')
     }
-  },
-  methods: {
-    getOrderDetail () { // 获取订单详情
-      orderDetail(this.$route.query.sn).then(res => {
-        this.order = res.result
-        this.orderGoods = res.result.orderItems[this.$route.query.index]
-        this.orderGoods['grade'] = 'GOOD'
-        this.orderGoods.uploadList = []
-      })
-    },
-    save () { // 保存评价
-      if (!this.form.serviceScore || !this.form.deliveryScore) {
-        Message.warning('物流服务评价不能为空')
-        return false;
-      }
+  }).catch((err) => {
+    loading.value = false;
+    Message.error(err?.message || '评价失败，请稍后重试')
+  })
+}
 
-      if (!this.form.descriptionScore) {
-        Message.warning('描述评价不能为空')
-        return false;
-      }
+function goGoodsDetail (skuId, goodsId) { // 跳转商品详情
+  let routerUrl = router.resolve({
+    path: '/goodsDetail',
+    query: {skuId, goodsId}
+  })
+  window.open(routerUrl.href, '_blank')
+}
 
-      if (!this.orderGoods.content || !String(this.orderGoods.content).trim()) {
-        Message.warning('评论内容不能为空')
-        return false;
-      }
+function handleView (name) { // 预览图片
+  previewImage.value = name;
+  visible.value = true;
+}
 
-      this.loading = true;
-      let goods = this.orderGoods
-      let params = {
-        goodsId: goods.goodsId,
-        orderItemSn: goods.sn,
-        skuId: goods.skuId,
-        descriptionScore: this.form.descriptionScore,
-        serviceScore: this.form.serviceScore,
-        deliveryScore: this.form.deliveryScore,
-        grade: goods.grade,
-        content: goods.content.trim(),
-        images: goods.uploadList.length ? goods.uploadList.join(',') : ''
-      }
-      addEvaluation(params).then(res => {
-        this.loading = false
-        if (res.success) {
-          Message.success('评价成功')
-          this.$router.push('/home/CommentList')
-        } else {
-          Message.error(res.message || '评价失败，请稍后重试')
-        }
-      }).catch((err) => {
-        this.loading = false;
-        Message.error(err?.message || '评价失败，请稍后重试')
-      })
-    },
-    goGoodsDetail (skuId, goodsId) { // 跳转商品详情
-      let routerUrl = this.$router.resolve({
-        path: '/goodsDetail',
-        query: {skuId, goodsId}
-      })
-      window.open(routerUrl.href, '_blank')
-    },
-    handleView (name) { // 预览图片
-      this.previewImage = name;
-      this.visible = true;
-    },
-    handleRemove (index) { // 移除图片
-      this.orderGoods.uploadList.splice(index, 1)
-      this.$forceUpdate()
-    },
-    handleSuccess (res, file) { // 上传成功回调
-      this.orderGoods.uploadList.push(res.result)
-      this.$forceUpdate()
-    },
-    handleBeforeUpload () { // 上传之前钩子
-      const check = this.orderGoods.uploadList.length < 9;
-      if (!check) {
-        Notice.warning({
-          title: '最多可以上传九张图片'
-        });
-        return check;
-      }
-    }
-  },
-  mounted () {
-    window.scrollTo(0, 0)
-    this.accessToken.accessToken = storage.getItem('accessToken');
-    this.getOrderDetail()
+function handleRemove (index) { // 移除图片
+  orderGoods.value.uploadList.splice(index, 1)
+  instance.proxy.$forceUpdate()
+}
+
+function handleSuccess (res, file) { // 上传成功回调
+  orderGoods.value.uploadList.push(res.result)
+  instance.proxy.$forceUpdate()
+}
+
+function handleBeforeUpload () { // 上传之前钩子
+  const check = orderGoods.value.uploadList.length < 9;
+  if (!check) {
+    Notice.warning({
+      title: '最多可以上传九张图片'
+    });
+    return check;
   }
 }
+
+onMounted(() => {
+  window.scrollTo(0, 0)
+  accessToken.accessToken = storage.getItem('accessToken');
+  getOrderDetail()
+})
 </script>
 <style lang="scss" scoped>
 .delivery-rate {

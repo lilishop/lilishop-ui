@@ -40,85 +40,87 @@
   </el-dialog>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { aMapSwitch } from "@/config/index";
 import mapping from "@/views/my-components/map/index.vue";
 import * as API_Setup from "@/api/common.js";
+import { Message } from "@/utils/message";
 
-export default {
-  components: { mapping },
-  data() {
-    return {
-      aMapSwitch,
-      enableMap: false,
-      mapDefault: "select",
-      data: {
-        province: [],
-        city: [],
-        area: [],
-        street: [],
-      },
-      chiosend: [],
-    };
-  },
-  mounted() {
-    this.chiosend = new Array(4).fill("");
-  },
-  methods: {
-    open() {
-      this.enableMap = true;
-      this.init({ id: 0 }, "province");
-    },
-    changeMap(val) {
-      this.mapDefault = val;
-    },
-    init(val, level = "province", index) {
-      if (level == 0) {
-        this.chiosend.splice(3, 1, val);
-      } else {
-        API_Setup.getChildRegion(val.id).then((res) => {
-          if (res.result.length && val.id !== 0) {
-            this.chiosend[index] = val;
-          } else if (!res.result.length) {
-            this.chiosend[index] = val;
-          }
-          this.data[level] = res.result;
-          if (level == "city") {
-            this.data.area = [];
-            this.data.street = [];
-            this.chiosend.splice(1, 3, "", "", "");
-          }
-          if (level == "area") {
-            this.data.street = [];
-            this.chiosend.splice(2, 2, "", "");
-          }
-          if (level == "street") {
-            this.chiosend.splice(3, 1, "");
-          }
-        });
+const emit = defineEmits(["callback"]);
+
+const enableMap = ref(false);
+const mapDefault = ref("select");
+const data = reactive({
+  province: [],
+  city: [],
+  area: [],
+  street: [],
+});
+const chiosend = ref([]);
+
+// 模板 ref，对应高德地图子组件
+const map = ref(null);
+
+onMounted(() => {
+  chiosend.value = new Array(4).fill("");
+});
+
+function open() {
+  enableMap.value = true;
+  init({ id: 0 }, "province");
+}
+function changeMap(val) {
+  mapDefault.value = val;
+}
+function init(val, level = "province", index) {
+  if (level == 0) {
+    chiosend.value.splice(3, 1, val);
+  } else {
+    API_Setup.getChildRegion(val.id).then((res) => {
+      if (res.result.length && val.id !== 0) {
+        chiosend.value[index] = val;
+      } else if (!res.result.length) {
+        chiosend.value[index] = val;
       }
-    },
-    getAddress(center) {
-      this.$emit("callback", {
-        type: this.mapDefault,
-        data: center,
-      });
-      this.enableMap = false;
-    },
-    finished() {
-      if (!this.chiosend[0]) {
-        this.$Message.error("请选择地址");
-        return;
+      data[level] = res.result;
+      if (level == "city") {
+        data.area = [];
+        data.street = [];
+        chiosend.value.splice(1, 3, "", "", "");
       }
-      const params = this.chiosend.filter((item) => item !== "" && item.value !== "");
-      this.enableMap = false;
-      this.$emit("callback", {
-        type: this.mapDefault,
-        data: params,
-      });
-    },
-  },
-};
+      if (level == "area") {
+        data.street = [];
+        chiosend.value.splice(2, 2, "", "");
+      }
+      if (level == "street") {
+        chiosend.value.splice(3, 1, "");
+      }
+    });
+  }
+}
+function getAddress(center) {
+  emit("callback", {
+    type: mapDefault.value,
+    data: center,
+  });
+  enableMap.value = false;
+}
+function finished() {
+  if (!chiosend.value[0]) {
+    Message.error("请选择地址");
+    return;
+  }
+  const params = chiosend.value.filter((item) => item !== "" && item.value !== "");
+  enableMap.value = false;
+  emit("callback", {
+    type: mapDefault.value,
+    data: params,
+  });
+}
+
+// 父组件（shopAddress/shopSetting/orderDetail）通过 ref 调用 open() 打开弹窗
+defineExpose({ open });
 </script>
 
 <style lang="scss" scoped>

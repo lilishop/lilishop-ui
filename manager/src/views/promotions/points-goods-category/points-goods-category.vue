@@ -49,7 +49,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="form" :model="formAdd" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="formAdd" label-width="100px" :rules="formValidate">
         <el-form-item label="分类名称" prop="name">
           <el-input v-model="formAdd.name" clearable />
         </el-form-item>
@@ -65,13 +65,17 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
 import {
   getPointsGoodsCategoryList,
   addPointsGoodsCategory,
   updatePointsGoodsCategory,
   deletePointsGoodsCategoryById,
 } from "@/api/promotion";
+import { Message, Modal } from "@/utils/message";
+
+defineOptions({ name: "pointsGoodsCategory" });
 
 const buildDefaultFormAdd = () => ({
   parentId: 0,
@@ -81,135 +85,130 @@ const buildDefaultFormAdd = () => ({
   sortOrder: 1,
 });
 
-export default {
-  name: "pointsGoodsCategory",
-  data() {
-    return {
-      submitLoading: false,
-      loading: false,
-      modalType: 0,
-      modalVisible: false,
-      modalTitle: "",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "sortOrder",
-        order: "asc",
-      },
-      formAdd: buildDefaultFormAdd(),
-      formValidate: {
-        name: [{ required: true, message: "商品分类名称不能为空", trigger: "blur" }],
-      },
-      tableData: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.getAllList();
-    },
-    edit(v) {
-      this.modalType = 1;
-      this.modalTitle = "编辑";
-      this.formAdd = {
-        ...buildDefaultFormAdd(),
-        id: v.id,
-        name: v.name,
-        sortOrder: v.sortOrder,
-      };
-      this.modalVisible = true;
-    },
-    addParent() {
-      this.modalType = 0;
-      this.modalTitle = "添加积分商品分类";
-      this.formAdd = buildDefaultFormAdd();
-      this.modalVisible = true;
-      this.$nextTick(() => {
-        this.$refs.form?.clearValidate();
+const formRef = ref(null);
+
+const submitLoading = ref(false);
+const loading = ref(false);
+const modalType = ref(0);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "sortOrder",
+  order: "asc",
+});
+const formAdd = ref(buildDefaultFormAdd());
+const formValidate = reactive({
+  name: [{ required: true, message: "商品分类名称不能为空", trigger: "blur" }],
+});
+const tableData = ref([]);
+const total = ref(0);
+
+function init() {
+  getAllList();
+}
+function edit(v) {
+  modalType.value = 1;
+  modalTitle.value = "编辑";
+  formAdd.value = {
+    ...buildDefaultFormAdd(),
+    id: v.id,
+    name: v.name,
+    sortOrder: v.sortOrder,
+  };
+  modalVisible.value = true;
+}
+function addParent() {
+  modalType.value = 0;
+  modalTitle.value = "添加积分商品分类";
+  formAdd.value = buildDefaultFormAdd();
+  modalVisible.value = true;
+  nextTick(() => {
+    formRef.value?.clearValidate();
+  });
+}
+function Submit() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+    if (modalType.value === 0) {
+      delete formAdd.value.id;
+      addPointsGoodsCategory(formAdd.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("添加成功");
+          getAllList();
+          modalVisible.value = false;
+          formAdd.value = buildDefaultFormAdd();
+        }
       });
-    },
-    Submit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        if (this.modalType === 0) {
-          delete this.formAdd.id;
-          addPointsGoodsCategory(this.formAdd).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("添加成功");
-              this.getAllList();
-              this.modalVisible = false;
-              this.formAdd = buildDefaultFormAdd();
-            }
-          });
-        } else {
-          updatePointsGoodsCategory(this.formAdd).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("修改成功");
-              this.getAllList();
-              this.modalVisible = false;
-              this.formAdd = buildDefaultFormAdd();
-            }
-          });
+    } else {
+      updatePointsGoodsCategory(formAdd.value).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("修改成功");
+          getAllList();
+          modalVisible.value = false;
+          formAdd.value = buildDefaultFormAdd();
+        }
+      });
+    }
+  });
+}
+function remove(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除 " + v.name + " ?",
+    loading: true,
+    onOk: () => {
+      deletePointsGoodsCategoryById(v.id).then((res) => {
+        Modal.remove();
+        if (res.success) {
+          Message.success("操作成功");
+          getAllList();
         }
       });
     },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除 " + v.name + " ?",
-        loading: true,
-        onOk: () => {
-          deletePointsGoodsCategoryById(v.id).then((res) => {
-            this.$Modal.remove();
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getAllList();
+  });
+}
+function getAllList() {
+  loading.value = true;
+  getPointsGoodsCategoryList(searchForm)
+    .then((res) => {
+      if (res.success) {
+        const records = res.result.records || [];
+        const sortFn = (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0);
+        const sortRecursively = (list = []) => {
+          list.sort(sortFn);
+          list.forEach((item) => {
+            if (Array.isArray(item.children) && item.children.length) {
+              sortRecursively(item.children);
             }
           });
-        },
-      });
-    },
-    getAllList() {
-      this.loading = true;
-      getPointsGoodsCategoryList(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            const records = res.result.records || [];
-            const sortFn = (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0);
-            const sortRecursively = (list = []) => {
-              list.sort(sortFn);
-              list.forEach((item) => {
-                if (Array.isArray(item.children) && item.children.length) {
-                  sortRecursively(item.children);
-                }
-              });
-              return list;
-            };
-            this.tableData = sortRecursively(records);
-            this.total = res.result.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getAllList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getAllList();
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+          return list;
+        };
+        tableData.value = sortRecursively(records);
+        total.value = res.result.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getAllList();
+}
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getAllList();
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style scoped>

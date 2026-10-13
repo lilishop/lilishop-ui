@@ -260,44 +260,38 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from "vue";
 import { Plus } from "@element-plus/icons-vue";
 import { ensureVideoItem } from "./video-style";
 
-export default {
-  name: "VideoConfig",
-  components: { Plus },
-  props: {
-    item: {
-      type: Object,
-      required: true,
-    },
+defineOptions({ name: "VideoConfig" });
+
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
   },
-  emits: ["select-file"],
-  data() {
-    return {
-      activeTab: "content",
-    };
+});
+
+defineEmits(["select-file"]);
+
+const activeTab = ref("content");
+
+ensureVideoItem(props.item);
+
+watch(
+  () => props.item,
+  (val) => {
+    if (val) ensureVideoItem(val);
   },
-  created() {
-    ensureVideoItem(this.item);
-  },
-  watch: {
-    item: {
-      handler(val) {
-        if (val) ensureVideoItem(val);
-      },
-      immediate: true,
-      deep: true,
-    },
-  },
-  methods: {
-    resetBgColors() {
-      this.item.style.bgColorStart = "#F5F5F5";
-      this.item.style.bgColorEnd = "#F5F5F5";
-    },
-  },
-};
+  { immediate: true, deep: true }
+);
+
+function resetBgColors() {
+  props.item.style.bgColorStart = "#F5F5F5";
+  props.item.style.bgColorEnd = "#F5F5F5";
+}
 </script>
 
 <style scoped lang="scss">

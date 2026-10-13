@@ -25,29 +25,25 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      isShow: false,
-    }
-  },
-  created() {
-    if (this.getNum() <= 3) {
-      setTimeout(() => {
-        this.isShow = true
-      }, 1000 * 30)
-    }
-  },
-  methods: {
-    getNum() {
-      return parseInt(localStorage.getItem('REWARD_BOX')) || 0
-    },
-    close() {
-      localStorage.setItem('REWARD_BOX', this.getNum() + 1)
-      this.isShow = false
-    },
-  },
+<script setup>
+import { ref } from 'vue'
+
+const isShow = ref(false)
+
+function getNum() {
+  return parseInt(localStorage.getItem('REWARD_BOX')) || 0
+}
+
+function close() {
+  localStorage.setItem('REWARD_BOX', getNum() + 1)
+  isShow.value = false
+}
+
+// created
+if (getNum() <= 3) {
+  setTimeout(() => {
+    isShow.value = true
+  }, 1000 * 30)
 }
 </script>
 <style lang="less" scoped>

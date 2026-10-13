@@ -59,7 +59,7 @@
       :close-on-click-modal="false"
       destroy-on-close
     >
-      <el-form ref="form" :model="form" :rules="formValidate" label-width="120px">
+      <el-form ref="formRef" :model="form" :rules="formValidate" label-width="120px">
         <el-form-item label="物流公司名称" prop="name">
           <el-input v-model="form.name" clearable style="width: 100%" />
         </el-form-item>
@@ -97,13 +97,17 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref } from "vue";
 import {
   getLogisticsPage,
   updateLogistics,
   addLogistics,
   delLogistics,
 } from "@/api/logistics";
+import { Message, Modal } from "@/utils/message";
+
+defineOptions({ name: "logistics" });
 
 const defaultForm = () => ({
   name: "",
@@ -114,156 +118,152 @@ const defaultForm = () => ({
 
 const normalizeStandBy = (value) => (value === true || value === "true" ? "true" : "false");
 
-export default {
-  name: "logistics",
-  data() {
-    return {
-      loading: true,
-      modalVisible: false,
-      modalTitle: "",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        name: "",
-      },
-      form: defaultForm(),
-      formValidate: {
-        name: [
-          {
-            required: true,
-            message: "请输入物流公司名称",
-            trigger: "blur",
-          },
-        ],
-        code: [
-          {
-            required: true,
-            message: "请输入物流公司编码",
-            trigger: "blur",
-          },
-        ],
-      },
-      submitLoading: false,
-      data: [],
-      total: 0,
-      id: "",
-    };
-  },
-  methods: {
-    init() {
-      this.getDataList();
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getLogisticsPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          const data = res.result.records;
-          data.forEach((e) => {
-            e.switch = e.disabled === "OPEN";
-            e.standBy = normalizeStandBy(e.standBy);
-          });
-          this.data = data;
-          this.total = res.result.total;
-        }
-      });
-    },
-    changeSwitch(row) {
-      updateLogistics(row.id, {
-        name: row.name,
-        code: row.code,
-        standBy: normalizeStandBy(row.standBy),
-        disabled: row.disabled === "CLOSE" ? "OPEN" : "CLOSE",
-      }).then((res) => {
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.getDataList();
-        } else {
-          row.switch = !row.switch;
-        }
-      });
-    },
-    handleSubmit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
+const table = ref(null);
+const formRef = ref(null);
 
-        if (this.modalTitle === "添加") {
-          const payload = {
-            name: this.form.name,
-            code: this.form.code,
-            disabled: this.form.disabled,
-            standBy: normalizeStandBy(this.form.standBy),
-            formItems: this.form.formItems,
-          };
-          addLogistics(payload).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-              this.modalVisible = false;
-            }
-          });
-        } else {
-          updateLogistics(this.id, {
-            ...this.form,
-            standBy: normalizeStandBy(this.form.standBy),
-          }).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-              this.modalVisible = false;
-            }
-          });
+const loading = ref(true);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  name: "",
+});
+const form = ref(defaultForm());
+const formValidate = reactive({
+  name: [
+    {
+      required: true,
+      message: "请输入物流公司名称",
+      trigger: "blur",
+    },
+  ],
+  code: [
+    {
+      required: true,
+      message: "请输入物流公司编码",
+      trigger: "blur",
+    },
+  ],
+});
+const submitLoading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const id = ref("");
+
+function init() {
+  getDataList();
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  getLogisticsPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      const records = res.result.records;
+      records.forEach((e) => {
+        e.switch = e.disabled === "OPEN";
+        e.standBy = normalizeStandBy(e.standBy);
+      });
+      data.value = records;
+      total.value = res.result.total;
+    }
+  });
+}
+function changeSwitch(row) {
+  updateLogistics(row.id, {
+    name: row.name,
+    code: row.code,
+    standBy: normalizeStandBy(row.standBy),
+    disabled: row.disabled === "CLOSE" ? "OPEN" : "CLOSE",
+  }).then((res) => {
+    if (res.success) {
+      Message.success("操作成功");
+      getDataList();
+    } else {
+      row.switch = !row.switch;
+    }
+  });
+}
+function handleSubmit() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+
+    if (modalTitle.value === "添加") {
+      const payload = {
+        name: form.value.name,
+        code: form.value.code,
+        disabled: form.value.disabled,
+        standBy: normalizeStandBy(form.value.standBy),
+        formItems: form.value.formItems,
+      };
+      addLogistics(payload).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+          modalVisible.value = false;
+        }
+      });
+    } else {
+      updateLogistics(id.value, {
+        ...form.value,
+        standBy: normalizeStandBy(form.value.standBy),
+      }).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
+          modalVisible.value = false;
+        }
+      });
+    }
+  });
+}
+function add() {
+  modalTitle.value = "添加";
+  form.value = defaultForm();
+  nextTick(() => {
+    formRef.value?.resetFields();
+  });
+  modalVisible.value = true;
+}
+function detail(v) {
+  id.value = v.id;
+  modalTitle.value = "修改";
+  form.value = {
+    name: v.name,
+    code: v.code,
+    standBy: normalizeStandBy(v.standBy),
+    disabled: v.disabled,
+  };
+  modalVisible.value = true;
+}
+function remove(v) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除 " + v.name + " ?",
+    onOk: () => {
+      return delLogistics(v.id).then((res) => {
+        if (res.success) {
+          Message.success("操作成功");
+          getDataList();
         }
       });
     },
-    add() {
-      this.modalTitle = "添加";
-      this.form = defaultForm();
-      this.$nextTick(() => {
-        this.$refs.form?.resetFields();
-      });
-      this.modalVisible = true;
-    },
-    detail(v) {
-      this.id = v.id;
-      this.modalTitle = "修改";
-      this.form = {
-        name: v.name,
-        code: v.code,
-        standBy: normalizeStandBy(v.standBy),
-        disabled: v.disabled,
-      };
-      this.modalVisible = true;
-    },
-    remove(v) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除 " + v.name + " ?",
-        onOk: () => {
-          return delLogistics(v.id).then((res) => {
-            if (res.success) {
-              this.$Message.success("操作成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>

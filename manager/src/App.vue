@@ -4,32 +4,39 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, onUpdated } from "vue";
+import { useRoute } from "vue-router";
 import Cookies from "js-cookie";
 import { getCategoryTree } from "@/api/goods.js";
 import util from "@/libs/util";
+import { getStore } from "@/libs/storage";
+import { useAppStore } from "@/stores/app";
 
-export default {
-  name: "App",
-  updated() {
-    if (!localStorage.getItem("category") && this.$route.path !== "/login") {
-      getCategoryTree(0).then((res) => {
-        if (res.success) {
-          localStorage.setItem("category", JSON.stringify(res.result));
-        }
-      });
-    }
-  },
-  mounted() {
-    const loggedIn = this.getStore("accessToken") || Cookies.get("userInfoManager");
-    if (loggedIn) {
-      util.bootstrapDynamicRoutesFromCache();
-      util.initRouter(this);
-      this.$store.commit("setOpenedList");
-      this.$store.commit("initCachePage");
-    }
-  },
-};
+defineOptions({ name: "App" });
+
+const route = useRoute();
+const appStore = useAppStore();
+
+onUpdated(() => {
+  if (!localStorage.getItem("category") && route.path !== "/login") {
+    getCategoryTree(0).then((res) => {
+      if (res.success) {
+        localStorage.setItem("category", JSON.stringify(res.result));
+      }
+    });
+  }
+});
+
+onMounted(() => {
+  const loggedIn = getStore("accessToken") || Cookies.get("userInfoManager");
+  if (loggedIn) {
+    util.bootstrapDynamicRoutesFromCache();
+    util.initRouter();
+    appStore.setOpenedList();
+    appStore.initCachePage();
+  }
+});
 </script>
 
 <style>

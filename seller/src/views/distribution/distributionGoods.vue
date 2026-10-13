@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -132,7 +132,7 @@
       </div>
     </el-card>
 
-    <liliDialog ref="liliDialog" @selectedGoodsData="selectedGoodsData" />
+    <liliDialog ref="liliDialogRef" @selectedGoodsData="selectedGoodsData" />
 
     <el-dialog
       v-model="modalVisible"
@@ -222,7 +222,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import {
   getDistributionGoods,
   distributionGoodsCancel,
@@ -230,242 +231,259 @@ import {
   updateDistributionGoodsCommission,
 } from "@/api/distribution";
 import { getShopGoodsLabelListSeller } from "@/api/goods";
-import liliDialog from "@/views/lili-dialog";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  name: "distributionGoods",
-  components: { liliDialog },
-  data() {
-    return {
-      modalVisible: false,
-      modalTitle: "添加分销商品",
-      editVisible: false,
-      editLoading: false,
-      submitLoading: false,
-      loading: true,
-      currentAuthStatus: "ALL",
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        goodsName: "",
-        storeCategoryPath: "",
-        goodsType: "",
-        authStatus: "",
-      },
-      shopCategoryList: [],
-      shopCategoryProps: {
-        value: "value",
-        label: "label",
-        children: "children",
-        checkStrictly: true,
-        emitPath: false,
-      },
-      selectedGoodsList: [],
-      editForm: {
-        id: "",
-        goodsName: "",
-        commission: "",
-        commissionError: false,
-      },
-      commissionPattern: /^[1-9]\d{0,3}(\.\d{1,2})?$/,
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    init() {
-      this.loadFilterOptions();
-      this.getDataList();
-    },
-    loadFilterOptions() {
-      getShopGoodsLabelListSeller()
-        .then((res) => {
-          if (res?.success) {
-            this.shopCategoryList = this.formatShopCategory(res.result || []);
-          }
-        })
-        .catch(() => {});
-    },
-    formatShopCategory(list) {
-      return (list || []).map((item) => ({
-        value: item.id,
-        label: item.labelName,
-        children:
-          item.children && item.children.length
-            ? this.formatShopCategory(item.children)
-            : undefined,
-      }));
-    },
-    goodsTypeText(value) {
-      if (value === "PHYSICAL_GOODS") return "实物商品";
-      if (value === "VIRTUAL_GOODS") return "虚拟商品";
-      if (value === "E_COUPON") return "电子卡券";
-      return "-";
-    },
-    authStatusText(value) {
-      if (value === "TOBEAUDITED") return "待审核";
-      if (value === "REFUSE") return "审核未通过";
-      return "已审核";
-    },
-    onAuthStatusChange(name) {
-      this.searchForm.authStatus = name === "ALL" ? "" : name;
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    add() {
-      this.$refs.liliDialog.goodsData = [];
-      this.$refs.liliDialog.open("goods");
-    },
-    selectedGoodsData(selected) {
-      if (!selected?.length) return;
-      this.selectedGoodsList = selected.map((item) => ({
-        skuId: item.id,
-        goodsId: item.goodsId,
-        thumbnail: item.thumbnail,
-        goodsName: item.goodsName,
-        specs: item.simpleSpecs || "-",
-        price: item.price,
-        commission: "1",
-        commissionError: false,
-      }));
-      this.modalVisible = true;
-      this.modalTitle = `添加分销商品（已选${this.selectedGoodsList.length}项）`;
-    },
-    validateRowCommission(row) {
-      const valid = this.commissionPattern.test(String(row.commission || "").trim());
-      row.commissionError = !valid;
-      return valid;
-    },
-    validateAllCommission() {
-      let valid = true;
-      this.selectedGoodsList.forEach((row) => {
-        if (!this.validateRowCommission(row)) {
-          valid = false;
+defineOptions({ name: "distributionGoods" });
+
+const modalVisible = ref(false);
+const modalTitle = ref("添加分销商品");
+const editVisible = ref(false);
+const editLoading = ref(false);
+const submitLoading = ref(false);
+const loading = ref(true);
+const currentAuthStatus = ref("ALL");
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  goodsName: "",
+  storeCategoryPath: "",
+  goodsType: "",
+  authStatus: "",
+});
+const shopCategoryList = ref([]);
+const shopCategoryProps = {
+  value: "value",
+  label: "label",
+  children: "children",
+  checkStrictly: true,
+  emitPath: false,
+};
+const selectedGoodsList = ref([]);
+const editForm = ref({
+  id: "",
+  goodsName: "",
+  commission: "",
+  commissionError: false,
+});
+const commissionPattern = /^[1-9]\d{0,3}(\.\d{1,2})?$/;
+const data = ref([]);
+const total = ref(0);
+
+// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+const liliDialogRef = ref(null);
+const editFormRef = ref(null);
+
+onMounted(() => {
+  init();
+});
+
+function init() {
+  loadFilterOptions();
+  getDataList();
+}
+
+function loadFilterOptions() {
+  getShopGoodsLabelListSeller()
+    .then((res) => {
+      if (res?.success) {
+        shopCategoryList.value = formatShopCategory(res.result || []);
+      }
+    })
+    .catch(() => {});
+}
+
+function formatShopCategory(list) {
+  return (list || []).map((item) => ({
+    value: item.id,
+    label: item.labelName,
+    children:
+      item.children && item.children.length
+        ? formatShopCategory(item.children)
+        : undefined,
+  }));
+}
+
+function goodsTypeText(value) {
+  if (value === "PHYSICAL_GOODS") return "实物商品";
+  if (value === "VIRTUAL_GOODS") return "虚拟商品";
+  if (value === "E_COUPON") return "电子卡券";
+  return "-";
+}
+
+function authStatusText(value) {
+  if (value === "TOBEAUDITED") return "待审核";
+  if (value === "REFUSE") return "审核未通过";
+  return "已审核";
+}
+
+function onAuthStatusChange(name) {
+  searchForm.authStatus = name === "ALL" ? "" : name;
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function add() {
+  liliDialogRef.value.goodsData = [];
+  liliDialogRef.value.open("goods");
+}
+
+function selectedGoodsData(selected) {
+  if (!selected?.length) return;
+  selectedGoodsList.value = selected.map((item) => ({
+    skuId: item.id,
+    goodsId: item.goodsId,
+    thumbnail: item.thumbnail,
+    goodsName: item.goodsName,
+    specs: item.simpleSpecs || "-",
+    price: item.price,
+    commission: "1",
+    commissionError: false,
+  }));
+  modalVisible.value = true;
+  modalTitle.value = `添加分销商品（已选${selectedGoodsList.value.length}项）`;
+}
+
+function validateRowCommission(row) {
+  const valid = commissionPattern.test(String(row.commission || "").trim());
+  row.commissionError = !valid;
+  return valid;
+}
+
+function validateAllCommission() {
+  let valid = true;
+  selectedGoodsList.value.forEach((row) => {
+    if (!validateRowCommission(row)) {
+      valid = false;
+    }
+  });
+  return valid;
+}
+
+function removeSelectedGoods(index) {
+  selectedGoodsList.value.splice(index, 1);
+  if (!selectedGoodsList.value.length) {
+    modalVisible.value = false;
+    return;
+  }
+  modalTitle.value = `添加分销商品（已选${selectedGoodsList.value.length}项）`;
+}
+
+function handleSubmit() {
+  if (!selectedGoodsList.value.length) return;
+  if (!validateAllCommission()) {
+    Message.error("请为所有商品填写大于1且小于9999的合法佣金金额");
+    return;
+  }
+  submitLoading.value = true;
+  const items = selectedGoodsList.value.map((item) => ({
+    skuId: item.skuId,
+    commission: Number(item.commission),
+  }));
+  distributionGoodsBatchCheck(items)
+    .then((res) => {
+      if (res?.success || res?.message === "success") {
+        const addedCount = Array.isArray(res?.result) ? res.result.length : 0;
+        if (addedCount > 0) {
+          Message.success(`成功添加${addedCount}个分销商品`);
+        } else {
+          Message.info("所选商品均已是分销商品，已跳过");
+        }
+      }
+      modalVisible.value = false;
+      selectedGoodsList.value = [];
+      getDataList();
+    })
+    .finally(() => {
+      submitLoading.value = false;
+    });
+}
+
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+
+function changePageSize(v) {
+  searchForm.pageSize = v;
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+
+function getDataList() {
+  loading.value = true;
+  getDistributionGoods(searchForm)
+    .then((res) => {
+      if (res?.success) {
+        const page = res.result || {};
+        data.value = page.records || [];
+        total.value = page.total || 0;
+      } else {
+        data.value = [];
+        total.value = 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function remove(row) {
+  Modal.confirm({
+    title: "确认删除",
+    content: "您确认要删除此分销商品吗?",
+    loading: true,
+    onOk: () => {
+      distributionGoodsCancel(row.id).then((res) => {
+        Modal.remove();
+        if (res?.success) {
+          Message.success("删除成功");
+          getDataList();
         }
       });
-      return valid;
     },
-    removeSelectedGoods(index) {
-      this.selectedGoodsList.splice(index, 1);
-      if (!this.selectedGoodsList.length) {
-        this.modalVisible = false;
-        return;
+  });
+}
+
+function edit(row) {
+  editForm.value = {
+    id: row.id,
+    goodsName: row.goodsName,
+    commission: row.commission != null ? String(row.commission) : "1",
+    commissionError: false,
+  };
+  editVisible.value = true;
+}
+
+function handleEditSubmit() {
+  const valid = commissionPattern.test(String(editForm.value.commission || "").trim());
+  editForm.value.commissionError = !valid;
+  if (!valid) {
+    Message.error("请输入大于1且小于9999的合法佣金金额");
+    return;
+  }
+  editLoading.value = true;
+  updateDistributionGoodsCommission(editForm.value.id, {
+    commission: Number(editForm.value.commission),
+  })
+    .then((res) => {
+      if (res?.success || res?.message === "success") {
+        Message.success("修改成功");
+        editVisible.value = false;
+        getDataList();
       }
-      this.modalTitle = `添加分销商品（已选${this.selectedGoodsList.length}项）`;
-    },
-    handleSubmit() {
-      if (!this.selectedGoodsList.length) return;
-      if (!this.validateAllCommission()) {
-        this.$Message.error("请为所有商品填写大于1且小于9999的合法佣金金额");
-        return;
-      }
-      this.submitLoading = true;
-      const items = this.selectedGoodsList.map((item) => ({
-        skuId: item.skuId,
-        commission: Number(item.commission),
-      }));
-      distributionGoodsBatchCheck(items)
-        .then((res) => {
-          if (res?.success || res?.message === "success") {
-            const addedCount = Array.isArray(res?.result) ? res.result.length : 0;
-            if (addedCount > 0) {
-              this.$Message.success(`成功添加${addedCount}个分销商品`);
-            } else {
-              this.$Message.info("所选商品均已是分销商品，已跳过");
-            }
-          }
-          this.modalVisible = false;
-          this.selectedGoodsList = [];
-          this.getDataList();
-        })
-        .finally(() => {
-          this.submitLoading = false;
-        });
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getDistributionGoods(this.searchForm)
-        .then((res) => {
-          if (res?.success) {
-            const page = res.result || {};
-            this.data = page.records || [];
-            this.total = page.total || 0;
-          } else {
-            this.data = [];
-            this.total = 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    remove(row) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        content: "您确认要删除此分销商品吗?",
-        loading: true,
-        onOk: () => {
-          distributionGoodsCancel(row.id).then((res) => {
-            this.$Modal.remove();
-            if (res?.success) {
-              this.$Message.success("删除成功");
-              this.getDataList();
-            }
-          });
-        },
-      });
-    },
-    edit(row) {
-      this.editForm = {
-        id: row.id,
-        goodsName: row.goodsName,
-        commission: row.commission != null ? String(row.commission) : "1",
-        commissionError: false,
-      };
-      this.editVisible = true;
-    },
-    handleEditSubmit() {
-      const valid = this.commissionPattern.test(String(this.editForm.commission || "").trim());
-      this.editForm.commissionError = !valid;
-      if (!valid) {
-        this.$Message.error("请输入大于1且小于9999的合法佣金金额");
-        return;
-      }
-      this.editLoading = true;
-      updateDistributionGoodsCommission(this.editForm.id, {
-        commission: Number(this.editForm.commission),
-      })
-        .then((res) => {
-          if (res?.success || res?.message === "success") {
-            this.$Message.success("修改成功");
-            this.editVisible = false;
-            this.getDataList();
-          }
-        })
-        .finally(() => {
-          this.editLoading = false;
-        });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    })
+    .finally(() => {
+      editLoading.value = false;
+    });
+}
 </script>
 
 <style lang="scss" scoped>

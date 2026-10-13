@@ -1,6 +1,6 @@
 <template>
   <div class="person-msg">
-    <el-form ref="thirdForm" :model="form" :rules="rules" label-width="140px">
+    <el-form ref="thirdFormRef" :model="form" :rules="rules" label-width="140px">
       <h4>基础信息</h4>
       <el-form-item prop="storeName" label="店铺名称">
         <el-input
@@ -92,7 +92,8 @@
     <multipleMap ref="map" @callback="getAddress" />
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
 import { Message } from "@/utils/message";
 import { Delete, View } from '@element-plus/icons-vue';
 import { applyThird } from '@/api/shopentry';
@@ -105,188 +106,184 @@ import { buyerUrl } from '@/plugins/request.js';
 import multipleMap from "@/components/map/multiple-map";
 
 
-export default {
-  emits: ['change'],
-  props: {
-    content: {
-      default: () => ({}),
-      type: Object
-    }
-  },
-  components: { multipleMap, View, Delete },
-  data () {
-    return {
-      loading: false, // 加载状态
-      uploadLoading: false, // 上传加载状态
-      action: buyerUrl + '/buyer/common/upload/file', // 上传地址
-      accessToken: {}, // 验证token
-      previewPicture: '', // 预览图片
+const emit = defineEmits(['change']);
 
-      visible: false, // 图片预览
-      form: { // 表单数据
-        storeLogo: [],
-        goodsManagementCategory: [],
-        storeName: "",
-        storeAddressDetail: "",
-        storeDesc: "",
-        storeAddressIdPath: "",
-        storeAddressPath: "",
-        storeCenter: "",
-      },
-      rules: { // 验证规则
-        goodsManagementCategory: [
-          { required: true, message: '请选择店铺经营类目' }
-        ],
-        storeName: [{ required: true, message: '请填写店铺名称' }],
-        storeLogo: [{ required: true, message: '请上传店铺logo' }],
-        storeDesc: [{ required: true, message: '请填写店铺简介' }],
-        storeCenter: [{ required: true, message: '请选择店铺位置' }],
-        storeAddressIdPath: [{ required: true, message: '请选择店铺位置' }],
-        storeAddressDetail: [{ required: true, message: '请输入店铺详细地址' }]
-      },
-      categoryList: [] // 分类数据
-    };
-  },
-  methods: {
-    // 下一步
-    next () {
-      this.$refs.thirdForm.validate((valid) => {
-        if (valid) {
-          this.loading = true;
-          let params = JSON.parse(JSON.stringify(this.form));
-          params.storeLogo = this.form.storeLogo.toString();
-          params.goodsManagementCategory = this.form.goodsManagementCategory.toString();
-          applyThird(params)
-            .then((res) => {
-              this.loading = false;
-              if (res.success) this.$emit('change', 3);
-            })
-            .catch(() => {
-              this.loading = false;
-            });
-        }
-      });
-    },
-    // 上传之前
-    beforeUpload (file) {
-      this.uploadLoading = true;
-      if (this.form.storeLogo.length >= 1) {
-        Message.warning('最多上传一张图片')
-        this.uploadLoading = false;
-        return false;
-      }
-      return this.validateUploadFile(file);
-    },
-    validateUploadFile (file) {
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-      const isAllowedType = allowedTypes.includes(file.type);
-      const isLt2M = file.size / 1024 / 1024 < 2;
-      if (!isAllowedType) {
-        this.uploadLoading = false;
-        Message.warning('上传文件格式不正确');
-        return false;
-      }
-      if (!isLt2M) {
-        this.uploadLoading = false;
-        Message.warning('文件大小不能超过2M');
-        return false;
-      }
-      return true;
-    },
-    // 上传成功回调
-    handleSuccess (res, file) {
-      this.uploadLoading = false;
-      this.form.storeLogo = [res.result];
-    },
-    // 上传失败
-    uploadErr () {
-      this.uploadLoading = false;
-    },
-    // 查看图片
-    handleView (item) {
-      this.previewPicture = item;
-      this.visible = true;
-    },
-    // 删除图片
-    handleRemove (index, listName) {
-      this.form[listName].splice(index, 1);
-    },
-    // 选择坐标回调
-    getAddress (val) {
-      if(val.type === 'select'){
-        const paths = val.data.map(item => item.name).join(',')
-        const ids = val.data.map(item => item.id).join(',')
-        this.form["storeAddressPath"] = paths;
-        this.form["storeAddressIdPath"] = ids;
-        this.form.storeCenter = val.data[val.data.length - 1].center
-      }else{
-        this.form["storeAddressPath"] = val.data.addr;
-        this.form["storeAddressIdPath"] = val.data.addrId;
-        
-          this.form['storeCenter'] = val.data.position.lng + ',' + val.data.position.lat
-        ;
-      }
-    },
-    // 获取商品分类
-    getCategoryList () {
-      getCategory(0).then((res) => {
-        if (res.success) {
-          this.categoryList = res.result || [];
-          this.syncCategorySelection();
-        }
-      });
-    },
-    normalizeCategoryId (id) {
-      return id == null ? '' : String(id);
-    },
-    syncCategorySelection () {
-      if (!Array.isArray(this.form.goodsManagementCategory)) {
-        this.form.goodsManagementCategory = [];
-        return;
-      }
-      this.form.goodsManagementCategory = this.form.goodsManagementCategory.map(
-        (id) => this.normalizeCategoryId(id)
-      );
-    },
-    createEmptyForm () {
-      return {
-        storeLogo: [],
-        goodsManagementCategory: [],
-        storeName: "",
-        storeAddressDetail: "",
-        storeDesc: "",
-        storeAddressIdPath: "",
-        storeAddressPath: "",
-        storeCenter: "",
-      };
-    },
-    initFormFromContent (content) {
-      const src = content && Object.keys(content).length
-        ? JSON.parse(JSON.stringify(content))
-        : {};
-      this.form = {
-        ...this.createEmptyForm(),
-        ...src,
-      };
-      this.form.storeLogo = src.storeLogo
-        ? String(src.storeLogo).split(",").filter(Boolean)
-        : [];
-      this.form.goodsManagementCategory = src.goodsManagementCategory
-        ? String(src.goodsManagementCategory).split(",").filter(Boolean)
-        : [];
-      ["storeName", "storeAddressDetail", "storeDesc", "storeAddressIdPath", "storeAddressPath", "storeCenter"].forEach((key) => {
-        if (this.form[key] == null) this.form[key] = "";
-      });
-    },
-  },
-  created () {
-    this.initFormFromContent(this.content);
-  },
-  mounted () {
-    this.accessToken.accessToken = storage.getItem('accessToken');
-    this.getCategoryList();
+const props = defineProps({
+  content: {
+    default: () => ({}),
+    type: Object
   }
+});
+
+const thirdFormRef = ref(null);
+
+const loading = ref(false); // 加载状态
+const uploadLoading = ref(false); // 上传加载状态
+const action = buyerUrl + '/buyer/common/upload/file'; // 上传地址
+const accessToken = reactive({}); // 验证token
+const previewPicture = ref(''); // 预览图片
+
+const visible = ref(false); // 图片预览
+const form = ref({ // 表单数据
+  storeLogo: [],
+  goodsManagementCategory: [],
+  storeName: "",
+  storeAddressDetail: "",
+  storeDesc: "",
+  storeAddressIdPath: "",
+  storeAddressPath: "",
+  storeCenter: "",
+});
+const rules = { // 验证规则
+  goodsManagementCategory: [
+    { required: true, message: '请选择店铺经营类目' }
+  ],
+  storeName: [{ required: true, message: '请填写店铺名称' }],
+  storeLogo: [{ required: true, message: '请上传店铺logo' }],
+  storeDesc: [{ required: true, message: '请填写店铺简介' }],
+  storeCenter: [{ required: true, message: '请选择店铺位置' }],
+  storeAddressIdPath: [{ required: true, message: '请选择店铺位置' }],
+  storeAddressDetail: [{ required: true, message: '请输入店铺详细地址' }]
 };
+const categoryList = ref([]); // 分类数据
+
+// 下一步
+function next () {
+  thirdFormRef.value.validate((valid) => {
+    if (valid) {
+      loading.value = true;
+      let params = JSON.parse(JSON.stringify(form.value));
+      params.storeLogo = form.value.storeLogo.toString();
+      params.goodsManagementCategory = form.value.goodsManagementCategory.toString();
+      applyThird(params)
+        .then((res) => {
+          loading.value = false;
+          if (res.success) emit('change', 3);
+        })
+        .catch(() => {
+          loading.value = false;
+        });
+    }
+  });
+}
+// 上传之前
+function beforeUpload (file) {
+  uploadLoading.value = true;
+  if (form.value.storeLogo.length >= 1) {
+    Message.warning('最多上传一张图片')
+    uploadLoading.value = false;
+    return false;
+  }
+  return validateUploadFile(file);
+}
+function validateUploadFile (file) {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+  const isAllowedType = allowedTypes.includes(file.type);
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isAllowedType) {
+    uploadLoading.value = false;
+    Message.warning('上传文件格式不正确');
+    return false;
+  }
+  if (!isLt2M) {
+    uploadLoading.value = false;
+    Message.warning('文件大小不能超过2M');
+    return false;
+  }
+  return true;
+}
+// 上传成功回调
+function handleSuccess (res, file) {
+  uploadLoading.value = false;
+  form.value.storeLogo = [res.result];
+}
+// 上传失败
+function uploadErr () {
+  uploadLoading.value = false;
+}
+// 查看图片
+function handleView (item) {
+  previewPicture.value = item;
+  visible.value = true;
+}
+// 删除图片
+function handleRemove (index, listName) {
+  form.value[listName].splice(index, 1);
+}
+// 选择坐标回调
+function getAddress (val) {
+  if(val.type === 'select'){
+    const paths = val.data.map(item => item.name).join(',')
+    const ids = val.data.map(item => item.id).join(',')
+    form.value["storeAddressPath"] = paths;
+    form.value["storeAddressIdPath"] = ids;
+    form.value.storeCenter = val.data[val.data.length - 1].center
+  }else{
+    form.value["storeAddressPath"] = val.data.addr;
+    form.value["storeAddressIdPath"] = val.data.addrId;
+
+      form.value['storeCenter'] = val.data.position.lng + ',' + val.data.position.lat
+    ;
+  }
+}
+// 获取商品分类
+function getCategoryList () {
+  getCategory(0).then((res) => {
+    if (res.success) {
+      categoryList.value = res.result || [];
+      syncCategorySelection();
+    }
+  });
+}
+function normalizeCategoryId (id) {
+  return id == null ? '' : String(id);
+}
+function syncCategorySelection () {
+  if (!Array.isArray(form.value.goodsManagementCategory)) {
+    form.value.goodsManagementCategory = [];
+    return;
+  }
+  form.value.goodsManagementCategory = form.value.goodsManagementCategory.map(
+    (id) => normalizeCategoryId(id)
+  );
+}
+function createEmptyForm () {
+  return {
+    storeLogo: [],
+    goodsManagementCategory: [],
+    storeName: "",
+    storeAddressDetail: "",
+    storeDesc: "",
+    storeAddressIdPath: "",
+    storeAddressPath: "",
+    storeCenter: "",
+  };
+}
+function initFormFromContent (content) {
+  const src = content && Object.keys(content).length
+    ? JSON.parse(JSON.stringify(content))
+    : {};
+  form.value = {
+    ...createEmptyForm(),
+    ...src,
+  };
+  form.value.storeLogo = src.storeLogo
+    ? String(src.storeLogo).split(",").filter(Boolean)
+    : [];
+  form.value.goodsManagementCategory = src.goodsManagementCategory
+    ? String(src.goodsManagementCategory).split(",").filter(Boolean)
+    : [];
+  ["storeName", "storeAddressDetail", "storeDesc", "storeAddressIdPath", "storeAddressPath", "storeCenter"].forEach((key) => {
+    if (form.value[key] == null) form.value[key] = "";
+  });
+}
+
+initFormFromContent(props.content);
+
+onMounted(() => {
+  accessToken.accessToken = storage.getItem('accessToken');
+  getCategoryList();
+});
 </script>
 <style lang="scss" scoped>
 h4 {

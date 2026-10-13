@@ -68,99 +68,95 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted, ref, watch } from "vue";
 import { getAllPromotion } from "@/api/promotion";
 
-export default {
-  data() {
-    return {
-      totals: "",
-      loading: true,
-      promotionList: "",
-      selectedIndex: 0,
-      promotions: "",
-      index: 999,
-      params: {
-        pageNumber: 1,
-        pageSize: 20,
-      },
-      showPromotionList: [],
-    };
+const emit = defineEmits(["selected"]);
+
+const totals = ref("");
+const loading = ref(true);
+const promotionList = ref("");
+const selectedIndex = ref(0);
+const promotions = ref("");
+const index = ref(999);
+const params = ref({
+  pageNumber: 1,
+  pageSize: 20,
+});
+const showPromotionList = ref([]);
+
+const isSeckillMode = computed(() => {
+  return promotions.value === "SECKILL";
+});
+
+watch(
+  params,
+  () => {
+    index.value = 999;
+    typeOption(promotions.value) && typeOption(promotions.value).methodsed();
   },
-  computed: {
-    isSeckillMode() {
-      return this.promotions === "SECKILL";
-    },
-  },
-  mounted() {
-    this.init();
-  },
-  watch: {
-    params: {
-      handler() {
-        this.index = 999;
-        this.typeOption(this.promotions) && this.typeOption(this.promotions).methodsed();
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    seckillStatusText(v) {
-      if (v === "APPLY") return "申请";
-      if (v === "PASS") return "通过";
-      return "拒绝";
-    },
-    sortGoods(type) {
-      this.loading = false;
-      this.showPromotionList = this.promotionList[type];
-    },
-    typeOption(type) {
-      switch (type) {
-        case "FULL_DISCOUNT":
-          return { title: "满减", methodsed: () => { this.showPromotionList = []; this.sortGoods("FULL_DISCOUNT"); } };
-        case "PINTUAN":
-          return { title: "拼团", methodsed: () => { this.showPromotionList = []; this.sortGoods("PINTUAN"); } };
-        case "KANJIA":
-          return { title: "砍价", methodsed: () => { this.showPromotionList = []; this.sortGoods("KANJIA"); } };
-        case "SECKILL":
-          return { title: "秒杀", methodsed: () => { this.showPromotionList = []; this.sortGoods("SECKILL"); } };
-        case "POINTS_GOODS":
-          return { title: "积分商品", methodsed: () => { this.showPromotionList = []; this.sortGoods("POINTS_GOODS"); } };
-        default:
-          return {};
-      }
-    },
-    selectedPromotion(val) {
-      val.row.___type = "marketing";
-      val.row.___promotion = this.promotions;
-      this.$emit("selected", [val.row]);
-      this.index = val.index;
-    },
-    async init() {
-      const res = await getAllPromotion();
-      if (res.success) {
-        this.loading = false;
-        this.getPromotion(res);
-      } else {
-        this.loading = false;
-      }
-    },
-    getPromotion(res) {
-      if (res.result) {
-        this.promotionList = res.result;
-        delete this.promotionList.COUPON;
-        Object.keys(res.result)[0] && this.typeOption(Object.keys(res.result)[0]).methodsed();
-        this.promotions = Object.keys(res.result)[0];
-      }
-    },
-    clickPromotion(val, i) {
-      this.promotions = val;
-      this.selectedIndex = i;
-      this.params.pageNumber = 1;
-      this.typeOption(val) && this.typeOption(val).methodsed(this.promotionList[val].id);
-    },
-  },
-};
+  { deep: true }
+);
+
+function seckillStatusText(v) {
+  if (v === "APPLY") return "申请";
+  if (v === "PASS") return "通过";
+  return "拒绝";
+}
+function sortGoods(type) {
+  loading.value = false;
+  showPromotionList.value = promotionList.value[type];
+}
+function typeOption(type) {
+  switch (type) {
+    case "FULL_DISCOUNT":
+      return { title: "满减", methodsed: () => { showPromotionList.value = []; sortGoods("FULL_DISCOUNT"); } };
+    case "PINTUAN":
+      return { title: "拼团", methodsed: () => { showPromotionList.value = []; sortGoods("PINTUAN"); } };
+    case "KANJIA":
+      return { title: "砍价", methodsed: () => { showPromotionList.value = []; sortGoods("KANJIA"); } };
+    case "SECKILL":
+      return { title: "秒杀", methodsed: () => { showPromotionList.value = []; sortGoods("SECKILL"); } };
+    case "POINTS_GOODS":
+      return { title: "积分商品", methodsed: () => { showPromotionList.value = []; sortGoods("POINTS_GOODS"); } };
+    default:
+      return {};
+  }
+}
+function selectedPromotion(val) {
+  val.row.___type = "marketing";
+  val.row.___promotion = promotions.value;
+  emit("selected", [val.row]);
+  index.value = val.index;
+}
+async function init() {
+  const res = await getAllPromotion();
+  if (res.success) {
+    loading.value = false;
+    getPromotion(res);
+  } else {
+    loading.value = false;
+  }
+}
+function getPromotion(res) {
+  if (res.result) {
+    promotionList.value = res.result;
+    delete promotionList.value.COUPON;
+    Object.keys(res.result)[0] && typeOption(Object.keys(res.result)[0]).methodsed();
+    promotions.value = Object.keys(res.result)[0];
+  }
+}
+function clickPromotion(val, i) {
+  promotions.value = val;
+  selectedIndex.value = i;
+  params.value.pageNumber = 1;
+  typeOption(val) && typeOption(val).methodsed(promotionList.value[val].id);
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss" scoped>
 .link-text {

@@ -40,60 +40,58 @@
     </el-form>
   </div>
 </template>
-<script>
+<script setup>
+import { onMounted, reactive, ref } from 'vue';
 import { applySecond } from '@/api/shopentry';
-export default {
-  emits: ['change'],
-  props: {
-    content: {
-      default: () => ({}),
-      type: Object
-    }
-  },
-  data () {
-    return {
-      loading: false, // 加载状态
-      form: {}, // 表单数据
-      rules: { // 验证规则
-        settlementBankAccountName: [
-          { required: true, message: '请填写银行开户名称' }
-        ],
-        settlementBankAccountNum: [
-          { required: true, message: '请填写银行账号' }
-        ],
-        settlementBankBranchName: [
-          { required: true, message: '请填写开户银行支行名称' }
-        ],
-        settlementBankJointName: [
-          { required: true, message: '请填写支行联行号' }
-        ]
-      }
-    };
-  },
-  methods: {
-    // 下一步
-    next () {
-      this.$refs.secondForm.validate((valid) => {
-        if (valid) {
-          this.loading = true;
-          applySecond(this.form)
-            .then((res) => {
-              this.loading = false;
-              if (res.success) this.$emit('change', 2);
-            })
-            .catch(() => {
-              this.loading = false;
-            });
-        }
-      });
-    }
-  },
-  mounted () {
-    if (this.content && Object.keys(this.content).length) {
-      this.form = JSON.parse(JSON.stringify(this.content));
-    }
+
+const emit = defineEmits(['change']);
+const props = defineProps({
+  content: {
+    default: () => ({}),
+    type: Object
   }
+});
+
+const secondForm = ref(null);
+const loading = ref(false); // 加载状态
+const form = reactive({}); // 表单数据
+const rules = { // 验证规则
+  settlementBankAccountName: [
+    { required: true, message: '请填写银行开户名称' }
+  ],
+  settlementBankAccountNum: [
+    { required: true, message: '请填写银行账号' }
+  ],
+  settlementBankBranchName: [
+    { required: true, message: '请填写开户银行支行名称' }
+  ],
+  settlementBankJointName: [
+    { required: true, message: '请填写支行联行号' }
+  ]
 };
+
+// 下一步
+function next() {
+  secondForm.value.validate((valid) => {
+    if (valid) {
+      loading.value = true;
+      applySecond(form)
+        .then((res) => {
+          loading.value = false;
+          if (res.success) emit('change', 2);
+        })
+        .catch(() => {
+          loading.value = false;
+        });
+    }
+  });
+}
+
+onMounted(() => {
+  if (props.content && Object.keys(props.content).length) {
+    Object.assign(form, JSON.parse(JSON.stringify(props.content)));
+  }
+});
 </script>
 <style lang="scss" scoped>
 h4 {

@@ -18,33 +18,30 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'FriendApplyMessage',
-  props: {
-    data: {
-      type: Object,
-      default() {
-        return {}
-      },
+<script setup>
+import { ref } from 'vue'
+
+defineOptions({ name: 'FriendApplyMessage' })
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default() {
+      return {}
     },
   },
-  data() {
-    return {
-      avatar:
-        'http://im-img.gzydong.club/media/images/avatar/20210602/60b6f03598ed0104301.png',
-      nickname: '独特态度',
-      datetime: '05/09 12:13 分',
-      remarks: '编辑个签，展示我的独特态度 展示我的独特态度。',
-      apply_id: 0,
-    }
-  },
-  created() {},
-  methods: {
-    handle(type) {
-      alert(type)
-    },
-  },
+})
+
+const avatar = ref(
+  'http://im-img.gzydong.club/media/images/avatar/20210602/60b6f03598ed0104301.png'
+)
+const nickname = ref('独特态度')
+const datetime = ref('05/09 12:13 分')
+const remarks = ref('编辑个签，展示我的独特态度 展示我的独特态度。')
+const apply_id = ref(0)
+
+function handle(type) {
+  alert(type)
 }
 </script>
 <style lang="less" scoped>

@@ -1,4 +1,5 @@
-import store from "@/store";
+import { useUserStore } from "@/stores/user";
+import { useDialogueStore } from "@/stores/dialogue";
 import router from "@/router";
 import { ElNotification } from "element-plus";
 
@@ -10,20 +11,15 @@ class Base {
     this.$notify = ElNotification;
   }
 
-  getStoreInstance() {
-    return store;
-  }
-
   /**
    * 获取当前登录用户的ID
    */
   getAccountId() {
-    // console.log("store.state", store.state.user);
-    return store.state.user.id;
+    return useUserStore().id;
   }
 
   getTalkParams() {
-    let { talk_type, receiver_id, index_name } = store.state.dialogue;
+    let { talk_type, receiver_id, index_name } = useDialogueStore();
 
     return { talk_type, receiver_id, index_name };
   }

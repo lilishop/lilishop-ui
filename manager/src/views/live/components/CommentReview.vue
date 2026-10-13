@@ -193,7 +193,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, watch, onMounted } from "vue";
 import { Refresh } from "@element-plus/icons-vue";
 import {
   authLiveMessage,
@@ -204,243 +205,261 @@ import {
   queryLiveMessagePage,
   unblockUser,
 } from "@/api/live";
+import { Message } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
-export default {
-  name: "CommentReview",
-  components: { Refresh },
-  props: {
-    liveId: {
-      type: String,
-      required: true,
-    },
-    embedded: {
-      type: Boolean,
-      default: false,
-    },
+defineOptions({ name: "CommentReview" });
+
+const props = defineProps({
+  liveId: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      activeTab: "message",
-      searchKeyword: "",
-      messageLoading: false,
-      userLoading: false,
-      blockLoading: false,
-      messageList: [],
-      userList: [],
-      blockList: [],
-      messagePagination: {
-        pageNumber: 1,
-        pageSize: 10,
-        total: 0,
-      },
-      userPagination: {
-        pageNumber: 1,
-        pageSize: 10,
-        total: 0,
-      },
-      blockPagination: {
-        pageNumber: 1,
-        pageSize: 10,
-        total: 0,
-      },
-      blockDialogVisible: false,
-      blockTarget: null,
-      blockReason: "",
-      blockSubmitting: false,
-    };
+  embedded: {
+    type: Boolean,
+    default: false,
   },
-  watch: {
-    liveId() {
-      this.loadMessages();
-    },
-  },
-  mounted() {
-    this.loadMessages();
-  },
-  methods: {
-    formatTime(time) {
-      if (!time) return "-";
-      return this.$filters.unixToDate(time);
-    },
-    authStatusText(status) {
-      const map = { PASS: "已通过", REFUSE: "已拒绝", TOBEAUDITED: "待审核" };
-      return map[status] || status || "待审核";
-    },
-    authStatusTagType(status) {
-      const map = { PASS: "success", REFUSE: "danger", TOBEAUDITED: "warning" };
-      return map[status] || "info";
-    },
-    canPassAuth(row) {
-      const status = row?.authStatus;
-      return status === "TOBEAUDITED" || status === "REFUSE" || !status;
-    },
-    canRejectAuth(row) {
-      const status = row?.authStatus;
-      return status === "TOBEAUDITED" || status === "PASS" || !status;
-    },
-    parsePageResult(res) {
-      if (!res) return { records: [], total: 0 };
-      if (res.records) {
-        return { records: res.records || [], total: res.total || 0 };
+});
+
+const activeTab = ref("message");
+const searchKeyword = ref("");
+const messageLoading = ref(false);
+const userLoading = ref(false);
+const blockLoading = ref(false);
+const messageList = ref([]);
+const userList = ref([]);
+const blockList = ref([]);
+const messagePagination = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+  total: 0,
+});
+const userPagination = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+  total: 0,
+});
+const blockPagination = reactive({
+  pageNumber: 1,
+  pageSize: 10,
+  total: 0,
+});
+const blockDialogVisible = ref(false);
+const blockTarget = ref(null);
+const blockReason = ref("");
+const blockSubmitting = ref(false);
+
+watch(
+  () => props.liveId,
+  () => {
+    loadMessages();
+  }
+);
+
+function formatTime(time) {
+  if (!time) return "-";
+  return unixToDate(time);
+}
+
+function authStatusText(status) {
+  const map = { PASS: "已通过", REFUSE: "已拒绝", TOBEAUDITED: "待审核" };
+  return map[status] || status || "待审核";
+}
+
+function authStatusTagType(status) {
+  const map = { PASS: "success", REFUSE: "danger", TOBEAUDITED: "warning" };
+  return map[status] || "info";
+}
+
+function canPassAuth(row) {
+  const status = row?.authStatus;
+  return status === "TOBEAUDITED" || status === "REFUSE" || !status;
+}
+
+function canRejectAuth(row) {
+  const status = row?.authStatus;
+  return status === "TOBEAUDITED" || status === "PASS" || !status;
+}
+
+function parsePageResult(res) {
+  if (!res) return { records: [], total: 0 };
+  if (res.records) {
+    return { records: res.records || [], total: res.total || 0 };
+  }
+  if (res.result?.records) {
+    return { records: res.result.records || [], total: res.result.total || 0 };
+  }
+  if (res.success && res.result) {
+    return { records: res.result.records || [], total: res.result.total || 0 };
+  }
+  return { records: [], total: 0 };
+}
+
+function onTabChange(tab) {
+  if (tab === "message") loadMessages();
+  if (tab === "user") loadUsers();
+  if (tab === "block") loadBlocks();
+}
+
+function loadMessages() {
+  if (!props.liveId) return;
+  messageLoading.value = true;
+  const params = {
+    liveStreamId: props.liveId,
+    pageNumber: messagePagination.pageNumber,
+    pageSize: messagePagination.pageSize,
+  };
+  if (searchKeyword.value?.trim()) {
+    params.keyword = searchKeyword.value.trim();
+  }
+  queryLiveMessagePage(params)
+    .then((res) => {
+      messageLoading.value = false;
+      if (res.success) {
+        const page = parsePageResult(res);
+        messageList.value = page.records;
+        messagePagination.total = page.total;
       }
-      if (res.result?.records) {
-        return { records: res.result.records || [], total: res.result.total || 0 };
+    })
+    .catch(() => {
+      messageLoading.value = false;
+    });
+}
+
+function loadUsers() {
+  if (!props.liveId) return;
+  userLoading.value = true;
+  liveUserList({
+    liveRoomId: props.liveId,
+    pageNumber: userPagination.pageNumber,
+    pageSize: userPagination.pageSize,
+  })
+    .then((res) => {
+      userLoading.value = false;
+      if (res.success) {
+        userList.value = res.result?.records || [];
+        userPagination.total = res.result?.total || 0;
       }
-      if (res.success && res.result) {
-        return { records: res.result.records || [], total: res.result.total || 0 };
+    })
+    .catch(() => {
+      userLoading.value = false;
+    });
+}
+
+function loadBlocks() {
+  if (!props.liveId) return;
+  blockLoading.value = true;
+  getLiveBlockPage({
+    liveRoomId: props.liveId,
+    pageNumber: blockPagination.pageNumber,
+    pageSize: blockPagination.pageSize,
+  })
+    .then((res) => {
+      blockLoading.value = false;
+      const page = parsePageResult(res);
+      blockList.value = page.records;
+      blockPagination.total = page.total;
+    })
+    .catch(() => {
+      blockLoading.value = false;
+    });
+}
+
+function handleAuth(record, authStatus) {
+  authLiveMessage({
+    ...record,
+    authStatus,
+  }).then((res) => {
+    if (res.success) {
+      Message.success("操作成功");
+      loadMessages();
+    }
+  });
+}
+
+function handleToggleMute(record) {
+  const muteFlag = !record.muteFlag;
+  editLiveUserMute({
+    liveUserid: record.id,
+    muteFlag,
+  }).then((res) => {
+    if (res.success) {
+      Message.success(muteFlag ? "已禁言" : "已解除禁言");
+      loadUsers();
+    }
+  });
+}
+
+function handleBlock(record) {
+  blockTarget.value = record;
+  blockReason.value = "";
+  blockDialogVisible.value = true;
+}
+
+function confirmBlock() {
+  if (!blockReason.value?.trim()) {
+    Message.warning("请输入拉黑原因");
+    return;
+  }
+  blockSubmitting.value = true;
+  blockUser({
+    liveRoomId: props.liveId,
+    userId: blockTarget.value?.userId || blockTarget.value?.id,
+    reason: blockReason.value.trim(),
+  })
+    .then((res) => {
+      blockSubmitting.value = false;
+      if (res.success) {
+        Message.success("拉黑成功");
+        blockDialogVisible.value = false;
+        loadUsers();
+        loadBlocks();
       }
-      return { records: [], total: 0 };
-    },
-    onTabChange(tab) {
-      if (tab === "message") this.loadMessages();
-      if (tab === "user") this.loadUsers();
-      if (tab === "block") this.loadBlocks();
-    },
-    loadMessages() {
-      if (!this.liveId) return;
-      this.messageLoading = true;
-      const params = {
-        liveStreamId: this.liveId,
-        pageNumber: this.messagePagination.pageNumber,
-        pageSize: this.messagePagination.pageSize,
-      };
-      if (this.searchKeyword?.trim()) {
-        params.keyword = this.searchKeyword.trim();
-      }
-      queryLiveMessagePage(params)
-        .then((res) => {
-          this.messageLoading = false;
-          if (res.success) {
-            const page = this.parsePageResult(res);
-            this.messageList = page.records;
-            this.messagePagination.total = page.total;
-          }
-        })
-        .catch(() => {
-          this.messageLoading = false;
-        });
-    },
-    loadUsers() {
-      if (!this.liveId) return;
-      this.userLoading = true;
-      liveUserList({
-        liveRoomId: this.liveId,
-        pageNumber: this.userPagination.pageNumber,
-        pageSize: this.userPagination.pageSize,
-      })
-        .then((res) => {
-          this.userLoading = false;
-          if (res.success) {
-            this.userList = res.result?.records || [];
-            this.userPagination.total = res.result?.total || 0;
-          }
-        })
-        .catch(() => {
-          this.userLoading = false;
-        });
-    },
-    loadBlocks() {
-      if (!this.liveId) return;
-      this.blockLoading = true;
-      getLiveBlockPage({
-        liveRoomId: this.liveId,
-        pageNumber: this.blockPagination.pageNumber,
-        pageSize: this.blockPagination.pageSize,
-      })
-        .then((res) => {
-          this.blockLoading = false;
-          const page = this.parsePageResult(res);
-          this.blockList = page.records;
-          this.blockPagination.total = page.total;
-        })
-        .catch(() => {
-          this.blockLoading = false;
-        });
-    },
-    handleAuth(record, authStatus) {
-      authLiveMessage({
-        ...record,
-        authStatus,
-      }).then((res) => {
-        if (res.success) {
-          this.$Message.success("操作成功");
-          this.loadMessages();
-        }
-      });
-    },
-    handleToggleMute(record) {
-      const muteFlag = !record.muteFlag;
-      editLiveUserMute({
-        liveUserid: record.id,
-        muteFlag,
-      }).then((res) => {
-        if (res.success) {
-          this.$Message.success(muteFlag ? "已禁言" : "已解除禁言");
-          this.loadUsers();
-        }
-      });
-    },
-    handleBlock(record) {
-      this.blockTarget = record;
-      this.blockReason = "";
-      this.blockDialogVisible = true;
-    },
-    confirmBlock() {
-      if (!this.blockReason?.trim()) {
-        this.$Message.warning("请输入拉黑原因");
-        return;
-      }
-      this.blockSubmitting = true;
-      blockUser({
-        liveRoomId: this.liveId,
-        userId: this.blockTarget?.userId || this.blockTarget?.id,
-        reason: this.blockReason.trim(),
-      })
-        .then((res) => {
-          this.blockSubmitting = false;
-          if (res.success) {
-            this.$Message.success("拉黑成功");
-            this.blockDialogVisible = false;
-            this.loadUsers();
-            this.loadBlocks();
-          }
-        })
-        .catch(() => {
-          this.blockSubmitting = false;
-        });
-    },
-    handleUnblock(record) {
-      unblockUser({
-        liveRoomId: this.liveId,
-        userId: record.userId || record.id,
-      }).then((res) => {
-        if (res.success) {
-          this.$Message.success("已解除拉黑");
-          this.loadBlocks();
-        }
-      });
-    },
-    onMessagePageSizeChange() {
-      this.messagePagination.pageNumber = 1;
-      this.loadMessages();
-    },
-    onUserPageSizeChange() {
-      this.userPagination.pageNumber = 1;
-      this.loadUsers();
-    },
-    onBlockPageSizeChange() {
-      this.blockPagination.pageNumber = 1;
-      this.loadBlocks();
-    },
-    handleSearch() {
-      this.messagePagination.pageNumber = 1;
-      this.loadMessages();
-    },
-    handleRefresh() {
-      this.loadMessages();
-    },
-  },
-};
+    })
+    .catch(() => {
+      blockSubmitting.value = false;
+    });
+}
+
+function handleUnblock(record) {
+  unblockUser({
+    liveRoomId: props.liveId,
+    userId: record.userId || record.id,
+  }).then((res) => {
+    if (res.success) {
+      Message.success("已解除拉黑");
+      loadBlocks();
+    }
+  });
+}
+
+function onMessagePageSizeChange() {
+  messagePagination.pageNumber = 1;
+  loadMessages();
+}
+
+function onUserPageSizeChange() {
+  userPagination.pageNumber = 1;
+  loadUsers();
+}
+
+function onBlockPageSizeChange() {
+  blockPagination.pageNumber = 1;
+  loadBlocks();
+}
+
+function handleSearch() {
+  messagePagination.pageNumber = 1;
+  loadMessages();
+}
+
+function handleRefresh() {
+  loadMessages();
+}
+
+onMounted(() => {
+  loadMessages();
+});
 </script>
 
 <style lang="scss" scoped>

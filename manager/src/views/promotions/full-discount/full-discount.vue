@@ -2,7 +2,7 @@
   <div class="search full-cut">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -48,7 +48,7 @@
 
     <el-card>
       <el-table
-        ref="table"
+        ref="tableRef"
         v-loading="loading"
         border
         :data="data"
@@ -100,103 +100,106 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getFullDiscountList, updateFullDiscount } from "@/api/promotion.js";
+import { Message, Modal } from "@/utils/message";
 
-export default {
-  data() {
-    return {
-      selectDate: [],
-      total: 0,
-      loading: false,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-      },
-      data: [],
-    };
-  },
-  methods: {
-    promotionStatusText(status) {
-      const map = {
-        NEW: "未开始",
-        START: "已开始",
-        END: "已结束",
-        CLOSE: "已关闭",
-      };
-      return map[status] || "未知";
-    },
-    promotionStatusTagType(status) {
-      const map = {
-        NEW: "info",
-        START: "success",
-        END: "danger",
-        CLOSE: "danger",
-      };
-      return map[status] || "danger";
-    },
-    init() {
-      this.getDataList();
-    },
-    openOrClose(row) {
-      let name = "开启";
-      if (row.promotionStatus === "NEW" || row.promotionStatus === "START") {
-        name = "关闭";
-        this.$Modal.confirm({
-          title: "提示",
-          content: `确认${name}此活动吗?需要一定时间才能生效，请耐心等待`,
-          loading: true,
-          onOk: () => {
-            updateFullDiscount(row.id).then((res) => {
-              this.$Modal.remove();
-              if (res.success) {
-                this.$Message.success(`${name}成功`);
-                this.getDataList();
-              }
-            });
-          },
+const router = useRouter();
+
+// 模板 ref（script 未使用，仅避免与 data 同名互相覆盖）
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+const selectDate = ref([]);
+const total = ref(0);
+const loading = ref(false);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+});
+const data = ref([]);
+
+function promotionStatusText(status) {
+  const map = {
+    NEW: "未开始",
+    START: "已开始",
+    END: "已结束",
+    CLOSE: "已关闭",
+  };
+  return map[status] || "未知";
+}
+function promotionStatusTagType(status) {
+  const map = {
+    NEW: "info",
+    START: "success",
+    END: "danger",
+    CLOSE: "danger",
+  };
+  return map[status] || "danger";
+}
+function init() {
+  getDataList();
+}
+function openOrClose(row) {
+  let name = "开启";
+  if (row.promotionStatus === "NEW" || row.promotionStatus === "START") {
+    name = "关闭";
+    Modal.confirm({
+      title: "提示",
+      content: `确认${name}此活动吗?需要一定时间才能生效，请耐心等待`,
+      loading: true,
+      onOk: () => {
+        updateFullDiscount(row.id).then((res) => {
+          Modal.remove();
+          if (res.success) {
+            Message.success(`${name}成功`);
+            getDataList();
+          }
         });
-      }
-    },
-    changePage() {
-      this.getDataList();
-    },
-    changePageSize() {
-      this.searchForm.pageNumber = 1;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      if (this.selectDate && this.selectDate[0] && this.selectDate[1]) {
-        this.searchForm.startTime = this.selectDate[0].getTime();
-        this.searchForm.endTime = this.selectDate[1].getTime();
-      } else {
-        this.searchForm.startTime = null;
-        this.searchForm.endTime = null;
-      }
-      getFullDiscountList(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    view(row) {
-      this.$router.push({ name: "full-discount-detail", query: { id: row.id } });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+      },
+    });
+  }
+}
+function changePage() {
+  getDataList();
+}
+function changePageSize() {
+  searchForm.pageNumber = 1;
+  getDataList();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+function getDataList() {
+  loading.value = true;
+  if (selectDate.value && selectDate.value[0] && selectDate.value[1]) {
+    searchForm.startTime = selectDate.value[0].getTime();
+    searchForm.endTime = selectDate.value[1].getTime();
+  } else {
+    searchForm.startTime = null;
+    searchForm.endTime = null;
+  }
+  getFullDiscountList(searchForm).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+function view(row) {
+  router.push({ name: "full-discount-detail", query: { id: row.id } });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

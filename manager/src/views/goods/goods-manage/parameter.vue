@@ -2,7 +2,7 @@
   <div class="search">
     <el-card>
       <el-form
-        ref="searchForm"
+        ref="searchFormRef"
         :model="searchForm"
         inline
         label-width="70px"
@@ -27,7 +27,7 @@
       <div class="operation padding-row">
         <el-button type="primary" @click="goAdd">添加</el-button>
       </div>
-      <el-table v-loading="loading" border :data="data" ref="table" style="width: 100%">
+      <el-table v-loading="loading" border :data="data" ref="tableRef" style="width: 100%">
         <el-table-column prop="paramName" label="参数名称" width="300" />
         <el-table-column prop="options" label="参数值" min-width="260" show-overflow-tooltip />
         <el-table-column label="必填" width="300" align="center">
@@ -65,83 +65,93 @@
     </el-card>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { deleteParams, getGoodsParamsPage } from "@/api/goods";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-export default {
-  name: "categoryParams",
-  data() {
-    return {
-      submitLoading: false,
-      loading: true,
-      total: 0,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        sort: "createTime",
-        order: "desc",
-        paramName: "",
-      },
-      data: [],
-    };
-  },
-  methods: {
-    isTruthyFlag(val) {
-      return val === 1 || val === "1" || val === true;
-    },
-    init() {
-      this.getDataList();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getDataList();
-    },
-    changePageSize(v) {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = v;
-      this.getDataList();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.searchForm.pageSize = 20;
-      this.getDataList();
-    },
-    getDataList() {
-      this.loading = true;
-      getGoodsParamsPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res && res.success) {
-          this.data = (res.result && res.result.records) || [];
-          this.total = (res.result && res.result.total) || 0;
-        }
-      });
-    },
-    goAdd() {
-      this.$router.push({ name: "goods-parameter-edit" });
-    },
-    goEdit(row) {
-      if (!row || !row.id) return;
-      try {
-        window.sessionStorage.setItem(`goods-parameter-edit:${row.id}`, JSON.stringify(row));
-      } catch (e) {}
-      this.$router.push({ name: "goods-parameter-edit", query: { id: row.id } });
-    },
-    remove(row) {
-      ElMessageBox.confirm("您确认要删除 " + (row.paramName || "") + " ?", "确认删除", { type: "warning" }).then(() => {
-        return deleteParams(row.id).then((res) => {
-          if (res && res.success) {
-            ElMessage.success("删除成功");
-            this.getDataList();
-          }
-        });
-      }).catch(() => {});
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+defineOptions({ name: "categoryParams" });
+
+const router = useRouter();
+
+const submitLoading = ref(false);
+const loading = ref(true);
+const total = ref(0);
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  sort: "createTime",
+  order: "desc",
+  paramName: "",
+});
+const data = ref([]);
+
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+function isTruthyFlag(val) {
+  return val === 1 || val === "1" || val === true;
+}
+
+function init() {
+  getDataList();
+}
+
+function changePage(v) {
+  searchForm.pageNumber = v;
+  getDataList();
+}
+
+function changePageSize(v) {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = v;
+  getDataList();
+}
+
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  searchForm.pageSize = 20;
+  getDataList();
+}
+
+function getDataList() {
+  loading.value = true;
+  getGoodsParamsPage(searchForm).then((res) => {
+    loading.value = false;
+    if (res && res.success) {
+      data.value = (res.result && res.result.records) || [];
+      total.value = (res.result && res.result.total) || 0;
+    }
+  });
+}
+
+function goAdd() {
+  router.push({ name: "goods-parameter-edit" });
+}
+
+function goEdit(row) {
+  if (!row || !row.id) return;
+  try {
+    window.sessionStorage.setItem(`goods-parameter-edit:${row.id}`, JSON.stringify(row));
+  } catch (e) {}
+  router.push({ name: "goods-parameter-edit", query: { id: row.id } });
+}
+
+function remove(row) {
+  ElMessageBox.confirm("您确认要删除 " + (row.paramName || "") + " ?", "确认删除", { type: "warning" }).then(() => {
+    return deleteParams(row.id).then((res) => {
+      if (res && res.success) {
+        ElMessage.success("删除成功");
+        getDataList();
+      }
+    });
+  }).catch(() => {});
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 <style lang="scss">
 .link-text {

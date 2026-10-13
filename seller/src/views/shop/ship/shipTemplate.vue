@@ -62,7 +62,7 @@
           </table>
         </el-tab-pane>
         <el-tab-pane v-if="csTab" :label="title" :name="operation">
-          <el-form ref="form" :model="form" label-width="100px" :rules="formValidate">
+          <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
             <el-form-item label="模板名称" prop="name">
               <el-input v-model="form.name" maxlength="10" clearable style="width: 20%" />
             </el-form-item>
@@ -175,264 +175,86 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from "vue";
 import * as API_Shop from "@/api/shops";
 import multipleRegion from "@/views/lili-components/multiple-region";
+import { useAppStore } from "@/stores/app";
+import { Message, Modal } from "@/utils/message";
 
-export default {
+defineOptions({
   name: "shipTemplate",
-  components: {
-    multipleRegion,
-  },
-  data() {
-    return {
-      gotop: false,
-      index:'0',
-      selectedIndex: 0, //选中的地址模板下标
-      item: "", //运费模板子模板
-      shipInfo: [], // 运费模板数据
-      title: "添加运费模板", // 模态框标题
-      operation: "INFO", // 操作状态
-      currentTab: "INFO", // 当前模板tab
-      // submitLoading:false,
-      saveError: false, // 是否显示错误提示
-      csTab: false, // 添加运费模板显示
-      form: {
-        // 添加或编辑表单对象初始化数据
-        name: "",
-        pricingMethod: "WEIGHT",
-      },
-      formValidate: {
-        name: [
-          {
-            required: true,
-            message: "请输入模板名称",
-            trigger: "blur",
-          },
-        ],
-        pricingMethod: [
-          // 计费方式
-          {
-            required: true,
-            message: "请选择计费方式",
-            trigger: "blur",
-          },
-        ],
-      },
-    };
-  },
-  computed: {
-    regions() {
-      return this.$store.state.regions;
-    },
-  },
-  methods: {
-    // 初始化数据
-    init() {
-      this.currentTab = "INFO";
-      this.csTab = false;
-      this.operation = "INFO";
-      this.getData();
-    },
-    //切换tabPane
-    handleClickType(tab) {
-      const tabName = tab.paneName ?? tab.props?.name;
-      if (tabName === "INFO") {
-        this.getData();
-        this.csTab = false;
-      }
-    },
-    //添加运费模板
-    add() {
-      this.$refs.region.clear();
-      this.title = "添加运费模板";
-      this.csTab = true;
-      this.operation = "ADD";
-      this.currentTab = "ADD";
-      this.saveError = false;
-      this.form = {
-        pricingMethod: "WEIGHT",
-        name: "",
-        freightTemplateChildList: [
-          {
-            area: "",
-            areaId: "",
-            firstCompany: 0,
-            firstPrice: 0,
-            continuedCompany: 0,
-            continuedPrice: 0,
-            selectedAll: false,
-          },
-        ],
-      };
-    },
-    handleScroll(){
-       let scrolltop = document.documentElement.scrollTop || document.body.scrollTop;
-      scrolltop > 30 ? (this.gotop = true) : (this.gotop = false);
-    },
-    //修改运费模板
-    edit(item) {
-      this.title = "修改运费模板";
-      this.csTab = true;
-      this.operation = "EDIT";
-      this.currentTab = "EDIT";
-      this.saveError = false;
-      //给form赋值
-      this.form = item;
+});
 
-      let top = document.documentElement.scrollTop || document.body.scrollTop;
-      // 实现滚动效果
-      const timeTop = setInterval(() => {
-        document.body.scrollTop = document.documentElement.scrollTop = top -= 50;
-        if (top <= 0) {
-          clearInterval(timeTop);
-        }
-      }, 0);
-    },
-    //选择地区
-    editRegion(item, index) {
-      this.selectedIndex = index;
-      this.item = item;
+const appStore = useAppStore();
 
-      this.regions.forEach((addr) => {
-        this.form.freightTemplateChildList.forEach((child) => {
-          child.area.split(",").forEach((area) => {
-            if (addr.name == area) {
-              addr.selectedAll = true;
-              child.selectedAll = true;
-            }
-          });
-        });
-      });
-      this.$store.state.shipTemplate = this.form.freightTemplateChildList;
-
-      this.$refs.region.open(item, index);
+const gotop = ref(false);
+const index = ref("0");
+const selectedIndex = ref(0); //选中的地址模板下标
+const curItem = ref(""); //运费模板子模板
+const shipInfo = ref([]); // 运费模板数据
+const title = ref("添加运费模板"); // 模态框标题
+const operation = ref("INFO"); // 操作状态
+const currentTab = ref("INFO"); // 当前模板tab
+// submitLoading:false,
+const saveError = ref(false); // 是否显示错误提示
+const csTab = ref(false); // 添加运费模板显示
+const form = ref({
+  // 添加或编辑表单对象初始化数据
+  name: "",
+  pricingMethod: "WEIGHT",
+});
+const formValidate = {
+  name: [
+    {
+      required: true,
+      message: "请输入模板名称",
+      trigger: "blur",
     },
-    //刷细数据
-    refresh() {
-      this.csTab = false;
-      this.operation = "INFO";
-      this.currentTab = "INFO";
-      this.getData();
-      this.$Message.success("刷新成功");
+  ],
+  pricingMethod: [
+    // 计费方式
+    {
+      required: true,
+      message: "请选择计费方式",
+      trigger: "blur",
     },
-    //运费模板数据
-    getData() {
-      API_Shop.getShipTemplate().then((res) => {
-        this.shipInfo = Array.isArray(res.result) ? res.result : [];
-      });
-    },
-    /**
-     * 选择地址回调
-     */
-    handleSelect(v) {
-      let area = "";
-      let areaId = "";
-      if (v != "") {
-        v.forEach((child) => {
-          if (child.selectedList != "") {
-            // 只显示省份
+  ],
+};
 
-            if (child.selectedAll) {
-              area += child.name + ",";
-              this.form.freightTemplateChildList[
-                this.selectedIndex
-              ].selectedAll = true;
-            }
+const formRef = ref(null);
+const region = ref(null);
 
-            child.selectedList.forEach((son) => {
-              if (child.selectedAll) {
-                areaId += son.id + ",";
-                return;
-              } else {
-                // 显示城市
-                area += son.name + ",";
-                areaId += son.id + ",";
-              }
-            });
-          }
-        });
-      }
-      this.item.area = area;
-      this.item.areaId = areaId;
-    },
-    //添加或者修改运费模板
-    handleSubmit() {
-      const headers = {
-        "Content-Type": "application/json;charset=utf-8",
-      };
+const regions = computed(() => appStore.regions);
 
-      this.$refs.form.validate((valid) => {
-        // const regNumber = /^\+?[1-9][0-9]*$/;
-        // const regMoney =
-        //   /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
-        if (valid) {
-          if (this.form.pricingMethod != "FREE") {
-            //校验运费模板详细信息
-            for (
-              let i = 0;
-              i < this.form.freightTemplateChildList.length;
-              i++
-            ) {
-              if (
-                this.form.freightTemplateChildList[i].area == "" ||
-                this.form.freightTemplateChildList[i].firstCompany == "" ||
-                // this.form.freightTemplateChildList[i].firstPrice == "" ||
-                this.form.freightTemplateChildList[i].continuedCompany == ""
-                // this.form.freightTemplateChildList[i].continuedPrice == ""
-              ) {
-                this.saveError = true;
-                return;
-              }
-              //  if (
-              //   regNumber.test(
-              //     this.form.freightTemplateChildList[i].firstCompany
-              //   ) == false ||
-              //   regNumber.test(
-              //     this.form.freightTemplateChildList[i].continuedCompany
-              //   ) == false ||
-              //   regMoney.test(
-              //     this.form.freightTemplateChildList[i].firstPrice
-              //   ) == false ||
-              //   regMoney.test(
-              //     this.form.freightTemplateChildList[i].continuedPrice
-              //   ) == false
-              // ) {
-              //   this.saveError = true;
-              //   return;
-              // }
-            }
-          }
-
-          if (this.operation == "ADD") {
-            API_Shop.addShipTemplate(this.form, headers).then((res) => {
-              if (res.success) {
-                this.$Message.success("新增成功");
-                this.operation = "INFO";
-                this.currentTab = "INFO";
-                this.csTab = false;
-                this.getData();
-              }
-            });
-          } else {
-            API_Shop.editShipTemplate(this.form.id, this.form, headers).then(
-              (res) => {
-                if (res.success) {
-                  this.$Message.success("新增成功");
-                  this.operation = "INFO";
-                  this.currentTab = "INFO";
-                  this.csTab = false;
-                  this.getData();
-                }
-              }
-            );
-          }
-        }
-      });
-    },
-    //添加子模板
-    addShipTemplateChildren() {
-      const params = {
+// 初始化数据
+function init() {
+  currentTab.value = "INFO";
+  csTab.value = false;
+  operation.value = "INFO";
+  getData();
+}
+//切换tabPane
+function handleClickType(tab) {
+  const tabName = tab.paneName ?? tab.props?.name;
+  if (tabName === "INFO") {
+    getData();
+    csTab.value = false;
+  }
+}
+//添加运费模板
+function add() {
+  region.value.clear();
+  title.value = "添加运费模板";
+  csTab.value = true;
+  operation.value = "ADD";
+  currentTab.value = "ADD";
+  saveError.value = false;
+  form.value = {
+    pricingMethod: "WEIGHT",
+    name: "",
+    freightTemplateChildList: [
+      {
         area: "",
         areaId: "",
         firstCompany: 0,
@@ -440,41 +262,218 @@ export default {
         continuedCompany: 0,
         continuedPrice: 0,
         selectedAll: false,
-      };
-      this.form.freightTemplateChildList.push(params);
-    },
-    //删除一个子模板
-    removeTemplateChildren(index) {
-      if (Object.keys(this.form.freightTemplateChildList).length == 1) {
-        this.$Message.error("必须保留一个子模板");
-        return;
+      },
+    ],
+  };
+}
+function handleScroll() {
+  let scrolltop = document.documentElement.scrollTop || document.body.scrollTop;
+  scrolltop > 30 ? (gotop.value = true) : (gotop.value = false);
+}
+//修改运费模板
+function edit(item) {
+  title.value = "修改运费模板";
+  csTab.value = true;
+  operation.value = "EDIT";
+  currentTab.value = "EDIT";
+  saveError.value = false;
+  //给form赋值
+  form.value = item;
+
+  let top = document.documentElement.scrollTop || document.body.scrollTop;
+  // 实现滚动效果
+  const timeTop = setInterval(() => {
+    document.body.scrollTop = document.documentElement.scrollTop = top -= 50;
+    if (top <= 0) {
+      clearInterval(timeTop);
+    }
+  }, 0);
+}
+//选择地区
+function editRegion(item, index) {
+  selectedIndex.value = index;
+  curItem.value = item;
+
+  regions.value.forEach((addr) => {
+    form.value.freightTemplateChildList.forEach((child) => {
+      child.area.split(",").forEach((area) => {
+        if (addr.name == area) {
+          addr.selectedAll = true;
+          child.selectedAll = true;
+        }
+      });
+    });
+  });
+  appStore.shipTemplates = form.value.freightTemplateChildList;
+
+  region.value.open(item, index);
+}
+//刷细数据
+function refresh() {
+  csTab.value = false;
+  operation.value = "INFO";
+  currentTab.value = "INFO";
+  getData();
+  Message.success("刷新成功");
+}
+//运费模板数据
+function getData() {
+  API_Shop.getShipTemplate().then((res) => {
+    shipInfo.value = Array.isArray(res.result) ? res.result : [];
+  });
+}
+/**
+ * 选择地址回调
+ */
+function handleSelect(v) {
+  let area = "";
+  let areaId = "";
+  if (v != "") {
+    v.forEach((child) => {
+      if (child.selectedList != "") {
+        // 只显示省份
+
+        if (child.selectedAll) {
+          area += child.name + ",";
+          form.value.freightTemplateChildList[
+            selectedIndex.value
+          ].selectedAll = true;
+        }
+
+        child.selectedList.forEach((son) => {
+          if (child.selectedAll) {
+            areaId += son.id + ",";
+            return;
+          } else {
+            // 显示城市
+            area += son.name + ",";
+            areaId += son.id + ",";
+          }
+        });
       }
-      this.form.freightTemplateChildList.splice(index, 1);
-    },
-    //删除运费模板
-    remove(id) {
-      this.$Modal.confirm({
-        title: "确认删除",
-        // 记得确认修改此处
-        content: "您确认要删除此运费模板 ?",
-        loading: true,
-        onOk: () => {
-          API_Shop.deleteShipTemplate(id).then((res) => {
+    });
+  }
+  curItem.value.area = area;
+  curItem.value.areaId = areaId;
+}
+//添加或者修改运费模板
+function handleSubmit() {
+  const headers = {
+    "Content-Type": "application/json;charset=utf-8",
+  };
+
+  formRef.value.validate((valid) => {
+    // const regNumber = /^\+?[1-9][0-9]*$/;
+    // const regMoney =
+    //   /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/;
+    if (valid) {
+      if (form.value.pricingMethod != "FREE") {
+        //校验运费模板详细信息
+        for (
+          let i = 0;
+          i < form.value.freightTemplateChildList.length;
+          i++
+        ) {
+          if (
+            form.value.freightTemplateChildList[i].area == "" ||
+            form.value.freightTemplateChildList[i].firstCompany == "" ||
+            // form.value.freightTemplateChildList[i].firstPrice == "" ||
+            form.value.freightTemplateChildList[i].continuedCompany == ""
+            // form.value.freightTemplateChildList[i].continuedPrice == ""
+          ) {
+            saveError.value = true;
+            return;
+          }
+          //  if (
+          //   regNumber.test(
+          //     form.value.freightTemplateChildList[i].firstCompany
+          //   ) == false ||
+          //   regNumber.test(
+          //     form.value.freightTemplateChildList[i].continuedCompany
+          //   ) == false ||
+          //   regMoney.test(
+          //     form.value.freightTemplateChildList[i].firstPrice
+          //   ) == false ||
+          //   regMoney.test(
+          //     form.value.freightTemplateChildList[i].continuedPrice
+          //   ) == false
+          // ) {
+          //   saveError.value = true;
+          //   return;
+          // }
+        }
+      }
+
+      if (operation.value == "ADD") {
+        API_Shop.addShipTemplate(form.value, headers).then((res) => {
+          if (res.success) {
+            Message.success("新增成功");
+            operation.value = "INFO";
+            currentTab.value = "INFO";
+            csTab.value = false;
+            getData();
+          }
+        });
+      } else {
+        API_Shop.editShipTemplate(form.value.id, form.value, headers).then(
+          (res) => {
             if (res.success) {
-              this.$Message.success("删除成功");
+              Message.success("新增成功");
+              operation.value = "INFO";
+              currentTab.value = "INFO";
+              csTab.value = false;
+              getData();
             }
-            this.$Modal.remove();
-            this.getData();
-          });
-        },
+          }
+        );
+      }
+    }
+  });
+}
+//添加子模板
+function addShipTemplateChildren() {
+  const params = {
+    area: "",
+    areaId: "",
+    firstCompany: 0,
+    firstPrice: 0,
+    continuedCompany: 0,
+    continuedPrice: 0,
+    selectedAll: false,
+  };
+  form.value.freightTemplateChildList.push(params);
+}
+//删除一个子模板
+function removeTemplateChildren(index) {
+  if (Object.keys(form.value.freightTemplateChildList).length == 1) {
+    Message.error("必须保留一个子模板");
+    return;
+  }
+  form.value.freightTemplateChildList.splice(index, 1);
+}
+//删除运费模板
+function remove(id) {
+  Modal.confirm({
+    title: "确认删除",
+    // 记得确认修改此处
+    content: "您确认要删除此运费模板 ?",
+    loading: true,
+    onOk: () => {
+      API_Shop.deleteShipTemplate(id).then((res) => {
+        if (res.success) {
+          Message.success("删除成功");
+        }
+        Modal.remove();
+        getData();
       });
     },
-  },
-  mounted() {
-    this.init();
-    window.addEventListener("scroll", this.handleScroll, true);
-  },
-};
+  });
+}
+
+onMounted(() => {
+  init();
+  window.addEventListener("scroll", handleScroll, true);
+});
 </script>
 <style lang="scss" scoped>
 .ncsc-default-table thead th {

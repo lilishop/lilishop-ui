@@ -23,7 +23,8 @@
   </el-card>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import WxChannelsSettingTab from "./components/WxChannelsSettingTab.vue";
 import WxChannelsCategoryTab from "./components/WxChannelsCategoryTab.vue";
 import WxChannelsGoodsTab from "./components/WxChannelsGoodsTab.vue";
@@ -31,20 +32,7 @@ import WxChannelsOrderTab from "./components/WxChannelsOrderTab.vue";
 import WxChannelsOverviewTab from "./components/WxChannelsOverviewTab.vue";
 import WxChannelsRefundTab from "./components/WxChannelsRefundTab.vue";
 
-export default {
-  name: "wx-channel",
-  components: {
-    WxChannelsSettingTab,
-    WxChannelsCategoryTab,
-    WxChannelsGoodsTab,
-    WxChannelsOrderTab,
-    WxChannelsOverviewTab,
-    WxChannelsRefundTab,
-  },
-  data() {
-    return {
-      selectedTab: "WX_CHANNELS",
-    };
-  },
-};
+defineOptions({ name: "wx-channel" });
+
+const selectedTab = ref("WX_CHANNELS");
 </script>

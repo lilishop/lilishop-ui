@@ -62,7 +62,7 @@
         :close-on-click-modal="false"
         destroy-on-close
       >
-        <el-form ref="form" :model="formAdd" label-width="110px" :rules="formValidate">
+        <el-form ref="formRef" :model="formAdd" label-width="110px" :rules="formValidate">
           <el-form-item v-if="showParent" label="上级分类" prop="parentId">
             {{ parentTitle }}
             <el-input v-model="formAdd.parentId" style="display: none" />
@@ -106,7 +106,7 @@
         width="500px"
         :close-on-click-modal="false"
       >
-        <el-form ref="brandForm" :model="brandForm" label-width="100px">
+        <el-form ref="brandFormRef" :model="brandForm" label-width="100px">
           <el-select v-model="brandForm.categoryBrands" filterable multiple style="width: 100%">
             <el-option v-for="item in brandWay" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
@@ -120,7 +120,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import {
   delCategory,
   disableCategory,
@@ -128,241 +129,249 @@ import {
   getCategoryBrandListData,
   getCategoryTree,
   insertCategory,
-  saveCategoryBrand,
+  saveCategoryBrand as apiSaveCategoryBrand,
   updateCategory,
 } from "@/api/goods";
 import uploadPicInput from "@/components/lili/upload-pic-input";
 import { regular } from "@/utils";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-export default {
-  name: "goods-category",
-  components: {
-    uploadPicInput,
-  },
-  data() {
-    return {
-      submitLoading: false,
-      categoryList: [],
-      loading: false,
-      brands: [],
-      categoryId: "",
-      modalType: 0,
-      modalVisible: false,
-      modalBrandVisible: false,
-      modalTitle: "",
-      showParent: false,
-      parentTitle: "",
-      modalBrandTitle: "",
-      formAdd: {
-        parentId: "",
-        name: "",
-        image: "",
-        sortOrder: 0,
-        deleteFlag: false,
-        commissionRate: 0,
-        level: 0,
-      },
-      brandForm: {
-        categoryBrands: [],
-      },
-      brandWay: [],
-      formValidate: {
-        commissionRate: [regular.REQUIRED, regular.INTEGER],
-        name: [regular.REQUIRED, regular.VARCHAR20],
-        sortOrder: [regular.REQUIRED, regular.INTEGER],
-      },
-      tableData: [],
-    };
-  },
-  methods: {
-    normalizeCategoryTree(list) {
-      if (!Array.isArray(list) || list.length === 0) return;
-      list.forEach((item) => {
-        if (!item || typeof item !== "object") return;
-        if (item.deleteFlag === 0) item.deleteFlag = false;
-        else if (item.deleteFlag === 1) item.deleteFlag = true;
-        else item.deleteFlag = !!item.deleteFlag;
-        if (Array.isArray(item.children) && item.children.length) {
-          this.normalizeCategoryTree(item.children);
-        }
-      });
-    },
-    onStatusSwitchChange(row, nextDeleteFlag) {
-      const previousDeleteFlag = !nextDeleteFlag;
-      const isClosing = nextDeleteFlag === true;
-      ElMessageBox.confirm(
-        `您是否要${isClosing ? "关闭" : "开启"}当前分类 ${row.name} 及其子分类?`,
-        isClosing ? "确认关闭" : "确认开启",
-        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
-      ).then(() => {
-        row._statusLoading = true;
-        return disableCategory(row.id, { enableOperations: isClosing ? true : 0 }).then((res) => {
-          row._statusLoading = false;
-          if (res && res.success) {
-            ElMessage.success("操作成功");
-            this.getAllList();
-            return;
-          }
-          row.deleteFlag = previousDeleteFlag;
-        });
-      }).catch(() => {
-        row.deleteFlag = previousDeleteFlag;
-      });
-    },
-    init() {
-      this.getAllList();
-      this.getBrandList();
-    },
-    getBrandList() {
-      getBrandListData().then((res) => {
-        this.brandWay = res;
-      });
-    },
-    brandOperation(v) {
-      getCategoryBrandListData(v.id).then((res) => {
-        this.categoryId = v.id;
-        this.modalBrandTitle = "品牌关联";
-        this.brandForm.categoryBrands = res.result.map((item) => item.id);
-        this.modalBrandVisible = true;
-      });
-    },
-    saveCategoryBrand() {
-      saveCategoryBrand(this.categoryId, this.brandForm).then((res) => {
-        this.submitLoading = false;
+defineOptions({ name: "goods-category" });
+
+const submitLoading = ref(false);
+const categoryList = ref([]);
+const loading = ref(false);
+const brands = ref([]);
+const categoryId = ref("");
+const modalType = ref(0);
+const modalVisible = ref(false);
+const modalBrandVisible = ref(false);
+const modalTitle = ref("");
+const showParent = ref(false);
+const parentTitle = ref("");
+const modalBrandTitle = ref("");
+const formAdd = reactive({
+  parentId: "",
+  name: "",
+  image: "",
+  sortOrder: 0,
+  deleteFlag: false,
+  commissionRate: 0,
+  level: 0,
+});
+const brandForm = reactive({
+  categoryBrands: [],
+});
+const brandWay = ref([]);
+const formValidate = reactive({
+  commissionRate: [regular.REQUIRED, regular.INTEGER],
+  name: [regular.REQUIRED, regular.VARCHAR20],
+  sortOrder: [regular.REQUIRED, regular.INTEGER],
+});
+const tableData = ref([]);
+
+const formRef = ref(null);
+const brandFormRef = ref(null);
+
+function normalizeCategoryTree(list) {
+  if (!Array.isArray(list) || list.length === 0) return;
+  list.forEach((item) => {
+    if (!item || typeof item !== "object") return;
+    if (item.deleteFlag === 0) item.deleteFlag = false;
+    else if (item.deleteFlag === 1) item.deleteFlag = true;
+    else item.deleteFlag = !!item.deleteFlag;
+    if (Array.isArray(item.children) && item.children.length) {
+      normalizeCategoryTree(item.children);
+    }
+  });
+}
+
+function onStatusSwitchChange(row, nextDeleteFlag) {
+  const previousDeleteFlag = !nextDeleteFlag;
+  const isClosing = nextDeleteFlag === true;
+  ElMessageBox.confirm(
+    `您是否要${isClosing ? "关闭" : "开启"}当前分类 ${row.name} 及其子分类?`,
+    isClosing ? "确认关闭" : "确认开启",
+    { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+  ).then(() => {
+    row._statusLoading = true;
+    return disableCategory(row.id, { enableOperations: isClosing ? true : 0 }).then((res) => {
+      row._statusLoading = false;
+      if (res && res.success) {
+        ElMessage.success("操作成功");
+        getAllList();
+        return;
+      }
+      row.deleteFlag = previousDeleteFlag;
+    });
+  }).catch(() => {
+    row.deleteFlag = previousDeleteFlag;
+  });
+}
+
+function init() {
+  getAllList();
+  getBrandList();
+}
+
+function getBrandList() {
+  getBrandListData().then((res) => {
+    brandWay.value = res;
+  });
+}
+
+function brandOperation(v) {
+  getCategoryBrandListData(v.id).then((res) => {
+    categoryId.value = v.id;
+    modalBrandTitle.value = "品牌关联";
+    brandForm.categoryBrands = res.result.map((item) => item.id);
+    modalBrandVisible.value = true;
+  });
+}
+
+function saveCategoryBrand() {
+  apiSaveCategoryBrand(categoryId.value, brandForm).then((res) => {
+    submitLoading.value = false;
+    if (res.success) {
+      ElMessage.success("操作成功");
+      modalBrandVisible.value = false;
+    }
+  });
+}
+
+function addChildren(v) {
+  modalType.value = 0;
+  modalTitle.value = "添加子分类";
+  parentTitle.value = v.name;
+  formAdd.level = Number(v.level) + 1;
+  formAdd.commissionRate = v.commissionRate;
+  showParent.value = true;
+  delete formAdd.id;
+  formAdd.parentId = v.id;
+  modalVisible.value = true;
+}
+
+function edit(v) {
+  modalType.value = 1;
+  modalTitle.value = "编辑";
+  formAdd.id = v.id;
+  formAdd.name = v.name;
+  formAdd.level = v.level;
+  formAdd.parentId = v.parentId;
+  formAdd.sortOrder = v.sortOrder;
+  formAdd.commissionRate = v.commissionRate;
+  formAdd.deleteFlag = v.deleteFlag;
+  formAdd.image = v.image;
+  showParent.value = false;
+  modalVisible.value = true;
+}
+
+function addParent() {
+  modalType.value = 0;
+  modalTitle.value = "添加一级分类";
+  parentTitle.value = "顶级分类";
+  showParent.value = true;
+  formRef.value?.resetFields();
+  delete formAdd.id;
+  formAdd.parentId = 0;
+  formAdd.level = 0;
+  modalVisible.value = true;
+}
+
+function Submit() {
+  formRef.value.validate((valid) => {
+    if (!valid) return;
+    submitLoading.value = true;
+    if (modalType.value === 0) {
+      delete formAdd.id;
+      insertCategory(formAdd).then((res) => {
+        submitLoading.value = false;
         if (res.success) {
-          ElMessage.success("操作成功");
-          this.modalBrandVisible = false;
+          ElMessage.success("添加成功");
+          getAllList();
+          modalVisible.value = false;
+          formRef.value.resetFields();
         }
       });
-    },
-    addChildren(v) {
-      this.modalType = 0;
-      this.modalTitle = "添加子分类";
-      this.parentTitle = v.name;
-      this.formAdd.level = Number(v.level) + 1;
-      this.formAdd.commissionRate = v.commissionRate;
-      this.showParent = true;
-      delete this.formAdd.id;
-      this.formAdd.parentId = v.id;
-      this.modalVisible = true;
-    },
-    edit(v) {
-      this.modalType = 1;
-      this.modalTitle = "编辑";
-      this.formAdd.id = v.id;
-      this.formAdd.name = v.name;
-      this.formAdd.level = v.level;
-      this.formAdd.parentId = v.parentId;
-      this.formAdd.sortOrder = v.sortOrder;
-      this.formAdd.commissionRate = v.commissionRate;
-      this.formAdd.deleteFlag = v.deleteFlag;
-      this.formAdd.image = v.image;
-      this.showParent = false;
-      this.modalVisible = true;
-    },
-    addParent() {
-      this.modalType = 0;
-      this.modalTitle = "添加一级分类";
-      this.parentTitle = "顶级分类";
-      this.showParent = true;
-      this.$refs.form?.resetFields();
-      delete this.formAdd.id;
-      this.formAdd.parentId = 0;
-      this.formAdd.level = 0;
-      this.modalVisible = true;
-    },
-    Submit() {
-      this.$refs.form.validate((valid) => {
-        if (!valid) return;
-        this.submitLoading = true;
-        if (this.modalType === 0) {
-          delete this.formAdd.id;
-          insertCategory(this.formAdd).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              ElMessage.success("添加成功");
-              this.getAllList();
-              this.modalVisible = false;
-              this.$refs.form.resetFields();
-            }
-          });
-        } else {
-          updateCategory(this.formAdd).then((res) => {
-            this.submitLoading = false;
-            if (res.success) {
-              ElMessage.success("修改成功");
-              this.getAllList();
-              this.modalVisible = false;
-              this.$refs.form.resetFields();
-            }
-          });
+    } else {
+      updateCategory(formAdd).then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          ElMessage.success("修改成功");
+          getAllList();
+          modalVisible.value = false;
+          formRef.value.resetFields();
         }
       });
-    },
-    remove(v) {
-      ElMessageBox.confirm("您确认要删除 " + v.name + " ?", "确认删除", { type: "warning" }).then(() => {
-        return delCategory(v.id).then((res) => {
-          if (res.success) {
-            ElMessage.success("操作成功");
-            this.getAllList();
-          }
-        });
-      }).catch(() => {});
-    },
-    getAllList() {
-      this.loading = true;
-      getCategoryTree()
-        .then((res) => {
-          this.loading = false;
-          if (res.success) {
-            localStorage.setItem("category", JSON.stringify(res.result));
-            this.normalizeCategoryTree(res.result);
-            this.categoryList = JSON.parse(JSON.stringify(res.result));
-            this.tableData = JSON.parse(JSON.stringify(res.result));
-          }
-        })
-        .catch(() => {
-          this.loading = false;
-        });
-    },
-    enable(v) {
-      ElMessageBox.confirm(
-        "您是否要启用当前分类 " + v.name + " 及其子分类?",
-        "确认启用",
-        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
-      ).then(() => {
-        return disableCategory(v.id, { enableOperations: 0 }).then((res) => {
-          if (res.success) {
-            ElMessage.success("操作成功");
-            this.getAllList();
-          }
-        });
-      }).catch(() => {
-        this.getAllList();
-      });
-    },
-    disable(v) {
-      ElMessageBox.confirm(
-        "您是否要禁用当前分类 " + v.name + " 及其子分类?",
-        "确认禁用",
-        { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
-      ).then(() => {
-        return disableCategory(v.id, { enableOperations: true }).then((res) => {
-          if (res.success) {
-            ElMessage.success("操作成功");
-            this.getAllList();
-          }
-        });
-      }).catch(() => {
-        this.getAllList();
-      });
-    },
-  },
-  mounted() {
-    this.init();
-  },
-};
+    }
+  });
+}
+
+function remove(v) {
+  ElMessageBox.confirm("您确认要删除 " + v.name + " ?", "确认删除", { type: "warning" }).then(() => {
+    return delCategory(v.id).then((res) => {
+      if (res.success) {
+        ElMessage.success("操作成功");
+        getAllList();
+      }
+    });
+  }).catch(() => {});
+}
+
+function getAllList() {
+  loading.value = true;
+  getCategoryTree()
+    .then((res) => {
+      loading.value = false;
+      if (res.success) {
+        localStorage.setItem("category", JSON.stringify(res.result));
+        normalizeCategoryTree(res.result);
+        categoryList.value = JSON.parse(JSON.stringify(res.result));
+        tableData.value = JSON.parse(JSON.stringify(res.result));
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+function enable(v) {
+  ElMessageBox.confirm(
+    "您是否要启用当前分类 " + v.name + " 及其子分类?",
+    "确认启用",
+    { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+  ).then(() => {
+    return disableCategory(v.id, { enableOperations: 0 }).then((res) => {
+      if (res.success) {
+        ElMessage.success("操作成功");
+        getAllList();
+      }
+    });
+  }).catch(() => {
+    getAllList();
+  });
+}
+
+function disable(v) {
+  ElMessageBox.confirm(
+    "您是否要禁用当前分类 " + v.name + " 及其子分类?",
+    "确认禁用",
+    { type: "warning", confirmButtonText: "是", cancelButtonText: "否" }
+  ).then(() => {
+    return disableCategory(v.id, { enableOperations: true }).then((res) => {
+      if (res.success) {
+        ElMessage.success("操作成功");
+        getAllList();
+      }
+    });
+  }).catch(() => {
+    getAllList();
+  });
+}
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style lang="scss" scoped>

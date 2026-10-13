@@ -79,51 +79,50 @@
     </UserCenterLayout>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { evaluationDetail } from "@/api/member.js";
-export default {
-  data() {
-    return {
-      order: {}, // 订单详情
-      orderGoods: {}, // 订单商品
-      visible: false, // 图片预览
-      previewImage: "", // 预览图片链接
-      loading: false, // 加载状态
-      // el-rate SVG 通过 colors 写入 fill-color，跟随平台主题色
-      rateThemeColors: ["var(--theme-color)", "var(--theme-color)", "var(--theme-color)"],
-    };
-  },
-  computed: {
-    gradeText () {
-      const map = { GOOD: '好评', MODERATE: '中评', WORSE: '差评' }
-      return map[this.orderGoods.grade] || '评价详情'
-    }
-  },
-  methods: {
-    getDetail() {
-      // 获取评价详情
-      evaluationDetail(this.$route.query.id).then((res) => {
-        if (res.success) this.orderGoods = res.result;
-      });
-    },
-    goGoodsDetail(skuId, goodsId) {
-      // 跳转商品详情
-      let routerUrl = this.$router.resolve({
-        path: "/goodsDetail",
-        query: { skuId, goodsId },
-      });
-      window.open(routerUrl.href, "_blank");
-    },
-    handleView(name) {
-      // 预览图片
-      this.previewImage = name;
-      this.visible = true;
-    },
-  },
-  mounted() {
-    this.getDetail();
-  },
-};
+
+const route = useRoute();
+const router = useRouter();
+
+const order = ref({}); // 订单详情
+const orderGoods = ref({}); // 订单商品
+const visible = ref(false); // 图片预览
+const previewImage = ref(""); // 预览图片链接
+const loading = ref(false); // 加载状态
+// el-rate SVG 通过 colors 写入 fill-color，跟随平台主题色
+const rateThemeColors = ref(["var(--theme-color)", "var(--theme-color)", "var(--theme-color)"]);
+
+const gradeText = computed(() => {
+  const map = { GOOD: '好评', MODERATE: '中评', WORSE: '差评' }
+  return map[orderGoods.value.grade] || '评价详情'
+});
+
+function getDetail() {
+  // 获取评价详情
+  evaluationDetail(route.query.id).then((res) => {
+    if (res.success) orderGoods.value = res.result;
+  });
+}
+function goGoodsDetail(skuId, goodsId) {
+  // 跳转商品详情
+  let routerUrl = router.resolve({
+    path: "/goodsDetail",
+    query: { skuId, goodsId },
+  });
+  window.open(routerUrl.href, "_blank");
+}
+function handleView(name) {
+  // 预览图片
+  previewImage.value = name;
+  visible.value = true;
+}
+
+onMounted(() => {
+  getDetail();
+});
 </script>
 <style lang="scss" scoped>
 .add-eval {

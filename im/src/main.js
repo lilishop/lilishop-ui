@@ -1,8 +1,8 @@
 import "core-js/stable";
 
 import { createApp } from "vue";
+import { createPinia } from "pinia";
 import App from "@/App.vue";
-import store from "@/store";
 import router from "@/router";
 import MainMixin from "./mixins/main-mixin";
 import face from "@/components/face";
@@ -30,7 +30,7 @@ registerDirectives(app);
 registerGlobalComponents(app);
 registerIcons(app);
 
-app.use(store);
+app.use(createPinia());
 app.use(router);
 setupContextmenu(app);
 app.use(VueVirtualScroller);

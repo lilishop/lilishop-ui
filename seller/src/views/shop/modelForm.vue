@@ -130,138 +130,145 @@
         </table>
       </div>
     </el-dialog>
-    <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
+    <liliDialog ref="liliDialogRef" @selectedLink="selectedLink"></liliDialog>
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
         @callback="callbackSelected"
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, nextTick, onMounted } from "vue";
 import { ShoppingCart } from "@element-plus/icons-vue";
 import logoImg from "@/assets/logo.png";
 import Draggable from "vuedraggable";
 import ModelFormItem from "./modelFormItem.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
-export default {
-  name: "modelForm",
-  components: {
-    Draggable,
-    ModelFormItem,
-    ossManage,
-    ShoppingCart,
-  },
-  props: ["data"],
-  data() {
-    return {
-      logoImg,
-      picModelFlag: false,
-      showModal: false,
-      showModalNav: false,
-      selectedNav: null,
-      promotionTags: ["买2免1", "领200神券", "199减100", "母婴5折抢", "充100送20"],
-      topAdvert: {
-        type: "topAdvert",
-        img: "",
-        url: "",
-        bgColor: "#de000d",
-        size: "1200*80",
-      },
-      currentIndex: 0,
-      navList: {
-        type: "navBar",
-        list: [
-          { name: "秒杀", url: "", title: "" },
-          { name: "闪购", url: "", title: "" },
-          { name: "优惠券", url: "", title: "" },
-          { name: "拍卖", url: "", title: "" },
-          { name: "服装城", url: "", title: "" },
-        ],
-      },
-    };
-  },
-  mounted() {
-    document.body.ondrop = function (event) {
-      let isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
-      if (isFirefox) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    };
-  },
-  methods: {
-    getModelItemKey(element) {
-      return element.model || element.key || element.type;
+import { formatLinkType } from "@/utils/filters";
+
+defineOptions({ name: "modelForm" });
+
+const props = defineProps(["data"]);
+
+const picModelFlag = ref(false);
+const showModal = ref(false);
+const showModalNav = ref(false);
+const selectedNav = ref(null);
+const promotionTags = ref(["买2免1", "领200神券", "199减100", "母婴5折抢", "充100送20"]);
+const topAdvert = ref({
+  type: "topAdvert",
+  img: "",
+  url: "",
+  bgColor: "#de000d",
+  size: "1200*80",
+});
+const currentIndex = ref(0);
+const navList = ref({
+  type: "navBar",
+  list: [
+    { name: "秒杀", url: "", title: "" },
+    { name: "闪购", url: "", title: "" },
+    { name: "优惠券", url: "", title: "" },
+    { name: "拍卖", url: "", title: "" },
+    { name: "服装城", url: "", title: "" },
+  ],
+});
+
+const liliDialogRef = ref(null);
+const ossManageRef = ref(null);
+
+// 父组件 renovation.vue 通过 $refs.modelForm 读取并整体赋值 navList / topAdvert
+defineExpose({ navList, topAdvert });
+
+onMounted(() => {
+  document.body.ondrop = function (event) {
+    let isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
+    if (isFirefox) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+});
+
+function getModelItemKey(element) {
+  return element.model || element.key || element.type;
+}
+
+function handleSelectLink(item, index) {
+  if (item) selectedNav.value = item;
+  liliDialogRef.value.open("link");
+  currentIndex.value = index;
+}
+
+function selectedLink(val) {
+  if (showModalNav.value) {
+    selectedNav.value.url = formatLinkType(val);
+    selectedNav.value.type = val.___type === "other" && val.url === "" ? "link" : "other";
+  } else {
+    topAdvert.value.url = formatLinkType(val);
+    topAdvert.value.type = val.___type === "other" && val.url === "" ? "link" : "other";
+  }
+  navList.value.list[currentIndex.value].title = val.title;
+}
+
+function handleDelNav(index) {
+  navList.value.list.splice(index, 1);
+}
+
+function handleAddNav() {
+  navList.value.list.push({ name: "", url: "", title: "" });
+  nextTick(() => {
+    selectedNav.value = navList.value.list[navList.value.list.length - 1];
+  });
+}
+
+function handleMoveEnd({ newIndex, oldIndex }) {
+  console.log("index", newIndex, oldIndex);
+}
+
+function handleModel(type) {
+  if (type == "topAdvert") {
+    showModal.value = true;
+  } else {
+    showModalNav.value = true;
+  }
+}
+
+function handleSelectImg() {
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+
+function callbackSelected(item) {
+  picModelFlag.value = false;
+  topAdvert.value.img = item.url;
+}
+
+function handleModelAdd(evt) {
+  const newIndex = evt.newIndex;
+  const current = props.data.list[newIndex];
+  if (!current || current.key) {
+    return;
+  }
+  const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
+  props.data.list[newIndex] = {
+    ...JSON.parse(JSON.stringify(current)),
+    options: {
+      ...current.options,
     },
-    handleSelectLink(item, index) {
-      if (item) this.selectedNav = item;
-      this.$refs.liliDialog.open("link");
-      this.currentIndex = index;
-    },
-    selectedLink(val) {
-      if (this.showModalNav) {
-        this.selectedNav.url = this.$filters.formatLinkType(val);
-        this.selectedNav.type = val.___type === "other" && val.url === "" ? "link" : "other";
-      } else {
-        this.topAdvert.url = this.$filters.formatLinkType(val);
-        this.topAdvert.type = val.___type === "other" && val.url === "" ? "link" : "other";
-      }
-      this.navList.list[this.currentIndex].title = val.title;
-    },
-    handleDelNav(index) {
-      this.navList.list.splice(index, 1);
-    },
-    handleAddNav() {
-      this.navList.list.push({ name: "", url: "", title: "" });
-      this.$nextTick(() => {
-        this.selectedNav = this.navList.list[this.navList.list.length - 1];
-      });
-    },
-    handleMoveEnd({ newIndex, oldIndex }) {
-      console.log("index", newIndex, oldIndex);
-    },
-    handleModel(type) {
-      if (type == "topAdvert") {
-        this.showModal = true;
-      } else {
-        this.showModalNav = true;
-      }
-    },
-    handleSelectImg() {
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    callbackSelected(item) {
-      this.picModelFlag = false;
-      this.topAdvert.img = item.url;
-    },
-    handleModelAdd(evt) {
-      const newIndex = evt.newIndex;
-      const current = this.data.list[newIndex];
-      if (!current || current.key) {
-        return;
-      }
-      const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
-      this.data.list[newIndex] = {
-        ...JSON.parse(JSON.stringify(current)),
-        options: {
-          ...current.options,
-        },
-        key,
-        model: current.type + "_" + key,
-      };
-    },
-  },
-};
+    key,
+    model: current.type + "_" + key,
+  };
+}
 </script>
 <style lang="scss" scoped>
 @import "./modelList/setup-box.scss";

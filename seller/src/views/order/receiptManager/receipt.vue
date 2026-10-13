@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="70px" class="search-form">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="70px" class="search-form">
         <el-form-item label="订单编号" prop="orderSn">
           <el-input v-model="searchForm.orderSn" clearable placeholder="请输入订单编号" style="width: 240px" />
         </el-form-item>
@@ -26,7 +26,7 @@
 
     <el-card>
       <div class="receipt-tip">订单状态为已发货/已完成可开票</div>
-      <el-table ref="table" v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
+      <el-table ref="tableRef" v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
         <el-table-column label="订单号" min-width="120">
           <template #default="{ row }">
             <a class="link-text" @click="$router.push({ name: 'order-detail', query: { sn: row.orderSn } })">
@@ -181,217 +181,219 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, ref } from "vue";
 import * as API_Order from "@/api/order";
 import { uploadFile } from "@/libs/axios";
+import { getStore } from "@/libs/storage";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "receipt",
-  data() {
-    return {
-      loading: true,
-      receiptModalVisible: false,
-      receiptDetailLoading: false,
-      invoiceSubmitting: false,
-      receiptModalMode: "detail",
-      uploadFileUrl: uploadFile,
-      accessToken: {},
-      receiptUploadData: { directoryPath: "default" }, // OSS 上传目录（与后端存储配置一致）
-      currentReceipt: {},
-      selectedReceiptRow: null,
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-        receiptStatus: "",
-      },
-      data: [],
-      total: 0,
-    };
-  },
-  methods: {
-    orderStatusText(status) {
-      const map = {
-        UNPAID: "未付款",
-        PAID: "已付款",
-        UNDELIVERED: "待发货",
-        DELIVERED: "已发货",
-        COMPLETED: "已完成",
-        TAKE: "待核验",
-        CANCELLED: "已取消",
-      };
-      return map[status] || status;
-    },
-    orderStatusTagType(status) {
-      const map = {
-        UNPAID: "danger",
-        PAID: "primary",
-        UNDELIVERED: "info",
-        DELIVERED: "info",
-        COMPLETED: "success",
-        TAKE: "warning",
-        CANCELLED: "danger",
-      };
-      return map[status] || "info";
-    },
-    canInvoicing(row) {
-      if (!row) return false;
-      return (
-        (row.orderStatus === "COMPLETED" || row.orderStatus === "DELIVERED") &&
-        Number(row.receiptStatus) === 0
-      );
-    },
-    initUploadAccessToken() {
-      this.accessToken = { accessToken: this.getStore("accessToken") };
-    },
-    hasValue(value) {
-      if (value === null || value === undefined) return false;
-      return String(value).trim() !== "";
-    },
-    hasPrice(value) {
-      return value !== null && value !== undefined && value !== "";
-    },
-    formatPrice(value) {
-      if (value === null || value === undefined || value === "") return "暂无";
-      return `￥${value}`;
-    },
-    isVatSpecialReceipt(receipt) {
-      if (!receipt) return false;
-      const receiptType = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
-      return receiptType === "2" || receiptType === "增值税专用发票" || receipt.invoiceKind === "VAT_SPECIAL";
-    },
-    formatReceiptType(receipt) {
-      if (!receipt || (!receipt.receiptType && !receipt.invoiceKind)) return "电子普通发票";
-      const receiptType = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
-      if (receiptType === "电子普通发票" || receiptType === "增值税专用发票") return receiptType;
-      return this.isVatSpecialReceipt(receipt) ? "增值税专用发票" : "电子普通发票";
-    },
-    getInvoiceAddress(receipt) {
-      if (!receipt) return "";
-      return receipt.invoiceAddress || receipt.invoiceFileUrl || "";
-    },
-    buildInvoicingPayload() {
-      const invoiceAddress = this.getInvoiceAddress(this.currentReceipt);
-      return invoiceAddress ? { invoiceAddress } : {};
-    },
-    beforeInvoiceUpload(file) {
-      const allowed = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
-      const okType = allowed.includes(file.type) || /\.(jpg|jpeg|png|pdf)$/i.test(file.name);
-      if (!okType) {
-        this.$Message.warning("请上传 jpg、jpeg、png 或 pdf 格式文件");
-        return false;
-      }
-      if (file.size / 1024 / 1024 > 10) {
-        this.$Message.warning("发票附件不能超过 10MB");
-        return false;
-      }
-      return true;
-    },
-    handleInvoiceUploadSuccess(res) {
-      if (res && res.success && res.result) {
-        this.currentReceipt.invoiceAddress = res.result;
-        if (this.selectedReceiptRow) {
-          this.selectedReceiptRow.invoiceAddress = res.result;
-        }
-        this.$Message.success("发票上传成功");
-      } else {
-        this.$Message.error((res && res.message) || "发票上传失败");
-      }
-    },
-    handleInvoiceUploadError() {
-      this.$Message.error("发票上传失败");
-    },
-    viewInvoiceFile(url) {
-      if (!url) return;
-      window.open(url, "_blank");
-    },
-    init() {
-      this.getData();
-    },
-    changePage(v) {
-      this.searchForm.pageNumber = v;
-      this.getData();
-    },
-    changePageSize(v) {
-      this.searchForm.pageSize = v;
-      this.getData();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.getData();
-    },
-    handleReset() {
-      this.searchForm = {
-        pageNumber: 1,
-        pageSize: 10,
-        sort: "createTime",
-        order: "desc",
-        receiptStatus: "",
-      };
-      this.getData();
-    },
-    getData() {
-      this.loading = true;
-      API_Order.getReceiptPage(this.searchForm).then((res) => {
-        this.loading = false;
-        if (res.success) {
-          this.data = res.result.records;
-          this.total = res.result.total;
-        }
-      });
-    },
-    async openReceiptModal(row, mode = "detail") {
-      if (!row) return;
-      this.receiptModalMode = mode;
-      this.selectedReceiptRow = row;
-      this.currentReceipt = { ...row };
-      this.receiptModalVisible = true;
-      this.receiptDetailLoading = true;
-      try {
-        const res = await API_Order.getReceiptDetail(row.id);
-        if (res.success && res.result) {
-          this.currentReceipt = { ...row, ...res.result };
-        } else {
-          this.$Message.warning("发票详情获取失败，已展示列表中的发票信息");
-        }
-      } catch (e) {
-        this.$Message.error("发票详情获取失败");
-      } finally {
-        this.receiptDetailLoading = false;
-      }
-    },
-    async submitInvoicing() {
-      if (!this.selectedReceiptRow) return;
-      if (!this.canInvoicing(this.selectedReceiptRow)) {
-        this.$Message.warning("当前订单状态不支持开票");
-        return;
-      }
-      const params = this.buildInvoicingPayload();
-      if (!params.invoiceAddress) {
-        this.$Message.warning("请先上传发票");
-        return;
-      }
-      this.invoiceSubmitting = true;
-      try {
-        const res = await API_Order.invoicing(this.selectedReceiptRow.id, params);
-        if (res.success) {
-          this.$Message.success("开票成功");
-          this.receiptModalVisible = false;
-          this.getData();
-        }
-      } catch (e) {
-        this.$Message.error("开票失败");
-      } finally {
-        this.invoiceSubmitting = false;
-      }
-    },
-  },
-  mounted() {
-    this.initUploadAccessToken();
-    this.init();
-  },
-};
+defineOptions({ name: "receipt" });
+
+const loading = ref(true);
+const receiptModalVisible = ref(false);
+const receiptDetailLoading = ref(false);
+const invoiceSubmitting = ref(false);
+const receiptModalMode = ref("detail");
+const uploadFileUrl = ref(uploadFile);
+const accessToken = ref({});
+const receiptUploadData = ref({ directoryPath: "default" }); // OSS 上传目录（与后端存储配置一致）
+const currentReceipt = ref({});
+const selectedReceiptRow = ref(null);
+const searchForm = ref({
+  pageNumber: 1,
+  pageSize: 10,
+  sort: "createTime",
+  order: "desc",
+  receiptStatus: "",
+});
+const data = ref([]);
+const total = ref(0);
+
+// searchFormRef / tableRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+const tableRef = ref(null);
+
+function orderStatusText(status) {
+  const map = {
+    UNPAID: "未付款",
+    PAID: "已付款",
+    UNDELIVERED: "待发货",
+    DELIVERED: "已发货",
+    COMPLETED: "已完成",
+    TAKE: "待核验",
+    CANCELLED: "已取消",
+  };
+  return map[status] || status;
+}
+function orderStatusTagType(status) {
+  const map = {
+    UNPAID: "danger",
+    PAID: "primary",
+    UNDELIVERED: "info",
+    DELIVERED: "info",
+    COMPLETED: "success",
+    TAKE: "warning",
+    CANCELLED: "danger",
+  };
+  return map[status] || "info";
+}
+function canInvoicing(row) {
+  if (!row) return false;
+  return (
+    (row.orderStatus === "COMPLETED" || row.orderStatus === "DELIVERED") &&
+    Number(row.receiptStatus) === 0
+  );
+}
+function initUploadAccessToken() {
+  accessToken.value = { accessToken: getStore("accessToken") };
+}
+function hasValue(value) {
+  if (value === null || value === undefined) return false;
+  return String(value).trim() !== "";
+}
+function hasPrice(value) {
+  return value !== null && value !== undefined && value !== "";
+}
+function formatPrice(value) {
+  if (value === null || value === undefined || value === "") return "暂无";
+  return `￥${value}`;
+}
+function isVatSpecialReceipt(receipt) {
+  if (!receipt) return false;
+  const receiptType = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
+  return receiptType === "2" || receiptType === "增值税专用发票" || receipt.invoiceKind === "VAT_SPECIAL";
+}
+function formatReceiptType(receipt) {
+  if (!receipt || (!receipt.receiptType && !receipt.invoiceKind)) return "电子普通发票";
+  const receiptType = receipt.receiptType != null ? String(receipt.receiptType).trim() : "";
+  if (receiptType === "电子普通发票" || receiptType === "增值税专用发票") return receiptType;
+  return isVatSpecialReceipt(receipt) ? "增值税专用发票" : "电子普通发票";
+}
+function getInvoiceAddress(receipt) {
+  if (!receipt) return "";
+  return receipt.invoiceAddress || receipt.invoiceFileUrl || "";
+}
+function buildInvoicingPayload() {
+  const invoiceAddress = getInvoiceAddress(currentReceipt.value);
+  return invoiceAddress ? { invoiceAddress } : {};
+}
+function beforeInvoiceUpload(file) {
+  const allowed = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
+  const okType = allowed.includes(file.type) || /\.(jpg|jpeg|png|pdf)$/i.test(file.name);
+  if (!okType) {
+    Message.warning("请上传 jpg、jpeg、png 或 pdf 格式文件");
+    return false;
+  }
+  if (file.size / 1024 / 1024 > 10) {
+    Message.warning("发票附件不能超过 10MB");
+    return false;
+  }
+  return true;
+}
+function handleInvoiceUploadSuccess(res) {
+  if (res && res.success && res.result) {
+    currentReceipt.value.invoiceAddress = res.result;
+    if (selectedReceiptRow.value) {
+      selectedReceiptRow.value.invoiceAddress = res.result;
+    }
+    Message.success("发票上传成功");
+  } else {
+    Message.error((res && res.message) || "发票上传失败");
+  }
+}
+function handleInvoiceUploadError() {
+  Message.error("发票上传失败");
+}
+function viewInvoiceFile(url) {
+  if (!url) return;
+  window.open(url, "_blank");
+}
+function init() {
+  getData();
+}
+function changePage(v) {
+  searchForm.value.pageNumber = v;
+  getData();
+}
+function changePageSize(v) {
+  searchForm.value.pageSize = v;
+  getData();
+}
+function handleSearch() {
+  searchForm.value.pageNumber = 1;
+  getData();
+}
+function handleReset() {
+  searchForm.value = {
+    pageNumber: 1,
+    pageSize: 10,
+    sort: "createTime",
+    order: "desc",
+    receiptStatus: "",
+  };
+  getData();
+}
+function getData() {
+  loading.value = true;
+  API_Order.getReceiptPage(searchForm.value).then((res) => {
+    loading.value = false;
+    if (res.success) {
+      data.value = res.result.records;
+      total.value = res.result.total;
+    }
+  });
+}
+async function openReceiptModal(row, mode = "detail") {
+  if (!row) return;
+  receiptModalMode.value = mode;
+  selectedReceiptRow.value = row;
+  currentReceipt.value = { ...row };
+  receiptModalVisible.value = true;
+  receiptDetailLoading.value = true;
+  try {
+    const res = await API_Order.getReceiptDetail(row.id);
+    if (res.success && res.result) {
+      currentReceipt.value = { ...row, ...res.result };
+    } else {
+      Message.warning("发票详情获取失败，已展示列表中的发票信息");
+    }
+  } catch (e) {
+    Message.error("发票详情获取失败");
+  } finally {
+    receiptDetailLoading.value = false;
+  }
+}
+async function submitInvoicing() {
+  if (!selectedReceiptRow.value) return;
+  if (!canInvoicing(selectedReceiptRow.value)) {
+    Message.warning("当前订单状态不支持开票");
+    return;
+  }
+  const params = buildInvoicingPayload();
+  if (!params.invoiceAddress) {
+    Message.warning("请先上传发票");
+    return;
+  }
+  invoiceSubmitting.value = true;
+  try {
+    const res = await API_Order.invoicing(selectedReceiptRow.value.id, params);
+    if (res.success) {
+      Message.success("开票成功");
+      receiptModalVisible.value = false;
+      getData();
+    }
+  } catch (e) {
+    Message.error("开票失败");
+  } finally {
+    invoiceSubmitting.value = false;
+  }
+}
+
+onMounted(() => {
+  initUploadAccessToken();
+  init();
+});
 </script>
 <style lang="scss">
 @import "@/styles/table-common.scss";

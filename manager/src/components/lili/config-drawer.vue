@@ -6,23 +6,22 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "configDrawer",
-  data() {
-    return {
-      drawer: false,
-    };
-  },
-  methods: {
-    open() {
-      this.drawer = true;
-    },
-    close() {
-      this.drawer = false;
-    },
-  },
-};
+<script setup>
+import { ref } from "vue";
+
+defineOptions({ name: "configDrawer" });
+
+const drawer = ref(false);
+
+function open() {
+  drawer.value = true;
+}
+
+function close() {
+  drawer.value = false;
+}
+
+defineExpose({ open, close });
 </script>
 
 <style scoped>

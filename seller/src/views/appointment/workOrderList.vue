@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form ref="searchForm" :model="searchForm" inline label-width="80px" @keyup.enter="handleSearch">
+      <el-form ref="searchFormRef" :model="searchForm" inline label-width="80px" @keyup.enter="handleSearch">
         <el-form-item label="工单编号" prop="workOrderSn">
           <el-input v-model="searchForm.workOrderSn" clearable style="width: 200px" />
         </el-form-item>
@@ -75,7 +75,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 import {
   getWorkOrderPage,
   getWorkOrderStatusCounts,
@@ -83,102 +85,103 @@ import {
   endWorkOrderService,
 } from "@/api/appointment";
 import { SERVICE_MODE_LABEL, WORK_ORDER_STATUS_LABEL } from "@/constants/appointment";
+import { Message } from "@/utils/message";
 
-export default {
-  name: "appointmentWorkOrderList",
-  data() {
-    return {
-      loading: false,
-      data: [],
-      total: 0,
-      statusTab: "ALL",
-      statusCounts: {},
-      searchForm: {
-        pageNumber: 1,
-        pageSize: 20,
-        serviceStatus: "",
-        workOrderSn: "",
-        orderSn: "",
-        serviceMode: "",
-      },
-      statusTabs: [
-        { value: "ALL", label: "全部" },
-        { value: "PENDING_CLAIM", label: "待领取" },
-        { value: "WAIT_VERIFY", label: "待核销" },
-        { value: "IN_SERVICE", label: "服务中" },
-        { value: "SERVICE_ENDED", label: "服务结束" },
-        { value: "REFUNDED", label: "已退款" },
-      ],
-    };
-  },
-  mounted() {
-    if (this.$route.query.tab) {
-      this.statusTab = this.$route.query.tab;
-      this.searchForm.serviceStatus = this.$route.query.tab === "ALL" ? "" : this.$route.query.tab;
+defineOptions({ name: "appointmentWorkOrderList" });
+
+const route = useRoute();
+
+const loading = ref(false);
+const data = ref([]);
+const total = ref(0);
+const statusTab = ref("ALL");
+const statusCounts = ref({});
+const searchForm = reactive({
+  pageNumber: 1,
+  pageSize: 20,
+  serviceStatus: "",
+  workOrderSn: "",
+  orderSn: "",
+  serviceMode: "",
+});
+const statusTabs = ref([
+  { value: "ALL", label: "全部" },
+  { value: "PENDING_CLAIM", label: "待领取" },
+  { value: "WAIT_VERIFY", label: "待核销" },
+  { value: "IN_SERVICE", label: "服务中" },
+  { value: "SERVICE_ENDED", label: "服务结束" },
+  { value: "REFUNDED", label: "已退款" },
+]);
+
+// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
+const searchFormRef = ref(null);
+
+onMounted(() => {
+  if (route.query.tab) {
+    statusTab.value = route.query.tab;
+    searchForm.serviceStatus = route.query.tab === "ALL" ? "" : route.query.tab;
+  }
+  loadCounts();
+  loadData();
+});
+
+function serviceModeText(v) {
+  return SERVICE_MODE_LABEL[v] || v || "—";
+}
+function statusText(v) {
+  return WORK_ORDER_STATUS_LABEL[v] || v || "—";
+}
+function tabLabel(item) {
+  const count = statusCounts.value[item.value];
+  return count != null ? `${item.label}(${count})` : item.label;
+}
+function onTabClick(tab) {
+  searchForm.serviceStatus = tab.paneName === "ALL" ? "" : tab.paneName;
+  searchForm.pageNumber = 1;
+  loadData();
+}
+function handleSearch() {
+  searchForm.pageNumber = 1;
+  loadData();
+}
+function loadCounts() {
+  getWorkOrderStatusCounts()
+    .then((res) => {
+      if (res.success && res.result) {
+        statusCounts.value = res.result;
+      }
+    })
+    .catch(() => {});
+}
+function loadData() {
+  loading.value = true;
+  getWorkOrderPage(searchForm)
+    .then((res) => {
+      if (res.success) {
+        data.value = res.result?.records || [];
+        total.value = res.result?.total || 0;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+function handleClaim(row) {
+  claimWorkOrder(row.id).then((res) => {
+    if (res.success) {
+      Message.success("领取成功");
+      loadCounts();
+      loadData();
     }
-    this.loadCounts();
-    this.loadData();
-  },
-  methods: {
-    serviceModeText(v) {
-      return SERVICE_MODE_LABEL[v] || v || "—";
-    },
-    statusText(v) {
-      return WORK_ORDER_STATUS_LABEL[v] || v || "—";
-    },
-    tabLabel(item) {
-      const count = this.statusCounts[item.value];
-      return count != null ? `${item.label}(${count})` : item.label;
-    },
-    onTabClick(tab) {
-      this.searchForm.serviceStatus = tab.paneName === "ALL" ? "" : tab.paneName;
-      this.searchForm.pageNumber = 1;
-      this.loadData();
-    },
-    handleSearch() {
-      this.searchForm.pageNumber = 1;
-      this.loadData();
-    },
-    loadCounts() {
-      getWorkOrderStatusCounts()
-        .then((res) => {
-          if (res.success && res.result) {
-            this.statusCounts = res.result;
-          }
-        })
-        .catch(() => {});
-    },
-    loadData() {
-      this.loading = true;
-      getWorkOrderPage(this.searchForm)
-        .then((res) => {
-          if (res.success) {
-            this.data = res.result?.records || [];
-            this.total = res.result?.total || 0;
-          }
-        })
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-    handleClaim(row) {
-      claimWorkOrder(row.id).then((res) => {
-        if (res.success) {
-          this.$message.success("领取成功");
-          this.loadCounts();
-          this.loadData();
-        }
-      });
-    },
-    handleEnd(row) {
-      endWorkOrderService(row.id).then((res) => {
-        if (res.success) {
-          this.$message.success("已结束服务");
-          this.loadCounts();
-          this.loadData();
-        }
-      });
-    },
-  },
-};
+  });
+}
+function handleEnd(row) {
+  endWorkOrderService(row.id).then((res) => {
+    if (res.success) {
+      Message.success("已结束服务");
+      loadCounts();
+      loadData();
+    }
+  });
+}
 </script>

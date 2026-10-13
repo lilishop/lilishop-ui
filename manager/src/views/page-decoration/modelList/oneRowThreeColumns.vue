@@ -49,7 +49,7 @@
     </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -60,89 +60,89 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, nextTick } from "vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
-export default {
-  name: "oneRowThreeColumns",
-  components:{ossManage},
-  props: {
-    data: {
-      type: Object,
-      default: {}
-    }
-  },
-  data () {
-    return {
-      showModal:false,
-      draftList: [],
-      picModelFlag:false,
-      current:0,
-    };
-  },
-  methods: {
-    cloneList(list) {
-      return JSON.parse(JSON.stringify(list || []));
-    },
-    // 回显图片
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      if (!val?.url) return;
-      this.draftList[this.current].img = val.url;
-    },
-    // 编辑模块
-    handleSelectModel() {
-      this.draftList = this.cloneList(this.data.options.list);
-      this.showModal = true;
-    },
-    // 选择商品回调
-    selectedGoodsData(val) {
-      const goods = val[0];
-      if (!goods) return;
-      const item = this.draftList[this.current];
-      item.img = goods.thumbnail;
-      item.price = goods.price;
-      item.name = goods.goodsName;
-      item.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
-    },
-    // 选择链接回调
-    selectedLink(val) {
-      const item = this.draftList[this.current];
-      item.url = this.$filters.formatLinkType(val);
-      item.type =
-        val.___type === "other" && val.url === "" ? "link" : "other";
-    },
-    handleSelectLink(index) {
-      // 调起选择链接弹窗
-      this.$refs.liliDialog.open("link");
-      this.current = index;
-    },
-    handleSelectImg(index){
-      // 选择图片
-      this.current = index;
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    handleCancelModal() {
-      this.draftList = [];
-      this.showModal = false;
-    },
-    handleConfirmModal() {
-      const saved = this.cloneList(this.draftList);
-      this.data.options.list.splice(0, this.data.options.list.length, ...saved);
-      this.draftList = [];
-      this.showModal = false;
-    },
+import { formatLinkType } from "@/utils/filters";
+
+defineOptions({ name: "oneRowThreeColumns" });
+
+const props = defineProps({
+  data: {
+    type: Object,
+    default: {}
   }
+});
+
+const showModal = ref(false);
+const draftList = ref([]);
+const picModelFlag = ref(false);
+const current = ref(0);
+
+const liliDialogRef = ref(null);
+const ossManageRef = ref(null);
+
+function cloneList(list) {
+  return JSON.parse(JSON.stringify(list || []));
+}
+// 回显图片
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  if (!val?.url) return;
+  draftList.value[current.value].img = val.url;
+}
+// 编辑模块
+function handleSelectModel() {
+  draftList.value = cloneList(props.data.options.list);
+  showModal.value = true;
+}
+// 选择商品回调
+function selectedGoodsData(val) {
+  const goods = val[0];
+  if (!goods) return;
+  const item = draftList.value[current.value];
+  item.img = goods.thumbnail;
+  item.price = goods.price;
+  item.name = goods.goodsName;
+  item.url = `/goodsDetail?skuId=${goods.id}&goodsId=${goods.goodsId}`;
+}
+// 选择链接回调
+function selectedLink(val) {
+  const item = draftList.value[current.value];
+  item.url = formatLinkType(val);
+  item.type =
+    val.___type === "other" && val.url === "" ? "link" : "other";
+}
+function handleSelectLink(index) {
+  // 调起选择链接弹窗
+  liliDialogRef.value.open("link");
+  current.value = index;
+}
+function handleSelectImg(index) {
+  // 选择图片
+  current.value = index;
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+function handleCancelModal() {
+  draftList.value = [];
+  showModal.value = false;
+}
+function handleConfirmModal() {
+  const saved = cloneList(draftList.value);
+  props.data.options.list.splice(0, props.data.options.list.length, ...saved);
+  draftList.value = [];
+  showModal.value = false;
 }
 </script>
 

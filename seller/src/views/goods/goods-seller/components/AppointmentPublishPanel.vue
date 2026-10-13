@@ -292,8 +292,11 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { getRequest } from "@/libs/axios";
+import { Message } from "@/utils/message";
 import {
   SERVICE_MODE,
   BOOKABLE_DATE_MODE,
@@ -307,6 +310,35 @@ import {
   slotKey,
 } from "@/constants/appointment";
 
+defineOptions({ name: "AppointmentPublishPanel" });
+
+const props = defineProps({
+  settings: { type: Object, default: () => defaultAppointmentSettings() },
+  division: { type: Object, default: () => defaultSlotDivision() },
+  skuCapacities: { type: Object, default: () => ({}) },
+  skuInfo: { type: Array, default: () => [] },
+  divisionTarget: {
+    type: String,
+    default: "",
+  },
+});
+const emit = defineEmits(["update:settings", "update:division", "update:skuCapacities"]);
+
+const router = useRouter();
+
+const localSettings = ref(defaultAppointmentSettings());
+const localDivision = ref(defaultSlotDivision());
+const enabledSlotKeys = ref([]);
+const systemFormOptions = ref([]);
+const capacityDialogVisible = ref(false);
+const capacityDraft = ref({});
+const activeSkuRowKey = ref("");
+const syncing = ref(false);
+const divisionReady = ref(false);
+
+// 历史遗留：原代码读取未声明的 this.part，恒为 undefined，行为原样保留
+const part = undefined;
+
 function parseMinutes(timeStr) {
   if (!timeStr) return 0;
   const [h, m] = timeStr.split(":").map(Number);
@@ -319,402 +351,391 @@ function formatMinutes(total) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-export default {
-  name: "AppointmentPublishPanel",
-  props: {
-    settings: { type: Object, default: () => defaultAppointmentSettings() },
-    division: { type: Object, default: () => defaultSlotDivision() },
-    skuCapacities: { type: Object, default: () => ({}) },
-    skuInfo: { type: Array, default: () => [] },
-    divisionTarget: {
-      type: String,
-      default: "",
-    },
+const bookableDateHint = computed(() => {
+  return "设置预约服务的可预约日期。例如：周六、周天不选中，则在可预约日期中的周一到周五可用。";
+});
+const customDateRange = computed({
+  get() {
+    const { bookableCustomStartDate, bookableCustomEndDate } = localSettings.value;
+    if (bookableCustomStartDate && bookableCustomEndDate) {
+      return [bookableCustomStartDate, bookableCustomEndDate];
+    }
+    return null;
   },
-  emits: ["update:settings", "update:division", "update:skuCapacities"],
-  data() {
-    return {
-      SERVICE_MODE,
-      BOOKABLE_DATE_MODE,
-      ADVANCE_MODE,
-      CANCEL_MODE,
-      FORM_SUBMIT_MODE,
-      SLOT_DIVISION_MODE,
-      WEEKDAY_OPTIONS,
-      localSettings: defaultAppointmentSettings(),
-      localDivision: defaultSlotDivision(),
-      enabledSlotKeys: [],
-      systemFormOptions: [],
-      capacityDialogVisible: false,
-      capacityDraft: {},
-      activeSkuRowKey: "",
-      syncing: false,
-      divisionReady: false,
+  set(val) {
+    if (val && val.length === 2) {
+      localSettings.value.bookableCustomStartDate = val[0];
+      localSettings.value.bookableCustomEndDate = val[1];
+    } else {
+      localSettings.value.bookableCustomStartDate = "";
+      localSettings.value.bookableCustomEndDate = "";
+    }
+  },
+});
+const autoTimeRange = computed({
+  get() {
+    if (localDivision.value.autoStartTime && localDivision.value.autoEndTime) {
+      return [localDivision.value.autoStartTime, localDivision.value.autoEndTime];
+    }
+    return null;
+  },
+  set(val) {
+    if (val && val.length === 2) {
+      localDivision.value.autoStartTime = val[0];
+      localDivision.value.autoEndTime = val[1];
+    }
+  },
+});
+const activeCapacityRows = computed(() => {
+  return localDivision.value.confirmedSlots
+    .filter((slot) => isSlotEnabled(slot))
+    .map((slot) => ({
+      key: slotKey(slot),
+      label: `${slot.startTime}-${slot.endTime}`,
+    }));
+});
+const allSlotsChecked = computed(() => {
+  const enabled = localDivision.value.confirmedSlots.filter((s) => isSlotEnabled(s));
+  return enabled.length > 0 && enabled.length === enabledSlotKeys.value.length;
+});
+const slotIndeterminate = computed(() => {
+  const enabled = localDivision.value.confirmedSlots.filter((s) => isSlotEnabled(s));
+  return enabledSlotKeys.value.length > 0 && enabledSlotKeys.value.length < enabled.length;
+});
+
+watch(
+  () => props.settings,
+  (val) => {
+    if (syncing.value) return;
+    localSettings.value = { ...defaultAppointmentSettings(), ...(val || {}) };
+  },
+  { immediate: true, deep: true }
+);
+watch(
+  () => props.division,
+  (val) => {
+    if (syncing.value) return;
+    localDivision.value = { ...defaultSlotDivision(), ...(val || {}) };
+    enabledSlotKeys.value = (localDivision.value.confirmedSlots || [])
+      .filter((s) => s.slotEnabled !== false)
+      .map((s) => slotKey(s));
+  },
+  { immediate: true, deep: true }
+);
+watch(
+  localSettings,
+  (val) => {
+    syncing.value = true;
+    emit("update:settings", { ...val });
+    nextTick(() => {
+      syncing.value = false;
+    });
+  },
+  { deep: true }
+);
+watch(
+  localDivision,
+  (val) => {
+    syncing.value = true;
+    emit("update:division", { ...val });
+    nextTick(() => {
+      syncing.value = false;
+    });
+  },
+  { deep: true }
+);
+watch(enabledSlotKeys, (val) => {
+  localDivision.value.confirmedSlots = (localDivision.value.confirmedSlots || []).map((slot) => ({
+    ...slot,
+    slotEnabled: val.includes(slotKey(slot)),
+  }));
+});
+watch(
+  () => props.divisionTarget,
+  () => {
+    prepareDivisionTarget();
+  },
+  { immediate: true }
+);
+
+function prepareDivisionTarget() {
+  divisionReady.value = false;
+  if (!props.divisionTarget) {
+    return;
+  }
+  nextTick(() => {
+    divisionReady.value = !!document.querySelector(props.divisionTarget);
+  });
+}
+function isSlotEnabled(slot) {
+  return slot.slotEnabled !== false;
+}
+function toggleAllSlots(checked) {
+  if (checked) {
+    enabledSlotKeys.value = localDivision.value.confirmedSlots.map((s) => slotKey(s));
+  } else {
+    enabledSlotKeys.value = [];
+  }
+}
+function loadSystemForms() {
+  getRequest("/appointment/system-forms/enabled")
+    .then((res) => {
+      if (res.success) {
+        systemFormOptions.value = res.result || [];
+      }
+    })
+    .catch(() => {});
+}
+function goAddSystemForm() {
+  // 主布局无 keep-alive，新开页避免发品表单被销毁
+  const route = router.resolve({ name: "appointment-system-form-designer" });
+  window.open(route.href, "_blank");
+}
+function addCustomDraft() {
+  const last = localDivision.value.customDrafts[localDivision.value.customDrafts.length - 1];
+  const start = last?.endTime || "08:00";
+  const endMinutes = parseMinutes(start) + 60;
+  const end = endMinutes >= 24 * 60 ? "23:59" : formatMinutes(endMinutes);
+  localDivision.value.customDrafts.push({ startTime: start, endTime: end });
+}
+function removeCustomDraft(index) {
+  localDivision.value.customDrafts.splice(index, 1);
+}
+function confirmSlots() {
+  let slots = [];
+  if (localDivision.value.slotDivisionMode === SLOT_DIVISION_MODE.AUTO) {
+    const duration = Number(localDivision.value.serviceDurationMinutes);
+    if (!duration || duration < 15) {
+      Message.error("请填写有效的服务时长（15-480 分钟）");
+      return false;
+    }
+    const start = parseMinutes(localDivision.value.autoStartTime);
+    const end = parseMinutes(localDivision.value.autoEndTime);
+    if (!localDivision.value.autoStartTime || !localDivision.value.autoEndTime || end <= start) {
+      Message.error("请选择有效的起止时间（同一天内，结束大于开始）");
+      return false;
+    }
+    for (let t = start; t + duration <= end; t += duration) {
+      slots.push({
+        startTime: formatMinutes(t),
+        endTime: formatMinutes(t + duration),
+        slotEnabled: true,
+      });
+    }
+    if (!slots.length) {
+      Message.error("未生成有效时段，请检查起止时间与服务时长");
+      return false;
+    }
+  } else {
+    const drafts = localDivision.value.customDrafts || [];
+    if (!drafts.length) {
+      Message.error("请至少添加一条自定义时段");
+      return false;
+    }
+    let prevEnd = -1;
+    for (const row of drafts) {
+      if (!row.startTime || !row.endTime) {
+        Message.error("请完整填写每条时段的开始和结束时间");
+        return false;
+      }
+      const s = parseMinutes(row.startTime);
+      const e = parseMinutes(row.endTime);
+      if (e <= s) {
+        Message.error("结束时间须大于开始时间，且不支持跨天");
+        return false;
+      }
+      if (s < prevEnd) {
+        Message.error("自定义时段不得重叠，须按时间顺序添加");
+        return false;
+      }
+      prevEnd = e;
+      slots.push({ startTime: row.startTime, endTime: row.endTime, slotEnabled: true });
+    }
+  }
+  localDivision.value.confirmedSlots = slots;
+  enabledSlotKeys.value = slots.map((s) => slotKey(s));
+  Message.success(`已确认 ${slots.length} 个时段`);
+  return true;
+}
+function openSkuCapacityDialog(skuRow) {
+  activeSkuRowKey.value = getSkuRowKey(skuRow);
+  const draft = {};
+  activeCapacityRows.value.forEach((row) => {
+    draft[row.key] = props.skuCapacities?.[activeSkuRowKey.value]?.[row.key] ?? 0;
+  });
+  capacityDraft.value = draft;
+  capacityDialogVisible.value = true;
+}
+function saveSkuCapacities() {
+  const next = { ...(props.skuCapacities || {}) };
+  next[activeSkuRowKey.value] = { ...capacityDraft.value };
+  emit("update:skuCapacities", next);
+  capacityDialogVisible.value = false;
+}
+function validateRules() {
+  const s = localSettings.value;
+  if (!s.serviceModes?.length) {
+    Message.error("预约规则：请至少选择一种服务模式");
+    return false;
+  }
+  if (s.bookableDateMode === BOOKABLE_DATE_MODE.CUSTOM) {
+    if (!s.bookableCustomStartDate || !s.bookableCustomEndDate) {
+      Message.error("预约规则：请选择自定义可预约日期范围");
+      return false;
+    }
+    if (!s.bookableWeekdays?.length) {
+      Message.error("预约规则：请至少勾选一天可约星期");
+      return false;
+    }
+  }
+  if (!s.bookableDays || s.bookableDays < 1) {
+    Message.error("预约规则：预约日期范围须为正整数");
+    return false;
+  }
+  if (s.advanceMode === ADVANCE_MODE.REQUIRE_HOURS && (!s.advanceHours || s.advanceHours < 1)) {
+    Message.error("预约规则：请填写提前预约小时数");
+    return false;
+  }
+  if (
+    s.cancelMode === CANCEL_MODE.ALLOW_BEFORE_HOURS &&
+    (!s.cancelAheadHours || s.cancelAheadHours < 1)
+  ) {
+    Message.error("预约规则：请填写取消政策小时数");
+    return false;
+  }
+  return true;
+}
+function validateDivision() {
+  const enabledSlots = (localDivision.value.confirmedSlots || []).filter((slot) =>
+    isSlotEnabled(slot)
+  );
+  if (!enabledSlots.length) {
+    Message.error("时段划分：请确认时间段并至少启用 1 个时段");
+    return false;
+  }
+  return true;
+}
+function validate() {
+  if (part === "rules") {
+    return validateRules();
+  }
+  if (part === "division") {
+    return validateDivision();
+  }
+  return validateRules() && validateDivision();
+}
+function buildSettingsPayload() {
+  return {
+    appointmentSettings: { ...localSettings.value },
+  };
+}
+function buildDivisionPayload() {
+  const enabledSlots = (localDivision.value.confirmedSlots || []).filter((slot) =>
+    isSlotEnabled(slot)
+  );
+  return {
+    appointmentSlotTemplate: {
+      slotDivisionMode: localDivision.value.slotDivisionMode,
+      serviceDurationMinutes: localDivision.value.serviceDurationMinutes,
+      autoStartTime: localDivision.value.autoStartTime,
+      autoEndTime: localDivision.value.autoEndTime,
+      slots: enabledSlots.map((slot) => ({
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        slotEnabled: true,
+      })),
+    },
+  };
+}
+function buildSubmitPayload() {
+  return {
+    ...buildSettingsPayload(),
+    ...buildDivisionPayload(),
+  };
+}
+function buildSkuSlotCapacities(skuRow) {
+  const rowKey = getSkuRowKey(skuRow);
+  const map = props.skuCapacities?.[rowKey] || {};
+  return (localDivision.value.confirmedSlots || [])
+    .filter((slot) => isSlotEnabled(slot))
+    .map((slot) => ({
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      slotCapacity: map[slotKey(slot)] ?? 0,
+    }));
+}
+function getSkuRowKey(row) {
+  return props.skuInfo
+    .map((info) => row[info.name])
+    .filter(Boolean)
+    .join("::");
+}
+function hydrateFromGoods(result) {
+  if (result.appointmentSettings) {
+    localSettings.value = { ...defaultAppointmentSettings(), ...result.appointmentSettings };
+  }
+  if (result.appointmentSlotTemplate) {
+    const tpl = result.appointmentSlotTemplate;
+    localDivision.value = {
+      ...defaultSlotDivision(),
+      slotDivisionMode: tpl.slotDivisionMode || SLOT_DIVISION_MODE.AUTO,
+      serviceDurationMinutes: tpl.serviceDurationMinutes || 60,
+      autoStartTime: tpl.autoStartTime || "08:00",
+      autoEndTime: tpl.autoEndTime || "18:00",
+      confirmedSlots: tpl.slots || [],
+      customDrafts: tpl.slots?.length
+        ? tpl.slots.map((s) => ({ startTime: s.startTime, endTime: s.endTime }))
+        : defaultSlotDivision().customDrafts,
     };
-  },
-  computed: {
-    bookableDateHint() {
-      return "设置预约服务的可预约日期。例如：周六、周天不选中，则在可预约日期中的周一到周五可用。";
-    },
-    customDateRange: {
-      get() {
-        const { bookableCustomStartDate, bookableCustomEndDate } = this.localSettings;
-        if (bookableCustomStartDate && bookableCustomEndDate) {
-          return [bookableCustomStartDate, bookableCustomEndDate];
-        }
-        return null;
-      },
-      set(val) {
-        if (val && val.length === 2) {
-          this.localSettings.bookableCustomStartDate = val[0];
-          this.localSettings.bookableCustomEndDate = val[1];
-        } else {
-          this.localSettings.bookableCustomStartDate = "";
-          this.localSettings.bookableCustomEndDate = "";
-        }
-      },
-    },
-    autoTimeRange: {
-      get() {
-        if (this.localDivision.autoStartTime && this.localDivision.autoEndTime) {
-          return [this.localDivision.autoStartTime, this.localDivision.autoEndTime];
-        }
-        return null;
-      },
-      set(val) {
-        if (val && val.length === 2) {
-          this.localDivision.autoStartTime = val[0];
-          this.localDivision.autoEndTime = val[1];
-        }
-      },
-    },
-    activeCapacityRows() {
-      return this.localDivision.confirmedSlots
-        .filter((slot) => this.isSlotEnabled(slot))
-        .map((slot) => ({
-          key: slotKey(slot),
-          label: `${slot.startTime}-${slot.endTime}`,
-        }));
-    },
-    allSlotsChecked() {
-      const enabled = this.localDivision.confirmedSlots.filter((s) => this.isSlotEnabled(s));
-      return enabled.length > 0 && enabled.length === this.enabledSlotKeys.length;
-    },
-    slotIndeterminate() {
-      const enabled = this.localDivision.confirmedSlots.filter((s) => this.isSlotEnabled(s));
-      return this.enabledSlotKeys.length > 0 && this.enabledSlotKeys.length < enabled.length;
-    },
-  },
-  watch: {
-    settings: {
-      immediate: true,
-      deep: true,
-      handler(val) {
-        if (this.syncing) return;
-        this.localSettings = { ...defaultAppointmentSettings(), ...(val || {}) };
-      },
-    },
-    division: {
-      immediate: true,
-      deep: true,
-      handler(val) {
-        if (this.syncing) return;
-        this.localDivision = { ...defaultSlotDivision(), ...(val || {}) };
-        this.enabledSlotKeys = (this.localDivision.confirmedSlots || [])
-          .filter((s) => s.slotEnabled !== false)
-          .map((s) => slotKey(s));
-      },
-    },
-    localSettings: {
-      deep: true,
-      handler(val) {
-        this.syncing = true;
-        this.$emit("update:settings", { ...val });
-        this.$nextTick(() => {
-          this.syncing = false;
-        });
-      },
-    },
-    localDivision: {
-      deep: true,
-      handler(val) {
-        this.syncing = true;
-        this.$emit("update:division", { ...val });
-        this.$nextTick(() => {
-          this.syncing = false;
-        });
-      },
-    },
-    enabledSlotKeys(val) {
-      this.localDivision.confirmedSlots = (this.localDivision.confirmedSlots || []).map((slot) => ({
-        ...slot,
-        slotEnabled: val.includes(slotKey(slot)),
-      }));
-    },
-    divisionTarget: {
-      immediate: true,
-      handler() {
-        this.prepareDivisionTarget();
-      },
-    },
-  },
-  mounted() {
-    this.loadSystemForms();
-    this.prepareDivisionTarget();
-  },
-  methods: {
-    prepareDivisionTarget() {
-      this.divisionReady = false;
-      if (!this.divisionTarget) {
-        return;
-      }
-      this.$nextTick(() => {
-        this.divisionReady = !!document.querySelector(this.divisionTarget);
+    enabledSlotKeys.value = (tpl.slots || [])
+      .filter((s) => s.slotEnabled !== false)
+      .map((s) => slotKey(s));
+  }
+  if (result.skuList?.length) {
+    const cap = {};
+    result.skuList.forEach((sku) => {
+      const specKey = (sku.specList || []).map((s) => s.specValue).filter(Boolean).join("::");
+      const keys = [specKey, sku.id, sku.sn].filter(Boolean);
+      const slotMap = {};
+      (sku.slotCapacities || []).forEach((item) => {
+        slotMap[slotKey(item)] = item.slotCapacity ?? 0;
       });
-    },
-    slotKey,
-    isSlotEnabled(slot) {
-      return slot.slotEnabled !== false;
-    },
-    toggleAllSlots(checked) {
-      if (checked) {
-        this.enabledSlotKeys = this.localDivision.confirmedSlots.map((s) => slotKey(s));
-      } else {
-        this.enabledSlotKeys = [];
-      }
-    },
-    loadSystemForms() {
-      getRequest("/appointment/system-forms/enabled")
-        .then((res) => {
-          if (res.success) {
-            this.systemFormOptions = res.result || [];
-          }
-        })
-        .catch(() => {});
-    },
-    goAddSystemForm() {
-      // 主布局无 keep-alive，新开页避免发品表单被销毁
-      const route = this.$router.resolve({ name: "appointment-system-form-designer" });
-      window.open(route.href, "_blank");
-    },
-    addCustomDraft() {
-      const last = this.localDivision.customDrafts[this.localDivision.customDrafts.length - 1];
-      const start = last?.endTime || "08:00";
-      const endMinutes = parseMinutes(start) + 60;
-      const end = endMinutes >= 24 * 60 ? "23:59" : formatMinutes(endMinutes);
-      this.localDivision.customDrafts.push({ startTime: start, endTime: end });
-    },
-    removeCustomDraft(index) {
-      this.localDivision.customDrafts.splice(index, 1);
-    },
-    confirmSlots() {
-      let slots = [];
-      if (this.localDivision.slotDivisionMode === SLOT_DIVISION_MODE.AUTO) {
-        const duration = Number(this.localDivision.serviceDurationMinutes);
-        if (!duration || duration < 15) {
-          this.$Message.error("请填写有效的服务时长（15-480 分钟）");
-          return false;
-        }
-        const start = parseMinutes(this.localDivision.autoStartTime);
-        const end = parseMinutes(this.localDivision.autoEndTime);
-        if (!this.localDivision.autoStartTime || !this.localDivision.autoEndTime || end <= start) {
-          this.$Message.error("请选择有效的起止时间（同一天内，结束大于开始）");
-          return false;
-        }
-        for (let t = start; t + duration <= end; t += duration) {
-          slots.push({
-            startTime: formatMinutes(t),
-            endTime: formatMinutes(t + duration),
-            slotEnabled: true,
-          });
-        }
-        if (!slots.length) {
-          this.$Message.error("未生成有效时段，请检查起止时间与服务时长");
-          return false;
-        }
-      } else {
-        const drafts = this.localDivision.customDrafts || [];
-        if (!drafts.length) {
-          this.$Message.error("请至少添加一条自定义时段");
-          return false;
-        }
-        let prevEnd = -1;
-        for (const row of drafts) {
-          if (!row.startTime || !row.endTime) {
-            this.$Message.error("请完整填写每条时段的开始和结束时间");
-            return false;
-          }
-          const s = parseMinutes(row.startTime);
-          const e = parseMinutes(row.endTime);
-          if (e <= s) {
-            this.$Message.error("结束时间须大于开始时间，且不支持跨天");
-            return false;
-          }
-          if (s < prevEnd) {
-            this.$Message.error("自定义时段不得重叠，须按时间顺序添加");
-            return false;
-          }
-          prevEnd = e;
-          slots.push({ startTime: row.startTime, endTime: row.endTime, slotEnabled: true });
-        }
-      }
-      this.localDivision.confirmedSlots = slots;
-      this.enabledSlotKeys = slots.map((s) => slotKey(s));
-      this.$Message.success(`已确认 ${slots.length} 个时段`);
-      return true;
-    },
-    openSkuCapacityDialog(skuRow) {
-      this.activeSkuRowKey = this.getSkuRowKey(skuRow);
-      const draft = {};
-      this.activeCapacityRows.forEach((row) => {
-        draft[row.key] = this.skuCapacities?.[this.activeSkuRowKey]?.[row.key] ?? 0;
+      keys.forEach((key) => {
+        cap[key] = { ...slotMap };
       });
-      this.capacityDraft = draft;
-      this.capacityDialogVisible = true;
-    },
-    saveSkuCapacities() {
-      const next = { ...(this.skuCapacities || {}) };
-      next[this.activeSkuRowKey] = { ...this.capacityDraft };
-      this.$emit("update:skuCapacities", next);
-      this.capacityDialogVisible = false;
-    },
-    validateRules() {
-      const s = this.localSettings;
-      if (!s.serviceModes?.length) {
-        this.$Message.error("预约规则：请至少选择一种服务模式");
-        return false;
-      }
-      if (s.bookableDateMode === BOOKABLE_DATE_MODE.CUSTOM) {
-        if (!s.bookableCustomStartDate || !s.bookableCustomEndDate) {
-          this.$Message.error("预约规则：请选择自定义可预约日期范围");
-          return false;
-        }
-        if (!s.bookableWeekdays?.length) {
-          this.$Message.error("预约规则：请至少勾选一天可约星期");
-          return false;
-        }
-      }
-      if (!s.bookableDays || s.bookableDays < 1) {
-        this.$Message.error("预约规则：预约日期范围须为正整数");
-        return false;
-      }
-      if (s.advanceMode === ADVANCE_MODE.REQUIRE_HOURS && (!s.advanceHours || s.advanceHours < 1)) {
-        this.$Message.error("预约规则：请填写提前预约小时数");
-        return false;
-      }
-      if (
-        s.cancelMode === CANCEL_MODE.ALLOW_BEFORE_HOURS &&
-        (!s.cancelAheadHours || s.cancelAheadHours < 1)
-      ) {
-        this.$Message.error("预约规则：请填写取消政策小时数");
-        return false;
-      }
-      return true;
-    },
-    validateDivision() {
-      const enabledSlots = (this.localDivision.confirmedSlots || []).filter((slot) =>
-        this.isSlotEnabled(slot)
-      );
-      if (!enabledSlots.length) {
-        this.$Message.error("时段划分：请确认时间段并至少启用 1 个时段");
-        return false;
-      }
-      return true;
-    },
-    validate() {
-      if (this.part === "rules") {
-        return this.validateRules();
-      }
-      if (this.part === "division") {
-        return this.validateDivision();
-      }
-      return this.validateRules() && this.validateDivision();
-    },
-    buildSettingsPayload() {
-      return {
-        appointmentSettings: { ...this.localSettings },
-      };
-    },
-    buildDivisionPayload() {
-      const enabledSlots = (this.localDivision.confirmedSlots || []).filter((slot) =>
-        this.isSlotEnabled(slot)
-      );
-      return {
-        appointmentSlotTemplate: {
-          slotDivisionMode: this.localDivision.slotDivisionMode,
-          serviceDurationMinutes: this.localDivision.serviceDurationMinutes,
-          autoStartTime: this.localDivision.autoStartTime,
-          autoEndTime: this.localDivision.autoEndTime,
-          slots: enabledSlots.map((slot) => ({
-            startTime: slot.startTime,
-            endTime: slot.endTime,
-            slotEnabled: true,
-          })),
-        },
-      };
-    },
-    buildSubmitPayload() {
-      return {
-        ...this.buildSettingsPayload(),
-        ...this.buildDivisionPayload(),
-      };
-    },
-    buildSkuSlotCapacities(skuRow) {
-      const rowKey = this.getSkuRowKey(skuRow);
-      const map = this.skuCapacities?.[rowKey] || {};
-      return (this.localDivision.confirmedSlots || [])
-        .filter((slot) => this.isSlotEnabled(slot))
-        .map((slot) => ({
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-          slotCapacity: map[slotKey(slot)] ?? 0,
-        }));
-    },
-    getSkuRowKey(row) {
-      return this.skuInfo
-        .map((info) => row[info.name])
-        .filter(Boolean)
-        .join("::");
-    },
-    hydrateFromGoods(result) {
-      if (result.appointmentSettings) {
-        this.localSettings = { ...defaultAppointmentSettings(), ...result.appointmentSettings };
-      }
-      if (result.appointmentSlotTemplate) {
-        const tpl = result.appointmentSlotTemplate;
-        this.localDivision = {
-          ...defaultSlotDivision(),
-          slotDivisionMode: tpl.slotDivisionMode || SLOT_DIVISION_MODE.AUTO,
-          serviceDurationMinutes: tpl.serviceDurationMinutes || 60,
-          autoStartTime: tpl.autoStartTime || "08:00",
-          autoEndTime: tpl.autoEndTime || "18:00",
-          confirmedSlots: tpl.slots || [],
-          customDrafts: tpl.slots?.length
-            ? tpl.slots.map((s) => ({ startTime: s.startTime, endTime: s.endTime }))
-            : defaultSlotDivision().customDrafts,
-        };
-        this.enabledSlotKeys = (tpl.slots || [])
-          .filter((s) => s.slotEnabled !== false)
-          .map((s) => slotKey(s));
-      }
-      if (result.skuList?.length) {
-        const cap = {};
-        result.skuList.forEach((sku) => {
-          const specKey = (sku.specList || []).map((s) => s.specValue).filter(Boolean).join("::");
-          const keys = [specKey, sku.id, sku.sn].filter(Boolean);
-          const slotMap = {};
-          (sku.slotCapacities || []).forEach((item) => {
-            slotMap[slotKey(item)] = item.slotCapacity ?? 0;
-          });
-          keys.forEach((key) => {
-            cap[key] = { ...slotMap };
-          });
-        });
-        this.$emit("update:skuCapacities", cap);
-      }
-    },
-  },
-};
+    });
+    emit("update:skuCapacities", cap);
+  }
+}
+
+onMounted(() => {
+  loadSystemForms();
+  prepareDivisionTarget();
+});
+
+// 父组件 goodsOperationSec.vue 通过 ref 调用以下方法，保持公开接口不变
+defineExpose({
+  prepareDivisionTarget,
+  slotKey,
+  isSlotEnabled,
+  toggleAllSlots,
+  loadSystemForms,
+  goAddSystemForm,
+  addCustomDraft,
+  removeCustomDraft,
+  confirmSlots,
+  openSkuCapacityDialog,
+  saveSkuCapacities,
+  validateRules,
+  validateDivision,
+  validate,
+  buildSettingsPayload,
+  buildDivisionPayload,
+  buildSubmitPayload,
+  buildSkuSlotCapacities,
+  getSkuRowKey,
+  hydrateFromGoods,
+});
 </script>
 
 <style scoped lang="scss">

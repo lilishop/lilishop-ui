@@ -192,11 +192,18 @@
     <OtherLink :toUser="toUser" :id="id" :goodsParams="goodsParams" class="flex-4" />
   </div>
 </template>
-<script>
+<script setup>
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 import { textReplaceLink } from "@/utils/functions";
 import { textReplaceEmoji, emojistwo } from "@/utils/emojis";
 import OtherLink from "@/components/chat/panel/OtherLink.vue";
-import { mapState, mapGetters } from "vuex";
 import TalkSearchRecord from "@/components/chat/TalkSearchRecord";
 import MeEditor from "@/components/editor/MeEditor";
 import PanelHeader from "./PanelHeader";
@@ -204,6 +211,12 @@ import PanelToolbar from "./PanelToolbar";
 import SocketInstance from "@/im-server/socket-instance";
 import { SvgMentionDown } from "@/core/icons";
 import { formatTime, parseTime, copyTextToClipboard } from "@/utils/functions";
+import { useUserStore } from "@/stores/user";
+import { useTalkStore } from "@/stores/talk";
+import { useNotifyStore } from "@/stores/notify";
+import { useSettingsStore } from "@/stores/settings";
+import { useDialogueStore } from "@/stores/dialogue";
+import { useEmoticonStore } from "@/stores/emoticon";
 
 import {
   ServeTalkRecords,
@@ -212,672 +225,667 @@ import {
   ServeRevokeRecords,
 } from "@/api/chat";
 
-export default {
-  name: "TalkEditorPanel",
-  components: {
-    MeEditor,
-    OtherLink,
-    TalkSearchRecord,
-    SvgMentionDown,
-    PanelToolbar,
-    PanelHeader,
-  },
-  props: {
-    // 对话相关参数
-    params: {
-      type: Object,
-      default: function () {
-        return {
-          // 消息来源（1：好友私信 2:群聊）
-          talk_type: 0,
-          // 消息接收者ID（好友ID或者群聊ID）
-          receiver_id: 0,
-          nickname: "",
-        };
-      },
-    },
-    goodsParams: {
-      type: Object,
-      default: null,
-    },
+defineOptions({ name: "TalkEditorPanel" });
 
-    // 用户是否在线
-    isOnline: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data () {
-    return {
-      // 记录加载相关参数
-      textReplaceEmoji,
-      emojistwo,
-      textReplaceLink,
-      loadRecord: {
-        status: 0,
-        minRecord: 0,
-        pageSize: 10,
-        pageNumber: 0,
-      },
-
-      // 多选相关操作
-      multiSelect: {
-        isOpen: false,
-        items: [],
-        mode: 0,
-      },
-
-      // 群组Box
-      group: {
-        panel: false,
-        notice: false,
-      },
-
-      // 键盘输入事件
-      keyboardEvent: {
-        isShow: false,
-        time: 0,
-      },
-
-      // 聊天记录管理器数据
-      findChatRecord: false,
-
-      // 置底按钮是否显示
-      tipsBoard: false,
-
-      // 防止并发请求导致 loading 状态错乱
-      recordsRequestId: 0,
-    };
-  },
-
-  computed: {
-    ...mapGetters(["talkItems"]),
-    ...mapState({
-      name: (state) => state.user.name,
-      face: (state) => state.user.face,
-      unreadMessage: (state) => state.talks.unreadMessage,
-      inputEvent: (state) => state.notify.inputEvent,
-      id: (state) => state.user.id,
-      records: (state) => state.dialogue.records,
-      index_name: (state) => state.dialogue.index_name,
-      toUser: (state) => state.user.toUser,
-    }),
-  },
-  watch: {
-    // 监听面板传递参数（含首次挂载）
-    params: {
-      handler () {
-        this.resetRecordState();
-        this.loadChatRecords();
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    parseTime,
-    sendTime: formatTime,
-
-    // 处理 Header 组件事件
-    handleHeaderEvent (event_name) {
-      switch (event_name) {
-        case "history":
-          this.findChatRecord = true;
-          break;
-        case "notice":
-          this.group.notice = true;
-          break;
-        case "setting":
-          this.group.panel = true;
-          break;
-      }
-    },
-    // linkTo(type,val){
-    //   if(type === 'GOODS'){
-    //     let routeUrl = this.$router.resolve({
-    //       path: '/goodsDetail',
-    //       query: { skuId:val.id, goodsId:val.goodsId }
-    //     });
-    //   window.open(routeUrl.href, '_blank');
-    //   }
-    // },
-    // #TODO 冗余代码
-
-    formatDateToString (date) {
-      var year = date.getFullYear();
-      var month = date.getMonth() + 1;
-      var day = date.getDate();
-      if (month < 10) month = "0" + month;
-      if (day < 10) day = "0" + day;
-      return year + "-" + month + "-" + day;
-    },
-
-    /**
-     * 将unix时间戳转换为指定格式
-     * @param unix   时间戳【秒】
-     * @param format 转换格式
-     * @returns {*|string}
-     */
-    unixToDate (unix, format) {
-      if (!unix) return unix;
-      let _format = format || "yyyy-MM-dd hh:mm:ss";
-      const d = new Date(unix);
-      const o = {
-        "M+": d.getMonth() + 1,
-        "d+": d.getDate(),
-        "h+": d.getHours(),
-        "m+": d.getMinutes(),
-        "s+": d.getSeconds(),
-        "q+": Math.floor((d.getMonth() + 3) / 3),
-        S: d.getMilliseconds(),
+const props = defineProps({
+  // 对话相关参数
+  params: {
+    type: Object,
+    default: function () {
+      return {
+        // 消息来源（1：好友私信 2:群聊）
+        talk_type: 0,
+        // 消息接收者ID（好友ID或者群聊ID）
+        receiver_id: 0,
+        nickname: "",
       };
-      if (/(y+)/.test(_format))
-        _format = _format.replace(
-          RegExp.$1,
-          (d.getFullYear() + "").substr(4 - RegExp.$1.length)
-        );
-      for (const k in o)
-        if (new RegExp("(" + k + ")").test(_format))
-          _format = _format.replace(
-            RegExp.$1,
-            RegExp.$1.length === 1
-              ? o[k]
-              : ("00" + o[k]).substr(("" + o[k]).length)
-          );
-      return _format;
     },
+  },
+  goodsParams: {
+    type: Object,
+    default: null,
+  },
 
-    formateDateAndTimeToString (date) {
-      var hours = date.getHours();
-      var mins = date.getMinutes();
-      var secs = date.getSeconds();
-      var msecs = date.getMilliseconds();
-      if (hours < 10) hours = "0" + hours;
-      if (mins < 10) mins = "0" + mins;
-      if (secs < 10) secs = "0" + secs;
-      if (msecs < 10) secs = "0" + msecs;
-      return (
-        this.formatDateToString(date) + " " + hours + ":" + mins + ":" + secs
+  // 用户是否在线
+  isOnline: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(["close-talk"]);
+
+// 全局属性（$notify/$contacts/$user/$contextmenu）通过实例代理访问，行为与原 this.$xxx 一致
+const { proxy } = getCurrentInstance();
+
+const userStore = useUserStore();
+const talkStore = useTalkStore();
+const notifyStore = useNotifyStore();
+const settingsStore = useSettingsStore();
+const dialogueStore = useDialogueStore();
+const emoticonStore = useEmoticonStore();
+
+// 记录加载相关参数
+const loadRecord = reactive({
+  status: 0,
+  minRecord: 0,
+  pageSize: 10,
+  pageNumber: 0,
+});
+
+// 多选相关操作
+const multiSelect = ref({
+  isOpen: false,
+  items: [],
+  mode: 0,
+});
+
+// 群组Box
+const group = reactive({
+  panel: false,
+  notice: false,
+});
+
+// 键盘输入事件
+const keyboardEvent = reactive({
+  isShow: false,
+  time: 0,
+});
+
+// 聊天记录管理器数据
+const findChatRecord = ref(false);
+
+// 置底按钮是否显示
+const tipsBoard = ref(false);
+
+// 防止并发请求导致 loading 状态错乱
+let recordsRequestId = 0;
+
+// PanelHeader 组件实例（模板 ref="panelHeader"）
+const panelHeader = ref(null);
+
+const talkItems = computed(() => talkStore.talkItems);
+const name = computed(() => userStore.name);
+const face = computed(() => userStore.face);
+const unreadMessage = computed(() => talkStore.unreadMessage);
+const inputEvent = computed(() => notifyStore.inputEvent);
+const id = computed(() => userStore.id);
+const records = computed(() => dialogueStore.records);
+const index_name = computed(() => dialogueStore.index_name);
+const toUser = computed(() => userStore.toUser);
+
+const sendTime = formatTime;
+
+// 监听面板传递参数（含首次挂载）
+watch(
+  () => props.params,
+  () => {
+    resetRecordState();
+    loadChatRecords();
+  },
+  { immediate: true }
+);
+
+// 处理 Header 组件事件
+function handleHeaderEvent(event_name) {
+  switch (event_name) {
+    case "history":
+      findChatRecord.value = true;
+      break;
+    case "notice":
+      group.notice = true;
+      break;
+    case "setting":
+      group.panel = true;
+      break;
+  }
+}
+// linkTo(type,val){
+//   if(type === 'GOODS'){
+//     let routeUrl = this.$router.resolve({
+//       path: '/goodsDetail',
+//       query: { skuId:val.id, goodsId:val.goodsId }
+//     });
+//   window.open(routeUrl.href, '_blank');
+//   }
+// },
+// #TODO 冗余代码
+
+function formatDateToString(date) {
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  if (month < 10) month = "0" + month;
+  if (day < 10) day = "0" + day;
+  return year + "-" + month + "-" + day;
+}
+
+/**
+ * 将unix时间戳转换为指定格式
+ * @param unix   时间戳【秒】
+ * @param format 转换格式
+ * @returns {*|string}
+ */
+function unixToDate(unix, format) {
+  if (!unix) return unix;
+  let _format = format || "yyyy-MM-dd hh:mm:ss";
+  const d = new Date(unix);
+  const o = {
+    "M+": d.getMonth() + 1,
+    "d+": d.getDate(),
+    "h+": d.getHours(),
+    "m+": d.getMinutes(),
+    "s+": d.getSeconds(),
+    "q+": Math.floor((d.getMonth() + 3) / 3),
+    S: d.getMilliseconds(),
+  };
+  if (/(y+)/.test(_format))
+    _format = _format.replace(
+      RegExp.$1,
+      (d.getFullYear() + "").substr(4 - RegExp.$1.length)
+    );
+  for (const k in o)
+    if (new RegExp("(" + k + ")").test(_format))
+      _format = _format.replace(
+        RegExp.$1,
+        RegExp.$1.length === 1
+          ? o[k]
+          : ("00" + o[k]).substr(("" + o[k]).length)
       );
-    },
-    // #冗余代码结束
+  return _format;
+}
 
-    // 重新发送消息
-    againSendMessage(val){
-     
-      this.submitSendMessage(val.text)
-    },
+function formateDateAndTimeToString(date) {
+  var hours = date.getHours();
+  var mins = date.getMinutes();
+  var secs = date.getSeconds();
+  var msecs = date.getMilliseconds();
+  if (hours < 10) hours = "0" + hours;
+  if (mins < 10) mins = "0" + mins;
+  if (secs < 10) secs = "0" + secs;
+  if (msecs < 10) secs = "0" + msecs;
+  return (
+    formatDateToString(date) + " " + hours + ":" + mins + ":" + secs
+  );
+}
+// #冗余代码结束
 
-    // 回车键发送消息回调事件
-    submitSendMessage (content) {
-      const record = {
-        operation_type: "MESSAGE",
-        to: this.params.receiver_id,
-        from: this.id,
-        message_type: "MESSAGE",
-        context: content,
-        talk_id: this.params.talkId,
-      };
-      // if (record.messageType == 'MESSAGE"') {
-      //   record.text = this.textReplaceEmoji(record.content)
-      // }
-      SocketInstance.emit("event_talk", record);
+// 重新发送消息
+function againSendMessage(val) {
 
-      this.$store.commit("UPDATE_TALK_ITEM", {
-        index_name: this.index_name,
-        draft_text: "",
-      });
+  submitSendMessage(val.text)
+}
 
-      /**
-       * 插入数据
-       */
-      const insterChat = {
-        createTime: this.formateDateAndTimeToString(new Date()),
-        fromUser: this.id,
-        toUser: record.to,
-        isRead: false,
-        messageType: "MESSAGE",
-        text: content,
-        float: "right",
-      };
-      // console.log("插入对话记录",'')
-      // 插入对话记录
-      this.$store.commit("PUSH_DIALOGUE", insterChat);
-      // 获取聊天面板元素节点
-      let el = document.getElementById("lumenChatPanel");
+// 回车键发送消息回调事件
+function submitSendMessage(content) {
+  const record = {
+    operation_type: "MESSAGE",
+    to: props.params.receiver_id,
+    from: id.value,
+    message_type: "MESSAGE",
+    context: content,
+    talk_id: props.params.talkId,
+  };
+  // if (record.messageType == 'MESSAGE"') {
+  //   record.text = textReplaceEmoji(record.content)
+  // }
+  SocketInstance.emit("event_talk", record);
 
-      // 判断的滚动条是否在底部
-      let isBottom =
-        Math.ceil(el.scrollTop) + el.clientHeight >= el.scrollHeight;
+  talkStore.UPDATE_TALK_ITEM({
+    index_name: index_name.value,
+    draft_text: "",
+  });
 
-      if (isBottom || record.to == this.id) {
-        this.$nextTick(() => {
-          el.scrollTop = el.scrollHeight;
-        });
-      } else {
-        this.$store.commit("SET_TLAK_UNREAD_MESSAGE", {
-          content: content,
-          nickname: record.name,
-        });
-      }
-    },
+  /**
+   * 插入数据
+   */
+  const insterChat = {
+    createTime: formateDateAndTimeToString(new Date()),
+    fromUser: id.value,
+    toUser: record.to,
+    isRead: false,
+    messageType: "MESSAGE",
+    text: content,
+    float: "right",
+  };
+  // console.log("插入对话记录",'')
+  // 插入对话记录
+  dialogueStore.PUSH_DIALOGUE(insterChat);
+  // 获取聊天面板元素节点
+  let el = document.getElementById("lumenChatPanel");
 
-    // 推送编辑事件消息
-    onKeyboardEvent (text) {
-      this.$store.commit("UPDATE_TALK_ITEM", {
-        index_name: this.index_name,
-        draft_text: text,
-      });
+  // 判断的滚动条是否在底部
+  let isBottom =
+    Math.ceil(el.scrollTop) + el.clientHeight >= el.scrollHeight;
 
-      // 判断当前对话是否属于私聊信息
-      if (this.params.talk_type == 2 || !this.isOnline) return;
-
-      // 判断是否推送键盘输入事件消息
-      if (!this.$store.state.settings.keyboardEventNotify) {
-        return false;
-      }
-
-      let time = new Date().getTime();
-      // 判断在两秒内是否已推送事件
-      if (this.keyboardEvent.time != 0 && time - this.keyboardEvent.time < 2000)
-        return;
-
-      this.keyboardEvent.time = time;
-
-      // 调用父类Websocket组件发送消息
-      SocketInstance.emit("event_keyboard", {
-        sender_id: this.id,
-        receiver_id: this.params.receiver_id,
-      });
-    },
-
-
-
-    resetRecordState () {
-      this.loadRecord.minRecord = 0;
-      this.loadRecord.pageNumber = 0;
-      this.tipsBoard = false;
-      this.multiSelect = {
-        isOpen: false,
-        items: [],
-        mode: 0,
-      };
-    },
-
-    // 加载用户聊天详情信息
-    loadChatRecords () {
-      if (!this.params.talkId) {
-        this.loadRecord.status = 2;
-        return;
-      }
-
-      const isFirstPage = this.loadRecord.pageNumber === 0;
-      if (isFirstPage) {
-        this.loadRecord.pageNumber = 1;
-      } else {
-        this.loadRecord.pageNumber = this.loadRecord.pageNumber + 1;
-      }
-
-      const user_id = this.id;
-      const data = {
-        pageNumber: this.loadRecord.pageNumber,
-        pageSize: this.loadRecord.pageSize,
-        talkId: this.params.talkId,
-      };
-      this.loadRecord.status = 0;
-
-      const requestId = ++this.recordsRequestId;
-      let el = document.getElementById('lumenChatPanel');
-      let scrollHeight = el ? el.scrollHeight : 0;
-
-      ServeTalkRecords(data).then((res) => {
-        if (requestId !== this.recordsRequestId) return;
-        if (res.code !== 200 || !Array.isArray(res.result)) {
-          this.loadRecord.status = 2;
-          return;
-        }
-        const records = res.result.map((item) => {
-          let key = new Date().getTime();
-          item.float = "center";
-          if (item.toUser > 0) {
-            item.float = item.fromUser == user_id ? "right" : "left";
-          }
-          if (item.messageType == 'GOODS') {
-            item.text = JSON.parse(item.text);
-          }
-          if (item.messageType == 'ORDER') {
-            item.text = JSON.parse(item.text);
-          }
-          return { ...item, [key]: key };
-        });
-        this.$store.commit("UNSHIFT_DIALOGUE", records);
-        this.loadRecord.status = records.length ? 1 : 2;
-        this.$nextTick(() => {
-          if (!el) return;
-          if (isFirstPage) {
-            el.scrollTop = el.scrollHeight;
-          } else {
-            el.scrollTop = el.scrollHeight - scrollHeight;
-          }
-        });
-      }).catch(() => {
-        if (requestId !== this.recordsRequestId) return;
-        this.loadRecord.status = 2;
-      });
-    },
-
-    // 多选处理方式
-    handleMultiMode (value) {
-      if (value == "close") {
-        this.closeMultiSelect();
-        return false;
-      }
-
-      if (this.multiSelect.items.length <= 1) {
-        return false;
-      }
-
-      if (value == "forward" || value == "merge_forward") {
-        this.multiSelect.mode = value == "forward" ? 1 : 2;
-        if (this.verifyMultiSelectType(3)) {
-          this.$notify({
-            title: "消息转发",
-            message: "会话记录不支持合并转发",
-          });
-          return false;
-        }
-
-        this.$contacts({
-          confirm: this.confirmSelectContacts,
-        });
-      } else if (value == "delete") {
-        this.multiSelect.mode = 3;
-
-        // 批量删除
-        let ids = this.multiSelect.items;
-        ServeRemoveRecords({
-          talk_type: this.params.talk_type,
-          receiver_id: this.params.receiver_id,
-          record_id: ids.join(","),
-        }).then((res) => {
-          if (res.code == 200) {
-            this.delRecords(ids).closeMultiSelect();
-          }
-        });
-      }
-    },
-
-    // 确认消息转发联系人事件
-    confirmSelectContacts (data) {
-      let user_ids = [];
-      let group_ids = [];
-      data.forEach((item) => {
-        if (item.type == 1) {
-          user_ids.push(item.id);
-        } else {
-          group_ids.push(item.id);
-        }
-      });
-
-      ServeForwardRecords({
-        forward_mode: this.multiSelect.mode,
-        talk_type: this.params.talk_type,
-        receiver_id: this.params.receiver_id,
-        records_ids: this.multiSelect.items,
-        receive_user_ids: user_ids,
-        receive_group_ids: group_ids,
-      }).then((res) => {
-        if (res.code == 200) {
-          this.closeMultiSelect();
-          this.$notify({
-            title: "消息转发",
-            message: "消息转发成功...",
-            type: "success",
-          });
-        }
-      });
-    },
-
-    // 处理消息时间是否显示
-    compareTime (index, datetime) {
-      if (datetime == undefined) {
-        return false;
-      }
-      if (typeof datetime == "number") {
-        datetime = this.unixToDate(datetime, "yyyy-MM-dd hh:mm");
-      }
-
-      if (this.records[index].is_revoke == 1) {
-        return false;
-      }
-
-      datetime = datetime.replace(/-/g, "/");
-      let time = Math.floor(Date.parse(datetime) / 1000);
-      let currTime = Math.floor(new Date().getTime() / 1000);
-
-      // 当前时间5分钟内时间不显示
-      if (currTime - time < 300) return false;
-
-      // 判断是否是最后一条消息,最后一条消息默认显示时间
-      if (index == this.records.length - 1) {
-        return true;
-      }
-
-      let nextDate = this.records[index + 1].createTime.replace(/-/g, "/");
-
-      return !(
-        parseTime(new Date(datetime), "{y}-{m}-{d} {h}:{i}") ==
-        parseTime(new Date(nextDate), "{y}-{m}-{d} {h}:{i}")
-      );
-    },
-
-    // 查看好友用户信息
-    catFriendDetail (value) {
-      this.$user(value);
-    },
-
-    // 撤回消息
-    revokeRecords (index, item) {
-      ServeRevokeRecords({
-        record_id: item.id,
-      }).then((res) => {
-        if (res.code == 200) {
-          this.$store.commit("UPDATE_DIALOGUE", { id: item.id, is_revoke: 1 });
-        }
-      });
-    },
-
-    // 删除消息
-    removeRecords (index, item) {
-      let receiver_id = item.receiver_id;
-      if (item.talk_type == 1 && item.user_id != this.id) {
-        receiver_id = item.user_id;
-      }
-
-      ServeRemoveRecords({
-        talk_type: item.talk_type,
-        receiver_id: receiver_id,
-        record_id: item.id.toString(),
-      }).then((res) => {
-        if (res.code == 200) {
-          this.$store.commit("DELETE_DIALOGUE", index);
-        }
-      });
-    },
-
-    // 从列表中删除记录
-    delRecords (arr) {
-      this.$store.commit("BATCH_DELETE_DIALOGUE", arr);
-      return this;
-    },
-
-    // 开启多选模式
-    openMultiSelect () {
-      this.multiSelect.isOpen = true;
-    },
-
-    // 关闭多选模式
-    closeMultiSelect () {
-      this.multiSelect.isOpen = false;
-      this.multiSelect.items = [];
-    },
-
-    // 判断记录是否选中
-    verifyMultiSelect (records_id) {
-      return this.multiSelect.items.indexOf(records_id) >= 0;
-    },
-
-    // 触发多选事件
-    triggerMultiSelect (records_id) {
-      let i = this.multiSelect.items.indexOf(records_id);
-      if (i >= 0) {
-        this.multiSelect.items.splice(i, 1);
-      } else {
-        if (this.multiSelect.items.length >= 30) {
-          this.$notify({
-            title: "温馨提示",
-            message: "批量操作最大支持30条数据...",
-          });
-          return false;
-        }
-        this.multiSelect.items.push(records_id);
-      }
-    },
-
-    // 验证是否存在选择的指定类型的消息
-    verifyMultiSelectType (type) {
-      return this.records.some((item) => {
-        return this.verifyMultiSelect(item.id) && item.messageType == type;
-      });
-    },
-
-    // 消息点击右键触发自定义菜单
-    onCopy (idx, item, event) {
-      let menus = [];
-      let content = "";
-      if (document.getElementById("copy_class_" + item.id)) {
-        content = document.getElementById("copy_class_" + item.id).innerText;
-      }
-
-      if (content) {
-        menus.push({
-          label: "复制",
-          icon: "el-icon-document-copy",
-          customClass: "cus-contextmenu-item",
-          onClick: () => {
-            copyTextToClipboard(content);
-          },
-        });
-      }
-
-      if (item.user_id == this.id) {
-        let time =
-          new Date().getTime() - Date.parse(item.createTime.replace(/-/g, "/"));
-        if (Math.floor(time / 1000 / 60) < 2) {
-          menus.push({
-            label: "撤回",
-            icon: "el-icon-s-flag",
-            customClass: "cus-contextmenu-item",
-            onClick: () => {
-              this.revokeRecords(idx, item);
-            },
-          });
-        }
-      }
-
-      menus.push({
-        label: "删除",
-        icon: "el-icon-delete",
-        customClass: "cus-contextmenu-item",
-        onClick: () => {
-          this.removeRecords(idx, item);
-        },
-      });
-
-      menus.push({
-        label: "引用",
-        icon: "el-icon-connection",
-        customClass: "cus-contextmenu-item",
-        onClick: () => { },
-      });
-
-      menus.push({
-        label: "多选",
-        icon: "el-icon-finished",
-        customClass: "cus-contextmenu-item",
-        onClick: () => {
-          this.openMultiSelect();
-        },
-      });
-
-      // 判断是否是图片消息
-      if (item.messageType == 2 && item.file.file_type == 1) {
-        menus.push({
-          label: "收藏",
-          icon: "el-icon-picture",
-          customClass: "cus-contextmenu-item",
-          onClick: () => {
-            this.$store.commit("SAVE_USER_EMOTICON", {
-              record_id: item.id,
-            });
-          },
-        });
-      }
-
-      this.$contextmenu({
-        items: menus,
-        event,
-        customClass: "cus-contextmenu",
-        zIndex: 3,
-        minWidth: 120,
-      });
-
-      this.closeMultiSelect();
-      event.preventDefault();
-    },
-
-    hideChatGroup () {
-      this.group.panel = false;
-    },
-
-    // 修改群聊免打扰状态
-    disturbChange (detail) {
-      this.$store.commit("UPDATE_TALK_ITEM", {
-        index_name: `2_${this.params.receiver_id}`,
-        is_disturb: parseInt(detail.status),
-      });
-    },
-
-    // 退出群聊回调事件
-    quitGroupSuccess () {
-      this.$emit("close-talk");
-    },
-
-    // 同步群信息
-    syncGroupInfo (groupInfo) {
-      this.$refs.panelHeader.setGroupNum(groupInfo.members_num);
-    },
-
-    // 对话面板滚动事件
-    talkPanelScroll (e) {
-      if (e.target.scrollTop == 0 && this.loadRecord.status == 1) {
-        this.loadChatRecords();
-        return;
-      }
-
-      const height = e.target.scrollTop + e.target.clientHeight + 5;
-      this.tipsBoard = height < e.target.scrollHeight;
-      if (this.tipsBoard == false && this.unreadMessage.num > 0) {
-        this.$store.commit("CLEAR_TLAK_UNREAD_MESSAGE");
-      }
-    },
-
-    // 聊天版本滚动到底部
-    talkPanelScrollBottom () {
-      let el = document.getElementById("lumenChatPanel");
+  if (isBottom || record.to == id.value) {
+    nextTick(() => {
       el.scrollTop = el.scrollHeight;
+    });
+  } else {
+    talkStore.SET_TLAK_UNREAD_MESSAGE({
+      content: content,
+      nickname: record.name,
+    });
+  }
+}
+
+// 推送编辑事件消息
+function onKeyboardEvent(text) {
+  talkStore.UPDATE_TALK_ITEM({
+    index_name: index_name.value,
+    draft_text: text,
+  });
+
+  // 判断当前对话是否属于私聊信息
+  if (props.params.talk_type == 2 || !props.isOnline) return;
+
+  // 判断是否推送键盘输入事件消息
+  if (!settingsStore.keyboardEventNotify) {
+    return false;
+  }
+
+  let time = new Date().getTime();
+  // 判断在两秒内是否已推送事件
+  if (keyboardEvent.time != 0 && time - keyboardEvent.time < 2000)
+    return;
+
+  keyboardEvent.time = time;
+
+  // 调用父类Websocket组件发送消息
+  SocketInstance.emit("event_keyboard", {
+    sender_id: id.value,
+    receiver_id: props.params.receiver_id,
+  });
+}
+
+
+
+function resetRecordState() {
+  loadRecord.minRecord = 0;
+  loadRecord.pageNumber = 0;
+  tipsBoard.value = false;
+  multiSelect.value = {
+    isOpen: false,
+    items: [],
+    mode: 0,
+  };
+}
+
+// 加载用户聊天详情信息
+function loadChatRecords() {
+  if (!props.params.talkId) {
+    loadRecord.status = 2;
+    return;
+  }
+
+  const isFirstPage = loadRecord.pageNumber === 0;
+  if (isFirstPage) {
+    loadRecord.pageNumber = 1;
+  } else {
+    loadRecord.pageNumber = loadRecord.pageNumber + 1;
+  }
+
+  const user_id = id.value;
+  const data = {
+    pageNumber: loadRecord.pageNumber,
+    pageSize: loadRecord.pageSize,
+    talkId: props.params.talkId,
+  };
+  loadRecord.status = 0;
+
+  const requestId = ++recordsRequestId;
+  let el = document.getElementById('lumenChatPanel');
+  let scrollHeight = el ? el.scrollHeight : 0;
+
+  ServeTalkRecords(data).then((res) => {
+    if (requestId !== recordsRequestId) return;
+    if (res.code !== 200 || !Array.isArray(res.result)) {
+      loadRecord.status = 2;
+      return;
+    }
+    const records = res.result.map((item) => {
+      let key = new Date().getTime();
+      item.float = "center";
+      if (item.toUser > 0) {
+        item.float = item.fromUser == user_id ? "right" : "left";
+      }
+      if (item.messageType == 'GOODS') {
+        item.text = JSON.parse(item.text);
+      }
+      if (item.messageType == 'ORDER') {
+        item.text = JSON.parse(item.text);
+      }
+      return { ...item, [key]: key };
+    });
+    dialogueStore.UNSHIFT_DIALOGUE(records);
+    loadRecord.status = records.length ? 1 : 2;
+    nextTick(() => {
+      if (!el) return;
+      if (isFirstPage) {
+        el.scrollTop = el.scrollHeight;
+      } else {
+        el.scrollTop = el.scrollHeight - scrollHeight;
+      }
+    });
+  }).catch(() => {
+    if (requestId !== recordsRequestId) return;
+    loadRecord.status = 2;
+  });
+}
+
+// 多选处理方式
+function handleMultiMode(value) {
+  if (value == "close") {
+    closeMultiSelect();
+    return false;
+  }
+
+  if (multiSelect.value.items.length <= 1) {
+    return false;
+  }
+
+  if (value == "forward" || value == "merge_forward") {
+    multiSelect.value.mode = value == "forward" ? 1 : 2;
+    if (verifyMultiSelectType(3)) {
+      proxy.$notify({
+        title: "消息转发",
+        message: "会话记录不支持合并转发",
+      });
+      return false;
+    }
+
+    proxy.$contacts({
+      confirm: confirmSelectContacts,
+    });
+  } else if (value == "delete") {
+    multiSelect.value.mode = 3;
+
+    // 批量删除
+    let ids = multiSelect.value.items;
+    ServeRemoveRecords({
+      talk_type: props.params.talk_type,
+      receiver_id: props.params.receiver_id,
+      record_id: ids.join(","),
+    }).then((res) => {
+      if (res.code == 200) {
+        delRecords(ids).closeMultiSelect();
+      }
+    });
+  }
+}
+
+// 确认消息转发联系人事件
+function confirmSelectContacts(data) {
+  let user_ids = [];
+  let group_ids = [];
+  data.forEach((item) => {
+    if (item.type == 1) {
+      user_ids.push(item.id);
+    } else {
+      group_ids.push(item.id);
+    }
+  });
+
+  ServeForwardRecords({
+    forward_mode: multiSelect.value.mode,
+    talk_type: props.params.talk_type,
+    receiver_id: props.params.receiver_id,
+    records_ids: multiSelect.value.items,
+    receive_user_ids: user_ids,
+    receive_group_ids: group_ids,
+  }).then((res) => {
+    if (res.code == 200) {
+      closeMultiSelect();
+      proxy.$notify({
+        title: "消息转发",
+        message: "消息转发成功...",
+        type: "success",
+      });
+    }
+  });
+}
+
+// 处理消息时间是否显示
+function compareTime(index, datetime) {
+  if (datetime == undefined) {
+    return false;
+  }
+  if (typeof datetime == "number") {
+    datetime = unixToDate(datetime, "yyyy-MM-dd hh:mm");
+  }
+
+  if (records.value[index].is_revoke == 1) {
+    return false;
+  }
+
+  datetime = datetime.replace(/-/g, "/");
+  let time = Math.floor(Date.parse(datetime) / 1000);
+  let currTime = Math.floor(new Date().getTime() / 1000);
+
+  // 当前时间5分钟内时间不显示
+  if (currTime - time < 300) return false;
+
+  // 判断是否是最后一条消息,最后一条消息默认显示时间
+  if (index == records.value.length - 1) {
+    return true;
+  }
+
+  let nextDate = records.value[index + 1].createTime.replace(/-/g, "/");
+
+  return !(
+    parseTime(new Date(datetime), "{y}-{m}-{d} {h}:{i}") ==
+    parseTime(new Date(nextDate), "{y}-{m}-{d} {h}:{i}")
+  );
+}
+
+// 查看好友用户信息
+function catFriendDetail(value) {
+  proxy.$user(value);
+}
+
+// 撤回消息
+function revokeRecords(index, item) {
+  ServeRevokeRecords({
+    record_id: item.id,
+  }).then((res) => {
+    if (res.code == 200) {
+      dialogueStore.UPDATE_DIALOGUE({ id: item.id, is_revoke: 1 });
+    }
+  });
+}
+
+// 删除消息
+function removeRecords(index, item) {
+  let receiver_id = item.receiver_id;
+  if (item.talk_type == 1 && item.user_id != id.value) {
+    receiver_id = item.user_id;
+  }
+
+  ServeRemoveRecords({
+    talk_type: item.talk_type,
+    receiver_id: receiver_id,
+    record_id: item.id.toString(),
+  }).then((res) => {
+    if (res.code == 200) {
+      dialogueStore.DELETE_DIALOGUE(index);
+    }
+  });
+}
+
+// 从列表中删除记录
+function delRecords(arr) {
+  dialogueStore.BATCH_DELETE_DIALOGUE(arr);
+  // 原代码 return this 供链式调用 closeMultiSelect
+  return { closeMultiSelect };
+}
+
+// 开启多选模式
+function openMultiSelect() {
+  multiSelect.value.isOpen = true;
+}
+
+// 关闭多选模式
+function closeMultiSelect() {
+  multiSelect.value.isOpen = false;
+  multiSelect.value.items = [];
+}
+
+// 判断记录是否选中
+function verifyMultiSelect(records_id) {
+  return multiSelect.value.items.indexOf(records_id) >= 0;
+}
+
+// 触发多选事件
+function triggerMultiSelect(records_id) {
+  let i = multiSelect.value.items.indexOf(records_id);
+  if (i >= 0) {
+    multiSelect.value.items.splice(i, 1);
+  } else {
+    if (multiSelect.value.items.length >= 30) {
+      proxy.$notify({
+        title: "温馨提示",
+        message: "批量操作最大支持30条数据...",
+      });
+      return false;
+    }
+    multiSelect.value.items.push(records_id);
+  }
+}
+
+// 验证是否存在选择的指定类型的消息
+function verifyMultiSelectType(type) {
+  return records.value.some((item) => {
+    return verifyMultiSelect(item.id) && item.messageType == type;
+  });
+}
+
+// 消息点击右键触发自定义菜单
+function onCopy(idx, item, event) {
+  let menus = [];
+  let content = "";
+  if (document.getElementById("copy_class_" + item.id)) {
+    content = document.getElementById("copy_class_" + item.id).innerText;
+  }
+
+  if (content) {
+    menus.push({
+      label: "复制",
+      icon: "el-icon-document-copy",
+      customClass: "cus-contextmenu-item",
+      onClick: () => {
+        copyTextToClipboard(content);
+      },
+    });
+  }
+
+  if (item.user_id == id.value) {
+    let time =
+      new Date().getTime() - Date.parse(item.createTime.replace(/-/g, "/"));
+    if (Math.floor(time / 1000 / 60) < 2) {
+      menus.push({
+        label: "撤回",
+        icon: "el-icon-s-flag",
+        customClass: "cus-contextmenu-item",
+        onClick: () => {
+          revokeRecords(idx, item);
+        },
+      });
+    }
+  }
+
+  menus.push({
+    label: "删除",
+    icon: "el-icon-delete",
+    customClass: "cus-contextmenu-item",
+    onClick: () => {
+      removeRecords(idx, item);
     },
-  },
-};
+  });
+
+  menus.push({
+    label: "引用",
+    icon: "el-icon-connection",
+    customClass: "cus-contextmenu-item",
+    onClick: () => { },
+  });
+
+  menus.push({
+    label: "多选",
+    icon: "el-icon-finished",
+    customClass: "cus-contextmenu-item",
+    onClick: () => {
+      openMultiSelect();
+    },
+  });
+
+  // 判断是否是图片消息
+  if (item.messageType == 2 && item.file.file_type == 1) {
+    menus.push({
+      label: "收藏",
+      icon: "el-icon-picture",
+      customClass: "cus-contextmenu-item",
+      onClick: () => {
+        emoticonStore.SAVE_USER_EMOTICON({
+          record_id: item.id,
+        });
+      },
+    });
+  }
+
+  proxy.$contextmenu({
+    items: menus,
+    event,
+    customClass: "cus-contextmenu",
+    zIndex: 3,
+    minWidth: 120,
+  });
+
+  closeMultiSelect();
+  event.preventDefault();
+}
+
+function hideChatGroup() {
+  group.panel = false;
+}
+
+// 修改群聊免打扰状态
+function disturbChange(detail) {
+  talkStore.UPDATE_TALK_ITEM({
+    index_name: `2_${props.params.receiver_id}`,
+    is_disturb: parseInt(detail.status),
+  });
+}
+
+// 退出群聊回调事件
+function quitGroupSuccess() {
+  emit("close-talk");
+}
+
+// 同步群信息
+function syncGroupInfo(groupInfo) {
+  panelHeader.value.setGroupNum(groupInfo.members_num);
+}
+
+// 对话面板滚动事件
+function talkPanelScroll(e) {
+  if (e.target.scrollTop == 0 && loadRecord.status == 1) {
+    loadChatRecords();
+    return;
+  }
+
+  const height = e.target.scrollTop + e.target.clientHeight + 5;
+  tipsBoard.value = height < e.target.scrollHeight;
+  if (tipsBoard.value == false && unreadMessage.value.num > 0) {
+    talkStore.CLEAR_TLAK_UNREAD_MESSAGE();
+  }
+}
+
+// 聊天版本滚动到底部
+function talkPanelScrollBottom() {
+  let el = document.getElementById("lumenChatPanel");
+  el.scrollTop = el.scrollHeight;
+}
 </script>
 <style lang="less" scoped>
 .flex-a-c{

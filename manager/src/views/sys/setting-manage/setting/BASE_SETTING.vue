@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <el-form ref="formValidate" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+    <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
       <el-form-item label="站点名称" prop="siteName">
         <el-input style="width:200px;" v-model="formValidate.siteName" />
         <span class="desc">配置买家端站点名称</span>
@@ -65,7 +65,7 @@
         <el-input v-model="formValidate.staticPageWapAddress" />
       </el-form-item>
       <div class="label-btns">
-        <el-button type="primary" @click="submit('formValidate')">保存</el-button>
+        <el-button type="primary" @click="submit('formValidateRef')">保存</el-button>
       </div>
     </el-form>
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close :show-close="true">
@@ -73,96 +73,97 @@
         @callback="callbackSelected"
         :isComponent="true"
         :initialize="picModelFlag"
-        ref="ossManage"
+        ref="ossManageRef"
       />
     </el-dialog>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, reactive, nextTick, getCurrentInstance } from "vue";
 import { ElMessage } from "element-plus";
 import { setSetting } from "@/api/index";
+import { setStore } from "@/libs/storage";
 import { handleSubmit } from "./validate";
 import ossManage from "@/views/sys/oss-manage/ossManage";
-export default {
-  title: "基础设置",
-  props: {
-    res: {
-      type: null,
-      default: "",
-    },
-    type: "",
+
+defineOptions({ title: "基础设置" });
+
+const props = defineProps({
+  res: {
+    type: null,
+    default: "",
   },
-  components: {
-    ossManage,
-  },
-  data() {
-    return {
-      picModelFlag: false,
-      formValidate: {
-        buyerSideLogo: "",
-        domainLogo: "",
-        icp: "",
-        storeSideLogo: "",
-        siteName: "",
-        staticPageAddress: "",
-        staticPageWapAddress: "",
+  type: "",
+});
+
+// validate.js 的 handleSubmit 仍接收组件实例读取 $refs
+const { proxy } = getCurrentInstance();
+
+const picModelFlag = ref(false);
+const formValidate = ref({
+  buyerSideLogo: "",
+  domainLogo: "",
+  icp: "",
+  storeSideLogo: "",
+  siteName: "",
+  staticPageAddress: "",
+  staticPageWapAddress: "",
+});
+const selected = ref("");
+const ruleValidate = reactive({});
+const result = ref("");
+
+// 模板 ref：formValidate/ossManage 与顶层变量重名，改名避免互相覆盖
+const formValidateRef = ref(null);
+const ossManageRef = ref(null);
+
+function onClickImg(item) {
+  selected.value = item;
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+    }
+  });
+}
+function submit(name) {
+  handleSubmit(proxy, name)
+    .then(() => {
+      setupSetting();
+    })
+    .catch(() => {});
+}
+function callbackSelected(val) {
+  picModelFlag.value = false;
+  formValidate.value[selected.value] = val.url;
+}
+function setupSetting() {
+  setSetting(props.type, formValidate.value).then((res) => {
+    if (res.success) {
+      ElMessage.success("保存成功!");
+      localStorage.setItem("icon", formValidate.value.domainLogo);
+      window.document.title = formValidate.value.siteName + " - 运营后台";
+      setStore("title", formValidate.value.siteName);
+    } else {
+      ElMessage.error("保存失败!");
+    }
+  });
+}
+function init() {
+  result.value = JSON.parse(props.res);
+  formValidate.value = { ...result.value };
+  Object.keys(result.value).forEach((item) => {
+    ruleValidate[item] = [
+      {
+        required: true,
+        message: "请填写必填项",
+        trigger: "blur",
       },
-      selected: "",
-      ruleValidate: {},
-      result: "",
-    };
-  },
-  created() {
-    this.init();
-  },
-  methods: {
-    onClickImg(item) {
-      this.selected = item;
-      this.picModelFlag = true;
-      this.$nextTick(() => {
-        if (this.$refs.ossManage) {
-          this.$refs.ossManage.selectImage = true;
-        }
-      });
-    },
-    submit(name) {
-      handleSubmit(this, name)
-        .then(() => {
-          this.setupSetting();
-        })
-        .catch(() => {});
-    },
-    callbackSelected(val) {
-      this.picModelFlag = false;
-      this.formValidate[this.selected] = val.url;
-    },
-    setupSetting() {
-      setSetting(this.type, this.formValidate).then((res) => {
-        if (res.success) {
-          ElMessage.success("保存成功!");
-          localStorage.setItem("icon", this.formValidate.domainLogo);
-          window.document.title = this.formValidate.siteName + " - 运营后台";
-          this.setStore("title", this.formValidate.siteName);
-        } else {
-          ElMessage.error("保存失败!");
-        }
-      });
-    },
-    init() {
-      this.result = JSON.parse(this.res);
-      this.formValidate = { ...this.result };
-      Object.keys(this.result).forEach((item) => {
-        this.ruleValidate[item] = [
-          {
-            required: true,
-            message: "请填写必填项",
-            trigger: "blur",
-          },
-        ];
-      });
-    },
-  },
-};
+    ];
+  });
+}
+
+init();
 </script>
 <style scoped lang="scss">
 @import "./style.scss";
