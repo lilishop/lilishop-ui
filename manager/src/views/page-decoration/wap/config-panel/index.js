@@ -8,6 +8,23 @@ import PanelCoupon from "./PanelCoupon.vue";
 import PanelArticle from "./PanelArticle.vue";
 import PanelShop from "./PanelShop.vue";
 import PanelFlexOne from "./PanelFlexOne.vue";
+import PanelCarousel from "./PanelCarousel.vue";
+import PanelAdCube from "./PanelAdCube.vue";
+import PanelMenu from "./PanelMenu.vue";
+
+// 图片魔方及其全部可选风格共用 PanelAdCube
+const adCubeTypes = [
+  "tpl_ad_list",
+  "leftOneRightTwo",
+  "leftTwoRightOne",
+  "flexThree",
+  "flexTwo",
+  "topOneBottomTwo",
+  "topTwoBottomOne",
+  "flexFive",
+  "flexFour",
+  "textPicture",
+];
 
 export default {
   blank: PanelBlank,
@@ -18,4 +35,7 @@ export default {
   article: PanelArticle,
   shop: PanelShop,
   flexOne: PanelFlexOne,
+  carousel: PanelCarousel,
+  menu: PanelMenu,
+  ...Object.fromEntries(adCubeTypes.map((t) => [t, PanelAdCube])),
 };

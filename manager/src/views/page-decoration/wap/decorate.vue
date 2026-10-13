@@ -32,6 +32,7 @@
       v-if="panelComponent"
       :is="panelComponent"
       :res="res"
+      @handleDrawer="$emit('handleDrawer', $event)"
     />
     <!-- 老组件遗留配置分支 -->
     <template v-else>

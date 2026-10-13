@@ -196,7 +196,8 @@ export default {
       ];
       return groups.map((g) => ({
         ...g,
-        list: this.modelData.filter((m) => m.group === g.key),
+        // drawer 标记的是图片魔方的可选风格，只在「选择风格」抽屉中出现，不在左侧组件列表展示
+        list: this.modelData.filter((m) => m.group === g.key && !m.drawer),
       }));
     },
   },
@@ -213,7 +214,12 @@ export default {
     },
     cloneModel(model) {
       const key = Date.now() + "_" + Math.ceil(Math.random() * 99999);
-      const cloned = JSON.parse(JSON.stringify(model));
+      // 图片魔方拖入画布时默认使用「左一右二」风格
+      const source =
+        model.type === "tpl_ad_list"
+          ? this.modelData.find((m) => m.type === "leftOneRightTwo") || model
+          : model;
+      const cloned = JSON.parse(JSON.stringify(source));
       return {
         ...cloned,
         key,

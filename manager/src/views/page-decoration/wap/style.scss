@@ -109,7 +109,7 @@
   margin: 20px 0;
   width: 375px;
   background: #ebebeb;
-  min-height: 700px;
+  min-height: calc(100vh - 200px);
   border-radius: 8px;
   overflow: visible;
   flex-shrink: 0;

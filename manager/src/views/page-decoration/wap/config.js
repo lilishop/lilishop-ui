@@ -419,7 +419,7 @@ export const modelData = [
 
   {
     type: "tpl_ad_list",
-    name: "广告魔方",
+    name: "图片魔方",
     icon: "Grid",
     group: "base",
     img: "md-image",

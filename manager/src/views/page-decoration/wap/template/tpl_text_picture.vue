@@ -1,30 +1,30 @@
 
 <template>
-  <div class="layout">
-    <div class="view-list">
+  <div class="layout" :style="[wrapperStyle, gapStyle]">
+    <div class="view-list" :style="gapStyle">
       <div class="view-item">
         <div class="-item-tilte">{{res.list[0].title}}</div>
-        <div class="-item-image">
+        <div class="-item-image" :style="imgStyle">
           <img :src="res.list[0].img" alt />
         </div>
       </div>
       <div class="view-item">
         <div class="-item-tilte">{{res.list[1].title}}</div>
-        <div class="-item-image">
+        <div class="-item-image" :style="imgStyle">
           <img :src="res.list[1].img" alt />
         </div>
       </div>
     </div>
-    <div class="view-list">
+    <div class="view-list" :style="gapStyle">
       <div class="view-item">
         <div class="-item-tilte">{{res.list[2].title}}</div>
-        <div class="-item-image">
+        <div class="-item-image" :style="imgStyle">
           <img :src="res.list[2].img" alt />
         </div>
       </div>
       <div class="view-item">
         <div class="-item-tilte">{{res.list[3].title}}</div>
-        <div class="-item-image">
+        <div class="-item-image" :style="imgStyle">
           <img :src="res.list[3].img" alt />
         </div>
       </div>
@@ -33,9 +33,22 @@
 </template>
 
 <script>
+import { cubeWrapperStyle, cubeImgStyle, cubeGapStyle } from "./cubeStyle";
+
 export default {
   title: "文字图片模板",
-  props: ["res"]
+  props: ["res"],
+  computed: {
+    wrapperStyle() {
+      return cubeWrapperStyle(this.res);
+    },
+    imgStyle() {
+      return cubeImgStyle(this.res);
+    },
+    gapStyle() {
+      return cubeGapStyle(this.res);
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -75,7 +88,8 @@ export default {
     border: 1px solid #ededed;
 
   > .view-item {
-    width: 50%;
+    flex: 1;
+    min-width: 0;
   }
   > .view-item:nth-of-type(1) {
     > .-item-tilte {
