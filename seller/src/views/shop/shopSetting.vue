@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card style="margin-left: 10px">
-      <el-tabs v-model="type" @click="handleClickType">
+      <el-tabs v-model="type" @tab-click="handleClickType">
         <el-tab-pane label="基本信息" name="INFO">
           <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
             <el-form-item label="店铺名称">
