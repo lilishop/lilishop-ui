@@ -234,7 +234,7 @@ function callBackData(way) {
   liveGoodsVisible.value = false;
   spinShow.value = true;
   addLiveGoods({
-    roomId: route.query.roomId,
+    roomId: route.query.id,
     liveGoodsId: way.liveGoodsId,
     goodsId: way.goodsId,
   }).then((res) => {

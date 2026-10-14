@@ -364,13 +364,14 @@ function handleSubmit() {
 }
 
 //tab切换
-function handleClickType(v) {
+function handleClickType(pane) {
+  const name = pane.paneName;
   //退款
-  if (v == "INFO") {
+  if (name === "INFO") {
     getShopInfo();
   }
   //退货
-  if (v == "REFUND_GOODS_ADDRESS") {
+  if (name === "REFUND_GOODS_ADDRESS") {
     getRefundGoodsAddress();
   }
 }
