@@ -347,7 +347,6 @@ const orderParam = reactive({
   endDate: null,
 });
 const orderTotal = ref(0);
-const refundTotal = ref(0);
 const billStatusList = ref([
   { status: "OUT", value: "已出账", title: "生成账单" },
   { status: "CHECK", value: "已对账", title: "商家对账" },
@@ -471,9 +470,7 @@ function download() {
         navigator.msSaveBlob(blob, "结算单-" + id.value + ".xlsx");
       }
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch((err) => {});
 }
 function init() {
   id.value = route.query.id;

@@ -122,10 +122,6 @@ function open(type, mutiple) {
     linkVisible.value = true;
   }
 }
-function close() {
-  clickClose();
-}
-
 // 外部通过 ref 访问的成员（grep seller/src 全量确认）：
 // - open：所有调用方打开弹窗（goods/link）
 // - singleGoods：shop/modelList/forYour.vue、mixModel.vue 直接调用

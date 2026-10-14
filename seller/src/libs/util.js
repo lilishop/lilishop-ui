@@ -313,7 +313,6 @@ util.setCurrentPath = function (name) {
       ];
     }
   }
-  appStore.setCurrentPath(currentPathArr);
 
   return currentPathArr;
 };
@@ -351,7 +350,6 @@ util.openNewPage = function (name, argu, query) {
       appStore.increateTag(tag);
     }
   }
-  appStore.setCurrentPageName(name);
 };
 
 util.toDefaultPage = function (routers, name, route, next) {
@@ -451,16 +449,8 @@ util.initMenuData = function (data) {
   }
   appStore.setNavList(navList);
   let currNav = window.localStorage.getItem("currNav");
-  if (currNav) {
-    for (let item of navList) {
-      if (item.name == currNav) {
-        appStore.setCurrNavTitle(item.title);
-        break;
-      }
-    }
-  } else {
+  if (!currNav) {
     currNav = HOME_NAV_NAME;
-    appStore.setCurrNavTitle(HOME_NAV_ITEM.title);
   }
   appStore.setCurrNav(currNav);
 

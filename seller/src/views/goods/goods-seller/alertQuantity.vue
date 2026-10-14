@@ -221,7 +221,7 @@ async function exportStock() {
         navigator.msSaveBlob(blob, randomNumber + ".xlsx");
       }
     })
-    .catch((err) => console.log(err));
+    .catch(() => {});
 }
 function openImportStock() {
   importModal.value = true;

@@ -284,7 +284,6 @@ function selectedLink(val) {
 }
 // 选择商品回调
 function selectedGoodsData(val) {
-  console.log(val);
   let goods = val[0];
   selected.value.img = goods.thumbnail;
   selected.value.price = goods.price;

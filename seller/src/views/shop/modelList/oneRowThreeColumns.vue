@@ -88,7 +88,6 @@ const ossManageRef = ref(null);
 function callbackSelected(val) {
   picModelFlag.value = false;
   selected.value[current.value].img = val.url;
-  console.log(selected.value)
 }
 
 // 编辑模块
@@ -100,7 +99,6 @@ function handleSelectModel(item) {
 
 // 选择商品回调
 function selectedGoodsData(val) {
-  console.log(val);
   let goods = val[0];
   selected.value.img = goods.thumbnail;
   selected.value.price = goods.price;

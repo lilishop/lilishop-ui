@@ -128,7 +128,6 @@ const loading = ref(true);
 const maxHeight = ref("500px");
 const strict = ref(true);
 const userLoading = ref(false);
-const loadingEdit = ref(false);
 const modalVisible = ref(false);
 const selectList = ref([]);
 const selectCount = ref(0);
@@ -136,7 +135,6 @@ const showParent = ref(false);
 const modalTitle = ref("");
 const editTitle = ref("");
 const selectedRole = ref([]);
-const searchKey = ref("");
 const currentNodeKey = ref(null);
 const treeProps = {
   label: "title",
@@ -165,7 +163,6 @@ const formValidate = {
 };
 const submitLoading = ref(false);
 const data = ref([]);
-const dataEdit = ref([]);
 const users = ref([]);
 
 function init() {
@@ -253,18 +250,6 @@ function cancelSelect() {
   delete form.value.id;
   editTitle.value = "";
   selectedRole.value = [];
-}
-function selectTreeEdit(v) {
-  if (v.length > 0) {
-    for (const attr in v[0]) {
-      if (v[0][attr] == null) {
-        v[0][attr] = "";
-      }
-    }
-    const data = JSON.parse(JSON.stringify(v[0]));
-    form.value.parentId = data.id;
-    form.value.parentTitle = data.title;
-  }
 }
 function cancelAdd() {
   modalVisible.value = false;

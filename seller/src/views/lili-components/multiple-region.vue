@@ -37,7 +37,6 @@ const switched = ref(false);
 const spinShow = ref(false);
 const data = ref([]);
 const selectedWay = ref([]);
-const callBackData = ref("");
 const treeProps = reactive({
   label: "title",
   children: "children",

@@ -73,7 +73,6 @@ let editor = null;
 let polygon = null;
 let suggestion = null;
 let TMap = null;
-let geometryId = "";
 let draftRing = [];
 let clickRing = [];
 let areas = [];

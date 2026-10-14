@@ -82,15 +82,6 @@ import { customRouterPush } from "@/utils/filters";
 
 defineProps(["res"]);
 
-const orderStatusList = reactive({ // 订单状态
-  UNDELIVERED: "待发货",
-  UNPAID: "未付款",
-  PAID: "已付款",
-  DELIVERED: "已发货",
-  CANCELLED: "已关闭",
-  COMPLETED: "已完成",
-  TAKE: "已完成",
-});
 // 售后类型
 const serviceTypeList = reactive({
   CANCEL: "取消",

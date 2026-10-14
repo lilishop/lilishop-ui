@@ -155,9 +155,7 @@ function getTemplateItem(id) {
   });
 }
 
-watch(modelForm, function (val) {
-  console.log(val);
-}, { deep: true });
+watch(modelForm, function (val) {}, { deep: true });
 </script>
 <style lang="scss" scoped>
 .renovation {

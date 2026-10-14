@@ -218,10 +218,8 @@ function handleSelectLink(val, index) {
 function callbackSelected(val) {
   picModelFlag.value = false;
   if (defaultCallbackImageType.value == "default") {
-    console.log(current.value.data.image);
     current.value.data.image.src = val.url;
   } else {
-    console.log(goodsIndex.value, props.data.options[align.value].data.list);
     props.data.options[align.value].data.list[goodsIndex.value].img = val.url;
 
     // props.data.options[align.value].data[selectedData.value][goodsIndex.value].url = val.img
@@ -229,7 +227,6 @@ function callbackSelected(val) {
 }
 // 选择商品回调
 function selectedGoodsData(val) {
-  console.log(val);
   nextTick(() => {
     props.data.options[align.value].data.list[goodsIndex.value].img =
       val[0].thumbnail;
@@ -240,14 +237,12 @@ function selectedGoodsData(val) {
     props.data.options[align.value].data.list[goodsIndex.value].url =
       val[0].url;
   });
-  console.log(props.data.options[align.value].data.list[goodsIndex.value]);
   proxy.$forceUpdate();
 }
 // 选择链接回调
 function selectedLink(val) {
   if (selectedData.value != "list") {
     props.data.options[align.value].data[selectedData.value].url = formatLinkType(val);
-    console.log(props.data.options[align.value].data[selectedData.value])
   }
   if (selectedData.value == "list") {
      props.data.options[align.value].data[selectedData.value][goodsIndex.value]
@@ -262,7 +257,6 @@ function selectedLink(val) {
 function handleSelectModel(alignVal) {
   align.value = alignVal;
   current.value = props.data.options[alignVal];
-  console.log(props.data.options[alignVal]);
   showModal.value = true;
 }
 </script>

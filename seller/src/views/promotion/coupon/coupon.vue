@@ -187,7 +187,6 @@ import { useRoute, useRouter } from "vue-router";
 import {
   getShopCouponList,
   updateCouponStatus,
-  deleteShopCoupon,
 } from "@/api/promotion";
 import { formatPromotionCouponValidityHtml } from "@/utils/promotions";
 import { Message, Modal } from "@/utils/message";
@@ -457,27 +456,6 @@ function close(v) {
           Modal.remove();
           if (res.success) {
             Message.success("优惠券已关闭");
-            getDataList();
-          }
-        })
-        .catch(() => {
-          Modal.remove();
-        });
-    },
-  });
-}
-
-function remove(v) {
-  Modal.confirm({
-    title: "确认删除",
-    content: "确认要删除此优惠券么?",
-    loading: true,
-    onOk: () => {
-      deleteShopCoupon(v.id)
-        .then((res) => {
-          Modal.remove();
-          if (res.success) {
-            Message.success("优惠券已删除");
             getDataList();
           }
         })

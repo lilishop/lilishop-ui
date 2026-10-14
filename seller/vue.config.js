@@ -112,6 +112,14 @@ module.exports = {
       args[0].cdn = { css: [], js: [] };
       return args;
     });
+    if (enableProduction) {
+      // 生产构建剥离 console.*，防止调试日志残留上线
+      config.optimization.minimizer("terser").tap((args) => {
+        args[0].terserOptions.compress = args[0].terserOptions.compress || {};
+        args[0].terserOptions.compress.drop_console = true;
+        return args;
+      });
+    }
   },
   pluginOptions: {
     "style-resources-loader": {

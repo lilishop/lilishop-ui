@@ -159,7 +159,6 @@ const picModelFlag = ref(false);
 const showModal = ref(false);
 const showModalNav = ref(false);
 const selectedNav = ref(null);
-const promotionTags = ref(["买2免1", "领200神券", "199减100", "母婴5折抢", "充100送20"]);
 const topAdvert = ref({
   type: "topAdvert",
   img: "",
@@ -227,9 +226,7 @@ function handleAddNav() {
   });
 }
 
-function handleMoveEnd({ newIndex, oldIndex }) {
-  console.log("index", newIndex, oldIndex);
-}
+function handleMoveEnd({ newIndex, oldIndex }) {}
 
 function handleModel(type) {
   if (type == "topAdvert") {

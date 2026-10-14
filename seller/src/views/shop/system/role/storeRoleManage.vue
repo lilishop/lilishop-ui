@@ -156,7 +156,6 @@ import {
   addRole as addRoleReq,
   editRole,
   deleteRole,
-  loadDepartment,
   selectRoleMenu,
   saveRoleMenu,
 } from "@/api/index";
@@ -178,15 +177,12 @@ const rolePermsWay = ref([]);
 const openLevel = ref("0");
 const loading = ref(true);
 const treeLoading = ref(true);
-const depTreeLoading = ref(true);
 const submitPermLoading = ref(false);
-const submitDepLoading = ref(false);
 const sortColumn = ref("");
 const sortType = ref("desc");
 const modalType = ref(0);
 const roleModalVisible = ref(false);
 const permModalVisible = ref(false);
-const depModalVisible = ref(false);
 const modalTitle = ref("");
 const roleForm = ref({
   name: "",
@@ -204,10 +200,6 @@ const pageSize = ref(20);
 const total = ref(0);
 const permData = ref([]);
 const editRolePermId = ref("");
-const selectAllFlag = ref(false);
-const depData = ref([]);
-const dataType = ref(0);
-const editDepartments = ref([]);
 const saveRoleWay = ref([]);
 const permTreeKey = ref(0);
 const permCheckedKeys = ref([]);
@@ -471,24 +463,6 @@ function saveRole() {
       getRoleList();
       permModalVisible.value = false;
       selectIsSuperModel.value = false;
-    }
-  });
-}
-function loadData(item, callback) {
-  loadDepartment(item.id, { openDataFilter: false }).then((res) => {
-    if (res.success) {
-      res.result.forEach(function (e) {
-        e.checked = false;
-        if (e.isParent) {
-          e.loading = false;
-          e.children = [];
-        }
-        if (e.status == -1) {
-          e.title = "[已禁用] " + e.title;
-          e.disabled = true;
-        }
-      });
-      callback(res.result);
     }
   });
 }

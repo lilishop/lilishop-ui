@@ -194,9 +194,7 @@ const showModal = ref(false);
 const picModelFlag = ref(false);
 const selectedData = ref(""); //选中的数据
 const goodsIndex = ref(0); // 商品索引
-const align = ref("");
 const defaultCallbackImageType = ref("");
-const current = ref("");
 
 const liliDialogRef = ref(null);
 const ossManageRef = ref(null);
@@ -244,17 +242,13 @@ function selectedGoodsData(val) {
   props.data.options.data.hot.list[goodsIndex.value].price = val[0].price;
   props.data.options.data.hot.list[goodsIndex.value].url =
     formatLinkType(val[0]);
-
-  console.log(val, selectedData.value, goodsIndex.value);
 }
 // 选择链接回调
 function selectedLink(val) {
-  console.log(val, selectedData.value)
   if (selectedData.value == "image") {
     props.data.options.data.image.url =
       formatLinkType(val);
   } else {
-    console.log(props.data.options.data.list, goodsIndex.value)
     props.data.options.data.list[
       goodsIndex.value
     ].url =  formatLinkType(val);

@@ -367,8 +367,6 @@ const afterSaleImage = ref([]); //会员申诉图片
 const submitLoading = ref(false); // 添加或编辑提交状态
 const confirmLoading = ref(false); // 确认收货提交状态
 const storeMsg = ref({}); // 商家地址信息
-// 原代码未在 data 声明、直接挂 this 上的字段，补声明避免 ReferenceError
-let loading = false;
 //商家处理意见
 const params = reactive({
   serviceStatus: "PASS",
@@ -480,9 +478,7 @@ const canConfirmReceipt = computed(() => {
 
 // 获取售后详情
 function getDetail() {
-  loading = true;
   API_Order.getAfterSaleOrderDetail(sn.value).then((res) => {
-    loading = false;
     if (res.success) {
       afterSaleInfo.value = res.result;
       afterSaleInfo.value.showDelivery = showDelivery(

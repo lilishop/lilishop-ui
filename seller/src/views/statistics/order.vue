@@ -313,31 +313,7 @@ const chartList = ref([]); // 绘制订单图表数据
 const orderChart = ref(""); //订单图表
 
 const overViewList = ref({}); // 绘制订单统计概览
-const overViewChart = ref(""); //订单订单统计概览图标
 
-// 时间
-const dateList = ref([
-  {
-    title: "今天",
-    selected: false,
-    value: "TODAY",
-  },
-  {
-    title: "昨天",
-    selected: false,
-    value: "YESTERDAY",
-  },
-  {
-    title: "过去7天",
-    selected: true,
-    value: "LAST_SEVEN",
-  },
-  {
-    title: "过去30天",
-    selected: false,
-    value: "LAST_THIRTY",
-  },
-]);
 // 订单传参
 const orderParams = ref({
   searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
@@ -347,12 +323,6 @@ const orderParams = ref({
 });
 // 订单概念
 const overViewParams = ref({
-  month: "",
-  searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
-  storeId: "",
-  year: "",
-});
-const defaultParams = ref({
   month: "",
   searchType: "LAST_SEVEN", // TODAY ,  YESTERDAY , LAST_SEVEN , LAST_THIRTY
   storeId: "",
@@ -438,7 +408,6 @@ function initOrderChart() {
 
 function clickBreadcrumb(item, index) {
   let callback = JSON.parse(JSON.stringify(item));
-  console.log("callback", callback);
   orderParams.value = callback;
 
   overViewParams.value = callback;

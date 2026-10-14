@@ -36,7 +36,7 @@
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import util, { HOME_NAV_NAME, HOME_NAV_ITEM } from "@/libs/util.js";
+import util, { HOME_NAV_NAME } from "@/libs/util.js";
 import { setStore } from "@/libs/storage";
 import { useAppStore } from "@/stores/app";
 
@@ -76,7 +76,6 @@ function syncRouteMenu(route) {
 
 function activateHomeNav() {
   appStore.setCurrNav(HOME_NAV_NAME);
-  appStore.setCurrNavTitle(HOME_NAV_ITEM.title);
   setStore("currNav", HOME_NAV_NAME);
   appStore.updateMenulist([]);
 }
@@ -92,7 +91,6 @@ function selectNav(name) {
   setStore("currNav", name);
   if (name === HOME_NAV_NAME) {
     appStore.updateMenulist([]);
-    appStore.setCurrNavTitle(HOME_NAV_ITEM.title);
     if (route.name !== "home_index") {
       router.push({ name: "home_index" });
     }

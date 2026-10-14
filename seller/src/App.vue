@@ -22,7 +22,6 @@ onMounted(() => {
     util.bootstrapDynamicRoutesFromCache();
     util.initRouter();
     appStore.setOpenedList();
-    appStore.initCachepage();
     if (!localStorage.getItem("category")) {
       getCategoryTree()
         .then((res) => {

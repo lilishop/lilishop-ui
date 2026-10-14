@@ -84,7 +84,6 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { Camera, Delete, View } from "@element-plus/icons-vue";
-import { uploadFile } from "@/libs/axios";
 import { getStore } from "@/libs/storage";
 import { Message } from "@/utils/message";
 import vuedraggable from "vuedraggable";
@@ -123,7 +122,6 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "input", "on-change", "uploadchange"]);
 
 const accessToken = ref({});
-const uploadFileUrl = uploadFile;
 const uploadList = ref([]);
 const viewImage = ref(false);
 const imgUrl = ref("");

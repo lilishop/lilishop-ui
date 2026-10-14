@@ -745,8 +745,6 @@ const loadingVideo = ref(false);
 const listImages = ref([]);
 const newSkuValues = ref([]);
 const contentImage = ref("");
-const previewImage = ref(''); // 预览图片地址
-const global = ref(0);
 const accessToken = ref(""); //令牌token
 const goodsParams = ref([]);
 const categoryId = ref(""); // 商品分类第三级id
@@ -764,8 +762,6 @@ const previewGoodsPicture = ref("");
 const visible = ref(false);
 //展示商品图片
 const goodsPictureVisible = ref(false);
-//展示sku图片
-const showSkuPicture = ref(false);
 //选择的sku
 const selectedSku = ref({});
 
@@ -809,47 +805,10 @@ const baseInfoForm = ref({
 // 原 Options API 中直接挂在 this 上的非响应式字段
 let goodsId;
 let currentSkuItem = "";
-let form;
-let editTitle;
-let selectCount;
 let scrollParent = null;
 let _onPublishScroll;
 let _scrollTick = false;
 let _scrollClickTimer;
-let skuIndex;
-
-const wholesalePreviewColumns = [
-  {
-    title: "销售规则",
-    width: 480,
-    render: (h, params) => {
-      let guide =
-        "当商品购买数量 ≥" +
-        params.row.num +
-        " 时，售价为 ￥" +
-        params.row.price +
-        " /" +
-        baseInfoForm.value.goodsUnit;
-      return h("div", guide);
-    },
-  },
-];
-
-const wholesaleColumns = [
-  {
-    title: "购买数量",
-    key: "num",
-    align: "center",
-    slot: "wholesaleNum",
-  },
-  {
-    title: "商品单价",
-    key: "price",
-    align: "center",
-    width: "280px",
-    slot: "wholesalePrice",
-  },
-];
 
 const wholesaleData = ref([
   {
@@ -890,7 +849,6 @@ const params_panel = ref([]);
 /** 存储未通过校验的单元格位置  */
 const validateError = ref([]);
 const currentSkuVal = ref("");
-const skuInfoRules = ref({});
 /** 品牌列表 */
 const brandList = ref([]);
 /** 店铺分类列表 */
@@ -1035,13 +993,6 @@ function changeSkuOpenImage() {
     })
   }
 }
-// ship大小不正确
-function handleVideoMaxSize(file) {
-  Notice.warning({
-    title: "超过文件大小限制",
-    desc: "视频大小不能超过10MB",
-  });
-}
 function parseOssSelectionUrl(item) {
   if (!item) return "";
   if (typeof item === "string") {
@@ -1108,22 +1059,6 @@ function refresh(v) {
     getGoodsBrandList('localRefresh');
   }
 }
-function getImages(v) {
-  previewImage.value = v;
-  visible.value = true;
-}
-function mouseOver(v) {
-  showContent.value = true
-  listImages.value = v
-  if (listImages.value.images.length <= 0) {
-    contentImage.value = '规格专属图片暂无'
-  } else {
-    contentImage.value = '当前规格专属图片'
-  }
-}
-function mouseLeave() {
-  // showContent.value = false
-}
 function getParamOptions(options) {
   if (!options) return [];
   return String(options)
@@ -1178,15 +1113,6 @@ function selectParams(params, value, paramsIndex) {
 
   // 同步更新表单项的值
   params.paramValue = value;
-}
-// 编辑sku图片
-function editSkuPicture(row) {
-  showContent.value = false
-  if (row.images && row.images.length > 0) {
-    previewPicture.value = row.images[0];
-  }
-  selectedSku.value = row;
-  showSkuPicture.value = true;
 }
 // 初始化视频操作
 async function initVideo() {
@@ -1349,17 +1275,6 @@ function assignSkuTableIndex() {
     row._index = index;
   });
 }
-// 更新sku图片
-function updateSkuPicture() {
-  baseInfoForm.value.regeneratorSkuFlag = true;
-  let _index = selectedSku.value._index;
-  if (_index === undefined || _index === null) {
-    _index = skuTableData.value.indexOf(selectedSku.value);
-  }
-  if (_index >= 0) {
-    skuTableData.value[_index] = selectedSku.value;
-  }
-}
 // sku图片上传成功
 function handleSuccess(res, file, images) {
   if (file.response) {
@@ -1460,20 +1375,6 @@ function checkWholesalePrice(index) {
   renderTableData(skuTableData.value);
   syncWholesalePriceToSku();
 }
-// 商品图片上传成功
-function handleSuccessGoodsPicture(res, file) {
-  if (file.response) {
-    file.url = file.response.result;
-    baseInfoForm.value.goodsGalleryFiles.push(file.url);
-  }
-}
-// 图片格式不正确
-function handleFormatError(file) {
-  Notice.warning({
-    title: "文件格式不正确",
-    desc: "文件 " + file.name + " 的格式不正确",
-  });
-}
 function beforeVideoUpload(file) {
   const allowTypes = ["avi", "wmv", "mpeg", "mp4", "mov"];
   const ext = (file.name.split(".").pop() || "").toLowerCase();
@@ -1509,16 +1410,6 @@ function handleMaxSize(size = 2) {
     title: "超过文件大小限制",
     desc: `图片大小不能超过${size}MB`,
   });
-}
-// 图片上传前钩子
-function handleBeforeUploadGoodsPicture(file) {
-  const check = baseInfoForm.value.goodsGalleryFiles.length < 5;
-  if (!check) {
-    Notice.warning({
-      title: "图片数量不能大于五张",
-    });
-    return false;
-  }
 }
 // sku图片上传前钩子
 function handleBeforeUpload(file) {
@@ -2189,11 +2080,6 @@ function addSpec($index, item) {
     skuInfoCopy.value = cloneObj(skuInfo.value);
   }
 }
-function handleClearSku() {
-  skuInfo.value = [];
-  skuTableData.value = [];
-  renderTableData(skuTableData.value);
-}
 /** 移除当前规格值 */
 function handleCloseSkuValue(item, index, spec) {
   if (spec.spec_values.length <= 1) {
@@ -2364,55 +2250,6 @@ function renderTableData(skus) {
 }
 
 /**
- * 迭代属性，形成表格
- * result 渲染的数据
- * array spec数据
- */
-function specIterator(result, spec, skus) {
-  let table = result;
-  if (spec.length > 0) {
-    //清除当前循环的分组
-    let cloneTemp = cloneObj(spec);
-    cloneTemp.shift();
-    spec[0].spec_values.forEach((specItem) => {
-      let index = skuIndex;
-      if (table[index]) {
-        table[index][spec[0].name] = specItem.value;
-      } else if (skus && skus[index] && specItem.value !== "") {
-        let obj = {
-          ...skus[index],
-          id: skus[index].id,
-          sn: skus[index].sn,
-          quantity: skus[index].quantity,
-          cost: skus[index].cost,
-          price: skus[index].price,
-          // [spec[0].name]: skus[index][spec[0].name] ? skus[index][spec[0].name] : specItem.value,
-          [spec[0].name]: specItem.value,
-          images:
-            skus[index].images || baseInfoForm.value.goodsGalleryFiles || [],
-        };
-        if (specItem.value !== "") {
-          obj.id = skus[index].id;
-        }
-        if (skus[index].weight !== "") {
-          obj.weight = skus[index].weight;
-        }
-        table.push(obj);
-      } else if (specItem.value !== "") {
-        table.push({
-          [spec[0].name]: specItem.value,
-          images: baseInfoForm.value.goodsGalleryFiles || [],
-        });
-      }
-
-      table = specIterator(table, cloneTemp, skus, index);
-    });
-  } else {
-    skuIndex++;
-  }
-  return table;
-}
-/**
  * 生成所有可能的规格组合
  * @param {Array} skuInfo 规格信息
  * @returns {Array} 所有可能的规格组合
@@ -2469,19 +2306,6 @@ function generateSkuCombinations(skuInfo) {
   return generateCombinations(0, []);
 }
 
-// 判断相同数组的值
-function scalarArrayEquals(array1, array2) {
-  return (
-    array1.length === array2.length &&
-    array1.every(function (v, i) {
-      return v === array2[i];
-    })
-  );
-}
-/** 自动完成表单所需方法*/
-function filterMethod(value, option) {
-  return option.toUpperCase().indexOf(value.toUpperCase()) !== -1;
-}
 /** 数据改变之后 抛出数据 */
 function updateSkuTable(row, item, rowIndex) {
   let index = rowIndex;
@@ -2535,15 +2359,10 @@ function selectTree(v) {
         v[0][attr] = "";
       }
     }
-    let str = JSON.stringify(v[0]);
-    let menu = JSON.parse(str);
-    form = menu;
-    editTitle = menu.title;
   }
 }
 // 店内分类选中
 function changeSelect(v) {
-  selectCount = v.length;
   let ids = "";
   v.forEach(function (e) {
     ids += e.id + ",";

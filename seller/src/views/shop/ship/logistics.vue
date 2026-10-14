@@ -89,12 +89,6 @@ defineOptions({ name: "logistics" });
 const row = ref({});
 const openModal = ref(false);
 const loading = ref(true);
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 10,
-  sort: "createTime",
-  order: "desc",
-});
 const openModalTitle = ref("开启信息");
 const ruleValidate = ref({});
 const faceSheetForm = ref({

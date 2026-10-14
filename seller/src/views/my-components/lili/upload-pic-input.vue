@@ -72,7 +72,6 @@
 <script setup>
 import { nextTick, ref, useAttrs, watch } from "vue";
 import { View } from "@element-plus/icons-vue";
-import { uploadFile } from "@/libs/axios";
 import { getStore } from "@/libs/storage";
 import { Message } from "@/utils/message";
 import ossManage from "@/views/sys/oss-manage/ossManage";
@@ -110,7 +109,6 @@ const attrs = useAttrs();
 const accessToken = ref({});
 const currentValue = ref(props.modelValue ?? props.value ?? "");
 const viewImage = ref(false);
-const uploadFileUrl = ref(uploadFile);
 const picModalFlag = ref(false);
 const selectedFormBtnName = ref("");
 const picIndex = ref("");
