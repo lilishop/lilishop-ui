@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form :model="liveForm" ref="liveFormRef" :rules="liveRulesForm" label-width="120px">
+      <el-form :model="liveForm" ref="liveFormRef" label-width="120px">
         <el-form-item label="直播标题" prop="name">
           <div class="form-field-block">
             <el-input disabled v-model="liveForm.name" style="width:460px"></el-input>
@@ -22,7 +22,6 @@
               format="YYYY-MM-DD HH:mm"
               type="datetimerange"
               v-model="times"
-              @change="handleChangeTime"
               start-placeholder="开始时间"
               end-placeholder="结束时间"
               placeholder="直播计划开始时间-直播计划结束时间"
@@ -110,10 +109,6 @@
               直播间商品中前两个商品将自动被选为封面，伴随直播间在直播列表中显示
             </div>
           </div>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="createLives()">保存</el-button>
         </el-form-item>
       </el-form>
     </el-card>
