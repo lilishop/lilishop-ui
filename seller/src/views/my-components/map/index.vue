@@ -28,7 +28,6 @@ defineOptions({ name: "map" });
 
 const emit = defineEmits(["getAddress"]);
 
-const showMap = ref(false);
 const mapSearch = ref("");
 const map = ref(null);
 const autoComplete = ref(null);

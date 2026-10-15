@@ -530,7 +530,6 @@ import { CircleClose } from "@element-plus/icons-vue";
 import { Message } from "@/utils/message";
 import alignTextLeftImg from "@/assets/align-text-left.png";
 import alignTextCenterImg from "@/assets/align-text-center.png";
-import alignTextRightImg from "@/assets/align-text-right.png";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { modelData } from "./config";
 import hotzone from "@/views/shop/hotzone";
@@ -540,7 +539,7 @@ import categoryTemplate from "@/views/lili-dialog/template/category";
 const props = defineProps(["res"]);
 const emit = defineEmits(["handleDrawer"]);
 
-// alignTextLeftImg/alignTextCenterImg/alignTextRightImg、ways(选择链接的类型)、modelData(装修数据) 为 import 常量，模板中直接使用
+// alignTextLeftImg/alignTextCenterImg、ways(选择链接的类型)、modelData(装修数据) 为 import 常量，模板中直接使用
 const picModelFlag = ref(false); //图片选择器
 const linkType = ref("goods"); // dialog弹窗口类型
 const styleFlag = ref(false); //广告魔方开关
@@ -548,10 +547,8 @@ const textAlign = ref(
   props.res.options.list[0] ? props.res.options.list[0].textAlign : "center"
 ); //文字对齐方式
 const promotionsFlag = ref(false); //广告魔方开关
-const selectedLinkIndex = ref(""); //选择链接的索引
 const selectedGoods = ref(""); // 已选商品
 const selectedLinks = ref(""); // 已选链接
-const modelList = ref(""); // 装修列表
 const enableSelectCategory = ref(false); //商品是否绑定分类
 const pendingCategory = ref(null); // 选择分类弹窗草稿
 const goodsSelectedIndex = ref(0); //绑定商品分类的索引
@@ -601,8 +598,6 @@ function confirmCategory(val) {
     }
   );
   props.res.options.list[0].titleWay[goodsSelectedIndex.value] = data;
-
-  console.log(props.res.options.list[0]);
 }
 // 商品排序
 function slotGoods(list, key, val) {
@@ -639,7 +634,6 @@ function slotGoods(list, key, val) {
 
 // 轮播图排序
 function slotBanner(val, key, index, down) {
-  console.log(val);
   if (down == "down") {
     downData(val.options.list, index);
   } else {
@@ -749,23 +743,8 @@ function clickLink(val, index, oval) {
     liliDialogFlag(false);
   }
 }
-function addZone(zoneInfo) {
-  selectedLinks.value.zoneInfo.push(zoneInfo);
-}
 function changeZone(zoneInfo) {
   selectedLinks.value.zoneInfo = zoneInfo;
-}
-//点击图片解析成base64
-function changeFile(item, index) {
-  const file = document.getElementById("files" + index).files[0];
-  if (file == void 0) return false;
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
-  nextTick((res) => {
-    reader.onload = (e) => {
-      item.img = e.target.result;
-    };
-  });
 }
 //添加设置
 function addDecorate(type, data) {
@@ -788,15 +767,6 @@ function addDecorate(type, data) {
     };
     props.res.options.list.push(way);
   }
-}
-function addHotPoint() {
-  let way = {
-    img: "https://picsum.photos/id/264/200/200",
-    text: "标题",
-    link: "",
-    url: "",
-  };
-  props.res.options.list[0].points.push(way);
 }
 // 图片选择器回显
 function callbackSelected(val) {

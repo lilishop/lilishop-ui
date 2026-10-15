@@ -23,14 +23,11 @@
 <script setup>
 import { nextTick, onMounted, ref, watch } from "vue";
 import wapList from "./wap.js";
-import goodsDialog from "./goods-dialog";
 import templateWay from "./template/index";
 
 const emit = defineEmits(["selectedLink"]);
 
 const changed = ref("");
-const selected = ref(0);
-const selectedLink = ref("");
 // wap 为共享的模块级数组，保持原 data 引用同一数组的行为
 const wap = ref(wapList);
 const activeTab = ref(wapList[0]?.title || "");

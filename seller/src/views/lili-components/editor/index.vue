@@ -48,8 +48,6 @@ const pendingContent = ref(null); // 编辑器未就绪时暂存待回填内容
 const tinymceId =
   "tinymce-" + +new Date() + ((Math.random() * 1000).toFixed(0) + ""); // 生成唯一的编辑器 ID
 const fullscreen = ref(false); // 标记编辑器是否处于全屏模式
-const toolbar = ref([]); // 工具栏配置
-const content = ref(""); // 编辑器内容
 
 const bindValue = computed(() => {
   return props.modelValue ?? props.value ?? "";

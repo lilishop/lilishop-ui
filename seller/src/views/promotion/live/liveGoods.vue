@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card>
-      <el-form :model="liveForm" ref="liveFormRef" :rules="liveRulesForm" label-width="120px">
+      <el-form :model="liveForm" ref="liveFormRef" label-width="120px">
         <el-form-item label="直播标题" prop="name">
           <div class="form-field-block">
             <el-input disabled v-model="liveForm.name" style="width:460px"></el-input>
@@ -22,7 +22,6 @@
               format="YYYY-MM-DD HH:mm"
               type="datetimerange"
               v-model="times"
-              @change="handleChangeTime"
               start-placeholder="开始时间"
               end-placeholder="结束时间"
               placeholder="直播计划开始时间-直播计划结束时间"
@@ -111,10 +110,6 @@
             </div>
           </div>
         </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="createLives()">保存</el-button>
-        </el-form-item>
       </el-form>
     </el-card>
 
@@ -128,8 +123,6 @@
 import { onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { getLiveInfo } from "@/api/promotion.js";
-import { Notice } from "@/utils/message";
-import { getStore } from "@/libs/storage";
 import { unixToDate } from "@/utils/filters";
 
 const route = useRoute();
@@ -152,28 +145,15 @@ const commodityList = ref("");
 // liveFormRef：模板 ref 改名避免与 liveForm 变量互相覆盖
 const liveFormRef = ref(null);
 
-// 原代码未在 data 声明、直接挂 this 的字段，script setup 下需显式声明
-let accessToken;
-let liveStatus;
-
 onMounted(() => {
   if (route.query.id) {
     getLiveDetail();
   }
-  accessToken = {
-    accessToken: getStore("accessToken"),
-  };
 });
 
 function handleView(src) {
   imageVisible.value = true;
   imageSrc.value = src;
-}
-function handleMaxSize(file) {
-  Notice.warning({
-    title: "文件大小过大",
-    desc: "所选文件大小过大, 不得超过 1M.",
-  });
 }
 async function getLiveDetail() {
   let result = await getLiveInfo(route.query.id);
@@ -191,7 +171,6 @@ async function getLiveDetail() {
       unixToDate(data.startTime, "yyyy-MM-dd hh:mm"),
       unixToDate(data.endTime, "yyyy-MM-dd hh:mm"),
     ];
-    liveStatus = data.status;
   }
 }
 </script>

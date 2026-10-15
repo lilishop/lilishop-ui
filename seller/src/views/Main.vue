@@ -93,7 +93,6 @@ import util from "@/libs/util.js";
 import { logout } from "@/api/index";
 import { getIMDetail } from "@/api/common";
 import { userMsg } from "@/api/index";
-import config from "@/config/index.js";
 import { Message } from "@/utils/message";
 import { getStore, setStore } from "@/libs/storage";
 import { useAppStore } from "@/stores/app";
@@ -199,13 +198,11 @@ function resize() {
 watch(
   () => route.name,
   (name) => {
-    appStore.setCurrentPageName(name);
     const pathArr = util.setCurrentPath(name);
     if (pathArr.length > 2) {
       appStore.addOpenSubmenu(pathArr[1].name);
     }
     checkTag(name);
-    localStorage.currentPageName = name;
   }
 );
 

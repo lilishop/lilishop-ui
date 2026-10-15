@@ -169,28 +169,6 @@ defineOptions({ name: "orderList" });
 
 const route = useRoute();
 
-const fields = ref({
-  订单编号: "sn",
-  下单时间: "createTime",
-  客户名称: "memberName",
-  支付方式: {
-    field: "clientType",
-    callback: (value) => {
-      if (value == "H5") return "移动端";
-      if (value == "PC") return "PC端";
-      if (value == "WECHAT_MP") return "小程序端";
-      if (value == "APP") return "移动应用端";
-      return value;
-    },
-  },
-  商品数量: "groupNum",
-  付款状态: {
-    field: "payStatus",
-    callback: (value) =>
-      value == "UNPAID" ? "未付款" : value == "PAID" ? "已付款" : "",
-  },
-  店铺: "storeName",
-});
 const loading = ref(true);
 const searchForm = reactive({
   pageNumber: 1,
@@ -318,16 +296,6 @@ function orderPromotionText(v) {
   };
   return map[v] || v || "-";
 }
-function orderPromotionTagType(v) {
-  const map = {
-    NORMAL: "primary",
-    PINTUAN: "danger",
-    GIFT: "success",
-    POINTS: "info",
-    KANJIA: "warning",
-  };
-  return map[v] || "info";
-}
 function paymentMethodText(v) {
   const map = {
     NOT_ACTUALLY_PAID: "-",
@@ -449,9 +417,7 @@ async function exportOrder() {
         navigator.msSaveBlob(blob, "订单列表.xlsx");
       }
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch((err) => {});
 }
 function orderStatusClick(name) {
   if (name === "ALL" || name === "" || name === undefined) {

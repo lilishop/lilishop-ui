@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-card style="margin-left: 10px">
-      <el-tabs v-model="type" @click="handleClickType">
+      <el-tabs v-model="type" @tab-click="handleClickType">
         <el-tab-pane label="基本信息" name="INFO">
           <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
             <el-form-item label="店铺名称">
@@ -133,16 +133,10 @@ import { Message } from "@/utils/message";
 defineOptions({ name: "shopSetting" });
 
 const currentKey = ref(""); //存储当前点击地址的key
-const showMap = ref(false); // 是否展示地图
 const type = ref("INFO");
 
 const storeName = ref(""); //店铺名称
 
-const regionId = ref([]); // 地区id
-// 历史遗留：loading、regionGoods、regionIdS 未在原 data 中声明，仅在方法内赋值，保持原行为
-let loading = false;
-let regionGoods = null;
-let regionIdS = null;
 const addressForm = ref({
   // 退货地址
   salesConsigneeName: "", // 收货人姓名
@@ -155,11 +149,6 @@ const addressForm = ref({
 const udeskForm = ref({
   merchantEuid: "",
 });
-const udeskFormValidate = {
-  merchantEuid: [
-    { required: true, message: "请输入店铺坐席ID", trigger: "blur" },
-  ],
-};
 const afterFormValidate = {
   salesConsigneeMobile: [
     { required: true, message: "手机号不能为空", trigger: "blur" },
@@ -261,7 +250,6 @@ const addressGoodsValidate = {
 const formRef = ref(null);
 const addressGoodsRef = ref(null);
 const addressFormRef = ref(null);
-const udeskFormRef = ref(null);
 const mapRef = ref(null);
 
 // 回调地址
@@ -315,8 +303,6 @@ function init() {
 
 
 function setAddressGoods() {
-  console.log(addressGoodsRef.value)
-
   addressGoodsRef.value.validate((valid) => {
     if (valid) {
       API_Shop.editDeliverAddress(addressGoods.value).then(res => {
@@ -329,9 +315,7 @@ function setAddressGoods() {
 }
 //获取店铺信息
 function getShopInfo() {
-  loading = true;
   API_Shop.getShopInfo().then((res) => {
-    loading = false;
     if (res.success) {
       form.value = res.result;
 
@@ -358,17 +342,11 @@ function getDeliverAddress() {
     if (res.success) {
       if (res.result != '' && res.result != null) {
         addressGoods.value = res.result;
-        regionGoods = res.result.salesConsignorAddressPath;
-        regionIdS = res.result.salesConsignorAddressId;
       }
     }
   })
 }
 
-//重置
-function handleReset() {
-  formRef.value.resetFields();
-}
 //提交保存
 function handleSubmit() {
   formRef.value.validate((valid) => {
@@ -384,29 +362,16 @@ function handleSubmit() {
     }
   });
 }
-function merchantSubmit() {
-  udeskFormRef.value.validate((valid) => {
-    if (valid) {
-      submitLoading.value = true;
-      API_Shop.updatEmerchantId(udeskForm.value).then((res) => {
-        submitLoading.value = false;
-        if (res.success) {
-          Message.success("修改成功");
-          getShopInfo();
-        }
-      });
-    }
-  });
-}
 
 //tab切换
-function handleClickType(v) {
+function handleClickType(pane) {
+  const name = pane.paneName;
   //退款
-  if (v == "INFO") {
+  if (name === "INFO") {
     getShopInfo();
   }
   //退货
-  if (v == "REFUND_GOODS_ADDRESS") {
+  if (name === "REFUND_GOODS_ADDRESS") {
     getRefundGoodsAddress();
   }
 }

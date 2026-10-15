@@ -141,9 +141,7 @@ function downLoad() {
         navigator.msSaveBlob(blob, "批量发货导入模板.xls");
       }
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch((err) => {});
 }
 </script>
 

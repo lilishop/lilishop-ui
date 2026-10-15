@@ -91,14 +91,12 @@ const route = useRoute();
 const appStore = useAppStore();
 
 // templates: 模板类型，modelData: 装修模型，均为 import 常量，模板中直接使用
-const qrcode = ref(""); // 二维码
 const selected = ref(0); // 已选下标
 const contentData = ref({
   // 总数据
   list: [],
 });
 const decorateData = ref(""); // 装修数据
-const decoratePromotionsData = ref(""); // 装修数据
 
 watch(
   contentData,

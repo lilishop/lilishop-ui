@@ -21,7 +21,7 @@
           />
         </el-form-item>
         <el-form-item label="部门">
-          <department-choose @change="handleSelectDep" style="width: 150px;" ref="dep"></department-choose>
+          <department-choose @on-change="handleSelectDep" style="width: 150px;" ref="dep"></department-choose>
         </el-form-item>
         <el-button type="primary" class="search-btn" @click="handleSearch">
           <el-icon><Search /></el-icon>

@@ -152,7 +152,7 @@ import { useAppStore } from "@/stores/app";
 
 defineOptions({ name: "coupon-recevie" });
 
-const props = defineProps({
+defineProps({
   promotionStatus: {
     type: String,
     default: "",
@@ -186,8 +186,7 @@ watch(
   () => route.query,
   (query) => {
     searchForm.couponId = query.couponId;
-    // 原代码此处判断的 couponId 在 data 中并不存在，恒为 undefined；保持原行为
-    if (props.couponId) {
+    if (query.couponId) {
       getDataList();
     } else {
       searchFormRef.value?.resetFields();
@@ -226,8 +225,7 @@ function handleSearch() {
 function changeSelect(e) {
   selectList.value = e;
   selectCount.value = e.length;
-  // 原代码此处判断的 getType 组件并未声明该 prop，恒为 undefined；保持原行为
-  if (props.getType === "ACTIVITY") check();
+  if (searchForm.getType === "ACTIVITY") check();
 }
 
 function getDataList() {

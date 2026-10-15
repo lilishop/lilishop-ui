@@ -142,7 +142,6 @@ const tabIndex = ref(0);
 const current = ref(0);
 const showModal = ref(false);
 const selected = ref({}); // 已选数据
-const picModelFlag = ref(false);
 const tabCurrentlyIndex = ref(0); // 选项卡索引
 
 onMounted(() => {
@@ -187,7 +186,6 @@ function delGoods(val) {
 
 // 切换选项卡
 function handleClickTab(name) {
-  console.log(name);
   tabCurrentlyIndex.value = name;
 }
 
@@ -199,7 +197,6 @@ function addCurrentGoods() {
 
 // 编辑模块
 function handleSelectModel(item) {
-  console.log(item);
   selected.value = item;
   showModal.value = true;
 }
@@ -226,14 +223,6 @@ function selectedLink(val) {
   selected.value[current.value].url = formatLinkType(val);
   selected.value[current.value].type =
     val.___type === "other" && val.url === "" ? "link" : "other";
-
-  console.log(selected.value[current.value]);
-}
-
-function handleSelectLink(index) {
-  // 调起选择链接弹窗
-  liliDialog.value.open("link");
-  current.value = index;
 }
 </script>
 

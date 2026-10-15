@@ -176,59 +176,9 @@ function updateHome() {
         saveDialog.value = false;
         Message.error("修改失败，请稍后重试");
       }
-      console.log(res);
     })
     .catch(error => {});
 }
-
-
-// 更新
-function update(submitWay) {
-  console.log(appStore.openStyleStore[0], "123123123");
-  if (appStore.openStyleStore == void 0) {
-    Message.error("请装修楼层!");
-    return false;
-  }
-  progress.value = false;
-
-  let id = route.query.id;
-  const pagetype = route.query.pagetype;
-  console.log(appStore.openStyleStore, submitWay);
-  const pageType = {
-    INDEX: "INDEX",
-    ALERT: "OPEN_SCREEN_PAGE",
-    OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
-  }[pagetype ? pagetype : "INDEX"];
-
-  if (pagetype) {
-    submitWay.pageData = JSON.stringify(
-      appStore.openStyleStore[0]
-    );
-    submitWay.pageType = pageType;
-    id = appStore.openStoreId;
-  }
-
-  API_Other.updateHome(id, submitWay)
-    .then((res) => {
-      num.value = 50;
-      if (res.success) {
-        num.value = 80;
-        /**制作保存成功动画¸ */
-        setTimeout(() => {
-          saveDialog.value = false;
-          Message.success("修改成功");
-          goBack();
-        }, 1000);
-      } else {
-        saveDialog.value = false;
-        Message.error("修改失败，请稍后重试");
-      }
-      console.log(res);
-    })
-    .catch((error) => {});
-}
-
-
 
 // 返回查询数据页面
 function goBack() {
@@ -254,7 +204,6 @@ function submit(submitWay) {
         saveDialog.value = false;
         Message.error("保存失败，请稍后重试");
       }
-      console.log(res);
     })
     .catch(error => {});
 }

@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted, nextTick } from "vue";
+import { ref, reactive, watch, onMounted } from "vue";
 // 自定义指令：script setup 中以 vXxx 命名的顶层变量即注册为指令
 import vChangeSize from "../directives/changeSize";
 import vDragItem from "../directives/dragItem";
@@ -112,7 +112,6 @@ const tooSmall = ref(false);
 const showModal = ref(false);
 const picModelFlag = ref(false);
 const currentIndex = ref(0);
-const currentShowIndex = ref(-1);
 const zoneForm = reactive({
   img: "",
   link: "",
@@ -157,15 +156,6 @@ function changeInfo(info = {}) {
 function showModalFn(index) {
   showModal.value = true;
   currentIndex.value = index;
-}
-// 选择图片
-function handleSelectImg() {
-  picModelFlag.value = true;
-  nextTick(() => {
-    if (ossManageRef.value) {
-      ossManageRef.value.selectImage = true;
-    }
-  });
 }
 // 选择图片回调
 function callbackSelected(item) {
@@ -217,12 +207,8 @@ function settingZone(val) {
       break;
   }
 }
-function saveZone() {}
 function cancelZone() {
   showModal.value = false;
-}
-function delZone() {
-  delItem(currentIndex.value);
 }
 function delItem(index) {
   emit("delItem", index);

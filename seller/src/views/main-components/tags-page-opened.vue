@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onBeforeUnmount } from "vue";
+import { ref, watch, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/stores/app";
 
@@ -72,8 +72,6 @@ const actionList = {
 
 const scrollCon = ref(null);
 const scrollBody = ref(null);
-
-const tagsList = computed(() => appStore.storeOpenedList);
 
 const isActive = (item) => {
   return item.children
@@ -109,7 +107,6 @@ const closePage = (event, name) => {
     tagBodyLeft.value = Math.min(tagBodyLeft.value + tagWidth, 0);
   }
   appStore.removeTag(name);
-  appStore.closePage(name);
   storeOpenedList = appStore.storeOpenedList;
   localStorage.storeOpenedList = JSON.stringify(storeOpenedList);
   if (currentPageName.value === name) {

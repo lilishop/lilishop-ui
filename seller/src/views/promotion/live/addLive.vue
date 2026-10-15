@@ -125,7 +125,6 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { uploadFile } from "@/libs/axios";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import { addLive, addLiveGoods, editLive, getLiveInfo, delRoomLiveGoods } from "@/api/promotion";
 import liveGoods from "./liveGoods";
@@ -140,7 +139,6 @@ const spinShow = ref(false);
 const liveGoodsVisible = ref(false);
 const imageVisible = ref(false);
 const imageSrc = ref("");
-const action = uploadFile;
 const accessToken = ref({});
 const liveStatus = ref("NEW");
 const liveRulesForm = {
@@ -236,7 +234,7 @@ function callBackData(way) {
   liveGoodsVisible.value = false;
   spinShow.value = true;
   addLiveGoods({
-    roomId: route.query.roomId,
+    roomId: route.query.id,
     liveGoodsId: way.liveGoodsId,
     goodsId: way.goodsId,
   }).then((res) => {

@@ -13,22 +13,9 @@ export const useAppStore = defineStore("app", {
     added: false,
     navList: [],
     currNav: "",
-    currNavTitle: "",
-    cachePage: [],
     lang: "",
-    isFullScreen: false,
     openedSubmenuArr: [],
-    menuTheme: "dark",
-    themeColor: "",
     storeOpenedList: [
-      {
-        title: "首页",
-        path: "",
-        name: "home_index",
-      },
-    ],
-    currentPageName: "",
-    currentPath: [
       {
         title: "首页",
         path: "",
@@ -38,8 +25,6 @@ export const useAppStore = defineStore("app", {
     menuList: [],
     routers: [otherRouter],
     tagsList: [...otherRouter.children],
-    messageCount: 0,
-    dontCache: ["test", "test"],
     refMenu: "",
   }),
   actions: {
@@ -62,9 +47,6 @@ export const useAppStore = defineStore("app", {
     setCurrNav(v) {
       this.currNav = v;
     },
-    setCurrNavTitle(v) {
-      this.currNavTitle = v;
-    },
     setTagsList(list) {
       this.tagsList.push(...list);
     },
@@ -74,19 +56,6 @@ export const useAppStore = defineStore("app", {
     addOpenSubmenu(name) {
       if (name.length && this.openedSubmenuArr.indexOf(name) === -1) {
         this.openedSubmenuArr.push(name);
-      }
-    },
-    closePage(name) {
-      this.cachePage.forEach((item, index) => {
-        if (item == name) {
-          this.cachePage.splice(index, 1);
-        }
-      });
-      localStorage.cachePage = JSON.stringify(this.cachePage);
-    },
-    initCachepage() {
-      if (localStorage.cachePage) {
-        this.cachePage = JSON.parse(localStorage.cachePage);
       }
     },
     removeTag(name) {
@@ -105,8 +74,6 @@ export const useAppStore = defineStore("app", {
     },
     clearAllTags() {
       this.storeOpenedList.splice(1);
-      this.cachePage.length = 0;
-      localStorage.cachePage = "";
       localStorage.storeOpenedList = JSON.stringify(this.storeOpenedList);
     },
     clearOtherTags(currentName) {
@@ -122,20 +89,12 @@ export const useAppStore = defineStore("app", {
         this.storeOpenedList.splice(currentIndex + 1);
         this.storeOpenedList.splice(1, currentIndex - 1);
       }
-      this.cachePage = this.cachePage.filter((item) => item == currentName);
-      localStorage.cachePage = JSON.stringify(this.cachePage);
       localStorage.storeOpenedList = JSON.stringify(this.storeOpenedList);
     },
     setOpenedList() {
       this.storeOpenedList = localStorage.storeOpenedList
         ? JSON.parse(localStorage.storeOpenedList)
         : [otherRouter.children[0]];
-    },
-    setCurrentPath(pathArr) {
-      this.currentPath = pathArr;
-    },
-    setCurrentPageName(name) {
-      this.currentPageName = name;
     },
     setAvatarPath(path) {
       localStorage.avatorImgPath = path;
@@ -147,14 +106,7 @@ export const useAppStore = defineStore("app", {
     clearOpenedSubmenu() {
       this.openedSubmenuArr.length = 0;
     },
-    setMessageCount(count) {
-      this.messageCount = count;
-    },
     increateTag(tagObj) {
-      if (this.dontCache.indexOf(tagObj.name) < 0) {
-        this.cachePage.push(tagObj.name);
-        localStorage.cachePage = JSON.stringify(this.cachePage);
-      }
       this.storeOpenedList.push(tagObj);
       localStorage.storeOpenedList = JSON.stringify(this.storeOpenedList);
     },

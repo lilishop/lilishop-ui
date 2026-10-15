@@ -41,7 +41,6 @@ const thirdIndex = ref(''); // 分类三级下标
 const categoryList = ref([]); // 分类列表一级数据
 const secondLevel = ref([]); // 分类列表二级数据
 const thirdLevel = ref([]); // 分类列表三级数据
-const selectedData = ref(""); // 已选分类数据
 
 function loadCategoryFromCache() {
   try {

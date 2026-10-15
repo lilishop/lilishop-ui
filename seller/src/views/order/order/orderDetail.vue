@@ -887,7 +887,6 @@ import { formatCardKeyStatus } from "@/constants/cardKey";
 import {
   collectCardKeyFulfillLines,
   orderHasCardKeySection,
-  flattenOrderCardKeys,
   cardKeyFulfillAlertType,
   resolveCardKeyFulfillMessage,
 } from "@/constants/goodsType";
@@ -1094,9 +1093,6 @@ const hasCardKeySection = computed(() => {
 const cardKeyFulfillLines = computed(() => {
   return collectCardKeyFulfillLines(data.value);
 });
-const ecouponCardKeyRows = computed(() => {
-  return flattenOrderCardKeys(data.value, true);
-});
 const canShip = computed(() => {
   return canShowShipButton(allowOperation.value, orderInfo.value?.order);
 });
@@ -1179,9 +1175,6 @@ function getPromotionText(row) {
     if (type.indexOf("POINTS_GOODS") != -1) resultText += "积分商品 ";
   }
   return resultText === "" ? "未参与" : resultText;
-}
-function gotoHomes () {
-  return false
 }
 function getOrderItemId(item) {
   return item && (item.id || item.orderItemId || item.sn);
