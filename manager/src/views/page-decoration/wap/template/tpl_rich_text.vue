@@ -3,9 +3,9 @@
     class="tpl-rich-text"
     :style="{
       background: richBg,
-      padding: `0 ${res.paddingX ?? 12}px`,
-      marginBottom: (res.pageGap ?? 10) + 'px',
-      borderRadius: (res.borderRadius ?? 0) + 'px',
+      padding: `0 ${px(res.paddingX ?? 12)}`,
+      marginBottom: px(res.pageGap ?? 10),
+      borderRadius: px(res.borderRadius ?? 0),
       overflow: 'hidden',
     }"
   >
@@ -14,10 +14,15 @@
 </template>
 
 <script>
+const px = (v) => `${(Number(v) || 0) / 2}px`;
+
 export default {
   name: "tpl_rich_text",
   props: {
     res: { type: Object, default: () => ({}) },
+  },
+  methods: {
+    px,
   },
   computed: {
     richBg() {

@@ -482,9 +482,11 @@ export default {
       if (!Array.isArray(val) || !val.length) return;
       const list = val.map((item) => ({
         id: item.id,
+        goodsId: item.goodsId,
         goodsName: item.goodsName,
         price: item.price,
         thumbnail: item.thumbnail,
+        buyCount: item.buyCount,
       }));
       const exist = new Set(this.firstItem.goodsList.map((g) => g.id));
       const merged = this.firstItem.goodsList.concat(

@@ -17,6 +17,7 @@ import PanelVideo from "./PanelVideo.vue";
 import PanelTitle from "./PanelTitle.vue";
 import PanelPromotion from "./PanelPromotion.vue";
 import PanelGoods from "./PanelGoods.vue";
+import PanelHomeComb from "./PanelHomeComb.vue";
 
 // 图片魔方及其全部可选风格共用 PanelAdCube
 const adCubeTypes = [
@@ -33,6 +34,7 @@ const adCubeTypes = [
 ];
 
 export default {
+  homeComb: PanelHomeComb,
   blank: PanelBlank,
   line: PanelLine,
   richText: PanelRichText,

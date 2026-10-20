@@ -149,9 +149,11 @@ const pointStyle = computed(() =>
 const nameStyle = computed(() =>
   styled.value && props.res.nameColor ? { color: props.res.nameColor } : {}
 );
-const gapStyle = computed(() =>
-  styled.value ? { gap: px(props.res.contentGap) } : {}
-);
+const gapStyle = computed(() => {
+  if (!styled.value) return {};
+  const gap = px(props.res.contentGap ?? 10);
+  return { gap, "--ig-gap": gap };
+});
 const imgRadiusStyle = computed(() =>
   styled.value ? { borderRadius: px(props.res.imgRadius), overflow: "hidden" } : {}
 );
@@ -230,7 +232,7 @@ const imgRadiusStyle = computed(() =>
   flex-wrap: wrap;
 }
 .ig-g2-item {
-  width: calc(50% - 5px);
+  width: calc((100% - var(--ig-gap, 5px)) / 2);
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
@@ -298,7 +300,7 @@ const imgRadiusStyle = computed(() =>
   flex-wrap: wrap;
 }
 .ig-g3-item {
-  width: calc(33.33% - 7px);
+  width: calc((100% - var(--ig-gap, 5px) * 2) / 3);
   background: #fff;
   border-radius: 8px;
   overflow: hidden;

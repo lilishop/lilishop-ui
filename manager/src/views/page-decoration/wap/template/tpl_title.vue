@@ -62,17 +62,17 @@ const barStyle = computed(() => {
 });
 const mainStyle = computed(() => ({
   color: item.value.color || "#282828",
-  fontSize: px(item.value.fontSize || 20),
+  fontSize: `${Number(item.value.fontSize) || 20}px`,
   fontWeight: item.value.textStyle === "bold" ? "bold" : "normal",
   fontStyle: item.value.textStyle === "italic" ? "italic" : "normal",
 }));
 const subStyle = computed(() => ({
   color: item.value.color1 || "#282828",
-  fontSize: px(item.value.subFontSize || 14),
+  fontSize: `${Number(item.value.subFontSize) || 14}px`,
 }));
 const moreStyle = computed(() => ({
   color: item.value.moreColor || "#282828",
-  fontSize: px(item.value.moreFontSize || 12),
+  fontSize: `${Number(item.value.moreFontSize) || 12}px`,
 }));
 </script>
 <style lang="scss" scoped>

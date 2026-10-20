@@ -177,7 +177,7 @@ const addHref = computed(
   () =>
     router.resolve({
       path: "/floorList/main",
-      query: { pagetype: params.pageType },
+      query: { pagetype: params.pageType, mode: "add" },
     }).href
 );
 function changePageSize(v) {

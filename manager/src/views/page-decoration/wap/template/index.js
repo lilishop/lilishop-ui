@@ -29,8 +29,10 @@ import tpl_rich_text from "./tpl_rich_text";
 import tpl_coupon from "./tpl_coupon";
 import tpl_article from "./tpl_article";
 import tpl_shop from "./tpl_shop";
+import tpl_home_comb from "./tpl_home_comb";
 
 export default {
+  homeComb: tpl_home_comb,
   notice: tpl_notice,
   carousel: tpl_banner,
   title: tpl_title,

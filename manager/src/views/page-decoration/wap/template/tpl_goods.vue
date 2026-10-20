@@ -27,7 +27,7 @@
               >
                 <template v-if="cartStyle === 'text'">加购</template>
                 <template v-else-if="cartStyle === 'plus'">+</template>
-                <svg v-else viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                <svg v-else viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                   <path
                     d="M7 4h-2l-1 2h2l2.4 9.6a2 2 0 0 0 1.9 1.4h7.9a2 2 0 0 0 1.9-1.5l1.6-6.5h-12l-.8-3h11.5l.5-2h-13.4zM10 20a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm8 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"
                   />
@@ -156,7 +156,8 @@ export default {
       };
     },
     listStyle() {
-      return { gap: this.px(this.res.contentGap) };
+      const gap = this.px(this.res.contentGap ?? 10);
+      return { gap, "--g-gap": gap };
     },
     itemStyle() {
       const r = this.px(this.res.contentRadius);
@@ -306,7 +307,7 @@ export default {
 }
 
 .g-name {
-  font-size: 12px;
+  font-size: 13px;
   color: #282828;
   line-height: 1.4;
   display: -webkit-box;
@@ -323,7 +324,7 @@ export default {
 
 .g-price {
   color: $theme_color;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   margin-bottom: 2px;
 }
@@ -344,41 +345,81 @@ export default {
   color: #fff;
   &.cart-plus,
   &.cart-cart {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1;
   }
   &.cart-text {
-    border-radius: 9px;
-    padding: 2px 8px;
-    font-size: 11px;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 12px;
   }
 }
 
-/* 卡片：左图右文 */
+/* 卡片：左图右文（参考 CRMEB 详细列表，左侧 112x112 缩略图，右侧标题置顶、价格销量置底） */
 .mode-card {
   flex-direction: column;
   .g-item {
     flex-direction: row;
-    align-items: center;
-    padding: 6px;
+    align-items: stretch;
+    padding: 10px;
   }
   .g-imgbox {
-    width: 55px;
-    height: 55px;
-    margin-right: 8px;
+    width: 112px;
+    height: 112px;
+    margin-right: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .g-info {
+    min-height: 112px;
+    justify-content: space-between;
   }
   .g-name {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    margin-bottom: 6px;
+  }
+  .g-price {
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: auto;
     margin-bottom: 4px;
+  }
+  .g-bottom {
+    margin-top: 0;
+  }
+  .g-sales {
+    font-size: 12px;
   }
 }
 
 /* 列表：两列网格 */
 .mode-list {
   .g-item {
-    width: calc(50% - 3px);
+    width: calc((100% - var(--g-gap, 5px)) / 2);
+    flex-direction: column;
+  }
+  .g-imgbox {
+    width: 100%;
+    aspect-ratio: 1;
+  }
+  .g-info {
+    padding: 8px 10px 10px;
+    min-height: 64px;
+  }
+  .g-name {
+    margin-bottom: 6px;
+  }
+}
+
+/* 三列 */
+.mode-three {
+  .g-item {
+    width: calc((100% - var(--g-gap, 5px) * 2) / 3);
     flex-direction: column;
   }
   .g-imgbox {
@@ -387,26 +428,7 @@ export default {
   }
   .g-info {
     padding: 6px;
-    min-height: 52px;
-  }
-  .g-name {
-    margin-bottom: 4px;
-  }
-}
-
-/* 三列 */
-.mode-three {
-  .g-item {
-    width: calc(33.33% - 4px);
-    flex-direction: column;
-  }
-  .g-imgbox {
-    width: 100%;
-    aspect-ratio: 1;
-  }
-  .g-info {
-    padding: 4px;
-    min-height: 44px;
+    min-height: 48px;
   }
   .g-name {
     -webkit-line-clamp: 1;
@@ -418,6 +440,14 @@ export default {
   }
   .g-sales {
     font-size: 10px;
+  }
+  .g-cart {
+    &.cart-plus,
+    &.cart-cart {
+      width: 20px;
+      height: 20px;
+      font-size: 13px;
+    }
   }
 }
 
@@ -433,10 +463,17 @@ export default {
     aspect-ratio: 3 / 2;
   }
   .g-info {
-    padding: 6px;
-    min-height: 44px;
+    padding: 10px 12px 12px;
+    min-height: 64px;
   }
   .g-name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .g-price {
+    font-size: 16px;
+    font-weight: 700;
     margin-bottom: 4px;
   }
 }

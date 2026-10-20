@@ -3,17 +3,22 @@
     class="tpl-blank"
     :style="{
       background: blankBg,
-      height: (res.height ?? 10) + 'px',
-      margin: `0 ${res.paddingX ?? 0}px ${res.pageGap ?? 10}px`,
+      height: px(res.height ?? 10),
+      margin: `0 ${px(res.paddingX ?? 0)} ${px(res.pageGap ?? 10)}`,
     }"
   ></div>
 </template>
 
 <script>
+const px = (v) => `${(Number(v) || 0) / 2}px`;
+
 export default {
   name: "tpl_blank",
   props: {
     res: { type: Object, default: () => ({}) },
+  },
+  methods: {
+    px,
   },
   computed: {
     blankBg() {

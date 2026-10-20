@@ -100,7 +100,7 @@
 </template>
 <script setup>
 import { ref, watch, nextTick, onMounted, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   Picture,
   PictureFilled,
@@ -142,6 +142,7 @@ import { Message, Modal } from "@/utils/message";
 import { useAppStore } from "@/stores/app";
 
 const route = useRoute();
+const router = useRouter();
 const appStore = useAppStore();
 
 // script setup 下 :is 无法按字符串解析局部导入，用映射表渲染组件图标
@@ -291,6 +292,40 @@ function init() {
 
     }
   if (!route.query.id) {
+    if (route.query.mode !== "add" && (!route.query.pagetype || route.query.pagetype === "INDEX")) {
+      API_Other.getHomeList({
+        pageNumber: 1,
+        pageSize: 10,
+        pageType: "INDEX",
+        pageClientType: "H5",
+      }).then((res) => {
+        const records = (res && res.result && res.result.records) || [];
+        const active = records.find((r) => r.pageShow === "OPEN") || records[0];
+        if (!active || !active.id) return;
+        router.replace({
+          path: route.path,
+          query: {
+            ...route.query,
+            id: active.id,
+            name: active.name,
+            type: active.pageShow === "OPEN",
+            pagetype: "INDEX",
+          },
+        });
+        API_Other.getHomeData(active.id).then((detail) => {
+          const parsed = JSON.parse(detail.result.pageData);
+          contentData.value = mergePageData(parsed);
+          if (!contentData.value.name) {
+            contentData.value.name = active.name || "";
+          }
+          const first = contentData.value.list[0];
+          if (first && templates[first.type]) {
+            handleComponent(first, 0);
+          }
+        });
+      });
+      return false;
+    }
     // 新建页面：模板名称取路由参数
     if (!contentData.value.name) {
       contentData.value.name = route.query.name || "";

@@ -9,6 +9,63 @@
  * group: 'base' | 'marketing' | 'tools'  组件面板分组（无 group 的条目不在面板显示，仅供抽屉使用）
  */
 export const modelData = [
+  {
+    type: "homeComb",
+    name: "头部组件",
+    icon: "Menu",
+    group: "base",
+    notAdd: true,
+    notImg: true,
+    notLink: true,
+    options: {
+      searType: "full",
+      logoUrl: "",
+      logoFixUrl: "",
+      placeWords: "搜索商品名称",
+      hotWords: ["兰蔻小黑瓶"],
+      hotInterval: 3,
+      textColor: "#303133",
+      boxColor: "#FFFFFF",
+      textAlign: "left",
+      searchRadius: 30,
+      showTabs: true,
+      tabColor: "#FFFFFF",
+      tabActiveColor: "#E93323",
+      tabList: [
+        { title: "精选", dataType: "category", value: "" },
+        { title: "靓丽美妆", dataType: "category", value: "" }
+      ],
+      swiperStyle: "card",
+      indicatorStyle: "round",
+      indicatorPosition: "center",
+      indicatorColor: "#E93323",
+      bannerRadius: 14,
+      pageGap: 0,
+      list: [
+        {
+          img: "https://i.loli.net/2020/12/05/fKH4CwImpbuD5Xj.png",
+          url: "",
+          link: "",
+          size: "750*332",
+          model: "link"
+        },
+        {
+          img: "https://i.loli.net/2020/12/05/12kleCgrSLfKoQs.png",
+          url: "",
+          link: "",
+          size: "750*332",
+          model: "link"
+        },
+        {
+          img: "https://i.loli.net/2021/05/14/ZlzcCdnpejtN9gL.png",
+          url: "",
+          link: "",
+          size: "750*332",
+          model: "link"
+        }
+      ]
+    }
+  },
 
   {
     type: "flexOne",
