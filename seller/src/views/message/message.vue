@@ -1,58 +1,67 @@
 <template>
-  <div class="message-main-con">
-    <div class="message-mainlist-con">
-      <div
-        v-for="item in mesTypeList"
-        :key="item.type"
-        class="mes-type-item"
-        :class="{ active: currentMessageType === item.type }"
-        @click="setCurrentMesType(item.type)"
-      >
-        <span class="mes-type-btn-text">{{ item.title }}</span>
-        <el-badge
-          v-if="item.type === 'unread' && unReadCount > 0"
-          :value="unReadCount"
-          class="message-count-badge-outer"
-        />
-      </div>
-    </div>
-    <div class="message-content-con">
-      <div v-if="showMesTitleList" class="message-title-list-con">
-        <el-table
-          ref="messageList"
-          v-loading="loading"
-          :data="currentMesList"
-          :empty-text="noDataText"
-          :show-header="false"
-          style="width: 100%"
+  <div class="message-page">
+    <div class="message-panel">
+      <div class="message-tabs">
+        <div
+          v-for="item in mesTypeList"
+          :key="item.type"
+          class="message-tab"
+          :class="{ active: currentMessageType === item.type }"
+          @click="setCurrentMesType(item.type)"
         >
-          <el-table-column min-width="300">
-            <template #default="{ row }">
-              <a class="link-text mes-title-link" @click="openMessage(row)">{{ row.title }}</a>
-            </template>
-          </el-table-column>
-          <el-table-column width="200" align="center">
-            <template #default="{ row }">
-              <el-icon class="mes-time-icon"><Clock /></el-icon>
-              <span>{{ row.createTime }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column width="180" align="center">
-            <template #default="{ row }">
-              <template v-if="currentMessageType == 'unread'">
-                <a class="link-text" @click="markAsRead(row)">标为已读</a>
-              </template>
-              <template v-else-if="currentMessageType == 'read'">
-                <a class="link-text" @click="deleteMes(row)">删除</a>
-              </template>
-              <template v-else>
-                <a class="link-text" @click="restoreMes(row)">还原</a>
-                <span class="op-split">|</span>
-                <a class="link-text" @click="deleteReal(row)">彻底删除</a>
-              </template>
-            </template>
-          </el-table-column>
-        </el-table>
+          <el-icon class="message-tab-icon"><component :is="item.icon" /></el-icon>
+          <span>{{ item.title }}</span>
+          <span
+            v-if="item.type === 'unread' && unReadCount > 0"
+            class="message-tab-badge"
+          >{{ unReadCount > 99 ? "99+" : unReadCount }}</span>
+        </div>
+      </div>
+
+      <div v-loading="loading" class="message-list-wrap">
+        <template v-if="currentMesList.length">
+          <div
+            v-for="row in currentMesList"
+            :key="row.id"
+            class="message-card"
+            :class="{ expanded: expandedId === row.id }"
+            @click="toggleMessage(row)"
+          >
+            <div class="message-card-icon" :class="currentMessageType">
+              <el-icon :size="18"><component :is="currentTypeIcon" /></el-icon>
+            </div>
+            <div class="message-card-main">
+              <div
+                class="message-card-title"
+                :class="{ unread: currentMessageType === 'unread' }"
+              >{{ row.title }}</div>
+              <div class="message-card-summary">{{ contentText(row.content) }}</div>
+            </div>
+            <div class="message-card-side">
+              <span class="message-card-time">
+                <el-icon><Clock /></el-icon>
+                <span>{{ row.createTime }}</span>
+              </span>
+              <span class="message-card-ops" @click.stop>
+                <template v-if="currentMessageType === 'unread'">
+                  <a class="link-text" @click="markAsRead(row)">标为已读</a>
+                </template>
+                <template v-else-if="currentMessageType === 'read'">
+                  <a class="link-text danger" @click="deleteMes(row)">删除</a>
+                </template>
+                <template v-else>
+                  <a class="link-text" @click="restoreMes(row)">还原</a>
+                  <span class="op-split">|</span>
+                  <a class="link-text danger" @click="deleteReal(row)">彻底删除</a>
+                </template>
+              </span>
+            </div>
+            <div v-if="expandedId === row.id" class="message-card-content" @click.stop>
+              <div class="message-card-content-inner" v-html="$filters.xssFilter(row.content)"></div>
+            </div>
+          </div>
+        </template>
+        <el-empty v-else-if="!loading" :description="noDataText" :image-size="110" />
         <div class="page-bar">
           <el-pagination
             v-model:current-page="params.pageNumber"
@@ -66,28 +75,14 @@
           />
         </div>
       </div>
-      <div v-else class="message-view-content-con">
-        <div class="message-content-top-bar">
-          <el-button type="primary" link @click="backMesTitleList">
-            <el-icon><ArrowLeft /></el-icon>返回
-          </el-button>
-          <h3 class="mes-title">{{ mes.title }}</h3>
-        </div>
-        <p class="mes-time-con">
-          <el-icon class="mes-time-icon"><Clock /></el-icon>{{ mes.time }}
-        </p>
-        <div class="message-content-body">
-          <p class="message-content" v-html="$filters.xssFilter(mes.content)"></p>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { Clock, ArrowLeft } from "@element-plus/icons-vue";
+import { Bell, ChatDotRound, Clock, Delete } from "@element-plus/icons-vue";
 import * as API_Index from "@/api/index";
 
 defineOptions({ name: "message_index" });
@@ -96,9 +91,9 @@ const route = useRoute();
 
 const loading = ref(true);
 const mesTypeList = ref([
-  { type: "unread", title: "未读消息" },
-  { type: "read", title: "已读消息" },
-  { type: "recycleBin", title: "回收站" },
+  { type: "unread", title: "未读消息", icon: Bell },
+  { type: "read", title: "已读消息", icon: ChatDotRound },
+  { type: "recycleBin", title: "回收站", icon: Delete },
 ]);
 const params = reactive({
   status: "UN_READY",
@@ -110,17 +105,13 @@ const params = reactive({
 const total = ref(0);
 const currentMesList = ref([]);
 const currentMessageType = ref("unread");
-const showMesTitleList = ref(true);
+const currentTypeIcon = computed(() => {
+  const item = mesTypeList.value.find((i) => i.type === currentMessageType.value);
+  return item ? item.icon : Bell;
+});
+const expandedId = ref("");
 const unReadCount = ref(0);
 const noDataText = ref("暂无未读消息");
-const mes = reactive({
-  title: "",
-  time: "",
-  content: "",
-});
-
-// messageList：模板 ref 对应声明（原 Options API 中未在 script 内使用，仅保留绑定）
-const messageList = ref(null);
 
 onMounted(() => {
   getAll();
@@ -129,6 +120,14 @@ onMounted(() => {
 watch(() => route, (to) => {
   if (to.name == "message_index") getAll();
 });
+
+function contentText(html) {
+  if (!html) return "";
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  const text = (div.textContent || "").replace(/\s+/g, " ").trim();
+  return text.length > 80 ? text.slice(0, 80) + "…" : text;
+}
 
 function changePage() {
   refreshMessage();
@@ -152,6 +151,11 @@ function refreshMessage() {
     }
   });
 }
+function refreshUnreadCount() {
+  API_Index.getAllMessage(params).then((res) => {
+    if (res.success) unReadCount.value = res.result.UN_READY.total;
+  });
+}
 function getAll() {
   API_Index.getAllMessage(params).then((res) => {
     loading.value = false;
@@ -161,12 +165,9 @@ function getAll() {
     }
   });
 }
-function backMesTitleList() {
-  showMesTitleList.value = true;
-}
 function setCurrentMesType(type) {
   if (currentMessageType.value !== type) {
-    showMesTitleList.value = true;
+    expandedId.value = "";
   }
   currentMessageType.value = type;
   if (type == "unread") noDataText.value = "暂无未读消息";
@@ -175,17 +176,29 @@ function setCurrentMesType(type) {
   params.pageNumber = 1;
   refreshMessage();
 }
-function openMessage(row) {
-  showMesTitleList.value = false;
-  mes.title = row.title;
-  mes.time = row.createTime;
-  getContent(row);
+function toggleMessage(row) {
+  if (expandedId.value === row.id) {
+    expandedId.value = "";
+    return;
+  }
+  expandedId.value = row.id;
+  if (currentMessageType.value === "unread") {
+    API_Index.read(row.id).then((res) => {
+      if (res.success) {
+        refreshMessage();
+        refreshUnreadCount();
+      }
+    });
+  }
 }
 function markAsRead(v) {
   loading.value = true;
   API_Index.read(v.id).then((res) => {
     loading.value = false;
-    if (res.success) getAll();
+    if (res.success) {
+      refreshMessage();
+      refreshUnreadCount();
+    }
   });
 }
 function deleteMes(v) {
@@ -203,16 +216,9 @@ function restoreMes(v) {
 }
 function deleteReal(v) {
   loading.value = true;
-  API_Index.clearMessage(v.id).then((res) => {
+  API_Index.clearMessage(v.id).then(res => {
     loading.value = false;
     if (res.success) refreshMessage();
-  });
-}
-function getContent(v) {
-  mes.content = v.content;
-  API_Index.read(v.id).then((res) => {
-    loading.value = false;
-    if (res.success) getAll();
   });
 }
 </script>
@@ -223,12 +229,17 @@ function getContent(v) {
   color: #409eff;
   cursor: pointer;
   text-decoration: none;
+
+  &.danger {
+    color: var(--el-color-danger);
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 .op-split {
   margin: 0 8px;
   color: #dcdee2;
-}
-.mes-title-link {
-  margin-right: 30px;
 }
 </style>
