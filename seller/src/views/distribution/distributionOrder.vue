@@ -114,8 +114,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -123,7 +123,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { ref, watch } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRoute } from "vue-router";
 import { getDistributionOrder } from "@/api/distribution";
 import vueQr from "vue-qr";
@@ -135,15 +136,32 @@ const route = useRoute();
 
 const timeRange = ref([]);
 const distributionId = ref(route.query.id);
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "create_time",
-  order: "desc",
-});
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getDistributionOrder,
+  {
+    pageSize: 20,
+    sort: "create_time",
+    order: "desc",
+    form: { orderSn: "", distributionName: "" },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      if (distributionId.value) {
+        params.distributionId = distributionId.value;
+      }
+      if (timeRange.value && timeRange.value[0] && timeRange.value[1]) {
+        const startTime = new Date(timeRange.value[0]).getTime();
+        const endTime = new Date(timeRange.value[1]).getTime();
+        params.startTime = filters.unixToDate(startTime / 1000);
+        params.endTime = filters.unixToDate(endTime / 1000);
+      }
+      return params;
+    },
+  }
+);
+function handleReset() {
+  timeRange.value = [];
+  resetSearch();
+}
 
 // searchFormRef：模板 ref 改名避免与响应式变量 searchForm 互相覆盖
 const searchFormRef = ref(null);
@@ -157,56 +175,11 @@ watch(
   }
 );
 
-onMounted(() => {
-  init();
-});
 
-function init() {
-  getDataList();
-}
 
-function changePage() {
-  getDataList();
-}
 
-function changePageSize() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
 
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = 20;
-  getDataList();
-}
 
-function getDataList() {
-  searchForm.distributionId = distributionId.value;
-  loading.value = true;
-  if (timeRange.value && timeRange.value[0] && timeRange.value[1]) {
-    const startTime = new Date(timeRange.value[0]).getTime();
-    const endTime = new Date(timeRange.value[1]).getTime();
-    searchForm.startTime = filters.unixToDate(startTime / 1000);
-    searchForm.endTime = filters.unixToDate(endTime / 1000);
-  } else {
-    searchForm.startTime = null;
-    searchForm.endTime = null;
-  }
-  getDistributionOrder(searchForm)
-    .then((res) => {
-      if (res?.success) {
-        const page = res.result || {};
-        data.value = page.records || [];
-        total.value = page.total || 0;
-      } else {
-        data.value = [];
-        total.value = 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
 
 function filterStatus(status) {
   const arr = [

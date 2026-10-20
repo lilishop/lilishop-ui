@@ -17,13 +17,13 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
-      <el-table v-loading="loading" border :data="data" ref="tableRef" class="mt_10" style="width: 100%">
+    <el-card class="mt_10">
+      <el-table ref="tableRef" v-loading="loading" border :data="data" style="width: 100%">
         <el-table-column prop="id" label="编号" min-width="120" />
         <el-table-column label="商品原图" width="120" align="center">
           <template #default="{ row }">
@@ -41,7 +41,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" min-width="120" />
-        <el-table-column label="操作" align="center" width="150">
+        <el-table-column label="操作" align="center" width="150" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="editGoods(row)">编辑</a>
             <span class="op-split">|</span>
@@ -58,8 +58,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -67,8 +67,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useTable } from "@/utils/useTable";
 import { getDraftGoodsListData, deleteDraftGoods } from "@/api/goods";
 import { Message, Modal } from "@/utils/message";
 
@@ -80,29 +81,37 @@ const router = useRouter();
 const searchFormRef = ref(null);
 const tableRef = ref(null);
 
-const loading = ref(true);
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 10,
-  sort: "create_time",
-  order: "desc",
-  saveType: "TEMPLATE",
-});
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getDraftGoodsListData,
+  {
+    pageSize: 10,
+    sort: "create_time",
+    order: "desc",
+    form: {
+      goodsName: "",
+      id: "",
+      saveType: "TEMPLATE",
+    },
+  }
+);
 
-function init() {
-  getDataList();
-}
+watch(
+  () => route.query,
+  () => {
+    getDataList();
+  }
+);
+
 function editGoods(v) {
   router.push({
     name: "goods-template-operation-edit",
     query: { draftId: v.id },
   });
 }
+
 function removeDraft(id) {
   Modal.confirm({
-    title: "确认审核",
+    title: "确认删除",
     content: "您确认要删除id为 " + id + " 的模版吗?",
     loading: true,
     onOk: () => {
@@ -116,44 +125,6 @@ function removeDraft(id) {
     },
   });
 }
-function changePage() {
-  getDataList();
-}
-function changePageSize() {
-  getDataList();
-}
-function handleSearch() {
-  searchForm.value.pageNumber = 1;
-  searchForm.value.pageSize = 10;
-  getDataList();
-}
-function handleReset() {
-  searchFormRef.value.resetFields();
-  searchForm.value.pageNumber = 1;
-  searchForm.value.pageSize = 10;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  getDraftGoodsListData(searchForm.value).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
-}
-
-onMounted(() => {
-  init();
-});
-
-watch(
-  () => route.query,
-  () => {
-    init();
-  }
-);
 </script>
 
 <style lang="scss" scoped>

@@ -16,11 +16,12 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
+    <el-card class="mt_10">
       <el-tabs v-model="statusTab" @tab-click="onTabClick">
         <el-tab-pane
           v-for="item in statusTabs"
@@ -32,12 +33,12 @@
       <el-table v-loading="loading" :data="data" border class="mt_10" style="width: 100%">
         <el-table-column prop="workOrderSn" label="工单编号" min-width="180" />
         <el-table-column prop="orderSn" label="订单编号" min-width="180" />
-        <el-table-column label="预约类型" width="100">
+        <el-table-column label="预约类型" width="100" align="center">
           <template #default="{ row }">{{ serviceModeText(row.serviceMode) }}</template>
         </el-table-column>
         <el-table-column prop="appointmentTime" label="预约时间" min-width="170" />
         <el-table-column prop="staffName" label="服务人员" min-width="110" />
-        <el-table-column label="服务状态" width="110">
+        <el-table-column label="服务状态" width="110" align="center">
           <template #default="{ row }">{{ statusText(row.serviceStatus) }}</template>
         </el-table-column>
         <el-table-column label="操作" width="160" fixed="right">
@@ -76,8 +77,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { useTable } from "@/utils/useTable";
 import {
   getWorkOrderPage,
   getWorkOrderStatusCounts,
@@ -90,20 +92,10 @@ import { Message } from "@/utils/message";
 defineOptions({ name: "appointmentWorkOrderList" });
 
 const route = useRoute();
-
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
+const searchFormRef = ref(null);
 const statusTab = ref("ALL");
 const statusCounts = ref({});
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  serviceStatus: "",
-  workOrderSn: "",
-  orderSn: "",
-  serviceMode: "",
-});
+
 const statusTabs = ref([
   { value: "ALL", label: "全部" },
   { value: "PENDING_CLAIM", label: "待领取" },
@@ -113,8 +105,22 @@ const statusTabs = ref([
   { value: "REFUNDED", label: "已退款" },
 ]);
 
-// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
-const searchFormRef = ref(null);
+const { loading, data, total, searchForm, getDataList: loadData, handleSearch, resetSearch } = useTable(
+  getWorkOrderPage,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: {
+      serviceStatus: "",
+      workOrderSn: "",
+      orderSn: "",
+      serviceMode: "",
+    },
+    onSuccess: () => {
+      loadCounts();
+    },
+  }
+);
 
 onMounted(() => {
   if (route.query.tab) {
@@ -128,22 +134,27 @@ onMounted(() => {
 function serviceModeText(v) {
   return SERVICE_MODE_LABEL[v] || v || "—";
 }
+
 function statusText(v) {
   return WORK_ORDER_STATUS_LABEL[v] || v || "—";
 }
+
 function tabLabel(item) {
   const count = statusCounts.value[item.value];
   return count != null ? `${item.label}(${count})` : item.label;
 }
+
 function onTabClick(tab) {
+  statusTab.value = tab.paneName;
   searchForm.serviceStatus = tab.paneName === "ALL" ? "" : tab.paneName;
-  searchForm.pageNumber = 1;
-  loadData();
+  handleSearch();
 }
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  loadData();
+
+function handleReset() {
+  statusTab.value = "ALL";
+  resetSearch();
 }
+
 function loadCounts() {
   getWorkOrderStatusCounts()
     .then((res) => {
@@ -153,33 +164,20 @@ function loadCounts() {
     })
     .catch(() => {});
 }
-function loadData() {
-  loading.value = true;
-  getWorkOrderPage(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result?.records || [];
-        total.value = res.result?.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
+
 function handleClaim(row) {
   claimWorkOrder(row.id).then((res) => {
     if (res.success) {
       Message.success("领取成功");
-      loadCounts();
       loadData();
     }
   });
 }
+
 function handleEnd(row) {
   endWorkOrderService(row.id).then((res) => {
     if (res.success) {
       Message.success("已结束服务");
-      loadCounts();
       loadData();
     }
   });

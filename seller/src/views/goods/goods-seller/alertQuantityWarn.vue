@@ -9,13 +9,13 @@
           <el-form-item label="商品编号" prop="goodsId">
             <el-input v-model="searchForm.goodsId" placeholder="请输入商品编号" clearable style="width: 200px" />
           </el-form-item>
-          <el-form-item label="状态" prop="status">
+          <el-form-item label="状态" prop="marketEnable">
             <el-select v-model="searchForm.marketEnable" placeholder="请选择" clearable style="width: 200px">
               <el-option label="下架" value="DOWN" />
               <el-option label="上架" value="UPPER" />
             </el-select>
           </el-form-item>
-          <el-form-item label="商品分类" prop="category">
+          <el-form-item label="商品分类">
             <el-cascader
               v-model="category"
               :options="categoryList"
@@ -36,7 +36,7 @@
 
       <el-tabs v-model="activeTab" @tab-click="switchTabs">
         <el-tab-pane label="预警商品" name="warnList">
-          <el-table v-loading="loading" border :data="warnData" class="mt_10" style="width: 100%">
+          <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
             <el-table-column prop="goodsName" label="商品名称" min-width="400" show-overflow-tooltip />
             <el-table-column label="库存" min-width="120">
               <template #default="{ row }">{{ row.quantity || 0 }}</template>
@@ -53,7 +53,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="设置预警" name="warnSetting">
-          <el-table v-loading="loading" border :data="skuAllData" class="mt_10" style="width: 100%">
+          <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
             <el-table-column prop="goodsName" label="商品名称" />
             <el-table-column label="库存" width="200">
               <template #default="{ row }">{{ row.quantity || 0 }}</template>
@@ -82,8 +82,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -123,6 +123,7 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useTable } from "@/utils/useTable";
 import {
   getGoodsCategoryAll,
   getGoodsListDataByStockSeller,
@@ -142,25 +143,38 @@ const ROUTE_TAB_MAP = {
 
 const route = useRoute();
 
-const loading = ref(true);
 const updateStockModalVisible = ref(false);
 const activeTab = ref("warnList");
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "create_time",
-  order: "desc",
-});
 const checkFlag = ref(false);
 const stockList = ref([]);
-const warnData = ref([]);
-const skuAllData = ref([]);
-const total = ref(0);
 const categoryList = ref([]);
 const category = ref([]);
 const selectedSku = ref({});
-
 const searchFormRef = ref(null);
+
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  (params) => {
+    return activeTab.value === "warnList"
+      ? getGoodsListDataByStockSeller(params)
+      : getGoodsSkuListDataSeller(params);
+  },
+  {
+    pageSize: 20,
+    sort: "create_time",
+    order: "desc",
+    form: {
+      goodsName: "",
+      goodsId: "",
+      marketEnable: "",
+      sn: "",
+    },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      params.categoryPath = category.value?.length ? category.value.join(",") : null;
+      return params;
+    },
+  }
+);
 
 watch(
   () => route.name,
@@ -172,16 +186,11 @@ watch(
 
 onMounted(() => {
   applyRouteTab();
-  init();
+  deepGroup();
 });
 
 function applyRouteTab(name = route.name) {
   activeTab.value = ROUTE_TAB_MAP[name] || "warnList";
-}
-
-function init() {
-  getDataList();
-  deepGroup();
 }
 
 function openUpdataStockModal(row) {
@@ -233,52 +242,9 @@ function switchTabs() {
   handleReset();
 }
 
-function changePageSize(v) {
-  searchForm.value.pageSize = v;
-  getDataList();
-}
-
-function changePage(v) {
-  searchForm.value.pageNumber = v;
-  getDataList();
-}
-
-function handleSearch() {
-  searchForm.value.pageNumber = 1;
-  searchForm.value.categoryPath = category.value?.length ? category.value.join(",") : null;
-  getDataList();
-}
-
 function handleReset() {
-  searchForm.value = {
-    pageNumber: 1,
-    pageSize: 20,
-    sort: "create_time",
-    order: "desc",
-  };
   category.value = [];
-  getDataList();
-}
-
-function getDataList() {
-  loading.value = true;
-  if (activeTab.value === "warnList") {
-    getGoodsListDataByStockSeller(searchForm.value).then((res) => {
-      if (res.success) {
-        warnData.value = res.result.records;
-        total.value = res.result.total;
-      }
-      loading.value = false;
-    });
-  } else {
-    getGoodsSkuListDataSeller(searchForm.value).then((res) => {
-      if (res.success) {
-        skuAllData.value = res.result.records;
-        total.value = res.result.total;
-      }
-      loading.value = false;
-    });
-  }
+  resetSearch();
 }
 
 function deepGroup() {

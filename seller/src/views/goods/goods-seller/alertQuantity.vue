@@ -9,13 +9,13 @@
           <el-form-item label="商品编号" prop="goodsId">
             <el-input v-model="searchForm.goodsId" placeholder="请输入商品编号" clearable style="width: 200px" />
           </el-form-item>
-          <el-form-item label="状态" prop="status">
+          <el-form-item label="状态" prop="marketEnable">
             <el-select v-model="searchForm.marketEnable" placeholder="请选择" clearable style="width: 200px">
               <el-option label="下架" value="DOWN" />
               <el-option label="上架" value="UPPER" />
             </el-select>
           </el-form-item>
-          <el-form-item label="商品分类" prop="category">
+          <el-form-item label="商品分类">
             <el-cascader
               v-model="category"
               :options="categoryList"
@@ -59,26 +59,6 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="上架状态" width="130">
-            <template #default="{ row }">
-              <el-tag :type="row.marketEnable === 'DOWN' ? 'danger' : 'success'">
-                {{ row.marketEnable === "DOWN" ? "下架" : "上架" }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="审核状态" width="120">
-            <template #default="{ row }">
-              <el-tag
-                :type="
-                  row.authFlag === 'PASS' ? 'success' : row.authFlag === 'TOBEAUDITED' ? 'warning' : 'danger'
-                "
-              >
-                {{
-                  row.authFlag === "PASS" ? "通过" : row.authFlag === "TOBEAUDITED" ? "待审核" : "审核拒绝"
-                }}
-              </el-tag>
-            </template>
-          </el-table-column>
           <el-table-column label="库存" min-width="120">
             <template #default="{ row }">{{ row.quantity || 0 }}</template>
           </el-table-column>
@@ -89,12 +69,12 @@
         <el-pagination
           v-model:current-page="searchForm.pageNumber"
           v-model:page-size="searchForm.pageSize"
-          :page-sizes="[20, 50]"
+          :page-sizes="[20, 50, 100]"
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -117,6 +97,7 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import {
   getGoodsCategoryAll,
   getGoodsSkuListDataSeller,
@@ -132,56 +113,35 @@ const tableRef = ref(null);
 
 const importModal = ref(false);
 const spinShow = ref(false);
-const loading = ref(true);
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "create_time",
-  order: "desc",
-});
-const stockAllData = ref([]);
-const total = ref(0);
 const categoryList = ref([]);
 const category = ref([]);
 const file = ref(null);
 
-function init() {
-  getDataList();
-  deepGroup();
-}
-function changePageSize(v) {
-  searchForm.value.pageSize = v;
-  getDataList();
-}
-function changePage(v) {
-  searchForm.value.pageNumber = v;
-  getDataList();
-}
-function handleSearch() {
-  searchForm.value.pageNumber = 1;
-  searchForm.value.categoryPath = category.value?.length ? category.value.join(",") : null;
-  getDataList();
-}
-function handleReset() {
-  searchForm.value = {
-    pageNumber: 1,
+const { loading, data: stockAllData, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getGoodsSkuListDataSeller,
+  {
     pageSize: 20,
     sort: "create_time",
     order: "desc",
-  };
+    form: {
+      goodsName: "",
+      goodsId: "",
+      marketEnable: "",
+      sn: "",
+    },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      params.categoryPath = category.value?.length ? category.value.join(",") : null;
+      return params;
+    },
+  }
+);
+
+function handleReset() {
   category.value = [];
-  getDataList();
+  resetSearch();
 }
-function getDataList() {
-  loading.value = true;
-  getGoodsSkuListDataSeller(searchForm.value).then((res) => {
-    if (res.success) {
-      stockAllData.value = res.result.records;
-      total.value = res.result.total;
-    }
-    loading.value = false;
-  });
-}
+
 function deepGroup() {
   getGoodsCategoryAll().then((res) => {
     if (res.success) {
@@ -200,12 +160,17 @@ function deepGroup() {
     }
   });
 }
-async function exportStock() {
+
+function exportStock() {
   let randomNumber = "";
   for (let i = 0; i < 10; i++) {
     randomNumber += Math.floor(Math.random() * 10);
   }
-  queryExportStock(searchForm.value)
+  const params = { ...searchForm };
+  if (category.value?.length) {
+    params.categoryPath = category.value.join(",");
+  }
+  queryExportStock(params)
     .then((res) => {
       const blob = new Blob([res], { type: "application/vnd.ms-excel;charset=utf-8" });
       if ("download" in document.createElement("a")) {
@@ -223,14 +188,17 @@ async function exportStock() {
     })
     .catch(() => {});
 }
+
 function openImportStock() {
   importModal.value = true;
 }
+
 function handleUpload(f) {
   file.value = f;
   upload();
   return false;
 }
+
 function upload() {
   const fd = new FormData();
   fd.append("files", file.value);
@@ -246,9 +214,10 @@ function upload() {
 }
 
 onMounted(() => {
-  init();
+  deepGroup();
 });
 </script>
+
 <style lang="scss" scoped>
 @import "@/styles/table-common.scss";
 </style>

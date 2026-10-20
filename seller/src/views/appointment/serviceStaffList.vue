@@ -13,17 +13,18 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="resetSearch">重置</el-button>
           <el-button type="success" @click="openCreate">新增服务人员</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
-      <el-table v-loading="loading" :data="data" border :fit="false">
-        <el-table-column prop="staffName" label="员工姓名" width="160" />
-        <el-table-column prop="contactPhone" label="联系电话" width="140" />
-        <el-table-column prop="sortOrder" label="排序" width="80" />
-        <el-table-column label="人员状态" width="110">
+    <el-card class="mt_10">
+      <el-table v-loading="loading" :data="data" border style="width: 100%">
+        <el-table-column prop="staffName" label="员工姓名" min-width="140" />
+        <el-table-column prop="contactPhone" label="联系电话" min-width="140" />
+        <el-table-column prop="sortOrder" label="排序" width="90" align="center" />
+        <el-table-column label="人员状态" width="110" align="center">
           <template #default="{ row }">
             <el-switch
               :model-value="row.status === 'ENABLED'"
@@ -31,8 +32,8 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="170" />
-        <el-table-column label="操作" width="140" align="center">
+        <el-table-column prop="createTime" label="创建时间" min-width="170" />
+        <el-table-column label="操作" width="140" align="center" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="openEdit(row)">编辑</a>
             <span class="op-split">|</span>
@@ -78,8 +79,14 @@
         <el-form-item label="联系电话">
           <el-input v-model="createForm.contactPhone" placeholder="选择店员后自动填入" />
         </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="createForm.sortOrder" :min="0" :max="9999" controls-position="right" />
+        <el-form-item label="排序值">
+          <el-input-number v-model="createForm.sortOrder" :min="0" :max="9999" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-radio-group v-model="createForm.status">
+            <el-radio value="ENABLED">开启</el-radio>
+            <el-radio value="DISABLED">关闭</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -91,10 +98,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
-import { ElMessageBox } from "element-plus";
-import { Message } from "@/utils/message";
-import { getUserListData } from "@/api/index";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
+import { getUserListData } from "@/api/member";
 import {
   getServiceStaffPage,
   createServiceStaff,
@@ -102,18 +108,12 @@ import {
   updateServiceStaffStatus,
   deleteServiceStaff,
 } from "@/api/appointment";
+import { ElMessageBox } from "element-plus";
+import { Message } from "@/utils/message";
 
 defineOptions({ name: "appointmentServiceStaffList" });
 
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  staffName: "",
-  status: "",
-});
+const searchFormRef = ref(null);
 const createVisible = ref(false);
 const createLoading = ref(false);
 const clerkLoading = ref(false);
@@ -127,31 +127,16 @@ const createForm = ref({
   status: "ENABLED",
 });
 
-// searchFormRef：模板 ref 改名避免与顶层变量互相覆盖（原 ref="searchForm" 在 script 中未被使用）
-const searchFormRef = ref(null);
-
-onMounted(() => {
-  loadData();
-});
-
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  loadData();
-}
-
-function loadData() {
-  loading.value = true;
-  getServiceStaffPage(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result?.records || [];
-        total.value = res.result?.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
+const { loading, data, total, searchForm, getDataList: loadData, handleSearch, resetSearch } = useTable(
+  getServiceStaffPage,
+  {
+    pageSize: 20,
+    form: {
+      staffName: "",
+      status: "",
+    },
+  }
+);
 
 function emptyForm() {
   return {
@@ -228,7 +213,6 @@ function onClerkChange(memberId) {
 
 function submitCreate() {
   if (!createForm.value.clerkUserId) {
-    // 原代码 this.$message 小写，全局仅注册了 $Message，此处按作者意图修正
     Message.warning("请选择店员");
     return;
   }
@@ -272,3 +256,15 @@ function toggleStatus(row, enabled) {
   });
 }
 </script>
+
+<style scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdfe6;
+}
+</style>

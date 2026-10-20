@@ -13,16 +13,16 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button @click="resetSearch">重置</el-button>
           <el-button type="success" @click="goDesigner()">新建</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <el-card class="mt_10">
-      <el-table v-loading="loading" :data="data" border>
+      <el-table v-loading="loading" :data="data" border style="width: 100%">
         <el-table-column prop="formName" label="表单名称" min-width="180" />
-        <el-table-column label="状态" width="110">
+        <el-table-column label="状态" width="110" align="center">
           <template #default="{ row }">
             <el-switch
               :key="`${row.id}-${row.status}`"
@@ -31,11 +31,11 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="字段数" width="90">
+        <el-table-column label="字段数" width="90" align="center">
           <template #default="{ row }">{{ fieldCount(row.formSchema) }}</template>
         </el-table-column>
         <el-table-column prop="updateTime" label="更新时间" min-width="170" />
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column label="操作" width="160" align="center" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="goDesigner(row.id)">编辑</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
@@ -55,8 +55,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useTable } from "@/utils/useTable";
 import { getRequest, postRequestWithNoForm, deleteRequest } from "@/libs/axios";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { countFormFields } from "@/constants/systemForm";
@@ -64,48 +64,18 @@ import { countFormFields } from "@/constants/systemForm";
 defineOptions({ name: "appointmentSystemFormList" });
 
 const router = useRouter();
-
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
-const searchForm = reactive({
-  formName: "",
-  status: "",
-  pageNumber: 1,
-  pageSize: 10,
-});
-
 const fieldCount = countFormFields;
 
-onMounted(() => {
-  loadData();
-});
-
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  loadData();
-}
-
-function handleReset() {
-  searchForm.formName = "";
-  searchForm.status = "";
-  searchForm.pageNumber = 1;
-  loadData();
-}
-
-function loadData() {
-  loading.value = true;
-  getRequest("/appointment/system-forms", searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result?.records || [];
-        total.value = res.result?.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
+const { loading, data, total, searchForm, getDataList: loadData, handleSearch, resetSearch } = useTable(
+  (p) => getRequest("/appointment/system-forms", p),
+  {
+    pageSize: 10,
+    form: {
+      formName: "",
+      status: "",
+    },
+  }
+);
 
 function goDesigner(id) {
   router.push({

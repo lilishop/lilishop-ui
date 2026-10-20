@@ -126,8 +126,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -223,7 +223,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import {
   getDistributionGoods,
   distributionGoodsCancel,
@@ -240,36 +241,33 @@ const modalTitle = ref("添加分销商品");
 const editVisible = ref(false);
 const editLoading = ref(false);
 const submitLoading = ref(false);
-const loading = ref(true);
-const currentAuthStatus = ref("ALL");
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  goodsName: "",
-  storeCategoryPath: "",
-  goodsType: "",
-  authStatus: "",
-});
+const currentAuthStatus = ref('ALL');
 const shopCategoryList = ref([]);
 const shopCategoryProps = {
-  value: "value",
-  label: "label",
-  children: "children",
+  value: 'value',
+  label: 'label',
+  children: 'children',
   checkStrictly: true,
   emitPath: false,
 };
 const selectedGoodsList = ref([]);
 const editForm = ref({
-  id: "",
-  goodsName: "",
-  commission: "",
+  id: '',
+  goodsName: '',
+  commission: '',
   commissionError: false,
 });
 const commissionPattern = /^[1-9]\d{0,3}(\.\d{1,2})?$/;
-const data = ref([]);
-const total = ref(0);
+
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getDistributionGoods,
+  {
+    pageSize: 20,
+    sort: "createTime",
+    order: "desc",
+    form: { goodsName: "", storeCategoryPath: "", goodsType: "", authStatus: "" },
+  }
+);
 
 // searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
 const searchFormRef = ref(null);
@@ -321,8 +319,11 @@ function authStatusText(value) {
 
 function onAuthStatusChange(name) {
   searchForm.authStatus = name === "ALL" ? "" : name;
-  searchForm.pageNumber = 1;
-  getDataList();
+  handleSearch();
+}
+function handleReset() {
+  currentAuthStatus.value = "ALL";
+  resetSearch();
 }
 
 function add() {
@@ -401,39 +402,9 @@ function handleSubmit() {
     });
 }
 
-function changePage(v) {
-  searchForm.pageNumber = v;
-  getDataList();
-}
 
-function changePageSize(v) {
-  searchForm.pageSize = v;
-  searchForm.pageNumber = 1;
-  getDataList();
-}
 
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
 
-function getDataList() {
-  loading.value = true;
-  getDistributionGoods(searchForm)
-    .then((res) => {
-      if (res?.success) {
-        const page = res.result || {};
-        data.value = page.records || [];
-        total.value = page.total || 0;
-      } else {
-        data.value = [];
-        total.value = 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
 
 function remove(row) {
   Modal.confirm({
