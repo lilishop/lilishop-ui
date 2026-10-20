@@ -137,7 +137,7 @@
       <el-tabs v-model="activeCategoryTab" @tab-change="handleCategoryTabChange">
         <el-tab-pane label="图片" name="IMAGE" />
         <el-tab-pane label="视频" name="VIDEO" />
-        <el-tab-pane label="文件" name="FILE" />
+        <el-tab-pane v-if="!isComponent" label="文件" name="FILE" />
       </el-tabs>
     </el-card>
     <el-row>
@@ -191,6 +191,7 @@
                         v-if="canUploadImages"
                         ref="upRef"
                         :action="managerApiUrl + '/manager/common/upload/file'"
+                        :accept="uploadAccept"
                         :data="uploadData"
                         :headers="accessToken"
                         :before-upload="beforeUpload"
@@ -930,13 +931,16 @@ const canShowGroups = computed(() => {
   return activeRoleTab.value === "MANAGER";
 });
 const canUploadImages = computed(() => {
-  return activeRoleTab.value === "MANAGER";
+  return activeRoleTab.value === "MANAGER" && activeCategoryTab.value !== "FILE";
+});
+const uploadAccept = computed(() => {
+  if (activeCategoryTab.value === "VIDEO") return "video/*";
+  return "image/*";
 });
 const uploadButtonText = computed(() => {
   const textMap = {
     IMAGE: "上传图片",
     VIDEO: "上传视频",
-    FILE: "上传文件",
   };
   return textMap[activeCategoryTab.value] || "上传图片";
 });
@@ -954,8 +958,21 @@ const uploadData = computed(() => {
 
 function beforeUpload(file) {
   if (!canUploadImages.value) {
-    ElMessage.warning("仅管理员模块支持上传图片");
+    ElMessage.warning("当前模块不支持上传");
     return false;
+  }
+  if (activeCategoryTab.value === "IMAGE") {
+    const isImg = (file?.type && file.type.startsWith("image/")) || /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file?.name || "");
+    if (!isImg) {
+      ElMessage.warning("请上传图片格式文件");
+      return false;
+    }
+  } else if (activeCategoryTab.value === "VIDEO") {
+    const isVid = (file?.type && file.type.startsWith("video/")) || /\.(mp4|webm|ogg|mov|avi|mkv)$/i.test(file?.name || "");
+    if (!isVid) {
+      ElMessage.warning("请上传视频格式文件");
+      return false;
+    }
   }
   const maxSize = 20480 * 1024;
   if (file && file.size > maxSize) {
@@ -1388,7 +1405,7 @@ function changeFileType() {
   const categoryMap = {
     pic: "IMAGE",
     video: "VIDEO",
-    file: "FILE",
+    file: props.isComponent ? "IMAGE" : "FILE",
     all: "IMAGE",
   };
   const category = categoryMap[fileType.value] || "IMAGE";

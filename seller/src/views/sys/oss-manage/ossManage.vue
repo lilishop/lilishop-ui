@@ -122,6 +122,7 @@
             @click="handleCategoryTabChange('VIDEO')"
           >视频</div>
           <div
+            v-if="!isComponent"
             class="oss-tab"
             :class="{ active: activeCategoryTab === 'FILE' }"
             @click="handleCategoryTabChange('FILE')"
@@ -132,6 +133,7 @@
             v-if="canUploadImages"
             ref="upRef"
             :action="sellerUrl + '/store/common/upload/file'"
+            :accept="uploadAccept"
             :data="uploadData"
             :headers="accessToken"
             :before-upload="beforeUpload"
@@ -534,15 +536,18 @@ watch(
 const canShowGroups = computed(() => {
   return activeRoleTab.value === "STORE";
 });
-// 商家端允许上传图片/视频/文件
+// 商家端允许上传图片/视频（文件仅在发票上传业务中使用）
 const canUploadImages = computed(() => {
-  return activeRoleTab.value === "STORE";
+  return activeRoleTab.value === "STORE" && activeCategoryTab.value !== "FILE";
+});
+const uploadAccept = computed(() => {
+  if (activeCategoryTab.value === "VIDEO") return "video/*";
+  return "image/*";
 });
 const uploadButtonText = computed(() => {
   const textMap = {
     IMAGE: "上传图片",
     VIDEO: "上传视频",
-    FILE: "上传文件",
   };
   return textMap[activeCategoryTab.value] || "上传图片";
 });
@@ -562,6 +567,19 @@ function beforeUpload(file) {
   if (!canUploadImages.value) {
     ElMessage.warning("当前模块不支持上传");
     return false;
+  }
+  if (activeCategoryTab.value === "IMAGE") {
+    const isImg = (file?.type && file.type.startsWith("image/")) || /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file?.name || "");
+    if (!isImg) {
+      ElMessage.warning("请上传图片格式文件");
+      return false;
+    }
+  } else if (activeCategoryTab.value === "VIDEO") {
+    const isVid = (file?.type && file.type.startsWith("video/")) || /\.(mp4|webm|ogg|mov|avi|mkv)$/i.test(file?.name || "");
+    if (!isVid) {
+      ElMessage.warning("请上传视频格式文件");
+      return false;
+    }
   }
   const maxSize = 20480 * 1024;
   if (file && file.size > maxSize) {
