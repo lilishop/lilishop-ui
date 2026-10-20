@@ -24,8 +24,8 @@
       </el-table>
       <div class="mt_10" style="display: flex; justify-content: flex-end">
         <el-pagination
-          v-model:current-page="pageNumber"
-          v-model:page-size="pageSize"
+          v-model:current-page="searchForm.pageNumber"
+          v-model:page-size="searchForm.pageSize"
           :total="total"
           layout="total, prev, pager, next"
           size="small"
@@ -37,46 +37,31 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Finance from "@/api/finance";
 import { getRequest } from "@/libs/axios";
 import { downloadBlob } from "@/utils/downloadBlob";
 
 defineOptions({ name: "finance-wallet-log" });
 
-const loading = ref(false);
-const searchForm = reactive({ memberName: "" });
 const dateRange = ref([]);
-const pageNumber = ref(1);
-const pageSize = ref(20);
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList, handleSearch } = useTable(
+  (p) => getRequest("/wallet/log", p),
+  {
+    pageSize: 20,
+    form: { memberName: "" },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      if (dateRange.value?.length === 2) {
+        params.startDate = dateRange.value[0];
+        params.endDate = dateRange.value[1];
+      }
+      return params;
+    },
+  }
+);
 
-onMounted(() => {
-  getDataList();
-});
-
-function handleSearch() {
-  pageNumber.value = 1;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  const params = {
-    pageNumber: pageNumber.value,
-    pageSize: pageSize.value,
-    memberName: searchForm.memberName,
-  };
-  getRequest("/wallet/log", params).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  }).catch(() => {
-    loading.value = false;
-  });
-}
 function handleExport() {
   const params = { memberName: searchForm.memberName };
   if (dateRange.value?.length === 2) {

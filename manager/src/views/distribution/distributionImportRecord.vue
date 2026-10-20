@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import {
   downloadDistributionImportFailItems,
   getDistributionImportBatches,
@@ -54,17 +54,11 @@ import { Message } from "@/utils/message";
 
 defineOptions({ name: "distributionImportRecord" });
 
-const loading = ref(false);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-});
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList } = useTable(
+  getDistributionImportBatches,
+  { pageSize: 20 }
+);
 
-onMounted(() => {
-  getDataList();
-});
 
 function statusLabel(status) {
   const map = {
@@ -80,20 +74,6 @@ function changePage() {
 function changePageSize() {
   searchForm.pageNumber = 1;
   getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  getDistributionImportBatches(searchForm)
-    .then((res) => {
-      loading.value = false;
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .catch(() => {
-      loading.value = false;
-    });
 }
 function downloadFailList(row) {
   if (!row || !row.failCount) return;

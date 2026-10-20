@@ -19,21 +19,12 @@
   </div>
 </template>
 <script setup>
-import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { getFlashDiscountList } from "@/api/promotion.js";
 
-const loading = ref(false);
-const rows = ref([]);
-const total = ref(0);
-const query = ref({ pageNumber: 1, pageSize: 20 });
+const { loading, data: rows, total, searchForm: query, getDataList: load } = useTable(
+  getFlashDiscountList,
+  { pageSize: 20, form: { promotionName: "" } }
+);
 
-onMounted(() => { load(); });
-
-function load() {
-  loading.value = true;
-  getFlashDiscountList(query.value).then((res) => {
-    loading.value = false;
-    if (res.success) { rows.value = res.result.records; total.value = res.result.total; }
-  });
-}
 </script>

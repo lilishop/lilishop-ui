@@ -37,48 +37,35 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
-      <el-table v-loading="loading" border :data="data" ref="table" class="mt_10" style="width: 100%">
-        <el-table-column prop="memberName" label="会员名称" width="200" />
-        <el-table-column prop="orderSn" label="订单编号" min-width="120" show-overflow-tooltip />
-        <el-table-column label="商品名称" min-width="200" show-overflow-tooltip>
+    <el-card class="mt_10">
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        :data="data"
+        style="width: 100%"
+      >
+        <el-table-column prop="orderSn" label="订单编号" min-width="150" align="left" />
+        <el-table-column prop="storeName" label="店铺名称" min-width="120" align="left" />
+        <el-table-column prop="memberName" label="会员名称" min-width="120" align="left" />
+        <el-table-column prop="complainTopic" label="投诉主题" min-width="130" align="left" />
+        <el-table-column prop="complainStatus" label="投诉状态" width="120" align="center">
           <template #default="{ row }">
-            <template v-if="row">
-              <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
-              <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
-                <template #reference>
-                  <img
-                    src="../../../assets/qrcode.svg"
-                    class="hover-pointer"
-                    width="20"
-                    height="20"
-                    alt="qrcode"
-                  />
-                </template>
-                <vue-qr
-                  :text="wapLinkTo(row.goodsId, row.skuId)"
-                  :margin="0"
-                  color-dark="#000"
-                  color-light="#fff"
-                  :size="150"
-                />
-              </el-popover>
-            </template>
-          </template>
-        </el-table-column>
-        <el-table-column prop="complainTopic" label="投诉主题" width="120" show-overflow-tooltip />
-        <el-table-column prop="createTime" label="投诉时间" width="180" />
-        <el-table-column label="投诉状态" width="110">
-          <template #default="{ row }">
-            <el-tag v-if="row" :type="complainStatusTagType(row.complainStatus)">
+            <el-tag
+              v-if="row && row.complainStatus"
+              :type="complainStatusTagType(row.complainStatus)"
+              size="small"
+            >
               {{ complainStatusText(row.complainStatus) }}
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="createTime" label="投诉时间" min-width="160" align="left" />
         <el-table-column label="操作" width="120" align="center" fixed="right">
           <template #default="{ row }">
             <a v-if="row" class="link-text" @click="detail(row)">
@@ -96,8 +83,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -105,28 +92,38 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRoute } from "vue-router";
 import * as API_Order from "@/api/order";
-import vueQr from "vue-qr";
 import { customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "orderComplaint" });
 
 const route = useRoute();
-
 const searchFormRef = ref(null);
 const table = ref(null);
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-});
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  API_Order.getOrderComplain,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: {
+      sort: "createTime",
+      order: "desc",
+      orderSn: "",
+      memberName: "",
+      status: "",
+    },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      if (route.query.orderSn && !params.orderSn) params.orderSn = route.query.orderSn;
+      if (route.query.status && !params.status) params.status = route.query.status;
+      return params;
+    },
+  }
+);
 
 watch(
   () => route.query,
@@ -146,6 +143,7 @@ function complainStatusText(v) {
   };
   return map[v] || v || "-";
 }
+
 function complainStatusTagType(v) {
   const map = {
     NEW: "primary",
@@ -157,37 +155,7 @@ function complainStatusTagType(v) {
   };
   return map[v] || "info";
 }
-function init() {
-  getDataList();
-}
-function changePage(v) {
-  searchForm.pageNumber = v;
-  getDataList();
-}
-function changePageSize(v) {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = v;
-  getDataList();
-}
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = 20;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  API_Order.getOrderComplain(searchForm)
-    .then((res) => {
-      loading.value = false;
-      if (res.success) {
-        data.value = res.result.records;
-        total.value = res.result.total;
-      }
-    })
-    .catch(() => {
-      loading.value = false;
-    });
-}
+
 function detail(v) {
   customRouterPush({
     name: "order-complaint-detail",
@@ -196,7 +164,9 @@ function detail(v) {
 }
 
 onMounted(() => {
-  init();
+  if (route.query.orderSn) searchForm.orderSn = route.query.orderSn;
+  if (route.query.status) searchForm.status = route.query.status;
+  getDataList();
 });
 </script>
 
@@ -205,12 +175,5 @@ onMounted(() => {
   color: #409eff;
   cursor: pointer;
   text-decoration: none;
-}
-.mr_10 {
-  margin-right: 10px;
-}
-.hover-pointer {
-  cursor: pointer;
-  vertical-align: bottom;
 }
 </style>

@@ -156,7 +156,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRouter } from "vue-router";
 import {
   getPointsGoodsList,
@@ -173,21 +174,20 @@ const router = useRouter();
 const searchFormRef = ref(null);
 const tableRef = ref(null);
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-});
+const { loading, data, total, searchForm, getDataList } = useTable(
+  getPointsGoodsList,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: { sort: "createTime", order: "desc" },
+  }
+);
 const statusList = ref([
   { label: "未开始", value: "NEW" },
   { label: "已开始", value: "START" },
   { label: "已结束", value: "END" },
   { label: "已关闭", value: "CLOSE" },
 ]);
-const data = ref([]);
-const total = ref(0);
 
 onMounted(() => {
   init();
@@ -234,19 +234,6 @@ function handleSearch() {
       searchForm.pointsS + "_" + (searchForm.pointsE ? searchForm.pointsE : "");
   }
   getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  getPointsGoodsList(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records;
-        total.value = res.result.total;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
 }
 function edit(id) {
   router.push({ name: "edit-points-goods", query: { id } });

@@ -28,44 +28,31 @@
             end-placeholder="结束时间"
             placeholder="选择起始时间"
             style="width: 240px"
-            @change="selectDateRange"
           />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
+    <el-card class="mt_10">
       <el-table
         ref="table"
         v-loading="loading"
         border
         :data="data"
-        class="mt_10"
         style="width: 100%"
       >
         <el-table-column prop="storeName" label="店铺名称" min-width="120" align="left" />
         <el-table-column prop="memberName" label="会员名称" min-width="120" align="left" />
-        <el-table-column label="店铺地址" width="300">
-          <template #default="{ row }">
-            <el-tag v-if="row">{{ row.storeAddressPath || "暂未填写" }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="是否自营" width="120" align="left">
-          <template #default="{ row }">
-            <el-tag v-if="row" :type="row.selfOperated ? '' : 'success'">
-              {{ row.selfOperated ? "自营" : "非自营" }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="170" align="left" />
-        <el-table-column label="操作" width="170" align="center" fixed="right">
+        <el-table-column prop="createTime" label="申请时间" min-width="160" align="left" />
+        <el-table-column prop="storeAddressPath" label="所在地" min-width="180" align="left" />
+        <el-table-column label="操作" width="100" align="center" fixed="right">
           <template #default="{ row }">
             <a
-              v-if="row && row.storeDisable == 'APPLYING'"
-              class="link-text"
+              style="color: #409eff; cursor: pointer;"
               @click="edit(row)"
             >查看</a>
           </template>
@@ -80,8 +67,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -89,79 +76,57 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useTable } from "@/utils/useTable";
 import { getShopListData } from "@/api/shops";
 
 defineOptions({ name: "shop" });
 
-const emit = defineEmits(["callback"]);
-
 const router = useRouter();
-
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  startDate: "",
-  endDate: "",
-});
 const selectDate = ref(null);
-const data = ref([]);
-const total = ref(0);
 
-const searchFormRef = ref(null);
-const table = ref(null);
-
-function callback(val) {
-  emit("callback", val);
-}
-
-function init() {
-  getDataList();
-}
-
-function changePage() {
-  getDataList();
-}
-
-function changePageSize() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
-
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = 20;
-  getDataList();
-}
-
-function selectDateRange(v) {
-  if (v) {
-    searchForm.startDate = v[0];
-    searchForm.endDate = v[1];
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getShopListData,
+  {
+    pageSize: 20,
+    form: {
+      sort: "createTime",
+      order: "desc",
+      startDate: "",
+      endDate: "",
+      storeName: "",
+      memberName: "",
+      storeDisable: "APPLYING",
+    },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      if (selectDate.value && selectDate.value.length === 2) {
+        params.startDate = selectDate.value[0];
+        params.endDate = selectDate.value[1];
+      } else {
+        delete params.startDate;
+        delete params.endDate;
+      }
+      return params;
+    },
   }
-}
+);
 
-function getDataList() {
-  loading.value = true;
-  searchForm.storeDisable = "APPLYING";
-  getShopListData(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
+function handleReset() {
+  selectDate.value = null;
+  resetSearch();
 }
 
 function edit(v) {
   router.push({ path: "/shop-operation", query: { shopId: v.id } });
 }
-
-onMounted(() => {
-  init();
-});
 </script>
+
+<style lang="scss" scoped>
+.search-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+</style>

@@ -73,7 +73,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Statistics from "@/api/statistics";
 import { getShopListData } from "@/api/shops";
 import { downloadBlob } from "@/utils/downloadBlob";
@@ -81,19 +82,17 @@ import { unitPrice } from "@/utils/filters";
 
 defineOptions({ name: "sales-order-detail-report" });
 
-const loading = ref(false);
 const dateRange = ref([]);
 const defaultTime = ref([new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)]);
-const params = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  storeId: "",
-  orderSn: "",
-  memberName: "",
-  keyword: "",
-});
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm: params, getDataList: loadData, handleSearch } = useTable(
+  API_Statistics.getSalesOrderDetailReport,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: { storeId: "", orderSn: "", memberName: "", keyword: "" },
+    beforeRequest: buildParams,
+  }
+);
 const shops = ref([]);
 
 onMounted(() => {
@@ -119,27 +118,13 @@ function loadShops() {
     if (res.success) shops.value = res.result.records || [];
   });
 }
-function buildParams() {
-  const p = { ...params };
+function buildParams(base = params) {
+  const p = { ...base };
   if (dateRange.value && dateRange.value.length === 2) {
     p.startTime = dateRange.value[0];
     p.endTime = dateRange.value[1];
   }
   return p;
-}
-function handleSearch() {
-  params.pageNumber = 1;
-  loadData();
-}
-function loadData() {
-  loading.value = true;
-  API_Statistics.getSalesOrderDetailReport(buildParams()).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records || [];
-      total.value = res.result.total || 0;
-    }
-  });
 }
 function handleExport() {
   API_Statistics.exportSalesOrderDetailReport(buildParams()).then((blob) => {

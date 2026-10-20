@@ -1,41 +1,47 @@
 <template>
   <div class="search">
     <el-card>
-      <el-form
-        ref="searchFormRef"
-        :model="searchForm"
-        inline
-        label-width="70px"
-        class="search-form"
-        @keyup.enter="handleSearch"
-      >
-        <el-form-item label="参数名称">
+      <el-form ref="searchFormRef" :model="searchForm" inline>
+        <el-form-item label="参数名称" prop="paramName">
           <el-input
             v-model="searchForm.paramName"
+            type="text"
             placeholder="请输入参数名称"
             clearable
-            style="width: 240px"
+            style="width: 200px"
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button type="primary" icon="search" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
-
-    <el-card>
-      <div class="operation padding-row">
+      <el-row class="operation" style="margin-bottom: 10px;">
         <el-button type="primary" @click="goAdd">添加</el-button>
-      </div>
-      <el-table v-loading="loading" border :data="data" ref="tableRef" style="width: 100%">
-        <el-table-column prop="paramName" label="参数名称" width="300" />
-        <el-table-column prop="options" label="参数值" min-width="260" show-overflow-tooltip />
-        <el-table-column label="必填" width="300" align="center">
+      </el-row>
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        :data="data"
+        border
+        style="width: 100%"
+      >
+        <el-table-column prop="paramName" label="参数名称" min-width="140">
           <template #default="{ row }">
-            <span v-if="row">{{ isTruthyFlag(row.required) ? "是" : "否" }}</span>
+            <span v-if="row">{{ row.paramName }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="可索引" width="300" align="center">
+        <el-table-column prop="paramType" label="类型" width="120">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.paramType === 1 ? '文本' : '单选' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="options" label="参数值" min-width="160">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.options }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="isIndex" label="是否检索" width="100">
           <template #default="{ row }">
             <span v-if="row">{{ isTruthyFlag(row.isIndex) ? "是" : "否" }}</span>
           </template>
@@ -58,15 +64,16 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
   </div>
 </template>
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRouter } from "vue-router";
 import { deleteParams, getGoodsParamsPage } from "@/api/goods";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -74,56 +81,23 @@ import { ElMessage, ElMessageBox } from "element-plus";
 defineOptions({ name: "categoryParams" });
 
 const router = useRouter();
-
-const submitLoading = ref(false);
-const loading = ref(true);
-const total = ref(0);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  paramName: "",
-});
-const data = ref([]);
-
 const searchFormRef = ref(null);
 const tableRef = ref(null);
+
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getGoodsParamsPage,
+  {
+    pageSize: 20,
+    form: { sort: "createTime", order: "desc", paramName: "" },
+  }
+);
 
 function isTruthyFlag(val) {
   return val === 1 || val === "1" || val === true;
 }
 
-function init() {
-  getDataList();
-}
-
-function changePage(v) {
-  searchForm.pageNumber = v;
-  getDataList();
-}
-
-function changePageSize(v) {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = v;
-  getDataList();
-}
-
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = 20;
-  getDataList();
-}
-
-function getDataList() {
-  loading.value = true;
-  getGoodsParamsPage(searchForm).then((res) => {
-    loading.value = false;
-    if (res && res.success) {
-      data.value = (res.result && res.result.records) || [];
-      total.value = (res.result && res.result.total) || 0;
-    }
-  });
+function handleReset() {
+  resetSearch();
 }
 
 function goAdd() {
@@ -148,10 +122,6 @@ function remove(row) {
     });
   }).catch(() => {});
 }
-
-onMounted(() => {
-  init();
-});
 </script>
 <style lang="scss">
 .link-text {

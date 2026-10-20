@@ -45,6 +45,7 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRoute } from "vue-router";
 import { getManagerWorkOrderPage } from "@/api/appointment";
 
@@ -63,22 +64,25 @@ const STATUS_OPTIONS = [
   { label: "逾期未到店", value: "NO_SHOW" },
 ];
 
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
 const statusOptions = ref(STATUS_OPTIONS);
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 10,
-  orderSn: "",
-  workOrderSn: "",
-  serviceStatus: "",
-});
+
+const { loading, data, total, searchForm, getDataList: getData, handleSearch } = useTable(
+  getManagerWorkOrderPage,
+  {
+    pageSize: 10,
+    immediate: false,
+    form: {
+      orderSn: "",
+      workOrderSn: "",
+      serviceStatus: "",
+    },
+  }
+);
 
 onMounted(() => {
   const status = route.query.serviceStatus;
   if (status) {
-    searchForm.value.serviceStatus = status;
+    searchForm.serviceStatus = status;
   }
   getData();
 });
@@ -86,22 +90,5 @@ onMounted(() => {
 function statusText(value) {
   const found = STATUS_OPTIONS.find((item) => item.value === value);
   return found ? found.label : value || "—";
-}
-function handleSearch() {
-  searchForm.value.pageNumber = 1;
-  getData();
-}
-function getData() {
-  loading.value = true;
-  getManagerWorkOrderPage(searchForm.value)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result?.records || [];
-        total.value = res.result?.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
 }
 </script>

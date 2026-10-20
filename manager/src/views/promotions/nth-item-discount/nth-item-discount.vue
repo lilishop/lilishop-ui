@@ -21,21 +21,11 @@
   </div>
 </template>
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { getNthItemDiscountList } from "@/api/promotion.js";
 
-const loading = ref(false);
-const rows = ref([]);
-const total = ref(0);
-const query = reactive({ pageNumber: 1, pageSize: 20 });
-
-function load() {
-  loading.value = true;
-  getNthItemDiscountList(query).then((res) => {
-    loading.value = false;
-    if (res.success) { rows.value = res.result.records; total.value = res.result.total; }
-  });
-}
-
-onMounted(load);
+const { loading, data: rows, total, searchForm: query, getDataList: load } = useTable(
+  getNthItemDiscountList,
+  { pageSize: 20, form: { promotionName: "" } }
+);
 </script>
