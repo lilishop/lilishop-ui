@@ -24,19 +24,19 @@
                     {{ overViewList.uvNum || 0 }}
                   </div>
                 </div>
-                <div class="card-item">
+                <div class="card-item highlight">
                   <div class="card-item-label">下单转化率</div>
                   <div class="card-item-value">
                     {{ overViewList.orderConversionRate || "0%" }}
                   </div>
                 </div>
-                <div class="card-item">
+                <div class="card-item highlight">
                   <div class="card-item-label">付款转化率</div>
                   <div class="card-item-value">
                     {{ overViewList.paymentsConversionRate || "0%" }}
                   </div>
                 </div>
-                <div class="card-item">
+                <div class="card-item highlight">
                   <div class="card-item-label">全店转化率</div>
                   <div class="card-item-value">
                     {{ overViewList.overallConversionRate || "0%" }}
@@ -56,7 +56,7 @@
                     {{ overViewList.orderMemberNum || 0 }}
                   </div>
                 </div>
-                <div class="card-item">
+                <div class="card-item highlight">
                   <div class="card-item-label">下单金额</div>
                   <div class="card-item-value">
                     {{ $filters.unitPrice(overViewList.orderAmount || 0, "￥") }}
@@ -74,7 +74,7 @@
                     {{ overViewList.paymentsNum || 0 }}
                   </div>
                 </div>
-                <div class="card-item">
+                <div class="card-item highlight">
                   <div class="card-item-label">付款金额</div>
                   <div class="card-item-value">
                     {{ $filters.unitPrice(overViewList.paymentAmount || 0, "￥") }}
@@ -88,7 +88,7 @@
                     {{ overViewList.refundOrderNum || 0 }}
                   </div>
                 </div>
-                <div class="card-item">
+                <div class="card-item highlight">
                   <div class="card-item-label">退单金额</div>
                   <div class="card-item-value">
                     {{ $filters.unitPrice(overViewList.refundOrderPrice || 0, "￥") }}
@@ -98,45 +98,34 @@
             </div>
           </div>
           <div class="shap">
-            <div id="overViewChart">
-              <!-- 上 -->
-              <div class="block">
-                <div class="box">
-                  <span>访客数</span>
-                  <span>{{ overViewList.uvNum || 0 }}</span>
-                </div>
+            <div class="funnel">
+              <div class="funnel-layer funnel-layer-uv">
+                <span class="layer-name">访客数</span>
+                <span class="layer-val">{{ overViewList.uvNum || 0 }}</span>
               </div>
-              <!-- 中 -->
-              <div class="block">
-                <div class="box">
-                  <span>下单笔数</span>
-                  <span>{{ overViewList.orderNum || 0 }}</span>
-                </div>
+              <div class="funnel-gap">
+                <span class="funnel-tag">
+                  <span class="funnel-tag-arrow">↓</span>
+                  下单转化率 <b>{{ overViewList.orderConversionRate || "0%" }}</b>
+                </span>
               </div>
-              <!-- 下 -->
-              <div class="block">
-                <div class="box">
-                  <span>付款笔数</span>
-                  <span>{{ overViewList.paymentOrderNum || 0 }}</span>
-                </div>
+              <div class="funnel-layer funnel-layer-order">
+                <span class="layer-name">下单笔数</span>
+                <span class="layer-val">{{ overViewList.orderNum || 0 }}</span>
               </div>
-
-              <!-- 线 -->
-              <div class="rightBorder"></div>
-              <div class="leftTopBorder"></div>
-              <div class="leftBottomBorder"></div>
-              <!--数据 -->
-              <div class="leftTopTips">
-                <div>下单转化率</div>
-                <div>{{ overViewList.orderConversionRate || "0%" }}</div>
+              <div class="funnel-gap">
+                <span class="funnel-tag">
+                  <span class="funnel-tag-arrow">↓</span>
+                  付款转化率 <b>{{ overViewList.paymentsConversionRate || "0%" }}</b>
+                </span>
               </div>
-              <div class="leftBottomTips">
-                <div>付款转化率</div>
-                <div>{{ overViewList.paymentsConversionRate || "0%" }}</div>
+              <div class="funnel-layer funnel-layer-pay">
+                <span class="layer-name">付款笔数</span>
+                <span class="layer-val">{{ overViewList.paymentOrderNum || 0 }}</span>
               </div>
-              <div class="rightTips">
-                <div>整体转换率</div>
-                <div>{{ overViewList.overallConversionRate || "0%" }}</div>
+              <div class="funnel-total">
+                <span class="funnel-total-label">整体转化率</span>
+                <span class="funnel-total-val">{{ overViewList.overallConversionRate || "0%" }}</span>
               </div>
             </div>
           </div>
@@ -504,128 +493,111 @@ onMounted(() => {
   text-align: right;
   margin: 20px 0;
 }
-#overViewChart {
+.shap {
+  width: 420px;
+  margin: 0 10px;
+  align-self: center;
+  flex-shrink: 0;
+}
+.funnel {
   display: flex;
-  justify-content: center;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  margin-left: 20px;
-  > .leftTopTips {
-    position: absolute;
-    top: 68px;
-    left: -2px;
-    width: 85px;
-    text-align: center;
-    background: rgb(255, 255, 255);
-    z-index: 1;
-    padding: 5px 0px;
-  }
-  > .leftBottomTips {
-    position: absolute;
-    bottom: 100px;
-    left: -2px;
-    width: 85px;
-    text-align: center;
-    background: rgb(255, 255, 255);
-    z-index: 1;
-    padding: 5px 0px;
-  }
-  > .rightTips {
-    position: absolute;
-    bottom: 240px;
-    right: 0px;
-    width: 85px;
-    text-align: center;
-    background: rgb(255, 255, 255);
-    z-index: 1;
-    padding: 5px 0px;
-  }
-  > .rightBorder {
-    width: 110px;
-    position: absolute;
-    top: 30px;
-    right: 40px;
-    border: 2px solid #d9d9d9;
-    border-left: 0;
-    height: 280px;
-  }
-  > .leftTopBorder {
-    border: 2px solid #d9d9d9;
-    height: 118px;
-    width: 56px;
-    position: absolute;
-    left: 40px;
-    top: 30px;
-    border-right: 0;
-  }
-  > .leftBottomBorder {
-    width: 108px;
-    border: 2px solid #d9d9d9;
-    height: 150px;
-    position: absolute;
-    bottom: 45px;
-    left: 40px;
-    border-right: 0;
-  }
-  > .block {
-    height: 0px;
-    border-left: 30px solid transparent;
-    border-right: 30px solid transparent;
-    position: relative;
-    background: rgb(255, 255, 255);
-    z-index: 1;
-    position: relative;
-  }
-  > .block:nth-of-type(1) {
-    width: 240px;
-    border-top: 90px solid #ff4646;
-    > .box {
-      left: -30px;
-      top: -90px;
-      width: 240px;
-      height: 90px;
-    }
-  }
-  > .block:nth-of-type(2) {
-    width: 172px;
-    border-top: 100px solid #ff8585;
-    margin-top: 10px;
-    > .box {
-      left: -29px;
-      top: -100px;
-      width: 172px;
-      height: 100px;
-    }
-  }
-  > .block:nth-of-type(3) {
-    width: 100px;
-    margin-top: 10px;
-    border-top: 150px solid #ffb396;
-    border-left: 50px solid transparent;
-    border-right: 50px solid transparent;
 
-    > .box {
-      left: -50px;
-      top: -150px;
-      width: 100px;
-      height: 120px;
-      z-index: 2;
-    }
-  }
-  :deep(.box){
-    color: #fff;
-    position: absolute;
-
-    z-index: 2;
+  .funnel-layer {
+    height: 84px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    > span {
-      font-size: 16px;
-      font-weight: bold;
+    color: #fff;
+    filter: drop-shadow(0 4px 8px rgba(243, 25, 71, 0.18));
+    .layer-name {
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0.95;
     }
+    .layer-val {
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+  }
+  .funnel-layer-uv {
+    width: 400px;
+    background: linear-gradient(135deg, #ff5f4d 0%, #f3223e 100%);
+    clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
+  }
+  .funnel-layer-order {
+    width: 320px;
+    background: linear-gradient(135deg, #ff8a76 0%, #ff6252 100%);
+    clip-path: polygon(0 0, 100% 0, 87.5% 100%, 12.5% 100%);
+  }
+  .funnel-layer-pay {
+    width: 240px;
+    background: linear-gradient(135deg, #ffb28f 0%, #ff8f66 100%);
+    clip-path: polygon(0 0, 100% 0, 83.3% 100%, 16.7% 100%);
+  }
+
+  // 层间转化率标签
+  .funnel-gap {
+    height: 34px;
+    margin: -1px 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    &::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      border-left: 2px dashed #f3c6ce;
+    }
+  }
+  .funnel-tag {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #f0d5da;
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 12px;
+    color: #666;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    .funnel-tag-arrow {
+      color: $theme_color;
+      font-weight: 700;
+    }
+    b {
+      color: $theme_color;
+      font-weight: 700;
+      font-size: 13px;
+    }
+  }
+
+  // 整体转化率
+  .funnel-total {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #fff1f3, #ffe4e9);
+    border: 1px solid #ffd3db;
+    border-radius: 10px;
+    padding: 12px 24px;
+  }
+  .funnel-total-label {
+    font-size: 13px;
+    color: #a0505e;
+  }
+  .funnel-total-val {
+    font-size: 22px;
+    font-weight: 700;
+    color: $theme_color;
   }
 }
 
@@ -638,39 +610,57 @@ h4 {
 .transactionList {
   flex: 7;
   padding: 0 20px;
-}
-.shap {
-  width: 400px;
-  margin-left: 20px;
-  margin-top: 50px;
+  min-width: 0;
 }
 
 .transaction-card {
-  height: 120px;
-  border-radius: 0.4em;
   display: flex;
-  background: #f3f5f7;
-}
-.card-item-label {
-  font-weight: bold;
-  font-size: #666;
-  font-size: 15px;
-  margin-bottom: 10px;
-}
-.card-item-value {
-  font-size: 15px;
-  font-weight: bold;
-  color: $theme_color;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 .card-item {
-  height: 100%;
-
-  width: 20%;
-  align-items: center;
+  position: relative;
+  flex: 1 1 150px;
+  min-width: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #eceff3;
+  border-radius: 8px;
+  padding: 14px 16px;
   display: flex;
-  align-items: center;
-  justify-content: center;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  transition: all 0.2s;
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #ff5f4d, $theme_color);
+  }
+  &:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  }
+  &.highlight .card-item-value {
+    color: $theme_color;
+  }
+}
+.card-item-label {
+  color: #999;
+  font-size: 12px;
+  margin-bottom: 6px;
+  padding-left: 8px;
+}
+.card-item-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+  padding-left: 8px;
 }
 
 .order-col {
