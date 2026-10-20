@@ -1,24 +1,6 @@
 <style lang="scss">
 @import "./ossManage.scss";
 
-.group-row {
-  padding-top: 16px;
-  margin-top: 8px;
-  border-top: 1px solid #ededed;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  > * {
-    margin-right: 10px;
-  }
-}
-
-.article-category {
-  flex: 2;
-  min-width: 200px;
-}
-
 .table {
   flex: 11;
 }
@@ -44,33 +26,24 @@
   gap: 10px;
 }
 
-.tab-empty {
-  padding: 48px 0;
-  color: #999;
-  text-align: center;
-}
-
-.tabs-card {
-  margin-bottom: 16px;
-}
-
 .oss-group-tree {
-  padding: 4px 8px 0;
+  flex: 1;
+  padding: 4px 4px 0;
 
   :deep(.el-tree-node__expand-icon) {
     display: none;
   }
 
   :deep(.el-tree-node) {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 
   :deep(.el-tree-node__content) {
     padding: 0 10px !important;
-    height: 42px;
+    height: 38px;
     border-radius: 6px;
-    font-size: 15px;
-    line-height: 42px;
+    font-size: 14px;
+    line-height: 38px;
   }
 
   :deep(.el-tree-node__content:hover) {
@@ -78,8 +51,8 @@
   }
 
   :deep(.el-tree-node.is-current > .el-tree-node__content) {
-    background: #ecf5ff;
-    color: #409eff;
+    background: var(--el-color-primary-light-9);
+    color: var(--el-color-primary);
     font-weight: 500;
   }
 }
@@ -90,7 +63,11 @@
   justify-content: space-between;
   width: 100%;
   padding-right: 4px;
-  font-size: 15px;
+  font-size: 14px;
+
+  &:hover .oss-tree-more {
+    opacity: 1;
+  }
 }
 
 .oss-tree-more {
@@ -98,6 +75,12 @@
   color: #909399;
   padding: 0 4px;
   font-size: 16px;
+  opacity: 0;
+  transition: opacity 0.2s;
+
+  &:hover {
+    color: var(--el-color-primary);
+  }
 }
 
 .file-preview-fallback {
@@ -124,157 +107,158 @@
 
 </style>
 <template>
-  <div class="search" :class="{ 'oss-manage-picker': isComponent }">
-    <el-card class="tabs-card category-tabs-card">
-      <el-tabs v-model="activeCategoryTab" @tab-change="handleCategoryTabChange">
-        <el-tab-pane label="图片" name="IMAGE" />
-        <el-tab-pane label="视频" name="VIDEO" />
-        <el-tab-pane label="文件" name="FILE" />
-      </el-tabs>
-    </el-card>
-    <el-row>
-      <el-card>
-        <div>
-          <el-row class="oss-manage-box">
-            <el-col v-if="canShowGroups" :span="isComponent ? 5 : 4">
-              <div class="file-list">
-                <div class="article-category mr_10">
-                  <el-tree
-                    :key="treeRenderKey"
-                    :data="treeData"
-                    node-key="value"
-                    :props="{ label: 'title', children: 'children' }"
-                    :indent="0"
-                    highlight-current
-                    class="demo-tree-render oss-group-tree"
-                    @node-click="handleTreeNodeClick"
+  <div class="search oss-manage" :class="{ 'oss-manage-picker': isComponent }">
+    <div class="oss-panel">
+      <div class="oss-toolbar">
+        <div class="oss-tabs">
+          <div
+            class="oss-tab"
+            :class="{ active: activeCategoryTab === 'IMAGE' }"
+            @click="handleCategoryTabChange('IMAGE')"
+          >图片</div>
+          <div
+            class="oss-tab"
+            :class="{ active: activeCategoryTab === 'VIDEO' }"
+            @click="handleCategoryTabChange('VIDEO')"
+          >视频</div>
+          <div
+            class="oss-tab"
+            :class="{ active: activeCategoryTab === 'FILE' }"
+            @click="handleCategoryTabChange('FILE')"
+          >文件</div>
+        </div>
+        <div class="oss-actions">
+          <el-upload
+            v-if="canUploadImages"
+            ref="upRef"
+            :action="sellerUrl + '/store/common/upload/file'"
+            :data="uploadData"
+            :headers="accessToken"
+            :before-upload="beforeUpload"
+            :on-error="handleError"
+            :on-success="handleSuccess"
+            :show-file-list="false"
+            multiple
+            style="display: inline-block"
+          >
+            <el-button type="primary">{{ uploadButtonText }}</el-button>
+          </el-upload>
+          <el-button v-if="!isComponent && showType == 'list'" @click="removeAll">批量删除</el-button>
+        </div>
+      </div>
+
+      <el-row class="oss-manage-box">
+        <el-col v-if="canShowGroups" :span="isComponent ? 5 : 4">
+          <div class="oss-side">
+            <div v-if="!isComponent" class="oss-add-group">
+              <el-button class="oss-add-group-btn" @click="handleClickAddGroup">+ 添加分组</el-button>
+            </div>
+            <el-tree
+              :key="treeRenderKey"
+              :data="treeData"
+              node-key="value"
+              :props="{ label: 'title', children: 'children' }"
+              :indent="0"
+              highlight-current
+              class="demo-tree-render oss-group-tree"
+              @node-click="handleTreeNodeClick"
+            >
+              <template #default="{ data }">
+                <span v-if="data" class="oss-tree-node">
+                  <span>{{ data.title }}</span>
+                  <el-dropdown
+                    v-if="data.value !== '0' && !isComponent"
+                    trigger="click"
+                    @command="(cmd) => onTreeDropdownCommand(cmd, data)"
                   >
-                    <template #default="{ data }">
-                      <span v-if="data" class="oss-tree-node">
-                        <span>{{ data.title }}</span>
-                        <el-dropdown
-                          v-if="data.value !== '0' && !isComponent"
-                          trigger="click"
-                          @command="(cmd) => onTreeDropdownCommand(cmd, data)"
-                        >
-                          <span class="oss-tree-more" @click.stop>···</span>
-                          <template #dropdown>
-                            <el-dropdown-menu>
-                              <el-dropdown-item command="edit">编辑</el-dropdown-item>
-                              <el-dropdown-item command="delete">删除</el-dropdown-item>
-                            </el-dropdown-menu>
-                          </template>
-                        </el-dropdown>
-                      </span>
+                    <span class="oss-tree-more" @click.stop>···</span>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item command="edit">编辑</el-dropdown-item>
+                        <el-dropdown-item command="delete">删除</el-dropdown-item>
+                      </el-dropdown-menu>
                     </template>
-                  </el-tree>
-                  <div v-if="!isComponent" class="group-row flex">
-                    <el-button @click="handleClickAddGroup">添加分组</el-button>
-                  </div>
-                </div>
-              </div>
-            </el-col>
-            <el-col :span="canShowGroups ? (isComponent ? 19 : 20) : 24">
-              <div class="pic-list">
-                <div>
-                  <div class="oss-operation padding-row" style="display: flex; flex-direction: row-reverse">
-                    <div>
-                      <el-upload
-                        v-if="canUploadImages"
-                        ref="upRef"
-                        :action="sellerUrl + '/store/common/upload/file'"
-                        :data="uploadData"
-                        :headers="accessToken"
-                        :before-upload="beforeUpload"
-                        :on-error="handleError"
-                        :on-success="handleSuccess"
-                        :show-file-list="false"
-                        multiple
-                        style="display: inline-block"
-                      >
-                        <el-button>{{ uploadButtonText }}</el-button>
-                      </el-upload>
-                      <el-button v-if="!isComponent && showType == 'list'" @click="removeAll">批量删除</el-button>
+                  </el-dropdown>
+                </span>
+              </template>
+            </el-tree>
+          </div>
+        </el-col>
+        <el-col :span="canShowGroups ? (isComponent ? 19 : 20) : 24">
+          <div class="oss-main">
+            <el-checkbox-group v-model="selectedOss" @change="selectOssChange">
+              <div class="oss-grid">
+                <div v-for="(item, index) in data" :key="index" class="oss-grid-item">
+                  <div
+                    class="oss-card"
+                    :class="{
+                      'is-checked': selectedOss.includes(item.id + ',' + item.url),
+                      'oss-card-selectable': isComponent && selectImage,
+                    }"
+                    @mouseenter="onMouseOver(item, index)"
+                    @mouseleave="onMouseOut(item, index)"
+                    @click="handleCardClick(item, $event)"
+                  >
+                    <el-checkbox
+                      :value="item.id + ',' + item.url"
+                      class="oss-card-check"
+                      @click.stop
+                    />
+                    <img v-if="isImageFile(item)" :src="item.url" alt="" />
+                    <video
+                      v-else-if="isVideoFile(item)"
+                      class="card-media"
+                      :src="item.url"
+                      muted
+                    />
+                    <div v-else class="card-file">
+                      <el-icon :size="28"><Document /></el-icon>
                     </div>
-                  </div>
-                </div>
-                <div>
-                  <el-checkbox-group v-model="selectedOss" @change="selectOssChange">
-                    <div class="img-box">
-                      <div v-for="(item, index) in data" :key="index" class="img-item">
-                        <div
-                          class="card"
-                          :class="{
-                            'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url),
-                            'oss-card-selectable': isComponent && selectImage,
-                          }"
-                          @mouseenter="onMouseOver(item, index)"
-                          @mouseleave="onMouseOut(item, index)"
-                          @click="handleCardClick(item, $event)"
-                        >
-                          <el-checkbox
-                            :value="item.id + ',' + item.url"
-                            class="card-checkbox"
-                            @click.stop
-                          />
-                          <img v-if="isImageFile(item)" :src="item.url" alt="" />
-                          <video
-                            v-else-if="isVideoFile(item)"
-                            class="card-media"
-                            :src="item.url"
-                            muted
-                          />
-                          <div v-else class="card-file">
-                            <el-icon :size="28"><Document /></el-icon>
-                          </div>
-                          <div v-if="item.isShowPreview" class="preview">
-                            <div @click.prevent="download(item)">
-                              <el-tooltip content="下载" placement="top">
-                                <el-icon :size="18"><Download /></el-icon>
-                              </el-tooltip>
-                            </div>
-                            <div @click.prevent="remove(item)">
-                              <el-tooltip content="删除" placement="top">
-                                <el-icon :size="18"><Delete /></el-icon>
-                              </el-tooltip>
-                            </div>
-                            <div
-                              @click.prevent="previewFile(item)"
-                            >
-                              <el-tooltip content="预览" placement="top">
-                                <el-icon :size="22"><View /></el-icon>
-                              </el-tooltip>
-                            </div>
-                          </div>
-                        </div>
-                        <el-tooltip :content="item.name" placement="bottom">
-                          <div class="text">{{ item.name }}</div>
+                    <div v-if="item.isShowPreview" class="oss-card-ops">
+                      <div @click.prevent="download(item)">
+                        <el-tooltip content="下载" placement="top">
+                          <el-icon :size="18"><Download /></el-icon>
+                        </el-tooltip>
+                      </div>
+                      <div @click.prevent="remove(item)">
+                        <el-tooltip content="删除" placement="top">
+                          <el-icon :size="18"><Delete /></el-icon>
+                        </el-tooltip>
+                      </div>
+                      <div
+                        @click.prevent="previewFile(item)"
+                      >
+                        <el-tooltip content="预览" placement="top">
+                          <el-icon :size="22"><View /></el-icon>
                         </el-tooltip>
                       </div>
                     </div>
-                  </el-checkbox-group>
-                </div>
-                <div class="page-box">
-                  <el-pagination
-                    v-model:current-page="searchForm.pageNumber"
-                    v-model:page-size="searchForm.pageSize"
-                    :total="total"
-                    layout="prev, pager, next, jumper"
-                    size="small"
-                    @current-change="pageChange"
-                  />
-                </div>
-                <div v-if="isComponent && selectImage && !hideSelectFooter" class="oss-select-footer">
-                  <el-button @click="handleSelectCancel">取消</el-button>
-                  <el-button type="primary" @click="handleSelectConfirm">确定</el-button>
+                  </div>
+                  <el-tooltip :content="item.name" placement="bottom">
+                    <div class="oss-name">{{ item.name }}</div>
+                  </el-tooltip>
                 </div>
               </div>
-            </el-col>
-          </el-row>
-
-        </div>
-      </el-card>
-    </el-row>
+            </el-checkbox-group>
+            <el-empty v-if="!loading && !data.length" description="暂无文件" :image-size="100" />
+            <div class="oss-pager">
+              <el-pagination
+                v-model:current-page="searchForm.pageNumber"
+                v-model:page-size="searchForm.pageSize"
+                :total="total"
+                layout="total, prev, pager, next, jumper"
+                size="small"
+                @current-change="pageChange"
+              />
+            </div>
+            <div v-if="isComponent && selectImage && !hideSelectFooter" class="oss-select-footer">
+              <el-button @click="handleSelectCancel">取消</el-button>
+              <el-button type="primary" @click="handleSelectConfirm">确定</el-button>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
     <el-dialog
       v-model="modalVisible"
       :close-on-click-modal="false"

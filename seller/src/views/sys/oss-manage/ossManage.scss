@@ -1,193 +1,274 @@
-// 弹窗选择器模式：固定内容区高度，避免空分组时布局塌陷
-.oss-manage-picker {
-  .category-tabs-card {
-    margin-bottom: 0;
-
-    :deep(.el-card__body) {
-      padding-bottom: 0;
-    }
+// 商家素材库（OSS 管理）样式：全部规则挂在 .oss-manage 根类下，避免全局污染
+.oss-manage {
+  // 单面板容器
+  .oss-panel {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    overflow: hidden;
   }
 
-  > .el-row > .el-card {
-    border: none;
-    box-shadow: none;
-
-    :deep(.el-card__body) {
-      padding: 0 0 8px;
-    }
-  }
-
-  .oss-manage-box {
-    min-height: 520px;
-    align-items: stretch;
-
-    > .el-col {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .file-list,
-    .pic-list {
-      flex: 1;
-      min-height: 520px;
-    }
-
-    .pic-list {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .img-box {
-      flex: 1;
-      min-height: 400px;
-    }
-
-    .page-box {
-      flex-shrink: 0;
-      margin-top: auto;
-    }
-  }
-}
-
-.search {
-  .oss-operation {
-    margin-bottom: 2vh;
+  // 顶部工具行：左侧分类 tab + 右侧操作按钮
+  .oss-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #ebeef5;
+  }
 
-    button {
-      margin-right: 5px;
+  .oss-tabs {
+    display: flex;
+    gap: 8px;
+
+    .oss-tab {
+      padding: 7px 18px;
+      border-radius: 16px;
+      font-size: 14px;
+      color: #606266;
+      cursor: pointer;
+      transition:
+        color 0.2s,
+        background 0.2s;
+
+      &:hover {
+        color: var(--el-color-primary);
+        background: var(--el-color-primary-light-9);
+      }
+
+      &.active {
+        color: #fff;
+        background: var(--el-color-primary);
+        font-weight: 500;
+      }
     }
   }
-}
 
-.none {
-  display: none;
-}
-
-.oss-manage-box {
-  .file-list {
-    height: 100%;
-    box-sizing: border-box;
-    border-right: 1px solid #e5e6eb;
-    padding: 20px 12px 28px;
-  }
-  .pic-list {
-    height: 100%;
-    box-sizing: border-box;
-    padding: 0 0 24px 0;
-  }
-  .img-box {
-    width: 100%;
+  .oss-actions {
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: flex-start;
-    align-content: flex-start;
-    margin-top: 20px;
-    .img-item {
-      width: 120px;
-      height: 158px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  // 内容区：左分组 + 右文件网格
+  .oss-manage-box {
+    .oss-side {
+      height: 100%;
       box-sizing: border-box;
-      margin: 0 13px 8px;
-      position: relative;
+      border-right: 1px solid #ebeef5;
+      padding: 14px 12px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      .card {
-        width: 120px;
-        height: 120px;
-        border-radius: 8px;
-        border: 2px solid transparent;
-        overflow: hidden;
-        box-sizing: border-box;
-        position: relative;
-        img,
-        .card-media {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        .card-file {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f5f7fa;
-          color: #909399;
-        }
-        .card-checkbox {
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          z-index: 1000;
-          height: auto;
-          margin: 0;
+    }
 
-          :deep(.el-checkbox__label) {
-            display: none;
-          }
+    .oss-add-group {
+      margin-bottom: 10px;
+
+      .oss-add-group-btn {
+        width: 100%;
+        border-style: dashed;
+        color: #606266;
+
+        &:hover {
+          color: var(--el-color-primary);
+          border-color: var(--el-color-primary);
         }
-        .preview {
-          width: 100%;
-          height: 26px;
-          background-color: #ffffff;
-          color: #666666;
-          position: absolute;
-          left: 0;
-          bottom: 0;
-          display: flex;
-          flex-wrap: nowrap;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
-          > div {
-            flex: 1;
+      }
+    }
+
+    .oss-main {
+      height: 100%;
+      box-sizing: border-box;
+      padding: 2px 16px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .oss-grid {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      margin-top: 14px;
+
+      .oss-grid-item {
+        width: 120px;
+        margin: 0 14px 14px 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .oss-card {
+          width: 120px;
+          height: 120px;
+          border-radius: 6px;
+          border: 2px solid transparent;
+          overflow: hidden;
+          box-sizing: border-box;
+          position: relative;
+          transition: border-color 0.2s;
+
+          img,
+          .card-media {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+          }
+
+          .card-file {
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            background: #f5f7fa;
+            color: #909399;
+          }
+
+          // 选中遮罩（盖在媒体上方、复选框与操作条下方）
+          &.is-checked::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--el-color-primary);
+            opacity: 0.08;
+            z-index: 2;
+            pointer-events: none;
+          }
+
+          .oss-card-check {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 3;
+            height: auto;
+            margin: 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+
+            :deep(.el-checkbox__label) {
+              display: none;
+            }
+          }
+
+          .oss-card-ops {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.96);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 3;
+
+            > div {
+              flex: 1;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100%;
+              color: #606266;
+              cursor: pointer;
+
+              &:hover {
+                color: var(--el-color-primary);
+              }
+            }
+          }
+
+          &:hover {
+            border-color: var(--el-color-primary);
+
+            .oss-card-check {
+              opacity: 1;
+            }
+
+            .oss-card-ops {
+              opacity: 1;
+            }
+          }
+
+          &.is-checked {
+            border-color: var(--el-color-primary);
+
+            .oss-card-check {
+              opacity: 1;
+            }
+          }
+
+          &.oss-card-selectable {
+            cursor: pointer;
+
+            .oss-card-check {
+              opacity: 1;
+            }
           }
         }
+
+        .oss-name {
+          width: 120px;
+          margin-top: 6px;
+          font-size: 12px;
+          line-height: 1.4;
+          color: #606266;
+          text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          cursor: pointer;
+        }
       }
-      .card:hover,
-      .custom-checkbox-card-checked {
-        border: 2px solid #ff5c58;
+    }
+
+    .oss-pager {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+  }
+
+  // 弹窗选择器模式：去掉面板阴影，固定内容区最小高度，避免空分组时布局塌陷
+  &.oss-manage-picker {
+    .oss-panel {
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .oss-toolbar {
+      padding: 10px 12px;
+    }
+
+    .oss-manage-box {
+      min-height: 520px;
+      align-items: stretch;
+
+      > .el-col {
+        display: flex;
+        flex-direction: column;
       }
-      .oss-card-selectable {
-        cursor: pointer;
+
+      .oss-side,
+      .oss-main {
+        flex: 1;
+        min-height: 520px;
       }
-      .text {
-        width: 120px;
-        height: 36px;
-        cursor: pointer;
-        color: #252931;
-        font-size: 14px;
-        line-height: 36px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-align: center;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
+
+      .oss-grid {
+        min-height: 400px;
+      }
+
+      .oss-pager {
+        margin-top: auto;
       }
     }
   }
-  .page-box {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-  .pagination-box {
-    display: flex;
-    flex-direction: row-reverse;
-  }
-
-  .demo-tree-render .el-tree-node__label {
-    width: 94%;
-  }
 }
-
