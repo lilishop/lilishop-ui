@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRouter } from "vue-router";
 import { getDamageReportPage } from "@/api/procurement";
 import { DAMAGE_STATUS, damageStatusText, damageStatusTag, formatMoney } from "../constants";
@@ -58,33 +58,13 @@ defineOptions({ name: "manager-damage-report-list" });
 
 const router = useRouter();
 
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
-const searchForm = reactive({ pageNumber: 1, pageSize: 10, storeId: "", status: "" });
+const { loading, data, total, searchForm, getDataList, handleSearch } = useTable(
+  getDamageReportPage,
+  { pageSize: 10, form: { storeId: "", status: "" } }
+);
 
-onMounted(() => {
-  getDataList();
-});
 
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
 
-function getDataList() {
-  loading.value = true;
-  getDamageReportPage(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
 
 function goDetail(row) {
   router.push({ name: "manager-damage-report-detail", query: { id: row.id } });

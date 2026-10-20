@@ -91,7 +91,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { getUserRecharge } from "@/api/member";
 
 defineOptions({ name: "recharge" });
@@ -100,19 +101,15 @@ defineOptions({ name: "recharge" });
 const searchFormRef = ref(null);
 const table = ref(null);
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  startDate: "",
-  endDate: "",
-  memberName: "",
-});
 const selectDate = ref(null);
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList } = useTable(
+  getUserRecharge,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: { sort: "createTime", order: "desc", startDate: "", endDate: "", memberName: "" },
+  }
+);
 
 function rechargeWayText(way) {
   if (way === "ALIPAY") return "支付宝";
@@ -145,16 +142,6 @@ function selectDateRange(v) {
     searchForm.startDate = "";
     searchForm.endDate = "";
   }
-}
-function getDataList() {
-  loading.value = true;
-  getUserRecharge(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
 }
 
 onMounted(() => {

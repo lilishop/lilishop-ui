@@ -109,7 +109,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Order from "@/api/order";
 import { unitPrice } from "@/utils/filters";
 
@@ -117,20 +118,15 @@ defineOptions({ name: "refundLog" });
 
 const searchFormRef = ref(null);
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  startDate: "",
-  endDate: "",
-  orderSn: "",
-  isRefund: "",
-});
 const selectDate = ref(null);
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList } = useTable(
+  API_Order.refundLog,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: { sort: "createTime", order: "desc", startDate: "", endDate: "", orderSn: "", isRefund: "" },
+  }
+);
 
 function init() {
   getDataList();
@@ -157,16 +153,6 @@ function selectDateRange(v) {
     searchForm.startDate = "";
     searchForm.endDate = "";
   }
-}
-function getDataList() {
-  loading.value = true;
-  API_Order.refundLog(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
 }
 
 onMounted(() => {

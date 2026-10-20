@@ -35,35 +35,18 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Finance from "@/api/finance";
 import { downloadBlob } from "@/utils/downloadBlob";
 
 defineOptions({ name: "finance-refund-log" });
 
-const loading = ref(false);
-const searchForm = reactive({ pageNumber: 1, pageSize: 20, orderSn: "" });
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList, handleSearch } = useTable(
+  API_Finance.refundLogPage,
+  { pageSize: 20, form: { orderSn: "" } }
+);
 
-onMounted(() => {
-  getDataList();
-});
 
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  API_Finance.refundLogPage(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
-}
 function handleExport() {
   const { pageNumber, pageSize, ...rest } = searchForm;
   API_Finance.exportRefundFlow(rest).then((blob) => {

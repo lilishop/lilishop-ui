@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRouter } from "vue-router";
 import { getInventoryCountPage } from "@/api/procurement";
 
@@ -37,28 +37,12 @@ defineOptions({ name: "manager-inventory-count-list" });
 
 const router = useRouter();
 
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
-const searchForm = ref({ pageNumber: 1, pageSize: 10 });
+const { loading, data, total, searchForm, getDataList } = useTable(
+  getInventoryCountPage,
+  { pageSize: 10 }
+);
 
-onMounted(() => {
-  getDataList();
-});
 
-function getDataList() {
-  loading.value = true;
-  getInventoryCountPage(searchForm.value)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
 function goDetail(row) {
   router.push({ name: "manager-inventory-count-detail", query: { id: row.id, sn: row.sn } });
 }

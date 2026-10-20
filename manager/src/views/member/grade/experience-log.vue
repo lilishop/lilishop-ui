@@ -79,7 +79,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Member from "@/api/member";
 
 const RULE_OPTIONS = [
@@ -100,16 +101,15 @@ defineOptions({ name: "memberGradeExperienceLog" });
 
 const searchFormRef = ref(null);
 
-const loading = ref(false);
-const total = ref(0);
-const data = ref([]);
-const ruleOptions = RULE_OPTIONS;
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  memberMobile: "",
-  ruleKey: "",
-});
+const { loading, data, total, searchForm, getDataList: getData } = useTable(
+  API_Member.getMemberExperienceByPage,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: { memberMobile: "", ruleKey: "" },
+    beforeRequest: buildParams,
+  }
+);
 
 onMounted(() => {
   init();
@@ -130,30 +130,14 @@ function findRuleName(ruleKey) {
 function init() {
   getData();
 }
-function buildParams() {
+function buildParams(base = searchForm) {
   const params = {
-    pageNumber: searchForm.pageNumber,
-    pageSize: searchForm.pageSize,
+    pageNumber: base.pageNumber,
+    pageSize: base.pageSize,
   };
-  if (searchForm.memberMobile) params.mobile = searchForm.memberMobile;
-  if (searchForm.ruleKey) params.ruleKey = searchForm.ruleKey;
+  if (base.memberMobile) params.mobile = base.memberMobile;
+  if (base.ruleKey) params.ruleKey = base.ruleKey;
   return params;
-}
-function getData() {
-  loading.value = true;
-  API_Member.getMemberExperienceByPage(buildParams())
-    .then((res) => {
-      if (res && res.success && res.result) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      } else {
-        data.value = [];
-        total.value = 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
 }
 function handleSearch() {
   searchForm.pageNumber = 1;

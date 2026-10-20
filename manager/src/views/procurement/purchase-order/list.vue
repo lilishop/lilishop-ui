@@ -54,7 +54,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRoute, useRouter } from "vue-router";
 import { getProcurementOrderPage } from "@/api/procurement";
 import { PROCUREMENT_STATUS, procurementStatusText, procurementStatusTag, formatMoney } from "../constants";
@@ -64,10 +65,10 @@ defineOptions({ name: "manager-procurement-order-list" });
 const route = useRoute();
 const router = useRouter();
 
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
-const searchForm = reactive({ pageNumber: 1, pageSize: 10, orderSn: "", goodsName: "", status: "" });
+const { loading, data, total, searchForm, getDataList, handleSearch } = useTable(
+  getProcurementOrderPage,
+  { pageSize: 10, immediate: false, form: { orderSn: "", goodsName: "", status: "" } }
+);
 
 onMounted(() => {
   const status = route.query.status;
@@ -77,23 +78,6 @@ onMounted(() => {
   getDataList();
 });
 
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  getProcurementOrderPage(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
 function goDetail(row) {
   router.push({ name: "manager-procurement-order-detail", query: { id: row.id } });
 }

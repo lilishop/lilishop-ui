@@ -86,7 +86,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { getUserWallet } from "@/api/member";
 
 defineOptions({ name: "walletLog" });
@@ -95,19 +96,15 @@ defineOptions({ name: "walletLog" });
 const searchFormRef = ref(null);
 const table = ref(null);
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  startDate: "",
-  endDate: "",
-  memberName: "",
-});
 const selectDate = ref(null);
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList } = useTable(
+  getUserWallet,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: { sort: "createTime", order: "desc", startDate: "", endDate: "", memberName: "" },
+  }
+);
 
 function serviceTypeText(type) {
   if (type === "WALLET_WITHDRAWAL") return "余额提现";
@@ -141,16 +138,6 @@ function selectDateRange(v) {
     searchForm.startDate = "";
     searchForm.endDate = "";
   }
-}
-function getDataList() {
-  loading.value = true;
-  getUserWallet(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
 }
 
 onMounted(() => {

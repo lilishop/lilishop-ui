@@ -112,27 +112,23 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Order from "@/api/order";
 
 defineOptions({ name: "paymentLog" });
 
 const searchFormRef = ref(null);
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  sn: "",
-  payStatus: "",
-  startDate: "",
-  endDate: "",
-});
 const times = ref([]);
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList } = useTable(
+  API_Order.paymentLog,
+  {
+    pageSize: 20,
+    immediate: false,
+    form: { sort: "createTime", order: "desc", sn: "", payStatus: "", startDate: "", endDate: "" },
+  }
+);
 
 function init() {
   getDataList();
@@ -152,16 +148,6 @@ function handleSearch() {
 function changeDate(val) {
   searchForm.startDate = val[0];
   searchForm.endDate = val[1];
-}
-function getDataList() {
-  loading.value = true;
-  API_Order.paymentLog(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
 }
 
 onMounted(() => {

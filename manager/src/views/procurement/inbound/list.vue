@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRouter } from "vue-router";
 import { getProcurementInboundPage } from "@/api/procurement";
 import { formatMoney } from "../constants";
@@ -49,32 +49,12 @@ defineOptions({ name: "manager-procurement-inbound-list" });
 
 const router = useRouter();
 
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
-const searchForm = reactive({ pageNumber: 1, pageSize: 10, inboundSn: "" });
+const { loading, data, total, searchForm, getDataList, handleSearch } = useTable(
+  getProcurementInboundPage,
+  { pageSize: 10, form: { inboundSn: "" } }
+);
 
-onMounted(() => {
-  getDataList();
-});
 
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  getProcurementInboundPage(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
 function goDetail(row) {
   router.push({ name: "manager-procurement-inbound-detail", query: { id: row.id } });
 }
