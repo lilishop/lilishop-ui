@@ -100,7 +100,7 @@
 <script setup>
 import { ref } from "vue";
 import { useTable } from "@/utils/useTable";
-import { getUserListData } from "@/api/member";
+import { getUserListData } from "@/api/index";
 import {
   getServiceStaffPage,
   createServiceStaff,
