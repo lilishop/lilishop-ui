@@ -213,7 +213,7 @@
       <el-form ref="formRef" :model="form" :rules="ruleValidate" label-width="80px">
         <el-input v-model="form.id" style="display: none" />
         <el-form-item label="头像">
-          <img :src="form.face || defaultPic" class="face" />
+          <img alt="会员头像" :src="form.face || defaultPic" class="face" />
           <el-button
             type="primary"
             link

@@ -429,7 +429,7 @@
                 <template #default="{ row }">
                   <div v-if="row" style="margin-top: 5px; height: 80px; display: flex">
                     <div>
-                      <img :src="row.goodsImage" style="height: 60px; margin-top: 3px" />
+                      <img alt="商品图片" :src="row.goodsImage" style="height: 60px; margin-top: 3px" />
                     </div>
                     <div style="margin-left: 13px; margin-top: 3px">
                       <div class="div-zoom">

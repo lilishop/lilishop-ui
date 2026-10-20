@@ -16,9 +16,8 @@
     </div>
 
     <template v-if="activeTab === 'content'">
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">内容设置</div>
-        <div class="section-tip">选定布局区域，在下方添加图片，建议添加比例一致的图片</div>
         <div class="img-preview" v-if="item.img">
           <img :src="item.img" alt="" />
         </div>
@@ -57,7 +56,7 @@
           v-model="res.options.paddingX"
           label="左右边距"
           :min="0"
-          :max="30"
+          :max="40"
         />
         <slider-field
           v-model="res.options.pageGap"
@@ -66,19 +65,19 @@
           :max="100"
         />
       </div>
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">圆角设置</div>
         <slider-field
           v-model="res.options.borderRadius"
           label="背景圆角"
           :min="0"
-          :max="50"
+          :max="30"
         />
         <slider-field
           v-model="res.options.imgRadius"
           label="内容圆角"
           :min="0"
-          :max="50"
+          :max="30"
         />
       </div>
     </template>
@@ -102,6 +101,7 @@ import ColorField from "../controls/ColorField.vue";
 import SliderField from "../controls/SliderField.vue";
 import hotzone from "@/components/hotzone";
 import ossManage from "@/views/sys/oss-manage/ossManage";
+import { ElMessage } from "element-plus";
 
 const DEFAULTS = {
   bgColor: "#FFFFFF",
@@ -163,7 +163,7 @@ export default {
     },
     openHotzone() {
       if (!this.item.img) {
-        this.$Message.warning("请先选择照片");
+        ElMessage.warning("请先选择照片");
         return;
       }
       this.$refs.hotzone.open(this.item);
@@ -176,11 +176,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "../controls/panel-common.scss";
 .panel-flex-one {
   background: #f5f7fa;
-  margin: 0 -20px -120px;
-  padding: 0 12px 120px;
-  min-height: calc(100vh - 70px);
+  margin: 0 -20px;
+  padding: 0 12px 12px;
+  min-height: 100%;
   box-sizing: border-box;
 }
 .panel-header {
@@ -195,7 +196,7 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
   .panel-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: #303133;
   }
@@ -228,13 +229,13 @@ export default {
   }
 }
 .section-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #303133;
   margin: 0 0 12px;
 }
 .section-tip {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
   margin-bottom: 10px;
 }

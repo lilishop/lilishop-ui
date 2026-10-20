@@ -13,7 +13,7 @@
     >
       <div class="main-header">
         <div class="header-logo-con">
-          <img :src="domainLogo" key="max-logo" />
+          <img alt="平台 Logo" :src="domainLogo" key="max-logo" />
         </div>
         <div class="header-avator-con">
           <div class="flex flex-a-c user-module" style="height: 100%">

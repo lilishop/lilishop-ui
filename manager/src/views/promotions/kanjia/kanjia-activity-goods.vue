@@ -63,7 +63,7 @@
         <el-table-column prop="goodsId" label="商品编号" width="180" show-overflow-tooltip />
         <el-table-column label="商品图片" width="100" align="center">
           <template #default="{ row }">
-            <img
+            <img alt="商品图片"
               v-if="row && row.thumbnail"
               :src="row.thumbnail"
               style="height: 50px; width: 50px; object-fit: cover"

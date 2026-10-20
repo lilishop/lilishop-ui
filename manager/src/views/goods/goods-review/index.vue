@@ -94,7 +94,7 @@
       <div class="info-list" style="overflow: hidden">
         <div class="left-container">
           <div class="product">
-            <img class="img" :src="infoData.goodsImage" />
+            <img alt="商品图片" class="img" :src="infoData.goodsImage" />
           </div>
           <div class="show">
             <label>页面展示：</label>

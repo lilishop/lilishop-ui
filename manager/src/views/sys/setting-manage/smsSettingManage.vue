@@ -3,7 +3,7 @@
   <el-card class="sms-setting-card">
     <div class="cardBox">
       <div class="methodItem">
-        <img src="../../../assets/aliyun.png" height="172" width="440" />
+        <img alt="阿里云短信" src="../../../assets/aliyun.png" height="172" width="440" />
         <h4>阿里云短信</h4>
       </div>
       <div class="bar">

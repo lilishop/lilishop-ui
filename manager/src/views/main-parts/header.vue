@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row class="header">
-      <img v-if="domainLogo" :src="domainLogo" class="logo" width="220px" />
+      <img alt="平台 Logo" v-if="domainLogo" :src="domainLogo" class="logo" width="220px" />
     </el-row>
   </div>
 </template>

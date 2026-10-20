@@ -39,7 +39,7 @@
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getSetting, setSetting } from "@/api/index";
-import { Message as $Message } from "@/utils/message";
+import { ElMessage } from "element-plus";
 import { useAppStore } from "@/stores/app";
 
 const router = useRouter();
@@ -72,7 +72,7 @@ async function handleSubmit() {
     hours,
   });
   if (result.success) {
-    $Message.success("设置成功!");
+    ElMessage.success("设置成功!");
     init();
   }
 }

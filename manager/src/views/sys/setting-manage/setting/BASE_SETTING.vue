@@ -11,7 +11,7 @@
 
       <el-form-item label="后台Logo" prop="domainLogo">
         <div class="label-item-upload">
-          <img v-if="formValidate.domainLogo" class="img" :src="formValidate.domainLogo" />
+          <img alt="平台 Logo" v-if="formValidate.domainLogo" class="img" :src="formValidate.domainLogo" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
           <el-button @click="onClickImg('domainLogo')">选择图片</el-button>
           <span class="desc">后台管理左上角logo展示 	17∶6</span>
@@ -19,7 +19,7 @@
       </el-form-item>
       <el-form-item label="后台Icon" prop="domainIcon">
         <div class="label-item-upload">
-          <img v-if="formValidate.domainIcon" class="img" :src="formValidate.domainIcon" />
+          <img alt="平台图标" v-if="formValidate.domainIcon" class="img" :src="formValidate.domainIcon" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
           <el-button @click="onClickImg('domainIcon')">选择图片</el-button>
           <span class="desc">后台管理网站icon展示 	1∶1</span>
@@ -27,7 +27,7 @@
       </el-form-item>
       <el-form-item label="买家端Logo" prop="buyerSideLogo">
         <div class="label-item-upload">
-          <img v-if="formValidate.buyerSideLogo" class="img" :src="formValidate.buyerSideLogo" />
+          <img alt="买家端 Logo" v-if="formValidate.buyerSideLogo" class="img" :src="formValidate.buyerSideLogo" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
           <el-button @click="onClickImg('buyerSideLogo')">选择图片</el-button>
           <span class="desc">买家端logo展示 	17∶6</span>
@@ -35,7 +35,7 @@
       </el-form-item>
       <el-form-item label="买家端Icon" prop="buyerSideIcon">
         <div class="label-item-upload">
-          <img v-if="formValidate.buyerSideIcon" class="img" :src="formValidate.buyerSideIcon" />
+          <img alt="买家端图标" v-if="formValidate.buyerSideIcon" class="img" :src="formValidate.buyerSideIcon" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
           <el-button @click="onClickImg('buyerSideIcon')">选择图片</el-button>
           <span class="desc">买家端网站icon展示 	1∶1</span>
@@ -43,7 +43,7 @@
       </el-form-item>
       <el-form-item label="商家端Logo" prop="storeSideLogo">
         <div class="label-item-upload">
-          <img v-if="formValidate.storeSideLogo" class="img" :src="formValidate.storeSideLogo" />
+          <img alt="商家端 Logo" v-if="formValidate.storeSideLogo" class="img" :src="formValidate.storeSideLogo" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
           <el-button @click="onClickImg('storeSideLogo')">选择图片</el-button>
           <span class="desc">商家端logo展示 	17∶6</span>
@@ -51,7 +51,7 @@
       </el-form-item>
       <el-form-item label="商家端Icon" prop="storeSideIcon">
         <div class="label-item-upload">
-          <img v-if="formValidate.storeSideIcon" class="img" :src="formValidate.storeSideIcon" />
+          <img alt="商家端图标" v-if="formValidate.storeSideIcon" class="img" :src="formValidate.storeSideIcon" />
           <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
           <el-button @click="onClickImg('storeSideIcon')">选择图片</el-button>
           <span class="desc">商家端icon展示 	1∶1</span>

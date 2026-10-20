@@ -108,7 +108,7 @@ import { saveKanJiaActivityGoods } from "@/api/promotion";
 import { regular } from "@/utils";
 import skuSelect from "@/components/lili-dialog";
 import { isECoupon } from "@/constants/goodsType";
-import { Message as $Message } from "@/utils/message";
+import { ElMessage } from "element-plus";
 import { unixToDate } from "@/utils/filters";
 import { useAppStore } from "@/stores/app";
 
@@ -169,7 +169,7 @@ function handleSubmit() {
       return;
     }
     if (!form.promotionGoodsList.length) {
-      $Message.warning("请至少选择一个商品");
+      ElMessage.warning("请至少选择一个商品");
       return;
     }
 
@@ -186,13 +186,13 @@ function handleSubmit() {
       const eCoupon = isECoupon(res.goodsType);
       if (res.stock <= 0 || res.stock > res.quantity) {
         checkResult = false;
-        $Message.error("活动库存不能为0且不能超过商品库存");
+        ElMessage.error("活动库存不能为0且不能超过商品库存");
         return;
       }
 
       if (!regular.money.test(res.settlementPrice)) {
         checkResult = false;
-        $Message.error("结算价格金额格式不正确");
+        ElMessage.error("结算价格金额格式不正确");
         return;
       }
       if (
@@ -200,7 +200,7 @@ function handleSubmit() {
         res.settlementPrice > res.price
       ) {
         checkResult = false;
-        $Message.error(
+        ElMessage.error(
           eCoupon
             ? "结算价格不能小于0且不能超过商品价格"
             : "结算价格金额不能为0且不能超过商品价格"
@@ -209,27 +209,27 @@ function handleSubmit() {
       }
       if (!regular.money.test(res.highestPrice)) {
         checkResult = false;
-        $Message.error("最高可砍金额格式错误");
+        ElMessage.error("最高可砍金额格式错误");
         return;
       }
       if (res.highestPrice <= 0 || res.highestPrice > res.price) {
         checkResult = false;
-        $Message.error("最高可砍金额不能为0且不能超过商品价格");
+        ElMessage.error("最高可砍金额不能为0且不能超过商品价格");
         return;
       }
       if (!regular.money.test(res.lowestPrice)) {
         checkResult = false;
-        $Message.error("最低可砍金额格式错误");
+        ElMessage.error("最低可砍金额格式错误");
         return;
       }
       if (res.lowestPrice < 0 || (!eCoupon && res.lowestPrice <= 0) || res.lowestPrice > res.price) {
         checkResult = false;
-        $Message.error(eCoupon ? "最低可砍金额不能小于0" : "最低可砍金额不能为0");
+        ElMessage.error(eCoupon ? "最低可砍金额不能小于0" : "最低可砍金额不能为0");
         return;
       }
       if (parseInt(res.lowestPrice) > parseInt(res.highestPrice)) {
         checkResult = false;
-        $Message.error("最低砍价金额不能大于最高砍价金额");
+        ElMessage.error("最低砍价金额不能大于最高砍价金额");
         return;
       }
     });
@@ -241,7 +241,7 @@ function handleSubmit() {
     saveKanJiaActivityGoods(params).then((res) => {
       submitLoading.value = false;
       if (res.success) {
-        $Message.success(
+        ElMessage.success(
           modalType.value === 1 ? "砍价活动修改成功" : "砍价活动添加成功"
         );
         closeCurrentPage();

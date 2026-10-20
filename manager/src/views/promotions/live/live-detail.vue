@@ -41,7 +41,7 @@
         <el-form-item label="分享卡片封面" prop="feedsImg">
           <div class="form-field-block">
             <div class="upload-list" v-if="liveForm.feedsImg">
-              <img :src="liveForm.feedsImg">
+              <img alt="直播间列表图" :src="liveForm.feedsImg">
               <div class="upload-list-cover" @click="handleView(liveForm.feedsImg)">
                 <span class="view-icon">查看</span>
               </div>
@@ -55,7 +55,7 @@
         <el-form-item label="直播间背景墙" prop="coverImg">
           <div class="form-field-block">
             <div class="upload-list" v-if="liveForm.coverImg">
-              <img :src="liveForm.coverImg">
+              <img alt="直播间背景图" :src="liveForm.coverImg">
               <div class="upload-list-cover" @click="handleView(liveForm.coverImg)">
                 <span class="view-icon">查看</span>
               </div>
@@ -67,7 +67,7 @@
         <el-form-item label="直播间分享图" prop="shareImg">
           <div class="form-field-block">
             <div class="upload-list" v-if="liveForm.shareImg">
-              <img :src="liveForm.shareImg">
+              <img alt="直播间分享图" :src="liveForm.shareImg">
               <div class="upload-list-cover" @click="handleView(liveForm.shareImg)">
                 <span class="view-icon">查看</span>
               </div>
@@ -83,7 +83,7 @@
               <template #default="{ row, $index }">
                 <div v-if="row" class="flex-goods">
                   <el-badge v-if="$index == 0 || $index == 1" is-dot type="danger" />
-                  <img class="thumbnail" :src="row.thumbnail || row.goodsImage">
+                  <img alt="商品图片" class="thumbnail" :src="row.thumbnail || row.goodsImage">
                   {{ row.goodsName || row.name }}
                 </div>
               </template>
@@ -119,7 +119,7 @@
     </el-card>
 
     <el-dialog v-model="imageVisible" title="查看图片" width="600px">
-      <img :src="imageSrc" v-if="imageVisible" style="width: 100%">
+      <img alt="预览图片" :src="imageSrc" v-if="imageVisible" style="width: 100%">
     </el-dialog>
   </div>
 </template>

@@ -98,7 +98,7 @@
     <el-dialog v-model="descFlag" :title="descTitle" width="500px" destroy-on-close>
       <el-form ref="formValidateRef" :model="formValidate" :rules="ruleValidate" label-width="80px">
         <el-form-item label="头像">
-          <img :src="formValidate.face" class="face" />
+          <img alt="会员头像" :src="formValidate.face" class="face" />
           <el-button
             type="primary"
             link
