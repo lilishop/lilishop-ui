@@ -34,39 +34,16 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { createInventoryCount, getInventoryCountPage } from "@/api/procurement";
 import { Message, Modal } from "@/utils/message";
 import { customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "procurement-inventory-count-list" });
 
-const loading = ref(false);
 const creating = ref(false);
-const data = ref([]);
-const total = ref(0);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 10,
-});
-
-onMounted(() => {
-  getDataList();
-});
-
-function getDataList() {
-  loading.value = true;
-  getInventoryCountPage(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
+const { loading, data, total, searchForm, getDataList } = useTable(getInventoryCountPage);
 
 function handleCreate() {
   Modal.confirm({

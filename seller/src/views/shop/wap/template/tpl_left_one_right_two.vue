@@ -2,7 +2,7 @@
 <template>
   <div class="layout">
     <div class="view-height-150">
-      <img class="image-mode" :src="res.list[0].img" />
+      <img alt="模板图片" class="image-mode" :src="res.list[0].img" />
     </div>
     <div class="view-height-150">
       <div class="view-height-75">

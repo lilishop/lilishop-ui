@@ -112,3 +112,30 @@
 .el-overlay.is-message-box {
   z-index: 4000 !important;
 }
+
+/* 统一空状态：表格 / 树 / 列表无数据时的展示（未自定义 #empty 插槽的页面均生效） */
+.el-table__empty-block {
+  min-height: 160px;
+}
+
+.el-table__empty-text,
+.el-tree__empty-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.5;
+  color: #909399;
+  font-size: 14px;
+
+  &::before {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 8px;
+    opacity: 0.7;
+    background: no-repeat center / contain
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23c0c4cc' stroke-width='2' stroke-linejoin='round'><path d='M8 36l8-20h32l8 20v12a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V36z'/><path d='M8 36h16a8 8 0 0 0 16 0h16'/></svg>");
+  }
+}

@@ -6,7 +6,7 @@
   <div class="main" :class="{ 'menu-collapsed': !showSubMenu }">
     <div class="sidebar-menu-con menu-bar">
       <div class="logo-con">
-        <img :src="storeSideLogo" key="max-logo" />
+        <img alt="店铺 Logo" :src="storeSideLogo" key="max-logo" />
       </div>
       <shrinkable-menu />
     </div>

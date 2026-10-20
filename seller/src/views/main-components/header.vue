@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row class="header">
-      <img class="logo" :src="storeSideLogo" />
+      <img alt="店铺 Logo" class="logo" :src="storeSideLogo" />
     </el-row>
   </div>
 </template>

@@ -96,6 +96,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRoute } from "vue-router";
 import {
   getProcurementOrderPage,
@@ -117,20 +118,21 @@ defineOptions({ name: "procurement-purchase-order-list" });
 
 const route = useRoute();
 
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
 const createRange = ref([]);
 const currentStatus = ref("ALL");
 const statusCountData = ref({});
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 10,
-  orderSn: "",
-  goodsName: "",
-  status: "",
-  sort: "createTime",
-  order: "desc",
+const {
+  loading,
+  data,
+  total,
+  searchForm,
+  getDataList,
+  handleSearch: search,
+  resetSearch: reset,
+} = useTable(getProcurementOrderPage, {
+  form: { orderSn: "", goodsName: "", status: "" }, sort: "createTime", order: "desc",
+  immediate: false,
+  beforeRequest: (p) => buildSearchParams(true, p),
 });
 
 // searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
@@ -153,7 +155,7 @@ onMounted(() => {
   const status = route.query.status;
   if (status) {
     currentStatus.value = status;
-    searchForm.value.status = status;
+    searchForm.status = status;
   }
   init();
 });
@@ -163,8 +165,8 @@ function init() {
   getDataList();
 }
 
-function buildSearchParams(includeStatus = true) {
-  const params = { ...searchForm.value };
+function buildSearchParams(includeStatus = true, base = searchForm) {
+  const params = { ...base };
   if (!includeStatus) {
     delete params.status;
   }
@@ -176,25 +178,15 @@ function buildSearchParams(includeStatus = true) {
 }
 
 function handleSearch() {
-  searchForm.value.pageNumber = 1;
   getStatusCount();
-  getDataList();
+  search();
 }
 
 function resetSearch() {
-  searchForm.value = {
-    pageNumber: 1,
-    pageSize: 10,
-    orderSn: "",
-    goodsName: "",
-    status: "",
-    sort: "createTime",
-    order: "desc",
-  };
   createRange.value = [];
   currentStatus.value = "ALL";
   getStatusCount();
-  getDataList();
+  reset();
 }
 
 function onStatusTabClick(tab) {
@@ -203,13 +195,13 @@ function onStatusTabClick(tab) {
 
 function statusClick(name) {
   if (name === "ALL" || name === "" || name === undefined) {
-    searchForm.value.status = "";
+    searchForm.status = "";
     currentStatus.value = "ALL";
   } else {
-    searchForm.value.status = name;
+    searchForm.status = name;
     currentStatus.value = name;
   }
-  searchForm.value.pageNumber = 1;
+  searchForm.pageNumber = 1;
   getDataList();
 }
 
@@ -219,20 +211,6 @@ function getStatusCount() {
       statusCountData.value = res.result || {};
     }
   });
-}
-
-function getDataList() {
-  loading.value = true;
-  getProcurementOrderPage(buildSearchParams(true))
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
 }
 
 function refreshList() {

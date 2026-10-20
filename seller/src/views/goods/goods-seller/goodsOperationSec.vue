@@ -1,7 +1,7 @@
 <template>
   <div ref="rootEl">
     <el-dialog v-model="visible" title="预览图片">
-      <img v-if="visible" :src="previewPicture" style="width: 100%">
+      <img alt="预览图片" v-if="visible" :src="previewPicture" style="width: 100%">
     </el-dialog>
     <div class="goods-publish-page">
       <div ref="sectionNav" class="goods-section-nav">
@@ -111,7 +111,7 @@
                 >
                   <template #item="{ element }">
                     <div class="demo-upload-list">
-                      <img :src="element" @error="handleGoodsPictureError($event, element)" />
+                      <img alt="商品图片" data-no-fallback :src="element" @error="handleGoodsPictureError($event, element)" />
                       <div class="demo-upload-list-cover">
                         <div>
                           <el-button link type="primary" @click="handleViewGoodsPicture(element)">预览</el-button>
@@ -139,7 +139,7 @@
                 <el-button @click="handleCLickImg('goodsGalleryFiles')" type="primary">上传图片</el-button>
               </div>
               <el-dialog v-model="goodsPictureVisible" title="View Image">
-                <img v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%" />
+                <img alt="商品图片预览" v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%" />
               </el-dialog>
             </el-form-item>
             <el-form-item>
@@ -186,7 +186,7 @@
               <el-form-item :label="contentImage" class="form-item-view-el">
                 <!-- {{item.url}} -->
                 <div v-for="(item, index) in listImages.images" :key="index" style="width:100%;display:flex;">
-                  <img :src="item.url" style="width:100px;flex:1;margin-top:10px;cursor:pointer;"
+                  <img alt="图片" :src="item.url" style="width:100px;flex:1;margin-top:10px;cursor:pointer;"
                     @click="handleView(item.url)" />
                 </div>
               </el-form-item>
@@ -415,7 +415,7 @@
                                         class="sku-upload-list"
                                         style="width: 180px;height: 140px"
                                       >
-                                        <img :src="element" style="width: 180px;height: 140px" />
+                                        <img alt="商品图片" :src="element" style="width: 180px;height: 140px" />
                                         <div class="sku-upload-list-cover">
                                           <div style="margin-top: 50px">
                                             <el-icon :size="25" style="cursor:pointer;margin-right:8px" @click="handleView(element)"><ZoomIn /></el-icon>

@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="view-height-150">
-      <img class="image-mode" style="height:150px;" :src="res.list[2].img" />
+      <img alt="模板图片" class="image-mode" style="height:150px;" :src="res.list[2].img" />
     </div>
   </div>
 </template>

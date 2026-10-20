@@ -25,7 +25,7 @@
         :key="index"
       >
         <div class="goods-img">
-          <img :src="item.img" />
+          <img alt="楼层图片" :src="item.img" />
         </div>
         <div>
           <div class="goods-name wes-2">{{ item.title }}</div>
@@ -93,7 +93,7 @@
               class="draggable"
             >
               <div class="flex">
-                <img :src="item.img" class="column-img" />
+                <img alt="楼层图片" :src="item.img" class="column-img" />
                 <div class="flex column-goods-config">
                   <div class="column-config">
                     <div>

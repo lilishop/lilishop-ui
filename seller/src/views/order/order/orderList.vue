@@ -157,7 +157,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRoute } from "vue-router";
 import { CopyDocument } from "@element-plus/icons-vue";
 import * as API_Order from "@/api/order";
@@ -169,25 +170,24 @@ defineOptions({ name: "orderList" });
 
 const route = useRoute();
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
+const { loading, data, total, searchForm, getDataList } = useTable(API_Order.getOrderList, {
   pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  startDate: "",
-  endDate: "",
-  orderType: "",
-  orderSn: "",
-  keywords: "",
-  goodsType: "",
-  orderStatus: "",
-  paymentMethod: "",
-  orderPromotionType: "",
+  immediate: false,
+  form: {
+    sort: "createTime",
+    order: "desc",
+    startDate: "",
+    endDate: "",
+    orderType: "",
+    orderSn: "",
+    keywords: "",
+    goodsType: "",
+    orderStatus: "",
+    paymentMethod: "",
+    orderPromotionType: "",
+  },
 });
 const selectDate = ref(null);
-const data = ref([]);
-const total = ref(0);
 const orderNumData = ref({});
 const currentStatus = ref("ALL");
 
@@ -361,20 +361,6 @@ function selectDateRange(v) {
     searchForm.startDate = "";
     searchForm.endDate = "";
   }
-}
-function getDataList() {
-  loading.value = true;
-  API_Order.getOrderList(searchForm)
-    .then((res) => {
-      loading.value = false;
-      if (res.success) {
-        data.value = res.result.records;
-        total.value = res.result.total;
-      }
-    })
-    .catch(() => {
-      loading.value = false;
-    });
 }
 function detail(v, openFulfill = false) {
   customRouterPush({

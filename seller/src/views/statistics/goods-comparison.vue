@@ -41,11 +41,6 @@
               style="width: 200px"
             />
           </el-form-item>
-          <el-form-item label="品牌">
-            <el-select v-model="params.brandId" clearable filterable placeholder="全部品牌" style="width: 160px">
-              <el-option v-for="item in brandList" :key="item.id" :label="item.name" :value="item.id" />
-            </el-select>
-          </el-form-item>
           <el-form-item label="商品名称">
             <el-input v-model="params.keyword" clearable placeholder="商品名称" style="width: 160px" />
           </el-form-item>
@@ -134,7 +129,7 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import * as API_Statistics from "@/api/statistics";
-import { getBrandListData, getCategoryTree } from "@/api/goods";
+import { getCategoryTree } from "@/api/goods";
 import { downloadBlob } from "@/utils/downloadBlob";
 import { unitPrice } from "@/utils/filters";
 
@@ -157,14 +152,12 @@ const params = reactive({
   pageNumber: 1,
   pageSize: 20,
   categoryId: "",
-  brandId: "",
   clientType: "",
   keyword: "",
   sortType: "PRICE",
 });
 const categoryList = ref([]);
 const categoryProps = ref({ value: "id", label: "name", children: "children", checkStrictly: true, emitPath: false });
-const brandList = ref([]);
 const clientTypeOptions = ref(CLIENT_TYPE_OPTIONS);
 const data = ref([]);
 const total = ref(0);
@@ -198,11 +191,6 @@ function loadOptions() {
   getCategoryTree()
     .then((res) => {
       if (res.success) categoryList.value = res.result || [];
-    })
-    .catch(() => {});
-  getBrandListData()
-    .then((res) => {
-      if (res.success) brandList.value = res.result || [];
     })
     .catch(() => {});
 }

@@ -86,19 +86,20 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Statistics from "@/api/statistics";
 import { downloadBlob } from "@/utils/downloadBlob";
 import { unitPrice } from "@/utils/filters";
 
 defineOptions({ name: "seller-store-performance-report" });
 
-const loading = ref(false);
 const dateRange = ref([]);
 const defaultTime = ref([new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)]);
-const params = reactive({ pageNumber: 1, pageSize: 20 });
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm: params, getDataList: loadData, handleSearch } = useTable(
+  API_Statistics.getStorePerformanceReport,
+  { pageSize: 20, immediate: false, beforeRequest: buildParams }
+);
 
 onMounted(() => {
   initDefaultRange();
@@ -117,27 +118,13 @@ function formatDate(date, startOfDay) {
   const d = String(date.getDate()).padStart(2, "0");
   return startOfDay ? `${y}-${m}-${d} 00:00:00` : `${y}-${m}-${d} 23:59:59`;
 }
-function buildParams() {
-  const p = { ...params };
+function buildParams(base = params) {
+  const p = { ...base };
   if (dateRange.value && dateRange.value.length === 2) {
     p.startTime = dateRange.value[0];
     p.endTime = dateRange.value[1];
   }
   return p;
-}
-function handleSearch() {
-  params.pageNumber = 1;
-  loadData();
-}
-function loadData() {
-  loading.value = true;
-  API_Statistics.getStorePerformanceReport(buildParams()).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records || [];
-      total.value = res.result.total || 0;
-    }
-  });
 }
 function handleExport() {
   API_Statistics.exportStorePerformanceReport(buildParams()).then((blob) => {

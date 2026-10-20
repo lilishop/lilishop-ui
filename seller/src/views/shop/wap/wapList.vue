@@ -13,11 +13,12 @@
         <el-button type="primary" @click="handleAdd()">添加页面</el-button>
       </div>
       <el-table v-loading="loading" :data="list" style="width: 100%">
-        <el-table-column prop="name" label="页面名称" min-width="200" show-overflow-tooltip>
+        <el-table-column prop="name" label="页面名称" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">
             <span v-if="row">{{ row.name || "暂无模板昵称" }}</span>
           </template>
         </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="180" align="center" />
         <el-table-column label="状态" width="120" align="center">
           <template #default="{ row }">
             <el-switch
@@ -30,7 +31,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="140" align="center" fixed="right">
+        <el-table-column label="操作" width="150" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="handleEdit(row)">修改</a>

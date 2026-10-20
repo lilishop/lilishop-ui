@@ -36,10 +36,10 @@
         @mouseup.stop
         @mousemove.stop
       >
-        <img width="17" height="17" src="../assets/styles/icons8-edit-64.png" />
+        <img alt="编辑" width="17" height="17" src="../assets/styles/icons8-edit-64.png" />
       </li>
       <li class="hz-flex-img">
-        <img class="hz-u-img" :src="zoneForm.img" />
+        <img alt="热区图片" class="hz-u-img" :src="zoneForm.img" />
       </li>
       <li class="hz-u-square hz-u-square-tl" data-pointer="dealTL"></li>
       <li class="hz-u-square hz-u-square-tc" data-pointer="dealTC"></li>

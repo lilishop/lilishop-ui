@@ -8,7 +8,7 @@
         <el-carousel autoplay height="340px">
           <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
             <div style="overflow: hidden">
-              <img :src="item.img" width="590" height="470" />
+              <img alt="轮播图" :src="item.img" width="590" height="470" />
             </div>
           </el-carousel-item>
         </el-carousel>
@@ -26,13 +26,13 @@
             :key="index"
           >
             <div class="mb_10">
-              <img :src="item[0].img" width="190" height="150" />
+              <img alt="轮播图" :src="item[0].img" width="190" height="150" />
             </div>
             <div class="mb_10">
-              <img :src="item[1].img" width="190" height="150" />
+              <img alt="轮播图" :src="item[1].img" width="190" height="150" />
             </div>
             <div>
-              <img :src="item[2].img" width="190" height="150" />
+              <img alt="轮播图" :src="item[2].img" width="190" height="150" />
             </div>
           </el-carousel-item>
         </el-carousel>

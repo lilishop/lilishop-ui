@@ -8,7 +8,7 @@
         <el-carousel autoplay @change="autoChange">
           <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
             <div style="overflow: hidden">
-              <img :src="item.img" width="1200" height="470" />
+              <img alt="轮播图" :src="item.img" width="1200" height="470" />
             </div>
           </el-carousel-item>
         </el-carousel>

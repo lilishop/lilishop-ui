@@ -127,29 +127,29 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Order from "@/api/order";
 import { Message, Modal } from "@/utils/message";
 import { customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "fictitiousOrderList" });
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
+const { loading, data, total, searchForm, getDataList } = useTable(API_Order.getOrderList, {
   pageSize: 20,
-  sort: "",
-  order: "",
-  startDate: "",
-  endDate: "",
-  orderType: "VIRTUAL",
-  orderSn: "",
-  buyerName: "",
-  orderStatus: "",
+  immediate: false,
+  form: {
+    sort: "",
+    order: "",
+    startDate: "",
+    endDate: "",
+    orderType: "VIRTUAL",
+    orderSn: "",
+    buyerName: "",
+    orderStatus: "",
+  },
 });
 const selectDate = ref(null);
-const data = ref([]);
-const total = ref(0);
 const orderStatus = ref([
   { title: "全部", value: "" },
   { title: "未付款", value: "UNPAID" },
@@ -193,16 +193,6 @@ function selectDateRange(v) {
     searchForm.startDate = v[0];
     searchForm.endDate = v[1];
   }
-}
-function getDataList() {
-  loading.value = true;
-  API_Order.getOrderList(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
 }
 function confirmPrice(v) {
   Modal.confirm({

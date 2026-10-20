@@ -9,7 +9,7 @@
               <dt>{{ isRefundOnly ? '退款商品' : '退货商品' }}</dt>
               <dd>
                 <div>
-                  <img :src="afterSaleInfo.goodsImage" style="height: 60px">
+                  <img alt="商品图片" :src="afterSaleInfo.goodsImage" style="height: 60px">
                 </div>
                 <a @click="linkTo(afterSaleInfo.goodsId, afterSaleInfo.skuId)">{{ afterSaleInfo.goodsName }}
                 </a><br>
@@ -59,7 +59,7 @@
               <dd v-if="afterSaleImage == ''">暂无凭证</dd>
               <dd v-else>
                 <div class="div-img" v-for="(item, index) in afterSaleImage" :key="index">
-                  <img class="complain-img" :src="item" />
+                  <img alt="投诉凭证" class="complain-img" :src="item" />
                 </div>
               </dd>
             </dl>

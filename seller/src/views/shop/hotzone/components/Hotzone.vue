@@ -2,7 +2,7 @@
   <div class="hotzone-box">
     <div class="hotzone-item">
       <div ref="content" class="hz-m-wrap">
-        <img class="hz-u-img" :src="image" />
+        <img alt="热区背景图" class="hz-u-img" :src="image" />
         <ul class="hz-m-area" v-add-item>
           <zone
             class="hz-m-item"

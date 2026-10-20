@@ -105,7 +105,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRoute } from "vue-router";
 import * as API_Order from "@/api/order";
 import vueQr from "vue-qr";
@@ -115,15 +116,14 @@ defineOptions({ name: "orderComplaint" });
 
 const route = useRoute();
 
-const loading = ref(true);
-const searchForm = reactive({
-  pageNumber: 1,
+const { loading, data, total, searchForm, getDataList } = useTable(API_Order.getOrderComplain, {
   pageSize: 20,
-  sort: "createTime",
-  order: "desc",
+  immediate: false,
+  form: {
+    sort: "createTime",
+    order: "desc",
+  },
 });
-const data = ref([]);
-const total = ref(0);
 
 // searchFormRef：模板 ref 改名避免与 searchForm 数据互相覆盖
 const searchFormRef = ref(null);
@@ -177,20 +177,6 @@ function handleSearch() {
   searchForm.pageNumber = 1;
   searchForm.pageSize = 20;
   getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  API_Order.getOrderComplain(searchForm)
-    .then((res) => {
-      loading.value = false;
-      if (res.success) {
-        data.value = res.result.records;
-        total.value = res.result.total;
-      }
-    })
-    .catch(() => {
-      loading.value = false;
-    });
 }
 function detail(v) {
   customRouterPush({

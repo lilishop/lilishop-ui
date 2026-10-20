@@ -126,7 +126,7 @@ import { sendSms } from "@/api/common.js";
 import { login, storeSmsLogin, userMsg } from "@/api/index";
 import util from "@/libs/util.js";
 import { setStore } from "@/libs/storage";
-import { Message as $Message } from "@/utils/message";
+import { ElMessage } from "element-plus";
 import { md5 } from "@/utils/md5.js";
 import Footer from "@/views/main-components/footer";
 import Header from "@/views/main-components/header";
@@ -238,7 +238,7 @@ function afterLogin(res) {
 
 function sendCode() {
   if (!isMobileValid.value) {
-    $Message.warning("请输入正确的手机号");
+    ElMessage.warning("请输入正确的手机号");
     return;
   }
   if (!verifyStatus.value) {
@@ -255,7 +255,7 @@ function sendCode() {
       .then((res) => {
         if (res.success) {
           smsCodeSent.value = true;
-          $Message.success("验证码发送成功");
+          ElMessage.success("验证码发送成功");
           interval = setInterval(() => {
             time.value--;
             if (time.value === 0) {
@@ -269,7 +269,7 @@ function sendCode() {
             }
           }, 1000);
         } else {
-          $Message.warning(res.message);
+          ElMessage.warning(res.message);
         }
       })
       .catch(() => {

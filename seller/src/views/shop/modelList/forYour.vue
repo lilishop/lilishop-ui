@@ -100,7 +100,7 @@
               class="draggable"
             >
               <div class="flex">
-                <img :src="item.img" class="column-img" />
+                <img alt="楼层图片" :src="item.img" class="column-img" />
                 <div class="column-goods-list">
                   <div><el-input v-model="item.title" /></div>
                   <div><el-input v-model="item.desc" /></div>
@@ -139,7 +139,7 @@
               class="draggable"
             >
               <div class="flex">
-                <img :src="item.img" class="column-img" />
+                <img alt="楼层图片" :src="item.img" class="column-img" />
                 <div class="column-goods-list">
                   <el-button
                     size="small"

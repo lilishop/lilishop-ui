@@ -2,7 +2,7 @@
   <div class="forget-password" @click="hideVerify">
     <div style="height: 50px"></div>
     <div class="logo-box">
-      <img :src="logoImg" width="150" @click="$router.push('/')" />
+      <img alt="店铺 Logo" :src="logoImg" width="150" @click="$router.push('/')" />
       <div>修改密码</div>
     </div>
     <div class="login-container">
@@ -119,7 +119,7 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Iphone, Message, Lock } from "@element-plus/icons-vue";
-import { Message as $Message } from "@/utils/message";
+import { ElMessage } from "element-plus";
 import { md5 } from "@/utils/md5.js";
 import * as RegExp from "@/utils/regular.js";
 import * as apiLogin from "@/api/index.js";
@@ -188,7 +188,7 @@ function next() {
           if (res.success) {
             step.value = 1;
           } else {
-            $Message.warning(res.message);
+            ElMessage.warning(res.message);
           }
         })
         .catch(() => {
@@ -203,7 +203,7 @@ function handleSubmit() {
     if (valid) {
       const params = JSON.parse(JSON.stringify(form));
       if (params.password !== params.oncePasd) {
-        $Message.warning("两次输入密码不一致");
+        ElMessage.warning("两次输入密码不一致");
         return;
       }
       params.mobile = formFirst.mobile;
@@ -216,7 +216,7 @@ function handleSubmit() {
         .then((res) => {
           loading1.value = false;
           if (res.success) {
-            $Message.success("修改密码成功");
+            ElMessage.success("修改密码成功");
             router.push("login");
           }
         })
@@ -230,11 +230,11 @@ function handleSubmit() {
 function sendCode() {
   if (time.value === 60) {
     if (formFirst.mobile === "") {
-      $Message.warning("请先填写手机号");
+      ElMessage.warning("请先填写手机号");
       return;
     }
     if (!verifyStatus.value) {
-      $Message.warning("请先完成安全验证");
+      ElMessage.warning("请先完成安全验证");
       return;
     }
     const params = {
@@ -244,7 +244,7 @@ function sendCode() {
     sendSms(params)
       .then((res) => {
         if (res.success) {
-          $Message.success("验证码发送成功");
+          ElMessage.success("验证码发送成功");
           interval.value = setInterval(() => {
             time.value--;
             if (time.value === 0) {
@@ -257,7 +257,7 @@ function sendCode() {
             }
           }, 1000);
         } else {
-          $Message.warning(res.message);
+          ElMessage.warning(res.message);
         }
       })
       .catch(() => {});

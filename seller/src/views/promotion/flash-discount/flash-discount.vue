@@ -51,44 +51,31 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { useRouter } from "vue-router";
 import { getFlashDiscountList, updateFlashDiscountStatus } from "@/api/promotion.js";
 import { Message } from "@/utils/message";
 
 const router = useRouter();
 
-const loading = ref(false);
-const total = ref(0);
-const data = ref([]);
-const searchForm = reactive({ pageNumber: 1, pageSize: 20, sort: "createTime", order: "desc" });
+const {
+  loading,
+  data,
+  total,
+  searchForm,
+  getDataList,
+  handleSearch,
+} = useTable(getFlashDiscountList, { pageSize: 20, sort: "createTime", order: "desc" });
 
 // searchFormRef：模板 ref 改名避免与顶层变量 searchForm 互相覆盖
 const searchFormRef = ref(null);
-
-onMounted(() => {
-  getDataList();
-});
 
 function statusText(s) {
   return { NEW: "未开始", START: "进行中", END: "已结束", CLOSE: "已关闭" }[s] || s;
 }
 function statusType(s) {
   return { NEW: "info", START: "success", END: "danger", CLOSE: "danger" }[s] || "info";
-}
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  getFlashDiscountList(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
 }
 function goAdd() {
   router.push({ name: "flash-discount-add" });

@@ -237,7 +237,7 @@
               <tr v-for="row in data" :key="row.sn || row.id">
                 <td>
                   <div class="order-goods-cell">
-                    <img :src="row.image" class="order-goods-img" />
+                    <img alt="商品图片" :src="row.image" class="order-goods-img" />
                     <div class="order-goods-meta">
                       <div class="div-zoom">
                         <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>

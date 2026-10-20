@@ -2,7 +2,7 @@
   <div class="line flex flex-j-sb">
     <div class="column" v-for="(item,index) in data.options.list" :key="index">
       <div v-if="!item.img" class="placeholder">占位符</div>
-      <img v-else :src="item.img" class="three-column-img">
+      <img alt="楼层图片" v-else :src="item.img" class="three-column-img">
     </div>
     <div class="setup-box">
       <div>
@@ -23,7 +23,7 @@
      append-to-body destroy-on-close>
       <div class="modal-tab-bar">
         <div v-for="(item,index) in data.options.list" :key="index">
-          <img :src="item.img" class="three-column-img">
+          <img alt="楼层图片" :src="item.img" class="three-column-img">
           <div>推荐尺寸：{{item.size}}</div>
           <el-button
             size="small"

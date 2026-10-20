@@ -10,13 +10,8 @@
     </div>
   </div>
 </template>
-<script>
-// 自定义选项（组件在 <component :is> 场景下按 title 展示名称），需保留在普通 script 块
-export default {
-  title: "两张横图",
-};
-</script>
 <script setup>
+defineOptions({ title: "两张横图" });
 defineProps(["res"]);
 </script>
 <style lang="scss" scoped>

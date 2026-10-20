@@ -175,7 +175,7 @@
         <el-table-column prop="id" label="商品ID" width="200" show-overflow-tooltip />
         <el-table-column label="商品图片" width="100" align="center">
           <template #default="{ row }">
-            <img
+            <img alt="商品图片"
               v-if="row && row.original"
               :src="row.original"
               style="height: 50px; width: 50px; object-fit: cover"

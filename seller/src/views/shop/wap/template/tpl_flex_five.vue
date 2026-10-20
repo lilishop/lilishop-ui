@@ -9,13 +9,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  title: "五列单行图片模块",
-};
-</script>
-
 <script setup>
+defineOptions({ title: "五列单行图片模块" });
 defineProps(["res"]);
 </script>
 <style lang="scss" scoped>

@@ -3,7 +3,7 @@
     <el-carousel class="carousel" v-if="res" autoplay :interval="5000" height="150px">
       <el-carousel-item v-for="(item, index) in res.list" :key="index">
         <div>
-          <img class="image-mode" :src="item.img" />
+          <img alt="轮播图" class="image-mode" :src="item.img" />
         </div>
       </el-carousel-item>
     </el-carousel>

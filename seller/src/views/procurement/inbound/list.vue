@@ -49,55 +49,26 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { getProcurementInboundPage } from "@/api/procurement";
 import { formatMoney } from "../constants";
 import { customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "procurement-inbound-list" });
 
-const loading = ref(false);
-const data = ref([]);
-const total = ref(0);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 10,
-  inboundSn: "",
-  sort: "createTime",
-  order: "desc",
-});
+const {
+  loading,
+  data,
+  total,
+  searchForm,
+  getDataList,
+  handleSearch,
+  resetSearch,
+} = useTable(getProcurementInboundPage, { form: { inboundSn: "" }, sort: "createTime", order: "desc" });
 
 // searchFormRef：模板 ref 改名避免与顶层变量互相覆盖
 const searchFormRef = ref(null);
-
-onMounted(() => {
-  getDataList();
-});
-
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
-
-function resetSearch() {
-  searchForm.inboundSn = "";
-  searchForm.pageNumber = 1;
-  getDataList();
-}
-
-function getDataList() {
-  loading.value = true;
-  getProcurementInboundPage(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
 
 function goCreate() {
   customRouterPush({ name: "procurement-inbound-operation" });

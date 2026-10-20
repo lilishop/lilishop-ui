@@ -5,6 +5,7 @@ import App from "./App.vue";
 import { router } from "./router/index";
 import { setupElementPlus } from "@/plugins/element";
 import { setupLegacyMessage } from "@/utils/message";
+import { setupImgFallback } from "@/utils/imgFallback";
 import liliDialog from "@/views/lili-dialog";
 import PriceColorScheme from "@/components/price-color-scheme.vue";
 import { install as installVueQr } from "vue-qr";
@@ -39,6 +40,7 @@ const app = createApp(App);
 
 setupElementPlus(app);
 setupLegacyMessage(app);
+setupImgFallback();
 installVueQr(app);
 
 app.use(router);
