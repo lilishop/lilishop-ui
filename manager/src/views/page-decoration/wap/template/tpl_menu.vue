@@ -1,7 +1,16 @@
 <template>
   <div class="layout" :style="wrapperStyle">
-    <div class="menu-list" :class="{ styled: styled }" :style="listStyle">
-      <div class="menu-item" v-for="(item, index) in res.list" :key="index">
+    <div
+      class="menu-list"
+      :class="{ styled: styled, single: isSingle }"
+      :style="listStyle"
+    >
+      <div
+        class="menu-item"
+        :style="itemStyle"
+        v-for="(item, index) in visibleList"
+        :key="index"
+      >
         <div class="menu-img-wrap" :style="imgStyle">
           <img class="menu-img" :src="item.img" alt="" />
         </div>
@@ -26,6 +35,22 @@ const listStyle = computed(() =>
 const titleStyle = computed(() =>
   styled.value && props.res.textColor ? { color: props.res.textColor } : {}
 );
+
+// 展示设置：单行/多行、行数、每行个数，超出部分不展示
+const isSingle = computed(
+  () => styled.value && props.res.menuDisplay === "single"
+);
+const cols = computed(() => (styled.value ? Number(props.res.menuCols) || 4 : 4));
+const rows = computed(() => Number(props.res.menuRows) || 3);
+const itemStyle = computed(() =>
+  styled.value ? { flex: `0 0 ${100 / cols.value}%` } : {}
+);
+const visibleList = computed(() => {
+  const list = props.res.list || [];
+  if (!styled.value) return list;
+  const limit = isSingle.value ? cols.value : rows.value * cols.value;
+  return list.slice(0, limit);
+});
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";
@@ -34,14 +59,21 @@ const titleStyle = computed(() =>
   align-items: flex-start;
   flex-wrap: wrap;
 
+  &.single {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
   > .menu-item {
     text-align: center;
-    width: 20%;
+    width: 25%;
     margin: 10px 0;
   }
 
-  &.styled > .menu-item {
+  &.styled > .menu-item,
+  &.single > .menu-item {
     margin: 0;
+    width: auto;
   }
 }
 .menu-img-wrap {

@@ -8,7 +8,7 @@
         <el-carousel autoplay height="340px">
           <el-carousel-item v-for="(item, index) in data.options.list" :key="index">
             <div style="overflow: hidden">
-              <img :src="item.img" width="790" height="340" />
+              <img alt="轮播图" :src="item.img" width="790" height="340" />
             </div>
           </el-carousel-item>
         </el-carousel>
@@ -117,7 +117,7 @@
       </template>
     </el-dialog>
     <!-- 选择商品。链接 -->
-    <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
+    <liliDialog ref="liliDialogRef" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
       <ossManage
@@ -153,7 +153,7 @@ const articleList = ref([
 ]);
 
 // ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 const ossManageRef = ref(null);
 
 function cloneList(list) {
@@ -182,7 +182,7 @@ function handleAdd() {
 }
 function handleSelectLink(item) {
   // 选择链接
-  liliDialog.value.open("link");
+  liliDialogRef.value.open("link");
   selected.value = item;
 }
 function callbackSelected(item) {

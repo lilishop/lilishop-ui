@@ -2,7 +2,7 @@
 <template>
   <div class="layout" :style="[wrapperStyle, gapStyle]">
     <div class="view-width-100" :style="imgStyle">
-      <img class="image-mode" :src="res.list[0].img" />
+      <img alt="模板图片" class="image-mode" :src="res.list[0].img" />
     </div>
     <div class="view-width-100" :style="gapStyle">
       <div class="view-height-85" :style="imgStyle">

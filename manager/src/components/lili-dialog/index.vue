@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    v-if="goodsFlag"
     v-model="flag"
     width="1160px"
     top="120px"
@@ -9,32 +10,49 @@
     destroy-on-close
     @close="clickClose"
   >
-    <template v-if="flag">
-      <goodsDialog
-        @selected="
-          (val) => {
-            goodsData = val;
-          }
-        "
-        v-if="goodsFlag"
-        ref="goodsDialogRef"
-        :selectedWay="goodsData"
-      />
-      <linkDialog
-        @selectedLink="
-          (val) => {
-            linkData = val;
-          }
-        "
-        v-else
-        class="linkDialog"
-      />
-    </template>
+    <goodsDialog
+      v-if="flag"
+      ref="goodsDialogRef"
+      :selectedWay="goodsData"
+      @selected="
+        (val) => {
+          goodsData = val;
+        }
+      "
+    />
     <template #footer>
       <el-button @click="clickClose">取消</el-button>
       <el-button type="primary" @click="clickOK">确定</el-button>
     </template>
   </el-dialog>
+
+  <el-drawer
+    v-else
+    v-model="flag"
+    class="link-selector-drawer"
+    direction="rtl"
+    size="1160px"
+    :with-header="false"
+    :z-index="10000"
+    :close-on-click-modal="false"
+    append-to-body
+    destroy-on-close
+    @close="clickClose"
+  >
+    <linkDialog
+      v-if="flag"
+      class="linkDialog"
+      @selectedLink="
+        (val) => {
+          linkData = val;
+        }
+      "
+    />
+    <template #footer>
+      <el-button @click="clickClose">取消</el-button>
+      <el-button type="primary" @click="clickOK">确定</el-button>
+    </template>
+  </el-drawer>
 </template>
 <script setup>
 import { ref } from "vue";
@@ -118,5 +136,24 @@ defineExpose({
   width: 100%;
   height: 500px;
   overflow: hidden;
+}
+</style>
+<style lang="scss">
+// 抽屉 append-to-body 后不在当前组件 DOM 内，不能使用 scoped 样式
+.link-selector-drawer {
+  max-width: 96vw;
+  .el-drawer__body {
+    overflow: hidden;
+  }
+  .goods-select-table,
+  .shops-select-table,
+  .articles-select-table,
+  .specials-select-table {
+    height: calc(100vh - 240px) !important;
+  }
+}
+// 商品分类下拉挂载到 body，需要高于抽屉的 10000 层级
+.goods-dialog-cascader-popper {
+  z-index: 10001 !important;
 }
 </style>

@@ -34,8 +34,8 @@ const route = useRoute();
 const changed = ref(""); // 变更模板
 const selected = ref(0); // 已选数据
 const selectedLink = ref(""); //选中的链接
-// wap 为共享的模块级数组，保持原 data 引用同一数组的行为
-const wap = ref(wapList); // tab标签
+// 选择链接不再提供“活动”tab，wap.js 中的配置保留用于已有链接的名称展示
+const wap = ref(wapList.filter((item) => item.name !== "marketing")); // tab标签
 const activeTab = ref(wapList[0]?.title || "");
 // v-for 内模板 ref 收集为数组；原名 lili-component 含连字符，改名并同步 script
 const liliComponentRef = ref([]);
@@ -75,11 +75,6 @@ onMounted(() => {
       });
     }
   } else {
-    wap.value.push({
-      title: "活动",
-      url: "3",
-      name: "marketing",
-    });
     let obj = {};
     wap.value = wap.value.reduce((cur, next) => {
       //对象去重

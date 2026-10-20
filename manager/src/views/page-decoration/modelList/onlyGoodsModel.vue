@@ -12,7 +12,7 @@
           <div class="goods-desc">{{ item.desc }}</div>
         </div>
         <div class="goods-img">
-          <img :src="item.img" />
+          <img alt="楼层图片" :src="item.img" />
         </div>
       </div>
       <div class="setup-box">
@@ -47,7 +47,7 @@
               class="draggable"
             >
               <div class="flex">
-                <img :src="item.img" class="column-img" />
+                <img alt="楼层图片" :src="item.img" class="column-img" />
                 <div class="flex column-goods-config">
                   <div class="column-config">
                     <div>
@@ -73,7 +73,7 @@
 
     <!-- 选择商品。链接 -->
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -97,7 +97,7 @@ const current = ref(0);
 const showModal = ref(false);
 const draftList = ref([]);
 
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 
 function cloneList(list) {
   return JSON.parse(JSON.stringify(list || []));
@@ -110,7 +110,7 @@ function delGoods(val, i) {
 
 // 添加当前选项卡中的商品
 function addCurrentGoods() {
-  liliDialog.value.open("goods");
+  liliDialogRef.value.open("goods");
 }
 
 // 编辑模块
@@ -156,7 +156,7 @@ function selectedLink(val) {
 
 function handleSelectLink(index) {
   // 调起选择链接弹窗
-  liliDialog.value.open("link");
+  liliDialogRef.value.open("link");
   current.value = index;
 }
 

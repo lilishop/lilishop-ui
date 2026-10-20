@@ -137,7 +137,7 @@
 }
 .floor-name {
   position: absolute;
-  left: -78px;
+  right: calc(100% + 8px);
   top: 8px;
   z-index: 60;
   background: #ffffff;
@@ -217,9 +217,10 @@
 }
 .model-config {
   overflow-y: auto;
+  background: #f5f7fa;
 }
 
 .active {
   box-sizing: border-box;
-  border: 1px solid $theme_color;
+  border: 2px solid $theme_color;
 }

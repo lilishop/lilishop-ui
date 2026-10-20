@@ -10,12 +10,18 @@
         />
       </el-tabs>
       <div class="operation mb_10">
-        <el-button type="primary" @click="handleAdd()">添加页面</el-button>
+        <el-button type="primary" tag="a" :href="addHref" target="_blank" class="add-page-btn">添加页面</el-button>
       </div>
-      <el-table v-loading="loading" :data="list" style="width: 100%">
-        <el-table-column prop="name" label="页面名称" min-width="200" show-overflow-tooltip>
+      <div class="page-table-wrap">
+        <el-table v-loading="loading" :data="list" style="width: 100%">
+        <el-table-column prop="name" label="页面名称" min-width="240" show-overflow-tooltip>
           <template #default="{ row }">
             <span v-if="row">{{ row.name || "暂无模板昵称" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" width="180">
+          <template #default="{ row }">
+            {{ formatTime(row.createTime) }}
           </template>
         </el-table-column>
         <el-table-column label="状态" width="120" align="center">
@@ -30,16 +36,17 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="140" align="center" fixed="right">
+        <el-table-column label="操作" width="160" align="center">
           <template #default="{ row }">
             <template v-if="row">
-              <a class="link-text" @click="handleEdit(row)">修改</a>
+              <a class="link-text" :href="editHref(row)" target="_blank">修改</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="confirmDel(row)">删除</a>
             </template>
           </template>
         </el-table-column>
-      </el-table>
+        </el-table>
+      </div>
       <div class="mt_10" style="display: flex; justify-content: flex-end">
         <el-pagination
           v-model:current-page="params.pageNumber"
@@ -57,10 +64,11 @@
   </div>
 </template>
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import * as API_Other from "@/api/other.js";
 import { Message, Modal } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
 const router = useRouter();
 
@@ -131,6 +139,12 @@ function beforeRelease(row) {
     });
   });
 }
+function formatTime(time) {
+  if (!time) return "—";
+  const ts = new Date(time).getTime();
+  if (Number.isNaN(ts)) return time;
+  return unixToDate(ts / 1000);
+}
 function init() {
   loading.value = true;
   API_Other.getHomeList(params).then((res) => {
@@ -147,8 +161,8 @@ function init() {
     total.value = res.result.total;
   });
 }
-function handleEdit(val) {
-  router.push({
+function editHref(val) {
+  const { href } = router.resolve({
     path: "/floorList/main",
     query: {
       id: val.id,
@@ -157,13 +171,15 @@ function handleEdit(val) {
       pagetype: params.pageType,
     },
   });
+  return href;
 }
-function handleAdd() {
-  router.push({
-    path: "/floorList/main",
-    query: { pagetype: params.pageType },
-  });
-}
+const addHref = computed(
+  () =>
+    router.resolve({
+      path: "/floorList/main",
+      query: { pagetype: params.pageType },
+    }).href
+);
 function changePageSize(v) {
   params.pageNumber = 1;
   params.pageSize = v;
@@ -190,5 +206,12 @@ function handleDel(val) {
 <style scoped lang="scss">
 .page-type-tabs {
   margin-bottom: 16px;
+}
+.add-page-btn {
+  text-decoration: none;
+}
+.page-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
 }
 </style>

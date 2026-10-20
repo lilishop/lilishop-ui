@@ -79,7 +79,7 @@
           </div>
         </div>
         <!-- <el-button type="primary" @click="addDecorate()" ghost>添加</el-button> -->
-        <liliDialog ref="liliDialog"    @selectedLink="selectedLink" :types="linkType"></liliDialog>
+        <liliDialog ref="liliDialogRef"    @selectedLink="selectedLink" :types="linkType"></liliDialog>
       </div>
       <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
          <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" ref="ossManageRef" />
@@ -112,7 +112,7 @@ const advertising = ref([
 const selectedLinks = reactive({});
 const linkType = ref(""); // 选择类型
 
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 const ossManageRef = ref(null);
 
 watch(
@@ -145,7 +145,7 @@ function openPage() {
 }
 // 点击链接
 function clickLink(item) {
-  liliDialog.value.open('link')
+  liliDialogRef.value.open('link')
 }
 // 回调选择的链接
 function selectedLink(val) {

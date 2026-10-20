@@ -12,7 +12,8 @@ const messages = {
 };
 
 const i18n = createI18n({
-  legacy: true,
+  // legacy:true 会禁用组合式 useI18n；关闭后配合 globalInjection 旧的 $t 写法依然可用
+  legacy: false,
   globalInjection: true,
   locale: lang,
   fallbackLocale: "zh-CN",

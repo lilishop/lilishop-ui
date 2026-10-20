@@ -37,7 +37,7 @@
     <!-- 老组件遗留配置分支 -->
     <template v-else>
     <el-alert
-      v-if="res.name == '商品分类'"
+      v-if="res.name == '商品列表'"
       type="warning"
       title="装修提示"
       :closable="false"
@@ -497,7 +497,7 @@
     >
 
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -580,7 +580,7 @@ const hidePanelTitle = computed(
 );
 
 // hotzoneRef/ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 const hotzoneRef = ref(null);
 const ossManageRef = ref(null);
 
@@ -748,9 +748,9 @@ function clickDrawer(item, index) {
 }
 // 打开图片选择器
 function liliDialogFlag(flag) {
-  liliDialog.value.clearGoodsSelected();
-  liliDialog.value.goodsFlag = flag;
-  liliDialog.value.flag = true;
+  liliDialogRef.value.clearGoodsSelected();
+  liliDialogRef.value.goodsFlag = flag;
+  liliDialogRef.value.flag = true;
 }
 
 function changeTextAlign(val) {

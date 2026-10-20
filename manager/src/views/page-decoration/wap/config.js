@@ -113,11 +113,11 @@ export const modelData = [
       list: [
         {
           title: "标题",
-          color: "#fff",
-          title1: '领取',
-          color1: "#fff",
-          bk_color: "#FF0000",
-          textAlign: "center",
+          color: "#282828",
+          title1: '副标题',
+          color1: "#999999",
+          bk_color: "#FFFFFF",
+          textAlign: "left",
           link: "",
           url: '',
           model: "link"
@@ -473,14 +473,6 @@ export const modelData = [
           title: "标题",
           size: "88*88 (1:1)",
           model: "link"
-        },
-        {
-          img: "https://i.loli.net/2020/12/05/eznDa3iNby5FkYL.png",
-          url: "",
-          link: "",
-          title: "标题",
-          size: "88*88 (1:1)",
-          model: "link"
         }
       ]
     }
@@ -502,74 +494,6 @@ export const modelData = [
       ]
     }
   },
-  {
-    type: "goods",
-    name: "商品分类",
-    icon: "Goods",
-    group: "base",
-    img: "md-image",
-    notAdd: true,
-    notLink: true,
-    notImg: true,
-    options: {
-      list: [
-        {
-          /**
-           * 2021/12/9
-           * 新增索引（‘index’）判断商品归属分类
-           * 之前代码没有配置index也不会收到印象
-           * 新建的楼层将采用索引判断分类
-           */
-          titleWay: [
-            {
-              title: "精选",
-              desc: "电子推荐",
-              ___index: 0,
-              bindCategory:""
-            },
-            {
-              title: "实惠",
-              desc: "便宜好货",
-              ___index: 1,
-              bindCategory:""
-            },
-            {
-              title: "进口",
-              desc: "国际自营",
-              ___index: 2,
-              bindCategory:""
-            },
-            {
-              title: "推荐",
-              desc: "喂奶推荐",
-              ___index: 3,
-              bindCategory:""
-            }
-          ],
-          listWay: [
-            {
-              img: "https://i.loli.net/2021/05/14/KTLSrOVJmEdX12A.png",
-              price: "120",
-              title:
-                " 微软 (Microsoft) Xbox 无线控制器/手柄 湛蓝色 | 3.5mm耳机接口蓝牙连接 Xbox主机电脑平板通用",
-              type: "精选",
-              ___index: 0
-            },
-            {
-              img: "https://i.loli.net/2020/12/05/c9mptI5Pg8qJ6ny.png",
-              title:
-                "宏碁(acer) DP高清线1.2版 2K*4KDisplayPort公对公接线笔记本电脑显卡连接显示器视频线1.5米",
-              price: "190",
-              type: "精选",
-              ___index: 0
-            },
-
-          ]
-        }
-      ]
-    }
-  },
-
   {
     type: "notice",
     name: "公告",
@@ -606,7 +530,66 @@ export const modelData = [
     subColor: "#fff",
     img: "md-image",
     options: {
-      list: []
+      list: [
+        {
+          type: "PINTUAN",
+          title: "超值拼团",
+          title1: "惊喜折扣",
+          bk_color: "#e1212b",
+          color1: "#fff",
+          groupSuccess: "134人拼团成功",
+          data: [
+            {
+              goodsName: "iPhone 16 Pro 5G智能手机 256GB 白色钛金属",
+              price: 8999,
+              originalPrice: 9999,
+              thumbnail: "/demo/apple-phone.png",
+              groupNum: 2,
+              joined: 3
+            },
+            {
+              goodsName: "Xiaomi 15 5G智能手机 12GB+256GB 白色",
+              price: 3999,
+              originalPrice: 4299,
+              thumbnail: "/demo/xiaomi-phone.png",
+              groupNum: 2,
+              joined: 8
+            },
+            {
+              goodsName: "vivo X200 5G智能手机 12GB+256GB 宝石蓝",
+              price: 4199,
+              originalPrice: 4599,
+              thumbnail: "/demo/vivo-phone.png",
+              groupNum: 2,
+              joined: 5
+            },
+            {
+              goodsName: "iPhone 16 5G智能手机 128GB 群青色",
+              price: 5999,
+              originalPrice: 6499,
+              thumbnail: "/demo/apple-phone.png",
+              groupNum: 2,
+              joined: 12
+            },
+            {
+              goodsName: "Redmi K80 5G智能手机 12GB+256GB 玄夜黑",
+              price: 2499,
+              originalPrice: 2799,
+              thumbnail: "/demo/xiaomi-phone.png",
+              groupNum: 2,
+              joined: 21
+            },
+            {
+              goodsName: "vivo S20 5G智能手机 8GB+256GB 凤羽金",
+              price: 2299,
+              originalPrice: 2599,
+              thumbnail: "/demo/vivo-phone.png",
+              groupNum: 2,
+              joined: 16
+            }
+          ]
+        }
+      ]
     }
   },
   {
@@ -624,7 +607,37 @@ export const modelData = [
     subColor: "#fff",
     img: "md-image",
     options: {
-      list: []
+      layoutStyle: "1",
+      list: [
+        {
+          type: "LIVE",
+          title: "精彩直播",
+          title1: "精彩抢先看",
+          bk_color: "#e1212b",
+          color1: "#fff",
+          data: [
+            {
+              title: "直播标题直播标题直播标题直播标题",
+              anchorName: "樱桃小丸子",
+              status: "LIVE",
+              cover: "/demo/apple-phone.png"
+            },
+            {
+              title: "直播标题直播标题直播标题直播标题",
+              anchorName: "樱桃小丸子",
+              status: "REPLAY",
+              cover: "/demo/xiaomi-phone.png"
+            },
+            {
+              title: "直播标题直播标题直播标题直播标题",
+              anchorName: "樱桃小丸子",
+              status: "PREVIEW",
+              startTime: "7/29 10:00",
+              cover: "/demo/vivo-phone.png"
+            }
+          ]
+        }
+      ]
     }
   },
   {
@@ -642,7 +655,38 @@ export const modelData = [
     subColor: "#fff",
     img: "md-image",
     options: {
-      list: []
+      layoutStyle: "1",
+      list: [
+        {
+          type: "SECKILL",
+          title: "限时秒杀",
+          title1: "邀请你的好友来参与",
+          bk_color: "#e1212b",
+          color1: "#fff",
+          data: [
+            {
+              goodsName: "一家很有品的店",
+              price: 234,
+              thumbnail: "/demo/apple-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              price: 177,
+              thumbnail: "/demo/xiaomi-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              price: 177,
+              thumbnail: "/demo/vivo-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              price: 234,
+              thumbnail: "/demo/apple-phone.png"
+            }
+          ]
+        }
+      ]
     }
   },
   {
@@ -660,7 +704,42 @@ export const modelData = [
     subColor: "#fff",
     img: "md-image",
     options: {
-      list: []
+      layoutStyle: "1",
+      list: [
+        {
+          type: "KANJIA",
+          title: "砍价免费拿",
+          title1: "邀请好友来砍价",
+          bk_color: "#e1212b",
+          color1: "#fff",
+          data: [
+            {
+              goodsName: "一家很有品的店",
+              price: 234,
+              purchasePrice: 99,
+              thumbnail: "/demo/apple-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              price: 177,
+              purchasePrice: 77,
+              thumbnail: "/demo/xiaomi-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              price: 177,
+              purchasePrice: 77,
+              thumbnail: "/demo/vivo-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              price: 234,
+              purchasePrice: 99,
+              thumbnail: "/demo/apple-phone.png"
+            }
+          ]
+        }
+      ]
     }
   },
   {
@@ -754,11 +833,39 @@ export const modelData = [
     group: "marketing",
     img: "md-image",
     options: {
-      list: [{ title: "积分商城", count: 3 }],
-      bgColor: "#FFFFFF",
-      paddingX: 0,
-      pageGap: 10,
-      borderRadius: 0
+      layoutStyle: "1",
+      list: [
+        {
+          title: "积分兑好礼",
+          count: 6,
+          data: [
+            {
+              goodsName: "一家很有品的店",
+              points: 200,
+              originalPrice: 234,
+              thumbnail: "/demo/apple-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              points: 150,
+              originalPrice: 177,
+              thumbnail: "/demo/xiaomi-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              points: 150,
+              originalPrice: 177,
+              thumbnail: "/demo/vivo-phone.png"
+            },
+            {
+              goodsName: "一家很有品的店",
+              points: 200,
+              originalPrice: 234,
+              thumbnail: "/demo/apple-phone.png"
+            }
+          ]
+        }
+      ]
     }
   },
   {
@@ -768,11 +875,50 @@ export const modelData = [
     group: "marketing",
     img: "md-image",
     options: {
-      list: [{ title: "优惠券", count: 3 }],
-      bgColor: "#FFFFFF",
-      paddingX: 0,
-      pageGap: 10,
-      borderRadius: 0
+      layoutStyle: "1",
+      list: [
+        {
+          title: "优惠券",
+          count: 5,
+          data: [
+            {
+              id: 1,
+              couponType: "PRICE",
+              price: 70,
+              consumeThreshold: 500,
+              storeName: "platform"
+            },
+            {
+              id: 2,
+              couponType: "PRICE",
+              price: 50,
+              consumeThreshold: 300,
+              storeName: "platform"
+            },
+            {
+              id: 3,
+              couponType: "PRICE",
+              price: 30,
+              consumeThreshold: 200,
+              storeName: "platform"
+            },
+            {
+              id: 4,
+              couponType: "PRICE",
+              price: 20,
+              consumeThreshold: 100,
+              storeName: "platform"
+            },
+            {
+              id: 5,
+              couponType: "PRICE",
+              price: 10,
+              consumeThreshold: 0,
+              storeName: "platform"
+            }
+          ]
+        }
+      ]
     }
   },
   {
@@ -802,5 +948,48 @@ export const modelData = [
       pageGap: 10,
       borderRadius: 0
     }
-  }
+  },
+  {
+    type: "goods",
+    name: "商品列表",
+    icon: "Goods",
+    group: "base",
+    img: "md-image",
+    notAdd: true,
+    notLink: true,
+    notImg: true,
+    options: {
+      list: [
+        {
+          layout: "list",
+          showName: true,
+          showPrice: true,
+          showSales: true,
+          cartShow: true,
+          cartStyle: "plus",
+          cartAction: "detail",
+          dataMode: "category",
+          categoryId: "",
+          brandId: "",
+          storeId: "",
+          goodsList: [],
+          count: 6,
+          sortType: "default"
+        }
+      ],
+      bgColor1: "#FFFFFF",
+      bgColor2: "#FFFFFF",
+      titleColor: "#282828",
+      toneMode: "theme",
+      priceColor: "#FF5C58",
+      salesColor: "#666666",
+      paddingTop: 10,
+      paddingBottom: 10,
+      paddingX: 12,
+      contentGap: 10,
+      pageGap: 10,
+      borderRadius: 0,
+      contentRadius: 7
+    }
+  },
 ];

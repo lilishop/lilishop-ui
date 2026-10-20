@@ -18,31 +18,55 @@
         </div>
       </div>
       <div>
-        <div v-loading="loading" class="wap-content-list">
-          <div
-            v-for="(item, index) in shopsData"
-            :key="index"
-            class="wap-content-item"
-            :class="{ active: selected == index }"
-            @click="clickShop(item, index)"
-          >
-            <div>
-              <img class="shop-logo" :src="item.storeLogo" alt="" />
-            </div>
-            <div class="wap-content-desc">
-              <div class="wap-content-desc-title">{{ item.storeName }}</div>
-              <div class="self-operated" :class="{ theme_color: item.selfOperated }">
-                {{ item.selfOperated ? "自营" : "非自营" }}
-              </div>
-              <div
-                class="wap-sku"
-                :class="{ theme_color: item.storeDisable === 'OPEN' }"
-              >
-                {{ item.storeDisable === "OPEN" ? "开启中" : "未开启" }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <el-table
+          ref="tableRef"
+          v-loading="loading"
+          class="shops-select-table"
+          :data="shopsData"
+          row-key="id"
+          height="340"
+          empty-text="暂无店铺信息"
+          @selection-change="onSelectionChange"
+        >
+          <el-table-column
+            type="selection"
+            label="选择"
+            width="60"
+            align="center"
+            reserve-selection
+          />
+          <el-table-column label="店铺图片" width="100" align="center">
+            <template #default="{ row }">
+              <img class="shop-logo" :src="row.storeLogo" alt="" />
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="storeName"
+            label="店铺名称"
+            min-width="240"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="createTime"
+            label="创建时间"
+            width="180"
+            show-overflow-tooltip
+          />
+          <el-table-column label="店铺类型" width="120">
+            <template #default="{ row }">
+              <span :class="{ theme_color: row.selfOperated }">
+                {{ row.selfOperated ? "自营" : "非自营" }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="店铺状态" width="120">
+            <template #default="{ row }">
+              <span :class="{ theme_color: row.storeDisable === 'OPEN' }">
+                {{ row.storeDisable === "OPEN" ? "开启中" : "未开启" }}
+              </span>
+            </template>
+          </el-table-column>
+        </el-table>
         <el-pagination
           class="pageration"
           size="small"
@@ -57,7 +81,7 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive } from "vue";
+import { nextTick, reactive, ref } from "vue";
 import { getShopListData } from "@/api/shops.js";
 
 const emit = defineEmits(["selected"]);
@@ -71,7 +95,8 @@ const params = reactive({
   storeName: "",
 });
 const shopsData = ref([]);
-const selected = ref(9999999999);
+const tableRef = ref(null);
+const selectedShop = ref(null);
 
 // 无 defineExpose：grep manager/src 全量确认无外部 ref/$refs/$parent 访问本组件成员
 // （link-dialog.vue 的 $refs["lili-component"][0].type 写入指向首个 tab 的 goods-dialog，与本组件无关）
@@ -92,19 +117,41 @@ function changePageSize(v) {
 
 function init() {
   loading.value = true;
-  getShopListData(params).then((res) => {
-    if (res.success) {
-      total.value = res.result.total;
-      shopsData.value = res.result.records;
-    }
-    loading.value = false;
+  getShopListData(params)
+    .then((res) => {
+      if (res.success) {
+        total.value = res.result.total;
+        shopsData.value = res.result.records;
+        nextTick(syncTableSelection);
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function syncTableSelection() {
+  const table = tableRef.value;
+  if (!table || !selectedShop.value) return;
+  shopsData.value.forEach((row) => {
+    table.toggleRowSelection(row, row.id === selectedShop.value.id);
   });
 }
 
-function clickShop(val, i) {
-  selected.value = i;
-  val = { ...val, ___type: "shops" };
-  emit("selected", [val]);
+function onSelectionChange(rows) {
+  // 选择链接只能保留一个店铺，勾选新店铺时自动取消上一个
+  if (!rows.length) {
+    selectedShop.value = null;
+    emit("selected", []);
+    return;
+  }
+  const row = rows[rows.length - 1];
+  if (rows.length > 1) {
+    tableRef.value?.clearSelection();
+    tableRef.value?.toggleRowSelection(row, true);
+  }
+  selectedShop.value = row;
+  emit("selected", [{ ...row, ___type: "shops" }]);
 }
 </script>
 <style lang="scss" scoped>
@@ -112,23 +159,13 @@ function clickShop(val, i) {
 .shop {
   display: flex;
 }
-.self-operated {
-  font-size: 12px;
-  color: #999;
-}
-.wap-content-list {
-  display: flex;
-  flex-wrap: wrap;
-  height: 340px;
-  min-height: 120px;
-}
 .shop-logo {
-  object-fit: cover;
-}
-.active {
-  background: url("../../../assets/selected.png") no-repeat;
-  background-position: right;
-  background-size: 10%;
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  border-radius: 4px;
+  object-fit: contain;
 }
 .pageration {
   margin-top: 12px;

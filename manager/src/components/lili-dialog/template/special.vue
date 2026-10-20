@@ -1,50 +1,67 @@
 <template>
   <div class="wrapper">
     <div class="content">
-      <div>
-        <div class="tables">
-          <el-table v-loading="loading" border height="350" :data="data" style="width: 100%">
-            <el-table-column prop="name" label="专题名称" show-overflow-tooltip />
-            <el-table-column label="操作" width="100" fixed="right" align="center">
-              <template #default="{ row, $index }">
-                <el-button
-                  v-if="row"
-                  :type="index === $index ? 'primary' : 'default'"
-                  size="small"
-                  @click="selectRow(row, $index)"
-                >
-                  {{ index === $index ? "已选" : "选择" }}
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        class="specials-select-table"
+        :data="data"
+        row-key="id"
+        height="340"
+        empty-text="暂无专题信息"
+        @selection-change="onSelectionChange"
+      >
+        <el-table-column
+          type="selection"
+          label="选择"
+          width="60"
+          align="center"
+          reserve-selection
+        />
+        <el-table-column
+          prop="id"
+          label="专题ID"
+          width="240"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          prop="name"
+          label="专题名称"
+          min-width="260"
+          show-overflow-tooltip
+        />
+        <el-table-column label="状态" width="120" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.pageShow === 'OPEN' ? 'success' : 'info'" size="small">
+              {{ row.pageShow === "OPEN" ? "开启" : "关闭" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
 
-          <el-pagination
-            v-model:current-page="params.pageNumber"
-            v-model:page-size="params.pageSize"
-            class="mt_10"
-            :total="Number(total)"
-            layout="prev, pager, next, jumper"
-            size="small"
-            @current-change="changePageNum"
-            @size-change="changePageSize"
-          />
-        </div>
-      </div>
+      <el-pagination
+        v-model:current-page="params.pageNumber"
+        v-model:page-size="params.pageSize"
+        class="pageration"
+        :total="Number(total)"
+        layout="total, prev, pager, next, jumper"
+        size="small"
+        @current-change="changePageNum"
+        @size-change="changePageSize"
+      />
     </div>
   </div>
 </template>
+
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { nextTick, onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { getHomeList } from "@/api/other.js";
 
 const emit = defineEmits(["selected"]);
 
 const route = useRoute();
-
 const loading = ref(true);
-const index = ref(999);
 const data = ref([]);
 const params = reactive({
   sort: "createTime",
@@ -55,12 +72,9 @@ const params = reactive({
   pageType: "SPECIAL",
 });
 const total = ref(0);
+const tableRef = ref(null);
+const selectedSpecial = ref(null);
 
-function selectRow(row, idx) {
-  index.value = idx;
-  const payload = { ...row, pageType: "special", ___type: "special" };
-  emit("selected", [payload]);
-}
 function changePageNum(val) {
   params.pageNumber = val;
   init();
@@ -71,43 +85,54 @@ function changePageSize(val) {
   init();
 }
 async function init() {
+  loading.value = true;
   params.pageClientType = route.name === "renovation" ? "PC" : "H5";
   const res = await getHomeList(params);
   if (res.success) {
-    loading.value = false;
-    data.value = res.result.records;
+    data.value = res.result.records || [];
     total.value = res.result.total;
-  } else {
-    loading.value = false;
+    nextTick(syncTableSelection);
   }
+  loading.value = false;
+}
+
+function syncTableSelection() {
+  const table = tableRef.value;
+  if (!table || !selectedSpecial.value) return;
+  data.value.forEach((row) => {
+    table.toggleRowSelection(row, row.id === selectedSpecial.value.id);
+  });
+}
+
+function onSelectionChange(rows) {
+  // 选择链接只能保留一个专题，勾选新专题时自动取消上一个
+  if (!rows.length) {
+    selectedSpecial.value = null;
+    emit("selected", []);
+    return;
+  }
+  const row = rows[rows.length - 1];
+  if (rows.length > 1) {
+    tableRef.value?.clearSelection();
+    tableRef.value?.toggleRowSelection(row, true);
+  }
+  selectedSpecial.value = row;
+  emit("selected", [{ ...row, pageType: "special", ___type: "special" }]);
 }
 
 onMounted(() => {
   init();
 });
 </script>
+
 <style lang="scss" scoped>
-img {
-  max-width: 100% !important;
-}
-.search {
-  width: 300px;
-}
-.page {
-  margin-top: 2vh;
-  text-align: right;
-}
-.tables {
-  height: 400px;
-  margin-top: 20px;
-  overflow: auto;
-  width: 100%;
-}
 .content {
   overflow: hidden;
-  flex: 4;
+  flex: 1;
 }
-.wrapper {
-  overflow: hidden;
+.pageration {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 </style>

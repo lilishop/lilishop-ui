@@ -32,8 +32,9 @@
       </div>
 
       <div class="model-view-content">
-        <div class="content">
-          <div class="wap-title">首页</div>
+        <div class="page-setting-entry" @click="showPageSetting">页面设置</div>
+        <div class="content" :style="canvasStyle">
+          <div class="wap-title" :style="titleBarStyle">{{ contentData.title || "页面标题" }}</div>
           <draggable
             class="draggable"
             group="model"
@@ -46,14 +47,14 @@
             <template #item="{ element, index }">
               <div class="list">
                 <div class="floor-name">{{ element.name || element.type }}</div>
-                <component
+                <div
                   v-if="templates[element.type]"
                   class="component"
                   :class="{ active: selected == index }"
                   @click="handleComponent(element, index)"
-                  :is="templates[element.type]"
-                  :res="element.options"
-                ></component>
+                >
+                  <component :is="templates[element.type]" :res="element.options"></component>
+                </div>
                 <div
                   v-else
                   class="component unknown-component"
@@ -92,6 +93,7 @@
           v-if="decorateData"
           :res="decorateData"
         ></decorate>
+        <PanelPageSetting v-else :res="contentData" />
       </div>
     </div>
   </div>
@@ -132,6 +134,7 @@ import templates from "./template/index";
 import Draggable from "vuedraggable";
 import { modelData } from "./config";
 import decorate from "./decorate";
+import PanelPageSetting from "./config-panel/PanelPageSetting.vue";
 import * as API_Other from "@/api/other";
 import * as API_Promotions from "@/api/promotion";
 import { getStore } from "@/libs/storage";
@@ -168,8 +171,28 @@ const iconMap = {
 
 const qrcode = ref(""); // 二维码
 const selected = ref(0); // 已选下标
+// 页面设置默认值（老数据没有这些字段，加载时合并）
+const PAGE_SETTING_DEFAULTS = {
+  name: "",
+  title: "",
+  bgType: "color", // color | image
+  bgColor: "#F5F5F5",
+  bgImage: "",
+  bgFill: "stretch", // stretch 拉伸 | contain 缩放 | cover 填充
+  topColor: "#ffffff",
+  titleColor: "black", // black | white
+};
+function mergePageData(data) {
+  const source = data && typeof data === "object" ? data : {};
+  return {
+    ...PAGE_SETTING_DEFAULTS,
+    ...source,
+    list: Array.isArray(source.list) ? source.list : [],
+  };
+}
 const contentData = ref({
   // 总数据
+  ...PAGE_SETTING_DEFAULTS,
   list: [],
 });
 const decorateData = ref(""); // 装修数据
@@ -180,8 +203,38 @@ watch(
   (val) => {
     appStore.styleStore = val;
   },
-  { deep: true }
+  { deep: true, immediate: true }
 );
+
+// 画布背景：背景色或背景图（拉伸/缩放/填充）
+const canvasStyle = computed(() => {
+  const d = contentData.value;
+  if (d.bgType === "image" && d.bgImage) {
+    const size =
+      { stretch: "100% 100%", contain: "contain", cover: "cover" }[d.bgFill] ||
+      "100% 100%";
+    return {
+      backgroundImage: `url(${d.bgImage})`,
+      backgroundSize: size,
+      backgroundRepeat: "no-repeat",
+      backgroundColor: d.bgColor || "#F5F5F5",
+    };
+  }
+  return { backgroundColor: d.bgColor || "#F5F5F5" };
+});
+// 画布顶部标题栏：背景用顶部颜色，文字色随标题颜色
+const titleBarStyle = computed(() => {
+  const d = contentData.value;
+  return {
+    background: d.topColor || "#ffffff",
+    color: d.titleColor === "black" ? "#000" : "#fff",
+  };
+});
+// 清空楼层选中，右侧回到页面设置面板
+function showPageSetting() {
+  selected.value = -1;
+  decorateData.value = "";
+}
 
 // 组件面板三类分组（drawer 标记的是图片魔方的可选风格，不进左侧组件列表）
 const modelGroups = computed(() => {
@@ -232,15 +285,25 @@ function init() {
       cancelText: '取消',
       onOk: () => {
         const data = JSON.parse(cache);
-        contentData.value = data;
+        contentData.value = mergePageData(data);
       }
     });
 
     }
-  if (!route.query.id) return false;
+  if (!route.query.id) {
+    // 新建页面：模板名称取路由参数
+    if (!contentData.value.name) {
+      contentData.value.name = route.query.name || "";
+    }
+    return false;
+  }
 
   API_Other.getHomeData(route.query.id).then((res) => {
-    contentData.value = JSON.parse(res.result.pageData);
+    const parsed = JSON.parse(res.result.pageData);
+    contentData.value = mergePageData(parsed);
+    if (!contentData.value.name) {
+      contentData.value.name = route.query.name || "";
+    }
     const first = contentData.value.list[0];
     if (first && templates[first.type]) {
       handleComponent(first, 0);
@@ -416,4 +479,32 @@ function handleMove() {
 </script>
 <style scoped lang="scss">
 @import "./style.scss";
+
+// 页面设置：画布容器支持悬浮入口、画布背景可透出到拖拽区
+.model-view-content {
+  position: relative;
+}
+.page-setting-entry {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  z-index: 200;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #409eff;
+  background: #ffffff;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  &:hover {
+    border-color: #409eff;
+  }
+}
+.content > .draggable {
+  background: transparent;
+}
+.wap-title {
+  border-bottom: none;
+}
 </style>

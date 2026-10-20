@@ -6,11 +6,12 @@
 }
 
 .ctrl-label {
-  width: 72px;
+  width: 90px;
   flex-shrink: 0;
   line-height: 32px;
   color: #606266;
-  font-size: 13px;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .ctrl-body {

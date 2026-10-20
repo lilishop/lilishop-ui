@@ -16,9 +16,9 @@
     </div>
 
     <template v-if="activeTab === 'content'">
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">菜单设置</div>
-        <div class="section-tip">每行展示 5 个，建议图标比例一致</div>
+        <div class="section-tip">推荐尺寸：88*88px（1:1）</div>
         <div class="menu-item-card" v-for="(item, index) in res.options.list" :key="index">
           <div class="img-item-head">
             <span>菜单 {{ index + 1 }}</span>
@@ -42,10 +42,10 @@
             </div>
             <div class="icon-placeholder" v-else>图标</div>
             <div class="menu-item-fields">
-              <el-input v-model="item.title" size="small" maxlength="6" placeholder="菜单名称" />
+              <el-input v-model="item.title" maxlength="6" placeholder="菜单名称" />
               <div class="btn-row">
-                <el-button plain type="primary" size="small" @click="pickImage(item)">选择图标</el-button>
-                <el-button plain type="primary" size="small" @click="pickLink(item)">选择链接</el-button>
+                <el-button plain type="primary" @click="pickImage(item)">选择图标</el-button>
+                <el-button plain type="primary" @click="pickLink(item)">选择链接</el-button>
               </div>
             </div>
           </div>
@@ -59,18 +59,70 @@
 
     <template v-else>
       <div class="panel-card">
+        <div class="section-title">展示设置</div>
+        <div class="ctrl-row">
+          <div class="ctrl-label">展示样式</div>
+          <div class="ctrl-body">
+            <div class="seg layout-seg">
+              <div
+                class="seg-item"
+                :class="{ active: res.options.menuDisplay === 'single' }"
+                @click="res.options.menuDisplay = 'single'"
+              >
+                单行
+              </div>
+              <div
+                class="seg-item"
+                :class="{ active: res.options.menuDisplay !== 'single' }"
+                @click="res.options.menuDisplay = 'multi'"
+              >
+                多行
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ctrl-row" v-if="res.options.menuDisplay !== 'single'">
+          <div class="ctrl-label">显示行数</div>
+          <div class="ctrl-body">
+            <div class="seg layout-seg-3">
+              <div
+                v-for="n in [2, 3, 4]"
+                :key="n"
+                class="seg-item"
+                :class="{ active: res.options.menuRows === n }"
+                @click="res.options.menuRows = n"
+              >
+                {{ n }}行
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ctrl-row">
+          <div class="ctrl-label">显示个数</div>
+          <div class="ctrl-body">
+            <div class="seg layout-seg-3">
+              <div
+                v-for="n in [3, 4, 5]"
+                :key="n"
+                class="seg-item"
+                :class="{ active: res.options.menuCols === n }"
+                @click="res.options.menuCols = n"
+              >
+                {{ n }}个
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card">
         <div class="section-title">颜色设置</div>
-        <color-field
-          v-model="res.options.bgColor1"
-          label="背景颜色"
-          :default-value="defaults.bgColor1"
+        <gradient-field
+          v-model:start="res.options.bgColor1"
+          v-model:end="res.options.bgColor2"
+          :default-start="defaults.bgColor1"
+          :default-end="defaults.bgColor2"
         />
-        <color-field
-          v-model="res.options.bgColor2"
-          label="渐变结束色"
-          :default-value="defaults.bgColor2"
-        />
-        <div class="section-tip">起始色与结束色一致时为纯色背景</div>
         <color-field
           v-model="res.options.textColor"
           label="文字颜色"
@@ -82,15 +134,15 @@
         <div class="section-title">边距设置</div>
         <slider-field v-model="res.options.paddingTop" label="上边距" :min="0" :max="100" />
         <slider-field v-model="res.options.paddingBottom" label="下边距" :min="0" :max="100" />
-        <slider-field v-model="res.options.paddingX" label="左右边距" :min="0" :max="30" />
-        <slider-field v-model="res.options.contentGap" label="内容间距" :min="0" :max="50" />
+        <slider-field v-model="res.options.paddingX" label="左右边距" :min="0" :max="40" />
+        <slider-field v-model="res.options.contentGap" label="内容间距" :min="0" :max="20" />
         <slider-field v-model="res.options.pageGap" label="页面间距" :min="0" :max="100" />
       </div>
 
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">圆角设置</div>
-        <slider-field v-model="res.options.borderRadius" label="背景圆角" :min="0" :max="50" />
-        <slider-field v-model="res.options.imgRadius" label="内容圆角" :min="0" :max="50" />
+        <slider-field v-model="res.options.borderRadius" label="背景圆角" :min="0" :max="30" />
+        <slider-field v-model="res.options.imgRadius" label="内容圆角" :min="0" :max="30" />
       </div>
     </template>
 
@@ -111,11 +163,15 @@
 <script>
 import { Top, Bottom, Delete } from "@element-plus/icons-vue";
 import ColorField from "../controls/ColorField.vue";
+import GradientField from "../controls/GradientField.vue";
 import SliderField from "../controls/SliderField.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import ways from "@/components/lili-dialog/wap.js";
 
 const DEFAULTS = {
+  menuDisplay: "single",
+  menuRows: 3,
+  menuCols: 4,
   bgColor1: "#FFFFFF",
   bgColor2: "#FFFFFF",
   textColor: "#282828",
@@ -131,7 +187,7 @@ const DEFAULTS = {
 export default {
   name: "PanelMenu",
   hideDecorateTitle: true,
-  components: { ColorField, SliderField, ossManage, Top, Bottom, Delete },
+  components: { ColorField, GradientField, SliderField, ossManage, Top, Bottom, Delete },
   props: {
     res: { type: Object, required: true },
   },
@@ -216,11 +272,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "../controls/field-common.scss";
+@import "../controls/panel-common.scss";
 .panel-menu {
   background: #f5f7fa;
-  margin: 0 -20px -120px;
-  padding: 0 12px 120px;
-  min-height: calc(100vh - 70px);
+  margin: 0 -20px;
+  padding: 0 12px 12px;
+  min-height: 100%;
   box-sizing: border-box;
 }
 .panel-header {
@@ -235,7 +293,7 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
   .panel-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: #303133;
   }
@@ -268,13 +326,13 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 .section-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #303133;
   margin: 0 0 12px;
 }
 .section-tip {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
   margin-bottom: 10px;
 }
@@ -288,7 +346,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: 14px;
   color: #303133;
   margin-bottom: 8px;
   .img-item-ops {
@@ -313,14 +371,15 @@ export default {
 }
 .menu-item-body {
   display: flex;
-  gap: 10px;
+  gap: 12px;
+  align-items: stretch;
 }
 .icon-preview {
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   border: 1px dashed #dcdfe6;
   border-radius: 8px;
-  padding: 3px;
+  padding: 4px;
   box-sizing: border-box;
   flex-shrink: 0;
   img {
@@ -331,15 +390,15 @@ export default {
   }
 }
 .icon-placeholder {
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   border: 1px dashed #dcdfe6;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #909399;
-  font-size: 12px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 .menu-item-fields {
@@ -347,11 +406,16 @@ export default {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 10px;
 }
 .btn-row {
   display: flex;
   gap: 10px;
+  .el-button {
+    flex: 1;
+    margin: 0;
+  }
 }
 .link-view {
   margin-top: 8px;

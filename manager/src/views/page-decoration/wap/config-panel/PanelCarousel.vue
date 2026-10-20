@@ -16,9 +16,8 @@
     </div>
 
     <template v-if="activeTab === 'content'">
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">图片设置</div>
-        <div class="section-tip">最多添加 10 张，建议添加比例一致的图片</div>
         <div class="img-item" v-for="(item, index) in res.options.list" :key="index">
           <div class="img-item-head">
             <span>图片 {{ index + 1 }}</span>
@@ -36,16 +35,21 @@
               <el-icon class="del" @click="removeItem(index)"><Delete /></el-icon>
             </div>
           </div>
-          <div class="img-preview" v-if="item.img">
-            <img :src="item.img" alt="" />
-          </div>
-          <div class="img-placeholder" v-else>建议尺寸 750*350</div>
-          <div class="btn-row">
-            <el-button plain type="primary" @click="pickImage(item)">选择照片</el-button>
-            <el-button plain type="primary" @click="pickLink(item)">选择链接</el-button>
-          </div>
-          <div class="link-view" v-if="item.url && item.url.___type">
-            已选链接：{{ linkText(item.url) }}
+          <div class="img-item-body">
+            <div class="img-thumb" v-if="item.img">
+              <img :src="item.img" alt="" />
+            </div>
+            <div class="img-thumb placeholder" v-else>750*350</div>
+            <div class="img-item-fields">
+              <div class="btn-row">
+                <el-button plain type="primary" @click="pickImage(item)">选择照片</el-button>
+                <el-button plain type="primary" @click="pickLink(item)">选择链接</el-button>
+              </div>
+              <div class="link-view" v-if="item.url && item.url.___type">
+                已选链接：{{ linkText(item.url) }}
+              </div>
+              <div class="link-view empty" v-else>未设置链接</div>
+            </div>
           </div>
         </div>
         <el-button
@@ -62,20 +66,19 @@
     <template v-else>
       <div class="panel-card">
         <div class="section-title">轮播风格</div>
-        <div class="setting-row">
-          <div class="setting-label">
-            风格
-            <span class="setting-value">{{ swiperStyleText }}</span>
-          </div>
-          <div class="seg">
-            <div
-              v-for="opt in swiperStyleOptions"
-              :key="opt.value"
-              class="seg-item"
-              :class="{ active: res.options.swiperStyle === opt.value }"
-              @click="res.options.swiperStyle = opt.value"
-            >
-              {{ opt.title }}
+        <div class="ctrl-row">
+          <div class="ctrl-label">风格</div>
+          <div class="ctrl-body">
+            <div class="seg layout-seg">
+              <div
+                v-for="opt in swiperStyleOptions"
+                :key="opt.value"
+                class="seg-item"
+                :class="{ active: res.options.swiperStyle === opt.value }"
+                @click="res.options.swiperStyle = opt.value"
+              >
+                {{ opt.title }}
+              </div>
             </div>
           </div>
         </div>
@@ -84,48 +87,48 @@
         </div>
       </div>
 
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">指示器设置</div>
-        <div class="setting-row">
-          <div class="setting-label">
-            指示器样式
-            <span class="setting-value">{{ indicatorStyleText }}</span>
-          </div>
-          <div class="seg">
-            <div
-              v-for="opt in indicatorStyleOptions"
-              :key="opt.value"
-              class="seg-item"
-              :class="{ active: res.options.indicatorStyle === opt.value }"
-              @click="res.options.indicatorStyle = opt.value"
-            >
-              {{ opt.title }}
+        <div class="ctrl-row">
+          <div class="ctrl-label">指示器样式</div>
+          <div class="ctrl-body">
+            <div class="seg layout-seg-3">
+              <div
+                v-for="opt in indicatorStyleOptions"
+                :key="opt.value"
+                class="seg-item"
+                :class="{ active: res.options.indicatorStyle === opt.value }"
+                @click="res.options.indicatorStyle = opt.value"
+              >
+                {{ opt.title }}
+              </div>
             </div>
           </div>
         </div>
-        <div class="setting-row" v-if="res.options.indicatorStyle !== 'none'">
-          <div class="setting-label">
-            指示器位置
-            <span class="setting-value">{{ indicatorPositionText }}</span>
-          </div>
-          <div class="seg">
-            <div
-              v-for="opt in indicatorPositionOptions"
-              :key="opt.value"
-              class="seg-item"
-              :class="{ active: res.options.indicatorPosition === opt.value }"
-              @click="res.options.indicatorPosition = opt.value"
-            >
-              {{ opt.title }}
+        <div class="ctrl-row" v-if="res.options.indicatorStyle !== 'none'">
+          <div class="ctrl-label">指示器位置</div>
+          <div class="ctrl-body">
+            <div class="seg layout-seg-3">
+              <div
+                v-for="opt in indicatorPositionOptions"
+                :key="opt.value"
+                class="seg-item"
+                :class="{ active: res.options.indicatorPosition === opt.value }"
+                @click="res.options.indicatorPosition = opt.value"
+              >
+                {{ opt.title }}
+              </div>
             </div>
           </div>
         </div>
-        <div class="setting-row" v-if="res.options.indicatorStyle !== 'none'">
-          <div class="setting-label">色调</div>
-          <el-radio-group v-model="res.options.indicatorColorMode">
-            <el-radio value="theme">跟随主题风格</el-radio>
-            <el-radio value="custom">自定义</el-radio>
-          </el-radio-group>
+        <div class="ctrl-row" v-if="res.options.indicatorStyle !== 'none'">
+          <div class="ctrl-label">色调</div>
+          <div class="ctrl-body">
+            <el-radio-group v-model="res.options.indicatorColorMode">
+              <el-radio value="theme">跟随主题风格</el-radio>
+              <el-radio value="custom">自定义</el-radio>
+            </el-radio-group>
+          </div>
         </div>
         <template
           v-if="
@@ -143,31 +146,26 @@
 
       <div class="panel-card">
         <div class="section-title">颜色设置</div>
-        <color-field
-          v-model="res.options.bgColor1"
-          label="背景颜色"
-          :default-value="defaults.bgColor1"
+        <gradient-field
+          v-model:start="res.options.bgColor1"
+          v-model:end="res.options.bgColor2"
+          :default-start="defaults.bgColor1"
+          :default-end="defaults.bgColor2"
         />
-        <color-field
-          v-model="res.options.bgColor2"
-          label="渐变结束色"
-          :default-value="defaults.bgColor2"
-        />
-        <div class="section-tip">起始色与结束色一致时为纯色背景</div>
       </div>
 
       <div class="panel-card">
         <div class="section-title">边距设置</div>
         <slider-field v-model="res.options.paddingTop" label="上边距" :min="0" :max="100" />
         <slider-field v-model="res.options.paddingBottom" label="下边距" :min="0" :max="100" />
-        <slider-field v-model="res.options.paddingX" label="左右边距" :min="0" :max="30" />
+        <slider-field v-model="res.options.paddingX" label="左右边距" :min="0" :max="40" />
         <slider-field v-model="res.options.pageGap" label="页面间距" :min="0" :max="100" />
       </div>
 
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">圆角设置</div>
-        <slider-field v-model="res.options.borderRadius" label="背景圆角" :min="0" :max="50" />
-        <slider-field v-model="res.options.imgRadius" label="内容圆角" :min="0" :max="50" />
+        <slider-field v-model="res.options.borderRadius" label="背景圆角" :min="0" :max="30" />
+        <slider-field v-model="res.options.imgRadius" label="内容圆角" :min="0" :max="30" />
       </div>
     </template>
 
@@ -188,6 +186,7 @@
 <script>
 import { Top, Bottom, Delete } from "@element-plus/icons-vue";
 import ColorField from "../controls/ColorField.vue";
+import GradientField from "../controls/GradientField.vue";
 import SliderField from "../controls/SliderField.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import ways from "@/components/lili-dialog/wap.js";
@@ -211,7 +210,7 @@ const DEFAULTS = {
 export default {
   name: "PanelCarousel",
   hideDecorateTitle: true,
-  components: { ColorField, SliderField, ossManage, Top, Bottom, Delete },
+  components: { ColorField, GradientField, SliderField, ossManage, Top, Bottom, Delete },
   props: {
     res: { type: Object, required: true },
   },
@@ -240,26 +239,6 @@ export default {
       picModelFlag: false,
       currentItem: null,
     };
-  },
-  computed: {
-    swiperStyleText() {
-      const hit = this.swiperStyleOptions.find(
-        (o) => o.value === this.res.options.swiperStyle
-      );
-      return hit ? hit.title : "";
-    },
-    indicatorStyleText() {
-      const hit = this.indicatorStyleOptions.find(
-        (o) => o.value === this.res.options.indicatorStyle
-      );
-      return hit ? hit.title : "";
-    },
-    indicatorPositionText() {
-      const hit = this.indicatorPositionOptions.find(
-        (o) => o.value === this.res.options.indicatorPosition
-      );
-      return hit ? hit.title : "";
-    },
   },
   created() {
     this.res.options = Object.assign({}, DEFAULTS, this.res.options);
@@ -329,11 +308,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "../controls/field-common.scss";
+@import "../controls/panel-common.scss";
 .panel-carousel {
   background: #f5f7fa;
-  margin: 0 -20px -120px;
-  padding: 0 12px 120px;
-  min-height: calc(100vh - 70px);
+  margin: 0 -20px;
+  padding: 0 12px 12px;
+  min-height: 100%;
   box-sizing: border-box;
 }
 .panel-header {
@@ -348,7 +329,7 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
   .panel-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: #303133;
   }
@@ -381,13 +362,13 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 .section-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #303133;
   margin: 0 0 12px;
 }
 .section-tip {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
   margin-bottom: 10px;
 }
@@ -400,7 +381,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 13px;
+    font-size: 14px;
     color: #303133;
     margin-bottom: 8px;
     .img-item-ops {
@@ -424,27 +405,43 @@ export default {
     }
   }
 }
-.img-preview {
+.img-item-body {
+  display: flex;
+  gap: 10px;
+}
+.img-thumb {
+  width: 132px;
+  height: 62px;
   border: 1px dashed #dcdfe6;
   border-radius: 6px;
-  padding: 6px;
-  margin-bottom: 10px;
+  padding: 3px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   img {
     width: 100%;
+    height: 100%;
     display: block;
     border-radius: 4px;
+    object-fit: cover;
+  }
+  &.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #909399;
+    font-size: 12px;
   }
 }
-.img-placeholder {
-  height: 80px;
+.img-item-fields {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  border: 1px dashed #dcdfe6;
-  border-radius: 6px;
-  color: #909399;
-  font-size: 12px;
-  margin-bottom: 10px;
+  gap: 6px;
+  .link-view {
+    margin-top: 0;
+  }
 }
 .btn-row {
   display: flex;
@@ -460,44 +457,5 @@ export default {
 }
 .add-btn {
   width: 100%;
-}
-.setting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 14px 0;
-  &:last-child {
-    margin-bottom: 0;
-  }
-  .setting-label {
-    font-size: 13px;
-    color: #606266;
-    .setting-value {
-      margin-left: 8px;
-      color: #303133;
-    }
-  }
-}
-.seg {
-  display: inline-flex;
-  border: 1px solid #dcdfe6;
-  border-radius: 6px;
-  overflow: hidden;
-  .seg-item {
-    padding: 6px 14px;
-    font-size: 12px;
-    color: #606266;
-    cursor: pointer;
-    border-left: 1px solid #dcdfe6;
-    transition: all 0.2s ease;
-    &:first-child {
-      border-left: none;
-    }
-    &.active {
-      background: #ecf5ff;
-      color: #409eff;
-      font-weight: 600;
-    }
-  }
 }
 </style>

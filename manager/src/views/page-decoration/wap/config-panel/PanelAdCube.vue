@@ -16,7 +16,7 @@
     </div>
 
     <template v-if="activeTab === 'content'">
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">图片设置</div>
         <div class="section-tip">当前风格：{{ res.name }}，请按布局区域配置对应图片</div>
         <div class="img-item" v-for="(item, index) in res.options.list" :key="index">
@@ -30,7 +30,7 @@
           <div class="img-placeholder" v-else>尺寸 {{ item.size || "不限" }}</div>
           <div class="field-row" v-if="item.title !== undefined">
             <div class="field-label">文字</div>
-            <el-input v-model="item.title" size="small" maxlength="10" />
+            <el-input v-model="item.title" maxlength="10" />
           </div>
           <div class="btn-row">
             <el-button plain type="primary" @click="pickImage(item)">选择照片</el-button>
@@ -62,32 +62,27 @@
 
       <div class="panel-card">
         <div class="section-title">颜色设置</div>
-        <color-field
-          v-model="res.options.bgColor1"
-          label="背景颜色"
-          :default-value="defaults.bgColor1"
+        <gradient-field
+          v-model:start="res.options.bgColor1"
+          v-model:end="res.options.bgColor2"
+          :default-start="defaults.bgColor1"
+          :default-end="defaults.bgColor2"
         />
-        <color-field
-          v-model="res.options.bgColor2"
-          label="渐变结束色"
-          :default-value="defaults.bgColor2"
-        />
-        <div class="section-tip">起始色与结束色一致时为纯色背景</div>
       </div>
 
       <div class="panel-card">
         <div class="section-title">边距设置</div>
         <slider-field v-model="res.options.paddingTop" label="上边距" :min="0" :max="100" />
         <slider-field v-model="res.options.paddingBottom" label="下边距" :min="0" :max="100" />
-        <slider-field v-model="res.options.paddingX" label="左右边距" :min="0" :max="30" />
+        <slider-field v-model="res.options.paddingX" label="左右边距" :min="0" :max="40" />
         <slider-field v-model="res.options.pageGap" label="页面间距" :min="0" :max="100" />
-        <slider-field v-model="res.options.contentGap" label="内容间距" :min="0" :max="50" />
+        <slider-field v-model="res.options.contentGap" label="内容间距" :min="0" :max="20" />
       </div>
 
-      <div class="panel-card">
+      <div class="panel-card panel-card-fill">
         <div class="section-title">圆角设置</div>
-        <slider-field v-model="res.options.borderRadius" label="背景圆角" :min="0" :max="50" />
-        <slider-field v-model="res.options.imgRadius" label="内容圆角" :min="0" :max="50" />
+        <slider-field v-model="res.options.borderRadius" label="背景圆角" :min="0" :max="30" />
+        <slider-field v-model="res.options.imgRadius" label="内容圆角" :min="0" :max="30" />
       </div>
     </template>
 
@@ -110,6 +105,7 @@ import ossManage from "@/views/sys/oss-manage/ossManage";
 import ways from "@/components/lili-dialog/wap.js";
 import { modelData } from "../config";
 import ColorField from "../controls/ColorField.vue";
+import GradientField from "../controls/GradientField.vue";
 import SliderField from "../controls/SliderField.vue";
 
 const DEFAULTS = {
@@ -127,7 +123,7 @@ const DEFAULTS = {
 export default {
   name: "PanelAdCube",
   hideDecorateTitle: true,
-  components: { ossManage, ColorField, SliderField },
+  components: { ossManage, ColorField, GradientField, SliderField },
   props: {
     res: { type: Object, required: true },
   },
@@ -200,11 +196,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import "../controls/panel-common.scss";
 .panel-ad-cube {
   background: #f5f7fa;
-  margin: 0 -20px -120px;
-  padding: 0 12px 120px;
-  min-height: calc(100vh - 70px);
+  margin: 0 -20px;
+  padding: 0 12px 12px;
+  min-height: 100%;
   box-sizing: border-box;
 }
 .panel-header {
@@ -219,7 +216,7 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
   .panel-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: #303133;
   }
@@ -252,13 +249,13 @@ export default {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 .section-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #303133;
   margin: 0 0 12px;
 }
 .section-tip {
-  font-size: 12px;
+  font-size: 13px;
   color: #909399;
   margin-bottom: 10px;
 }
@@ -271,7 +268,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 13px;
+    font-size: 14px;
     color: #303133;
     margin-bottom: 8px;
     .img-size {
@@ -307,7 +304,7 @@ export default {
   align-items: center;
   margin-bottom: 10px;
   .field-label {
-    font-size: 13px;
+    font-size: 14px;
     color: #606266;
     margin-right: 10px;
     flex-shrink: 0;

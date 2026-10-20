@@ -11,6 +11,12 @@ import PanelFlexOne from "./PanelFlexOne.vue";
 import PanelCarousel from "./PanelCarousel.vue";
 import PanelAdCube from "./PanelAdCube.vue";
 import PanelMenu from "./PanelMenu.vue";
+import PanelSearch from "./PanelSearch.vue";
+import PanelNotice from "./PanelNotice.vue";
+import PanelVideo from "./PanelVideo.vue";
+import PanelTitle from "./PanelTitle.vue";
+import PanelPromotion from "./PanelPromotion.vue";
+import PanelGoods from "./PanelGoods.vue";
 
 // 图片魔方及其全部可选风格共用 PanelAdCube
 const adCubeTypes = [
@@ -37,5 +43,11 @@ export default {
   flexOne: PanelFlexOne,
   carousel: PanelCarousel,
   menu: PanelMenu,
+  search: PanelSearch,
+  notice: PanelNotice,
+  video: PanelVideo,
+  title: PanelTitle,
+  promotionDetail: PanelPromotion,
+  goods: PanelGoods,
   ...Object.fromEntries(adCubeTypes.map((t) => [t, PanelAdCube])),
 };

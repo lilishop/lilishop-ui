@@ -100,7 +100,7 @@
               class="draggable"
             >
               <div class="flex">
-                <img :src="item.img" class="column-img" />
+                <img alt="楼层图片" :src="item.img" class="column-img" />
                 <div class="column-goods-list">
                   <div><el-input v-model="item.title" /></div>
                   <div><el-input v-model="item.desc" /></div>
@@ -139,7 +139,7 @@
               class="draggable"
             >
               <div class="flex">
-                <img :src="item.img" class="column-img" />
+                <img alt="楼层图片" :src="item.img" class="column-img" />
                 <div class="column-goods-list">
                   <el-button
                     size="small"
@@ -162,7 +162,7 @@
 
     <!-- 选择商品。链接 -->
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -203,7 +203,7 @@ const selectedData = ref(""); //选中的数据
 const goodsIndex = ref(0); // 商品索引
 const defaultCallbackImageType = ref("");
 
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 // ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
 const ossManageRef = ref(null);
 
@@ -223,14 +223,14 @@ function handleSelectImg(type, index) {
 }
 
 function handleSelectGoods(val, index) {
-  liliDialog.value.open("goods");
-  liliDialog.value.singleGoods();
+  liliDialogRef.value.open("goods");
+  liliDialogRef.value.singleGoods();
   selectedData.value = val;
   goodsIndex.value = index;
 }
 function handleSelectLink(val, index) {
   // 调起选择链接弹窗
-  liliDialog.value.open("link");
+  liliDialogRef.value.open("link");
   selectedData.value = val;
 
   goodsIndex.value = index;

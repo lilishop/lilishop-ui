@@ -79,7 +79,7 @@
           </div>
         </div>
         <liliDialog
-          ref="liliDialog"
+          ref="liliDialogRef"
           @selectedLink="selectedLink"
           :types="linkType"
         ></liliDialog>
@@ -113,7 +113,7 @@ const advertising = ref([
 const linkType = ref(""); // 选择类型
 const selectedLinks = reactive({});
 
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 // files：v-for 文件输入框 ref，脚本内未直接读取（changeFile 通过 document.getElementById 取值）
 const files = ref([]);
 // ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
@@ -174,7 +174,7 @@ function handleClickFile(item, index) {
 
 // 点击链接
 function clickLink(item) {
-  liliDialog.value.open("link");
+  liliDialogRef.value.open("link");
 }
 
 //点击图片解析成base64

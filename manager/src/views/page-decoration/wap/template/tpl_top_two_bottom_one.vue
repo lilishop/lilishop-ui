@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="view-width-100" :style="imgStyle">
-      <img class="image-mode" :src="res.list[2].img" />
+      <img alt="模板图片" class="image-mode" :src="res.list[2].img" />
     </div>
   </div>
 </template>

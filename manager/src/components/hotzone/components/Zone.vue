@@ -36,10 +36,10 @@
         @mouseup.stop
         @mousemove.stop
       >
-        <img width="17" height="17" src="../assets/styles/icons8-edit-64.png"></img>
+        <img alt="编辑" width="17" height="17" src="../assets/styles/icons8-edit-64.png"></img>
       </li>
       <li class="hz-flex-img">
-        <img class="hz-u-img" :src="zoneForm.img" />
+        <img alt="热区图片" class="hz-u-img" :src="zoneForm.img" />
       </li>
       <li class="hz-u-square hz-u-square-tl" data-pointer="dealTL"></li>
       <li class="hz-u-square hz-u-square-tc" data-pointer="dealTC"></li>
@@ -79,7 +79,7 @@
       </template>
     </el-dialog>
     <!-- 选择商品。链接 -->
-    <liliDialog ref="liliDialog" @selectedLink="selectedLink"></liliDialog>
+    <liliDialog ref="liliDialogRef" @selectedLink="selectedLink"></liliDialog>
     <!-- 选择图片 -->
     <el-dialog width="1200px" v-model="picModelFlag" append-to-body destroy-on-close>
       <ossManage
@@ -124,7 +124,7 @@ const zoneForm = reactive({
 // 未在原 data 中声明、直接挂载在 this 上的遗留字段（仅赋值，未被读取）
 let selectedNav;
 
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 // 模板 ref 与 import 组件同名会互相覆盖，故改名 ossManageRef
 const ossManageRef = ref(null);
 
@@ -179,7 +179,7 @@ function callbackSelected(item) {
 // 调起选择链接弹窗
 function handleSelectLink(item, index) {
   if (item) selectedNav = item;
-  liliDialog.value.open("link");
+  liliDialogRef.value.open("link");
 }
 // 已选链接
 function selectedLink(val) {

@@ -28,49 +28,60 @@
         </div>
       </div>
       <div>
-        <div class="wap-content-list">
-          <div
-            class="wap-content-item"
-            :class="{ active: item.selected }"
-            @click="checkedGoods(item, index)"
-            v-for="(item, index) in goodsData"
-            :key="index"
-          >
-            <div>
-              <img :src="item.thumbnail" alt="" />
-            </div>
-            <div class="wap-content-desc">
-              <div class="wap-content-desc-title">{{ item.goodsName }}</div>
-
-              <div class="wap-sku">
-                {{ item.goodsUnit }}
-                <el-tag
-                  v-if="item.goodsType"
-                  style="margin-left: 6px"
-                  size="small"
-                  :type="goodsTypeTagType(item.goodsType)"
-                >
-                  {{ goodsTypeLabel(item.goodsType) }}
-                </el-tag>
-                <el-tag
-                  style="margin-left: 6px"
-                  :type="item.salesModel === 'RETAIL' ? 'info' : 'primary'"
-                >
-                  {{ item.salesModel === "RETAIL" ? "零售型" : "批发型" }}
-                </el-tag>
-              </div>
-              <div class="wap-content-desc-bottom">
-                <div>￥{{ $filters.unitPrice(item.price) }}</div>
-                <div v-if="item.goodsType === 'E_COUPON'" class="pool-stock-hint">
-                  库存 {{ item.quantity != null ? item.quantity : "—" }}（卡池）
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-if="loading" v-loading="loading" class="loading-mask" />
-
-          <div v-if="empty" class="empty">暂无商品信息</div>
-        </div>
+        <el-table
+          ref="tableRef"
+          v-loading="loading"
+          class="goods-select-table"
+          :data="goodsData"
+          row-key="id"
+          height="340"
+          empty-text="暂无商品信息"
+          @selection-change="onSelectionChange"
+        >
+          <el-table-column
+            type="selection"
+            label="选择"
+            width="60"
+            align="center"
+            reserve-selection
+          />
+          <el-table-column label="商品图片" width="90" align="center">
+            <template #default="{ row }">
+              <img class="goods-thumb" :src="row.thumbnail" alt="" />
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="goodsName"
+            label="商品名称"
+            min-width="200"
+            show-overflow-tooltip
+          />
+          <el-table-column label="商品规格" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row.simpleSpecs || "默认规格" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="价格" width="110">
+            <template #default="{ row }">
+              <span class="goods-price">￥{{ $filters.unitPrice(row.price) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="库存" width="90">
+            <template #default="{ row }">
+              {{ row.quantity != null ? row.quantity : "—" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="销量" width="90">
+            <template #default="{ row }">
+              {{ row.buyCount != null ? row.buyCount : 0 }}
+            </template>
+          </el-table-column>
+          <el-table-column label="商品类型" width="110">
+            <template #default="{ row }">
+              {{ goodsTypeLabel(row.goodsType) }}
+            </template>
+          </el-table-column>
+        </el-table>
         <el-pagination
           v-model:current-page="goodsParams.pageNumber"
           class="pageration"
@@ -85,9 +96,9 @@
   </div>
 </template>
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { nextTick, onMounted, reactive, ref, watch } from "vue";
 import * as API_Goods from "@/api/goods";
-import { goodsTypeLabel, goodsTypeTagType } from "@/constants/goodsType";
+import { goodsTypeLabel } from "@/constants/goodsType";
 
 const props = defineProps({
   selectedWay: {
@@ -114,8 +125,8 @@ const goodsParams = reactive({
 });
 const category = ref([]);
 const goodsData = ref([]);
-const empty = ref(false);
 const loading = ref(false);
+const tableRef = ref(null);
 
 watch(category, (val) => {
   goodsParams.categoryPath = val && val.length ? val[2] : "";
@@ -124,6 +135,7 @@ watch(
   () => props.selectedWay,
   (val) => {
     selectedList.value = Array.isArray(val) ? val.slice() : [];
+    nextTick(syncTableSelection);
   },
   { deep: true, immediate: true }
 );
@@ -162,27 +174,45 @@ function getQueryGoodsList() {
 }
 function initGoods(res) {
   const records = res?.result?.records || [];
-  if (records.length) {
-    records.forEach((item) => {
-      item.selected = false;
-      item.___type = "goods";
-      selectedList.value.forEach((e) => {
-        if (e.id && e.id === item.id) {
-          item.selected = true;
-        }
-      });
-    });
-    total.value = res.result.total || 0;
-    goodsData.value = records;
-    empty.value = false;
-  } else {
-    goodsData.value = [];
-    empty.value = true;
+  records.forEach((item) => {
+    item.___type = "goods";
+  });
+  total.value = res?.result?.total || 0;
+  goodsData.value = records;
+  nextTick(syncTableSelection);
+}
+function syncTableSelection() {
+  const table = tableRef.value;
+  if (!table) return;
+  if (!selectedList.value.length) {
+    table.clearSelection();
+    return;
   }
+  goodsData.value.forEach((item) => {
+    const selected = selectedList.value.some((e) => e.id && e.id === item.id);
+    table.toggleRowSelection(item, selected);
+  });
 }
 function emitSelected(list) {
   selectedList.value = list;
   emit("selected", selectedList.value);
+}
+function onSelectionChange(rows) {
+  // 选择链接时为单选：保留最后勾选的一项，多选框交互不变
+  if (type.value !== "multiple") {
+    if (!rows.length) {
+      emitSelected([]);
+      return;
+    }
+    const row = rows[rows.length - 1];
+    if (rows.length > 1) {
+      tableRef.value?.clearSelection();
+      tableRef.value?.toggleRowSelection(row, true);
+    }
+    emitSelected([row]);
+    return;
+  }
+  emitSelected(rows);
 }
 function init() {
   API_Goods.getGoodsSkuData(goodsParams).then((res) => {
@@ -221,24 +251,6 @@ function deepGroup(val) {
     });
   });
 }
-function checkedGoods(val) {
-  if (type.value !== "multiple") {
-    goodsData.value.forEach((item) => {
-      item.selected = false;
-    });
-    val.selected = true;
-    emitSelected([val]);
-    return;
-  }
-
-  if (!val.selected) {
-    val.selected = true;
-    emitSelected([...selectedList.value, val]);
-  } else {
-    val.selected = false;
-    emitSelected(selectedList.value.filter((item) => item.id !== val.id));
-  }
-}
 
 // 父组件 lili-dialog/index.vue 通过 $refs.goodsDialog.type = "single" 切换单选；
 // expose 的 ref 外部读写等价于原 data 字段
@@ -248,31 +260,19 @@ defineExpose({ type });
 @import "./style.scss";
 .wap-content {
   width: 100%;
-}
-.empty {
-  text-align: center;
-  padding: 8px 0;
-  width: 100%;
-}
-.wap-content {
   flex: 1;
   padding: 0;
 }
-.wap-content-list {
-  display: flex;
-  position: relative;
-  flex-wrap: wrap;
-  height: 340px;
+.goods-thumb {
+  display: block;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  border-radius: 4px;
+  object-fit: cover;
 }
-.wap-content-item {
-  width: 210px;
-  margin: 10px 7px;
-  padding: 6px 0;
-}
-.active {
-  background: url("../../assets/selected.png") no-repeat;
-  background-position: right;
-  background-size: 10%;
+.goods-price {
+  color: $theme_color;
 }
 .pageration {
   display: flex;
@@ -281,12 +281,5 @@ defineExpose({ type });
   margin-top: 16px;
   padding-right: 8px;
   box-sizing: border-box;
-}
-</style>
-<style lang="scss">
-.pool-stock-hint {
-  font-size: 12px;
-  color: #999;
-  margin-top: 4px;
 }
 </style>

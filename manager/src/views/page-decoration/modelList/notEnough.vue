@@ -91,7 +91,7 @@
             </template>
         </el-dialog>
         <liliDialog
-            ref="liliDialog"
+            ref="liliDialogRef"
             @selectedGoodsData="selectedGoodsData"
         ></liliDialog>
     </div>
@@ -117,7 +117,7 @@ const showContent = ref(true);
 const draftNavList = ref([]);
 const draftGoodsList = ref([]);
 
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 
 watch(() => props.data, function(val){
     conData.value = val
@@ -146,9 +146,9 @@ function handleSelectGoods(item) {
     showGoodsModal.value = true;
 }
 function handleOpenGoodsPicker() {
-    liliDialog.value.open('goods', 'single');
+    liliDialogRef.value.open('goods', 'single');
     setTimeout(() => {
-        liliDialog.value.goodsData = [selected.value];
+        liliDialogRef.value.goodsData = [selected.value];
     }, 500);
 }
 function selectedGoodsData(val){

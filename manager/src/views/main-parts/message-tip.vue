@@ -25,9 +25,6 @@
           <el-dropdown-item v-if="res.store" command="shopAuth">
             <el-badge :value="res.store">待处理店铺入驻审核</el-badge>
           </el-dropdown-item>
-          <el-dropdown-item v-if="res.waitPayBill" command="accountStatementBill">
-            <el-badge :value="res.waitPayBill">待与商家对账</el-badge>
-          </el-dropdown-item>
           <el-dropdown-item v-if="res.appointmentWorkOrder" command="manager-appointment-work-orders">
             <el-badge :value="res.appointmentWorkOrder">未完成预约工单</el-badge>
           </el-dropdown-item>

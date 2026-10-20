@@ -44,8 +44,36 @@ const item = computed(() => {
   ensureVideoItem(data);
   return data;
 });
-const wrapperStyle = computed(() => getVideoWrapperStyle(item.value));
-const boxStyle = computed(() => getVideoBoxStyle(item.value));
+
+// 面板保存过样式字段（options 级）才启用新样式，老数据走 item.style 体系
+const styled = computed(() => props.res && props.res.paddingTop !== undefined);
+// 画布 375px ≈ 750rpx，预览按一半像素呈现
+const px = (v) => `${(Number(v) || 0) / 2}px`;
+const wrapperStyle = computed(() => {
+  const res = props.res || {};
+  if (!styled.value) return getVideoWrapperStyle(item.value);
+  const bg =
+    !res.bgColor2 || res.bgColor1 === res.bgColor2
+      ? res.bgColor1
+      : `linear-gradient(180deg, ${res.bgColor1}, ${res.bgColor2})`;
+  return {
+    padding: `${px(res.paddingTop)} ${px(res.paddingX)} ${px(res.paddingBottom)}`,
+    background: bg,
+    borderRadius: px(res.borderRadius),
+    marginBottom: px(res.pageGap),
+    overflow: Number(res.borderRadius) > 0 ? "hidden" : "visible",
+    boxSizing: "border-box",
+  };
+});
+const boxStyle = computed(() => {
+  if (!styled.value) return getVideoBoxStyle(item.value);
+  return {
+    borderRadius: px(props.res.imgRadius),
+    overflow: "hidden",
+    position: "relative",
+    width: "100%",
+  };
+});
 const aspectPadding = computed(() => getAspectPadding(item.value.aspectRatio));
 </script>
 <style lang="scss" scoped>

@@ -3,21 +3,41 @@
     <div class="banner-box" :style="cardMode ? {} : boxStyle">
       <el-carousel
         class="carousel"
-        :class="{ 'card-mode': cardMode }"
-        v-if="res"
+        v-if="res && !cardMode"
         autoplay
         :interval="5000"
         height="150px"
-        :type="cardMode ? 'card' : ''"
         :indicator-position="customIndicator ? 'none' : ''"
         @change="onChange"
       >
         <el-carousel-item v-for="(item, index) in res.list" :key="index">
           <div class="slide-wrap">
-            <img class="image-mode" :style="boxStyle" :src="item.img" />
+            <img alt="轮播图" class="image-mode" :style="boxStyle" :src="item.img" />
           </div>
         </el-carousel-item>
       </el-carousel>
+      <!-- 卡片风格：当前图 82% 居中放大，两侧 9% 露出并缩小，循环切换 -->
+      <div
+        v-if="res && cardMode"
+        ref="cardPreview"
+        class="card-preview"
+        @mouseenter="stopAuto"
+        @mouseleave="startAuto"
+      >
+        <div
+          class="card-track"
+          :style="{ transform: `translateX(${trackOffset}px)` }"
+        >
+          <div
+            class="card-slide"
+            :class="{ active: index === current }"
+            v-for="(item, index) in res.list"
+            :key="index"
+          >
+            <img alt="轮播图" class="card-img" :style="boxStyle" :src="item.img" />
+          </div>
+        </div>
+      </div>
       <div
         v-if="customIndicator && res.indicatorStyle !== 'none' && res.list.length > 1"
         class="indicator"
@@ -35,12 +55,15 @@
   </div>
 </template>
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 
 defineOptions({ title: "导航栏" });
 const props = defineProps(["res"]);
 
 const current = ref(0);
+const previewWidth = ref(0);
+const cardPreview = ref(null);
+let timer = null;
 
 // 配置过样式字段才启用自定义样式/指示器，老数据保持原样
 const customIndicator = computed(
@@ -51,6 +74,10 @@ const indicatorColor = computed(() =>
   props.res.indicatorColorMode === "custom" && props.res.indicatorColor
     ? props.res.indicatorColor
     : "#409eff"
+);
+// 卡片宽 82%，两侧各露出 9%
+const trackOffset = computed(
+  () => previewWidth.value * 0.09 - current.value * previewWidth.value * 0.82
 );
 const wrapperStyle = computed(() => {
   const res = props.res || {};
@@ -77,6 +104,48 @@ const boxStyle = computed(() => {
 function onChange(index) {
   current.value = index;
 }
+
+function measure() {
+  if (cardPreview.value) {
+    previewWidth.value = cardPreview.value.offsetWidth;
+  }
+}
+
+function startAuto() {
+  stopAuto();
+  if (!cardMode.value || !props.res.list || props.res.list.length < 2) return;
+  timer = setInterval(() => {
+    current.value = (current.value + 1) % props.res.list.length;
+  }, 5000);
+}
+
+function stopAuto() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+watch(
+  cardMode,
+  (val) => {
+    stopAuto();
+    if (val) {
+      measure();
+      startAuto();
+    }
+  },
+  { immediate: true, flush: "post" }
+);
+
+watch(
+  () => props.res.list && props.res.list.length,
+  (len) => {
+    if (current.value >= len) current.value = 0;
+  }
+);
+
+onBeforeUnmount(stopAuto);
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";
@@ -98,15 +167,33 @@ function onChange(index) {
   display: block;
   overflow: hidden;
 }
-// 卡片模式：卡片铺满轮播项，去掉 el-carousel 默认卡片白底阴影
-.card-mode {
-  :deep(.el-carousel__item--card) {
-    background: transparent;
-    box-shadow: none;
+.card-preview {
+  overflow: hidden;
+  height: 150px;
+  display: flex;
+  align-items: center;
+}
+.card-track {
+  display: flex;
+  align-items: center;
+  transition: transform 0.5s ease;
+  width: 100%;
+}
+.card-slide {
+  flex: 0 0 82%;
+  padding: 0 3px;
+  box-sizing: border-box;
+  transform: scale(0.9);
+  transition: transform 0.4s ease;
+  &.active {
+    transform: scale(1);
   }
-  :deep(.el-carousel__mask) {
-    background: transparent;
-  }
+}
+.card-img {
+  width: 100%;
+  height: 150px;
+  display: block;
+  overflow: hidden;
 }
 .indicator {
   position: absolute;

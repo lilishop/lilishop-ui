@@ -94,7 +94,7 @@
               class="draggable"
             >
               <div class="flex column-item">
-                <img :src="item.img" class="column-img" />
+                <img alt="楼层图片" :src="item.img" class="column-img" />
                 <el-button
                   size="small"
                   class="ml_10"

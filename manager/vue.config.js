@@ -31,6 +31,9 @@ module.exports = {
     port: configs.port,
     client: {
       overlay: {
+        // 编译警告（如上游分销模块未完成的导出）不再弹全屏浮层，真实错误仍然弹出
+        warnings: false,
+        errors: true,
         runtimeErrors: (error) => {
           const message = error?.message || "";
           if (message.includes("ResizeObserver loop")) {

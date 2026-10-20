@@ -5,16 +5,17 @@
       <el-button size="default" @click="goBack">返回</el-button>
       <div class="page-name">
         <template v-if="!editingName">
-          <span class="page-name-label">当前页面：{{ submitWay.name }}</span>
+          <span class="page-name-label">当前页面：{{ pageName }}</span>
           <el-icon class="page-name-edit" @click="startEditName"><Edit /></el-icon>
         </template>
         <el-input
           v-else
           ref="nameInput"
-          v-model="submitWay.name"
+          v-model="pageName"
           size="small"
           style="width: 200px"
           maxlength="30"
+          placeholder="请输入模板名称"
           @blur="editingName = false"
           @keyup.enter="editingName = false"
         />
@@ -43,7 +44,7 @@
         <div v-if="progress">
           <div class="model-item">
             模板名称
-            <el-input style="width: 200px" v-model="submitWay.name" />
+            <el-input style="width: 200px" v-model="pageName" placeholder="请输入模板名称" />
           </div>
           <div class="model-item">
             是否立即发布
@@ -66,7 +67,7 @@
   </div>
 </template>
 <script setup>
-import { reactive, ref, watch, onMounted, nextTick } from "vue";
+import { reactive, ref, watch, onMounted, nextTick, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import * as API_Other from "@/api/other.js";
 import { Edit } from "@element-plus/icons-vue";
@@ -119,8 +120,32 @@ function startEditName() {
 const submitWay = reactive({
   // 表单信息
   pageShow: route.query.type || false,
-  name: route.query.name || "模板名称",
   pageClientType: "H5"
+});
+
+// 模板名称与「页面设置」面板共用 store 中的同一份数据，双向同步
+const pageName = computed({
+  get() {
+    const store = appStore.styleStore;
+    if (store && typeof store === "object") {
+      return store.name || "";
+    }
+    return route.query.name || "";
+  },
+  set(val) {
+    if (!appStore.styleStore || typeof appStore.styleStore !== "object") {
+      appStore.styleStore = { ...appStore.styleStore, list: [] };
+    }
+    appStore.styleStore.name = val;
+  },
+});
+
+onMounted(() => {
+  // 新建页面时把路由带来的模板名称写入 store（不覆盖已有名称）
+  const store = appStore.styleStore;
+  if (store && typeof store === "object" && !store.name && route.query.name) {
+    store.name = route.query.name;
+  }
 });
 
 watch(
@@ -171,7 +196,23 @@ function handleSpinShow() {
 
 // 填写是否发布，模板名称之后保存
 function save() {
-   if (
+  // 楼层装修页面（非开屏/弹窗广告）需校验页面设置的必填项
+  const isFloorPage =
+    route.query.pagetype != "ALERT" &&
+    route.query.pagetype != "OPEN_SCREEN_ANIMATION";
+  if (isFloorPage) {
+    if (!pageName.value || !pageName.value.trim()) {
+      Message.error("请填写模板名称");
+      return false;
+    }
+    const title = appStore.styleStore && appStore.styleStore.title;
+    if (!title || !String(title).trim()) {
+      Message.error("请填写页面标题");
+      return false;
+    }
+  }
+
+  if (
     appStore.styleStore == void 0 &&
     (route.query.pagetype && route.query.pagetype != 'ALERT' &&  route.query.pagetype != 'OPEN_SCREEN_ANIMATION')
   ) {
@@ -183,6 +224,7 @@ function save() {
     ? (submitWay.pageShow = "OPEN")
     : (submitWay.pageShow = "CLOSE");
 
+  submitWay.name = pageName.value;
   submitWay.pageData = JSON.stringify(appStore.styleStore);
   submitWay.pageType = "INDEX";
   submitWay.pageType =  route.query.pagetype ||  "INDEX";
@@ -202,7 +244,7 @@ function updateHome() {
   progress.value = false;
   API_Other.updateHome(route.query.id, {
     pageData: JSON.stringify(appStore.styleStore),
-    name: submitWay.name,
+    name: pageName.value,
     pageShow: submitWay.pageShow,
     pageType: submitWay.pageType,
     pageClientType: "H5",

@@ -216,7 +216,7 @@
     </el-dialog>
     <!-- 选择商品。链接 -->
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -253,7 +253,7 @@ const editTarget = ref(null); // 确认后写回的原数据
 const picModelFlag = ref(false); // 图片选择
 
 // ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 const ossManageRef = ref(null);
 
 function cloneItem(item) {
@@ -271,11 +271,11 @@ function handleSelectModel(item, type) {
 }
 function handleSelectLink(item, index) {
   // 调起选择链接弹窗
-  liliDialog.value.open("link");
+  liliDialogRef.value.open("link");
 }
 function handleSelectGoods(item) {
   // 调起选择商品
-  liliDialog.value.open("goods", "single");
+  liliDialogRef.value.open("goods", "single");
 }
 // 选择链接回调
 function selectedLink(val) {

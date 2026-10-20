@@ -25,7 +25,7 @@
         :key="index"
       >
         <div class="goods-img">
-          <img :src="item.img" />
+          <img alt="楼层图片" :src="item.img" />
         </div>
         <div>
           <div class="goods-name wes-2">{{ item.title }}</div>
@@ -93,7 +93,7 @@
               class="draggable"
             >
               <div class="flex">
-                <img :src="item.img" class="column-img" />
+                <img alt="楼层图片" :src="item.img" class="column-img" />
                 <div class="flex column-goods-config">
                   <div class="column-config">
                     <div>
@@ -120,7 +120,7 @@
 
     <!-- 选择商品。链接 -->
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -146,7 +146,7 @@ const showModal = ref(false);
 const draftOptions = ref(null);
 const tabCurrentlyIndex = ref(0); // 选项卡索引
 
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 
 onMounted(() => {
   tabIndex.value = props.data.options.labels[0].___index;
@@ -191,8 +191,8 @@ function handleClickTab(name) {
 }
 // 添加当前选项卡中的商品
 function addCurrentGoods() {
-  liliDialog.value.clearGoodsSelected();
-  liliDialog.value.open("goods");
+  liliDialogRef.value.clearGoodsSelected();
+  liliDialogRef.value.open("goods");
 }
 // 编辑模块
 function handleSelectModel() {
@@ -228,7 +228,7 @@ function selectedLink(val) {
   item.type = val.___type === "other" && val.url === "" ? "link" : "other";
 }
 function handleSelectLink(index) {
-  liliDialog.value.open("link");
+  liliDialogRef.value.open("link");
   current.value = index;
 }
 function handleCancelModal() {
