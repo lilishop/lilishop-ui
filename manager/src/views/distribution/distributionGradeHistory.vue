@@ -57,31 +57,26 @@
       </el-form>
     </el-card>
 
-    <el-card>
-      <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
-        <el-table-column prop="distributionId" label="分销员ID" min-width="200" class-name="id-column" show-overflow-tooltip />
-        <el-table-column prop="memberName" label="分销员昵称" min-width="120" show-overflow-tooltip />
-        <el-table-column prop="memberMobile" label="分销员手机号" min-width="130" />
-        <el-table-column label="变更前等级" min-width="140" show-overflow-tooltip>
+    <el-card class="mt_10">
+      <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
+        <el-table-column prop="memberName" label="分销员昵称" min-width="120" />
+        <el-table-column prop="distributionMobile" label="手机号" min-width="130" />
+        <el-table-column label="变更前等级" min-width="120">
           <template #default="{ row }">
-            <span v-if="row">{{ formatGrade(row.previousGradeName, row.previousGradeId) }}</span>
+            {{ formatGrade(row.beforeGradeName, row.beforeGradeId) }}
           </template>
         </el-table-column>
-        <el-table-column label="变更后等级" min-width="140" show-overflow-tooltip>
+        <el-table-column label="变更后等级" min-width="120">
           <template #default="{ row }">
-            <span v-if="row">{{ formatGrade(row.gradeName, row.gradeId) }}</span>
+            {{ formatGrade(row.afterGradeName, row.afterGradeId) }}
           </template>
         </el-table-column>
-        <el-table-column label="商品佣金比例" width="130" align="right">
+        <el-table-column label="佣金比例" min-width="110">
           <template #default="{ row }">
-            <span v-if="row">{{ formatRate(row.goodsCommissionRate) }}</span>
+            {{ formatRate(row.commissionRate) }}
           </template>
         </el-table-column>
-        <el-table-column label="邀请佣金比例" width="130" align="right">
-          <template #default="{ row }">
-            <span v-if="row">{{ formatRate(row.inviteCommissionRate) }}</span>
-          </template>
-        </el-table-column>
+        <el-table-column prop="upgradeRuleDesc" label="升级原因" min-width="200" show-overflow-tooltip />
         <el-table-column prop="upgradeTime" label="升级时间" min-width="170" />
       </el-table>
 
@@ -93,8 +88,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -103,32 +98,42 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useTable } from "@/utils/useTable";
 import { getDistributionGradeHistoryPage, getDistributionGrades } from "@/api/distribution";
 
 defineOptions({ name: "distributionGradeHistory" });
 
-// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
 const searchFormRef = ref(null);
-
-const loading = ref(false);
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 20,
-  memberName: "",
-  distributionMobile: "",
-  gradeId: "",
-  upgradeTimeStart: "",
-  upgradeTimeEnd: "",
-});
 const upgradeTimeRange = ref([]);
 const gradeOptions = ref([]);
-const data = ref([]);
-const total = ref(0);
 
-onMounted(() => {
-  loadGradeOptions();
-  getDataList();
-});
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getDistributionGradeHistoryPage,
+  {
+    pageSize: 20,
+    form: {
+      memberName: "",
+      distributionMobile: "",
+      gradeId: "",
+    },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      if (upgradeTimeRange.value && upgradeTimeRange.value.length === 2) {
+        params.upgradeTimeStart = `${upgradeTimeRange.value[0]} 00:00:00`;
+        params.upgradeTimeEnd = `${upgradeTimeRange.value[1]} 23:59:59`;
+      } else {
+        delete params.upgradeTimeStart;
+        delete params.upgradeTimeEnd;
+      }
+      return params;
+    },
+  }
+);
+
+function handleReset() {
+  upgradeTimeRange.value = [];
+  resetSearch();
+}
 
 function loadGradeOptions() {
   getDistributionGrades()
@@ -145,6 +150,7 @@ function loadGradeOptions() {
         }));
     });
 }
+
 function formatGrade(name, gradeId) {
   if (name) {
     return name;
@@ -154,6 +160,7 @@ function formatGrade(name, gradeId) {
   }
   return "-";
 }
+
 function formatRate(value) {
   const num = Number(value);
   if (!Number.isFinite(num)) {
@@ -161,54 +168,10 @@ function formatRate(value) {
   }
   return `${(num * 100).toFixed(2).replace(/\.?0+$/, "") || "0"}%`;
 }
-function applyUpgradeTimeRange() {
-  if (upgradeTimeRange.value && upgradeTimeRange.value.length === 2) {
-    searchForm.value.upgradeTimeStart = `${upgradeTimeRange.value[0]} 00:00:00`;
-    searchForm.value.upgradeTimeEnd = `${upgradeTimeRange.value[1]} 23:59:59`;
-  } else {
-    searchForm.value.upgradeTimeStart = "";
-    searchForm.value.upgradeTimeEnd = "";
-  }
-}
-function handleSearch() {
-  searchForm.value.pageNumber = 1;
-  getDataList();
-}
-function handleReset() {
-  searchForm.value = {
-    pageNumber: 1,
-    pageSize: 20,
-    memberName: "",
-    distributionMobile: "",
-    gradeId: "",
-    upgradeTimeStart: "",
-    upgradeTimeEnd: "",
-  };
-  upgradeTimeRange.value = [];
-  getDataList();
-}
-function changePage() {
-  getDataList();
-}
-function changePageSize() {
-  searchForm.value.pageNumber = 1;
-  getDataList();
-}
-function getDataList() {
-  applyUpgradeTimeRange();
-  loading.value = true;
-  getDistributionGradeHistoryPage(searchForm.value)
-    .then((res) => {
-      loading.value = false;
-      if (res.success) {
-        data.value = res.result.records || [];
-        total.value = res.result.total || 0;
-      }
-    })
-    .catch(() => {
-      loading.value = false;
-    });
-}
+
+onMounted(() => {
+  loadGradeOptions();
+});
 </script>
 
 <style scoped>

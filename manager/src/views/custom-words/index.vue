@@ -3,6 +3,7 @@
     <el-card>
       <div class="operation">
         <el-button type="primary" @click="add">添加</el-button>
+        <el-button v-if="selectCount > 0" type="danger" @click="delAll">批量删除</el-button>
       </div>
 
       <el-table
@@ -38,8 +39,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -58,14 +59,15 @@
       </el-form>
       <template #footer>
         <el-button @click="modalVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">保存</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { reactive, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import {
   getCustomWordsPage,
   delCustom,
@@ -80,17 +82,11 @@ defineOptions({ name: "custom-words" });
 const table = ref(null);
 const formRef = ref(null);
 
-const loading = ref(true);
 const modalType = ref(0);
 const modalVisible = ref(false);
 const modalTitle = ref("");
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-  words: "",
-});
+const currentId = ref("");
+
 const form = ref({
   name: "",
 });
@@ -100,90 +96,76 @@ const formValidate = reactive({
 const submitLoading = ref(false);
 const selectList = ref([]);
 const selectCount = ref(0);
-const data = ref([]);
-const total = ref(0);
-// 未在 data 声明、detail() 中直接挂到 this 上的字段
-let id;
 
-function init() {
-  getDataList();
-}
-function changePage(v) {
-  searchForm.pageNumber = v;
-  getDataList();
-  clearSelectAll();
-}
-function changePageSize(v) {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = v;
-  getDataList();
-}
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  getDataList();
-}
+const { loading, data, total, searchForm, getDataList } = useTable(
+  getCustomWordsPage,
+  {
+    pageSize: 20,
+    sort: "createTime",
+    order: "desc",
+    form: { words: "" },
+  }
+);
+
 function clearSelectAll() {
   table.value?.clearSelection();
 }
+
 function changeSelect(e) {
   selectList.value = e;
   selectCount.value = e.length;
 }
-function getDataList() {
-  loading.value = true;
-  getCustomWordsPage(searchForm)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records;
-        total.value = res.result.total;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
+
 function handleSubmit() {
   formRef.value.validate((valid) => {
     if (valid) {
       submitLoading.value = true;
-      if (modalType.value == 0) {
-        delete form.value.id;
-        insertCustomWords(form.value).then((res) => {
-          submitLoading.value = false;
-          if (res.success) {
-            Message.success("操作成功");
-            getDataList();
-            modalVisible.value = false;
-          }
-        });
+      if (modalType.value === 0) {
+        insertCustomWords(form.value)
+          .then((res) => {
+            if (res.success) {
+              Message.success("操作成功");
+              getDataList();
+              modalVisible.value = false;
+            }
+          })
+          .finally(() => {
+            submitLoading.value = false;
+          });
       } else {
-        form.value.id = id;
-        updateCustomWords(form.value).then((res) => {
-          submitLoading.value = false;
-          if (res.success) {
-            Message.success("操作成功");
-            getDataList();
-            modalVisible.value = false;
-          }
-        });
+        updateCustomWords({ ...form.value, id: currentId.value })
+          .then((res) => {
+            if (res.success) {
+              Message.success("操作成功");
+              getDataList();
+              modalVisible.value = false;
+            }
+          })
+          .finally(() => {
+            submitLoading.value = false;
+          });
       }
     }
   });
 }
+
 function add() {
   modalType.value = 0;
   modalTitle.value = "添加";
-  form.value = {};
+  currentId.value = "";
+  form.value = { name: "" };
   formRef.value?.resetFields();
   modalVisible.value = true;
 }
+
 function detail(v) {
   modalType.value = 1;
-  id = v.id;
+  currentId.value = v.id;
   modalTitle.value = "修改";
+  form.value = { name: v.name };
   modalVisible.value = true;
-  form.value.name = v.name;
 }
+
 function remove(v) {
   Modal.confirm({
     title: "确认删除",
@@ -200,6 +182,7 @@ function remove(v) {
     },
   });
 }
+
 function delAll() {
   if (selectCount.value <= 0) {
     Message.warning("您还未选择要删除的数据");
@@ -210,11 +193,7 @@ function delAll() {
     content: "您确认要删除所选的 " + selectCount.value + " 条数据?",
     loading: true,
     onOk: () => {
-      let ids = "";
-      selectList.value.forEach(function (e) {
-        ids += e.id + ",";
-      });
-      ids = ids.substring(0, ids.length - 1);
+      const ids = selectList.value.map((e) => e.id).join(",");
       delCustom(ids).then((res) => {
         Modal.remove();
         if (res.success) {
@@ -226,8 +205,19 @@ function delAll() {
     },
   });
 }
-
-onMounted(() => {
-  init();
-});
 </script>
+
+<style lang="scss" scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
+.operation {
+  margin-bottom: 10px;
+}
+</style>

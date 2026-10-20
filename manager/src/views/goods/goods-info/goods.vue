@@ -209,8 +209,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -300,6 +300,7 @@
 
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import {
   getGoodsListData,
   getGoodsNumerData,
@@ -322,32 +323,50 @@ const auditForm = ref(null);
 const batchAuditFormRef = ref(null);
 const goodsGroupFormRef = ref(null);
 
-const id = ref(""); //要操作的id
-const loading = ref(true); // 表单加载状态
-const modalVisible = ref(false); // 添加或编辑显示
-const searchForm = reactive({
-  // 搜索框初始化对象
-  pageNumber: 1, // 当前页数
-  pageSize: 20, // 页面大小
-  sort: "create_time", // 默认排序字段
-  order: "desc", // 默认排序方式
-  groupId: "",
-});
-const underForm = reactive({
-  // 下架原因
-  reason: "",
-});
-const goodsAuditForm = reactive({
-  // 商品审核表单
-  auth_flag: 1,
-});
-const auditModalVisible = ref(false); // 审核弹框显示状态
+const id = ref("");
+const modalVisible = ref(false);
+const underForm = reactive({ reason: "" });
+const goodsAuditForm = reactive({ auth_flag: 1 });
+const auditModalVisible = ref(false);
 const auditSubmitLoading = ref(false);
-const currentAuditGoods = ref(null); // 当前审核的商品
-const submitLoading = ref(false); // 添加或编辑提交状态
-const data = ref([]); // 表单数据
-const total = ref(0); // 表单数据总数
+const currentAuditGoods = ref(null);
+const submitLoading = ref(false);
 const currentStatus = ref("ALL");
+
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getGoodsListData,
+  {
+    pageSize: 20,
+    sort: "create_time",
+    order: "desc",
+    immediate: false,
+    form: {
+      goodsName: "",
+      id: "",
+      storeName: "",
+      salesModel: "",
+      goodsType: "",
+      groupId: "",
+    },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      if (currentStatus.value && currentStatus.value !== "ALL") {
+        params.goodsStatus = currentStatus.value;
+      } else {
+        delete params.goodsStatus;
+      }
+      return params;
+    },
+    onSuccess: () => {
+      getNumberData();
+    },
+  }
+);
+
+function handleReset() {
+  currentStatus.value = "ALL";
+  resetSearch();
+}
 const goodsNumerData = ref({});
 const selectedRows = ref([]); // 选中的行数据
 const selectAll = ref(false); // 全选状态
@@ -414,33 +433,9 @@ function init() {
   loadGoodsGroupList();
 }
 // 分页 改变页码
-function changePage(v) {
-  searchForm.pageNumber = v;
-  getDataList();
-}
 // 分页 改变页数
-function changePageSize(v) {
-  searchForm.pageSize = v;
-  getDataList();
-}
 // 搜索
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = 20;
-  getDataList();
-  getNumberData();
-}
 // 获取数据
-function getDataList() {
-  loading.value = true;
-  getGoodsListData(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
-}
 function getNumberData() {
   // 创建一个不包含goodsStatus字段的搜索参数
   const { goodsStatus, ...searchParams } = searchForm;

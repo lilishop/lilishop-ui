@@ -4,10 +4,11 @@
       <el-form
         ref="searchFormRef"
         :model="searchForm"
+        inline
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="分销员名称" class="flex" prop="memberName">
+        <el-form-item label="分销员名称" prop="memberName">
           <el-input
             v-model="searchForm.memberName"
             placeholder="请输入分销员名称"
@@ -15,7 +16,7 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="编号" class="flex">
+        <el-form-item label="编号" prop="sn">
           <el-input
             v-model="searchForm.sn"
             placeholder="请输入编号"
@@ -25,11 +26,12 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
+    <el-card class="mt_10">
       <el-tabs v-model="tabStatus" @tab-change="handleTabChange">
         <el-tab-pane label="全部" name="" />
         <el-tab-pane :label="applyCountLabel" name="APPLY" />
@@ -82,8 +84,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -176,29 +178,21 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { useTable } from "@/utils/useTable";
 import { auditDistributionCash, getDistributionCash } from "@/api/distribution";
 import { Message, Modal } from "@/utils/message";
 
 defineOptions({ name: "distributionCash" });
 
 const route = useRoute();
-
-// 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
 const searchFormRef = ref(null);
 const table = ref(null);
 
 const tabStatus = ref("");
 const applyCount = ref(0);
-const loading = ref(true);
 const drawerVisible = ref(false);
 const drawerTitle = ref("");
 const result = ref("VIA_AUDITING");
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "createTime",
-  order: "desc",
-});
 const handleStatus = ref("edit");
 const form = ref({
   sn: "",
@@ -210,17 +204,45 @@ const form = ref({
   settlementBankAccountNum: "",
 });
 const submitLoading = ref(false);
-const data = ref([]);
-const total = ref(0);
 
 const applyCountLabel = computed(() => {
   return applyCount.value > 0 ? `待处理(${applyCount.value})` : "待处理";
 });
 
-function init() {
-  getDataList();
-  loadApplyCount();
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getDistributionCash,
+  {
+    pageSize: 20,
+    immediate: false,
+    sort: "createTime",
+    order: "desc",
+    form: {
+      memberName: "",
+      sn: "",
+    },
+    beforeRequest: (p) => {
+      const params = { ...p };
+      if (tabStatus.value) {
+        params.distributionCashStatus = tabStatus.value;
+      }
+      return params;
+    },
+    onSuccess: () => {
+      loadApplyCount();
+    },
+  }
+);
+
+function handleTabChange(name) {
+  tabStatus.value = name;
+  handleSearch();
 }
+
+function handleReset() {
+  tabStatus.value = "";
+  resetSearch();
+}
+
 function loadApplyCount() {
   getDistributionCash({
     distributionCashStatus: "APPLY",
@@ -228,78 +250,48 @@ function loadApplyCount() {
     pageNumber: 1,
   }).then((res) => {
     if (res.success) {
-      applyCount.value = res.result.total || 0;
+      applyCount.value = res.result?.total || 0;
     }
   });
 }
-function changePage() {
-  getDataList();
-}
-function changePageSize() {
-  searchForm.value.pageNumber = 1;
-  getDataList();
-}
-function handleSearch() {
-  searchForm.value.pageNumber = 1;
-  searchForm.value.pageSize = 20;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  const params = { ...searchForm.value };
-  if (tabStatus.value) {
-    params.distributionCashStatus = tabStatus.value;
-  }
-  getDistributionCash(params).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
-}
-function handleTabChange(name) {
-  tabStatus.value = name;
-  searchForm.value.pageNumber = 1;
-  getDataList();
-}
+
 function handleSubmit() {
-  let resultText = result.value == "VIA_AUDITING" ? "通过" : "拒绝";
+  const resultText = result.value === "VIA_AUDITING" ? "通过" : "拒绝";
   Modal.confirm({
     title: "确认审核",
     content: "您确认要审核" + resultText + "么?",
     loading: true,
     onOk: () => {
       auditDistributionCash(form.value.id, { result: result.value }).then((res) => {
+        Modal.remove();
         if (res.success) {
-          Modal.remove();
           Message.success("审核成功");
           drawerVisible.value = false;
           getDataList();
           loadApplyCount();
-        } else {
-          Modal.remove();
         }
       });
     },
   });
 }
+
 function edit(v) {
   drawerTitle.value = "审核";
   handleStatus.value = "edit";
   result.value = "VIA_AUDITING";
   const formData = {};
-  for (let attr in v) {
+  for (const attr in v) {
     formData[attr] = v[attr] === null ? "" : v[attr];
   }
   form.value = formData;
   drawerVisible.value = true;
 }
+
 function view(v) {
   drawerTitle.value = "查看";
   handleStatus.value = "view";
   const formData = {};
-  for (let attr in v) {
+  for (const attr in v) {
     formData[attr] = v[attr] === null ? "" : v[attr];
   }
   form.value = formData;
@@ -307,17 +299,18 @@ function view(v) {
 }
 
 onMounted(() => {
-  // 处理路由参数，自动跳转到指定标签页
   const queryTabStatus = route.query.tabStatus;
   if (queryTabStatus) {
     tabStatus.value = queryTabStatus;
   }
-  init();
+  getDataList();
+  loadApplyCount();
 });
 </script>
+
 <style lang="scss" scoped>
 .ops a {
-  color: #2d8cf0;
+  color: #409eff;
   cursor: pointer;
   text-decoration: none;
 }
@@ -329,68 +322,58 @@ onMounted(() => {
 .audit-action {
   margin-top: 4px;
 }
-.drawer-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-</style>
-
-<style lang="scss">
 .cash-detail-drawer {
-  .el-drawer__header {
-    margin-bottom: 0;
-    padding: 16px 24px;
-    border-bottom: 1px solid #e8eaec;
-  }
-  .el-drawer__body {
-    padding: 20px 24px 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-  .el-drawer__footer {
-    padding: 12px 24px;
-    border-top: 1px solid #e8eaec;
+  :deep(.el-drawer__body) {
+    padding: 20px;
+    background: #f7f8fa;
   }
 }
-.cash-detail-drawer .detail-body {
-  min-height: 200px;
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-.cash-detail-drawer .detail-section-title {
+.detail-section-title {
   font-size: 14px;
   font-weight: 600;
-  color: #17233d;
-  margin: 20px 0 12px;
-  &:first-child { margin-top: 0; }
+  color: #303133;
+  padding-left: 8px;
+  border-left: 3px solid var(--el-color-primary, #409eff);
+  margin-top: 8px;
 }
-.cash-detail-drawer .detail-meta {
+.detail-meta {
+  background: #fff;
+  border-radius: 6px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: #f8f8f9;
-  border: 1px solid #e8eaec;
-  border-radius: 8px;
-  padding: 14px 16px;
+  border: 1px solid #ebeef5;
 }
-.cash-detail-drawer .detail-meta-row {
+.detail-meta-row {
   display: flex;
-  align-items: flex-start;
-  font-size: 14px;
-  line-height: 22px;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
 }
-.cash-detail-drawer .detail-meta-label {
-  color: #808695;
-  min-width: 110px;
-  flex-shrink: 0;
+.detail-meta-label {
+  color: #909399;
 }
-.cash-detail-drawer .detail-meta-value {
-  color: #515a6e;
-  flex: 1;
+.detail-meta-value {
+  color: #303133;
+  font-weight: 500;
   word-break: break-all;
+  max-width: 340px;
+  text-align: right;
 }
-.cash-detail-drawer .detail-meta-price {
-  font-weight: 600;
+.detail-meta-price {
   color: #f56c6c;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 </style>

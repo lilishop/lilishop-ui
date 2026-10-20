@@ -19,18 +19,19 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
-      <div class="operation padding-row">
+    <el-card class="mt_10">
+      <div class="operation padding-row" style="margin-bottom: 10px;">
         <el-button type="primary" @click="add">添加</el-button>
       </div>
 
       <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
         <el-table-column prop="name" label="品牌名称" width="200" />
-        <el-table-column label="品牌图标" align="left" >
+        <el-table-column label="品牌图标" align="left">
           <template #default="{ row }">
             <img
               v-if="row"
@@ -74,8 +75,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -85,18 +86,17 @@
       :title="modalTitle"
       width="500px"
       :close-on-click-modal="false"
-      destroy-on-close
     >
       <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="品牌名称" prop="name">
-          <el-input v-model="form.name" clearable style="width: 100%" />
+          <el-input v-model="form.name" style="width: 100%" />
         </el-form-item>
         <el-form-item label="品牌图标" prop="logo">
-          <div style="display: flex; align-items: center; gap: 12px">
+          <div style="display: flex; align-items: center; gap: 8px">
             <img
               :src="form.logo || defaultPic"
-              alt="品牌图标"
-              style="width: 80px; height: 60px; object-fit: contain; border: 1px solid #dcdee2; border-radius: 4px; background: #fff"
+              alt=""
+              style="width: 60px; height: 60px; object-fit: contain; border: 1px solid #dcdfe6; border-radius: 4px"
             />
             <el-button type="primary" link @click="openLogoPicker">修改</el-button>
           </div>
@@ -147,7 +147,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, nextTick, onMounted, getCurrentInstance } from "vue";
+import { ref, reactive, nextTick, getCurrentInstance } from "vue";
+import { useTable } from "@/utils/useTable";
 import {
   getManagerBrandPage,
   addBrand,
@@ -167,7 +168,6 @@ defineOptions({ name: "brand" });
 
 const { proxy } = getCurrentInstance();
 
-const loading = ref(true);
 const modalType = ref(0);
 const modalVisible = ref(false);
 const modalTitle = ref("");
@@ -180,12 +180,7 @@ const categoryTreeKey = ref(0);
 const categorySubmitLoading = ref(false);
 const currentBrandId = ref("");
 const selectedCategoryIds = ref([]);
-const searchForm = reactive({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "create_time",
-  order: "desc",
-});
+
 const form = ref({
   name: "",
   logo: "",
@@ -196,12 +191,20 @@ const formValidate = reactive({
   logo: [regular.REQUIRED, regular.URL200],
 });
 const submitLoading = ref(false);
-const data = ref([]);
-const total = ref(0);
 
 const searchFormRef = ref(null);
 const formRef = ref(null);
 const ossManageRef = ref(null);
+
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getManagerBrandPage,
+  {
+    pageSize: 20,
+    sort: "create_time",
+    order: "desc",
+    form: { name: "" },
+  }
+);
 
 function openLogoPicker() {
   picModelFlag.value = true;
@@ -306,37 +309,6 @@ function delBrand(row) {
   }).catch(() => {});
 }
 
-function init() {
-  getDataList();
-}
-
-function changePage(v) {
-  searchForm.pageNumber = v;
-  getDataList();
-}
-
-function changePageSize(v) {
-  searchForm.pageSize = v;
-  getDataList();
-}
-
-function handleSearch() {
-  searchForm.pageNumber = 1;
-  searchForm.pageSize = 20;
-  getDataList();
-}
-
-function getDataList() {
-  loading.value = true;
-  getManagerBrandPage(searchForm).then((res) => {
-    loading.value = false;
-    if (res.success) {
-      data.value = res.result.records;
-      total.value = res.result.total;
-    }
-  });
-}
-
 function handleSubmit() {
   formRef.value.validate((valid) => {
     if (valid) {
@@ -382,16 +354,19 @@ function edit(v) {
       v[attr] = "";
     }
   }
-  const str = JSON.stringify(v);
-  const data = JSON.parse(str);
-  form.value = data;
+  form.value = JSON.parse(JSON.stringify(v));
   modalVisible.value = true;
 }
-
-onMounted(() => {
-  init();
-});
 </script>
 
 <style lang="scss" scoped>
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
+}
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+}
 </style>

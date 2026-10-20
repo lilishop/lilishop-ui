@@ -27,12 +27,13 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
-      <el-table v-loading="loading" :data="data" ref="table" class="mt_10" style="width: 100%">
+    <el-card class="mt_10">
+      <el-table v-loading="loading" :data="data" ref="table" style="width: 100%">
         <el-table-column label="商品名称" min-width="220" class-name="goods-name-column">
           <template #default="{ row }">
             <div v-if="row" class="goods-name-cell">
@@ -60,13 +61,13 @@
         <el-table-column prop="storeName" label="店铺名称" min-width="120" show-overflow-tooltip />
         <el-table-column label="操作" width="200" align="center" fixed="right">
           <template #default="{ row }">
-            <template v-if="row">
+            <div v-if="row">
               <a class="link-text" @click="examine(row, 1)">通过</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="examine(row, 2)">拒绝</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="showDetail(row)">查看</a>
-            </template>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -79,8 +80,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -88,29 +89,30 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import { authGoods, getAuthGoodsListData } from "@/api/goods";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "goodsApply" });
 
-// 模板中 el-form 的 ref 与数据 searchForm 同名，避免相互覆盖改名
 const searchFormRef = ref(null);
 const table = ref(null);
 
-const loading = ref(true);
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 20,
-  sort: "create_time",
-  order: "desc",
-});
-const goodsAuditForm = ref({
-  auth_flag: 1,
-});
-const data = ref([]);
-const total = ref(0);
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  getAuthGoodsListData,
+  {
+    pageSize: 20,
+    sort: "create_time",
+    order: "desc",
+    form: {
+      goodsName: "",
+      id: "",
+      authFlag: 0,
+    },
+  }
+);
 
 function authFlagText(v) {
   const map = {
@@ -120,6 +122,7 @@ function authFlagText(v) {
   };
   return map[v] || v || "-";
 }
+
 function authFlagTagType(v) {
   const map = {
     TOBEAUDITED: "warning",
@@ -128,44 +131,14 @@ function authFlagTagType(v) {
   };
   return map[v] || "info";
 }
-function init() {
-  getDataList();
-}
-function changePage(v) {
-  searchForm.value.pageNumber = v;
-  getDataList();
-}
-function changePageSize(v) {
-  searchForm.value.pageSize = v;
-  getDataList();
-}
-function handleSearch() {
-  searchForm.value.pageNumber = 1;
-  searchForm.value.pageSize = 20;
-  getDataList();
-}
-function getDataList() {
-  loading.value = true;
-  searchForm.value.authFlag = 0;
-  getAuthGoodsListData(searchForm.value)
-    .then((res) => {
-      loading.value = false;
-      if (res.success) {
-        data.value = res.result.records;
-        total.value = res.result.total;
-      }
-    })
-    .catch(() => {
-      loading.value = false;
-    });
-}
+
 function examine(v, authFlag) {
-  const examine = authFlag === 1 ? "通过" : "拒绝";
-  goodsAuditForm.value.authFlag = authFlag === 1 ? "PASS" : "REFUSE";
-  ElMessageBox.confirm(`您确认要审核${examine} ${v.goodsName} ?`, "确认审核", { type: "warning" }).then(() => {
+  const examineText = authFlag === 1 ? "通过" : "拒绝";
+  const authStatus = authFlag === 1 ? "PASS" : "REFUSE";
+  ElMessageBox.confirm(`您确认要审核${examineText} ${v.goodsName} ?`, "确认审核", { type: "warning" }).then(() => {
     const formData = new FormData();
     formData.append("goodsIds", v.id);
-    formData.append("authFlag", goodsAuditForm.value.authFlag);
+    formData.append("authFlag", authStatus);
     return authGoods(formData).then((res) => {
       if (res.success) {
         ElMessage.success("审核成功");
@@ -174,16 +147,13 @@ function examine(v, authFlag) {
     });
   }).catch(() => {});
 }
+
 function showDetail(v) {
   customRouterPush({
     name: "goods-detail",
     query: { id: v.id },
   });
 }
-
-onMounted(() => {
-  init();
-});
 </script>
 
 <style scoped>

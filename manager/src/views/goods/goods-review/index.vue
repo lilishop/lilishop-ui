@@ -27,12 +27,13 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
-      <el-table ref="table" v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
+    <el-card class="mt_10">
+      <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
         <el-table-column prop="goodsName" label="商品名称" min-width="120" show-overflow-tooltip />
         <el-table-column prop="memberName" label="客户名称" min-width="120" show-overflow-tooltip />
         <el-table-column prop="content" label="评论内容" min-width="220" show-overflow-tooltip />
@@ -43,13 +44,13 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="评价" width="90">
+        <el-table-column label="评价" width="90" align="center">
           <template #default="{ row }">
             <el-tag v-if="row" :type="gradeTagType(row.grade)">{{ gradeText(row.grade) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="评价时间" width="170" />
-        <el-table-column label="页面展示" width="100">
+        <el-table-column label="页面展示" width="100" align="center">
           <template #default="{ row }">
             <el-switch
               v-if="row"
@@ -84,8 +85,8 @@
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           size="small"
-          @current-change="changePage"
-          @size-change="changePageSize"
+          @current-change="getDataList"
+          @size-change="() => { searchForm.pageNumber = 1; getDataList(); }"
         />
       </div>
     </el-card>
@@ -112,18 +113,10 @@
           </div>
         </div>
         <div class="right-container">
-          <div class="border-b">{{ infoData.goodsName }}</div>
-          <div class="border-b">
-            <div class="div-height">店铺名称：{{ infoData.storeName }}</div>
-            <div class="div-height">订单号：{{ infoData.orderNo }}</div>
-          </div>
           <div class="border-b">
             <div class="review-item">
-              <el-avatar v-if="infoData.memberProfile" :src="infoData.memberProfile" :size="40" />
-              <div class="review-meta">
-                <div class="review-name">{{ infoData.memberName }}</div>
-                <div class="review-content">{{ infoData.content }}</div>
-              </div>
+              <div class="review-name">{{ infoData.memberName }}：</div>
+              <div class="review-content">{{ infoData.content }}</div>
             </div>
             <div class="score-content">
               <span>物流评分：{{ infoData.deliveryScore }}</span>
@@ -171,43 +164,49 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, ref } from "vue";
+import { nextTick, ref } from "vue";
+import { useTable } from "@/utils/useTable";
 import * as API_Member from "@/api/member";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 defineOptions({ name: "goods-review" });
 
-// 模板中的 el-form ref（原 ref="searchForm"，为避免与数据 searchForm 同名互相覆盖而改名），script 内未使用
 const searchFormRef = ref(null);
+const table = ref(null);
 
 const infoData = ref({});
 const infoFlag = ref(false);
 const infoTitle = ref("");
 const currentReviewId = ref("");
 const detailStatusReady = ref(false);
-const loading = ref(true);
-const searchForm = ref({
-  pageNumber: 1,
-  pageSize: 20,
-  goodsName: "",
-  sort: "createTime",
-  order: "desc",
-  startDate: "",
-  endDate: "",
-});
-const data = ref([]);
-const total = ref(0);
+
+const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
+  API_Member.getMemberReview,
+  {
+    pageSize: 20,
+    sort: "createTime",
+    order: "desc",
+    form: {
+      goodsName: "",
+      memberName: "",
+      startDate: "",
+      endDate: "",
+    },
+  }
+);
 
 function gradeTagType(grade) {
   if (grade === "GOOD") return "success";
   if (grade === "MODERATE") return "warning";
   return "danger";
 }
+
 function gradeText(grade) {
   if (grade === "GOOD") return "好评";
   if (grade === "MODERATE") return "中评";
   return "差评";
 }
+
 function changeSwitchView(status) {
   if (!detailStatusReady.value || !currentReviewId.value) {
     return;
@@ -219,22 +218,7 @@ function changeSwitchView(status) {
     }
   });
 }
-function init() {
-  getDataList();
-}
-function changePage(v) {
-  searchForm.value.pageNumber = v;
-  getDataList();
-}
-function changePageSize(v) {
-  searchForm.value.pageSize = v;
-  getDataList();
-}
-function handleSearch() {
-  searchForm.value.pageNumber = 1;
-  searchForm.value.pageSize = 20;
-  getDataList();
-}
+
 function changeSwitch(row) {
   if (!row || !row.id) {
     return;
@@ -245,6 +229,7 @@ function changeSwitch(row) {
     }
   });
 }
+
 function updateTop(v) {
   const top = !v.top;
   API_Member.updateMemberReviewTop(v.id, { top }).then((res) => {
@@ -259,23 +244,11 @@ function updateTop(v) {
         };
       });
       ElMessage.success(top ? "置顶成功!" : "取消置顶成功!");
-      init();
+      getDataList();
     }
   });
 }
-function getDataList() {
-  loading.value = true;
-  API_Member.getMemberReview(searchForm.value)
-    .then((res) => {
-      if (res.success) {
-        data.value = res.result.records;
-        total.value = res.result.total;
-      }
-    })
-    .finally(() => {
-      loading.value = false;
-    });
-}
+
 function info(v) {
   currentReviewId.value = v.id;
   detailStatusReady.value = false;
@@ -291,23 +264,21 @@ function info(v) {
     }
   });
 }
+
 function onInfoDialogClosed() {
   detailStatusReady.value = false;
   currentReviewId.value = "";
   infoData.value = {};
 }
+
 function remove(v) {
   ElMessageBox.confirm("您确认要删除客户" + v.memberName + "的评论?", "确认删除", { type: "warning" }).then(() => {
     return API_Member.delMemberReview(v.id).then(() => {
       ElMessage.success("修改成功");
-      init();
+      getDataList();
     });
   }).catch(() => {});
 }
-
-onMounted(() => {
-  init();
-});
 </script>
 
 <style lang="scss" scoped>
@@ -356,9 +327,6 @@ label {
   position: relative;
   margin-top: 12px;
 }
-.div-height {
-  line-height: 25px;
-}
 .score-content {
   margin: 5px 0;
   span {
@@ -378,7 +346,7 @@ label {
   margin-top: 4px;
 }
 .ops a {
-  color: #2d8cf0;
+  color: #409eff;
   cursor: pointer;
   text-decoration: none;
 }
