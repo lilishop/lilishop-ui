@@ -114,7 +114,7 @@ const DEFAULTS = {
   paddingTop: 10,
   paddingBottom: 10,
   paddingX: 12,
-  pageGap: 10,
+  pageGap: 0,
   contentGap: 0,
   borderRadius: 0,
   imgRadius: 0,

@@ -154,7 +154,7 @@ export const del = (url, data = {}, options = {}) => {
  */
 export const upload = (url, data = {}, options = {}) => {
   return request({
-    url: config.BASE_COMMON + url,
+    url: config.BASE_BUYER + url,
     method: "post",
     data: data,
     ...options,

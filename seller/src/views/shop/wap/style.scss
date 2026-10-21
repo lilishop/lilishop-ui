@@ -1,12 +1,42 @@
 .model-view {
   display: flex;
+  gap: 12px;
+  height: calc(100vh - 96px);
   .model-view-menu {
     flex: 1.5;
     min-width: 250px;
-    > .model-view-menu-item {
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    padding: 14px 12px;
+    box-sizing: border-box;
+    .model-view-menu-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .model-group {
+      margin-bottom: 16px;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    .model-group-title {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
+      font-size: 15px;
+      font-weight: 400;
+      color: #303133;
+      margin: 0 0 12px;
+      &::before {
+        content: "";
+        width: 3px;
+        height: 12px;
+        border-radius: 2px;
+        background: #409eff;
+        margin-right: 6px;
+      }
     }
   }
   .model-config {
@@ -16,17 +46,44 @@
     flex: 6;
   }
   .model-item {
-    line-height: 1.75;
-    font-size: 13px;
-    margin: 0 5px 10px 5px;
-    border: 1px solid #ededed;
-    background: #f6f6f9;
-    width: 70px;
-    height: 70px;
+    line-height: 1.4;
+    font-size: 12px;
+    border: 1px solid #ebeef5;
+    background: #ffffff;
+    border-radius: 8px;
+    height: 78px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    gap: 8px;
+    color: #606266;
+    cursor: grab;
+    transition: all 0.2s ease;
+    .el-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #f0f5ff;
+      color: #409eff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    &:hover {
+      border-color: #c6e2ff;
+      box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
+      transform: translateY(-2px);
+      color: #303133;
+      .el-icon {
+        background: #409eff;
+        color: #ffffff;
+      }
+    }
+    &:active {
+      cursor: grabbing;
+    }
   }
 }
 .model-view-content {
@@ -36,6 +93,8 @@
   justify-content: flex-start;
   align-items: center;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .wap-title {
   line-height: 44px;
@@ -48,12 +107,12 @@
 .content {
   box-sizing: border-box;
   margin: 20px 0;
-  padding: 50px 13px;
-  width: 360px;
-  background: url("../../../assets/iPhoneX_model.png") no-repeat;
-  height: 780px;
-  background-size: 100% 100%;
-  overflow: hidden;
+  width: 375px;
+  background: #ebebeb;
+  min-height: calc(100vh - 200px);
+  border-radius: 8px;
+  overflow: visible;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
 
@@ -61,8 +120,7 @@
     flex: 1;
     width: 100%;
     min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: visible;
     background: #ebebeb;
     padding-bottom: 100px;
     box-sizing: border-box;
@@ -77,11 +135,67 @@
 .list {
   position: relative;
 }
-.close {
+.floor-name {
   position: absolute;
-  right: 5px;
-  top: 10px;
-  z-index: 99;
+  right: calc(100% + 8px);
+  top: 8px;
+  z-index: 60;
+  background: #ffffff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 14px;
+  color: #606266;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+.floor-tools {
+  position: absolute;
+  right: -56px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  .el-icon {
+    font-size: 20px;
+    padding: 9px 12px;
+    cursor: pointer;
+    color: #606266;
+    &:hover {
+      color: #409eff;
+    }
+    &.disabled {
+      color: #dcdfe6;
+      cursor: not-allowed;
+    }
+  }
+}
+.floor-hidden-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.unknown-component {
+  padding: 16px 10px;
+  background: #fff2f0;
+  border: 1px dashed #ffccc7;
+  color: #cf1322;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
 }
 
 .model-btn {
@@ -97,15 +211,16 @@
   text-align: center;
   font-weight: bold;
   line-height: 2;
-  :deep(img) {
+  :deep(img){
     margin: 0 auto;
   }
 }
 .model-config {
   overflow-y: auto;
+  background: #f5f7fa;
 }
 
 .active {
   box-sizing: border-box;
-  border: 1px solid $theme_color;
+  border: 2px solid $theme_color;
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="decorate">
-    <div class="decorate-title">
+    <div class="decorate-title" v-if="!hidePanelTitle">
       {{ res.name }}
 
       <el-button
@@ -20,14 +20,24 @@
         style="margin-left: 20px"
         size="small"
         plain
-        v-if="res.type == 'promotions' || res.drawerPromotions"
+        v-if="res.drawerPromotions"
         type="primary"
         @click="selectPromotions()"
         >选择促销活动</el-button
       >
     </div>
+
+    <!-- 新组件独立配置面板（按 type 分发） -->
+    <component
+      v-if="panelComponent"
+      :is="panelComponent"
+      :res="res"
+      @handleDrawer="emit('handleDrawer', $event)"
+    />
+    <!-- 老组件遗留配置分支 -->
+    <template v-else>
     <el-alert
-      v-if="res.name == '商品分类'"
+      v-if="res.name == '商品列表'"
       type="warning"
       title="装修提示"
       :closable="false"
@@ -95,9 +105,7 @@
     <div
       class="decorate-list"
       v-if="
-        (res.type != 'tpl_ad_list' &&
-          res.type != 'tpl_activity_list' &&
-          res.type != 'promotions') ||
+        (res.type != 'tpl_ad_list' && res.type != 'tpl_activity_list') ||
         res.drawer ||
         res.drawerPromotions
       "
@@ -107,7 +115,7 @@
         v-for="(item, index) in res.options.list"
         :key="index"
       >
-        <div class="decorate-item-title">
+        <div class="decorate-item-title" v-if="res.type != 'video'">
           <div>卡片</div>
           <el-icon
             v-if="res.close || res.type == 'promotionDetail'"
@@ -247,7 +255,7 @@
                 @click="changeTextAlign('left')"
               >
                 <img
-                  :src="alignTextLeftImg"
+                  :src="alignTextLeft"
                   class="align-text"
                   alt=""
                 />
@@ -258,7 +266,7 @@
                 @click="changeTextAlign('center')"
               >
                 <img
-                  :src="alignTextCenterImg"
+                  :src="alignTextCenter"
                   class="align-text"
                   alt=""
                 />
@@ -269,7 +277,7 @@
                 @click="changeTextAlign('right')"
               >
                 <img
-                  :src="alignTextRightImg"
+                  :src="alignTextRight"
                   class="align-text"
                   alt=""
                 />
@@ -373,21 +381,17 @@
             </div>
           </div>
 
+          <!-- 视频楼层配置 -->
+          <video-config
+            v-if="res.type == 'video'"
+            :item="item"
+            @select-file="(field) => handleClickFile(item, index, field)"
+          />
+
           <!-- 填写链接 -->
 
-          <div class="decorate-view" v-if="res.onlyImg">
-            <div class="decorate-view-title">选择模式</div>
-
-            <div>
-              <el-radio-group v-model="item.model">
-                <el-radio value="link">链接</el-radio>
-                <el-radio value="hotzone">热区</el-radio>
-              </el-radio-group>
-            </div>
-          </div>
-
           <div class="decorate-view" v-if="!res.notLink">
-            <div class="decorate-view-title">选择链接</div>
+            <div class="decorate-view-title">{{ item.model === "hotzone" ? "热区" : "选择链接" }}</div>
             <div
               v-if="item.url && item.url.length != 0"
               class="decorate-view-link"
@@ -493,7 +497,7 @@
     >
 
     <liliDialog
-      ref="liliDialog"
+      ref="liliDialogRef"
       @selectedLink="selectedLink"
       @selectedGoodsData="selectedGoodsData"
     ></liliDialog>
@@ -520,26 +524,36 @@
     <hotzone ref="hotzoneRef" @changeZone="changeZone"></hotzone>
 
     <el-dialog v-model="picModelFlag" width="1200px" append-to-body destroy-on-close>
-      <ossManage @callback="callbackSelected" :is-component="true" :initialize="picModelFlag" :max-select="1" ref="ossManageRef" />
+      <ossManage
+        @callback="callbackSelected"
+        :is-component="true"
+        :initialize="picModelFlag"
+        :max-select="1"
+        ref="ossManageRef"
+      />
     </el-dialog>
+    </template>
   </div>
 </template>
 <script setup>
-import { ref, watch, nextTick } from "vue";
+import { ref, watch, nextTick, computed } from "vue";
 import { CircleClose } from "@element-plus/icons-vue";
 import { Message } from "@/utils/message";
-import alignTextLeftImg from "@/assets/align-text-left.png";
-import alignTextCenterImg from "@/assets/align-text-center.png";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import { modelData } from "./config";
 import hotzone from "@/views/shop/hotzone";
 import ways from "@/views/lili-dialog/wap.js";
 import categoryTemplate from "@/views/lili-dialog/template/category";
+import VideoConfig from "./video-config";
+import panelMap from "./config-panel";
+import alignTextLeft from "@/assets/align-text-left.png";
+import alignTextCenter from "@/assets/align-text-center.png";
+import alignTextRight from "@/assets/align-text-right.png";
 
 const props = defineProps(["res"]);
 const emit = defineEmits(["handleDrawer"]);
 
-// alignTextLeftImg/alignTextCenterImg、ways(选择链接的类型)、modelData(装修数据) 为 import 常量，模板中直接使用
+// alignTextLeft/alignTextCenter/alignTextRight、ways(选择链接的类型)、modelData(装修数据) 为 import 常量，模板中直接使用
 const picModelFlag = ref(false); //图片选择器
 const linkType = ref("goods"); // dialog弹窗口类型
 const styleFlag = ref(false); //广告魔方开关
@@ -547,14 +561,26 @@ const textAlign = ref(
   props.res.options.list[0] ? props.res.options.list[0].textAlign : "center"
 ); //文字对齐方式
 const promotionsFlag = ref(false); //广告魔方开关
+const selectedLinkIndex = ref(""); //选择链接的索引
 const selectedGoods = ref(""); // 已选商品
 const selectedLinks = ref(""); // 已选链接
+const modelList = ref(""); // 装修列表
 const enableSelectCategory = ref(false); //商品是否绑定分类
 const pendingCategory = ref(null); // 选择分类弹窗草稿
 const goodsSelectedIndex = ref(0); //绑定商品分类的索引
+const pictureField = ref("img"); //图片选择器回写的字段
+
+// 新组件按 type 分发到独立配置面板；老组件走下方遗留分支
+const panelComponent = computed(
+  () => (props.res && panelMap[props.res.type]) || null
+);
+// 面板声明 hideDecorateTitle 时，标题行由面板自己渲染
+const hidePanelTitle = computed(
+  () => !!(panelComponent.value && panelComponent.value.hideDecorateTitle)
+);
 
 // hotzoneRef/ossManageRef：模板 ref 与组件 import 同名，改名避免互相覆盖
-const liliDialog = ref(null);
+const liliDialogRef = ref(null);
 const hotzoneRef = ref(null);
 const ossManageRef = ref(null);
 
@@ -722,9 +748,9 @@ function clickDrawer(item, index) {
 }
 // 打开图片选择器
 function liliDialogFlag(flag) {
-  liliDialog.value.clearGoodsSelected();
-  liliDialog.value.goodsFlag = flag;
-  liliDialog.value.flag = true;
+  liliDialogRef.value.clearGoodsSelected();
+  liliDialogRef.value.goodsFlag = flag;
+  liliDialogRef.value.flag = true;
 }
 
 function changeTextAlign(val) {
@@ -743,8 +769,23 @@ function clickLink(val, index, oval) {
     liliDialogFlag(false);
   }
 }
+function addZone(zoneInfo) {
+  selectedLinks.value.zoneInfo.push(zoneInfo);
+}
 function changeZone(zoneInfo) {
   selectedLinks.value.zoneInfo = zoneInfo;
+}
+//点击图片解析成base64
+function changeFile(item, index) {
+  const file = document.getElementById("files" + index).files[0];
+  if (file == void 0) return false;
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  nextTick((res) => {
+    reader.onload = (e) => {
+      item.img = e.target.result;
+    };
+  });
 }
 //添加设置
 function addDecorate(type, data) {
@@ -768,20 +809,43 @@ function addDecorate(type, data) {
     props.res.options.list.push(way);
   }
 }
+function addHotPoint() {
+  let way = {
+    img: "https://picsum.photos/id/264/200/200",
+    text: "标题",
+    link: "",
+    url: "",
+  };
+  props.res.options.list[0].points.push(way);
+}
 // 图片选择器回显
 function callbackSelected(val) {
   picModelFlag.value = false;
   if (!val?.url) return;
-  selectedGoods.value.img = val.url;
+  if (pictureField.value === "bgImage") {
+    if (!selectedGoods.value.style) {
+      selectedGoods.value.style = {};
+    }
+    selectedGoods.value.style.bgImage = val.url;
+    return;
+  }
+  selectedGoods.value[pictureField.value] = val.url;
 }
 // 点击选择图片
-function handleClickFile(item, index) {
+function handleClickFile(item, index, field = "img") {
+  pictureField.value = field;
   selectedGoods.value = item;
   picModelFlag.value = true;
   nextTick(() => {
-    if (ossManageRef.value) {
-      ossManageRef.value.selectImage = true;
+    const oss = ossManageRef.value;
+    if (!oss) return;
+    oss.selectImage = true;
+    if (field === "videoUrl") {
+      oss.fileType = "video";
+    } else {
+      oss.fileType = "pic";
     }
+    oss.changeFileType();
   });
 }
 function removeNotice(index) {

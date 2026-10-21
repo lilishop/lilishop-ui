@@ -1,30 +1,30 @@
 
 <template>
-  <div class="layout">
-    <div class="view-list">
+  <div class="layout" :style="[wrapperStyle, gapStyle]">
+    <div class="view-list" :style="gapStyle">
       <div class="view-item">
         <div class="-item-tilte">{{res.list[0].title}}</div>
-        <div class="-item-image">
+        <div class="-item-image" :style="imgStyle">
           <img :src="res.list[0].img" alt />
         </div>
       </div>
       <div class="view-item">
         <div class="-item-tilte">{{res.list[1].title}}</div>
-        <div class="-item-image">
+        <div class="-item-image" :style="imgStyle">
           <img :src="res.list[1].img" alt />
         </div>
       </div>
     </div>
-    <div class="view-list">
+    <div class="view-list" :style="gapStyle">
       <div class="view-item">
         <div class="-item-tilte">{{res.list[2].title}}</div>
-        <div class="-item-image">
+        <div class="-item-image" :style="imgStyle">
           <img :src="res.list[2].img" alt />
         </div>
       </div>
       <div class="view-item">
         <div class="-item-tilte">{{res.list[3].title}}</div>
-        <div class="-item-image">
+        <div class="-item-image" :style="imgStyle">
           <img :src="res.list[3].img" alt />
         </div>
       </div>
@@ -33,8 +33,15 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+import { cubeWrapperStyle, cubeImgStyle, cubeGapStyle } from "./cubeStyle";
+
 defineOptions({ title: "文字图片模板" });
-defineProps(["res"]);
+const props = defineProps(["res"]);
+
+const wrapperStyle = computed(() => cubeWrapperStyle(props.res));
+const imgStyle = computed(() => cubeImgStyle(props.res));
+const gapStyle = computed(() => cubeGapStyle(props.res));
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";
@@ -73,7 +80,8 @@ defineProps(["res"]);
     border: 1px solid #ededed;
 
   > .view-item {
-    width: 50%;
+    flex: 1;
+    min-width: 0;
   }
   > .view-item:nth-of-type(1) {
     > .-item-tilte {

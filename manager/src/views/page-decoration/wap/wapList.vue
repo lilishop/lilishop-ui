@@ -24,6 +24,11 @@
             {{ formatTime(row.createTime) }}
           </template>
         </el-table-column>
+        <el-table-column label="修改时间" width="180">
+          <template #default="{ row }">
+            {{ formatTime(row.updateTime) }}
+          </template>
+        </el-table-column>
         <el-table-column label="状态" width="120" align="center">
           <template #default="{ row }">
             <el-switch

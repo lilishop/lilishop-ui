@@ -9,11 +9,11 @@
       />
       <div v-else class="integral-head-title" :style="headTitleStyle">{{ title }}</div>
       <div class="integral-head-space"></div>
-      <div class="integral-head-more" :style="moreStyle">更多 &gt;</div>
+      <div class="integral-head-more" :style="moreStyle">更多 ></div>
     </div>
     <!-- 老数据：原始四列样式 -->
     <div v-if="!styled" class="join-box">
-      <div class="join-item" v-for="item in 4" :key="item">
+      <div class="join-item" v-for="item in count" :key="item">
         <div class="item-img-box">
           <img
             class="item-img"
@@ -71,6 +71,45 @@
 </template>
 <script setup>
 import { computed } from "vue";
+const INTEGRAL_DEMO = [
+  {
+    goodsName: "小米小爱音箱 Play 增强版 智能红外遥控",
+    points: 1200,
+    originalPrice: 149,
+    thumbnail: "/demo/xiaomi-phone.png",
+  },
+  {
+    goodsName: "Apple 20W USB-C 官方原装快充充电器",
+    points: 1500,
+    originalPrice: 149,
+    thumbnail: "/demo/apple-phone.png",
+  },
+  {
+    goodsName: "米家自动洗手机 套装 抑菌洗手液",
+    points: 800,
+    originalPrice: 79,
+    thumbnail: "/demo/xiaomi-phone.png",
+  },
+  {
+    goodsName: "多功能桌面风扇 超长续航三档风力",
+    points: 600,
+    originalPrice: 59,
+    thumbnail: "/demo/vivo-phone.png",
+  },
+  {
+    goodsName: "精品保温杯 316不锈钢 480ml",
+    points: 990,
+    originalPrice: 99,
+    thumbnail: "/demo/apple-phone.png",
+  },
+  {
+    goodsName: "无线双模鼠标 2.4G+蓝牙 轻音便携",
+    points: 750,
+    originalPrice: 69,
+    thumbnail: "/demo/vivo-phone.png",
+  },
+];
+
 
 const props = defineProps(["res"]);
 
@@ -79,9 +118,27 @@ const title = computed(
 );
 const firstItem = computed(() => (props.res.list && props.res.list[0]) || {});
 const layoutStyle = computed(() => props.res.layoutStyle || "1");
+const count = computed(() => {
+  const c = firstItem.value?.count ?? props.res?.count;
+  if (c !== undefined && c !== null && !isNaN(Number(c)) && Number(c) > 0) {
+    return Number(c);
+  }
+  return layoutStyle.value === "1" ? 4 : 6;
+});
+
 const displayData = computed(() => {
-  const data = (firstItem.value && firstItem.value.data) || [];
-  return layoutStyle.value === "1" ? data.slice(0, 4) : data.slice(0, 6);
+  const raw = (firstItem.value && firstItem.value.data) || [];
+  const data = raw.length ? raw : INTEGRAL_DEMO;
+  const targetCount = count.value;
+  if (data.length >= targetCount) {
+    return data.slice(0, targetCount);
+  }
+  // 如果设置的数量大于现有模拟数据长度，循环补齐，使预览数量与配置数量严格一致
+  const result = [...data];
+  while (result.length < targetCount) {
+    result.push({ ...data[result.length % data.length] });
+  }
+  return result.slice(0, targetCount);
 });
 
 // 面板保存过样式字段才启用新样式，老数据保持原样
@@ -94,7 +151,7 @@ const wrapperStyle = computed(() => {
     return {
       background: res.bgColor || "#FFFFFF",
       padding: `0 ${res.paddingX || 0}px`,
-      marginBottom: `${res.pageGap !== undefined ? res.pageGap : 10}px`,
+      marginBottom: `${res.pageGap !== undefined ? res.pageGap : 0}px`,
       borderRadius: `${res.borderRadius || 0}px`,
       overflow: "hidden",
     };

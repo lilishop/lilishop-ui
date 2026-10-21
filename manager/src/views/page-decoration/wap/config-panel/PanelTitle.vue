@@ -157,7 +157,7 @@ const DEFAULTS = {
   paddingTop: 10,
   paddingBottom: 10,
   paddingX: 12,
-  pageGap: 10,
+  pageGap: 0,
   radiusTop: 0,
   radiusBottom: 0,
   color: "#282828",

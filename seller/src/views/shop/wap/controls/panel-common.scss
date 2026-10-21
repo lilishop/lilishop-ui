@@ -1,0 +1,179 @@
+// 新配置面板共用的骨架样式（灰底 + 白色卡片 + 头部 tabs）
+// 使用方式：面板根类名需与 .panel-root 一起用，或在面板 scoped 样式里 @import 后把根类加上
+.panel-search,
+.panel-promotion,
+.panel-coupon,
+.panel-title,
+.panel-shop,
+.panel-goods,
+.panel-notice,
+.panel-video,
+.panel-article,
+.panel-page-setting {
+  background: #f5f7fa;
+  margin: 0 -20px;
+  padding: 0 12px 12px;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  margin-bottom: 12px;
+  padding: 0 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  .panel-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #303133;
+  }
+}
+.panel-tabs {
+  display: inline-flex;
+  background: #f4f4f5;
+  border-radius: 8px;
+  padding: 3px;
+  .panel-tab {
+    padding: 5px 14px;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #606266;
+    transition: all 0.2s ease;
+    &.active {
+      background: #ffffff;
+      color: #409eff;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+    }
+  }
+}
+.panel-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+.panel-card-fill {
+  flex: 1;
+  margin-bottom: 0;
+}
+// 面板根容器改为纵向 flex，让最后一张卡片可撑满到底
+.panel-flex-one,
+.panel-carousel,
+.panel-ad-cube,
+.panel-menu,
+.panel-search,
+.panel-notice,
+.panel-video,
+.panel-title,
+.panel-integral,
+.panel-coupon,
+.panel-article,
+.panel-shop,
+.panel-goods,
+.panel-blank,
+.panel-line,
+.panel-rich-text,
+.panel-promotion,
+.panel-page-setting {
+  display: flex;
+  flex-direction: column;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 12px;
+}
+.section-tip {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 10px;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 0;
+  .setting-label {
+    font-size: 14px;
+    color: #606266;
+    .setting-value {
+      margin-left: 8px;
+      color: #303133;
+    }
+  }
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  overflow: hidden;
+  .seg-item {
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #606266;
+    cursor: pointer;
+    border-left: 1px solid #dcdfe6;
+    transition: all 0.2s ease;
+    &:first-child {
+      border-left: none;
+    }
+    &.active {
+      background: #ecf5ff;
+      color: #409eff;
+      font-weight: 600;
+    }
+  }
+}
+// 选项平铺选择器：一行两个，超出换行
+.layout-seg {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  .seg-item {
+    flex: 1 0 40%;
+    padding: 6px 0;
+    text-align: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+    &:nth-child(3) {
+      border-left: none;
+    }
+    &:nth-child(n + 3) {
+      border-top: 1px solid #dcdfe6;
+    }
+  }
+  &.layout-seg-3 {
+    flex-wrap: nowrap;
+    .seg-item {
+      flex: 1 1 0;
+      &:nth-child(3) {
+        border-left: 1px solid #dcdfe6;
+      }
+      &:nth-child(n + 3) {
+        border-top: none;
+      }
+    }
+  }
+}
+// 选项平铺选择器（独立用法）：一行三个
+.layout-seg-3 {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  .seg-item {
+    flex: 1 1 0;
+    padding: 6px 0;
+    text-align: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+}

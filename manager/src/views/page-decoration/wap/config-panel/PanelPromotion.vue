@@ -231,7 +231,7 @@ const DEFAULTS = {
   paddingBottom: 10,
   contentGap: 10,
   paddingX: 12,
-  pageGap: 10,
+  pageGap: 0,
   borderRadius: 0,
   imgRadius: 10,
   showGoodsName: true,

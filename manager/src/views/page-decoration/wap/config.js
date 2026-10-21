@@ -851,7 +851,7 @@ export const modelData = [
       bgColor: "#f5f5f5",
       height: 10,
       paddingX: 0,
-      pageGap: 10
+      pageGap: 0
     }
   },
   {
@@ -866,7 +866,7 @@ export const modelData = [
       lineStyle: "dashed",
       lineHeight: 1,
       paddingX: 0,
-      pageGap: 10
+      pageGap: 0
     }
   },
   {
@@ -879,7 +879,7 @@ export const modelData = [
       content: "",
       bgColor: "#FFFFFF",
       paddingX: 12,
-      pageGap: 10,
+      pageGap: 0,
       borderRadius: 0
     }
   },
@@ -988,7 +988,7 @@ export const modelData = [
       list: [{ title: "文章列表", categoryId: "", count: 3 }],
       bgColor: "#FFFFFF",
       paddingX: 0,
-      pageGap: 10,
+      pageGap: 0,
       borderRadius: 0
     }
   },
@@ -1002,7 +1002,7 @@ export const modelData = [
       list: [{ title: "店铺列表", count: 4 }],
       bgColor: "#FFFFFF",
       paddingX: 0,
-      pageGap: 10,
+      pageGap: 0,
       borderRadius: 0
     }
   },
@@ -1044,7 +1044,7 @@ export const modelData = [
       paddingBottom: 10,
       paddingX: 12,
       contentGap: 10,
-      pageGap: 10,
+      pageGap: 0,
       borderRadius: 0,
       contentRadius: 7
     }

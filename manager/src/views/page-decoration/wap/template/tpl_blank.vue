@@ -4,7 +4,7 @@
     :style="{
       background: blankBg,
       height: px(res.height ?? 10),
-      margin: `0 ${px(res.paddingX ?? 0)} ${px(res.pageGap ?? 10)}`,
+      margin: `0 ${px(res.paddingX ?? 0)} ${px(res.pageGap ?? 0)}`,
     }"
   ></div>
 </template>

@@ -4,7 +4,7 @@
     :style="{
       background: lineBg,
       padding: `0 ${px(res.paddingX ?? 0)}`,
-      marginBottom: px(res.pageGap ?? 10),
+      marginBottom: px(res.pageGap ?? 0),
     }"
   >
     <div

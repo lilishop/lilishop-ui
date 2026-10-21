@@ -145,7 +145,7 @@ export default {
         return {
           background: this.res.bgColor || "#FFFFFF",
           padding: `10px ${this.res.paddingX || 0}px`,
-          marginBottom: `${this.res.pageGap !== undefined ? this.res.pageGap : 10}px`,
+          marginBottom: `${this.res.pageGap !== undefined ? this.res.pageGap : 0}px`,
           borderRadius: `${this.res.borderRadius || 0}px`,
           overflow: "hidden",
         };

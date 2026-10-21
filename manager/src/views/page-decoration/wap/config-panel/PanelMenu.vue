@@ -179,7 +179,7 @@ const DEFAULTS = {
   paddingBottom: 10,
   paddingX: 12,
   contentGap: 10,
-  pageGap: 10,
+  pageGap: 0,
   borderRadius: 0,
   imgRadius: 30,
 };

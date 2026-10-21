@@ -7,7 +7,7 @@
         <span class="title-sub" :style="subStyle" v-if="item.title1">{{ item.title1 }}</span>
       </div>
       <div v-if="item.showMore" class="title-more" :style="moreStyle">
-        {{ item.moreText || "更多" }} &gt;
+        {{ item.moreText || "更多" }} >
       </div>
     </div>
     <!-- 老数据：保持原样 -->

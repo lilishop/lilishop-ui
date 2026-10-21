@@ -98,7 +98,7 @@ const DEFAULTS = {
   paddingBottom: 10,
   contentGap: 10,
   paddingX: 0,
-  pageGap: 10,
+  pageGap: 0,
   borderRadius: 0,
 };
 const DEFAULT_ITEM = { title: "文章列表", categoryId: "", count: 6 };

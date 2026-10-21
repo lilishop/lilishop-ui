@@ -1,14 +1,14 @@
 
 <template>
-  <div class="layout">
-    <div class="view-width-100">
+  <div class="layout" :style="[wrapperStyle, gapStyle]">
+    <div class="view-width-100" :style="imgStyle">
       <img alt="模板图片" class="image-mode" :src="res.list[0].img" />
     </div>
-    <div class="view-width-100">
-      <div class="view-height-85">
+    <div class="view-width-100" :style="gapStyle">
+      <div class="view-height-85" :style="imgStyle">
         <img class="image-mode" :src="res.list[1].img" alt />
       </div>
-      <div class="view-height-85">
+      <div class="view-height-85" :style="imgStyle">
         <img class="image-mode" :src="res.list[2].img" alt />
       </div>
     </div>
@@ -16,8 +16,15 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+import { cubeWrapperStyle, cubeImgStyle, cubeGapStyle } from "./cubeStyle";
+
 defineOptions({ title: "上一下二" });
-defineProps(["res"]);
+const props = defineProps(["res"]);
+
+const wrapperStyle = computed(() => cubeWrapperStyle(props.res));
+const imgStyle = computed(() => cubeImgStyle(props.res));
+const gapStyle = computed(() => cubeGapStyle(props.res));
 </script>
 <style lang="scss" scoped>
 @import "./tpl.scss";
@@ -26,7 +33,6 @@ defineProps(["res"]);
   align-items: center;
   justify-content: center;
   background-size: cover;
-  height: 170px;
   flex-direction: column;
 }
 img {
@@ -40,6 +46,7 @@ img {
 }
 .view-height-85 {
   padding: 0 1px;
-  width: 50%;
+  flex: 1;
+  min-width: 0;
 }
 </style>

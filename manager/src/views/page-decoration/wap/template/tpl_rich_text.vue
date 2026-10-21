@@ -4,7 +4,7 @@
     :style="{
       background: richBg,
       padding: `0 ${px(res.paddingX ?? 12)}`,
-      marginBottom: px(res.pageGap ?? 10),
+      marginBottom: px(res.pageGap ?? 0),
       borderRadius: px(res.borderRadius ?? 0),
       overflow: 'hidden',
     }"

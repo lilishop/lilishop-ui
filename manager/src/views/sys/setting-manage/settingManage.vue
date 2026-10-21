@@ -75,6 +75,14 @@ const setting = ref([
     type: "LIVE_SETTING",
     name: "直播设置",
   },
+  {
+    type: "VERIFICATION_SETTING",
+    name: "验证码设置",
+  },
+  {
+    type: "SECURITY_SETTING",
+    name: "安全设置",
+  },
 ]);
 const authLogin = ref([
   // 登录设置

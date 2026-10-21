@@ -89,7 +89,7 @@ const DEFAULTS = {
   paddingBottom: 10,
   contentGap: 5,
   paddingX: 12,
-  pageGap: 10,
+  pageGap: 0,
   borderRadius: 0,
 };
 const DEFAULT_ITEM = { title: "优惠券", count: 5 };

@@ -58,7 +58,7 @@ const DEFAULTS = {
   bgColor1: "#FFFFFF",
   bgColor2: "#FFFFFF",
   paddingX: 12,
-  pageGap: 10,
+  pageGap: 0,
   borderRadius: 0,
 };
 

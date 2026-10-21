@@ -34,12 +34,13 @@
       <el-button size="default" type="primary" @click="handleSpinShow">保存页面</el-button>
 
       <el-dialog
-        title="保存中"
+        :title="progress ? '保存页面' : '保存中'"
         v-model="saveDialog"
         :show-close="true"
         :close-on-click-modal="false"
         append-to-body
         destroy-on-close
+        @closed="handleDialogClosed"
       >
         <div v-if="progress">
           <div class="model-item">
@@ -56,7 +57,7 @@
           </div>
           <div class="model-item">
             将当前装修内容写入到本地缓存中，下次进入页面时可继续使用
-            <el-button type="small" @click="witeLocalStore">写入</el-button>
+            <el-button size="small" @click="witeLocalStore">写入</el-button>
           </div>
 
           <el-button type="primary" @click="save()">保存</el-button>
@@ -84,7 +85,7 @@ const appStore = useAppStore();
 
 const hasCache = ref(false); // 是否有缓存
 const progress = ref(true); // 展示进度
-const num = ref(20); // 提交进度
+const num = ref(0); // 提交进度
 const saveDialog = ref(false); // 加载状态
 const way = ref([
   // 装修tab栏切换
@@ -119,9 +120,16 @@ function startEditName() {
 
 const submitWay = reactive({
   // 表单信息
-  pageShow: route.query.type || false,
+  pageShow: route.query.type === "true" || route.query.type === true || route.query.type === "OPEN",
   pageClientType: "H5"
 });
+
+watch(
+  () => route.query.type,
+  (val) => {
+    submitWay.pageShow = val === "true" || val === true || val === "OPEN";
+  }
+);
 
 // 模板名称与「页面设置」面板共用 store 中的同一份数据，双向同步
 const pageName = computed({
@@ -191,7 +199,14 @@ function clickBtn(val) {
  * 加载，并保存模板
  */
 function handleSpinShow() {
+  progress.value = true;
+  num.value = 0;
   saveDialog.value = true;
+}
+
+function handleDialogClosed() {
+  progress.value = true;
+  num.value = 0;
 }
 
 // 填写是否发布，模板名称之后保存
@@ -220,49 +235,57 @@ function save() {
     return false;
   }
 
-  submitWay?.pageShow === true
-    ? (submitWay.pageShow = "OPEN")
-    : (submitWay.pageShow = "CLOSE");
-
-  submitWay.name = pageName.value;
-  submitWay.pageData = JSON.stringify(appStore.styleStore);
-  submitWay.pageType = "INDEX";
-  submitWay.pageType =  route.query.pagetype ||  "INDEX";
-  // submitWay.pageType = props.pagetype;
+  const payload = {
+    ...submitWay,
+    pageShow: submitWay.pageShow ? "OPEN" : "CLOSE",
+    name: pageName.value,
+    pageData: JSON.stringify(appStore.styleStore),
+    pageType: route.query.pagetype || "INDEX",
+  };
 
   if (route.query.pagetype == 'ALERT' || route.query.pagetype == 'OPEN_SCREEN_ANIMATION') {
-    update(submitWay);
+    update(payload);
   } else {
-    route.query.id ? updateHome() : submit(submitWay);
+    route.query.id ? updateHome(payload) : submit(payload);
   }
-
-  // route.query.id ? update() : submit(submitWay);
 }
 
 // 更新
-function updateHome() {
+function updateHome(payload) {
   progress.value = false;
-  API_Other.updateHome(route.query.id, {
+  num.value = 20;
+  const data = payload || {
     pageData: JSON.stringify(appStore.styleStore),
     name: pageName.value,
-    pageShow: submitWay.pageShow,
-    pageType: submitWay.pageType,
+    pageShow: submitWay.pageShow ? "OPEN" : "CLOSE",
+    pageType: submitWay.pageType || route.query.pagetype || "INDEX",
     pageClientType: "H5",
-  })
+  };
+  API_Other.updateHome(route.query.id, data)
     .then(res => {
-      num.value = 50;
+      num.value = 60;
       if (res.success) {
-        num.value = 80;
+        num.value = 100;
         /**制作保存成功动画¸ */
         setTimeout(() => {
           saveDialog.value = false;
+          progress.value = true;
+          num.value = 0;
           Message.success("修改成功");
           goBack();
-        }, 1000);
+        }, 800);
       } else {
+        progress.value = true;
+        num.value = 0;
         saveDialog.value = false;
         Message.error("修改失败，请稍后重试");
       }
+    })
+    .catch(() => {
+      progress.value = true;
+      num.value = 0;
+      saveDialog.value = false;
+      Message.error("修改失败，请稍后重试");
     });
 }
 
@@ -274,6 +297,7 @@ function update(submitWay) {
     return false;
   }
   progress.value = false;
+  num.value = 20;
 
   let id = route.query.id;
   const pagetype = route.query.pagetype;
@@ -283,29 +307,40 @@ function update(submitWay) {
     OPEN_SCREEN_ANIMATION: "OPEN_SCREEN_ANIMATION",
   }[pagetype ? pagetype : "INDEX"];
 
+  const payload = { ...submitWay };
   if (pagetype) {
-    submitWay.pageData = JSON.stringify(
+    payload.pageData = JSON.stringify(
       appStore.openStyleStore[0]
     );
-    submitWay.pageType = pageType;
+    payload.pageType = pageType;
     id = appStore.openStoreId;
   }
 
-  API_Other.updateHome(id, submitWay)
+  API_Other.updateHome(id, payload)
     .then((res) => {
-      num.value = 50;
+      num.value = 60;
       if (res.success) {
-        num.value = 80;
+        num.value = 100;
         /**制作保存成功动画¸ */
         setTimeout(() => {
           saveDialog.value = false;
+          progress.value = true;
+          num.value = 0;
           Message.success("修改成功");
           goBack();
-        }, 1000);
+        }, 800);
       } else {
+        progress.value = true;
+        num.value = 0;
         saveDialog.value = false;
         Message.error("修改失败，请稍后重试");
       }
+    })
+    .catch(() => {
+      progress.value = true;
+      num.value = 0;
+      saveDialog.value = false;
+      Message.error("修改失败，请稍后重试");
     });
 }
 
@@ -313,28 +348,42 @@ function update(submitWay) {
 
 // 返回查询数据页面
 function goBack() {
-  router.go(-1);
+  if (window.history.state?.back) {
+    router.go(-1);
+  } else {
+    window.close();
+  }
 }
 
 // 保存
 function submit(submitWay) {
   progress.value = false;
+  num.value = 20;
   API_Other.setHomeSetup(submitWay)
     .then(res => {
-      num.value = 50;
+      num.value = 60;
       if (res.success) {
-        num.value = 80;
+        num.value = 100;
         /**制作保存成功动画¸ */
         setTimeout(() => {
           saveDialog.value = false;
+          progress.value = true;
+          num.value = 0;
           Message.success("保存成功");
           goBack();
-        }, 1000);
+        }, 800);
       } else {
         progress.value = true;
+        num.value = 0;
         saveDialog.value = false;
         Message.error("保存失败，请稍后重试");
       }
+    })
+    .catch(() => {
+      progress.value = true;
+      num.value = 0;
+      saveDialog.value = false;
+      Message.error("保存失败，请稍后重试");
     });
 }
 </script>

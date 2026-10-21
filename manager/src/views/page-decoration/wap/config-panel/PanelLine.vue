@@ -47,7 +47,7 @@ const DEFAULTS = {
   lineStyle: "dashed",
   lineHeight: 1,
   paddingX: 0,
-  pageGap: 10,
+  pageGap: 0,
 };
 
 export default {

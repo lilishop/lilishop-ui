@@ -37,7 +37,7 @@ const DEFAULTS = {
   bgColor2: "#f5f5f5",
   height: 10,
   paddingX: 0,
-  pageGap: 10,
+  pageGap: 0,
 };
 
 export default {

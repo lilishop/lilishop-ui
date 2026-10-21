@@ -1,13 +1,13 @@
-
 :deep(.el-overlay) {
   z-index: 2000;
 }
-.decorate-view-link{
-    font-size: 12px;
-    margin: 0 4px;
-    flex: 1;
-    min-width: 0;
-    color: #999;
+
+.decorate-view-link {
+  font-size: 12px;
+  margin: 0 4px;
+  flex: 1;
+  min-width: 0;
+  color: #999;
 }
 .decorate-view-btn {
   flex-shrink: 0;
@@ -22,111 +22,179 @@
     margin: 0;
   }
 }
+
 .decorate-view-style {
-    border: 1px solid #ededed;
-    background: #f7f7fa;
-    text-align: center;
-    width: 100%;
-    padding: 30px 0 0 0;
-    margin-bottom: 20px;
-    cursor: pointer;
-    > .select-style {
-      background: #ededed;
-      padding: 15px 0;
-      font-size: 15px;
-    }
-  }
-  .decorate-border {
-    border: 1px solid #ededed;
-    margin: 10px 0;
-    padding: 0 10px;
-  }
-  .drawer {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    > .drawer-item {
-      cursor: pointer;
-      border: 1px solid #ededed;
-      background: #f9f0ff;
-      width: calc(50% - 7px);
-      box-sizing: border-box;
-      color: #9254de;
-      border-radius: 0.8em;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      flex-direction: column;
-      justify-content: center;
-    }
-  }
-  .hidden-input {
-    display: none;
-  }
-  .decorate {
-    padding: 0 20px;
-    height: calc(100vh - 120px);
-    overflow-y: auto;
-    padding-bottom: 120px;
-  }
-  .decorate-title {
-    height: 50px;
-    line-height: 50px;
-    font-weight: bold;
-  }
-  .decorate-list {
-    overflow: hidden;
-  }
-  .decorate-view {
-    display: flex;
-    margin: 20px 0;
-    align-items: center;
-  }
-  .decorate-item-box {
-    background: #fff;
-    padding: 10px;
-    border: 1px solid #ededed;
-  }
-  .decorate-item-title {
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    line-height: 40px;
-    padding: 0 10px;
-  }
-  .decorate-view-title {
-    margin-right: 10px;
-  }
-  .decorate-item {
+  border: 1px solid #ededed;
+  background: #f7f7fa;
+  text-align: center;
+  width: 100%;
+  padding: 30px 0 0 0;
+  margin-bottom: 20px;
+  cursor: pointer;
+
+  >.select-style {
     background: #ededed;
-    border-top-left-radius: 0.4em;
-    margin-bottom: 20px;
-    border-top-right-radius: 0.4em;
+    padding: 15px 0;
+    font-size: 15px;
   }
-  .show-image {
-    max-width: 50px;
-  }
-  .tips {
-    font-size: 12px;
-    color: #999;
-    > span {
-      color: $theme_color;
-    }
-  }
-  .selectBtn {
-    margin-left: 10px;
-  }
-  .bing-goods-list {
+}
+
+.decorate-border {
+  border: 1px solid #ededed;
+  margin: 10px 0;
+  padding: 0 10px;
+}
+
+.drawer {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+
+  >.drawer-item {
+    cursor: pointer;
+    border: 1px solid #ededed;
+    background: #f9f0ff;
+    width: calc(50% - 7px);
+    box-sizing: border-box;
+    color: #9254de;
+    border-radius: 0.8em;
+    height: 60px;
     display: flex;
-    > .bing-goods-item {
-      width: 50px;
-      height: 50px;
-      > img {
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+.hidden-input {
+  display: none;
+}
+
+.decorate {
+  padding: 0 20px;
+  height: calc(100vh - 96px);
+  overflow-y: auto;
+  background: #f5f7fa;
+}
+
+.decorate-title {
+  height: 50px;
+  line-height: 50px;
+  font-weight: bold;
+}
+
+.decorate-list {
+  overflow: hidden;
+}
+
+.decorate-view {
+  display: flex;
+  margin: 12px 0;
+  align-items: center;
+}
+
+.decorate-item-box {
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #ededed;
+}
+
+.decorate-item-title {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  line-height: 40px;
+  padding: 0 10px;
+}
+
+.decorate-view-title {
+  margin-right: 10px;
+
+}
+
+.decorate-item {
+  background: #ededed;
+  border-top-left-radius: 0.4em;
+  margin-bottom: 20px;
+  border-top-right-radius: 0.4em;
+}
+
+.show-image {
+  max-width: 50px;
+}
+
+.tips {
+  font-size: 12px;
+  color: #999;
+
+  >span {
+    color: $theme_color;
+  }
+}
+
+.selectBtn {
+  margin-left: 10px;
+}
+
+.bing-goods-list {
+  display: flex;
+
+  >.bing-goods-item {
+    width: 50px;
+    height: 50px;
+
+    >img {
+      width: 100%;
+      height: 100%;
+      display: block;
     }
   }
+}
+
+.align-text {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+.card-box {
+  display: flex;
+}
+
+.decorate-notice {
+  margin-top: 10px;
+}
+
+.card {}
+
+.card:hover {
+  background: #ededed;
+}
+
+.active {
+  background: #ededed;
+}
+.title-item{
+  border-bottom: 1px solid #ededed;
+  padding:10px 10px 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  >.title-btn{
+    display: flex;
+  }
+}
+.title-goodsName{
+  /* 适用于webkit内核和移动端 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+
+}
+.title-tooltip{
+  white-space: normal;
+}

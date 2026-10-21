@@ -23,7 +23,7 @@
           <span class="pt-success">{{ firstItem.groupSuccess }}</span>
         </template>
         <span class="pt-space"></span>
-        <span class="pt-more" :style="moreStyle">更多 &gt;</span>
+        <span class="pt-more" :style="moreStyle">更多 ></span>
       </div>
       <div class="pt-body">
         <!-- 样式一：纵向商品行 -->
@@ -154,7 +154,7 @@
         <span v-else class="lv-head-title">{{ firstItem.title || "精彩直播" }}</span>
         <span class="lv-head-sub" :style="titleStyle">{{ firstItem.title1 || "精彩抢先看" }}</span>
         <span class="lv-space"></span>
-        <span class="lv-more" :style="moreStyle">更多 &gt;</span>
+        <span class="lv-more" :style="moreStyle">更多 ></span>
       </div>
       <div class="lv-head-en">Exciting live streaming</div>
       <!-- 单行：横向滑动卡片 -->
@@ -201,7 +201,7 @@
         <span class="sk-divider"></span>
         <span class="sk-head-sub" :style="titleStyle">{{ firstItem.title1 || "邀请你的好友来参与" }}</span>
         <span class="sk-space"></span>
-        <span class="sk-go">GO &gt;</span>
+        <span class="sk-go">GO ></span>
       </div>
       <!-- 样式一：横向滑动 -->
       <div v-if="layoutStyle === '1'" class="sk-scroll" :style="gapStyle">
@@ -246,7 +246,7 @@
         <span class="sk-divider"></span>
         <span class="sk-head-sub" :style="titleStyle">{{ firstItem.title1 || "邀请好友来砍价" }}</span>
         <span class="sk-space"></span>
-        <span class="sk-go">GO &gt;</span>
+        <span class="sk-go">GO ></span>
       </div>
       <!-- 样式一：横向滑动 -->
       <div v-if="layoutStyle === '1'" class="sk-scroll" :style="gapStyle">
@@ -287,7 +287,7 @@
       <div v-if="styled && (res.icon || res.moreUrl)" class="promo-head">
         <img v-if="res.icon" class="promo-head-icon" :src="res.icon" alt="" />
         <div class="promo-head-space"></div>
-        <div v-if="res.moreUrl" class="promo-more" :style="moreStyle">更多 &gt;</div>
+        <div v-if="res.moreUrl" class="promo-more" :style="moreStyle">更多 ></div>
       </div>
       <div class="join-list" :style="gapStyle">
         <div
@@ -343,6 +343,155 @@
 </template>
 <script setup>
 import { computed } from "vue";
+const SECKILL_DEMO = [
+  {
+    goodsName: "iPhone 16 Pro 256GB 黑色钛金属",
+    price: 6999,
+    originalPrice: 8999,
+    thumbnail: "/demo/apple-phone.png",
+  },
+  {
+    goodsName: "Xiaomi 15 Pro 16GB+512GB 沉墨色",
+    price: 4699,
+    originalPrice: 5299,
+    thumbnail: "/demo/xiaomi-phone.png",
+  },
+  {
+    goodsName: "vivo X200 Pro 16GB+512GB 钛色",
+    price: 4899,
+    originalPrice: 5499,
+    thumbnail: "/demo/vivo-phone.png",
+  },
+  {
+    goodsName: "Apple Watch Series 10 46mm GPS款",
+    price: 2699,
+    originalPrice: 3199,
+    thumbnail: "/demo/apple-phone.png",
+  },
+  {
+    goodsName: "AirPods Pro (第二代) 配USB-C充电盒",
+    price: 1399,
+    originalPrice: 1899,
+    thumbnail: "/demo/apple-phone.png",
+  },
+  {
+    goodsName: "Xiaomi 平板 6S Pro 12.4英寸",
+    price: 2799,
+    originalPrice: 3299,
+    thumbnail: "/demo/xiaomi-phone.png",
+  },
+];
+
+const PINTUAN_DEMO = [
+  {
+    goodsName: "iPhone 16 Pro 5G智能手机 256GB 白色钛金属",
+    price: 7999,
+    originalPrice: 8999,
+    thumbnail: "/demo/apple-phone.png",
+    groupNum: 2,
+    joined: 128,
+  },
+  {
+    goodsName: "Xiaomi 15 5G智能手机 12GB+256GB 白色",
+    price: 3699,
+    originalPrice: 4299,
+    thumbnail: "/demo/xiaomi-phone.png",
+    groupNum: 2,
+    joined: 256,
+  },
+  {
+    goodsName: "vivo X200 5G智能手机 12GB+256GB 宝石蓝",
+    price: 3999,
+    originalPrice: 4599,
+    thumbnail: "/demo/vivo-phone.png",
+    groupNum: 3,
+    joined: 89,
+  },
+  {
+    goodsName: "Apple AirPods 4 主动降噪无线耳机",
+    price: 1099,
+    originalPrice: 1399,
+    thumbnail: "/demo/apple-phone.png",
+    groupNum: 2,
+    joined: 412,
+  },
+  {
+    goodsName: "小米手环 9 Pro 晨曦金 金属机身",
+    price: 349,
+    originalPrice: 399,
+    thumbnail: "/demo/xiaomi-phone.png",
+    groupNum: 2,
+    joined: 680,
+  },
+  {
+    goodsName: "vivo Pad3 Pro 13英寸 3.1K 超清大屏",
+    price: 2999,
+    originalPrice: 3399,
+    thumbnail: "/demo/vivo-phone.png",
+    groupNum: 2,
+    joined: 195,
+  },
+];
+
+const KANJIA_DEMO = [
+  {
+    goodsName: "米家智能空气炸锅 6.5L 嫩烤大容量",
+    purchasePrice: 0,
+    price: 0,
+    originalPrice: 299,
+    thumbnail: "/demo/xiaomi-phone.png",
+  },
+  {
+    goodsName: "电动声波牙刷 T300 高频震动洁齿",
+    purchasePrice: 0,
+    price: 0,
+    originalPrice: 129,
+    thumbnail: "/demo/vivo-phone.png",
+  },
+  {
+    goodsName: "小米随身手持小风扇 大风力轻便便携",
+    purchasePrice: 0,
+    price: 0,
+    originalPrice: 59,
+    thumbnail: "/demo/xiaomi-phone.png",
+  },
+  {
+    goodsName: "智能温湿度计 电子墨水屏高精度",
+    purchasePrice: 0,
+    price: 0,
+    originalPrice: 69,
+    thumbnail: "/demo/apple-phone.png",
+  },
+];
+
+const LIVE_DEMO = [
+  {
+    cover: "/demo/apple-phone.png",
+    title: "双11新品首发专场 抢先看",
+    anchorName: "官方品牌主播",
+    status: "LIVE",
+    tagText: "直播中",
+    tagClass: "lv-tag-live",
+  },
+  {
+    cover: "/demo/xiaomi-phone.png",
+    title: "米粉狂欢日 爆款好物直降",
+    anchorName: "好物推荐官",
+    status: "PREVIEW",
+    startTime: "10/22 19:00",
+    tagText: "预告",
+    tagClass: "lv-tag-preview",
+  },
+  {
+    cover: "/demo/vivo-phone.png",
+    title: "旗舰影像新机实测现场",
+    anchorName: "数码达人",
+    status: "REPLAY",
+    tagText: "回放",
+    tagClass: "lv-tag-replay",
+  },
+];
+
 
 const props = defineProps(["res"]);
 
@@ -354,7 +503,8 @@ const isLive = computed(() => firstItem.value.type === "LIVE");
 const isSeckill = computed(() => firstItem.value.type === "SECKILL");
 const isKanjia = computed(() => firstItem.value.type === "KANJIA");
 const seckillData = computed(() => {
-  const data = (firstItem.value && firstItem.value.data) || [];
+  const raw = (firstItem.value && firstItem.value.data) || [];
+  const data = raw.length ? raw : (isKanjia.value ? KANJIA_DEMO : SECKILL_DEMO);
   return layoutStyle.value === "2" ? data.slice(0, 4) : data.slice(0, 6);
 });
 // 老数据未保存过样式时，给个红→白渐变兜底背景
@@ -382,9 +532,12 @@ const fmtLiveTime = (t) => {
   return s;
 };
 const liveData = computed(() => {
-  const data = (firstItem.value && firstItem.value.data) || [];
+  const raw = (firstItem.value && firstItem.value.data) || [];
+  if (!raw.length) {
+    return LIVE_DEMO;
+  }
   const limit = layoutStyle.value === "2" ? 3 : 6;
-  return data.slice(0, limit).map((item) => {
+  return raw.slice(0, limit).map((item) => {
     const tag = liveTagOf(item.status != null ? item.status : item.liveStatus);
     return {
       cover: item.cover || item.roomImg || item.shareImg || item.thumbnail || "",
@@ -398,11 +551,12 @@ const liveData = computed(() => {
   });
 });
 const displayData = computed(() => {
-  const data = (firstItem.value && firstItem.value.data) || [];
+  const raw = (firstItem.value && firstItem.value.data) || [];
+  const data = raw.length ? raw : PINTUAN_DEMO;
   if (layoutStyle.value === "3" || layoutStyle.value === "4") {
     return data.slice(0, 6);
   }
-  return data.slice(0, 2);
+  return data.slice(0, 4);
 });
 const headTitleImage = computed(() =>
   props.res.headTitleType === "image" ? props.res.headTitleImage : ""
