@@ -2374,8 +2374,15 @@ function changeSelect(v) {
   }
   baseInfoForm.value.storeCategoryPath = ids;
 }
-/**  添加商品 **/
+/**
+ * 保存/发布商品
+ * 包含表单校验、业务逻辑预校验、SKU组装及接口提交全流程
+ */
 function save() {
+  // 防重复提交：若当前已有请求处于 loading 状态，则直接拦截
+  if (submitLoading.value) return;
+
+  // 1. 规格项与规格值查重校验
   if (containsSameSkuItem.value) {
     jumpToTab("price");
     Message.error("存在重复规格项！");
@@ -2386,6 +2393,8 @@ function save() {
     Message.error("存在重复规格值！");
     return;
   }
+
+  // 2. 检查分类下的必填商品参数是否均已填写
   let checkFlag = false;
   let missingParams = [];
   goodsParams.value.forEach((param) => {
@@ -2404,9 +2413,17 @@ function save() {
     Message.error(`以下参数为必填项：${missingParams.join('、')}`);
     return;
   }
-  submitLoading.value = true;
-  baseInfoFormRef.value.validate((valid, fields) => {
-    if (valid) {
+
+  // 3. 执行 el-form 表单校验（在校验未通过时不开启 loading，直接引导用户修改）
+  baseInfoFormRef.value.validate(async (valid, fields) => {
+    try {
+      if (!valid) {
+        jumpToTab(tabForInvalidFields(fields));
+        Message.error("还有必填项未做处理，请检查表单");
+        return;
+      }
+
+      // 4. 批发销售模式：校验并同步阶梯价格与数量
       if (baseInfoForm.value.salesModel === "WHOLESALE") {
         for (let i = 0; i < wholesaleData.value.length; i++) {
           checkWholesaleNum(i);
@@ -2416,46 +2433,52 @@ function save() {
         baseInfoForm.value.wholesaleList = wholesaleData.value;
       }
 
-      // 判断是否是复制商品
+      // 判断是否是复制商品（复制商品时不复用原有 goodsId，重新生成）
       if (!route.query.copyId) {
         baseInfoForm.value.goodsId = goodsId;
       }
+
+      // 同步富文本编辑器内容至表单对象
       syncIntroFromEditors();
       let submit = JSON.parse(JSON.stringify(baseInfoForm.value));
+
+      // 5. 商品主图相册校验
       if (
         submit.goodsGalleryFiles &&
         submit.goodsGalleryFiles.length <= 0
       ) {
-        submitLoading.value = false;
         jumpToTab("specs");
         Message.error("请上传商品图片");
         return;
       }
-      const invalidGalleryFiles = submit.goodsGalleryFiles.filter((url) =>
+      const invalidGalleryFiles = (submit.goodsGalleryFiles || []).filter((url) =>
         invalidGoodsGalleryFiles.value.includes(url)
       );
       if (invalidGalleryFiles.length > 0) {
-        submitLoading.value = false;
         jumpToTab("specs");
         Message.error("存在已失效的商品主图，请删除后重新上传");
         return;
       }
+
+      // 兜底运费模板与品牌默认值
       if (submit.templateId === "") submit.templateId = 0;
       if (submit.brandId === "" || submit.brandId == null) submit.brandId = 0;
+
+      // 6. 电子卡券商品特殊参数处理
       if (isECouponGoods.value) {
         submit.templateId = 0;
         submit.salesModel = "RETAIL";
       }
+
+      // 7. 预约服务商品特殊参数与预约时段规则校验
       if (isAppointmentGoods.value) {
         submit.templateId = 0;
         submit.salesModel = "RETAIL";
         if (!appointmentPanel.value?.validateRules()) {
-          submitLoading.value = false;
           jumpToTab("appointment");
           return;
         }
         if (!appointmentPanel.value?.validateDivision()) {
-          submitLoading.value = false;
           jumpToTab("appointment");
           return;
         }
@@ -2466,17 +2489,18 @@ function save() {
 
       if (flag) {
         Message.error(paramValue + " 参数值不能为空");
-        submitLoading.value = false;
         return;
       }
 
+      // 8. 商品单位有效性检查
       if (goodsUnitList.value && !goodsUnitList.value.find(i => i === baseInfoForm.value.goodsUnit)) {
-        submit.goodsUnit = ""
+        submit.goodsUnit = "";
         Message.error("商品单位不存在");
-        submitLoading.value = false;
         jumpToTab("basic");
         return;
       }
+
+      // 9. 组装 SKU 列表数据
       let skuInfoNames = skuInfo.value.map((n) => n.name);
       submit.skuList = [];
       let containEmptyImage = false;
@@ -2489,6 +2513,7 @@ function save() {
           sn: sku.sn,
           images: [],
         };
+        // 若开启规格图片，将第1个规格项关联的图片注入对应 SKU
         if (openImage.value) {
           skuInfo.value[0].spec_values.forEach(item => {
             if (!item.images || item.images.length === 0) {
@@ -2496,10 +2521,9 @@ function save() {
               return;
             }
             if (item.value === sku[skuInfo.value[0].name]) {
-              skuCopy.images = item.images
+              skuCopy.images = item.images;
             }
-          })
-
+          });
         }
         if (sku.weight) {
           skuCopy.weight = sku.weight;
@@ -2518,13 +2542,22 @@ function save() {
         }
         submit.skuList.push(skuCopy);
       });
+
+      // 规格图片完整性校验
       if (containEmptyImage) {
         Message.error("开启规格图片，所有规格图片不能为空！");
-        submitLoading.value = false;
         jumpToTab("price");
         return;
       }
-      if (submit.goodsGalleryFiles.length > 0) {
+
+      // 10. 前置校验：商品规格必须至少包含一个（避免向后端提交空 SKU 列表导致 400 校验失败）
+      if (!submit.skuList || submit.skuList.length === 0) {
+        jumpToTab("price");
+        Message.error("规格必须要有一个！");
+        return;
+      }
+
+      if (submit.goodsGalleryFiles && submit.goodsGalleryFiles.length > 0) {
         submit.goodsGalleryList = submit.goodsGalleryFiles.map(
           (i) => i
         );
@@ -2536,34 +2569,35 @@ function save() {
       submit.recommend
         ? (submit.recommend = true)
         : (submit.recommend = false);
-      // 判断是否是复制商品
-      if (goodsId && !route.query.copyId) {
-        API_GOODS.editGoods(goodsId, submit).then((res) => {
-          if (res.success) {
-            submitLoading.value = false;
+
+      // 11. 前端所有校验均通过，正式发起网络请求并激活保存按钮 loading
+      submitLoading.value = true;
+      try {
+        if (goodsId && !route.query.copyId) {
+          // 编辑商品
+          const res = await API_GOODS.editGoods(goodsId, submit);
+          if (res && res.success) {
             router.go(-1);
-          } else {
-            submitLoading.value = false;
           }
-        }).catch(() => {
-          submitLoading.value = false;
-          Message.error("保存失败，请重试");
-        });
-      } else {
-        API_GOODS.createGoods(submit).then((res) => {
-          if (res.success) {
-            submitLoading.value = false;
+        } else {
+          // 新增商品 / 复制商品
+          const res = await API_GOODS.createGoods(submit);
+          if (res && res.success) {
             proxy.$parent.activestep = 2;
             window.scrollTo(0, 0);
-          } else {
-            submitLoading.value = false;
           }
-        });
+        }
+      } catch (err) {
+        // 请求失败时，Axios 响应拦截器已统一弹出错误提示（如业务校验 400 报错）
+        console.error("保存商品请求异常:", err);
+      } finally {
+        // 关键兜底：无论成功、业务失败、网络超时还是接口报错，确保复位 submitLoading，防止按钮卡死
+        submitLoading.value = false;
       }
-    } else {
+    } catch (e) {
+      // 捕获表单数据组装阶段可能的意外异常，确保 loading 状态准确复位
       submitLoading.value = false;
-      jumpToTab(tabForInvalidFields(fields));
-      Message.error("还有必填项未做处理，请检查表单");
+      console.error("表单处理异常:", e);
     }
   });
 }
