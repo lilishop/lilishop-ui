@@ -33,17 +33,6 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="销售模式" prop="salesModel">
-          <el-select
-            v-model="searchForm.salesModel"
-            placeholder="请选择"
-            clearable
-            style="width: 240px"
-          >
-            <el-option label="零售" value="RETAIL" />
-            <el-option label="批发" value="WHOLESALE" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="商品类型" prop="goodsType">
           <el-select
             v-model="searchForm.goodsType"
@@ -159,11 +148,6 @@
         </el-table-column>
         <el-table-column prop="buyCount" label="销量" width="150" />
         <el-table-column prop="quantity" label="库存" width="150" />
-        <el-table-column label="销售模式" width="150">
-          <template #default="{ row }">
-            <span v-if="row">{{ salesModelText(row.salesModel) }}</span>
-          </template>
-        </el-table-column>
         <el-table-column label="商品类型" width="150">
           <template #default="{ row }">
             <span v-if="row">{{ goodsTypeText(row.goodsType) }}</span>
@@ -344,7 +328,6 @@ const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch
       goodsName: "",
       id: "",
       storeName: "",
-      salesModel: "",
       goodsType: "",
       groupId: "",
     },
@@ -402,11 +385,6 @@ function clearTableSelection() {
 function onStatusTabClick(tab) {
   const status = tab.paneName ?? tab.props?.name;
   goodsStatusClick(status);
-}
-function salesModelText(v) {
-  if (v === "RETAIL") return "零售";
-  if (v === "WHOLESALE") return "批发";
-  return "其他类型";
 }
 function goodsTypeText(v) {
   if (v === "PHYSICAL_GOODS") return "实物商品";

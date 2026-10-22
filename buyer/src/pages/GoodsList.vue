@@ -56,12 +56,6 @@
                 </span>
               </div>
               <div class="goods-show-detail">
-                <el-tag
-                  v-if="item.salesModel === 'WHOLESALE'"
-                  class="goods-show-tag goods-show-tag-wholesale"
-                >
-                  批发
-                </el-tag>
                 <span>{{ item.goodsName }}</span>
               </div>
               <div class="goods-show-num">
@@ -351,15 +345,6 @@ getGoodsList();
   }
 }
 
-.goods-show-tag-wholesale {
-  margin-right: 5px;
-  background-color: #f9f0ff;
-  border-color: #d3adf7;
-  color: #9254de;
-
-  :deep(.el-tag__content) {
-    color: #9254de;
-  }
 }
 
 .goods-show-seller {

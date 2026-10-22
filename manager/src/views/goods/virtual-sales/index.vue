@@ -25,10 +25,10 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="SKU货号" prop="sn">
+        <el-form-item label="SKU编码" prop="sn">
           <el-input
             v-model="searchForm.sn"
-            placeholder="请输入SKU货号"
+            placeholder="请输入SKU编码"
             clearable
             style="width: 240px"
           />

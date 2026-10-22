@@ -24,10 +24,10 @@
               clearable
             />
           </el-form-item>
-          <el-form-item label="SKU货号" prop="skuSn">
+          <el-form-item label="SKU编码" prop="skuSn">
             <el-input
               v-model="searchForm.skuSn"
-              placeholder="请输入SKU货号"
+              placeholder="请输入SKU编码"
               clearable
             />
           </el-form-item>

@@ -87,10 +87,6 @@
             <span class="seckill-price text-danger">{{ $filters.unitPrice(item.price, "￥") }}</span>
           </div>
           <div class="goods-show-detail">
-            <el-tag
-              v-if="item.salesModel === 'WHOLESALE'"
-              class="goods-show-tag goods-show-tag-wholesale"
-            >批发</el-tag>
             <span>{{ item.goodsName }}</span>
           </div>
           <div class="goods-show-num">
@@ -717,15 +713,6 @@ window.onscroll = () => {
   background-color: #fa2c19;
   border-color: #fa2c19;
   color: #fff;
-}
-
-.goods-show-tag-wholesale {
-  --el-tag-bg-color: #f9f0ff;
-  --el-tag-border-color: #d3adf7;
-  --el-tag-text-color: #9254de;
-  background-color: #f9f0ff;
-  border-color: #d3adf7;
-  color: #9254de;
 }
 
 .goods-page {

@@ -36,13 +36,13 @@
               <span> &gt; {{ baseInfoForm.categoryName[1] }}</span>
               <span> &gt; {{ baseInfoForm.categoryName[2] }}</span>
             </el-form-item>
+            <el-form-item label="SPU编码">
+              <el-input :model-value="baseInfoForm.spuSn || ($route.query.id && !$route.query.copyId ? '—' : '保存后自动生成')" class="goods-field" disabled type="text" />
+            </el-form-item>
             <el-form-item label="商品名称" prop="goodsName">
               <el-input v-model="baseInfoForm.goodsName" class="goods-field" clearable placeholder="商品名称" type="text" />
             </el-form-item>
 
-            <el-form-item label="商品价格" prop="price">
-              <el-input v-model="baseInfoForm.price" class="goods-field" clearable placeholder="商品价格" type="text" />
-            </el-form-item>
             <el-form-item label="商品卖点" prop="sellingPoint">
               <el-input v-model="baseInfoForm.sellingPoint" class="goods-field" clearable placeholder="商品卖点" type="text" />
             </el-form-item>
@@ -101,82 +101,81 @@
             </div>
             <div class="goods-section-bd">
           <div class="form-item-view">
-            <el-form-item class="form-item-view-el required" label="主图" prop="goodsGalleryFiles">
-              <div style="display: flex; flex-wrap: wrap;">
-                <vuedraggable
-                  v-model="baseInfoForm.goodsGalleryFiles"
-                  :animation="200"
-                  :item-key="draggableItemKey"
-                  style="display: flex; flex-wrap: wrap"
-                >
-                  <template #item="{ element }">
-                    <div class="demo-upload-list">
-                      <img alt="商品图片" data-no-fallback :src="element" @error="handleGoodsPictureError($event, element)" />
-                      <div class="demo-upload-list-cover">
-                        <div>
-                          <el-button link type="primary" @click="handleViewGoodsPicture(element)">预览</el-button>
-                          <el-button link type="danger" @click="handleRemoveGoodsPicture(element)">删除</el-button>
+            <el-form-item class="form-item-view-el required media-form-item" label="商品图片:" prop="goodsGalleryFiles">
+              <div class="media-upload-wrapper">
+                <div class="media-list-container">
+                  <vuedraggable
+                    v-if="(baseInfoForm.goodsGalleryFiles || []).length > 0"
+                    v-model="baseInfoForm.goodsGalleryFiles"
+                    :animation="200"
+                    :item-key="draggableItemKey"
+                    class="media-draggable-list"
+                  >
+                    <template #item="{ element, index }">
+                      <div class="media-card-item">
+                        <img alt="商品图片" data-no-fallback :src="element" @error="handleGoodsPictureError($event, element)" />
+                        <span v-if="index === 0" class="media-card-badge">主图</span>
+                        <div class="media-card-cover">
+                          <el-icon class="cover-icon" title="预览" @click.stop="handleViewGoodsPicture(element)"><ZoomIn /></el-icon>
+                          <el-icon class="cover-icon" title="删除" @click.stop="handleRemoveGoodsPicture(element)"><Delete /></el-icon>
                         </div>
                       </div>
-                    </div>
-                  </template>
-                </vuedraggable>
-                <!--<Upload ref="upload"-->
-                <!--:action="uploadFileUrl" :before-upload="handleBeforeUploadGoodsPicture"-->
-                <!--:format="['jpg', 'jpeg', 'png', 'webp']"-->
-                <!--:headers="{ ...accessToken }"-->
-                <!--:max-size="2048" :on-error="() => { $Spin.hide(); }" :on-exceeded-size="handleMaxSize"-->
-                <!--:on-format-error="handleFormatError" :on-progress="() => { $Spin.show(); }"-->
-                <!--:on-success="handleSuccessGoodsPicture" :show-upload-list="false" multiple-->
-                <!--style="margin-left: 10px"-->
-                <!--type="drag">-->
-                <!--<div style="width: 148px; height: 148px; line-height: 148px">-->
-                <!--<Icon size="20" type="md-add"></Icon>-->
-                <!--</div>-->
-                <!--</Upload>-->
+                    </template>
+                  </vuedraggable>
+                  <div
+                    v-if="(baseInfoForm.goodsGalleryFiles || []).length < 5"
+                    class="media-upload-card"
+                    title="上传图片"
+                    @click="handleCLickImg('goodsGalleryFiles')"
+                  >
+                    <el-icon class="uploader-plus-icon"><Plus /></el-icon>
+                  </div>
+                </div>
+                <div class="media-uploader-tip">
+                  <el-icon class="tip-icon"><InfoFilled /></el-icon>
+                  <span>建议尺寸:800*800px,单张大小不超过2M,最多可上传5张</span>
+                </div>
               </div>
-              <div style="width: 100%;display: flex;justify-content: start;margin-top: 10px;">
-                <el-button @click="handleCLickImg('goodsGalleryFiles')" type="primary">上传图片</el-button>
-              </div>
-              <el-dialog v-model="goodsPictureVisible" title="View Image">
-                <img alt="商品图片预览" v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%" />
+              <el-dialog v-model="goodsPictureVisible" title="图片预览" width="600px" append-to-body destroy-on-close>
+                <img alt="商品图片预览" v-if="goodsPictureVisible" :src="previewGoodsPicture" style="width: 100%; display: block;" />
               </el-dialog>
             </el-form-item>
-            <el-form-item>
-              <div class="gallery-hint">主图仅支持png，jpg，jpeg格式，宽高至少600*600px，大小2M内，可拖拽调整主图顺序</div>
-            </el-form-item>
-            <el-form-item
-              class="form-item-view-el goods-video-form-item"
-              :class="{ 'goods-video-form-item--multi': baseInfoForm.goodsVideo }"
-              label="主图视频"
-              prop="goodsVideo"
-            >
-              <div class="goods-video">
-                <div v-if="baseInfoForm.goodsVideo" class="goods-video-preview">
-                  <video :src="baseInfoForm.goodsVideo" class="video" controls style="max-width: 300px;" />
-                </div>
-                <div
-                  class="goods-video-actions"
-                  :class="{ 'goods-video-actions--with-preview': baseInfoForm.goodsVideo }"
-                >
+
+            <el-form-item class="form-item-view-el media-form-item" label="商品视频:" prop="goodsVideo">
+              <div class="media-upload-wrapper">
+                <div class="media-list-container">
+                  <div v-if="baseInfoForm.goodsVideo" class="media-card-item video-card-item">
+                    <video :src="baseInfoForm.goodsVideo" class="card-video-thumb" preload="metadata" />
+                    <div class="media-card-cover">
+                      <el-icon class="cover-icon" title="播放预览" @click.stop="videoPreviewVisible = true"><VideoPlay /></el-icon>
+                      <el-icon class="cover-icon" title="删除" @click.stop="handleRemoveGoodsVideo"><Delete /></el-icon>
+                    </div>
+                  </div>
                   <el-upload
+                    v-else
                     :action="uploadFileUrl"
                     :headers="{ ...accessToken }"
-                    accept=".avi,.wmv,.mpeg,.mp4,.mov"
+                    accept=".mp4,.avi,.wmv,.mpeg,.mov"
                     :show-file-list="false"
                     :before-upload="beforeVideoUpload"
                     :on-success="handleSuccessGoodsVideo"
                     :on-error="() => { loadingVideo = false }"
+                    class="media-uploader-action"
                   >
-                    <el-button :loading="loadingVideo" type="primary" link>
-                      {{ loadingVideo ? "正在上传..." : `${baseInfoForm.goodsVideo ? "已" : ""}上传视频` }}
-                    </el-button>
+                    <div class="media-upload-card" :class="{ 'is-loading': loadingVideo }" title="上传视频">
+                      <el-icon v-if="loadingVideo" class="is-loading uploader-plus-icon"><Loading /></el-icon>
+                      <el-icon v-else class="uploader-plus-icon"><Plus /></el-icon>
+                    </div>
                   </el-upload>
-                  <el-button v-if="baseInfoForm.goodsVideo" link type="danger" @click="handleRemoveGoodsVideo">
-                    删除
-                  </el-button>
+                </div>
+                <div class="media-uploader-tip">
+                  <el-icon class="tip-icon"><InfoFilled /></el-icon>
+                  <span>商品视频最大限制30M，支持文件类型：mp4，推荐时长小于等于90s，大于等于6s，推荐视频比例7:9</span>
                 </div>
               </div>
+              <el-dialog v-model="videoPreviewVisible" title="视频预览" width="640px" append-to-body destroy-on-close>
+                <video v-if="videoPreviewVisible" :src="baseInfoForm.goodsVideo" controls autoplay style="width: 100%; max-height: 480px; display: block; margin: 0 auto;" />
+              </el-dialog>
             </el-form-item>
           </div>
           <div v-if="showContent" class="goods-submodule">
@@ -253,93 +252,6 @@
             </div>
             <div class="goods-section-bd">
           <div class="form-item-view">
-            <el-form-item v-if="showSalesModel" class="form-item-view-el" label="销售模式" prop="salesModel">
-              <el-radio-group
-                v-if="!isVirtualLikeGoods"
-                v-model="baseInfoForm.salesModel"
-                @change="handleSalesModeChange"
-              >
-                <el-radio-button value="RETAIL">零售型</el-radio-button>
-                <el-radio-button value="WHOLESALE">批发型</el-radio-button>
-              </el-radio-group>
-              <el-radio-group v-else v-model="baseInfoForm.salesModel">
-                <el-radio-button value="RETAIL">{{
-                  isECouponGoods ? "电子卡券" : isAppointmentGoods ? "预约型" : "虚拟型"
-                }}</el-radio-button>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item
-              v-if="baseInfoForm.salesModel == 'WHOLESALE'"
-              class="form-item-view-el wholesale-rule-form-item"
-              label="销售规则"
-              prop="wholesaleRule"
-            >
-              <div class="form-item-view-wholesale">
-                <div>
-                  <el-table
-                    :key="'wholesale-edit-' + (baseInfoForm.goodsUnit || '')"
-                    :data="wholesaleData"
-                    border
-                    style="width: 100%"
-                  >
-                    <el-table-column label="购买数量" align="center" width="220">
-                      <template #default="{ $index }">
-                        <el-input
-                          class="wholesale-num-input"
-                          v-model="wholesaleData[$index].num"
-                          type="number"
-                          @blur="checkWholesaleNum($index)"
-                        >
-                          <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
-                        </el-input>
-                      </template>
-                    </el-table-column>
-                    <el-table-column label="商品单价" align="center" width="320">
-                      <template #default="{ $index }">
-                        <div class="wholesale-price-cell">
-                          <el-input
-                            class="wholesale-price-input"
-                            v-model="wholesaleData[$index].price"
-                            type="number"
-                            @blur="checkWholesalePrice($index)"
-                          >
-                            <template #append>元</template>
-                          </el-input>
-                          <el-button
-                            v-if="$index > 0"
-                            class="wholesale-price-del"
-                            size="small"
-                            type="danger"
-                            @click="handleDeleteWholesaleData($index)"
-                          >
-                            删除
-                          </el-button>
-                        </div>
-                      </template>
-                    </el-table-column>
-                  </el-table>
-
-                  <el-button v-if="wholesaleData.length < 3" style="margin-top: 10px" @click="handleAddWholesaleData()">
-                    <el-icon><Plus /></el-icon>
-                    添加价格区间
-                  </el-button>
-                </div>
-                <div class="form-item-view-wholesale-preview">
-                  <el-table
-                    :key="'wholesale-preview-' + (baseInfoForm.goodsUnit || '')"
-                    :data="wholesaleData"
-                    border
-                    class="wholesale-preview-table"
-                  >
-                    <el-table-column label="销售规则" width="480">
-                      <template #default="{ row }">
-                        {{ wholesaleRulePreview(row) }}
-                      </template>
-                    </el-table-column>
-                  </el-table>
-                </div>
-              </div>
-            </el-form-item>
             <el-alert
               v-if="isECouponGoods"
               class="mb_10"
@@ -348,225 +260,264 @@
               :closable="false"
               title="卡密库存不在这里填写。商品保存后，到商品列表的「卡池管理」导入卡密。"
             />
-            <div class="layout" style="width: 100%">
-              <el-collapse v-model="open_panel">
-                <el-collapse-item title="自定义规格项" name="1">
-                    <div>
-                      <div v-for="(item, $index) in skuInfo" :key="$index" class="sku-item-content">
-                        <el-card>
-                          <template #header>
-                            <el-button link type="danger" @click="handleCloseSkuItem($index, item)">删除规格项</el-button>
-                          </template>
-                          <div class="sku-item-content-name">
-                            <div class="sku-item-label">规格项</div>
-                            <div class="sku-item-input-row">
-                              <el-autocomplete
-                                v-model="item.name"
-                                :fetch-suggestions="(q, cb) => cb([])"
-                                maxlength="30"
-                                placeholder="请输入规格项名称"
-                                style="width: 150px"
-                                @focus="changeSkuItem(item.name)"
-                                @change="editSkuItem(item.name, $index, item)"
-                              />
-                              <el-switch
-                                v-if="$index === 0"
-                                v-model="openImage"
-                                style="margin-left: 10px"
-                                @change="changeSkuOpenImage"
-                              />
-                              <span v-if="$index === 0" style="margin-left: 5px">添加规格图片</span>
-                            </div>
-                          </div>
-                          <div class="sku-val">
-                            <div class="sku-val-label">规格值 (输入完成后，鼠标点击其他地方后生效)</div>
-                            <el-form :model="item" class="sku-val-form flex">
-                              <!--规格值文本列表-->
-                              <el-form-item v-for="(val, index) in item.spec_values" :key="index"
-                                class="sku-item-content-val" label="">
-                                <div class="sku-val-item">
-                                  <div class="sku-val-input-row">
-                                    <el-autocomplete
-                                      v-model="val.value"
-                                      :disabled="containsSameSkuItem"
-                                      :fetch-suggestions="(q, cb) => cb([])"
-                                      maxlength="30"
-                                      placeholder="请输入规格值"
-                                      style="width: 180px"
-                                      @focus="changeSkuVals(val, item.name)"
-                                      @blur="checkSkuVal(val, $index, item)"
-                                      @change="skuValueChange(val, index, item)"
-                                    />
-                                    <el-button link type="danger" style="margin-left: 6px" @click="handleCloseSkuValue(val, index, item)">
-                                      <el-icon><Delete /></el-icon>
-                                    </el-button>
-                                  </div>
-                                  <!-- 内联错误提示 -->
-                                  <div v-if="val._error" class="sku-inline-error">{{ val._error }}</div>
-                                  <div v-if="$index === 0 && openImage" class="sku-val-image">
-                                  <vuedraggable
-                                    v-model="val.images"
-                                    :animation="200"
-                                    :item-key="draggableItemKey"
-                                    style="display: flex; flex-wrap: wrap"
-                                  >
-                                    <template #item="{ element, index: imgIndex }">
-                                      <div
-                                        class="sku-upload-list"
-                                        style="width: 180px;height: 140px"
-                                      >
-                                        <img alt="商品图片" :src="element" style="width: 180px;height: 140px" />
-                                        <div class="sku-upload-list-cover">
-                                          <div style="margin-top: 50px">
-                                            <el-icon :size="25" style="cursor:pointer;margin-right:8px" @click="handleView(element)"><ZoomIn /></el-icon>
-                                            <el-icon :size="25" style="cursor:pointer" @click="handleRemove(val.images, imgIndex)"><Delete /></el-icon>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </template>
-                                  </vuedraggable>
-                                  <el-upload
-                                    v-if="val.images.length < 1"
-                                    :action="uploadFileUrl"
-                                    :before-upload="handleBeforeUpload"
-                                    :headers="{ ...accessToken }"
-                                    :on-error="() => {}"
-                                    :on-exceeded-size="handleMaxSize"
-                                    :on-success="(res, file) => handleSuccess(res, file, val.images)"
-                                    :show-file-list="false"
-                                    accept=".jpg,.jpeg,.png,.webp"
-                                    drag
-                                    style="width: 180px;height: 140px;margin-right: 10px"
-                                  >
-                                    <el-icon :size="40"><Camera /></el-icon>
-                                  </el-upload>
-                                  </div>
-                                </div>
-                              </el-form-item>
+            <!-- 规格模式切换栏（对齐单/多规格设置） -->
+            <div class="spec-mode-switch-bar">
+              <el-checkbox v-model="isMultiSpec" size="large" @change="handleMultiSpecChange">
+                <span class="spec-checkbox-label">设置商品多规格</span>
+              </el-checkbox>
+            </div>
 
-                              <el-form-item
-                                v-if="item.spec_values.length < 10 && item.spec_values.length >= 1 && item.spec_values[0].value !== ''"
-                                class="sku-item-content-val" label="">
-                                <el-autocomplete
-                                  v-model="newSkuValues[$index]"
-                                  :disabled="containsSameSkuItem"
-                                  :fetch-suggestions="(q, cb) => cb([])"
-                                  maxlength="30"
-                                  placeholder="自定义规格值"
-                                  style="width: 180px"
-                                  @blur="addSpec($index, item)"
-                                  @keyup.enter="addSpec($index, item)"
-                                />
-                              </el-form-item>
-                            </el-form>
-                          </div>
-                        </el-card>
+            <!-- 单规格模式 -->
+            <div v-if="!isMultiSpec" class="single-spec-table-wrapper">
+              <el-table :data="[singleSku]" border class="mt_10" style="width: 100%">
+                <el-table-column label="图片" width="100" align="center">
+                  <template #default="{ row }">
+                    <div class="spec-sku-image-cell">
+                      <div v-if="row.images && row.images.length > 0" class="spec-sku-image-preview">
+                        <img :src="row.images[0]" alt="商品图片" />
+                        <div class="spec-sku-image-mask">
+                          <el-icon @click="row.images = []"><Delete /></el-icon>
+                        </div>
                       </div>
-                    <div style="display: flex">
-                      <el-button class="add-sku-btn" type="primary" @click="addSkuItem">添加规格项
+                      <div
+                        v-else
+                        class="spec-sku-image-uploader"
+                        title="点击选择图片，未选则默认取主图"
+                        @click="handleCLickImg('selectedSingleSkuImage')"
+                      >
+                        <el-icon><Plus /></el-icon>
+                      </div>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="SKU编码" min-width="160">
+                  <template #default="{ row }">
+                    <span>{{ row.sn || '保存后自动生成' }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="价格" min-width="160">
+                  <template #default="{ row }">
+                    <el-input v-model="row.price" placeholder="请输入价格" type="number" clearable>
+                      <template #append>元</template>
+                    </el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column v-if="needsLogistics" label="物流重量" min-width="150">
+                  <template #default="{ row }">
+                    <el-input v-model="row.weight" placeholder="请输入重量" type="number" clearable>
+                      <template #append>kg</template>
+                    </el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column v-if="!isECouponGoods && !isAppointmentGoods" label="库存" min-width="150">
+                  <template #default="{ row }">
+                    <el-input v-model="row.quantity" placeholder="请输入库存" type="number" clearable>
+                      <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
+                    </el-input>
+                  </template>
+                </el-table-column>
+                <el-table-column v-if="isAppointmentGoods" label="预约设置" min-width="160" align="center">
+                  <template #default="{ row }">
+                    <el-button link type="primary" @click="openAppointmentCapacity(row)">设置可预约数量</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+
+            <!-- 多规格模式（对齐参考截图3） -->
+            <div v-else class="multi-spec-container">
+              <!-- 规格项设置区 -->
+              <div class="spec-builder-list">
+                <div v-for="(item, $index) in skuInfo" :key="$index" class="spec-builder-row">
+                  <div class="spec-builder-left">
+                    <span class="spec-star">*</span>
+                    <el-input
+                      v-model="item.name"
+                      placeholder="规格项名称"
+                      class="spec-name-input"
+                      @blur="handleSpecNameChange(item, $index)"
+                    />
+                    <el-button
+                      v-if="skuInfo.length > 1"
+                      link
+                      type="danger"
+                      class="spec-del-link"
+                      @click="handleRemoveSpecItem($index, item)"
+                    >
+                      删除
+                    </el-button>
+                    <span v-else class="spec-del-disabled">删除</span>
+                  </div>
+
+                  <div class="spec-builder-right">
+                    <!-- 已添加的规格值标签流 -->
+                    <div
+                      v-for="(val, vIndex) in item.spec_values"
+                      :key="vIndex"
+                      class="spec-val-tag-wrap"
+                    >
+                      <el-tag
+                        closable
+                        size="large"
+                        class="spec-val-tag"
+                        @close="handleRemoveSpecValue(item, vIndex)"
+                      >
+                        {{ val.value }}
+                      </el-tag>
+                      <!-- 若开启规格图片（仅首个规格项生效） -->
+                      <div v-if="$index === 0 && openImage" class="spec-val-img-box">
+                        <div v-if="val.images && val.images.length > 0" class="spec-val-img-preview">
+                          <img :src="val.images[0]" alt="规格图" />
+                          <div class="spec-val-img-mask" @click="val.images = []">
+                            <el-icon><Delete /></el-icon>
+                          </div>
+                        </div>
+                        <div
+                          v-else
+                          class="spec-val-img-uploader"
+                          title="上传规格图片"
+                          @click="handleCLickSpecValueImg(val)"
+                        >
+                          <el-icon><Camera /></el-icon>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 输入新规格值 -->
+                    <div class="spec-val-input-group">
+                      <el-input
+                        v-model="newSkuValues[$index]"
+                        placeholder="请输入规格值"
+                        class="spec-val-input"
+                        maxlength="30"
+                        clearable
+                        @keyup.enter="handleAddSpecValue($index, item)"
+                      />
+                      <el-button
+                        type="primary"
+                        plain
+                        class="spec-val-add-btn"
+                        @click="handleAddSpecValue($index, item)"
+                      >
+                        添加规格值
                       </el-button>
                     </div>
+
+                    <!-- 首个规格项可开启规格图片 -->
+                    <div v-if="$index === 0" class="spec-image-checkbox">
+                      <el-checkbox v-model="openImage" @change="changeSkuOpenImage">
+                        添加规格图片
+                      </el-checkbox>
                     </div>
-                </el-collapse-item>
-                <el-collapse-item title="规格详细" name="2">
-                    <div v-if="needToloadSku" class="topinfo" @click="handleLoadingSkuData">点击加载sku数据</div>
-                    <div :class="needToloadSku ? 'mask' : ''">
-                      <el-table :data="skuTableData" border class="mt_10" style="width: 100%">
-                        <el-table-column
-                          v-for="(col, colIndex) in skuTableColumn"
-                          :key="colIndex"
-                          :label="col.title"
-                          :prop="col.key"
-                          :min-width="col.minWidth || 120"
-                        >
-                          <template #default="{ row, $index }">
-                            <span v-if="col.key && !col.slot">{{ row[col.key] }}</span>
-                            <el-input
-                              v-else-if="col.slot === 'sn'"
-                              v-model="row.sn"
-                              clearable
-                              placeholder="请输入货号"
-                              @change="updateSkuTable(row, 'sn', $index)"
-                            />
-                            <el-input
-                              v-else-if="col.slot === 'weight' && needsLogistics && baseInfoForm.salesModel !== 'WHOLESALE'"
-                              v-model="row.weight"
-                              clearable
-                              placeholder="请输入重量"
-                              @change="updateSkuTable(row, 'weight', $index)"
-                            >
-                              <template #append>kg</template>
-                            </el-input>
-                            <el-button
-                              v-else-if="col.slot === 'appointmentCapacity' && isAppointmentGoods"
-                              link
-                              type="primary"
-                              @click="openAppointmentCapacity(row)"
-                            >
-                              设置可预约数量
-                            </el-button>
-                            <el-input
-                              v-else-if="col.slot === 'quantity' && isECouponGoods"
-                              :model-value="row.quantity ?? 0"
-                              disabled
-                              placeholder="库存"
-                            >
-                              <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
-                            </el-input>
-                            <el-input
-                              v-else-if="col.slot === 'quantity'"
-                              v-model="row.quantity"
-                              clearable
-                              placeholder="请输入库存"
-                              @change="updateSkuTable(row, 'quantity', $index)"
-                            >
-                              <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
-                            </el-input>
-                            <el-input
-                              v-else-if="col.slot === 'cost'"
-                              v-model="row.cost"
-                              clearable
-                              placeholder="请输入成本价"
-                              @change="updateSkuTable(row, 'cost', $index)"
-                            >
-                              <template #append>元</template>
-                            </el-input>
-                            <el-input
-                              v-else-if="col.slot === 'price'"
-                              v-model="row.price"
-                              clearable
-                              placeholder="请输入价格"
-                              @change="updateSkuTable(row, 'price', $index)"
-                            >
-                              <template #append>元</template>
-                            </el-input>
-                            <el-input
-                              v-else-if="col.slot === 'wholePrice0' && wholesaleData[0]"
-                              v-model="wholesaleData[0].price"
-                              disabled
-                            >
-                              <template #append>元</template>
-                            </el-input>
-                            <el-input
-                              v-else-if="col.slot === 'wholePrice1' && wholesaleData[1]"
-                              v-model="wholesaleData[1].price"
-                              disabled
-                            >
-                              <template #append>元</template>
-                            </el-input>
-                            <el-input
-                              v-else-if="col.slot === 'wholePrice2' && wholesaleData[2]"
-                              v-model="wholesaleData[2].price"
-                              disabled
-                            >
-                              <template #append>元</template>
-                            </el-input>
-                          </template>
-                        </el-table-column>
-                      </el-table>
-                    </div>
-                </el-collapse-item>
-              </el-collapse>
+                  </div>
+                </div>
+
+                <!-- 添加规格项按钮 -->
+                <div v-if="skuInfo.length < 5" class="spec-add-btn-row">
+                  <el-button class="add-spec-item-btn" @click="addSkuItem">
+                    <el-icon><Plus /></el-icon>
+                    <span>添加规格项</span>
+                  </el-button>
+                </div>
+              </div>
+
+              <!-- 规格详细表格（平铺展示，无多余折叠条） -->
+              <div class="multi-spec-table-section">
+                <div class="spec-detail-hd">
+                  <div class="spec-detail-title">规格详细</div>
+                  <!-- 批量填充快捷工具（仅当有多行且非占位行时展示） -->
+                  <div v-if="skuTableData.length > 1 && !skuTableData[0]._isPlaceholder" class="spec-batch-fill-bar">
+                    <span class="batch-title">批量设置：</span>
+                    <el-input
+                      v-model="batchFillPrice"
+                      placeholder="价格"
+                      clearable
+                      class="batch-fill-input"
+                    >
+                      <template #append>元</template>
+                    </el-input>
+                    <el-input
+                      v-if="needsLogistics"
+                      v-model="batchFillWeight"
+                      placeholder="重量"
+                      clearable
+                      class="batch-fill-input"
+                    >
+                      <template #append>kg</template>
+                    </el-input>
+                    <el-input
+                      v-if="!isECouponGoods && !isAppointmentGoods"
+                      v-model="batchFillQuantity"
+                      placeholder="库存"
+                      clearable
+                      class="batch-fill-input"
+                    >
+                      <template #append>{{ baseInfoForm.goodsUnit || "件" }}</template>
+                    </el-input>
+                    <el-button type="primary" class="batch-apply-btn" @click="handleBatchApply">
+                      应用
+                    </el-button>
+                  </div>
+                </div>
+
+                <el-table :data="skuTableData" border style="width: 100%">
+                  <el-table-column
+                    v-for="(col, colIndex) in skuTableColumn"
+                    :key="colIndex"
+                    :label="col.title"
+                    :prop="col.key"
+                    :min-width="col.minWidth || 120"
+                  >
+                    <template #default="{ row, $index }">
+                      <span v-if="col.key && !col.slot">{{ row[col.key] }}</span>
+                      <span v-else-if="col.slot === 'sn'">{{ row.sn || '保存后自动生成' }}</span>
+                      <el-input
+                        v-else-if="col.slot === 'weight' && needsLogistics"
+                        v-model="row.weight"
+                        clearable
+                        placeholder="请输入重量"
+                        @change="updateSkuTable(row, 'weight', $index)"
+                      >
+                        <template #append>kg</template>
+                      </el-input>
+                      <el-button
+                        v-else-if="col.slot === 'appointmentCapacity' && isAppointmentGoods"
+                        link
+                        type="primary"
+                        @click="openAppointmentCapacity(row)"
+                      >
+                        设置可预约数量
+                      </el-button>
+                      <el-input
+                        v-else-if="col.slot === 'quantity' && isECouponGoods"
+                        :model-value="row.quantity ?? 0"
+                        disabled
+                        placeholder="库存"
+                      >
+                        <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
+                      </el-input>
+                      <el-input
+                        v-else-if="col.slot === 'quantity'"
+                        v-model="row.quantity"
+                        clearable
+                        placeholder="请输入库存"
+                        @change="updateSkuTable(row, 'quantity', $index)"
+                      >
+                        <template #append>{{ baseInfoForm.goodsUnit || "" }}</template>
+                      </el-input>
+                      <el-input
+                        v-else-if="col.slot === 'price'"
+                        v-model="row.price"
+                        clearable
+                        placeholder="请输入价格"
+                        @change="updateSkuTable(row, 'price', $index)"
+                      >
+                        <template #append>元</template>
+                      </el-input>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
             </div>
           </div>
             </div>
@@ -581,11 +532,23 @@
             </div>
             <div class="goods-section-bd">
           <div class="form-item-view">
-            <el-form-item class="form-item-view-el" label="商品发布" prop="release">
+            <el-form-item class="form-item-view-el" label="上下架" prop="release">
               <el-radio-group v-model="baseInfoForm.release">
-                <el-radio-button :value="1">上架</el-radio-button>
-                <el-radio-button :value="0">下架</el-radio-button>
+                <el-radio-button :value="1">立即上架</el-radio-button>
+                <el-radio-button :value="0">立即下架</el-radio-button>
+                <el-radio-button :value="2">定时上架</el-radio-button>
               </el-radio-group>
+            </el-form-item>
+            <el-form-item v-if="baseInfoForm.release === 2" class="form-item-view-el" label="上架时间">
+              <el-date-picker
+                v-model="baseInfoForm.scheduledUpperTime"
+                type="datetime"
+                placeholder="请选择定时上架时间"
+                format="YYYY-MM-DD HH:mm"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                :disabled-date="disabledPastDate"
+                style="width: 240px"
+              />
             </el-form-item>
             <el-form-item v-if="needsLogistics" class="form-item-view-el goods-field-with-refresh" label="运费模板" prop="templateId">
               <el-select v-model="baseInfoForm.templateId" class="goods-field">
@@ -594,12 +557,6 @@
               <el-button class="refresh-icon" circle link @click="refresh('template')">
                 <el-icon><Refresh /></el-icon>
               </el-button>
-            </el-form-item>
-            <el-form-item v-if="needsLogistics && baseInfoForm.salesModel == 'WHOLESALE'" class="form-item-view-el" label="商品重量"
-              prop="weight">
-              <el-input v-model="baseInfoForm.weight" class="goods-field" placeholder="请输入商品重量">
-                <template #append>kg</template>
-              </el-input>
             </el-form-item>
             <div class="tree-bar" :class="{ 'is-empty': !shopCategory.length }">
               <el-form-item class="form-item-view-el" label="店内分类" prop="shopCategory">
@@ -649,7 +606,7 @@
         ref="ossManageRef"
         :isComponent="true"
         :initialize="picModelFlag"
-        :max-select="selectedFormBtnName === 'goodsGalleryFiles' ? 1 : 0"
+        :max-select="selectedFormBtnName === 'goodsGalleryFiles' ? Math.max(0, 5 - ((baseInfoForm.goodsGalleryFiles && baseInfoForm.goodsGalleryFiles.length) || 0)) : 0"
         :hide-select-footer="true"
         @callback="callbackSelected"
         @selected="(list) => { selectedImage = list }"
@@ -676,7 +633,7 @@ import { useRoute, useRouter } from "vue-router";
 import * as API_GOODS from "@/api/goods";
 import * as API_Shop from "@/api/shops";
 import cloneObj from "@/utils/index";
-import { Camera, Delete, Plus, Refresh, ZoomIn } from "@element-plus/icons-vue";
+import { Camera, Delete, InfoFilled, Loading, Plus, Refresh, VideoPlay, ZoomIn } from "@element-plus/icons-vue";
 import vuedraggable from "vuedraggable";
 import editor from "@/views/lili-components/editor/index.vue";
 
@@ -690,6 +647,7 @@ import {
 } from "@/constants/appointment";
 import { getStore } from "@/libs/storage";
 import { Message, Notice } from "@/utils/message";
+import { ElMessageBox } from "element-plus";
 
 defineOptions({ name: "goodsOperationSec" });
 
@@ -704,25 +662,8 @@ const route = useRoute();
 const router = useRouter();
 const { proxy } = getCurrentInstance();
 
-// 表单验证项，商品价格
-const checkPrice = (rule, value, callback) => {
-  if (!value && value !== 0) {
-    return callback(new Error("商品价格不能为空"));
-  }
-  setTimeout(() => {
-    if (!regular.money.test(value)) {
-      callback(new Error("请输入正整数或者两位小数"));
-    } else if (parseFloat(value) > 99999999) {
-      callback(new Error("商品价格设置超过上限值"));
-    } else {
-      callback();
-    }
-  }, 1000);
-};
-
 const baseInfoFormRule = {
   goodsName: [regular.REQUIRED, regular.WHITE_SPACE, regular.VARCHAR60],
-  price: [regular.REQUIRED, { validator: checkPrice }],
   sellingPoint: [regular.REQUIRED, regular.VARCHAR60],
   goodsUnit: [{ required: true, message: "请选择计量单位" }],
   name: [regular.REQUIRED, regular.VARCHAR5],
@@ -762,16 +703,22 @@ const previewGoodsPicture = ref("");
 const visible = ref(false);
 //展示商品图片
 const goodsPictureVisible = ref(false);
+//展示商品视频
+const videoPreviewVisible = ref(false);
 //选择的sku
 const selectedSku = ref({});
 
 /** 发布商品基本参数 */
 const baseInfoForm = ref({
   salesModel: "RETAIL",
+  /** SPU编码（后端自动生成，只读展示） */
+  spuSn: "",
   /** 商品相册列表 */
   goodsGalleryFiles: [],
-  /** 是否立即发布 true 立即发布 false 放入仓库 */
+  /** 是否立即发布 1 立即上架 0 立即下架 2 定时上架 */
   release: 1,
+  /** 定时上架时间（release 为 2 时必填） */
+  scheduledUpperTime: "",
   /** 是否为推荐商品 */
   recommend: 1,
   /** 店铺分类 */
@@ -804,19 +751,13 @@ const baseInfoForm = ref({
 
 // 原 Options API 中直接挂在 this 上的非响应式字段
 let goodsId;
+// 本次会话中新建成功的商品ID（含复制商品场景），用于保存失败重试时走编辑而不是重复创建
+let createdGoodsId;
 let currentSkuItem = "";
 let scrollParent = null;
 let _onPublishScroll;
 let _scrollTick = false;
 let _scrollClickTimer;
-
-const wholesaleData = ref([
-  {
-    num: 0,
-    price: 0,
-    goodsId,
-  },
-]);
 
 const invalidGoodsGalleryFiles = ref([]);
 const goodsPictureFallback =
@@ -837,6 +778,18 @@ const skuVals = ref([]);
 const skuVal = ref([]);
 // 规格展开的项
 const open_panel = ref(["1", "2"]);
+/** 是否开启多规格模式（默认单规格） */
+const isMultiSpec = ref(false);
+/** 单规格模式下的 SKU 数据 */
+const singleSku = ref({
+  id: "",
+  sn: "",
+  price: "",
+  cost: 1,
+  quantity: "",
+  weight: "",
+  images: []
+});
 /** 要提交的规格数据*/
 const skuInfo = ref([]);
 /** 物流模板 **/
@@ -924,7 +877,7 @@ const priceSectionTitle = computed(() => {
 const priceSectionDesc = computed(() => {
   if (isAppointmentGoods.value) return "规格、售价与各时段可预约数量";
   if (isECouponGoods.value) return "规格与售价，库存由卡池管理";
-  return "销售模式、规格与库存";
+  return "商品规格、售价与库存";
 });
 const otherSectionDesc = computed(() => {
   if (needsLogistics.value) return "上架状态、运费模板与店内分类";
@@ -970,6 +923,10 @@ function draggableItemKey(item) {
 }
 // 选择图片modal
 function handleCLickImg(val, index) {
+  if (val === "goodsGalleryFiles" && (baseInfoForm.value.goodsGalleryFiles || []).length >= 5) {
+    Message.warning("商品图片最多可上传5张");
+    return;
+  }
   selectedImage.value = [];
   picModelFlag.value = true;
   selectedFormBtnName.value = val;
@@ -1001,6 +958,13 @@ function parseOssSelectionUrl(item) {
   }
   return item.url || "";
 }
+// 当前正在上传图片的规格值对象
+let currentSpecValue = null;
+function handleCLickSpecValueImg(val) {
+  currentSpecValue = val;
+  handleCLickImg("selectedSpecValueImage");
+}
+
 // 图片选择后回调
 function callbackSelected(val) {
   picModelFlag.value = false;
@@ -1012,6 +976,21 @@ function callbackSelected(val) {
       selectedSku.value.images = [];
     }
     selectedSku.value.images.push(val.url);
+  } else if (selectedFormBtnName.value === "selectedSingleSkuImage") {
+    singleSku.value.images = [val.url];
+  } else if (selectedFormBtnName.value === "selectedSpecValueImage") {
+    if (currentSpecValue) {
+      currentSpecValue.images = [val.url];
+    }
+  } else if (selectedFormBtnName.value === "goodsGalleryFiles") {
+    if (!baseInfoForm.value.goodsGalleryFiles) {
+      baseInfoForm.value.goodsGalleryFiles = [];
+    }
+    if (baseInfoForm.value.goodsGalleryFiles.length < 5) {
+      baseInfoForm.value.goodsGalleryFiles.push(val.url);
+    } else {
+      Message.warning("商品图片最多可上传5张");
+    }
   } else {
     baseInfoForm.value[selectedFormBtnName.value].push(val.url);
   }
@@ -1033,6 +1012,14 @@ function confirmUrls() {
         selectedSku.value.images.push(url);
       }
     });
+  } else if (selectedFormBtnName.value === "selectedSingleSkuImage") {
+    if (urls.length > 0) {
+      singleSku.value.images = [urls[0]];
+    }
+  } else if (selectedFormBtnName.value === "selectedSpecValueImage") {
+    if (currentSpecValue && urls.length > 0) {
+      currentSpecValue.images = [urls[0]];
+    }
   } else if (selectedFormBtnName.value === "goodsGalleryFiles") {
     urls.forEach((url) => {
       if (baseInfoForm.value.goodsGalleryFiles.length < 5) {
@@ -1141,27 +1128,37 @@ function handleTabChange(name) {
   });
 }
 function getScrollParent() {
+  const container = document.querySelector(".single-page-con");
+  if (container) return container;
+
   let node = rootEl.value && rootEl.value.parentElement;
-  while (node && node !== document.body) {
-    const overflowY = window.getComputedStyle(node).overflowY;
-    if (overflowY === "auto" || overflowY === "scroll") {
+  while (node && node !== document.body && node !== document.documentElement) {
+    const style = window.getComputedStyle(node);
+    if (
+      (style.overflowY === "auto" || style.overflowY === "scroll") &&
+      node.scrollHeight > node.clientHeight
+    ) {
       return node;
     }
     node = node.parentElement;
   }
-  return null;
+  return document.scrollingElement || document.documentElement || document.body || window;
 }
 function bindPublishScroll() {
   unbindPublishScroll();
   scrollParent = getScrollParent();
-  if (scrollParent) {
-    _onPublishScroll = () => onPublishScroll();
+  _onPublishScroll = () => onPublishScroll();
+  if (scrollParent && scrollParent.addEventListener) {
     scrollParent.addEventListener("scroll", _onPublishScroll, { passive: true });
   }
+  window.addEventListener("scroll", _onPublishScroll, { passive: true, capture: true });
 }
 function unbindPublishScroll() {
-  if (scrollParent && _onPublishScroll) {
+  if (scrollParent && _onPublishScroll && scrollParent.removeEventListener) {
     scrollParent.removeEventListener("scroll", _onPublishScroll);
+  }
+  if (_onPublishScroll) {
+    window.removeEventListener("scroll", _onPublishScroll, { capture: true });
   }
   scrollParent = null;
 }
@@ -1177,13 +1174,32 @@ function onPublishScroll() {
 function syncActiveTabByScroll() {
   const scroller = scrollParent || getScrollParent();
   if (!scroller) return;
-  const navHeight = (sectionNav.value && sectionNav.value.offsetHeight) || 48;
-  const marker = scroller.getBoundingClientRect().top + navHeight + 12;
-  let current = "basic";
+
+  // 滚动到底部时优先高亮最后一个 tab
+  const scrollTop = scroller.scrollTop !== undefined ? scroller.scrollTop : window.scrollY;
+  const clientHeight = scroller.clientHeight || window.innerHeight;
+  const scrollHeight = scroller.scrollHeight || document.documentElement.scrollHeight;
+  if (scrollTop + clientHeight >= scrollHeight - 30 && sectionTabs.value.length > 0) {
+    const lastTab = sectionTabs.value[sectionTabs.value.length - 1].name;
+    if (activeTab.value !== lastTab) {
+      activeTab.value = lastTab;
+      handleTabChange(lastTab);
+    }
+    return;
+  }
+
+  const navHeight = (sectionNav.value && sectionNav.value.offsetHeight) || 56;
+  const scrollerTop = scroller.getBoundingClientRect ? scroller.getBoundingClientRect().top : 0;
+  const marker = scrollerTop + navHeight + 20;
+
+  let current = sectionTabs.value[0]?.name || "basic";
   sectionTabs.value.forEach((tab) => {
     const el = document.getElementById(`goods-section-${tab.name}`);
-    if (el && el.getBoundingClientRect().top <= marker) {
-      current = tab.name;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= marker) {
+        current = tab.name;
+      }
     }
   });
   if (activeTab.value !== current) {
@@ -1202,18 +1218,29 @@ function jumpToTab(name) {
   nextTick(() => {
     const el = document.getElementById(`goods-section-${name}`);
     const scroller = scrollParent || getScrollParent();
-    if (!el || !scroller) {
+    if (!el) {
       scrollingByClick.value = false;
       return;
     }
-    const navHeight = (sectionNav.value && sectionNav.value.offsetHeight) || 48;
-    const top =
-      el.getBoundingClientRect().top -
-      scroller.getBoundingClientRect().top +
-      scroller.scrollTop -
-      navHeight -
-      8;
-    scroller.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+    const navHeight = (sectionNav.value && sectionNav.value.offsetHeight) || 56;
+    if (
+      scroller &&
+      scroller.getBoundingClientRect &&
+      scroller !== window &&
+      scroller !== document.body &&
+      scroller !== document.documentElement
+    ) {
+      const top =
+        el.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top +
+        scroller.scrollTop -
+        navHeight -
+        8;
+      scroller.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+    } else {
+      const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+      window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+    }
     window.clearTimeout(_scrollClickTimer);
     _scrollClickTimer = window.setTimeout(() => {
       scrollingByClick.value = false;
@@ -1226,7 +1253,7 @@ function tabForInvalidFields(fields) {
     if (key === "goodsGalleryFiles" || key === "goodsVideo" || key === "intro" || key === "skuList") {
       return "specs";
     }
-    if (key === "salesModel" || key === "wholesaleRule") {
+    if (key === "salesModel") {
       return "price";
     }
     if (key === "shopCategory" || key === "templateId" || key === "weight") {
@@ -1285,96 +1312,7 @@ function handleSuccess(res, file, images) {
     previewPicture.value = file.url;
   }
 }
-function handleAddWholesaleData() {
-  if (
-    wholesaleData.value.length === 1 &&
-    (wholesaleData.value[0].price <= 0 || wholesaleData.value[0].num <= 0)
-  ) {
-    Message.error("请输入正确的销售规则");
-    return;
-  }
-  if (wholesaleData.value.length < 3) {
-    wholesaleData.value.push({
-      price:
-        Number(wholesaleData.value[wholesaleData.value.length - 1].price) -
-        0.01,
-      num:
-        Number(wholesaleData.value[wholesaleData.value.length - 1].num) + 1,
-      goodsId,
-    });
-  }
-  renderTableData(skuTableData.value);
-  syncWholesalePriceToSku();
-}
-function wholesaleRulePreview(row) {
-  const unit = baseInfoForm.value.goodsUnit || "";
-  const unitText = unit ? `/${unit}` : "";
-  return `当商品购买数量 ≥${row.num} 时，售价为 ￥${row.price}${unitText}`;
-}
-function handleDeleteWholesaleData(index) {
-  wholesaleData.value.splice(index, 1);
-  renderTableData(skuTableData.value);
-  syncWholesalePriceToSku();
-}
-// 同步批发价格到SKU
-function syncWholesalePriceToSku() {
-  if (baseInfoForm.value.salesModel === 'WHOLESALE' && wholesaleData.value.length > 0) {
-    // 使用第一个批发价格作为SKU的基础价格
-    const basePrice = wholesaleData.value[0].price || 0;
-    skuTableData.value.forEach(sku => {
-      sku.price = basePrice;
-    });
-  }
-}
-// 处理销售模式切换
-function handleSalesModeChange() {
-  renderTableData(skuTableData.value);
-  // 如果切换到批发模式，同步价格
-  if (baseInfoForm.value.salesModel === 'WHOLESALE') {
-    syncWholesalePriceToSku();
-  }
-}
-function checkWholesaleNum(index) {
-  if (wholesaleData.value[index].num < 0) {
-    Message.error("购买数量必须大于0");
-    wholesaleData.value[index].num = 0;
-    return;
-  }
-  if (
-    index > 0 &&
-    wholesaleData.value[index - 1].num >= wholesaleData.value[index].num
-  ) {
-    Notice.error({
-      title: "在批发模式的销售规则中",
-      desc: "下一个购买数量必须大于上一个购买数量",
-      duration: 5,
-    });
-    wholesaleData.value[index].num = wholesaleData.value[index - 1].num + 1;
-  }
-  renderTableData(skuTableData.value);
-  syncWholesalePriceToSku();
-}
-function checkWholesalePrice(index) {
-  if (wholesaleData.value[index].price < 0) {
-    Message.error("商品单价必须大于0");
-    wholesaleData.value[index].price = 0;
-    return;
-  }
-  if (
-    index > 0 &&
-    wholesaleData.value[index - 1].price <= wholesaleData.value[index].price
-  ) {
-    Notice.error({
-      title: "在批发模式的销售规则中",
-      desc: "下一个商品单价必须小于上一个商品单价",
-      duration: 5,
-    });
-    wholesaleData.value[index].price =
-      wholesaleData.value[index - 1].price - 0.01;
-  }
-  renderTableData(skuTableData.value);
-  syncWholesalePriceToSku();
-}
+
 function beforeVideoUpload(file) {
   const allowTypes = ["avi", "wmv", "mpeg", "mp4", "mov"];
   const ext = (file.name.split(".").pop() || "").toLowerCase();
@@ -1382,9 +1320,9 @@ function beforeVideoUpload(file) {
     Message.warning("视频格式仅支持 avi、wmv、mpeg、mp4、mov");
     return false;
   }
-  const maxSize = 50 * 1024 * 1024;
+  const maxSize = 30 * 1024 * 1024;
   if (file.size > maxSize) {
-    Message.warning("视频大小不能超过 50MB");
+    Message.warning("商品视频最大限制30M");
     return false;
   }
   loadingVideo.value = true;
@@ -1498,13 +1436,21 @@ async function GET_GoodData(id, draftId) {
     : (response.result.recommend = 0);
   invalidGoodsGalleryFiles.value = [];
   baseInfoForm.value = { ...baseInfoForm.value, ...response.result };
+  baseInfoForm.value.salesModel = "RETAIL";
   baseInfoForm.value.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
+  // 已设置定时上架的商品，编辑时回显为定时上架
+  if (!draftId && !route.query.copyId && response.result.scheduledUpperTime) {
+    baseInfoForm.value.release = 2;
+    baseInfoForm.value.scheduledUpperTime = response.result.scheduledUpperTime;
+  }
   baseInfoForm.value.brandId = normalizeBrandId(baseInfoForm.value.brandId);
   categoryId.value = response.result.categoryPath.split(",")[2];
 
   // 如果是复制商品，需要清除ID，确保提交时作为新商品
   if (route.query.copyId) {
     baseInfoForm.value.id = "";
+    // 复制商品是新商品，SPU编码由后端重新生成
+    baseInfoForm.value.spuSn = "";
   }
 
   if (
@@ -1517,21 +1463,9 @@ async function GET_GoodData(id, draftId) {
       });
   }
 
-  if (
-    response.result.wholesaleList &&
-    response.result.wholesaleList.length > 0
-  ) {
-    wholesaleData.value = response.result.wholesaleList;
-  }
-
   if (isECouponGoods.value || isAppointmentGoods.value) {
     baseInfoForm.value.salesModel = "RETAIL";
   }
-
-  if (response.result.salesModel === "WHOLESALE" && showSalesModel.value) {
-    baseInfoForm.value.weight = response.result.skuList[0].weight;
-  }
-
   renderGoodsDetailSku(response.result.skuList);
   nextTick(() => {
     if (isAppointmentGoods.value) {
@@ -1562,6 +1496,11 @@ async function GET_GoodData(id, draftId) {
 
   /** 查询商品参数 */
   GET_GoodsParams();
+
+  // 复制商品/草稿场景：SPU编码为空时进入页面即生成
+  if (!baseInfoForm.value.spuSn && (!route.query.id || route.query.copyId)) {
+    baseInfoForm.value.spuSn = generateSpuCode();
+  }
 
   nextTick(() => {
     editorRef.value?.setContent?.(baseInfoForm.value.intro);
@@ -1642,9 +1581,29 @@ function renderGoodsDetailSku(skuList) {
     });
     skus.push(sku);
   });
-  skuInfo.value = skusInfo;
-  skuTableData.value = skus;
-  renderTableData(skus);
+  if (skusInfo.length > 0) {
+    isMultiSpec.value = true;
+    skuInfo.value = skusInfo;
+    skuTableData.value = skus;
+    renderTableData(skus);
+  } else {
+    isMultiSpec.value = false;
+    skuInfo.value = [];
+    skuTableData.value = [];
+    skuTableColumn.value = [];
+    if (skuList && skuList.length > 0) {
+      const first = skuList[0];
+      singleSku.value = {
+        id: first.id || "",
+        sn: first.sn || generateSkuCode(),
+        price: first.price !== undefined && first.price !== null ? first.price : "",
+        cost: first.cost !== undefined && first.cost !== null ? first.cost : 1,
+        quantity: first.quantity !== undefined && first.quantity !== null ? first.quantity : "",
+        weight: first.weight !== undefined && first.weight !== null ? first.weight : "",
+        images: (first.goodsGalleryList && first.goodsGalleryList.length > 0) ? first.goodsGalleryList : []
+      };
+    }
+  }
 }
 // 将pc商品描述同步给移动端
 function promiseIntroEditor() {
@@ -1750,29 +1709,173 @@ function GET_GoodsParams() {
     }
   );
 }
+// 批量设置相关变量
+const batchFillPrice = ref("");
+const batchFillQuantity = ref("");
+const batchFillWeight = ref("");
+
+function handleBatchApply() {
+  if (skuTableData.value.length === 0 || skuTableData.value[0]._isPlaceholder) return;
+  const p = (batchFillPrice.value || "").toString().trim();
+  const q = (batchFillQuantity.value || "").toString().trim();
+  const w = (batchFillWeight.value || "").toString().trim();
+
+  if (p === "" && q === "" && w === "") {
+    Message.warning("请至少输入一项批量设置的数值");
+    return;
+  }
+
+  if (p !== "") {
+    if (isNaN(Number(p)) || Number(p) < 0) {
+      Message.warning("批量价格请输入正确的非负数字");
+      return;
+    }
+  }
+
+  if (w !== "") {
+    if (isNaN(Number(w)) || Number(w) < 0) {
+      Message.warning("批量重量请输入正确的非负数字");
+      return;
+    }
+  }
+
+  if (q !== "") {
+    if (!/^\d+$/.test(q) || Number(q) < 0) {
+      Message.warning("批量库存请输入正确的整数");
+      return;
+    }
+  }
+
+  skuTableData.value.forEach(row => {
+    if (p !== "") row.price = p;
+    if (q !== "") row.quantity = q;
+    if (w !== "") row.weight = w;
+  });
+  Message.success("批量设置成功");
+}
+
+/** 切换多规格模式 */
+function handleMultiSpecChange(val) {
+  if (val) {
+    if (!skuInfo.value || skuInfo.value.length === 0) {
+      skuInfo.value = [
+        {
+          name: "规格1",
+          spec_values: []
+        }
+      ];
+      newSkuValues.value = [""];
+    }
+    renderTableData(skuTableData.value);
+  } else {
+    const hasSpecData = (skuInfo.value && skuInfo.value.some(i => i.spec_values && i.spec_values.length > 0)) || (skuTableData.value && skuTableData.value.length > 0 && !skuTableData.value[0]._isPlaceholder);
+    if (hasSpecData) {
+      ElMessageBox.confirm("切换为单规格将清空当前已配置的多规格属性，是否继续？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        isMultiSpec.value = false;
+        if (skuTableData.value && skuTableData.value[0]) {
+          if (skuTableData.value[0].price !== undefined && skuTableData.value[0].price !== "") singleSku.value.price = skuTableData.value[0].price;
+          if (skuTableData.value[0].quantity !== undefined && skuTableData.value[0].quantity !== "") singleSku.value.quantity = skuTableData.value[0].quantity;
+          if (skuTableData.value[0].weight !== undefined && skuTableData.value[0].weight !== "") singleSku.value.weight = skuTableData.value[0].weight;
+        }
+        skuInfo.value = [];
+        skuTableData.value = [];
+        skuTableColumn.value = [];
+      }).catch(() => {
+        isMultiSpec.value = true;
+      });
+    } else {
+      isMultiSpec.value = false;
+      skuInfo.value = [];
+      skuTableData.value = [];
+      skuTableColumn.value = [];
+    }
+  }
+}
+
 /** 添加规格项 */
 function addSkuItem() {
-  if (containsSameSkuItem.value) {
-    Message.error("存在重复规格项！");
-    return;
-  }
-  if (containsSameSkuValue.value) {
-    Message.error("存在重复规格值！");
-    return;
-  }
   if (skuInfo.value.length >= 5) {
-    Message.error("规格项不能大于5个！");
+    Message.warning("规格项不能大于5个！");
     return;
   }
-  if (skuInfo.value.find((i) => i.name === "")) {
-    Message.error("规格项不能为空！");
+  if (skuInfo.value.find((i) => !i.name || i.name.trim() === "")) {
+    Message.warning("规格项名称不能为空！");
     return;
   }
+  let nextNum = skuInfo.value.length + 1;
+  while (skuInfo.value.some(i => i.name === `规格${nextNum}`)) {
+    nextNum++;
+  }
+  const newName = `规格${nextNum}`;
   skuInfo.value.push({
-    spec_values: [{ name: "", value: "", images: [] }],
-    name: "",
+    name: newName,
+    spec_values: [],
   });
+  newSkuValues.value[skuInfo.value.length - 1] = "";
 
+  renderTableData(skuTableData.value);
+}
+
+/** 删除规格项 */
+function handleRemoveSpecItem($index, item) {
+  if (skuInfo.value.length <= 1) {
+    Message.warning("至少保留一个规格项！");
+    return;
+  }
+  skuInfo.value.splice($index, 1);
+  newSkuValues.value.splice($index, 1);
+  renderTableData(skuTableData.value);
+}
+
+/** 编辑规格项名称失焦检查 */
+function handleSpecNameChange(item, $index) {
+  const trimmed = (item.name || "").trim();
+  if (!trimmed) {
+    item.name = `规格${$index + 1}`;
+  }
+  const hasDup = skuInfo.value.filter((i, idx) => idx !== $index && i.name === item.name).length > 0;
+  if (hasDup) {
+    Message.warning("已存在相同规格项名称！");
+    return;
+  }
+  item.spec_values.forEach(v => {
+    v.name = item.name;
+  });
+  renderTableData(skuTableData.value);
+}
+
+/** 添加当前规格项的规格值 */
+function handleAddSpecValue($index, item) {
+  const val = (newSkuValues.value[$index] || "").trim();
+  if (!val) {
+    Message.warning("请输入规格值");
+    return;
+  }
+  if (item.spec_values.some(i => i.value === val)) {
+    Message.warning("已存在相同规格值！");
+    return;
+  }
+  if (item.spec_values.length >= 10) {
+    Message.warning("规格值不能大于10个！");
+    return;
+  }
+
+  item.spec_values.push({
+    name: item.name,
+    value: val,
+    images: []
+  });
+  newSkuValues.value[$index] = "";
+  renderTableData(skuTableData.value);
+}
+
+/** 移除当前规格值 */
+function handleRemoveSpecValue(item, vIndex) {
+  item.spec_values.splice(vIndex, 1);
   renderTableData(skuTableData.value);
 }
 function changeSkuItem(val) {
@@ -2057,7 +2160,7 @@ function addSpec($index, item) {
         return {
           ...combination,
           id: existingCombination.id || "",
-          sn: existingCombination.sn || "",
+          sn: existingCombination.sn || generateSkuCode(),
           quantity: hideSkuQuantity.value
             ? (existingCombination.quantity ?? 0)
             : (existingCombination.quantity || ""),
@@ -2112,7 +2215,7 @@ function handleCloseSkuValue(item, index, spec) {
       return {
         ...combination,
         id: existingCombination.id || "",
-        sn: existingCombination.sn || "",
+        sn: existingCombination.sn || generateSkuCode(),
         quantity: hideSkuQuantity.value
           ? (existingCombination.quantity ?? 0)
           : (existingCombination.quantity || ""),
@@ -2147,34 +2250,13 @@ function renderTableData(skus) {
       key: columnName,
     });
   });
-  // 有成本价和价格的情况
-  if (baseInfoForm.value.salesModel !== "WHOLESALE") {
-    pushData.push(
-      // {
-      //   title: "成本价",
-      //   slot: "cost",
-      // },
-      {
-        title: "价格",
-        slot: "price",
-      }
-    );
-  }
-
-  if (baseInfoForm.value.salesModel === "WHOLESALE" && wholesaleData.value) {
-    wholesaleData.value.forEach((item, index) => {
-      pushData.push({
-        title: "购买量 ≥ " + item.num,
-        slot: "wholePrice" + index,
-      });
-    });
-  }
+  pushData.push({
+    title: "价格",
+    slot: "price",
+  });
 
   // 有重量的情况
-  if (
-    needsLogistics.value &&
-    baseInfoForm.value.salesModel !== "WHOLESALE"
-  ) {
+  if (needsLogistics.value) {
     pushData.push({
       title: "重量",
       slot: "weight",
@@ -2198,7 +2280,7 @@ function renderTableData(skus) {
     //   slot: "alertQuantity",
     // },
     {
-      title: "货号",
+      title: "SKU编码",
       slot: "sn",
     },
   );
@@ -2209,10 +2291,41 @@ function renderTableData(skus) {
   if (skuInfo.value.length > 0) {
     const newCombinations = generateSkuCombinations(skuInfo.value);
 
+    // 如果还没有添加任何规格值，渲染一行平滑的占位行，避免出现空数据提示框
+    if (newCombinations.length === 0) {
+      const prevRow = (Array.isArray(skus) && skus[0]) || {};
+      const placeholderRow = {
+        _isPlaceholder: true,
+        id: "",
+        sn: "",
+        price: prevRow.price || singleSku.value.price || "",
+        weight: prevRow.weight || singleSku.value.weight || "",
+        quantity: (prevRow.quantity !== undefined && prevRow.quantity !== "")
+          ? prevRow.quantity
+          : (singleSku.value.quantity !== undefined && singleSku.value.quantity !== "" ? singleSku.value.quantity : defaultSkuQuantity()),
+        cost: prevRow.cost || singleSku.value.cost || "",
+        images: baseInfoForm.value.goodsGalleryFiles || []
+      };
+      skuInfo.value.forEach(info => {
+        placeholderRow[info.name] = "-";
+      });
+      skuTableData.value = [placeholderRow];
+      assignSkuTableIndex();
+      return;
+    }
+
+    const prevRow = (Array.isArray(skus) && skus[0]) || {};
+    const fallbackPrice = prevRow.price || singleSku.value.price || "";
+    const fallbackWeight = prevRow.weight || singleSku.value.weight || "";
+    const fallbackQuantity = (prevRow.quantity !== undefined && prevRow.quantity !== "")
+      ? prevRow.quantity
+      : (singleSku.value.quantity !== undefined && singleSku.value.quantity !== "" ? singleSku.value.quantity : defaultSkuQuantity());
+
     // 保留原有组合的属性值
     skuTableData.value = newCombinations.map(combination => {
-      // 查找匹配的原有组合
-      const existingCombination = skus.find(item => {
+      // 查找匹配的原有组合（排除占位行）
+      const existingCombination = Array.isArray(skus) && skus.find(item => {
+        if (!item || item._isPlaceholder) return false;
         // 检查所有规格项是否匹配
         return skuInfo.value.every(info => {
           return item[info.name] === combination[info.name];
@@ -2224,28 +2337,30 @@ function renderTableData(skus) {
         return {
           ...combination,
           id: existingCombination.id || "",
-          sn: existingCombination.sn || "",
+          sn: existingCombination.sn || generateSkuCode(),
           quantity: hideSkuQuantity.value
             ? (existingCombination.quantity ?? 0)
             : (existingCombination.quantity || ""),
           cost: existingCombination.cost || "",
-          price: existingCombination.price || (baseInfoForm.value.salesModel === 'WHOLESALE' && wholesaleData.value.length > 0 ? wholesaleData.value[0].price : ""),
+          price: existingCombination.price || "",
           weight: existingCombination.weight || ""
         };
       } else {
-        // 新组合使用默认值，批发模式下设置默认价格
+        // 新组合使用继承值或默认值
         return {
           ...combination,
           id: "",
-          sn: "",
-          quantity: defaultSkuQuantity(),
+          sn: generateSkuCode(),
+          quantity: fallbackQuantity,
           cost: "",
-          price: baseInfoForm.value.salesModel === 'WHOLESALE' && wholesaleData.value.length > 0 ? wholesaleData.value[0].price : "",
-          weight: ""
+          price: fallbackPrice,
+          weight: fallbackWeight
         };
       }
     });
     assignSkuTableIndex();
+  } else {
+    skuTableData.value = [];
   }
 }
 
@@ -2423,15 +2538,8 @@ function save() {
         return;
       }
 
-      // 4. 批发销售模式：校验并同步阶梯价格与数量
-      if (baseInfoForm.value.salesModel === "WHOLESALE") {
-        for (let i = 0; i < wholesaleData.value.length; i++) {
-          checkWholesaleNum(i);
-          checkWholesalePrice(i);
-          wholesaleData.value[i].goodsId = goodsId;
-        }
-        baseInfoForm.value.wholesaleList = wholesaleData.value;
-      }
+      baseInfoForm.value.salesModel = "RETAIL";
+      baseInfoForm.value.wholesaleList = [];
 
       // 判断是否是复制商品（复制商品时不复用原有 goodsId，重新生成）
       if (!route.query.copyId) {
@@ -2441,6 +2549,8 @@ function save() {
       // 同步富文本编辑器内容至表单对象
       syncIntroFromEditors();
       let submit = JSON.parse(JSON.stringify(baseInfoForm.value));
+      submit.salesModel = "RETAIL";
+      submit.wholesaleList = [];
 
       // 5. 商品主图相册校验
       if (
@@ -2501,61 +2611,133 @@ function save() {
       }
 
       // 9. 组装 SKU 列表数据
-      let skuInfoNames = skuInfo.value.map((n) => n.name);
       submit.skuList = [];
-      let containEmptyImage = false;
-      skuTableData.value.map((sku) => {
-        let skuCopy = {
+
+      if (!isMultiSpec.value) {
+        // --- 单规格模式校验与组装 ---
+        const p = singleSku.value.price;
+        if (p === "" || p == null || isNaN(Number(p)) || Number(p) < 0) {
+          jumpToTab("price");
+          Message.error("请在规格设置中填写商品价格！");
+          return;
+        }
+        if (!isECouponGoods.value && !isAppointmentGoods.value) {
+          const q = singleSku.value.quantity;
+          if (q === "" || q == null || isNaN(Number(q)) || Number(q) < 0) {
+            jumpToTab("price");
+            Message.error("请在规格设置中填写商品库存！");
+            return;
+          }
+        }
+        if (needsLogistics.value) {
+          const w = singleSku.value.weight;
+          if (w === "" || w == null || isNaN(Number(w)) || Number(w) < 0) {
+            jumpToTab("price");
+            Message.error("请在规格设置中填写商品物流重量！");
+            return;
+          }
+        }
+
+        const skuCopy = {
           cost: 1,
-          price: sku.price,
-          quantity: resolveSubmitQuantity(sku),
-          // alertQuantity: sku.alertQuantity,
-          sn: sku.sn,
-          images: [],
+          price: Number(singleSku.value.price),
+          quantity: resolveSubmitQuantity(singleSku.value),
+          sn: singleSku.value.sn || "",
+          weight: needsLogistics.value ? Number(singleSku.value.weight || 0) : 0,
+          images: (singleSku.value.images && singleSku.value.images.length > 0)
+            ? singleSku.value.images
+            : (submit.goodsGalleryFiles || []).slice(0, 1)
         };
-        // 若开启规格图片，将第1个规格项关联的图片注入对应 SKU
-        if (openImage.value) {
-          skuInfo.value[0].spec_values.forEach(item => {
-            if (!item.images || item.images.length === 0) {
-              containEmptyImage = true;
-              return;
-            }
-            if (item.value === sku[skuInfo.value[0].name]) {
-              skuCopy.images = item.images;
-            }
-          });
-        }
-        if (sku.weight) {
-          skuCopy.weight = sku.weight;
-        }
-        if (baseInfoForm.value.weight) {
-          skuCopy.weight = baseInfoForm.value.weight;
-        }
-        if (sku.id) {
-          skuCopy.id = sku.id;
-        }
-        for (let skuInfoName of skuInfoNames) {
-          skuCopy[skuInfoName] = sku[skuInfoName];
+        if (singleSku.value.id) {
+          skuCopy.id = singleSku.value.id;
         }
         if (isAppointmentGoods.value && appointmentPanel.value) {
-          skuCopy.slotCapacities = appointmentPanel.value.buildSkuSlotCapacities(sku);
+          skuCopy.slotCapacities = appointmentPanel.value.buildSkuSlotCapacities(singleSku.value);
         }
         submit.skuList.push(skuCopy);
-      });
+      } else {
+        // --- 多规格模式校验与组装 ---
+        if (skuTableData.value.length === 0 || skuTableData.value[0]._isPlaceholder) {
+          jumpToTab("price");
+          Message.error("已开启多规格，请至少添加一个有效的规格值！");
+          return;
+        }
+        let skuInfoNames = skuInfo.value.map((n) => n.name);
+        let containEmptyImage = false;
+        skuTableData.value.map((sku) => {
+          let skuCopy = {
+            cost: 1,
+            price: sku.price,
+            quantity: resolveSubmitQuantity(sku),
+            sn: sku.sn,
+            images: [],
+          };
+          if (openImage.value) {
+            skuInfo.value[0].spec_values.forEach(item => {
+              if (!item.images || item.images.length === 0) {
+                containEmptyImage = true;
+                return;
+              }
+              if (item.value === sku[skuInfo.value[0].name]) {
+                skuCopy.images = item.images;
+              }
+            });
+          }
+          if (sku.weight) {
+            skuCopy.weight = sku.weight;
+          }
+          if (baseInfoForm.value.weight) {
+            skuCopy.weight = baseInfoForm.value.weight;
+          }
+          if (sku.id) {
+            skuCopy.id = sku.id;
+          }
+          for (let skuInfoName of skuInfoNames) {
+            skuCopy[skuInfoName] = sku[skuInfoName];
+          }
+          if (isAppointmentGoods.value && appointmentPanel.value) {
+            skuCopy.slotCapacities = appointmentPanel.value.buildSkuSlotCapacities(sku);
+          }
+          submit.skuList.push(skuCopy);
+        });
 
-      // 规格图片完整性校验
-      if (containEmptyImage) {
-        Message.error("开启规格图片，所有规格图片不能为空！");
-        jumpToTab("price");
-        return;
+        // 规格图片完整性校验
+        if (containEmptyImage) {
+          Message.error("开启规格图片，所有规格图片不能为空！");
+          jumpToTab("price");
+          return;
+        }
+
+        // 前置校验：多规格下必须有至少一条 SKU 数据
+        if (!submit.skuList || submit.skuList.length === 0) {
+          jumpToTab("price");
+          Message.error("已开启多规格，请至少添加一个有效的规格值！");
+          return;
+        }
+
+        // 检查 SKU 价格有效性
+        for (let i = 0; i < submit.skuList.length; i++) {
+          const skuPrice = submit.skuList[i].price;
+          if (skuPrice === "" || skuPrice == null || isNaN(Number(skuPrice)) || Number(skuPrice) < 0) {
+            jumpToTab("price");
+            Message.error(`请在价格库存中填写第 ${i + 1} 行规格的商品价格！`);
+            return;
+          }
+        }
       }
 
-      // 10. 前置校验：商品规格必须至少包含一个（避免向后端提交空 SKU 列表导致 400 校验失败）
-      if (!submit.skuList || submit.skuList.length === 0) {
-        jumpToTab("price");
-        Message.error("规格必须要有一个！");
-        return;
+      // 取第一个 SKU 或者价格最低的 SKU 的值赋给商品（SPU）价格
+      const validPrices = submit.skuList
+        .map((s) => Number(s.price))
+        .filter((p) => !isNaN(p) && p >= 0);
+      if (validPrices.length > 0) {
+        submit.price = Math.min(...validPrices);
+      } else if (submit.skuList[0] && submit.skuList[0].price !== undefined && !isNaN(Number(submit.skuList[0].price))) {
+        submit.price = Number(submit.skuList[0].price);
+      } else {
+        submit.price = 0;
       }
+      baseInfoForm.value.price = submit.price;
 
       if (submit.goodsGalleryFiles && submit.goodsGalleryFiles.length > 0) {
         submit.goodsGalleryList = submit.goodsGalleryFiles.map(
@@ -2565,7 +2747,21 @@ function save() {
       /** 参数校验 **/
       /* Object.keys(submit.goodsParamsList).forEach((item) => {
       });*/
-      submit.release ? (submit.release = true) : (submit.release = false);
+      // 定时上架：先校验时间，保存时按下架处理，保存成功后再调用定时上架接口
+      const scheduledUpper = submit.release === 2;
+      const scheduledUpperTime = submit.scheduledUpperTime;
+      delete submit.scheduledUpperTime;
+      if (scheduledUpper) {
+        if (!scheduledUpperTime) {
+          Message.error("请选择定时上架时间！");
+          return;
+        }
+        if (new Date(scheduledUpperTime.replace(/-/g, "/")).getTime() <= Date.now()) {
+          Message.error("定时上架时间必须晚于当前时间！");
+          return;
+        }
+      }
+      submit.release = submit.release === 1;
       submit.recommend
         ? (submit.recommend = true)
         : (submit.recommend = false);
@@ -2573,16 +2769,28 @@ function save() {
       // 11. 前端所有校验均通过，正式发起网络请求并激活保存按钮 loading
       submitLoading.value = true;
       try {
-        if (goodsId && !route.query.copyId) {
+        // 编辑商品；新建/复制成功后重试也走编辑，避免重复创建
+        const editId = goodsId && !route.query.copyId ? goodsId : createdGoodsId;
+        if (editId) {
           // 编辑商品
-          const res = await API_GOODS.editGoods(goodsId, submit);
+          const res = await API_GOODS.editGoods(editId, submit);
           if (res && res.success) {
+            if (scheduledUpper) {
+              await scheduleUpper(editId, scheduledUpperTime);
+            }
             router.go(-1);
           }
         } else {
           // 新增商品 / 复制商品
           const res = await API_GOODS.createGoods(submit);
           if (res && res.success) {
+            // 记录新商品ID：后续定时设置失败重试时走编辑而不是重复创建
+            if (res.result) {
+              createdGoodsId = res.result;
+            }
+            if (scheduledUpper && res.result) {
+              await scheduleUpper(res.result, scheduledUpperTime);
+            }
             proxy.$parent.activestep = 2;
             window.scrollTo(0, 0);
           }
@@ -2601,6 +2809,24 @@ function save() {
     }
   });
 }
+function disabledPastDate(date) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date.getTime() < today.getTime();
+}
+// 设置定时上架；失败时给出明确提示（商品已保存，仅定时未生效），不阻断保存流程
+async function scheduleUpper(id, time) {
+  try {
+    await API_GOODS.scheduleGoodsMarket({
+      goodsIds: [id],
+      status: "UPPER",
+      triggerTime: time,
+      reason: "商家定时上架",
+    });
+  } catch (e) {
+    Message.warning("商品已保存，但定时上架设置失败，请在商品编辑页重新设置");
+  }
+}
 function GET_ShipTemplate(type) {
   // 获取物流模板
   API_Shop.getShipTemplate().then((res) => {
@@ -2613,6 +2839,22 @@ function GET_ShipTemplate(type) {
       Message.error("刷新失败，请重试");
     }
   });
+}
+
+/** 生成SPU编码：P + yyyyMMddHHmmss + 2位随机数（与后端 GoodsCodeGenerator 规则一致） */
+function generateSpuCode() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  const ts = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  return "P" + ts + p(Math.floor(Math.random() * 100));
+}
+
+/** 生成SKU编码：S + yyyyMMddHHmmss + 4位随机数（与后端 GoodsCodeGenerator 规则一致） */
+function generateSkuCode() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  const ts = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  return "S" + ts + String(Math.floor(Math.random() * 10000)).padStart(4, "0");
 }
 
 onMounted(() => {
@@ -2639,6 +2881,10 @@ onMounted(() => {
     categoryId.value = cateId[2];
     baseInfoForm.value.categoryPath = cateId.toString();
     baseInfoForm.value.goodsType = props.firstData.goodsType;
+    // 进入发布页即生成SPU编码，随表单提交
+    baseInfoForm.value.spuSn = generateSpuCode();
+    // 单规格SKU编码同步生成
+    singleSku.value.sn = generateSkuCode();
 
     GET_GoodsParams();
     getGoodsBrandList();
@@ -2747,6 +2993,7 @@ onBeforeUnmount(() => {
   box-shadow: none;
   border-radius: 0;
   text-align: left;
+  overflow: visible;
 }
 
 .goods-publish-page :deep(.base-info-item > div) {
@@ -2767,16 +3014,16 @@ onBeforeUnmount(() => {
 
 .goods-section-nav {
   position: sticky;
-  top: 0;
-  z-index: 20;
+  top: -10px;
+  z-index: 100;
   display: flex;
   align-items: center;
   height: 56px;
-  margin: 0 0 12px;
-  padding: 0 12px;
+  margin: -10px -10px 12px -10px;
+  padding: 0 16px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .goods-section-nav-item {
@@ -2903,68 +3150,199 @@ onBeforeUnmount(() => {
   line-height: 16px;
 }
 
-.gallery-hint {
-  color: grey;
-  white-space: nowrap;
-}
-
 .goods-field {
   width: 260px;
 }
 
+/* 图文信息 - 卡片式上传样式 */
+.media-form-item {
+  margin-bottom: 22px;
 
+  :deep(.el-form-item__label) {
+    font-size: 14px;
+    color: #303133;
+    padding-top: 6px;
+    font-weight: 500;
+  }
 
-/* .tox-notifications-container{
-  display: none !important;
-} */
-.goods-video-form-item {
-  align-items: center;
+  :deep(.el-form-item__content) {
+    line-height: normal;
+  }
 }
 
-.goods-video-form-item--multi {
-  align-items: flex-start;
-}
-
-.goods-video-form-item--multi :deep(.el-form-item__label) {
-  padding-top: 8px;
-}
-
-.goods-video-form-item :deep(.el-form-item__content) {
-  display: flex;
-  align-items: center;
-}
-
-.goods-video-form-item--multi :deep(.el-form-item__content) {
-  align-items: flex-start;
-}
-
-.goods-video {
-  align-items: flex-start;
+.media-upload-wrapper {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  align-items: flex-start;
 }
 
-.goods-video-preview {
+.media-list-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.media-draggable-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+
+  &:empty {
+    display: none !important;
+  }
+}
+
+/* 虚线加号卡片 */
+.media-upload-card {
+  width: 98px;
+  height: 98px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  background-color: #fafafa;
   display: flex;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.25s ease;
+
+  &:hover {
+    border-color: var(--el-color-primary, #409eff);
+    background-color: #f5f9ff;
+
+    .uploader-plus-icon {
+      color: var(--el-color-primary, #409eff);
+    }
+  }
+
+  .uploader-plus-icon {
+    font-size: 32px;
+    color: #8c8c8c;
+    transition: color 0.25s ease;
+  }
+
+  &.is-loading {
+    cursor: not-allowed;
+    background-color: #f5f7fa;
+  }
 }
 
-.goods-video-actions {
+.media-uploader-action {
+  display: inline-block;
+  line-height: 0;
+  margin: 0;
+  padding: 0;
+
+  :deep(.el-upload) {
+    display: block;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* 已上传卡片（图片 / 视频） */
+.media-card-item {
+  position: relative;
+  width: 98px;
+  height: 98px;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  background-color: #fff;
+  overflow: hidden;
+  box-sizing: border-box;
+  cursor: grab;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  img,
+  .card-video-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .media-card-badge {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    padding: 0 6px;
+    height: 18px;
+    line-height: 18px;
+    background: rgba(64, 158, 255, 0.9);
+    color: #fff;
+    font-size: 11px;
+    border-bottom-right-radius: 4px;
+    pointer-events: none;
+  }
+
+  .media-card-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    .cover-icon {
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        transform: scale(1.2);
+        color: var(--el-color-primary, #409eff);
+      }
+
+      &[title="删除"]:hover {
+        color: #f56c6c;
+      }
+    }
+  }
+
+  &:hover .media-card-cover {
+    opacity: 1;
+  }
+
+  &.video-card-item {
+    cursor: default;
+  }
+}
+
+/* 下方提示文字 */
+.media-uploader-tip {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 32px;
-}
-
-.goods-video-actions--with-preview {
+  gap: 5px;
   margin-top: 8px;
-}
+  font-size: 12px;
+  color: #8c8c8c;
+  line-height: 18px;
 
-.goods-video-actions :deep(.el-upload) {
-  display: inline-flex;
-  align-items: center;
-  vertical-align: middle;
+  .tip-icon {
+    font-size: 13px;
+    color: #8c8c8c;
+    flex-shrink: 0;
+  }
 }
 
 .mb-10 {
@@ -3023,4 +3401,330 @@ onBeforeUnmount(() => {
   margin-left: 100px;
   transform: translateY(-50%);
 }
+
+/* 单/多规格切换与单规格表格样式 */
+.spec-mode-switch-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  background: #f8f9fb;
+  border-radius: 4px;
+  border: 1px solid #ebeef5;
+
+  .spec-checkbox-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #303133;
+  }
+}
+
+.single-spec-table-wrapper {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.spec-sku-image-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spec-sku-image-preview {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #dcdfe6;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .spec-sku-image-mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+
+    &:hover {
+      color: #f56c6c;
+    }
+  }
+
+  &:hover .spec-sku-image-mask {
+    opacity: 1;
+  }
+}
+
+.spec-sku-image-uploader {
+  width: 52px;
+  height: 52px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #909399;
+  background: #fafafa;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: var(--el-color-primary, #409eff);
+    color: var(--el-color-primary, #409eff);
+    background: #f5f9ff;
+  }
+}
+
+.sku-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .sku-card-title {
+    font-weight: 600;
+    color: #303133;
+  }
+
+  .sku-card-tip {
+    font-size: 12px;
+    color: #909399;
+  }
+}
+
+/* 多规格构建器全新样式（对齐规范布局） */
+.multi-spec-container {
+  width: 100%;
+  margin-top: 12px;
+
+  .spec-builder-list {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .spec-builder-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 12px 16px;
+    background: #fbfbfb;
+    border: 1px solid #ebeef5;
+    border-radius: 6px;
+  }
+
+  .spec-builder-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    .spec-star {
+      color: #f56c6c;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .spec-name-input {
+      width: 140px;
+    }
+
+    .spec-del-link {
+      font-size: 13px;
+      padding: 0 4px;
+    }
+
+    .spec-del-disabled {
+      font-size: 13px;
+      color: #c0c4cc;
+      cursor: not-allowed;
+      padding: 0 4px;
+    }
+  }
+
+  .spec-builder-right {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1;
+
+    .spec-val-tag-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .spec-val-tag {
+      font-size: 13px;
+      height: 32px;
+      line-height: 30px;
+      border-radius: 4px;
+    }
+
+    .spec-val-img-box {
+      width: 32px;
+      height: 32px;
+
+      .spec-val-img-preview {
+        position: relative;
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid #dcdfe6;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .spec-val-img-mask {
+          position: absolute;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          opacity: 0;
+          cursor: pointer;
+          font-size: 14px;
+          transition: opacity 0.2s;
+
+          &:hover {
+            color: #f56c6c;
+          }
+        }
+
+        &:hover .spec-val-img-mask {
+          opacity: 1;
+        }
+      }
+
+      .spec-val-img-uploader {
+        width: 32px;
+        height: 32px;
+        border: 1px dashed #c0c4cc;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #909399;
+        font-size: 14px;
+        background: #fff;
+        transition: all 0.2s;
+
+        &:hover {
+          border-color: var(--el-color-primary, #409eff);
+          color: var(--el-color-primary, #409eff);
+        }
+      }
+    }
+
+    .spec-val-input-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      .spec-val-input {
+        width: 140px;
+      }
+
+      .spec-val-add-btn {
+        height: 32px;
+      }
+    }
+
+    .spec-image-checkbox {
+      margin-left: 8px;
+    }
+  }
+
+  .spec-add-btn-row {
+    display: flex;
+    align-items: center;
+
+    .add-spec-item-btn {
+      border-style: dashed;
+      color: var(--el-color-primary, #409eff);
+      border-color: var(--el-color-primary, #409eff);
+      background: #fdfdfd;
+
+      &:hover {
+        background: #ecf5ff;
+      }
+    }
+  }
+
+  .multi-spec-table-section {
+    margin-top: 16px;
+
+    .spec-detail-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+
+      .spec-detail-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #303133;
+      }
+
+      .spec-batch-fill-bar {
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: #f8f9fa;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid #ebeef5;
+
+        .batch-title {
+          font-size: 13px;
+          font-weight: 500;
+          color: #606266;
+          white-space: nowrap;
+        }
+
+        .batch-fill-input {
+          width: 140px;
+
+          :deep(.el-input__inner) {
+            text-align: left;
+          }
+
+          :deep(.el-input-group__append) {
+            padding: 0 10px;
+            background-color: #f5f7fa;
+            color: #909399;
+            font-size: 12px;
+          }
+        }
+
+        .batch-apply-btn {
+          margin-left: 4px;
+        }
+      }
+    }
+  }
+}
+
+
 </style>

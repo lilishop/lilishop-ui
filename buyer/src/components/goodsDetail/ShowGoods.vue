@@ -70,35 +70,7 @@
             </div>
             <!-- 商品原价 -->
             <div class="item-price-row" v-else>
-              <!-- 批发价格 -->
-              <div v-if="!isECouponGoods && wholesaleNum && wholesaleNum.length">
-                <div class="flex">
-                  <div class="item-price-title"></div>
-
-                  <div
-                    v-for="(item, index) in wholesalePrice"
-                    :key="index"
-                    class="item-price item-num"
-                  >
-                    {{ $filters.unitPrice(item, "￥") }}
-                  </div>
-                </div>
-                <div class="flex">
-                  <div class="item-price-title">起批量</div>
-                  <div
-                    v-for="(item, index) in wholesaleNum"
-                    :key="index"
-                    class="item-num item-price-num"
-                  >
-                    {{ item }}{{ skuDetail.goodsUnit }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- 普通价格 -->
-              <div v-else>
-                <span class="item-price">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
-              </div>
+              <span class="item-price">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
             </div>
             <!-- 优惠券展示 -->
             <div class="item-price-coupon-row" v-if="promotionMap['COUPON'].length">
@@ -364,7 +336,6 @@ const router = useRouter();
 
 const showGoodsVideo = ref(false);
 const goodsVideo = ref("");
-const wholesaleList = ref([]);
 const count = ref(1); // 商品数量
 const imgIndex = ref(0); // 展示图片下标
 const currentSelceted = ref([]); // 当前商品sku
@@ -389,21 +360,6 @@ const currentImg = computed(() => {
   return item ? item.url || item : "";
 });
 
-const wholesalePrice = computed(() => {
-  return wholesaleList.value.length
-    ? wholesaleList.value.map((item) => {
-        return item.price;
-      })
-    : [];
-});
-
-const wholesaleNum = computed(() => {
-  return wholesaleList.value.length
-    ? wholesaleList.value.map((item) => {
-        return item.num;
-      })
-    : [];
-});
 
 /** 卡密商品：禁加购，仅立即购买；库存读 quantity（M-02 起支持促销） */
 const isECouponGoods = computed(() => {
@@ -436,7 +392,6 @@ watch(
   () => props.detail,
   (val) => {
     skuDetail.value = val.data;
-    wholesaleList.value = val.wholesaleList;
     syncCountWithQuantity();
     promotion();
     swiperGoodsImg();
@@ -472,10 +427,6 @@ function syncCountWithQuantity() {
     count.value = 1;
     return;
   }
-  if (!isECouponGoods.value && wholesaleList.value && wholesaleList.value.length > 0) {
-    count.value = Math.min(Math.max(wholesaleList.value[0].num, 1), qty);
-    return;
-  }
   const max = isECouponGoods.value ? getECouponMaxBuyNum(skuDetail.value) : qty;
   if (count.value > max) {
     count.value = max;
@@ -484,14 +435,7 @@ function syncCountWithQuantity() {
   }
 }
 
-function changeCount(val) {
-  if (wholesaleList.value && wholesaleList.value.length > 0) {
-    if (count.value <= wholesaleList.value[0].num) {
-      Message.warning("批发商品购买数量不能小于起批数量");
-      count.value = wholesaleList.value[0].num;
-    }
-  }
-}
+function changeCount(val) {}
 
 function select(index, value) {
   // 选择规格

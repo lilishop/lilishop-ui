@@ -115,54 +115,6 @@ const member = [{
 //   display: true
 // }]
 
-// 批发中心
-// const wholesale = [
-//   {
-//     icon: '',
-//     title: '批发中心',
-//     menus: [
-//       {
-//         icon: '',
-//         title: '我的采购单',
-//         path: 'MyOrder',
-//       },
-//       {
-//         icon: '',
-//         title: '采购退货单',
-//         path: 'MyOrder',
-//       },
-//       {
-//         icon: '',
-//         title: '我的求购单',
-//         path: 'MyOrder',
-//       },
-//
-//     ],
-//     display: true
-//   }
-// ]
-
-// 店铺
-// const shop = [
-//   {
-//     icon: '',
-//     title: '店铺管理',
-//     menus: [
-//       {
-//         icon: '',
-//         title: '店铺后台',
-//         path: 'MyOrder',
-//       },
-//       {
-//         icon: '',
-//         title: '商家等级',
-//         path: 'MyOrder',
-//       },
-//     ],
-//     display: true
-//   }
-// ]
-// wholesale[0], shop[0]
 let menuList = []
 menuList.push(order[0], member[0])
 

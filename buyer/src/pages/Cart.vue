@@ -118,13 +118,6 @@
                   <p>
                     {{ goods.goodsSku.goodsName }}
                   </p>
-                  <p><el-tag
-                    v-if="goods.goodsSku.salesModel === 'WHOLESALE'"
-                    class="goods-show-tag"
-                    color="purple"
-                  >
-                    批发商品
-                  </el-tag></p>
                   <template
                     v-for="(promotion, promotionIndex) in goods.promotions"
                   >

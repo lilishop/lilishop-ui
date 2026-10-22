@@ -98,7 +98,7 @@ const selectGoodsType = ref(false);
 const goodsTypeWay = ref([
   {
     title: "实物商品",
-    desc: "零售批发，物流配送",
+    desc: "标准实物，物流配送",
     type: "PHYSICAL_GOODS",
     icon: markRaw(Box),
     tone: "tone-physical",

@@ -1,101 +1,85 @@
 <template>
-  <div class="category-setting" v-loading="loading">
-    <el-card shadow="never" class="panel">
-      <div class="section-title">分类导航</div>
-      <div class="section-sub">选择模板</div>
-      <div class="template-list">
-        <div
-          v-for="tpl in templates"
-          :key="tpl.value"
-          class="template-card"
-          :class="{ active: form.template === tpl.value }"
-          @click="form.template = tpl.value"
-        >
-          <!-- 纯 CSS 示意图 -->
-          <div class="mini-phone">
-            <div class="mini-search"></div>
-            <!-- 模板1:左栏 + 宫格 -->
-            <template v-if="tpl.value === 1">
-              <div class="mini-body">
-                <div class="mini-side">
-                  <i v-for="n in 6" :key="n" :class="{ on: n === 1 }"></i>
-                </div>
-                <div class="mini-grid">
-                  <div class="mini-grid-title"></div>
-                  <div class="mini-grid-cells">
-                    <i v-for="n in 6" :key="n"></i>
-                  </div>
-                </div>
-              </div>
-            </template>
-            <!-- 模板2:顶部图标横排 + 标签行 + 左竖列 + 单列商品 -->
-            <template v-else-if="tpl.value === 2">
-              <div class="mini-icon-row">
-                <i v-for="n in 5" :key="n" :class="{ on: n === 1 }"></i>
-              </div>
-              <div class="mini-tag-row">
-                <i v-for="n in 4" :key="n" :class="{ on: n === 1 }"></i>
-              </div>
-              <div class="mini-body">
-                <div class="mini-side">
-                  <i v-for="n in 5" :key="n" :class="{ on: n === 2 }"></i>
-                </div>
-                <div class="mini-goods">
-                  <i v-for="n in 3" :key="n"></i>
-                </div>
-              </div>
-            </template>
-            <!-- 模板3:顶部图标横排 + 左竖列 + 单列商品(无标签行) -->
-            <template v-else-if="tpl.value === 3">
-              <div class="mini-icon-row">
-                <i v-for="n in 5" :key="n" :class="{ on: n === 1 }"></i>
-              </div>
-              <div class="mini-body">
-                <div class="mini-side">
-                  <i v-for="n in 5" :key="n" :class="{ on: n === 1 }"></i>
-                </div>
-                <div class="mini-goods">
-                  <i v-for="n in 3" :key="n"></i>
-                </div>
-              </div>
-            </template>
-            <!-- 模板4:左竖列(一级) + 右上文字横排(二级) + 单列商品 -->
-            <template v-else>
-              <div class="mini-body">
-                <div class="mini-side">
-                  <i v-for="n in 5" :key="n" :class="{ on: n === 1 }"></i>
-                </div>
-                <div class="mini-right">
-                  <div class="mini-tag-row">
-                    <i v-for="n in 4" :key="n" :class="{ on: n === 1 }"></i>
-                  </div>
-                  <div class="mini-goods">
-                    <i v-for="n in 3" :key="n"></i>
-                  </div>
-                </div>
-              </div>
-            </template>
+  <div class="category-setting-page" v-loading="loading">
+    <div class="setting-container">
+      <!-- 分类导航模块 -->
+      <section class="cate-setting-section">
+        <h2 class="cate-setting-main-title">分类导航</h2>
+        <h3 class="cate-setting-section-title">选择模板</h3>
+
+        <div class="cate-setting-templates">
+          <div
+            v-for="tpl in templates"
+            :key="tpl.value"
+            class="cate-setting-template-card"
+            :class="{ active: form.template === tpl.value }"
+            :title="tpl.name"
+            @click="form.template = tpl.value"
+          >
+            <div class="cate-setting-template-thumb">
+              <img :src="tpl.img" :alt="tpl.name" class="cate-setting-template-img" />
+            </div>
           </div>
-          <div class="template-name">{{ tpl.name }}</div>
         </div>
-      </div>
+      </section>
 
-      <div class="section-title">页面设置</div>
-      <div class="section-sub">商品列表展示字段</div>
-      <div class="field-list">
-        <el-checkbox model-value :disabled="true">商品名称</el-checkbox>
-        <el-checkbox
-          v-for="f in fieldOptions"
-          :key="f.key"
-          v-model="form.showFields[f.key]"
-          >{{ f.label }}</el-checkbox
+      <!-- 页面设置模块（仅模板2/3/4展示商品列表字段开关，模板1为分类宫格无需配置） -->
+      <transition name="fade">
+        <section v-if="form.template !== 1" class="cate-setting-section">
+          <h2 class="cate-setting-main-title">页面设置</h2>
+          <p class="cate-setting-section-desc">商品列表展示字段：</p>
+
+          <div class="cate-setting-columns">
+            <!-- 左列 -->
+            <div class="cate-setting-column-block">
+              <div
+                v-for="item in columnLeft"
+                :key="item.key"
+                class="cate-setting-check-row"
+              >
+                <el-checkbox
+                  v-if="item.disabled"
+                  :model-value="true"
+                  :disabled="true"
+                >
+                  {{ item.label }}
+                </el-checkbox>
+                <el-checkbox
+                  v-else
+                  v-model="form.showFields[item.key]"
+                >
+                  {{ item.label }}
+                </el-checkbox>
+              </div>
+            </div>
+
+            <!-- 右列 -->
+            <div class="cate-setting-column-block">
+              <div
+                v-for="item in columnRight"
+                :key="item.key"
+                class="cate-setting-check-row"
+              >
+                <el-checkbox v-model="form.showFields[item.key]">
+                  {{ item.label }}
+                </el-checkbox>
+              </div>
+            </div>
+          </div>
+        </section>
+      </transition>
+
+      <!-- 底部保存按钮 -->
+      <div class="bar-button">
+        <el-button
+          type="primary"
+          class="save-btn"
+          :loading="saveLoading"
+          @click="submit"
         >
+          保存设置
+        </el-button>
       </div>
-
-      <el-button type="primary" :loading="saveLoading" class="save-btn" @click="submit"
-        >保存设置</el-button
-      >
-    </el-card>
+    </div>
   </div>
 </template>
 
@@ -109,21 +93,25 @@ defineOptions({ name: "category-setting" });
 const SETTING_KEY = "CATEGORY_PAGE_SETTING";
 
 const templates = [
-  { value: 1, name: "模板一:左树右宫格" },
-  { value: 2, name: "模板二:图标导航+三级标签" },
-  { value: 3, name: "模板三:图标导航" },
-  { value: 4, name: "模板四:侧栏一级+二级横滑" },
+  { value: 1, name: "模板一: 左树右宫格", img: "https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/tpl-1.png" },
+  { value: 2, name: "模板二: 图标导航+三级标签", img: "https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/tpl-2.png" },
+  { value: 3, name: "模板三: 图标导航", img: "https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/tpl-3.png" },
+  { value: 4, name: "模板四: 侧栏一级+二级横滑", img: "https://lilishop-wechat.oss-cn-beijing.aliyuncs.com/tpl-4.png" },
 ];
 
-const fieldOptions = [
-  { key: "subTitle", label: "商品副标题" },
-  { key: "spec", label: "规格值" },
-  { key: "tags", label: "标签" },
+// 左列展示字段配置（商品名称 规格值固定必选置灰）
+const columnLeft = [
+  { key: "spuName", label: "商品名称 规格值", disabled: true },
   { key: "selfTag", label: "自营标签" },
-  { key: "price", label: "价格(市场价/会员价)" },
-  { key: "linePrice", label: "划线价" },
-  { key: "sales", label: "销量/好评/好评率" },
   { key: "cart", label: "购物车" },
+];
+
+// 右列展示字段配置
+const columnRight = [
+  { key: "subTitle", label: "商品副标题" },
+  { key: "tags", label: "标签" },
+  { key: "price", label: "价格(会员价)" },
+  { key: "sales", label: "销量/好评/好评率" },
 ];
 
 const loading = ref(false);
@@ -138,7 +126,7 @@ function defaultForm() {
       tags: true,
       selfTag: true,
       price: true,
-      linePrice: true,
+      linePrice: false,
       sales: true,
       cart: true,
     },
@@ -172,6 +160,8 @@ function loadSetting() {
 
 function submit() {
   saveLoading.value = true;
+  form.value.showFields.spec = true;
+  form.value.showFields.linePrice = false;
   setSetting(SETTING_KEY, form.value)
     .then((res) => {
       if (res.success) {
@@ -187,163 +177,150 @@ function submit() {
 </script>
 
 <style scoped lang="scss">
-.category-setting {
-  padding: 16px;
+.category-setting-page {
+  padding: 0;
+  min-height: 100%;
 }
-.panel {
-  max-width: 960px;
+
+.setting-container {
+  background: #ffffff;
+  padding: 20px 28px 80px 28px;
+  min-height: calc(100vh - 126px);
+  box-sizing: border-box;
 }
-.section-title {
+
+/* 模块区域 */
+.cate-setting-section {
+  margin-bottom: 32px;
+}
+
+.cate-setting-main-title {
+  margin: 0 0 16px 0;
   font-size: 16px;
   font-weight: 600;
-  margin: 8px 0;
+  color: #333333;
+  line-height: 22px;
 }
-.section-sub {
+
+.cate-setting-section-title {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  line-height: 20px;
+}
+
+.cate-setting-section-desc {
+  margin: 0 0 16px 0;
   font-size: 13px;
-  color: #666;
-  margin-bottom: 12px;
+  color: #888888;
+  line-height: 20px;
 }
-.template-list {
+
+/* 模板预览卡片列表 */
+.cate-setting-templates {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
 }
-.template-card {
-  width: 150px;
+
+.cate-setting-template-card {
+  padding: 0;
+  border: 2px solid #e8e8e8;
+  border-radius: 4px;
+  background: #ffffff;
   cursor: pointer;
-  border: 2px solid #e4e7ed;
-  border-radius: 8px;
-  padding: 8px;
-  transition: border-color 0.2s;
-  &.active {
-    border-color: var(--el-color-primary);
-  }
-}
-.template-name {
   text-align: center;
-  font-size: 12px;
-  color: #333;
-  margin-top: 6px;
-}
-
-/* ---- 示意图 ---- */
-.mini-phone {
-  background: #f5f6f8;
-  border-radius: 4px;
-  padding: 4px;
-  height: 180px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 250px;
   overflow: hidden;
-}
-.mini-search {
-  height: 8px;
-  background: #e4e7ed;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-.mini-body {
-  display: flex;
-  gap: 4px;
-  flex: 1;
-  min-height: 0;
-}
-.mini-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.mini-side {
-  width: 26px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  i {
-    height: 14px;
-    background: #e4e7ed;
-    border-radius: 2px;
-    &.on {
-      background: var(--el-color-primary);
-    }
+  box-sizing: border-box;
+
+  &:hover {
+    border-color: #ffb366;
   }
-}
-.mini-icon-row {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-  i {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #e4e7ed;
-    &.on {
-      background: var(--el-color-primary);
-    }
+
+  &.active {
+    border-color: #ff6600;
+    box-shadow: 0 0 0 1px rgba(255, 102, 0, 0.2);
   }
-}
-.mini-tag-row {
-  display: flex;
-  gap: 3px;
-  flex-shrink: 0;
-  i {
-    width: 18px;
-    height: 7px;
-    border-radius: 3px;
-    background: #e4e7ed;
-    &.on {
-      background: var(--el-color-primary);
-    }
+
+  .cate-setting-template-thumb {
+    background: #f5f5f5;
+    line-height: 0;
   }
-}
-.mini-grid {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.mini-grid-title {
-  height: 7px;
-  width: 40%;
-  background: #dcdfe6;
-  border-radius: 3px;
-}
-.mini-grid-cells {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  i {
-    width: 22px;
-    height: 22px;
-    background: #e4e7ed;
-    border-radius: 2px;
-  }
-}
-.mini-goods {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  i {
-    height: 30px;
-    background: #e4e7ed;
-    border-radius: 2px;
+
+  .cate-setting-template-img {
+    display: block;
+    width: 250px;
+    max-width: 100%;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 }
 
-.field-list {
+/* 商品展示字段两列排布 */
+.cate-setting-columns {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 24px;
-  .el-checkbox {
-    width: 220px;
+  gap: 24px 60px;
+  max-width: 720px;
+}
+
+.cate-setting-column-block {
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cate-setting-check-row {
+  margin-bottom: 14px;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 }
+
+/* 底部操作条与保存按钮 */
+.bar-button {
+  margin-top: 36px;
+  padding-top: 8px;
+}
+
 .save-btn {
-  min-width: 140px;
+  min-width: 104px;
+  height: 36px;
+  padding: 0 20px;
+  font-size: 14px;
+  background-color: #ff6600 !important;
+  border-color: #ff6600 !important;
+  border-radius: 4px;
+  color: #ffffff !important;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #ff8533 !important;
+    border-color: #ff8533 !important;
+  }
+
+  &:active {
+    background-color: #e65c00 !important;
+    border-color: #e65c00 !important;
+  }
+}
+
+/* 淡入淡出过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>

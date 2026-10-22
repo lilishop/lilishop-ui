@@ -246,37 +246,23 @@
           <span class="goods-section-index">{{ sectionNo("price") }}</span>
           <div class="goods-section-hd-text">
             <h3>价格库存</h3>
-            <p>销售模式、规格与库存</p>
+            <p>商品规格与库存</p>
           </div>
         </div>
         <div class="goods-section-bd">
-          <el-form-item label="销售模式">
-            <span class="detail-value">{{ salesModelDisplayText }}</span>
-          </el-form-item>
-          <el-form-item v-if="goods.salesModel === 'WHOLESALE'" label="销售规则">
-            <el-table border :data="wholesaleData" style="width: 100%">
-              <el-table-column label="销售规则" min-width="320">
-                <template #default="{ row }">
-                  <span v-if="row">
-                    当商品购买数量 ≥ {{ row.num }} 时，售价为 ￥{{ row.price }} / {{ goods.goodsUnit || "件" }}
-                  </span>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-form-item>
           <div class="goods-submodule">
             <div class="goods-submodule-hd">SKU 规格</div>
             <el-table :data="skuData" border style="width: 100%">
               <el-table-column prop="id" label="SKU ID" min-width="180" show-overflow-tooltip />
               <el-table-column prop="specs" label="规格" min-width="160" show-overflow-tooltip />
-              <el-table-column prop="sn" label="货号" min-width="120" show-overflow-tooltip />
-              <el-table-column v-if="goods.salesModel !== 'WHOLESALE'" label="价格" width="120">
+              <el-table-column prop="sn" label="SKU编码" min-width="120" show-overflow-tooltip />
+              <el-table-column label="价格" width="120">
                 <template #default="{ row }">
                   <priceColorScheme v-if="row" :value="row.price" :color="$mainColor" />
                 </template>
               </el-table-column>
               <el-table-column
-                v-if="!isAppointmentGoods && goods.salesModel !== 'WHOLESALE'"
+                v-if="!isAppointmentGoods"
                 prop="quantity"
                 label="库存"
                 width="90"
@@ -392,7 +378,6 @@ const goods = ref({});
 const brandList = ref([]);
 const previewGoodsPicture = ref("");
 const goodsPictureVisible = ref(false);
-const wholesaleData = ref([]);
 const skuData = ref([]);
 const activeTab = ref("basic");
 const slotCapacityVisible = ref(false);
@@ -408,16 +393,6 @@ const isAppointmentGoods = computed(() => {
 });
 const needsLogistics = computed(() => {
   return goods.value.goodsType === "PHYSICAL_GOODS";
-});
-const salesModelDisplayText = computed(() => {
-  const type = goods.value.goodsType;
-  const model = goods.value.salesModel;
-  if (type === "APPOINTMENT_GOODS") return "预约型";
-  if (type === "E_COUPON") return "电子卡券";
-  if (type === "VIRTUAL_GOODS") return "虚拟型";
-  if (model === "WHOLESALE") return "批发型";
-  if (model === "RETAIL") return "零售型";
-  return model || "—";
 });
 const sectionTabs = computed(() => {
   const tabs = [
@@ -568,7 +543,6 @@ function initGoods(id) {
         quantity: sku.quantity,
         slotCapacities: sku.slotCapacities,
       }));
-      wholesaleData.value = res.result?.wholesaleList || [];
     })
     .finally(() => {
       loading.value = false;
