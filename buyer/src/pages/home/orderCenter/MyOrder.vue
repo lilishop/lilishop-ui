@@ -40,7 +40,11 @@
             <div class="order-sn" v-else>
               {{ order.createTime }}<span>订单号 {{ order.sn }}</span><span class="order-store" @click="shopPage(order.storeId)">{{ order.storeName }}</span>
             </div>
-            <div class="order-status">{{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}</div>
+            <div class="order-status">
+              <el-tag size="small" :type="statusTagType(order.isAfterSale ? order.serviceStatus : order.orderStatus)">
+                {{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}
+              </el-tag>
+            </div>
           </div>
           <div class="order-body">
             <div class="col-detail">
@@ -64,12 +68,10 @@
                   <div class="goods-name hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
                   <div class="goods-num">共{{ goods.num }}件</div>
                   <div class="goods-extra">
-                    <span v-if="refundPriceList(goods.isRefund)" class="refund-tag">{{ refundPriceList(goods.isRefund) }}</span>
-                    <button v-if="goods.complainStatus == 'NO_APPLY'" type="button" class="sub-btn" @click="complain(order.sn, goodsIndex)">投诉</button>
+                    <el-tag v-if="refundPriceList(goods.isRefund) && !isUnpaid(order)" type="warning" size="small">{{ refundPriceList(goods.isRefund) }}</el-tag>
                   </div>
                 </div>
               </div>
-              <button v-if="canAfterSale(order)" type="button" class="sub-btn" @click="applyAfterSale(order.orderItems)">申请售后</button>
             </div>
             <div class="col-amount">
               <div class="order-amount">{{ $filters.unitPrice(order.flowPrice, "￥") }}</div>
@@ -77,14 +79,14 @@
             </div>
             <div class="col-ops">
               <template v-if="order.isAfterSale">
-                <button type="button" class="text-link" @click="goAfterSaleDetail(order.serviceSn)">售后详情</button>
+                <el-button link type="primary" @click="goAfterSaleDetail(order.serviceSn)">售后详情</el-button>
               </template>
               <template v-else>
-                <button v-if="order.allowOperationVO && order.allowOperationVO.pay" type="button" class="op-btn" @click="goPay(order.sn)">去支付</button>
-                <button v-if="order.allowOperationVO && order.allowOperationVO.rog" type="button" class="op-btn" @click="received(order.sn)">确认收货</button>
-                <button type="button" class="text-link" @click="orderDetail(order.sn)">订单详情</button>
-                <button v-if="order.allowOperationVO && order.allowOperationVO.cancel" type="button" class="text-link" @click="handleCancelOrder(order.sn)">取消订单</button>
-                <button v-if="order.orderStatus === 'COMPLETED'" type="button" class="text-link" @click="delOrder(order.sn)">删除订单</button>
+                <el-button v-if="order.allowOperationVO && order.allowOperationVO.pay" type="primary" size="small" @click="goPay(order.sn)">去支付</el-button>
+                <el-button v-if="order.allowOperationVO && order.allowOperationVO.rog" type="primary" size="small" @click="received(order.sn)">确认收货</el-button>
+                <el-button link type="primary" @click="orderDetail(order.sn)">订单详情</el-button>
+                <el-button v-if="order.allowOperationVO && order.allowOperationVO.cancel" link type="info" @click="handleCancelOrder(order.sn)">取消订单</el-button>
+                <el-button v-if="order.orderStatus === 'COMPLETED'" link type="info" @click="delOrder(order.sn)">删除订单</el-button>
               </template>
             </div>
           </div>
@@ -120,7 +122,11 @@
           <div class="order-sn" v-else>
             {{ order.createTime }}<span>订单号 {{ order.sn }}</span><span class="order-store" @click="shopPage(order.storeId)">{{ order.storeName }}</span>
           </div>
-          <div class="order-status">{{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}</div>
+          <div class="order-status">
+            <el-tag size="small" :type="statusTagType(order.isAfterSale ? order.serviceStatus : order.orderStatus)">
+              {{ order.isAfterSale ? filterAfterSaleStatus(order.serviceStatus) : filterOrderStatus(order.orderStatus) }}
+            </el-tag>
+          </div>
         </div>
         <div class="order-body">
           <div class="col-detail">
@@ -144,12 +150,10 @@
                 <div class="goods-name hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
                 <div class="goods-num">共{{ goods.num }}件</div>
                 <div class="goods-extra">
-                  <span v-if="refundPriceList(goods.isRefund)" class="refund-tag">{{ refundPriceList(goods.isRefund) }}</span>
-                  <button v-if="goods.complainStatus == 'NO_APPLY'" type="button" class="sub-btn" @click="complain(order.sn, goodsIndex)">投诉</button>
+                  <el-tag v-if="refundPriceList(goods.isRefund) && !isUnpaid(order)" type="warning" size="small">{{ refundPriceList(goods.isRefund) }}</el-tag>
                 </div>
               </div>
             </div>
-            <button v-if="canAfterSale(order)" type="button" class="sub-btn" @click="applyAfterSale(order.orderItems)">申请售后</button>
           </div>
           <div class="col-amount">
             <div class="order-amount">{{ $filters.unitPrice(order.flowPrice, "￥") }}</div>
@@ -157,30 +161,20 @@
           </div>
           <div class="col-ops">
             <template v-if="order.isAfterSale">
-              <button type="button" class="text-link" @click="goAfterSaleDetail(order.serviceSn)">售后详情</button>
+              <el-button link type="primary" @click="goAfterSaleDetail(order.serviceSn)">售后详情</el-button>
             </template>
             <template v-else>
-              <button v-if="order.allowOperationVO && order.allowOperationVO.pay" type="button" class="op-btn" @click="goPay(order.sn)">去支付</button>
-              <button v-if="order.allowOperationVO && order.allowOperationVO.rog" type="button" class="op-btn" @click="received(order.sn)">确认收货</button>
-              <button type="button" class="text-link" @click="orderDetail(order.sn)">订单详情</button>
-              <button v-if="order.allowOperationVO && order.allowOperationVO.cancel" type="button" class="text-link" @click="handleCancelOrder(order.sn)">取消订单</button>
-              <button v-if="order.orderStatus === 'COMPLETED'" type="button" class="text-link" @click="delOrder(order.sn)">删除订单</button>
+              <el-button v-if="order.allowOperationVO && order.allowOperationVO.pay" type="primary" size="small" @click="goPay(order.sn)">去支付</el-button>
+              <el-button v-if="order.allowOperationVO && order.allowOperationVO.rog" type="primary" size="small" @click="received(order.sn)">确认收货</el-button>
+              <el-button link type="primary" @click="orderDetail(order.sn)">订单详情</el-button>
+              <el-button v-if="order.allowOperationVO && order.allowOperationVO.cancel" link type="info" @click="handleCancelOrder(order.sn)">取消订单</el-button>
+              <el-button v-if="order.orderStatus === 'COMPLETED'" link type="info" @click="delOrder(order.sn)">删除订单</el-button>
             </template>
           </div>
         </div>
       </div>
       <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
     </div>
-    <!-- 选择售后商品 -->
-    <el-dialog v-model="afterSaleModal" title="请选择申请售后的商品">
-      <div>
-        <el-table :data="afterSaleArr" border @row-click="afterSaleSelect">
-          <el-table-column prop="name" label="商品名称" />
-          <el-table-column prop="goodsPrice" label="价格" />
-        </el-table>
-      </div>
-      <template #footer><div></div></template>
-    </el-dialog>
     <el-dialog v-model="cancelAvail" title="请选择取消订单原因">
       <el-radio-group v-model="cancelParams.reason">
         <el-radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
@@ -233,8 +227,6 @@ const changeWay = ref(['全部', '待付款', '待发货', '待收货/使用']);
 const activeOrderTab = ref(0);
 const total = ref(0); // 数据总数
 const spinShow = ref(false); // 加载状态
-const afterSaleModal = ref(false); // 选择售后商品模态框
-const afterSaleArr = ref([]); // 售后商品列表
 const cancelAvail = ref(false); // 取消订单modal控制
 const cancelReason = ref([]); // 取消订单原因
 
@@ -311,27 +303,6 @@ function received (sn) { // 确认收货
 }
 function goPay (sn) { // 去支付
   router.push({path: '/payment', query: {orderType: 'ORDER', sn}});
-}
-function applyAfterSale (goodsItem) { // 申请售后
-  let arr = []
-  goodsItem.forEach(e => {
-    if (e.afterSaleStatus === 'NOT_APPLIED'|| e.afterSaleStatus === 'PART_AFTER_SALE') {
-      arr.push(e)
-    }
-  });
-  if (arr.length === 1) {
-    router.push({name: 'ApplyAfterSale', query: {sn: arr[0].sn}})
-  } else {
-    afterSaleArr.value = arr;
-    afterSaleModal.value = true
-  }
-}
-// 申请售后
-function afterSaleSelect (item) {
-  router.push({name: 'ApplyAfterSale', query: {sn: item.sn}})
-}
-function complain (sn, goodsIndex) { // 投诉
-  router.push({name: 'Complain', query: {sn, index: goodsIndex}})
 }
 function delOrder (sn) { // 删除订单
   Modal.confirm({
@@ -420,11 +391,16 @@ function filterAfterSaleStatus (status) {
   const ob = afterSaleStatusList.filter(e => e.status === status);
   return ob && ob[0] ? ob[0].name : status
 }
-function canAfterSale (order) {
-  if (order.isAfterSale || order.orderType === 'E_COUPON' || !order.groupAfterSaleStatus) {
-    return false
+function statusTagType (status) { // 订单/售后状态对应标签类型
+  const map = {
+    UNPAID: 'warning', WAIT_PAY: 'warning', PAID: 'warning',
+    UNDELIVERED: 'warning', PARTS_DELIVERED: 'warning', DELIVERED: 'warning',
+    WAIT_SHIP: 'warning', WAIT_USE: 'warning', TAKE: 'warning', STAY_PICKED_UP: 'warning',
+    APPLY: 'warning', APPLYING: 'warning',
+    COMPLETED: 'success', COMPLETE: 'success',
+    CANCELLED: 'info', CANCEL: 'info'
   }
-  return order.groupAfterSaleStatus.includes('NOT_APPLIED') || order.groupAfterSaleStatus.includes('PART_AFTER_SALE')
+  return map[status] || 'info'
 }
 function paymentLabel (order) {
   const map = {
@@ -436,10 +412,13 @@ function paymentLabel (order) {
   if (order.paymentMethod && map[order.paymentMethod]) {
     return map[order.paymentMethod]
   }
-  if (order.payStatus === 'UNPAID' || order.orderStatus === 'UNPAID') {
+  if (isUnpaid(order)) {
     return '待支付'
   }
   return ''
+}
+function isUnpaid (order) {
+  return order.payStatus === 'UNPAID' || order.orderStatus === 'UNPAID'
 }
 
 watch(() => route.query.tag, () => {
@@ -529,7 +508,7 @@ onMounted(() => {
     align-items: center;
     min-width: 0;
     font-size: 14px;
-    color: #171A26;
+    color: #333;
     line-height: 1.5;
 
     span {
@@ -630,37 +609,6 @@ onMounted(() => {
     margin-top: 6px;
   }
 
-  .refund-tag {
-    padding: 0 6px;
-    border-radius: 4px;
-    background: #fff7e8;
-    color: #ff9900;
-    font-size: 14px;
-    line-height: 22px;
-  }
-
-  .sub-btn {
-    height: 28px;
-    margin-top: 8px;
-    padding: 0 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
-    color: #666;
-    font-size: 14px;
-    line-height: 26px;
-    cursor: pointer;
-
-    &:hover {
-      border-color: $theme_color;
-      color: $theme_color;
-    }
-  }
-
-  .goods-extra .sub-btn {
-    margin-top: 0;
-  }
-
   .col-amount,
   .col-ops {
     text-align: center;
@@ -685,38 +633,9 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-  }
 
-  .op-btn {
-    min-width: 96px;
-    height: 32px;
-    padding: 0 12px;
-    border: 1px solid $theme_color;
-    border-radius: 4px;
-    background: #fff;
-    color: #171A26;
-    font-family: inherit;
-    font-size: 14px;
-    line-height: 30px;
-    cursor: pointer;
-
-    &:hover {
-      background: #fff5f4;
-    }
-  }
-
-  .text-link {
-    border: none;
-    background: none;
-    padding: 0;
-    color: #171A26;
-    font-family: inherit;
-    font-size: 14px;
-    line-height: 22px;
-    cursor: pointer;
-
-    &:hover {
-      color: $theme_color;
+    :deep(.el-button + .el-button) {
+      margin-left: 0;
     }
   }
 }

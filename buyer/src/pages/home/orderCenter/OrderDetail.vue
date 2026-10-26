@@ -1,10 +1,10 @@
 <template>
   <div class="order-detail" v-if="order.order">
     <UserCenterLayout>
-    <div class="order-card status-card">
+    <div class="panel">
       <div class="status-head">
         <div class="status-main">
-          <p class="status-text">{{ order.orderStatusValue }}</p>
+          <el-tag :type="statusTagType" effect="dark">{{ order.orderStatusValue }}</el-tag>
           <p class="status-sn">订单号：{{ order.order.sn }}</p>
         </div>
         <div class="status-side">
@@ -23,7 +23,7 @@
             "
           >
             <el-button
-              type="success"
+              type="primary"
               @click="goPay(order.order.sn)"
               size="small"
               v-if="order.allowOperationVO.pay"
@@ -35,7 +35,6 @@
               v-if="order.allowOperationVO.rog"
               >确认收货</el-button>
             <el-button
-              type="danger"
               @click="handleCancelOrder(order.order.sn)"
               v-if="order.allowOperationVO.cancel"
               size="small"
@@ -61,95 +60,152 @@
     <p class="verificationCode" v-if="order.order.verificationCode && !isECouponOrder">
       核验码：<span>{{ order.order.verificationCode }}</span>
     </p>
-    <div class="order-card" v-if="order.order.deliveryMethod === 'LOGISTICS' && !isNonPhysicalOrder">
+    <div class="panel" v-if="order.order.deliveryMethod === 'LOGISTICS' && !isNonPhysicalOrder">
       <h3>收货人信息</h3>
-      <p>收货人：{{ order.order.consigneeName }}</p>
-      <p>手机号码：{{ $filters.secrecyMobile( order.order.consigneeMobile ) }}</p>
-      <p>
-        收货地址：{{ $filters.unitAddress(order.order.consigneeAddressPath) }}
-        {{ order.order.consigneeDetail }}
-      </p>
+      <div class="info-row">
+        <span class="info-label">收货人</span>
+        <span class="info-value">{{ order.order.consigneeName }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">手机号码</span>
+        <span class="info-value">{{ $filters.secrecyMobile( order.order.consigneeMobile ) }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">收货地址</span>
+        <span class="info-value">
+          {{ $filters.unitAddress(order.order.consigneeAddressPath) }}
+          {{ order.order.consigneeDetail }}
+        </span>
+      </div>
     </div>
-    <div class="order-card" v-if="order.order.deliveryMethod === 'SELF_PICK_UP'">
+    <div class="panel" v-if="order.order.deliveryMethod === 'SELF_PICK_UP'">
       <h3>自提点信息</h3>
-      <p>自提点名称：{{ order.order.storeAddressPath }}</p>
-      <p>联系方式：{{ order.order.storeAddressMobile }}</p>
+      <div class="info-row">
+        <span class="info-label">自提点名称</span>
+        <span class="info-value">{{ order.order.storeAddressPath }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">联系方式</span>
+        <span class="info-value">{{ order.order.storeAddressMobile }}</span>
+      </div>
     </div>
-    <div class="order-card">
+    <div class="panel">
       <h3>付款信息</h3>
-      <p>支付方式：{{ order.paymentMethodValue }}</p>
-      <p>付款状态：{{ order.payStatusValue }}</p>
+      <div class="info-row">
+        <span class="info-label">支付方式</span>
+        <span class="info-value">{{ order.paymentMethodValue }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">付款状态</span>
+        <span class="info-value">{{ order.payStatusValue }}</span>
+      </div>
     </div>
-    <div class="order-card" v-if="!order.order.verificationCode && !isNonPhysicalOrder">
+    <div class="panel" v-if="!order.order.verificationCode && !isNonPhysicalOrder">
       <h3>配送信息</h3>
-      <p>配送方式：{{ displayDeliveryMethodValue }}</p>
-      <p v-if="order.order.deliveryMethod === 'LOGISTICS' && !isNoDeliveryOrder">配送状态：{{ order.deliverStatusValue }}</p>
+      <div class="info-row">
+        <span class="info-label">配送方式</span>
+        <span class="info-value">{{ displayDeliveryMethodValue }}</span>
+      </div>
+      <div class="info-row" v-if="order.order.deliveryMethod === 'LOGISTICS' && !isNoDeliveryOrder">
+        <span class="info-label">配送状态</span>
+        <span class="info-value">{{ order.deliverStatusValue }}</span>
+      </div>
       <template v-if="isNoDeliveryOrder">
-        <p v-if="noDeliveryShipTime">发货时间：{{ noDeliveryShipTime }}</p>
-        <p v-if="noDeliveryRemark">配送说明：{{ noDeliveryRemark }}</p>
+        <div class="info-row" v-if="noDeliveryShipTime">
+          <span class="info-label">发货时间</span>
+          <span class="info-value">{{ noDeliveryShipTime }}</span>
+        </div>
+        <div class="info-row" v-if="noDeliveryRemark">
+          <span class="info-label">配送说明</span>
+          <span class="info-value">{{ noDeliveryRemark }}</span>
+        </div>
       </template>
       <template v-else>
-        <p v-if="logistics">
-          物流信息：{{ logistics.shipper || "暂无物流信息" }}
-        </p>
-        <p v-if="logistics">
-          物流单号：{{ logistics.logisticCode || "暂无物流单号" }}
-        </p>
-        <div class="div-express-log" v-if="logistics">
-          <div class="express-log">
-            <p>订单日志：</p>
-            <div v-for="(item, index) in logistics.traces" :key="index">
-              <span class="time">{{ item.AcceptTime }}</span>
-              <span class="detail">{{ item.AcceptStation }}</span>
+        <div class="info-row" v-if="logistics">
+          <span class="info-label">物流信息</span>
+          <span class="info-value">{{ logistics.shipper || "暂无物流信息" }}</span>
+        </div>
+        <div class="info-row" v-if="logistics">
+          <span class="info-label">物流单号</span>
+          <span class="info-value">{{ logistics.logisticCode || "暂无物流单号" }}</span>
+        </div>
+        <div class="info-row" v-if="logistics">
+          <span class="info-label">订单日志</span>
+          <div class="info-value">
+            <div class="div-express-log">
+              <div class="express-log">
+                <div v-for="(item, index) in logistics.traces" :key="index">
+                  <span class="time">{{ item.AcceptTime }}</span>
+                  <span class="detail">{{ item.AcceptStation }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </template>
     </div>
-    <div class="order-card" v-if="order.order.payStatus === 'PAID'">
+    <div class="panel" v-if="order.order.payStatus === 'PAID'">
       <h3>发票信息</h3>
       <!-- 以 li_receipt 为准：needReceipt 可能为 null/false 导致有 receipt 仍显示「未开发票」 -->
       <template v-if="hasValidReceipt()">
-        <p>发票类型：{{ formatReceiptType(order.receipt) }}</p>
-        <p>发票抬头：{{ formatReceiptHeaderType(order.receipt) }}</p>
-        <p v-if="isPersonalReceipt(order.receipt) && order.receipt.personalName">
-          个人名称：{{ order.receipt.personalName }}
-        </p>
-        <p v-if="order.receipt.companyName">
-          单位名称：{{ order.receipt.companyName }}
-        </p>
-        <p v-if="order.receipt.taxpayerId">
-          纳税人识别号：{{ order.receipt.taxpayerId }}
-        </p>
-        <p v-if="order.receipt.companyAddress">
-          单位地址：{{ order.receipt.companyAddress }}
-        </p>
-        <p v-if="order.receipt.companyPhone">
-          单位电话：{{ order.receipt.companyPhone }}
-        </p>
-        <p v-if="order.receipt.bankName">
-          开户银行：{{ order.receipt.bankName }}
-        </p>
-        <p v-if="order.receipt.bankAccount">
-          银行账号：{{ order.receipt.bankAccount }}
-        </p>
-        <p>发票内容：{{ order.receipt.receiptContent }}</p>
-        <p v-if="order.receipt.receiptPhone">
-          收票人手机：{{ order.receipt.receiptPhone }}
-        </p>
-        <p v-if="order.receipt.receiptEmail">
-          收票人邮箱：{{ order.receipt.receiptEmail }}
-        </p>
+        <div class="info-row">
+          <span class="info-label">发票类型</span>
+          <span class="info-value">{{ formatReceiptType(order.receipt) }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">发票抬头</span>
+          <span class="info-value">{{ formatReceiptHeaderType(order.receipt) }}</span>
+        </div>
+        <div class="info-row" v-if="isPersonalReceipt(order.receipt) && order.receipt.personalName">
+          <span class="info-label">个人名称</span>
+          <span class="info-value">{{ order.receipt.personalName }}</span>
+        </div>
+        <div class="info-row" v-if="order.receipt.companyName">
+          <span class="info-label">单位名称</span>
+          <span class="info-value">{{ order.receipt.companyName }}</span>
+        </div>
+        <div class="info-row" v-if="order.receipt.taxpayerId">
+          <span class="info-label">纳税人识别号</span>
+          <span class="info-value">{{ order.receipt.taxpayerId }}</span>
+        </div>
+        <div class="info-row" v-if="order.receipt.companyAddress">
+          <span class="info-label">单位地址</span>
+          <span class="info-value">{{ order.receipt.companyAddress }}</span>
+        </div>
+        <div class="info-row" v-if="order.receipt.companyPhone">
+          <span class="info-label">单位电话</span>
+          <span class="info-value">{{ order.receipt.companyPhone }}</span>
+        </div>
+        <div class="info-row" v-if="order.receipt.bankName">
+          <span class="info-label">开户银行</span>
+          <span class="info-value">{{ order.receipt.bankName }}</span>
+        </div>
+        <div class="info-row" v-if="order.receipt.bankAccount">
+          <span class="info-label">银行账号</span>
+          <span class="info-value">{{ order.receipt.bankAccount }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">发票内容</span>
+          <span class="info-value">{{ order.receipt.receiptContent }}</span>
+        </div>
+        <div class="info-row" v-if="order.receipt.receiptPhone">
+          <span class="info-label">收票人手机</span>
+          <span class="info-value">{{ order.receipt.receiptPhone }}</span>
+        </div>
+        <div class="info-row" v-if="order.receipt.receiptEmail">
+          <span class="info-label">收票人邮箱</span>
+          <span class="info-value">{{ order.receipt.receiptEmail }}</span>
+        </div>
         <div v-if="Number(order.receipt.receiptStatus) === 1" class="receipt-action">
-          <el-button size="small" type="primary" ghost @click="viewReceiptInvoice(order.receipt)">
+          <el-button size="small" type="primary" @click="viewReceiptInvoice(order.receipt)">
             查看发票
           </el-button>
         </div>
       </template>
-      <div v-else style="color: #999; margin-left: 5px">未开发票</div>
+      <div v-else class="empty-text">未开发票</div>
     </div>
     <!-- 卡密信息（当前订单 orderItems；满赠赠品卡密在赠品子单详情查看） -->
-    <div class="order-card ecoupon-card-keys" v-if="hasCardKeySection">
+    <div class="panel ecoupon-card-keys" v-if="hasCardKeySection">
       <h3>卡密信息</h3>
       <div
         v-for="line in cardKeyFulfillLines"
@@ -194,75 +250,62 @@
     </div>
 
     <!-- 订单商品 -->
-    <div class="goods">
+    <div class="panel goods-panel">
       <div class="shop-name">
         <span @click="shopPage(order.order.storeId)">{{order.order.storeName}}</span>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th width="28%">商品</th>
-            <th width="16%">货号</th>
-            <th width="10%">单价</th>
-            <th width="8%">数量</th>
-            <th width="10%">小计</th>
-            <th width="8%">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(goods, goodsIndex) in order.orderItems" :key="goodsIndex">
-            <td>
-              <div class="goods-cell">
-                <img
-                  @click="goodsDetail(goods.skuId, goods.goodsId)"
-                  :src="goods.image"
-                  loading="lazy"
-                  decoding="async"
-                  alt=""
-                />
-                <p
-                  @click="goodsDetail(goods.skuId, goods.goodsId)"
-                  class="hover-color goods-name"
-                >
-                  {{ goods.goodsName }}
-                </p>
-              </div>
-            </td>
-            <td>{{ goods.id }}</td>
-            <td>{{ $filters.unitPrice(goods.goodsPrice, "￥") }}</td>
-            <td>{{ goods.num }}</td>
-            <td>{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</td>
-            <td class="order-item-actions">
-              <button
-                v-if="goods.commentStatus == 'UNFINISHED'"
-                type="button"
-                class="comment-text"
-                @click="comment(order.order.sn, goodsIndex)"
-              >评价</button>
-              <el-button
-                v-if="goods.complainStatus == 'NO_APPLY'"
-                @click="complain(order.order.sn, goodsIndex)"
-                type="danger"
-                class="order-item-action-btn mb_5"
-                size="small"
-                >投诉</el-button
-              >
-              <el-button
-                v-if="
-                  !isECouponOrder &&
-                  (goods.afterSaleStatus.includes('NOT_APPLIED') ||
-                    goods.afterSaleStatus.includes('PART_AFTER_SALE'))
-                "
-                @click="applyAfterSale(goods.sn)"
-                type="default"
-                size="small"
-                class="order-item-action-btn mb_5"
-                >申请售后</el-button
-              >
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="goods-list">
+        <div class="goods-row" v-for="(goods, goodsIndex) in order.orderItems" :key="goodsIndex">
+          <img
+            class="goods-thumb"
+            @click="goodsDetail(goods.skuId, goods.goodsId)"
+            :src="goods.image"
+            loading="lazy"
+            decoding="async"
+            alt=""
+          />
+          <div class="goods-info">
+            <p
+              @click="goodsDetail(goods.skuId, goods.goodsId)"
+              class="hover-color goods-name"
+            >
+              {{ goods.goodsName }}
+            </p>
+            <p class="goods-sn">货号：{{ goods.id }}</p>
+          </div>
+          <div class="goods-price">
+            <span class="unit-price">
+              {{ $filters.unitPrice(goods.goodsPrice, "￥") }} × {{ goods.num }}
+            </span>
+            <span class="subtotal">{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</span>
+          </div>
+          <div class="goods-actions">
+            <button
+              v-if="goods.commentStatus == 'UNFINISHED'"
+              type="button"
+              class="comment-text"
+              @click="comment(order.order.sn, goodsIndex)"
+            >评价</button>
+            <el-button
+              v-if="goods.complainStatus == 'NO_APPLY'"
+              @click="complain(order.order.sn, goodsIndex)"
+              type="danger"
+              size="small"
+              >投诉</el-button
+            >
+            <el-button
+              v-if="
+                !isECouponOrder &&
+                (goods.afterSaleStatus.includes('NOT_APPLIED') ||
+                  goods.afterSaleStatus.includes('PART_AFTER_SALE'))
+              "
+              @click="applyAfterSale(goods.sn)"
+              size="small"
+              >申请售后</el-button
+            >
+          </div>
+        </div>
+      </div>
       <!-- 订单价格 -->
       <div class="order-price">
         <div>
@@ -487,6 +530,20 @@ const noDeliveryRemark = computed(() => {
 const noDeliveryShipTime = computed(() => {
   const pkg = noDeliveryPackages.value[0];
   return pkg?.logisticsTime || "";
+});
+const statusTagType = computed(() => {
+  const map = {
+    UNPAID: "warning",
+    PAID: "warning",
+    UNDELIVERED: "warning",
+    PARTS_DELIVERED: "warning",
+    DELIVERED: "warning",
+    TAKE: "warning",
+    STAY_PICKED_UP: "warning",
+    COMPLETED: "success",
+    CANCELLED: "info",
+  };
+  return map[order.value?.order?.orderStatus] || "info";
 });
 
 function lineCardKeyRows(line) {
@@ -720,36 +777,59 @@ onMounted(() => {
   }
 }
 
-.mb_5 {
-  margin-bottom: 5px;
-}
 .order-detail {
   color: #333;
 }
 
-.order-card {
-  padding: 4px 0 16px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+.panel {
+  margin-top: 16px;
+  padding: 16px 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
 
   h3 {
     margin: 0 0 12px;
-    font-size: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
-    line-height: 1.4;
-  }
-
-  p {
-    margin: 0;
-    padding: 4px 0;
-    color: #666;
-    line-height: 22px;
+    line-height: 24px;
   }
 }
 
-.status-card {
-  padding-top: 8px;
+.info-row {
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 4px;
+  }
+}
+
+.info-label {
+  flex: 0 0 80px;
+  color: #999;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.info-value {
+  flex: 1;
+  min-width: 0;
+  color: #333;
+  font-size: 14px;
+  line-height: 22px;
+  word-break: break-all;
+}
+
+.empty-text {
+  color: #999;
+  font-size: 14px;
 }
 
 .status-head {
@@ -759,16 +839,17 @@ onMounted(() => {
   gap: 16px;
 }
 
-.status-text {
-  color: $theme_color;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.4;
+.status-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .status-sn {
-  margin-top: 6px;
-  color: #666;
+  margin: 0;
+  color: #999;
+  font-size: 14px;
 }
 
 .status-side {
@@ -828,78 +909,61 @@ onMounted(() => {
   }
 }
 
-.goods {
-  padding-top: 8px;
-}
+.goods-panel {
+  .shop-name {
+    margin: 0 0 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 16px;
+    font-weight: 600;
 
-.shop-name {
-  margin: 8px 0 12px;
-  font-size: 14px;
-  font-weight: 600;
+    span {
+      color: #333;
+      cursor: pointer;
 
-  span {
-    color: #438cde;
-    cursor: pointer;
-
-    &:hover {
-      color: $theme_color;
+      &:hover {
+        color: $theme_color;
+      }
     }
   }
 }
 
-table {
-  border: 1px solid #eee;
-  color: #666;
-  border-collapse: collapse;
-  width: 100%;
-
-  tr {
-    border-top: 1px solid #eee;
-  }
-
-  thead > tr {
-    height: 40px;
-    background: #fafafa;
-  }
-
-  th {
-    padding: 0 8px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #666;
-  }
-
-  td {
-    padding: 12px 8px;
-    text-align: center;
-    vertical-align: middle;
-
-    &:first-child {
-      text-align: left;
-    }
-  }
+// 覆盖全局 .goods-list 的 flex 布局，避免订单商品行被压缩
+.goods-list {
+  display: block;
 }
 
-.goods-cell {
+.goods-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-width: 0;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
 
-  img {
-    width: 64px;
-    height: 64px;
-    border-radius: 6px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: #f5f5f5;
-    cursor: pointer;
+  &:last-child {
+    border-bottom: none;
   }
+}
+
+.goods-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+.goods-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .goods-name {
-  min-width: 0;
+  margin: 0;
   color: #333;
+  font-size: 14px;
   line-height: 20px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -909,12 +973,41 @@ table {
   cursor: pointer;
 }
 
-.order-item-actions {
-  vertical-align: middle;
+.goods-sn {
+  margin: 4px 0 0;
+  color: #999;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.goods-price {
+  flex-shrink: 0;
+  text-align: right;
+
+  .unit-price {
+    display: block;
+    color: #999;
+    font-size: 13px;
+    line-height: 20px;
+  }
+
+  .subtotal {
+    display: block;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 22px;
+  }
+}
+
+.goods-actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 
   .comment-text {
-    display: block;
-    margin: 0 auto 6px;
     padding: 0;
     border: 0;
     background: transparent;
@@ -924,9 +1017,8 @@ table {
     cursor: pointer;
   }
 
-  .order-item-action-btn {
-    display: block;
-    margin: 0 auto 6px;
+  .el-button {
+    margin: 0;
     min-width: 88px;
   }
 }
@@ -958,13 +1050,12 @@ table {
   }
 }
 .verificationCode {
-  font-size: 20px;
-  margin-bottom: 20px;
-  color: rgb(65, 63, 63);
-  font-weight: bold;
-  text-align: center;
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: #333;
+
   span {
-    color: $theme_color;
+    font-weight: 600;
   }
 }
 
@@ -1083,36 +1174,6 @@ table {
     display: flex;
     span  {
       display: flex;
-    }
-  }
-}
-
-.layui-layer-wrap {
-  dl {
-    border-top: solid 1px #f5f5f5;
-    margin-top: -1px;
-    overflow: hidden;
-
-    dt {
-      font-size: 14px;
-      line-height: 28px;
-      display: inline-block;
-      padding: 8px 1% 8px 0;
-      color: #999;
-    }
-
-    dd {
-      font-size: 14px;
-      line-height: 28px;
-      display: inline-block;
-      padding: 8px 0 8px 8px;
-      border-left: solid 1px #f5f5f5;
-
-      .text-box {
-        line-height: 40px;
-        color: #333;
-        word-break: break-all;
-      }
     }
   }
 }
