@@ -1,7 +1,7 @@
 <template>
   <div class="person-msg">
-    <el-form ref="thirdFormRef" :model="form" :rules="rules" label-width="140px">
-      <h4>基础信息</h4>
+    <el-form ref="thirdFormRef" :model="form" :rules="rules" label-width="140px" scroll-to-error>
+      <div class="section-title">店铺信息</div>
       <el-form-item prop="storeName" label="店铺名称">
         <el-input
           type="text"
@@ -13,19 +13,22 @@
       <el-form-item prop="storeLogo" label="店铺logo">
         <div class="upload-wrap">
           <el-upload
-            ref="uploadLogo"
+            v-if="form.storeLogo.length < 1"
             :show-file-list="false"
             :on-success="handleSuccess"
             accept=".jpg,.jpeg,.png,.gif"
             :before-upload="beforeUpload"
             :on-error="uploadErr"
-            :disabled="form.storeLogo.length >= 1"
             :action="action"
             :headers="accessToken"
           >
-            <el-button type="info" :loading="uploadLoading" :disabled="form.storeLogo.length >= 1">上传logo</el-button>
+            <div class="upload-box">
+              <el-icon v-if="uploadLoading" class="is-loading"><Loading /></el-icon>
+              <el-icon v-else><Plus /></el-icon>
+              <span>上传logo</span>
+            </div>
           </el-upload>
-          <div class="describe">请压缩图片在2M以内，格式为gif，jpg，png，仅可上传1张</div>
+          <div class="describe">请压缩图片在2M以内，格式为gif、jpg、png，仅可上传1张</div>
           <div class="img-list-wrap">
             <div
               class="img-list"
@@ -45,8 +48,8 @@
         <el-select
           v-model="form.goodsManagementCategory"
           multiple
-          placeholder="请选择"
-          style="width: 300px"
+          placeholder="请选择店铺经营类目"
+          style="width: 360px"
         >
           <el-option
             v-for="item in categoryList"
@@ -58,8 +61,13 @@
       </el-form-item>
 
       <el-form-item prop="storeAddressIdPath" label="店铺所在地">
-        <span>{{ form.storeAddressPath || '暂无地址' }}</span>
-        <el-button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</el-button>
+        <div class="address-select" @click="openMap">
+          <el-icon class="addr-icon"><Location /></el-icon>
+          <span class="addr-text" :class="{ placeholder: !form.storeAddressPath }">
+            {{ form.storeAddressPath || '请选择店铺所在地' }}
+          </span>
+          <span class="addr-action">{{ form.storeAddressPath ? '重新选择' : '选择' }}</span>
+        </div>
       </el-form-item>
       <el-form-item prop="storeAddressDetail" label="店铺详细地址">
         <el-input
@@ -80,10 +88,12 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button @click="$emit('change', 1)">返回</el-button>
-        <el-button type="primary" :loading="loading" @click="next"
-          >提交平台审核</el-button
-        >
+        <div class="form-actions">
+          <el-button size="large" @click="$emit('change', 1)">上一步</el-button>
+          <el-button type="primary" size="large" :loading="loading" @click="next"
+            >提交平台审核</el-button
+          >
+        </div>
       </el-form-item>
     </el-form>
     <el-dialog title="图片预览" v-model="visible">
@@ -93,9 +103,9 @@
   </div>
 </template>
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { Message } from "@/utils/message";
-import { Delete, View } from '@element-plus/icons-vue';
+import { Delete, Loading, Location, Plus, View } from '@element-plus/icons-vue';
 import { applyThird } from '@/api/shopentry';
 import { getCategory } from '@/api/goods';
 
@@ -105,6 +115,7 @@ import { buyerUrl } from '@/plugins/request.js';
 
 import multipleMap from "@/components/map/multiple-map";
 
+const THIRD_APPLY_DRAFT_KEY = 'shopEntryThirdDraft';
 
 const emit = defineEmits(['change']);
 
@@ -116,6 +127,7 @@ const props = defineProps({
 });
 
 const thirdFormRef = ref(null);
+const map = ref(null);
 
 const loading = ref(false); // 加载状态
 const uploadLoading = ref(false); // 上传加载状态
@@ -147,6 +159,10 @@ const rules = { // 验证规则
 };
 const categoryList = ref([]); // 分类数据
 
+function openMap() {
+  map.value?.open();
+}
+
 // 下一步
 function next () {
   thirdFormRef.value.validate((valid) => {
@@ -158,7 +174,10 @@ function next () {
       applyThird(params)
         .then((res) => {
           loading.value = false;
-          if (res.success) emit('change', 3);
+          if (res.success) {
+            sessionStorage.removeItem(THIRD_APPLY_DRAFT_KEY);
+            emit('change', 3);
+          }
         })
         .catch(() => {
           loading.value = false;
@@ -192,14 +211,24 @@ function validateUploadFile (file) {
   }
   return true;
 }
-// 上传成功回调
+// 上传成功回调（el-upload 只认 HTTP 状态码，业务失败 success:false 也会进这里，需要判断）
 function handleSuccess (res, file) {
   uploadLoading.value = false;
-  form.value.storeLogo = [res.result];
+  if (res && res.success && res.result) {
+    form.value.storeLogo = [res.result];
+  } else {
+    Message.error(res && res.message ? res.message : '上传失败，请重试');
+  }
 }
-// 上传失败
-function uploadErr () {
+// 上传失败（非 2xx：err.message 通常是响应体字符串，尝试解析出服务端提示）
+function uploadErr (err) {
   uploadLoading.value = false;
+  let msg = '上传失败，请重试';
+  try {
+    const body = JSON.parse(err && err.message);
+    if (body && body.message) msg = body.message;
+  } catch (e) { /* 非 JSON 响应，用默认提示 */ }
+  Message.error(msg);
 }
 // 查看图片
 function handleView (item) {
@@ -277,28 +306,117 @@ function initFormFromContent (content) {
     if (form.value[key] == null) form.value[key] = "";
   });
 }
+function restoreDraft () {
+  const draft = sessionStorage.getItem(THIRD_APPLY_DRAFT_KEY);
+  if (!draft) return;
+  try {
+    const parsed = JSON.parse(draft);
+    form.value = {
+      ...createEmptyForm(),
+      ...parsed,
+      storeLogo: Array.isArray(parsed.storeLogo) ? parsed.storeLogo : [],
+      goodsManagementCategory: Array.isArray(parsed.goodsManagementCategory)
+        ? parsed.goodsManagementCategory
+        : [],
+    };
+  } catch (e) {
+    sessionStorage.removeItem(THIRD_APPLY_DRAFT_KEY);
+  }
+}
+function saveDraft () {
+  sessionStorage.setItem(THIRD_APPLY_DRAFT_KEY, JSON.stringify(form.value));
+}
 
-initFormFromContent(props.content);
+if (Object.keys(props.content).length) {
+  initFormFromContent(props.content);
+} else {
+  restoreDraft();
+}
 
 onMounted(() => {
   accessToken.accessToken = storage.getItem('accessToken');
   getCategoryList();
 });
+
+onBeforeUnmount(() => {
+  saveDraft();
+});
 </script>
 <style lang="scss" scoped>
-h4 {
-  margin-bottom: 10px;
-  padding: 0 10px;
-  border: 1px solid #ddd;
-  background-color: #f8f8f8;
-  font-weight: bold;
-  color: #333;
-  font-size: 14px;
-  line-height: 40px;
-  text-align: left;
+.section-title {
+  display: flex;
+  align-items: center;
+  margin: 24px 0 18px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+
+  &::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background: $theme_color;
+    margin-right: 8px;
+  }
 }
 .el-input {
-  width: 300px;
+  width: 360px;
+}
+.el-textarea {
+  width: 640px;
+  max-width: 100%;
+}
+.address-select {
+  display: flex;
+  align-items: center;
+  width: 360px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  background: #fff;
+
+  &:hover {
+    border-color: $theme_color;
+  }
+
+  .addr-icon {
+    color: #909399;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  .addr-text {
+    flex: 1;
+    color: #303133;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.placeholder {
+      color: #a8abb2;
+    }
+  }
+
+  .addr-action {
+    color: $theme_color;
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+}
+.form-actions {
+  margin-top: 8px;
+
+  .el-button {
+    min-width: 120px;
+  }
+
+  .el-button--primary {
+    min-width: 240px;
+  }
 }
 .img-list-wrap {
   display: flex;
@@ -316,6 +434,7 @@ h4 {
   position: relative;
   overflow: hidden;
   border: 1px solid #eee;
+  border-radius: 8px;
   box-sizing: border-box;
   background-color: #f5f5f5;
 
@@ -359,6 +478,32 @@ h4 {
 
   :deep(.el-upload-list) {
     display: none;
+  }
+}
+
+.upload-box {
+  width: 120px;
+  height: 120px;
+  border: 1px dashed #c0c4cc;
+  border-radius: 8px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #909399;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  .el-icon {
+    font-size: 26px;
+  }
+
+  &:hover {
+    border-color: $theme_color;
+    color: $theme_color;
   }
 }
 

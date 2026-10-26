@@ -5,27 +5,33 @@
       :model="form"
       :rules="rules"
       label-width="140px"
+      scroll-to-error
       @submit.prevent
       @keydown.enter.prevent
       @focusout="saveDraft"
     >
-      <h4>基础信息</h4>
+      <div class="section-title">基础信息</div>
       <el-form-item prop="companyName" label="公司名称">
         <el-input
           type="text"
           v-model="form.companyName"
-          placeholder="请填写公司信息"
+          placeholder="请填写公司名称"
         />
       </el-form-item>
       <el-form-item prop="companyAddressIdPath" label="公司所在地">
-        <span>{{ form.companyAddressPath || '暂无地址' }}</span>
-        <el-button type="default" style="margin-left: 10px;" @click="$refs.map.open()">选择</el-button>
+        <div class="address-select" @click="openMap">
+          <el-icon class="addr-icon"><Location /></el-icon>
+          <span class="addr-text" :class="{ placeholder: !form.companyAddressPath }">
+            {{ form.companyAddressPath || '请选择公司所在地' }}
+          </span>
+          <span class="addr-action">{{ form.companyAddressPath ? '重新选择' : '选择' }}</span>
+        </div>
       </el-form-item>
       <el-form-item prop="companyAddress" label="公司详细地址">
         <el-input
           type="text"
           v-model="form.companyAddress"
-          placeholder="请填写公司详细信息"
+          placeholder="请填写公司详细地址"
         />
       </el-form-item>
       <el-form-item prop="employeeNum" label="员工总数">
@@ -71,7 +77,7 @@
         />
       </el-form-item>
 
-      <h4>营业执照信息</h4>
+      <div class="section-title">营业执照信息</div>
       <el-form-item prop="licenseNum" label="营业执照号">
         <el-input
           type="text"
@@ -92,25 +98,23 @@
       <el-form-item prop="licencePhoto" label="营业执照电子版">
         <div class="upload-wrap">
           <el-upload
-            ref="uploadLicence"
+            v-if="form.licencePhoto.length < 1"
             :show-file-list="false"
             :on-success="handleSuccess"
             accept=".jpg,.jpeg,.png,.gif"
             :before-upload="beforeUpload"
             :on-error="uploadErr"
-            :disabled="form.licencePhoto.length >= 1"
             :action="action"
             :headers="accessToken"
           >
-            <el-button
-              type="info"
-              :loading="uploadLoading"
-              :disabled="form.licencePhoto.length >= 1"
-              >证照上传</el-button
-            >
+            <div class="upload-box">
+              <el-icon v-if="uploadLoading" class="is-loading"><Loading /></el-icon>
+              <el-icon v-else><Plus /></el-icon>
+              <span>上传营业执照</span>
+            </div>
           </el-upload>
           <div class="describe">
-            请压缩图片在2M以内，格式为gif，jpg，png，并确保文字清晰，以免上传或审核失败，仅可上传1张
+            请压缩图片在2M以内，格式为gif、jpg、png，并确保文字清晰，以免上传或审核失败，仅可上传1张
           </div>
           <div class="img-list-wrap">
             <div
@@ -128,7 +132,7 @@
         </div>
       </el-form-item>
 
-      <h4>法人信息</h4>
+      <div class="section-title">法人信息</div>
       <el-form-item prop="legalName" label="法人姓名">
         <el-input
           type="text"
@@ -147,7 +151,7 @@
       <el-form-item prop="legalPhoto" label="法人证件电子版">
         <div class="upload-wrap">
           <el-upload
-            ref="uploadLegal"
+            v-if="form.legalPhoto.length < 2"
             :show-file-list="false"
             :on-success="handleSuccess1"
             :before-upload="beforeUpload1"
@@ -157,7 +161,11 @@
             :action="action"
             :headers="accessToken"
           >
-            <el-button type="info" :loading="uploadLoading1">证照上传</el-button>
+            <div class="upload-box">
+              <el-icon v-if="uploadLoading1" class="is-loading"><Loading /></el-icon>
+              <el-icon v-else><Plus /></el-icon>
+              <span>上传法人证件</span>
+            </div>
           </el-upload>
           <div class="describe">
             请压缩图片在2M以内，身份证正反面两张照片，确保图片清晰无缺角
@@ -178,9 +186,11 @@
         </div>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" :loading="loading" @click="next"
-          >填写财务资质信息</el-button
-        >
+        <div class="form-actions">
+          <el-button type="primary" size="large" :loading="loading" @click="next"
+            >下一步：填写财务资质信息</el-button
+          >
+        </div>
       </el-form-item>
     </el-form>
     <el-dialog title="图片预览" v-model="visible">
@@ -192,8 +202,8 @@
 </template>
 <script setup>
 import { onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
-import { Message, Notice } from "@/utils/message";
-import { Delete, View } from '@element-plus/icons-vue';
+import { Message } from "@/utils/message";
+import { Delete, Loading, Location, Plus, View } from '@element-plus/icons-vue';
 import { applyFirst } from '@/api/shopentry';
 import * as RegExp from '@/plugins/RegExp.js';
 import multipleMap from "@/components/map/multiple-map";
@@ -237,7 +247,7 @@ const form = ref({ // 表单数据
   licencePhoto: []
 });
 const rules = { // 验证规则
-  companyName: [{ required: true, message: '请填写公司信息' }],
+  companyName: [{ required: true, message: '请填写公司名称' }],
   companyAddressIdPath: [{ required: true, message: '请选择公司所在地' }],
   companyAddress: [{ required: true, message: '请填写公司详细地址' }],
   employeeNum: [
@@ -254,29 +264,30 @@ const rules = { // 验证规则
     { pattern: RegExp.mobile, message: '请填写正确的号码' }
   ],
   companyPhone: [
-    { required: true, message: '请填写公司电话' },
-    { pattern: RegExp.mobile, message: '请填写正确的号码' }
+    { required: true, message: '请填写公司电话' }
   ],
   companyEmail: [
     { required: true, message: '请填写电子邮箱' },
     { type: 'email', message: '请输入正确的邮箱' }
   ],
   licenseNum: [
-    { required: true, message: '请填写营业执照号' },
-    { pattern: RegExp.licenseNum, message: '请输入正确的营业执照号' }
+    { required: true, message: '请填写营业执照号' }
   ],
   scope: [{ required: true, message: '请填写营业执照所示经营范围' }],
   legalPhoto: [{ required: true, message: '请上传法人身份证照片' }],
   licencePhoto: [{ required: true, message: '请上传营业执照' }],
   legalName: [{ required: true, message: '请输入法人姓名' }],
   legalId: [
-    { required: true, message: '请输入法人证件号' },
-    { pattern: RegExp.IDCard, message: '请输入正确的证件号' }
+    { required: true, message: '请输入法人证件号' }
   ]
 };
 const uploadLoading1 = ref(false); // 上传loading
 const uploadLoading = ref(false); // 上传loading
 const contentInitialized = ref(false);
+
+function openMap() {
+  map.value?.open();
+}
 
 // 获取店铺地址
 function getAddress(val){
@@ -352,38 +363,34 @@ function validateUploadFile (file) {
   }
   return true;
 }
-// 上传成功回调
+// 上传成功回调（el-upload 只认 HTTP 状态码，业务失败 success:false 也会进这里，需要判断）
 function handleSuccess (res, file) {
   uploadLoading.value = false;
-  form.value.licencePhoto = [res.result];
+  if (res && res.success && res.result) {
+    form.value.licencePhoto = [res.result];
+  } else {
+    Message.error(res && res.message ? res.message : '上传失败，请重试');
+  }
 }
 // 上传成功回调
 function handleSuccess1 (res, file) {
   uploadLoading1.value = false;
-  form.value.legalPhoto.push(res.result);
+  if (res && res.success && res.result) {
+    form.value.legalPhoto.push(res.result);
+  } else {
+    Message.error(res && res.message ? res.message : '上传失败，请重试');
+  }
 }
-// 上传失败
-function uploadErr () {
+// 上传失败（非 2xx：err.message 通常是响应体字符串，尝试解析出服务端提示）
+function uploadErr (err) {
   uploadLoading.value = false;
   uploadLoading1.value = false;
-}
-// 上传失败回调
-function handleFormatError (file) {
-  uploadLoading.value = false;
-  uploadLoading1.value = false;
-  Notice.warning({
-    title: 'The file format is incorrect',
-    desc: '上传文件格式不正确'
-  });
-}
-// 上传大小限制
-function handleMaxSize (file) {
-  uploadLoading.value = false;
-  uploadLoading1.value = false;
-  Notice.warning({
-    title: 'Exceeding file size limit',
-    desc: '文件大小不能超过2M'
-  });
+  let msg = '上传失败，请重试';
+  try {
+    const body = JSON.parse(err && err.message);
+    if (body && body.message) msg = body.message;
+  } catch (e) { /* 非 JSON 响应，用默认提示 */ }
+  Message.error(msg);
 }
 // 图片查看
 function handleView (item) {
@@ -456,19 +463,76 @@ onBeforeUnmount(() => {
 });
 </script>
 <style lang="scss" scoped>
-h4 {
-  margin-bottom: 10px;
-  padding: 0 10px;
-  border: 1px solid #ddd;
-  background-color: #f8f8f8;
-  font-weight: bold;
-  color: #333;
-  font-size: 14px;
-  line-height: 40px;
-  text-align: left;
+.section-title {
+  display: flex;
+  align-items: center;
+  margin: 24px 0 18px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+
+  &::before {
+    content: '';
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background: $theme_color;
+    margin-right: 8px;
+  }
 }
 .el-input {
-  width: 300px;
+  width: 360px;
+}
+.el-textarea {
+  width: 640px;
+  max-width: 100%;
+}
+.address-select {
+  display: flex;
+  align-items: center;
+  width: 360px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  background: #fff;
+
+  &:hover {
+    border-color: $theme_color;
+  }
+
+  .addr-icon {
+    color: #909399;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  .addr-text {
+    flex: 1;
+    color: #303133;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.placeholder {
+      color: #a8abb2;
+    }
+  }
+
+  .addr-action {
+    color: $theme_color;
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+}
+.form-actions {
+  margin-top: 8px;
+
+  .el-button {
+    min-width: 240px;
+  }
 }
 .img-list-wrap {
   display: flex;
@@ -486,6 +550,7 @@ h4 {
   position: relative;
   overflow: hidden;
   border: 1px solid #eee;
+  border-radius: 8px;
   box-sizing: border-box;
   background-color: #f5f5f5;
 
@@ -528,6 +593,32 @@ h4 {
 
   :deep(.el-upload-list) {
     display: none;
+  }
+}
+
+.upload-box {
+  width: 120px;
+  height: 120px;
+  border: 1px dashed #c0c4cc;
+  border-radius: 8px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #909399;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  .el-icon {
+    font-size: 26px;
+  }
+
+  &:hover {
+    border-color: $theme_color;
+    color: $theme_color;
   }
 }
 

@@ -1,14 +1,38 @@
 <template>
   <div class="shop-entry">
-    <div style="height: 20px"></div>
     <div class="content">
-      <h1>店铺入驻</h1>
-      <el-steps :active="currentIndex" class="margin" finish-status="success">
-        <el-step title="企业资质信息"></el-step>
-        <el-step title="财务资质信息"></el-step>
-        <el-step title="其他信息"></el-step>
-        <el-step title="提交审核"></el-step>
-      </el-steps>
+      <div class="page-header">
+        <div class="header-icon">
+          <el-icon><Shop /></el-icon>
+        </div>
+        <div class="header-text">
+          <h1>店铺入驻</h1>
+          <p>完善企业资质信息，快速开启您的电商之旅</p>
+        </div>
+      </div>
+
+      <div class="steps-bar">
+        <div
+          v-for="(step, i) in steps"
+          :key="i"
+          class="step-item"
+          :class="{
+            active: currentIndex === i,
+            done: currentIndex > i,
+            clickable: canClickStep(i),
+          }"
+          @click="onStepClick(i)"
+        >
+          <div class="step-circle">
+            <el-icon v-if="currentIndex > i"><Check /></el-icon>
+            <span v-else>{{ i + 1 }}</span>
+          </div>
+          <div class="step-title">{{ step.title }}</div>
+          <div class="step-desc">{{ step.desc }}</div>
+          <div class="step-line" v-if="i < steps.length - 1"></div>
+        </div>
+      </div>
+
       <div v-if="initLoading" class="step-loading" v-loading="true"></div>
       <template v-else>
         <first-apply
@@ -30,34 +54,68 @@
         ></third-apply>
       </template>
 
-      <div class="success-page" v-if="currentIndex == 3">
-        <span v-if="storeDisable == '' || storeDisable == 'APPLYING'">入驻申请提交成功，等待平台审核</span>
-        <span v-if="storeDisable == 'OPEN'">申请已通过，请联系管理员</span>
-        <span v-if="storeDisable == 'CLOSED'">店铺已关闭，重申请联系管理员</span>
-        <span v-if="storeDisable == 'REFUSED'">审核未通过,请修改资质信息，如有疑问请联系管理员</span>
+      <div class="status-page" v-if="currentIndex === 3">
+        <el-result
+          v-if="storeDisable === '' || storeDisable === 'APPLYING'"
+          icon="info"
+          title="入驻申请提交成功"
+          sub-title="您的入驻申请已提交，请耐心等待平台审核"
+        >
+          <template #extra>
+            <el-button type="primary" @click="$router.push('/')">返回首页</el-button>
+          </template>
+        </el-result>
+        <el-result
+          v-else-if="storeDisable === 'OPEN'"
+          icon="success"
+          title="申请已通过"
+          sub-title="您的店铺已开通，如有问题请联系管理员"
+        >
+          <template #extra>
+            <el-button type="primary" @click="$router.push('/')">返回首页</el-button>
+          </template>
+        </el-result>
+        <el-result
+          v-else-if="storeDisable === 'CLOSED'"
+          icon="warning"
+          title="店铺已关闭"
+          sub-title="如需重新入驻，请联系管理员"
+        >
+          <template #extra>
+            <el-button type="primary" @click="$router.push('/')">返回首页</el-button>
+          </template>
+        </el-result>
+        <el-result
+          v-else-if="storeDisable === 'REFUSED'"
+          icon="error"
+          title="审核未通过"
+          sub-title="请修改资质信息后重新提交，如有疑问请联系管理员"
+        >
+          <template #extra>
+            <el-button @click="$router.push('/')">返回首页</el-button>
+            <el-button type="primary" @click="currentIndex = 0">重新申请</el-button>
+          </template>
+        </el-result>
       </div>
-      <el-button v-if="currentIndex === 3" @click="$router.push('/')">返回</el-button>
-      &nbsp;
-      <el-button type="primary" @click='currentIndex = 0'
-        v-if="storeDisable === 'REFUSED' && currentIndex === 3">重新申请</el-button>
     </div>
 
-    <el-dialog title="店铺入驻协议" v-model="showAgreement" width="1200" :show-close="false" :close-on-click-modal="false">
+    <el-dialog title="店铺入驻协议" v-model="showAgreement" width="900px" :show-close="false" :close-on-click-modal="false">
       <div class="agreement-scroll">
         <div class="agreeent-con" v-html="agreementCon"></div>
       </div>
 
       <template #footer><div style="text-align: center">
         <p>
-          <el-checkbox v-model="checked">我已同意以上协议</el-checkbox>
+          <el-checkbox v-model="checked">我已阅读并同意以上协议</el-checkbox>
         </p>
-        <el-button type="primary" :disabled="!checked" class="margin" @click="confirmAgreement">同意协议填写资质信息</el-button>
+        <el-button type="primary" :disabled="!checked" class="margin" @click="confirmAgreement">同意协议，填写资质信息</el-button>
       </div></template>
     </el-dialog>
   </div>
 </template>
 <script setup>
 import { onMounted, reactive, ref } from "vue";
+import { Check, Shop } from "@element-plus/icons-vue";
 import { agreement, applyStatus } from "@/api/shopentry";
 import firstApply from "./FirstApply";
 import secondApply from "./SecondApply";
@@ -73,6 +131,24 @@ const thirdData = reactive({}); // 第三步数据
 const storeDisable = ref(""); // APPLY OPEN 开店中 CLOSED 关闭 REFUSED 拒绝 APPLYING 申请中，审核
 const initLoading = ref(true);
 const agreementAccepted = ref(false); // 是否已同意入驻协议
+
+const steps = [
+  { title: "企业资质信息", desc: "填写企业与法人资料" },
+  { title: "财务资质信息", desc: "填写结算银行信息" },
+  { title: "其他信息", desc: "完善店铺资料" },
+  { title: "提交审核", desc: "等待平台审核" },
+];
+
+// 已完成步骤可点击回跳；审核状态页仅在 REFUSED 时允许回跳修改
+function canClickStep(i) {
+  if (!agreementAccepted.value || i >= currentIndex.value) return false;
+  if (currentIndex.value === 3) return storeDisable.value === "REFUSED";
+  return true;
+}
+
+function onStepClick(i) {
+  if (canClickStep(i)) nextPage(i);
+}
 
 function confirmAgreement() {
   agreementAccepted.value = true;
@@ -193,16 +269,126 @@ onMounted(() => {
   min-height: 500px;
   border-radius: 20px;
   background: #fff;
-  padding: 10px 20px;
+  padding: 28px 48px 48px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: $theme_color;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
 
   h1 {
+    margin: 0;
+    font-size: 22px;
+    color: #303133;
+  }
 
-    margin-top: 20px;
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #909399;
   }
 }
 
+.steps-bar {
+  display: flex;
+  align-items: flex-start;
+  margin: 28px 0 36px;
+}
+
+.step-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover .step-title {
+      color: $theme_color;
+    }
+  }
+
+  &.active .step-circle {
+    border-color: $theme_color;
+    background: $theme_color;
+    color: #fff;
+  }
+
+  &.active .step-title {
+    color: $theme_color;
+  }
+
+  &.done .step-circle {
+    border-color: $theme_color;
+    color: $theme_color;
+  }
+
+  &.done .step-line {
+    background: $theme_color;
+  }
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #dcdfe6;
+  background: #fff;
+  color: #909399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+  transition: all 0.25s;
+}
+
+.step-title {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  transition: color 0.25s;
+}
+
+.step-desc {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.step-line {
+  position: absolute;
+  top: 18px;
+  left: calc(50% + 28px);
+  width: calc(100% - 56px);
+  height: 2px;
+  background: #e4e7ed;
+  transition: background 0.25s;
+}
+
 .margin {
-  margin: 30px 0;
+  margin: 30px 0 0;
 }
 .agreeent-con {
   max-height: 500px;
@@ -218,12 +404,11 @@ onMounted(() => {
 .step-loading {
   min-height: 320px;
 }
-.success-page {
-  height: 500px;
-  width: 100%;
-  line-height: 500px;
-  text-align: center;
-  font-size: 20px;
+.status-page {
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .shop-entry {
   min-height: 100vh;

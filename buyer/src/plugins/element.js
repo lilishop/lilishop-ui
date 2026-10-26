@@ -37,6 +37,7 @@ import "element-plus/es/components/radio/style/css";
 import "element-plus/es/components/radio-button/style/css";
 import "element-plus/es/components/radio-group/style/css";
 import "element-plus/es/components/rate/style/css";
+import "element-plus/es/components/result/style/css";
 import "element-plus/es/components/select/style/css";
 import "element-plus/es/components/skeleton/style/css";
 import "element-plus/es/components/step/style/css";
@@ -94,6 +95,7 @@ import {
   ElRadioButton,
   ElRadioGroup,
   ElRate,
+  ElResult,
   ElSelect,
   ElSkeleton,
   ElStep,
@@ -149,6 +151,7 @@ const components = [
   ElRadioButton,
   ElRadioGroup,
   ElRate,
+  ElResult,
   ElSelect,
   ElSkeleton,
   ElStep,

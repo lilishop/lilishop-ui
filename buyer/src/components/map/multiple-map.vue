@@ -9,7 +9,7 @@
         <div class="selector">
           <div class="selector-item" v-for="(plant, plantIndex) in Object.keys(data)" :key="plantIndex">
             <div :class="{ 'active': chiosend[plantIndex].id == item.id }" v-for="(item, index) in data[plant]"
-              :key="index"
+              :key="index" :title="item.name"
               @click="init(item, plantIndex != Object.keys(data).length - 1 ? Object.keys(data)[plantIndex + 1] : 0, plantIndex)"
               class="map-item">
               {{ item.name }}
@@ -125,7 +125,8 @@ function finished() {
 .selector-item {
   width: 100%;
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .map-item {
@@ -133,6 +134,10 @@ function finished() {
   padding: 10px;
   border-bottom: 1px solid #eee;
   cursor: pointer;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
     background: #eee;
