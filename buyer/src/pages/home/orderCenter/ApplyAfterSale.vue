@@ -1,26 +1,20 @@
 <template>
   <div class="apply-after-sale">
     <UserCenterLayout>
-    <el-table :data="goodsData" border>
-      <el-table-column label="商品名称">
-        <template #default="{ row }">
-          <div style="padding:5px;display:flex;">
-            <img :src="row.image" loading="lazy" decoding="async" style="vertical-align: top;" width="60" height="60" alt="">
-            <span class="ml_10">{{ row.goodsName }}</span>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="价格">
-        <template #default="{ row }">
-          <div>{{ $filters.unitPrice(row.applyRefundPrice, '￥') }}</div>
-        </template>
-      </el-table-column>
-      <el-table-column prop="num" label="购买数量" />
-    </el-table>
+    <div class="goods-row" v-for="(goods, index) in goodsData" :key="index">
+      <img class="goods-img" :src="goods.image" loading="lazy" decoding="async" alt="">
+      <div class="goods-info">
+        <div class="goods-name">{{ goods.goodsName }}</div>
+        <div class="goods-meta">
+          <span class="goods-price">{{ $filters.unitPrice(goods.applyRefundPrice, '￥') }}</span>
+          <span class="goods-num">×{{ goods.num }}</span>
+        </div>
+      </div>
+    </div>
     <div>
       <el-form :model="form" ref="formRef" class="mt_10" :rules="rules" label-width="80px">
         <el-form-item label="售后类别">
-          <el-radio-group v-model="form.serviceType" @change="changeReason" type="button" button-style="solid">
+          <el-radio-group v-model="form.serviceType" @change="changeReason">
             <el-radio v-if="info.returnGoods" label="RETURN_GOODS">退货</el-radio>
             <el-radio v-if="info.returnMoney" label="RETURN_MONEY">退款</el-radio>
           </el-radio-group>
@@ -224,6 +218,50 @@ onMounted(() => {
 <style lang="scss" scoped>
 
 /** 商品信息 */
+.goods-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.goods-img {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.goods-info {
+  min-width: 0;
+  margin-left: 12px;
+}
+
+.goods-name {
+  color: #333;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.goods-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.goods-price {
+  color: $theme_color;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.goods-num {
+  color: #999;
+  font-size: 14px;
+}
+
 .order-price {
   text-align: right;
   margin-top: 30px;

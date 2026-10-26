@@ -13,7 +13,7 @@
               :action="action"
               :headers="accessToken"
             >
-              <button type="button" class="ghost-btn">上传头像</button>
+              <el-button size="small">上传头像</el-button>
             </el-upload>
           </div>
         </el-form-item>
@@ -29,13 +29,13 @@
           />
         </el-form-item>
         <el-form-item label="性别">
-          <div class="sex-group">
-            <button type="button" class="sex-btn" :class="{ active: formItem.sex === 1 }" @click="formItem.sex = 1">男</button>
-            <button type="button" class="sex-btn" :class="{ active: formItem.sex === 0 }" @click="formItem.sex = 0">女</button>
-          </div>
+          <el-radio-group v-model="formItem.sex">
+            <el-radio-button :value="1">男</el-radio-button>
+            <el-radio-button :value="0">女</el-radio-button>
+          </el-radio-group>
         </el-form-item>
         <el-form-item>
-          <button type="button" class="op-btn" @click="save">确认修改</button>
+          <el-button type="primary" @click="save">确认修改</el-button>
         </el-form-item>
       </el-form>
     </UserCenterLayout>
@@ -167,7 +167,7 @@ function handleSuccess (res, file) { // 上传成功
   :deep(.el-form-item__label) {
     height: auto;
     line-height: 22px;
-    color: #666;
+    color: #999;
     font-size: 14px;
   }
 
@@ -198,52 +198,6 @@ function handleSuccess (res, file) { // 上传成功
 
 :deep(.profile-field.el-date-editor) {
   width: 320px;
-}
-
-.sex-group {
-  display: flex;
-  gap: 8px;
-}
-
-.sex-btn,
-.ghost-btn,
-.op-btn {
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 30px;
-  cursor: pointer;
-}
-
-.sex-btn,
-.ghost-btn {
-  border: 1px solid #ddd;
-  background: #fff;
-  color: #171A26;
-
-  &:hover {
-    border-color: $theme_color;
-    color: $theme_color;
-  }
-}
-
-.sex-btn.active {
-  border-color: $theme_color;
-  background: #fff5f4;
-  color: $theme_color;
-}
-
-.op-btn {
-  min-width: 96px;
-  border: 1px solid $theme_color;
-  background: $theme_color;
-  color: #fff;
-
-  &:hover {
-    opacity: 0.9;
-  }
 }
 </style>
 

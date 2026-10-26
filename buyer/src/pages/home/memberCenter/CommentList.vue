@@ -34,7 +34,7 @@
           <div class="comment-cell">{{ item.grade === 'GOOD' ? '好评' : item.grade === 'WORSE' ? '差评' : '中评' }}</div>
           <div class="comment-content">{{ item.content }}</div>
           <div class="comment-ops">
-            <button type="button" class="text-link" @click="evaluateDetail(item.id)">评价详情</button>
+            <el-button link type="primary" @click="evaluateDetail(item.id)">评价详情</el-button>
           </div>
         </div>
       </div>
@@ -229,20 +229,5 @@ onMounted(() => {
 .comment-ops {
   display: flex;
   justify-content: center;
-}
-
-.text-link {
-  border: none;
-  background: none;
-  padding: 0;
-  color: #171A26;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 22px;
-  cursor: pointer;
-
-  &:hover {
-    color: $theme_color;
-  }
 }
 </style>

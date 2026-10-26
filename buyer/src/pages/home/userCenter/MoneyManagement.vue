@@ -1,6 +1,10 @@
 <template>
   <div class="wrapper">
-    <UserCenterLayout>
+    <UserCenterLayout
+      :tabs="walletTabs"
+      :active-tab="activeWalletTabIndex"
+      @tab-change="handleTabChange"
+    >
 
     <div class="wallet-summary">
       <div class="wallet-stat">
@@ -13,8 +17,8 @@
       </div>
     </div>
     <div class="account-btns">
-      <button type="button" class="op-btn" @click="recharge">在线充值</button>
-      <button type="button" class="ghost-btn" @click="withdrawalApply">申请提现</button>
+      <el-button type="primary" @click="recharge">在线充值</el-button>
+      <el-button @click="withdrawalApply">申请提现</el-button>
     </div>
     <el-dialog v-model="modal" width="530">
       <template #header><p>
@@ -36,7 +40,7 @@
         </el-form>
       </div>
       <template #footer><div style="text-align: center">
-        <el-button size="large" type="success" @click="rechargePrice">充值</el-button>
+        <el-button size="large" type="primary" @click="rechargePrice">充值</el-button>
       </div></template>
     </el-dialog>
     <!-- 提现申请 -->
@@ -65,7 +69,7 @@
               number
               size="large"
             ><template #append><span>元</span></template></el-input>
-            <span style="color: red">最低提现金额 {{ withdrawApplyFormData.minPrice }}元</span>
+            <span class="form-tip">最低提现金额 {{ withdrawApplyFormData.minPrice }}元</span>
           </el-form-item>
           <el-form-item v-if="withdrawApplyFormData.type === 'ALI'" label="真实姓名" prop="realName">
             <el-input
@@ -86,14 +90,9 @@
         </el-form>
       </div>
       <template #footer><div style="text-align: center">
-        <el-button size="large" type="success" @click="withdrawal">提现</el-button>
+        <el-button size="large" type="primary" @click="withdrawal">提现</el-button>
       </div></template>
     </el-dialog>
-    <div class="wallet-tabs">
-      <div class="wallet-tab" :class="{ active: activeWalletTab === 'log' }" @click="tabPaneChange('log')">余额日志</div>
-      <div class="wallet-tab" :class="{ active: activeWalletTab === 'recharge' }" @click="tabPaneChange('recharge')">充值记录</div>
-      <div class="wallet-tab" :class="{ active: activeWalletTab === 'withdrawApply' }" @click="tabPaneChange('withdrawApply')">提现记录</div>
-    </div>
 
     <div v-show="activeWalletTab === 'log'">
       <empty v-if="!(logColumnsData.records || []).length" />
@@ -181,7 +180,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import {getDepositLog, getMembersWallet, getRecharge, getWithdrawApply, recharge as apiRecharge, withdrawalApply as apiWithdrawalApply} from '@/api/member';
@@ -196,6 +195,12 @@ const formDataRef = ref(null);
 const withdrawApplyFormDataRef = ref(null);
 
 const activeWalletTab = ref("log");
+const walletTabs = ["余额日志", "充值记录", "提现记录"]; // 钱包页签
+const walletTabKeys = ["log", "recharge", "withdrawApply"]; // 页签对应标识
+const activeWalletTabIndex = computed(() => {
+  const index = walletTabKeys.indexOf(activeWalletTab.value);
+  return index > -1 ? index : 0;
+});
 const frozenDeposit = ref(0); // 冻结余额
 const memberDeposit = ref(0); // 余额
 
@@ -289,6 +294,10 @@ function tabPaneChange(v) {
   if (v === 'withdrawApply') {
     getWithdrawApplyData();
   }
+}
+// 页签切换
+function handleTabChange(index) {
+  tabPaneChange(walletTabKeys[index]);
 }
 // 充值记录
 function getRechargeData() {
@@ -416,7 +425,8 @@ function withdrawal() {
 .wallet-stat {
   flex: 1;
   padding: 16px 20px;
-  background: #fafafa;
+  background: #fff;
+  border: 1px solid #eee;
   border-radius: 8px;
 
   .label {
@@ -445,67 +455,9 @@ function withdrawal() {
   margin-bottom: 8px;
 }
 
-.op-btn,
-.ghost-btn {
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 4px;
-  font-family: inherit;
+.form-tip {
+  color: #999;
   font-size: 14px;
-  line-height: 30px;
-  cursor: pointer;
-}
-
-.op-btn {
-  border: 1px solid $theme_color;
-  background: $theme_color;
-  color: #fff;
-
-  &:hover {
-    opacity: 0.9;
-  }
-}
-
-.ghost-btn {
-  border: 1px solid #ddd;
-  background: #fff;
-  color: #171A26;
-
-  &:hover {
-    border-color: $theme_color;
-    color: $theme_color;
-  }
-}
-
-.wallet-tabs {
-  display: flex;
-  gap: 24px;
-  margin: 16px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.wallet-tab {
-  position: relative;
-  padding: 10px 0;
-  color: #666;
-  font-size: 14px;
-  line-height: 22px;
-  cursor: pointer;
-
-  &.active {
-    color: $theme_color;
-    font-weight: 600;
-
-    &::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 2px;
-      background: $theme_color;
-    }
-  }
 }
 
 .wallet-list {

@@ -87,10 +87,10 @@ onMounted(() => {
 <style lang="scss" scoped>
 h3 {
   margin: 8px 0 12px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
-  line-height: 1.4;
+  line-height: 24px;
 }
 
 .point-summary {
@@ -102,7 +102,8 @@ h3 {
 .point-stat {
   flex: 1;
   padding: 16px 20px;
-  background: #fafafa;
+  background: #fff;
+  border: 1px solid #eee;
   border-radius: 8px;
 
   .label {

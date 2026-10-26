@@ -1,10 +1,10 @@
 <template>
   <div class="order-detail">
     <UserCenterLayout>
-    <div class="order-card status-card" v-if="afterSale.sn">
+    <div class="panel" v-if="afterSale.sn">
       <div class="status-head">
         <div class="status-main">
-          <p class="status-text">{{ afterSale.serviceName }}</p>
+          <el-tag :type="statusTagType" effect="dark">{{ afterSale.serviceName }}</el-tag>
           <p class="status-sn">
             售后单号：{{ afterSale.sn }}
             <span>订单号：{{ afterSale.orderSn }}</span>
@@ -13,8 +13,8 @@
         <div class="status-side">
           <div class="operation-time">创建时间：{{ afterSale.createTime }}</div>
           <div class="status-actions" v-if="canSubmitLogistics || canCancel">
-            <button v-if="canSubmitLogistics" type="button" class="op-btn" @click="openModal">提交物流</button>
-            <button v-if="canCancel" type="button" class="text-link" @click="cancel(afterSale.sn)">取消售后</button>
+            <el-button v-if="canSubmitLogistics" type="primary" size="small" @click="openModal">提交物流</el-button>
+            <el-button v-if="canCancel" link type="primary" @click="cancel(afterSale.sn)">取消售后</el-button>
           </div>
         </div>
       </div>
@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-    <div class="order-card" v-if="logList.length">
+    <div class="panel" v-if="logList.length">
       <h3>售后进程</h3>
       <el-steps
         class="progress"
@@ -43,50 +43,48 @@
         ></el-step>
       </el-steps>
     </div>
-    <div class="order-card">
+    <div class="panel">
       <h3>服务单信息</h3>
-      <div class="info-list">
+      <div class="info-row">
+        <span class="info-label">退款方式</span>
+        <span class="info-value">{{ afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">申请退款金额</span>
+        <span class="info-value">{{ $filters.unitPrice(afterSale.applyRefundPrice, '￥') }}</span>
+      </div>
+      <div class="info-row" v-if="afterSale.actualRefundPrice">
+        <span class="info-label">实际退款金额</span>
+        <span class="info-value">{{ $filters.unitPrice(afterSale.actualRefundPrice, '￥') }}</span>
+      </div>
+      <template v-if="afterSale.refundWay === 'OFFLINE'">
         <div class="info-row">
-          <span class="label">退款方式</span>
-          <span>{{ afterSale.refundWay == 'ORIGINAL' ? '原路退回' : '账号退款' }}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">申请退款金额</span>
-          <span>{{ $filters.unitPrice(afterSale.applyRefundPrice, '￥') }}</span>
-        </div>
-        <div class="info-row" v-if="afterSale.actualRefundPrice">
-          <span class="label">实际退款金额</span>
-          <span>{{ $filters.unitPrice(afterSale.actualRefundPrice, '￥') }}</span>
-        </div>
-        <template v-if="afterSale.refundWay === 'OFFLINE'">
-          <div class="info-row">
-            <span class="label">退款开户行</span>
-            <span>{{ afterSale.bankDepositName }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">退款开户名</span>
-            <span>{{ afterSale.bankAccountName }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">退款卡号</span>
-            <span>{{ afterSale.bankAccountNumber }}</span>
-          </div>
-        </template>
-        <div class="info-row">
-          <span class="label">商品处理方式</span>
-          <span>{{ afterSale.serviceType == 'RETURN_MONEY' ? '退款' : '退货' }}</span>
+          <span class="info-label">退款开户行</span>
+          <span class="info-value">{{ afterSale.bankDepositName }}</span>
         </div>
         <div class="info-row">
-          <span class="label">退款原因</span>
-          <span>{{ afterSale.reasonName }}</span>
+          <span class="info-label">退款开户名</span>
+          <span class="info-value">{{ afterSale.bankAccountName }}</span>
         </div>
         <div class="info-row">
-          <span class="label">问题描述</span>
-          <span>{{ afterSale.problemDesc }}</span>
+          <span class="info-label">退款卡号</span>
+          <span class="info-value">{{ afterSale.bankAccountNumber }}</span>
         </div>
+      </template>
+      <div class="info-row">
+        <span class="info-label">商品处理方式</span>
+        <span class="info-value">{{ afterSale.serviceType == 'RETURN_MONEY' ? '退款' : '退货' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">退款原因</span>
+        <span class="info-value">{{ afterSale.reasonName }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">问题描述</span>
+        <span class="info-value">{{ afterSale.problemDesc }}</span>
       </div>
     </div>
-    <div class="order-card" v-if="afterSale.afterSaleImage">
+    <div class="panel" v-if="afterSale.afterSaleImage">
       <h3>图片信息</h3>
       <div class="image-list">
         <img
@@ -173,6 +171,22 @@ const canSubmitLogistics = computed(() => {
 });
 const canCancel = computed(() => {
   return afterSale.value.afterSaleAllowOperationVO && afterSale.value.afterSaleAllowOperationVO.cancel
+});
+
+const statusTagType = computed(() => {
+  const map = {
+    APPLY: 'warning',
+    PASS: 'success',
+    REFUSE: 'info',
+    BUYER_RETURN: 'warning',
+    SELLER_CONFIRM: 'warning',
+    SELLER_TERMINATION: 'info',
+    BUYER_CONFIRM: 'warning',
+    BUYER_CANCEL: 'info',
+    COMPLETE: 'success',
+    WAIT_REFUND: 'warning'
+  };
+  return map[afterSale.value.serviceStatus] || 'info';
 });
 
 function getDetail () { // 售后详情
@@ -286,26 +300,22 @@ onMounted(() => {
   color: #333;
 }
 
-.order-card {
-  padding: 4px 0 16px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+.panel {
+  margin-top: 16px;
+  padding: 16px 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
 
   h3 {
     margin: 0 0 12px;
-    font-size: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
-    line-height: 1.4;
+    line-height: 24px;
   }
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.status-card {
-  padding-top: 8px;
 }
 
 .status-head {
@@ -315,17 +325,16 @@ onMounted(() => {
   gap: 16px;
 }
 
-.status-text {
-  margin: 0;
-  color: $theme_color;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.4;
+.status-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .status-sn {
-  margin: 6px 0 0;
-  color: #171A26;
+  margin: 0;
+  color: #999;
   font-size: 14px;
   line-height: 22px;
 
@@ -340,7 +349,7 @@ onMounted(() => {
 }
 
 .operation-time {
-  color: #171A26;
+  color: #999;
   font-size: 14px;
   line-height: 22px;
 }
@@ -392,7 +401,7 @@ onMounted(() => {
 
   span {
     margin: 0 4px;
-    color: #438cde;
+    color: #333;
     cursor: pointer;
 
     &:hover {
@@ -435,35 +444,30 @@ onMounted(() => {
   }
 }
 
-.info-list {
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .info-row {
-  display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
-  min-height: 44px;
-  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
   font-size: 14px;
   line-height: 22px;
 
-  &:first-child {
-    border-top: none;
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 4px;
   }
+}
 
-  span {
-    display: flex;
-    align-items: center;
-    padding: 10px 16px;
-    color: #171A26;
-  }
+.info-label {
+  flex: 0 0 96px;
+  color: #999;
+}
 
-  .label {
-    background: #fafafa;
-    color: #666;
-  }
+.info-value {
+  flex: 1;
+  min-width: 0;
+  color: #333;
+  word-break: break-all;
 }
 
 .image-list {
@@ -478,39 +482,6 @@ onMounted(() => {
     border: 1px solid #f0f0f0;
     border-radius: 6px;
     cursor: pointer;
-  }
-}
-
-.op-btn {
-  min-width: 96px;
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid $theme_color;
-  border-radius: 4px;
-  background: $theme_color;
-  color: #fff;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 30px;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-}
-
-.text-link {
-  border: none;
-  background: none;
-  padding: 0;
-  color: #171A26;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 22px;
-  cursor: pointer;
-
-  &:hover {
-    color: $theme_color;
   }
 }
 </style>

@@ -4,7 +4,7 @@
       <div class="order-card status-card" v-if="orderGoods.goodsName || orderGoods.content">
         <div class="status-head">
           <div class="status-main">
-            <p class="status-text">{{ gradeText }}</p>
+            <el-tag :type="gradeTagType" effect="dark">{{ gradeText }}</el-tag>
             <p class="status-sn">评价时间：{{ orderGoods.createTime }}</p>
           </div>
         </div>
@@ -99,6 +99,10 @@ const gradeText = computed(() => {
   const map = { GOOD: '好评', MODERATE: '中评', WORSE: '差评' }
   return map[orderGoods.value.grade] || '评价详情'
 });
+const gradeTagType = computed(() => {
+  const map = { GOOD: 'success', MODERATE: 'warning', WORSE: 'info' }
+  return map[orderGoods.value.grade] || 'info'
+});
 
 function getDetail() {
   // 获取评价详情
@@ -130,33 +134,23 @@ onMounted(() => {
 }
 
 .order-card {
-  padding: 4px 0 16px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  margin-top: 16px;
+  padding: 16px 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
 
   h3 {
     margin: 0 0 12px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
-    line-height: 1.4;
-  }
-
-  &:last-of-type {
-    border-bottom: none;
+    line-height: 24px;
   }
 }
 
 .status-card {
-  padding-top: 8px;
-}
-
-.status-text {
-  margin: 0;
-  color: $theme_color;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.4;
+  margin-top: 0;
 }
 
 .status-sn {

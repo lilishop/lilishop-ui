@@ -15,10 +15,10 @@
           <template #append><span>输入验证码</span></template>
         </el-input>
       </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submitRegister">下一步</el-button>
+      </el-form-item>
     </el-form>
-    <div v-if="(status == 2 || status == 3) && !showPwd" style="text-align: center;width: 50%">
-      <el-button type="primary" class="ml_10" @click="submitRegister">下一步</el-button>
-    </div>
 
     <!--  修改  -->
     <el-form ref="formRegisterRef" :model="formRegister" :rules="ruleInline" label-width="80px" v-if="status == 1 && !showPwd">
@@ -43,11 +43,10 @@
           <template #prepend><el-icon><Lock /></el-icon></template>
         </el-input>
       </el-form-item>
-
+      <el-form-item>
+        <el-button type="primary" @click="handleRegist">修改</el-button>
+      </el-form-item>
     </el-form>
-    <div v-if="status == 1 && !showPwd" style="width: 50%;text-align: center">
-      <el-button type="primary" class="ml_10" @click="handleRegist">修改</el-button>
-    </div>
     <!-- 设置&修改的第二种情况   -->
     <el-form ref="formDataUpdateRef" :model="formDataUpdate" label-position="left" label-width="100px" :rules="ruleIn"
           v-if="showPwd">
@@ -65,10 +64,10 @@
           <template #prepend><el-icon><Lock /></el-icon></template>
         </el-input>
       </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="setPassword">设置</el-button>
+      </el-form-item>
     </el-form>
-    <div v-if="showPwd" style="text-align: center;width: 50%">
-      <el-button type="primary" class="ml_10" @click="setPassword">设置</el-button>
-    </div>
     </UserCenterLayout>
   </div>
 </template>
@@ -252,9 +251,6 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-  .wrapper {
-    text-align: center;
-  }
   .phone {
     text-align: left;
   }

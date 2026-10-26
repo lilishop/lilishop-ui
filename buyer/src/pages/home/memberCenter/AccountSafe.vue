@@ -27,9 +27,9 @@
         </div>
         <div class="connect-row">
           <span class="connect-name">{{ wechatConnect.label }}</span>
-          <span class="connect-status" :class="{ 'is-bound': isBound(wechatConnect.type) }">
+          <el-tag :type="isBound(wechatConnect.type) ? 'success' : 'info'" size="small">
             {{ isBound(wechatConnect.type) ? "已绑定" : "未绑定" }}
-          </span>
+          </el-tag>
           <el-skeleton v-if="connectLoading" animated class="connect-skeleton" />
         </div>
       </div>
@@ -277,8 +277,9 @@ onMounted(() => {
 
   .safe-card {
     padding: 20px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #eee;
     border-radius: 8px;
+    background: #fff;
   }
 
   .safe-card-connect {
@@ -295,7 +296,7 @@ onMounted(() => {
     width: 48px;
     height: 48px;
     border-radius: 8px;
-    background: #fff5f4;
+    background: color-mix(in srgb, #{$theme_color} 8%, #fff);
     color: $theme_color;
     display: flex;
     align-items: center;
@@ -309,7 +310,7 @@ onMounted(() => {
 
   .safe-title {
     margin: 0;
-    color: #171A26;
+    color: #333;
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
@@ -333,24 +334,9 @@ onMounted(() => {
   }
 
   .connect-name {
-    color: #171A26;
+    color: #333;
     font-size: 14px;
     line-height: 22px;
-  }
-
-  .connect-status {
-    height: 22px;
-    padding: 0 8px;
-    border-radius: 4px;
-    background: #f5f5f5;
-    color: #999;
-    font-size: 12px;
-    line-height: 22px;
-  }
-
-  .connect-status.is-bound {
-    background: #f0faf3;
-    color: #1f9d55;
   }
 
   .connect-skeleton {

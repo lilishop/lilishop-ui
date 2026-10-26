@@ -30,7 +30,7 @@
           </div>
         </div>
       </div>
-      <el-empty v-else description="暂无收货地址" />
+      <empty v-else _Title="暂无收货地址" />
     </UserCenterLayout>
   </div>
 </template>
@@ -130,7 +130,7 @@ onMounted(() => {
 .address-name {
   font-size: 16px;
   font-weight: 600;
-  color: $light_title_color;
+  color: #333;
 }
 
 .address-mobile {
@@ -183,13 +183,13 @@ onMounted(() => {
   }
 
   .del-btn:hover {
-    color: #f56c6c;
+    color: $theme_color;
   }
 }
 
 .default-address-tag {
   margin-left: 10px;
-  background-color: #fff3f2 !important;
+  background-color: color-mix(in srgb, #{$theme_color} 8%, #fff) !important;
   border: 1px solid $theme_color !important;
   color: $theme_color !important;
 }

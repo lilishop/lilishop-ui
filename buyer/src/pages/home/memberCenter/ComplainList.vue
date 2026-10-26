@@ -32,17 +32,19 @@
               {{ item.goodsName }}
             </div>
           </div>
-          <div class="complain-cell">{{ statusLabel[item.complainStatus] || item.complainStatus }}</div>
+          <div class="complain-cell">
+            <el-tag size="small" :type="statusTagType(item.complainStatus)">{{ statusLabel[item.complainStatus] || item.complainStatus }}</el-tag>
+          </div>
           <div class="complain-topic">{{ item.complainTopic }}</div>
           <div class="complain-content">{{ item.content }}</div>
           <div class="complain-ops">
-            <button type="button" class="text-link" @click="goDetail(item.id)">投诉详情</button>
-            <button
+            <el-button link type="primary" @click="goDetail(item.id)">投诉详情</el-button>
+            <el-button
               v-if="item.complainStatus === 'APPLYING' || item.complainStatus === 'NEW'"
-              type="button"
-              class="text-link"
+              link
+              type="danger"
               @click="cancel(item.id)"
-            >取消投诉</button>
+            >取消投诉</el-button>
           </div>
         </div>
       </div>
@@ -83,6 +85,18 @@ const params = reactive({ // 请求参数
   pageNumber: 1,
   pageSize: 20
 });
+
+function statusTagType(status) { // 投诉状态标签类型
+  const map = {
+    COMPLETE: 'success',
+    APPLYING: 'warning',
+    NEW: 'warning',
+    CANCEL: 'info',
+    EXPIRED: 'info',
+    NO_APPLY: 'info'
+  };
+  return map[status] || 'info';
+}
 
 function getList() { // 获取投诉列表
   complainList(params).then(res => {
@@ -268,20 +282,9 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-}
 
-.text-link {
-  border: none;
-  background: none;
-  padding: 0;
-  color: #171A26;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 22px;
-  cursor: pointer;
-
-  &:hover {
-    color: $theme_color;
+  .el-button + .el-button {
+    margin-left: 0;
   }
 }
 </style>

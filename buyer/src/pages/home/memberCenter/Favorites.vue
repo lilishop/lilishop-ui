@@ -33,10 +33,10 @@
           </div>
           <div v-if="params.type === 'GOODS'" class="fav-price">{{ $filters.unitPrice(item.price, '￥') }}</div>
           <div class="fav-ops">
-            <button v-if="params.type === 'GOODS'" type="button" class="op-btn" @click="buynow(item.skuId, item.goodsId)">立即购买</button>
-            <button v-else type="button" class="op-btn" @click="goShop(item.id)">查看店铺</button>
-            <button v-if="params.type === 'GOODS'" type="button" class="text-link" @click="cancel(item.skuId)">取消收藏</button>
-            <button v-else type="button" class="text-link" @click="cancelStore(item.id)">取消收藏</button>
+            <el-button v-if="params.type === 'GOODS'" type="primary" size="small" @click="buynow(item.skuId, item.goodsId)">立即购买</el-button>
+            <el-button v-else type="primary" size="small" @click="goShop(item.id)">查看店铺</el-button>
+            <el-button v-if="params.type === 'GOODS'" link type="danger" @click="cancel(item.skuId)">取消收藏</el-button>
+            <el-button v-else link type="danger" @click="cancelStore(item.id)">取消收藏</el-button>
           </div>
         </div>
         <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
@@ -72,10 +72,10 @@
           </div>
           <div v-if="params.type === 'GOODS'" class="fav-price">{{ $filters.unitPrice(item.price, '￥') }}</div>
           <div class="fav-ops">
-            <button v-if="params.type === 'GOODS'" type="button" class="op-btn" @click="buynow(item.skuId, item.goodsId)">立即购买</button>
-            <button v-else type="button" class="op-btn" @click="goShop(item.id)">查看店铺</button>
-            <button v-if="params.type === 'GOODS'" type="button" class="text-link" @click="cancel(item.skuId)">取消收藏</button>
-            <button v-else type="button" class="text-link" @click="cancelStore(item.id)">取消收藏</button>
+            <el-button v-if="params.type === 'GOODS'" type="primary" size="small" @click="buynow(item.skuId, item.goodsId)">立即购买</el-button>
+            <el-button v-else type="primary" size="small" @click="goShop(item.id)">查看店铺</el-button>
+            <el-button v-if="params.type === 'GOODS'" link type="danger" @click="cancel(item.skuId)">取消收藏</el-button>
+            <el-button v-else link type="danger" @click="cancelStore(item.id)">取消收藏</el-button>
           </div>
         </div>
         <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
@@ -316,7 +316,7 @@ onMounted(() => {
   margin-top: 6px;
   padding: 0 6px;
   border-radius: 4px;
-  background: #fff1f0;
+  background: color-mix(in srgb, #{$theme_color} 8%, #fff);
   color: $theme_color;
   font-size: 12px;
   line-height: 20px;
@@ -335,38 +335,5 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 16px;
-}
-
-.op-btn {
-  min-width: 96px;
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid $theme_color;
-  border-radius: 4px;
-  background: $theme_color;
-  color: #fff;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 30px;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-}
-
-.text-link {
-  border: none;
-  background: none;
-  padding: 0;
-  color: #171A26;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 22px;
-  cursor: pointer;
-
-  &:hover {
-    color: $theme_color;
-  }
 }
 </style>

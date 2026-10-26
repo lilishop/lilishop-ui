@@ -164,17 +164,6 @@ onMounted(() => {
 })
 </script>
 <style lang="scss" scoped>
-.delivery-rate {
-  display: flex;
-  align-items: center;
-  margin-top: 20px;
-  height: 50px;
-  border-bottom: 1px solid #eee;
-  >div:nth-child(1) {
-    width: 30%;
-    font-weight: bold;
-  }
-}
 .goods-eval{
   display: flex;
   .goods-con {

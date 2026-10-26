@@ -33,7 +33,9 @@
           <div class="order-sn">
             {{ order.createTime }}<span>售后单号 {{ order.sn }}</span><span class="order-store" @click="shopPage(order.storeId)">{{ order.storeName }}</span>
           </div>
-          <div class="order-status">{{ filterOrderStatus(order.serviceStatus) }}</div>
+          <div class="order-status">
+            <el-tag size="small" :type="statusTagType(order.serviceStatus)">{{ filterOrderStatus(order.serviceStatus) }}</el-tag>
+          </div>
         </div>
         <div class="order-body">
           <div class="col-detail">
@@ -59,19 +61,19 @@
             <div class="order-amount">{{ $filters.unitPrice(order.applyRefundPrice, "￥") }}</div>
           </div>
           <div class="col-ops">
-            <button
+            <el-button
               v-if="order.serviceStatus == 'PASS' && order.serviceType != 'RETURN_MONEY'"
-              type="button"
-              class="op-btn"
+              type="primary"
+              size="small"
               @click="openModal(order)"
-            >提交物流</button>
-            <button type="button" class="text-link" @click="goDetail(order.sn)">售后详情</button>
-            <button
+            >提交物流</el-button>
+            <el-button link type="primary" @click="goDetail(order.sn)">售后详情</el-button>
+            <el-button
               v-if="order.afterSaleAllowOperationVO && order.afterSaleAllowOperationVO.cancel"
-              type="button"
-              class="text-link"
+              link
+              type="danger"
               @click="cancel(order.sn)"
-            >取消售后</button>
+            >取消售后</el-button>
           </div>
         </div>
       </div>
@@ -253,6 +255,14 @@ function filterOrderStatus(status) { // 获取订单状态中文
   });
   return ob && ob[0] ? ob[0].name : status
 }
+function statusTagType(status) { // 售后状态对应标签类型
+  const map = {
+    APPLY: 'warning', APPLYING: 'warning',
+    COMPLETE: 'success',
+    CANCEL: 'info', EXPIRED: 'info'
+  }
+  return map[status] || 'info'
+}
 // 获取物流公司列表
 function getCompany() {
   getLogisticsCompany().then(res => {
@@ -372,7 +382,7 @@ onMounted(() => {
     align-items: center;
     min-width: 0;
     font-size: 14px;
-    color: #171A26;
+    color: #333;
     line-height: 1.5;
 
     span {
@@ -476,38 +486,9 @@ onMounted(() => {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-  }
 
-  .op-btn {
-    min-width: 96px;
-    height: 32px;
-    padding: 0 12px;
-    border: 1px solid $theme_color;
-    border-radius: 4px;
-    background: $theme_color;
-    color: #fff;
-    font-family: inherit;
-    font-size: 14px;
-    line-height: 30px;
-    cursor: pointer;
-
-    &:hover {
-      opacity: 0.9;
-    }
-  }
-
-  .text-link {
-    border: none;
-    background: none;
-    padding: 0;
-    color: #171A26;
-    font-family: inherit;
-    font-size: 14px;
-    line-height: 22px;
-    cursor: pointer;
-
-    &:hover {
-      color: $theme_color;
+    :deep(.el-button + .el-button) {
+      margin-left: 0;
     }
   }
 }
