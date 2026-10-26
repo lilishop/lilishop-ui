@@ -33,13 +33,16 @@
       <template v-if="!loading">
         <empty v-if="list.length === 0" />
         <div v-else class="gift-card-grid">
-          <div v-for="item in list" :key="item.id || item.cardNo" class="gcc-card-item">
+          <div v-for="item in list" :key="item.id || item.cardNo" class="gcc-card-item" :class="{ 'is-unavailable': statusTab === 'UNAVAILABLE' }">
             <div class="gcc-card-header">
               <div class="gcc-header-pattern" aria-hidden="true" />
               <div class="gcc-header-inner">
                 <div class="gcc-header-left">
-                  <div class="gcc-title">{{ item.giftCardName || "礼品卡" }}</div>
-                  <div class="gcc-face">面值{{ formatYuan(item.faceValue) }}元</div>
+                  <div class="gcc-name-row">
+                    <div class="gcc-title">{{ item.giftCardName || "礼品卡" }}</div>
+                    <span class="gcc-status-chip">{{ statusChipLabel }}</span>
+                  </div>
+                  <div class="gcc-face"><span class="gcc-face-symbol">￥</span>{{ formatYuan(item.faceValue) }}</div>
                   <div class="gcc-cardno">{{ item.cardNo }}</div>
                 </div>
                 <div class="gcc-header-right">
@@ -145,6 +148,10 @@ const primaryActionDisabled = computed(() => {
 });
 const pendingActivateLocked = computed(() => {
   return statusTab.value === "PENDING_ACTIVATION" && !!activatingId.value;
+});
+const statusChipLabel = computed(() => {
+  const map = { AVAILABLE: "可用", UNAVAILABLE: "不可用", PENDING_ACTIVATION: "待激活" };
+  return map[statusTab.value] || "";
 });
 
 onMounted(() => {
@@ -303,8 +310,8 @@ function isActivating(item) {
 .my-gift-cards {
   .bind-section {
     padding: 16px 18px;
-    border-radius: 4px;
-    border: 1px solid #e8eaec;
+    border-radius: 8px;
+    border: 1px solid #eee;
     @include white_background_color();
   }
   .section-title {
@@ -331,8 +338,8 @@ function isActivating(item) {
   }
   .gift-card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px 18px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
     align-items: start;
   }
   .gcc-card-item {
@@ -375,19 +382,38 @@ function isActivating(item) {
     padding-right: 8px;
   }
   .gcc-title {
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     line-height: 1.3;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   }
+  .gcc-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .gcc-status-chip {
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 11px;
+    line-height: 18px;
+  }
   .gcc-face {
-    margin-top: 8px;
-    font-size: 14px;
-    opacity: 0.95;
+    margin-top: 10px;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .gcc-face-symbol {
+    margin-right: 2px;
+    font-size: 15px;
+    font-weight: 500;
   }
   .gcc-cardno {
-    margin-top: 22px;
-    font-size: 14px;
+    margin-top: 14px;
+    font-size: 12px;
     letter-spacing: 0.02em;
     opacity: 0.75;
     word-break: break-all;
@@ -433,23 +459,31 @@ function isActivating(item) {
     display: block;
     width: 100%;
     margin-top: 14px;
-    padding: 10px 16px;
+    padding: 9px 16px;
     border: none;
     border-radius: 999px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    color: #e95b6c;
-    background: #faf4f5;
+    color: #fff;
+    background: $theme_color;
     transition: opacity 0.2s, background 0.2s;
   }
   .gcc-action:hover:not(.is-disabled) {
-    background: #f5e8ea;
+    opacity: 0.9;
   }
   .gcc-action.is-disabled {
     color: #c5c8ce;
     cursor: not-allowed;
     background: #f7f7f7;
+  }
+  .gcc-card-item.is-unavailable {
+    .gcc-card-header {
+      background: linear-gradient(125deg, #c9c9c9 0%, #a8a8a8 100%);
+    }
+    .gcc-strong {
+      color: #999;
+    }
   }
   .page-size {
     display: flex;

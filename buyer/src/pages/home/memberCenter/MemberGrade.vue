@@ -9,63 +9,74 @@
           <span v-for="b in currentGradeBenefits" :key="b.id" class="benefit-tag">{{ b.benefitName || '-' }}</span>
         </div>
         <div class="grade-exp">当前经验值：<span class="num">{{ currentExperience || 0 }}</span></div>
-        <div class="grade-next" v-if="nextGrade">
-          距 {{ nextGrade.gradeName }} 还差 <span class="num">{{ diffExperience }}</span> 经验值
-        </div>
+        <template v-if="nextGrade">
+          <div class="grade-next">
+            距 {{ nextGrade.gradeName }} 还差 <span class="num">{{ diffExperience }}</span> 经验值
+          </div>
+          <el-progress
+            class="grade-progress"
+            :percentage="progressPercent"
+            :stroke-width="8"
+            :show-text="false"
+            color="#f0c46c"
+          />
+        </template>
         <div class="grade-next" v-else>已达最高等级</div>
       </div>
     </div>
 
-    <div class="grade-tabs">
-      <div class="grade-tab" :class="{ active: activeGradeTab === 'rules' }" @click="activeGradeTab = 'rules'">获取经验值方式</div>
-      <div class="grade-tab" :class="{ active: activeGradeTab === 'logs' }" @click="activeGradeTab = 'logs'">经验值记录</div>
-    </div>
-
-    <div v-show="activeGradeTab === 'rules'" v-loading="rulesLoading">
-      <empty v-if="!rulesLoading && !ruleList.length" />
-      <div v-else class="rule-list">
-        <div class="rule-item" v-for="row in ruleList" :key="row.ruleKey || row.id">
-          <div class="rule-top">
-            <div class="rule-name">{{ row.ruleName || row.ruleKey || '-' }}</div>
-            <span class="rule-status" :class="{ done: row.completed === true }">{{ row.completed === true ? '已完成' : '未完成' }}</span>
-          </div>
-          <div class="rule-desc">{{ getRuleDesc(row.ruleKey) }}</div>
-          <div class="rule-meta">
-            <span>单次获得 <b>+{{ row.value == null ? 0 : row.value }}</b></span>
-            <span v-if="row.maxValue != null && Number(row.maxValue) > 0">限额 <b>{{ row.maxValue }}</b></span>
-            <span>已获得 <b>{{ row.gainedExperience == null ? 0 : row.gainedExperience }}</b></span>
-          </div>
-        </div>
+    <div class="grade-panel">
+      <div class="grade-tabs">
+        <div class="grade-tab" :class="{ active: activeGradeTab === 'rules' }" @click="activeGradeTab = 'rules'">获取经验值方式</div>
+        <div class="grade-tab" :class="{ active: activeGradeTab === 'logs' }" @click="activeGradeTab = 'logs'">经验值记录</div>
       </div>
-      <div class="rules-desc" v-if="rulesDescription">{{ rulesDescription }}</div>
-    </div>
 
-    <div v-show="activeGradeTab === 'logs'" v-loading="logLoading">
-      <empty v-if="!(experienceLogs.records || []).length" />
-      <div v-else class="log-list">
-        <div class="log-head">
-          <span>时间</span>
-          <span>规则</span>
-          <span>变动值</span>
-        </div>
-        <div class="log-row" v-for="(row, index) in experienceLogs.records" :key="row.id || index">
-          <div class="log-time">{{ row.createTime }}</div>
-          <div class="log-rule">{{ getRuleName(row.ruleKey) }}</div>
-          <div class="log-point" :class="getLogDeltaSign(row) === '+' ? 'is-plus' : 'is-minus'">
-            {{ getLogDeltaSign(row) }}{{ getLogDeltaAbsValue(row) }}
+      <div v-show="activeGradeTab === 'rules'" v-loading="rulesLoading">
+        <empty v-if="!rulesLoading && !ruleList.length" />
+        <div v-else class="rule-list">
+          <div class="rule-item" v-for="row in ruleList" :key="row.ruleKey || row.id">
+            <div class="rule-top">
+              <div class="rule-name">{{ row.ruleName || row.ruleKey || '-' }}</div>
+              <span class="rule-status" :class="{ done: row.completed === true }">{{ row.completed === true ? '已完成' : '未完成' }}</span>
+            </div>
+            <div class="rule-desc">{{ getRuleDesc(row.ruleKey) }}</div>
+            <div class="rule-meta">
+              <span>单次获得 <b>+{{ row.value == null ? 0 : row.value }}</b></span>
+              <span v-if="row.maxValue != null && Number(row.maxValue) > 0">限额 <b>{{ row.maxValue }}</b></span>
+              <span>已获得 <b>{{ row.gainedExperience == null ? 0 : row.gainedExperience }}</b></span>
+            </div>
           </div>
         </div>
+        <div class="rules-desc" v-if="rulesDescription">{{ rulesDescription }}</div>
       </div>
-      <div class="grade-pagination">
-        <el-pagination
-          v-model:current-page="params.pageNumber"
-          v-model:page-size="params.pageSize"
-          :total="experienceLogs.total || 0"
-          @current-change="changePage"
-          @size-change="changePageSize"
-          :page-sizes="[20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-        />
+
+      <div v-show="activeGradeTab === 'logs'" v-loading="logLoading">
+        <empty v-if="!(experienceLogs.records || []).length" />
+        <div v-else class="log-list">
+          <div class="log-head">
+            <span>时间</span>
+            <span>规则</span>
+            <span>变动值</span>
+          </div>
+          <div class="log-row" v-for="(row, index) in experienceLogs.records" :key="row.id || index">
+            <div class="log-time">{{ row.createTime }}</div>
+            <div class="log-rule">{{ getRuleName(row.ruleKey) }}</div>
+            <div class="log-point" :class="getLogDeltaSign(row) === '+' ? 'is-plus' : 'is-minus'">
+              {{ getLogDeltaSign(row) }}{{ getLogDeltaAbsValue(row) }}
+            </div>
+          </div>
+        </div>
+        <div class="grade-pagination">
+          <el-pagination
+            v-model:current-page="params.pageNumber"
+            v-model:page-size="params.pageSize"
+            :total="experienceLogs.total || 0"
+            @current-change="changePage"
+            @size-change="changePageSize"
+            :page-sizes="[20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+          />
+        </div>
       </div>
     </div>
     </UserCenterLayout>
@@ -92,7 +103,6 @@ const currentGradeId = ref('')
 const selectedRuleKey = ref('')
 const activeGradeTab = ref('rules')
 const logLoading = ref(false)
-const gradeLoading = ref(false)
 const params = reactive({
   pageNumber: 1,
   pageSize: 20
@@ -137,6 +147,15 @@ const diffExperience = computed(() => {
   return diff > 0 ? diff : 0
 })
 
+/** 当前经验占下一级所需经验的百分比（无下一级时视为 100%） */
+const progressPercent = computed(() => {
+  if (!nextGrade.value || !nextGrade.value.requiredExperience) return 100
+  const required = Number(nextGrade.value.requiredExperience)
+  if (!required || required <= 0) return 100
+  const percent = Math.round((Number(currentExperience.value || 0) / required) * 100)
+  return Math.min(100, Math.max(0, percent))
+})
+
 /** 当前等级在列表详情中对应的启用权益（顺序与后台 benefits 一致） */
 const currentGradeBenefits = computed(() => {
   const id = currentGradeId.value
@@ -174,7 +193,6 @@ function loadRules () {
 }
 
 function loadGradeList () {
-  gradeLoading.value = true
   memberGradeList()
     .then(res => {
       if (res && res.success) {
@@ -197,9 +215,6 @@ function loadGradeList () {
         gradeList.value = []
       }
     })
-    .finally(() => {
-      gradeLoading.value = false
-    })
 }
 
 function loadCurrent () {
@@ -221,12 +236,6 @@ function loadCurrent () {
     .finally(() => {
       logLoading.value = false
     })
-}
-
-function selectRule (ruleKey) {
-  selectedRuleKey.value = ruleKey || ''
-  params.pageNumber = 1
-  loadCurrent()
 }
 
 function changePage (val) {
@@ -283,28 +292,29 @@ function getLogDeltaAbsValue (row) {
   const num = getLogDeltaRaw(row)
   return Math.abs(num)
 }
-
-function getLogDeltaColor (row) {
-  return getLogDeltaRaw(row) >= 0 ? 'green' : 'red'
-}
 </script>
 
 <style scoped lang="scss">
 .grade-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 8px;
+  gap: 20px;
+  padding: 24px 28px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3a4157 0%, #23262f 100%);
+  box-shadow: 0 6px 20px rgba(35, 38, 47, 0.25);
 }
 
 .grade-icon {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
   flex-shrink: 0;
+}
+
+.grade-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .grade-name-row {
@@ -315,39 +325,57 @@ function getLogDeltaColor (row) {
 }
 
 .grade-name {
-  color: #171A26;
-  font-size: 18px;
+  color: #f0c46c;
+  font-size: 20px;
   font-weight: 600;
   line-height: 1.4;
+  letter-spacing: 1px;
 }
 
 .benefit-tag {
-  padding: 0 8px;
-  border-radius: 4px;
-  background: #fff;
-  color: $theme_color;
-  font-size: 14px;
-  line-height: 22px;
+  padding: 0 10px;
+  border: 1px solid rgba(240, 196, 108, 0.4);
+  border-radius: 10px;
+  background: rgba(240, 196, 108, 0.12);
+  color: #f0d9a8;
+  font-size: 12px;
+  line-height: 20px;
 }
 
 .grade-exp,
 .grade-next {
-  margin-top: 6px;
-  color: #666;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.75);
   font-size: 14px;
   line-height: 22px;
 }
 
 .num {
-  color: $theme_color;
+  color: #f0c46c;
   font-size: 16px;
   font-weight: 600;
+}
+
+.grade-progress {
+  margin-top: 10px;
+
+  :deep(.el-progress-bar__outer) {
+    background: rgba(255, 255, 255, 0.15);
+  }
+}
+
+.grade-panel {
+  margin-top: 16px;
+  padding: 4px 20px 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
 }
 
 .grade-tabs {
   display: flex;
   gap: 24px;
-  margin: 16px 0;
+  margin-bottom: 16px;
   border-bottom: 1px solid #f0f0f0;
 }
 

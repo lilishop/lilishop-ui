@@ -7,7 +7,12 @@
     >
       <empty v-if="list.length == 0" />
       <ul class="coupon-list" v-else>
-      <li v-for="(item, index) in list" class="coupon-item" :key="index">
+      <li
+        v-for="(item, index) in list"
+        class="coupon-item"
+        :class="{ 'is-disabled': params.memberCouponStatus !== 'NEW' }"
+        :key="index"
+      >
         <div class="c-left">
           <div>
             <span
@@ -176,33 +181,60 @@ onMounted(() => {
 
 <style scoped lang="scss">
 @import "../../../assets/styles/coupon.scss";
+
+.coupon-list {
+  gap: 16px;
+}
+
 .coupon-item {
   overflow: hidden;
   height: auto;
-  min-height: 168px;
-  margin-left: 0;
+  min-height: 140px;
+  margin: 0;
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
   $claim-width: 55px;
+
+  &:not(.is-disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
 
   .c-left {
     width: calc(100% - #{$claim-width});
     box-sizing: border-box;
     padding: 16px 16px 14px;
+    background: #fff8f5;
 
     .coupon-amount {
       font-size: 14px;
+
+      .price {
+        font-size: 28px;
+        font-weight: 700;
+      }
     }
 
     .describe {
-      font-size: 14px;
+      font-size: 12px;
     }
 
     p {
-      font-size: 14px;
+      font-size: 13px;
       overflow: visible;
       text-overflow: unset;
       white-space: normal;
-      word-break: break-all;
+      word-break: normal;
       line-height: 20px;
+    }
+
+    p:nth-of-type(1) {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .coupon-expire {
+      font-size: 12px;
     }
   }
 
@@ -248,6 +280,7 @@ onMounted(() => {
     right: calc(#{$claim-width} - 9px);
     width: 18px;
     height: 18px;
+    border-color: #eee;
   }
 
   i.circle-top {
@@ -256,6 +289,26 @@ onMounted(() => {
 
   i.circle-bottom {
     bottom: -9px;
+  }
+
+  &.is-disabled {
+    .c-left {
+      background: #fafafa;
+
+      .coupon-amount,
+      .price {
+        color: #999;
+      }
+
+      .describe {
+        background: #f0f0f0;
+        color: #999;
+      }
+
+      p {
+        color: #999 !important;
+      }
+    }
   }
 }
 
