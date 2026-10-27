@@ -35,7 +35,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="goodsName" label="销售商品" min-width="160" />
-        <el-table-column prop="goodsId" label="商品ID" width="140" />
+        <el-table-column prop="goodsId" label="SPU编码" width="140" />
         <el-table-column prop="salesNum" label="商品销售数量" width="110" />
         <el-table-column prop="salesAmount" label="商品销售金额" width="120">
           <template #default="{ row }">{{ formatMoney(row.salesAmount) }}</template>

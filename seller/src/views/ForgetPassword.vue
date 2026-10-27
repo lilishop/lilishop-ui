@@ -107,7 +107,7 @@
       <el-row justify="center" class="copyright">
         Copyright © {{ year }} - Present
         <a href="https://pickmall.cn/" target="_blank" style="margin: 0 5px">{{
-          config.title
+          siteName
         }}</a>
         版权所有
       </el-row>
@@ -124,7 +124,7 @@ import { md5 } from "@/utils/md5.js";
 import * as RegExp from "@/utils/regular.js";
 import * as apiLogin from "@/api/index.js";
 import { sendSms } from "@/api/common.js";
-import config from "@/config/index";
+import util from "@/libs/util.js";
 import verify from "@/views/my-components/verify";
 import { useAppStore } from "@/stores/app";
 
@@ -146,6 +146,8 @@ const form = reactive({
   oncePasd: "",
 });
 const year = new Date().getFullYear();
+// 站点名优先取接口下发缓存，兜底用本地配置
+const siteName = util.getSiteName();
 const step = ref(0);
 const ruleInline = {
   mobile: [

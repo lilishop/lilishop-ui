@@ -47,6 +47,8 @@ function getSite() {
         localStorage.setItem("sellersiteName", data.siteName);
         localStorage.setItem("sellerlogoImg", data.storeSideLogo);
         localStorage.setItem("sellerIconImg", data.storeSideIcon);
+        localStorage.setItem("sellerCompanyName", data.companyName || "");
+        localStorage.setItem("sellerCompanyUrl", data.companyUrl || "");
         storeSideLogo.value = data.storeSideLogo;
         window.document.title = data.siteName;
         applyFavicon(data.storeSideIcon);

@@ -37,7 +37,12 @@
       <el-tabs v-model="activeTab" @tab-click="switchTabs">
         <el-tab-pane label="预警商品" name="warnList">
           <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
-            <el-table-column prop="goodsName" label="商品名称" min-width="400" show-overflow-tooltip />
+            <el-table-column prop="goodsId" label="商品编号" min-width="160" show-overflow-tooltip />
+            <el-table-column prop="goodsName" label="商品名称" min-width="220" show-overflow-tooltip />
+            <el-table-column prop="sn" label="SKU编码" min-width="140" show-overflow-tooltip />
+            <el-table-column label="SKU信息" min-width="140" show-overflow-tooltip>
+              <template #default="{ row }">{{ row.simpleSpecs || "-" }}</template>
+            </el-table-column>
             <el-table-column label="库存" min-width="120">
               <template #default="{ row }">{{ row.quantity || 0 }}</template>
             </el-table-column>
@@ -54,7 +59,12 @@
 
         <el-tab-pane label="设置预警" name="warnSetting">
           <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
-            <el-table-column prop="goodsName" label="商品名称" />
+            <el-table-column prop="goodsId" label="商品编号" min-width="160" show-overflow-tooltip />
+            <el-table-column prop="goodsName" label="商品名称" min-width="220" show-overflow-tooltip />
+            <el-table-column prop="sn" label="SKU编码" min-width="140" show-overflow-tooltip />
+            <el-table-column label="SKU信息" min-width="140" show-overflow-tooltip>
+              <template #default="{ row }">{{ row.simpleSpecs || "-" }}</template>
+            </el-table-column>
             <el-table-column label="库存" width="200">
               <template #default="{ row }">{{ row.quantity || 0 }}</template>
             </el-table-column>

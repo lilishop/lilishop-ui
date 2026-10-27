@@ -1,110 +1,5 @@
 <style lang="scss">
 @import "./ossManage.scss";
-
-.table {
-  flex: 11;
-}
-
-.el-card {
-  width: 100%;
-}
-
-.modal-footer {
-  text-align: center;
-
-  > * {
-    margin: 0 10px;
-  }
-}
-
-.oss-select-footer {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #ededed;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.oss-group-tree {
-  flex: 1;
-  padding: 4px 4px 0;
-
-  :deep(.el-tree-node__expand-icon) {
-    display: none;
-  }
-
-  :deep(.el-tree-node) {
-    margin-bottom: 4px;
-  }
-
-  :deep(.el-tree-node__content) {
-    padding: 0 10px !important;
-    height: 38px;
-    border-radius: 6px;
-    font-size: 14px;
-    line-height: 38px;
-  }
-
-  :deep(.el-tree-node__content:hover) {
-    background: #f5f7fa;
-  }
-
-  :deep(.el-tree-node.is-current > .el-tree-node__content) {
-    background: var(--el-color-primary-light-9);
-    color: var(--el-color-primary);
-    font-weight: 500;
-  }
-}
-
-.oss-tree-node {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding-right: 4px;
-  font-size: 14px;
-
-  &:hover .oss-tree-more {
-    opacity: 1;
-  }
-}
-
-.oss-tree-more {
-  cursor: pointer;
-  color: #909399;
-  padding: 0 4px;
-  font-size: 16px;
-  opacity: 0;
-  transition: opacity 0.2s;
-
-  &:hover {
-    color: var(--el-color-primary);
-  }
-}
-
-.file-preview-fallback {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 16px;
-  color: #606266;
-
-  .file-preview-name {
-    margin: 16px 0 8px;
-    font-size: 16px;
-    font-weight: 500;
-    word-break: break-all;
-    text-align: center;
-  }
-
-  .file-preview-tip {
-    margin: 0 0 20px;
-    color: #909399;
-  }
-}
-
 </style>
 <template>
   <div class="search oss-manage" :class="{ 'oss-manage-picker': isComponent }">
@@ -167,7 +62,10 @@
             >
               <template #default="{ data }">
                 <span v-if="data" class="oss-tree-node">
-                  <span>{{ data.title }}</span>
+                  <span class="oss-tree-label">
+                    <el-icon class="oss-tree-icon"><Folder /></el-icon>
+                    {{ data.title }}
+                  </span>
                   <el-dropdown
                     v-if="data.value !== '0' && !isComponent"
                     trigger="click"
@@ -197,8 +95,6 @@
                       'is-checked': selectedOss.includes(item.id + ',' + item.url),
                       'oss-card-selectable': isComponent && selectImage,
                     }"
-                    @mouseenter="onMouseOver(item, index)"
-                    @mouseleave="onMouseOut(item, index)"
                     @click="handleCardClick(item, $event)"
                   >
                     <el-checkbox
@@ -206,7 +102,15 @@
                       class="oss-card-check"
                       @click.stop
                     />
-                    <img v-if="isImageFile(item)" :src="item.url" alt="" />
+                    <img
+                      v-if="isImageFile(item) && !imgFailIds.has(item.id)"
+                      :src="item.url"
+                      alt=""
+                      @error="onImgError(item)"
+                    />
+                    <div v-else-if="isImageFile(item)" class="card-file">
+                      <el-icon :size="28"><Picture /></el-icon>
+                    </div>
                     <video
                       v-else-if="isVideoFile(item)"
                       class="card-media"
@@ -216,7 +120,7 @@
                     <div v-else class="card-file">
                       <el-icon :size="28"><Document /></el-icon>
                     </div>
-                    <div v-if="item.isShowPreview" class="oss-card-ops">
+                    <div class="oss-card-ops">
                       <div @click.prevent="download(item)">
                         <el-tooltip content="下载" placement="top">
                           <el-icon :size="18"><Download /></el-icon>
@@ -365,14 +269,13 @@ let dp;
 <script setup>
 import {
   computed,
-  getCurrentInstance,
   onMounted,
   reactive,
   ref,
   watch,
 } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Delete, Download, View, Document } from "@element-plus/icons-vue";
+import { Delete, Download, View, Document, Folder, Picture } from "@element-plus/icons-vue";
 import {
   addFileDirectory,
   deleteFile,
@@ -411,8 +314,11 @@ const props = defineProps({
 });
 const emit = defineEmits(["callback", "selected"]);
 
-// $forceUpdate 依赖组件实例
-const { proxy } = getCurrentInstance();
+// 加载失败的图片 id 集合：裂图时用图标占位代替浏览器默认裂图样式
+const imgFailIds = ref(new Set());
+function onImgError(item) {
+  imgFailIds.value.add(item.id);
+}
 
 const groupFormValidate = ref({
   id: "",
@@ -600,13 +506,6 @@ function onTreeDropdownCommand(cmd, data) {
   } else if (cmd === "delete") {
     handleContextMenuDelete();
   }
-}
-function onMouseOver(item, index) {
-  data.value[index].isShowPreview = true;
-  proxy.$forceUpdate();
-}
-function onMouseOut(item, index) {
-  data.value[index].isShowPreview = false;
 }
 function handleCategoryTabChange(name) {
   activeCategoryTab.value = name;
@@ -884,6 +783,7 @@ function getDataList(type = null) {
   getFileListData(searchForm)
     .then((res) => {
       if (res && res.success && res.result) {
+        imgFailIds.value = new Set();
         data.value = res.result.records || [];
         total.value = res.result.total || 0;
       } else {

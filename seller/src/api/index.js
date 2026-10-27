@@ -295,7 +295,7 @@ export const deleteDepartment = (ids, params) => {
 };
 // 编辑部门
 export const editDepartment = (ids, params) => {
-  return putRequest(`/department/${ids} `, params);
+  return putRequest(`/department/${ids}`, params);
 };
 // 加载部门子级数据
 export const loadDepartment = (id) => {

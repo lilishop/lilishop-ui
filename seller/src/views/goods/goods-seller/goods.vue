@@ -6,74 +6,70 @@
         :model="searchForm"
         inline
         label-width="70px"
-        class="search-form"
+        class="search-form goods-search-form"
         @keyup.enter="handleSearch"
       >
-        <div class="search-form-row">
-          <el-form-item label="商品名称" prop="goodsName">
-            <el-input
-              v-model="searchForm.goodsName"
-              placeholder="请输入商品名称"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="SKU名称" prop="skuName">
-            <el-input
-              v-model="searchForm.skuName"
-              placeholder="请输入SKU名称"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="SKU编码" prop="skuSn">
-            <el-input
-              v-model="searchForm.skuSn"
-              placeholder="请输入SKU编码"
-              clearable
-            />
-          </el-form-item>
-          <el-form-item label="商品ID" prop="id">
-            <el-input
-              v-model="searchForm.id"
-              placeholder="请输入商品ID"
-              clearable
-            />
-          </el-form-item>
-        </div>
-        <div class="search-form-row">
-          <el-form-item label="店铺分类" prop="storeCategoryPath">
-            <el-cascader
-              v-model="searchForm.storeCategoryPath"
-              :options="shopCategoryList"
-              :props="shopCategoryProps"
-              clearable
-              filterable
-              placeholder="请选择店铺分类"
-            />
-          </el-form-item>
-          <el-form-item label="平台分类" prop="categoryPath">
-            <el-cascader
-              v-model="searchForm.categoryPath"
-              :options="platformCategoryList"
-              :props="platformCategoryProps"
-              clearable
-              filterable
-              placeholder="请选择平台商品分类"
-            />
-          </el-form-item>
-          <el-form-item label="商品类型" prop="goodsType">
-            <el-select
-              v-model="searchForm.goodsType"
-              placeholder="请选择"
-              clearable
-            >
-              <el-option label="实物商品" value="PHYSICAL_GOODS" />
-              <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
-              <!-- E_COUPON：卡密商品，可跳转卡池管理 -->
-              <el-option label="电子卡券" value="E_COUPON" />
-              <el-option label="预约商品" value="APPOINTMENT_GOODS" />
-            </el-select>
-          </el-form-item>
-        </div>
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
+            v-model="searchForm.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="SKU名称" prop="skuName">
+          <el-input
+            v-model="searchForm.skuName"
+            placeholder="请输入SKU名称"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="SKU编码" prop="skuSn">
+          <el-input
+            v-model="searchForm.skuSn"
+            placeholder="请输入SKU编码"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="SPU编码" prop="id">
+          <el-input
+            v-model="searchForm.id"
+            placeholder="请输入SPU编码"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="店铺分类" prop="storeCategoryPath">
+          <el-cascader
+            v-model="searchForm.storeCategoryPath"
+            :options="shopCategoryList"
+            :props="shopCategoryProps"
+            clearable
+            filterable
+            placeholder="请选择店铺分类"
+          />
+        </el-form-item>
+        <el-form-item label="平台分类" prop="categoryPath">
+          <el-cascader
+            v-model="searchForm.categoryPath"
+            :options="platformCategoryList"
+            :props="platformCategoryProps"
+            clearable
+            filterable
+            placeholder="请选择平台商品分类"
+          />
+        </el-form-item>
+        <el-form-item label="商品类型" prop="goodsType">
+          <el-select
+            v-model="searchForm.goodsType"
+            placeholder="请选择"
+            clearable
+          >
+            <el-option label="实物商品" value="PHYSICAL_GOODS" />
+            <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
+            <!-- E_COUPON：卡密商品，可跳转卡池管理 -->
+            <el-option label="电子卡券" value="E_COUPON" />
+            <el-option label="预约商品" value="APPOINTMENT_GOODS" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="创建时间">
           <el-date-picker
             v-model="createRange"
@@ -81,7 +77,6 @@
             value-format="YYYY-MM-DD HH:mm:ss"
             start-placeholder="开始"
             end-placeholder="结束"
-            style="width: 360px"
           />
         </el-form-item>
         <el-form-item label="库存状态" prop="stockStatus">
@@ -89,7 +84,6 @@
             v-model="searchForm.stockStatus"
             placeholder="全部"
             clearable
-            style="width: 240px"
             @change="onStockStatusChange"
           >
             <el-option label="有货" value="IN_STOCK" />
@@ -97,34 +91,18 @@
           </el-select>
         </el-form-item>
         <el-form-item v-if="searchForm.stockStatus === 'IN_STOCK'" label="库存区间">
-          <el-input
-            v-model="searchForm.stockMin"
-            placeholder="≥"
-            clearable
-            style="width: 110px"
-          />
-          <span style="margin: 0 6px">~</span>
-          <el-input
-            v-model="searchForm.stockMax"
-            placeholder="≤"
-            clearable
-            style="width: 110px"
-          />
+          <div class="range-inputs">
+            <el-input v-model="searchForm.stockMin" placeholder="≥" clearable />
+            <span class="range-sep">~</span>
+            <el-input v-model="searchForm.stockMax" placeholder="≤" clearable />
+          </div>
         </el-form-item>
         <el-form-item label="售价区间">
-          <el-input
-            v-model="searchForm.priceMin"
-            placeholder="≥"
-            clearable
-            style="width: 110px"
-          />
-          <span style="margin: 0 6px">~</span>
-          <el-input
-            v-model="searchForm.priceMax"
-            placeholder="≤"
-            clearable
-            style="width: 110px"
-          />
+          <div class="range-inputs">
+            <el-input v-model="searchForm.priceMin" placeholder="≥" clearable />
+            <span class="range-sep">~</span>
+            <el-input v-model="searchForm.priceMax" placeholder="≤" clearable />
+          </div>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
@@ -172,7 +150,7 @@
         @selection-change="onSelectionChange"
       >
         <el-table-column type="selection" width="100" align="center" />
-        <el-table-column prop="id" label="商品ID" width="200" show-overflow-tooltip />
+        <el-table-column prop="id" label="SPU编码" width="200" show-overflow-tooltip />
         <el-table-column label="商品图片" width="100" align="center">
           <template #default="{ row }">
             <img alt="商品图片"
@@ -219,7 +197,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="170" show-overflow-tooltip />
-        <el-table-column label="操作" width="320" align="center" fixed="right">
+        <el-table-column label="操作" width="320" align="right" fixed="right">
           <template #default="{ row }">
             <template v-if="row.marketEnable === 'DOWN'">
               <a class="link-text" @click="upper(row)">上架</a>
@@ -693,28 +671,48 @@ onMounted(() => {
 });
 </script>
 <style lang="scss" scoped>
-.search-form-row {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-start;
-  width: 100%;
-  margin-bottom: 18px;
+.goods-search-form {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  align-items: start;
 
-  :deep(.el-form-item) {
-    flex: 1;
+  > :deep(.el-form-item) {
+    display: flex;
+    width: auto;
     min-width: 0;
-    margin-right: 12px;
-    margin-bottom: 0;
+    margin: 8px 0 !important;
   }
 
-  :deep(.el-form-item:last-child) {
-    margin-right: 0;
+  :deep(.el-form-item__content) {
+    flex: 1;
+    min-width: 0;
   }
 
   :deep(.el-input),
   :deep(.el-select),
-  :deep(.el-cascader) {
+  :deep(.el-cascader),
+  :deep(.el-date-editor) {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .range-inputs {
+    display: flex;
+    align-items: center;
     width: 100%;
+
+    :deep(.el-input) {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .range-sep {
+      margin: 0 6px;
+      flex-shrink: 0;
+    }
   }
 }
 

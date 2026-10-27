@@ -15,10 +15,10 @@
               />
             </div>
             <div class="filter-row-field">
-              <span class="filter-row-label">商品ID</span>
+              <span class="filter-row-label">SPU编码</span>
               <el-input
                 v-model="filterForm.goodsId"
-                placeholder="请输入商品ID"
+                placeholder="请输入SPU编码"
                 clearable
                 class="filter-control"
               />

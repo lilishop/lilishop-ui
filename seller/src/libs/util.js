@@ -164,8 +164,14 @@ util.bootstrapDynamicRoutesFromCache = function () {
   }
 };
 
+/** 站点名称：优先取接口下发并缓存的站点名，兜底用本地配置 */
+util.getSiteName = function () {
+  return window.localStorage.getItem("sellersiteName") || config.title;
+};
+
 util.title = function (title) {
-  title = title || `${config.title} 商家后台`;
+  const siteName = util.getSiteName();
+  title = title ? `${title} - ${siteName}商家后台` : `${siteName} 商家后台`;
   window.document.title = title;
 };
 
@@ -508,9 +514,8 @@ util.initRouterNode = function (routers, data) {
     }
 
     const meta = {};
-    meta.title = menu.title
-      ? menu.title + " - " + config.title + "商家后台"
-      : null;
+    // 站点后缀统一由 util.title 在路由跳转时动态拼接，避免初始化时定死
+    meta.title = menu.title ? menu.title : null;
     meta.firstRouterName = item.firstRouterName;
     meta.keepAlive = menu.keepAlive ? true : false;
     menu.meta = meta;

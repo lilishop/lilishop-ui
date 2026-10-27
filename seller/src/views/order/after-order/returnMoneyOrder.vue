@@ -96,7 +96,7 @@
                   <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
                 </div>
                 <div style="color: #999; font-size: 12px; margin-top: 5px">
-                  商品ID: {{ row.goodsId }}
+                  SPU编码: {{ row.goodsId }}
                 </div>
               </div>
             </div>

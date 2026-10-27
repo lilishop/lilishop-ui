@@ -3,7 +3,7 @@ var BASE = {
    * @description api请求基础路径
    */
   API_DEV: {
-    seller: "https://admin-api.pickmall.cn",
+    seller: "http://127.0.0.1:8887",
   },
   API_PROD: {
     seller: "https://admin-api.pickmall.cn",

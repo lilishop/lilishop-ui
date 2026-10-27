@@ -1,35 +1,30 @@
 <template>
   <div class="search">
     <el-card>
-      <el-row>
+      <div>
         <el-button @click="refresh">刷新</el-button>
         <el-button @click="add" type="primary">添加</el-button>
-      </el-row>
+      </div>
       <el-tabs @tab-click="handleClickType" v-model="currentTab" style="margin-top: 10px">
         <el-tab-pane label="运费模板" name="INFO">
+          <el-empty v-if="!shipInfo.length" description="暂无运费模板，点击右上角「添加」创建" />
           <table class="ncsc-default-table order m-b-30" :key="index" v-for="(item,index) in shipInfo">
             <tbody>
               <tr>
                 <td class="sep-row" colspan="20"></td>
               </tr>
               <tr>
-                <th colspan="20">
-                  <span class="temp-name">{{item.name}}</span>
-                  <el-tag v-if="item.pricingMethod==='FREE'" class="baoyou" color="warning">包邮</el-tag>
-                  <span class="fr m-r-5">
-                    <time style="margin-right: 20px" title="最后编辑时间">
-                      <i class="icon-time"></i>{{item.updateTime}}
-                    </time>
-                    <a
-                      style="color:#2d8cf0;cursor:pointer;text-decoration:none"
-                      @click="edit(item)"
-                    >修改</a>
-                    <span style="margin: 0 8px; color: #dcdee2">|</span>
-                    <a
-                      style="color:#2d8cf0;cursor:pointer;text-decoration:none"
-                      @click="remove(item.id)"
-                    >删除</a>
-                  </span>
+                <th colspan="20" class="template-head">
+                  <div class="template-head-inner">
+                    <span class="temp-name">{{item.name}}</span>
+                    <el-tag v-if="item.pricingMethod==='FREE'" type="warning" size="small">包邮</el-tag>
+                    <div class="template-head-right">
+                      <time class="update-time" title="最后编辑时间">{{item.updateTime}}</time>
+                      <a class="action-link" @click="edit(item)">修改</a>
+                      <span class="action-split">|</span>
+                      <a class="action-link" @click="remove(item.id)">删除</a>
+                    </div>
+                  </div>
                 </th>
               </tr>
               <tr v-if="item.pricingMethod!=='FREE'">
@@ -499,10 +494,10 @@ onMounted(() => {
   }
 
   tbody td {
-    color: #999;
+    color: #606266;
     background-color: #fff;
     text-align: center;
-    padding: 6px 0;
+    padding: 8px 0;
   }
 }
 
@@ -536,28 +531,39 @@ onMounted(() => {
   border-left: 1px solid #e6e6e6;
 }
 
-.order tbody tr th .temp-name {
-  float: left;
+.order tbody tr th.template-head {
+  padding: 0;
+}
+
+.template-head-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+}
+
+.temp-name {
   font-size: 14px;
-  color: #555;
-  // line-height: 44px;
-  margin: 7px 0 0 10px;
+  font-weight: 600;
+  color: #303133;
 }
 
-.m-r-5 {
-  margin-right: 5px !important;
+.template-head-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  font-size: 13px;
 }
 
-.fr {
-  float: right !important;
+.update-time {
+  margin-right: 16px;
+  color: #909399;
+  font-size: 12px;
 }
 
 .m-b-30 {
   margin-bottom: 10px !important;
-}
-
-Button {
-  margin: 3px 5px 0px 5px;
 }
 
 thead {
@@ -704,14 +710,8 @@ em {
   font-size: 15px;
   color: #f00;
 }
-.baoyou {
-  margin: 6px 10px 0;
-}
-/* 操作链接与分隔符不加粗 */
-.order tbody tr th .fr a {
-  font-weight: normal;
-}
-.order tbody tr th .fr span {
-  font-weight: normal;
+
+.action-link:hover {
+  text-decoration: underline;
 }
 </style>

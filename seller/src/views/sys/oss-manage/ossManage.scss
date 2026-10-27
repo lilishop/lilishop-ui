@@ -1,4 +1,6 @@
-// 商家素材库（OSS 管理）样式：全部规则挂在 .oss-manage 根类下，避免全局污染
+// 商家素材库（OSS 管理）样式。
+// 本文件经 @import 全局引入且未加 scoped，页面内规则全部挂在 .oss-manage 根类下避免污染；
+// 全局样式里不要写 :deep()，浏览器会把含未知伪类的整条规则丢弃。
 .oss-manage {
   // 单面板容器
   .oss-panel {
@@ -91,11 +93,11 @@
       display: flex;
       flex-wrap: wrap;
       align-content: flex-start;
+      gap: 16px 14px;
       margin-top: 14px;
 
       .oss-grid-item {
         width: 120px;
-        margin: 0 14px 14px 0;
         position: relative;
         display: flex;
         flex-direction: column;
@@ -104,12 +106,15 @@
         .oss-card {
           width: 120px;
           height: 120px;
-          border-radius: 6px;
-          border: 2px solid transparent;
+          border-radius: 8px;
+          border: 1px solid #ebeef5;
+          background: #f7f8fa;
           overflow: hidden;
           box-sizing: border-box;
           position: relative;
-          transition: border-color 0.2s;
+          transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
 
           img,
           .card-media {
@@ -150,7 +155,7 @@
             opacity: 0;
             transition: opacity 0.2s;
 
-            :deep(.el-checkbox__label) {
+            .el-checkbox__label {
               display: none;
             }
           }
@@ -186,6 +191,7 @@
 
           &:hover {
             border-color: var(--el-color-primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 
             .oss-card-check {
               opacity: 1;
@@ -236,6 +242,92 @@
     }
   }
 
+  // 左侧分组树
+  .oss-group-tree {
+    flex: 1;
+    padding: 4px 4px 0;
+
+    .el-tree-node__expand-icon {
+      display: none;
+    }
+
+    .el-tree-node {
+      margin-bottom: 4px;
+    }
+
+    .el-tree-node__content {
+      padding: 0 10px !important;
+      height: 38px;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 38px;
+    }
+
+    .el-tree-node__content:hover {
+      background: #f5f7fa;
+    }
+
+    .el-tree-node.is-current > .el-tree-node__content {
+      background: var(--el-color-primary-light-9);
+      color: var(--el-color-primary);
+      font-weight: 500;
+    }
+
+    .el-tree-node.is-current .oss-tree-icon {
+      color: var(--el-color-primary);
+    }
+  }
+
+  .oss-tree-node {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-right: 4px;
+    font-size: 14px;
+
+    &:hover .oss-tree-more {
+      opacity: 1;
+    }
+  }
+
+  .oss-tree-label {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .oss-tree-icon {
+    margin-right: 6px;
+    flex-shrink: 0;
+    color: #c0c4cc;
+  }
+
+  .oss-tree-more {
+    cursor: pointer;
+    color: #909399;
+    padding: 0 4px;
+    font-size: 16px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      color: var(--el-color-primary);
+    }
+  }
+
+  // picker 模式的底部确认栏
+  .oss-select-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #ededed;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
   // 弹窗选择器模式：去掉面板阴影，固定内容区最小高度，避免空分组时布局塌陷
   &.oss-manage-picker {
     .oss-panel {
@@ -270,5 +362,36 @@
         margin-top: auto;
       }
     }
+  }
+}
+
+// 以下两条用于 el-dialog 内部；el-dialog 默认挂载到 body 下，必须保持全局
+.modal-footer {
+  text-align: center;
+
+  > * {
+    margin: 0 10px;
+  }
+}
+
+.file-preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #606266;
+
+  .file-preview-name {
+    margin: 16px 0 8px;
+    font-size: 16px;
+    font-weight: 500;
+    word-break: break-all;
+    text-align: center;
+  }
+
+  .file-preview-tip {
+    margin: 0 0 20px;
+    color: #909399;
   }
 }

@@ -20,23 +20,28 @@
           </a>
         </li>
       </div>
-      <a class="company-link" :href="config.company.href" target="_blank">
+      <a class="company-link" :href="companyUrl" target="_blank">
         <img class="zhizhao" :src="zhizhaoImg" alt="" />
-        {{ config.company.name }}
+        {{ companyName }}
       </a>
     </div>
 
     <div class="copyright">
-      <p>Copyright © {{ year }} {{ config.title }}</p>
+      <p>Copyright © {{ year }} {{ siteName }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import config from "@/config/index";
+import util from "@/libs/util.js";
 import zhizhaoImg from "@/assets/images/zhizhao.jpg";
 
 const year = new Date().getFullYear();
+// 站点名/公司信息优先取接口下发缓存，兜底用本地配置
+const siteName = util.getSiteName();
+const companyName = localStorage.getItem("sellerCompanyName") || config.company.name;
+const companyUrl = localStorage.getItem("sellerCompanyUrl") || config.company.href;
 </script>
 
 <style lang="scss" scoped>

@@ -19,6 +19,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="180" align="center" />
+        <el-table-column prop="updateTime" label="修改时间" width="180" align="center" />
         <el-table-column
           v-if="searchForm.pageType !== 'SPECIAL'"
           label="状态"

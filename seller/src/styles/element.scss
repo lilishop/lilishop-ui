@@ -113,6 +113,11 @@
   z-index: 4000 !important;
 }
 
+/* 全局禁止 textarea 拖拽改变大小 */
+.el-textarea__inner {
+  resize: none;
+}
+
 /* 统一空状态：表格 / 树 / 列表无数据时的展示（未自定义 #empty 插槽的页面均生效） */
 .el-table__empty-block {
   min-height: 160px;
