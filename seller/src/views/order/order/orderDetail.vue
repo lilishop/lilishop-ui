@@ -2,20 +2,17 @@
   <div class="search">
     <div>
       <el-card style="height: 60px">
-        <div>
-          <el-button v-if="allowOperation.editPrice" type="primary" @click="modifyPrice">调整价格</el-button>
-          <el-button v-if="showDelivery && allowOperation.editConsignee" type="primary" @click="editAddress">修改收货地址</el-button>
+        <div class="order-toolbar">
+          <el-button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</el-button>
+          <el-button v-if="showDelivery && allowOperation.editConsignee" @click="editAddress">修改收货地址</el-button>
           <el-button
             v-if="showDelivery && (allowOperation.showLogistics || orderPackages.length > 0)"
-            type="primary"
             @click="checkLogistics"
           >查看物流</el-button>
-          <el-button type="primary" @click="orderLog">订单日志</el-button>
           <el-button v-if="canOrderTake" type="primary" @click="orderTake">
             {{ isAppointmentOrder ? "预约核销" : "订单核销" }}
           </el-button>
           <el-button v-if="showDelivery && canShip" type="primary" @click="openFulfill()">发货</el-button>
-          <el-button type="primary" @click="modifyRemark">添加备注</el-button>
           <el-button
             v-if="showDelivery && allowOperation.showLogistics && logisticsType === 'SHUNFENG'"
             type="primary"
@@ -28,21 +25,28 @@
             plain
             @click="toPrint"
           >打印电子面单</el-button>
-          <el-button
-            v-if="showDelivery"
-            type="primary"
-            plain
-            style="float: right"
-            @click="printOrder"
-          >打印发货单</el-button>
+          <div class="toolbar-right">
+            <el-button @click="orderLog">订单日志</el-button>
+            <el-button @click="modifyRemark">添加备注</el-button>
+            <el-button
+              v-if="showDelivery"
+              type="primary"
+              plain
+              @click="printOrder"
+            >打印发货单</el-button>
+          </div>
         </div>
       </el-card>
       <el-card class="mt_10">
         <div class="order-info-grid">
         <div class="order-info-col">
+          <div class="info-group-title">订单信息</div>
           <div class="div-item">
             <div class="div-item-left">订单号：</div>
-            <div class="div-item-right">{{ orderInfo.order.sn }}</div>
+            <div class="div-item-right">
+              {{ orderInfo.order.sn }}
+              <el-button link type="primary" size="small" @click="copySn">复制</el-button>
+            </div>
           </div>
           <div class="div-item">
             <div class="div-item-left">订单来源：</div>
@@ -97,6 +101,7 @@
           </div>
         </div>
         <div class="order-info-col" v-if="showInvoice">
+          <div class="info-group-title">发票信息</div>
           <div class="div-item" v-if="orderInfo.order.needReceipt == false">
             <div class="div-item-left">发票信息：</div>
             <div class="div-item-right">暂无发票信息</div>
@@ -148,6 +153,7 @@
           </div>
         </div>
         <div class="order-info-col">
+          <div class="info-group-title">收货与支付</div>
           <div class="div-item" v-if="showDelivery && orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
             <div class="div-item-left">收货信息：</div>
             <div class="div-item-right">
@@ -330,8 +336,8 @@
               orderInfo.order.priceDetailDTO.discountPrice > 0
             ">
               <span class="label">优惠金额：</span>
-              <span class="txt">
-                {{ $filters.unitPrice(orderInfo.order.priceDetailDTO.discountPrice, "￥") }}</span>
+              <span class="txt" style="color: #f56c6c">
+                -¥{{ $filters.unitPrice(orderInfo.order.priceDetailDTO.discountPrice) }}</span>
             </li>
 
             <li v-if="
@@ -339,47 +345,14 @@
               orderInfo.order.priceDetailDTO.couponPrice > 0
             ">
               <span class="label">优惠券金额：</span>
-              <span class="txt">
-                <priceColorScheme :value="orderInfo.order.priceDetailDTO.couponPrice" :color="$mainColor"></priceColorScheme>
+              <span class="txt" style="color: #f56c6c">
+                -¥{{ $filters.unitPrice(orderInfo.order.priceDetailDTO.couponPrice) }}
               </span>
             </li>
-            <li
-              v-if="orderInfo.order.priceDetailDTO.discountPriceDetail != undefined && orderInfo.order.priceDetailDTO.discountPriceDetail && orderInfo.order.priceDetailDTO.discountPriceDetail != null && orderInfo.order.priceDetailDTO.discountPriceDetail != ''">
-              <div class="label">
-                <el-popover v-if="typeList.length > 0" trigger="hover" placement="left" width="220">
-                  <template #reference>
-                    <span class="hover-pointer" style="color: #cc0000" @click="getOrderPrice">ⓘ</span>
-                  </template>
-                  <div class="api" style="text-align:left;">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>优惠详情：</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(item, index) in typeList" :key="index">
-                          <td>{{ item.promotionName }}：</td>
-                          <td>¥{{ $filters.unitPrice(item.discountPrice) }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </el-popover>
-                <span>优惠详情：</span>
-              </div>
+            <li v-for="(item, index) in typeList" :key="index" class="discount-detail-row">
+              <span class="label">{{ item.promotionName }}：</span>
+              <span class="txt">-¥{{ $filters.unitPrice(item.discountPrice) }}</span>
             </li>
-            <!-- <li v-if="showPrices">
-                <span class="label" style="color: #cc0000;font-size: 14px;" v-if="typeList.length > 0" >优惠详情：</span>
-              </li> -->
-            <!-- <li v-if="showPrices"  v-for="(item,index) in typeList" :key="index">
-                <span class="label" v-if="index == 1 && typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
-                <span class="txt" style="border-bottom: 1px dashed;font-size:10px !important;" v-if="index == 1 &&  typeList.length > 1">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
-                <span class="label" v-if="index == 0 &&  typeList.length > 1" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
-                <span class="txt" style="border-top: 1px dashed;font-size:10px !important;" v-if="index == 0 && typeList.length > 1">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
-                <span class="label" v-if="typeList.length == 1 && index == 0" style="font-size:10px !important;"><a  @click="gotoHomes" style="display: inline-block;border-top: 1px dashed;border-bottom: 1px dashed;color:black;width:80px;">{{item.promotionName}}：</a><span class="op-split">|</span>
-                <span class="txt"  v-if="typeList.length == 1 && index == 0" style="border-top: 1px dashed;border-bottom: 1px dashed;font-size:10px !important;">¥{{ $filters.unitPrice(item.discountPrice) }}</span>
-              </li> -->
             <li v-if="showDelivery">
               <span class="label">运费：</span>
               <span class="txt">{{
@@ -396,7 +369,7 @@
                 orderInfo.order.priceDetailDTO.payPoint
               }}</span>
             </li>
-            <li>
+            <li class="total-row">
               <span class="label">应付金额：</span>
               <span class="txt flowPrice">¥{{ $filters.unitPrice(orderInfo.order.flowPrice) }}</span>
             </li>
@@ -922,7 +895,6 @@ const fulfillTable = ref(null);
 const map = ref(null);
 
 const typeList = ref([]);
-const showPrices = ref(false);
 const printHiddenFlag = ref(false);
 const loading = ref(false);
 const logisticsType = ref("KUAIDINIAO");
@@ -1148,6 +1120,23 @@ onBeforeRouteLeave((to, from, next) => {
 function lineCardKeyRows(line) {
   return line.cardKeys || [];
 }
+function copySn() {
+  const text = orderInfo.value?.order?.sn || "";
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      Message.success("订单号已复制");
+    });
+  } else {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    Message.success("订单号已复制");
+  }
+}
 function copyCardKey(row) {
   const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1261,7 +1250,6 @@ function refreshFulfillAfterSubmit() {
           ? JSON.parse(JSON.stringify(res.result.order.priceDetailDTO.discountPriceDetail))
           : [];
         getContentPrice();
-        getOrderPrice();
       }
     }),
     getOrderPackages(),
@@ -1423,7 +1411,6 @@ function getDataDetail () {
         ? JSON.parse(JSON.stringify(discountDetail))
         : [];
       getContentPrice();
-      getOrderPrice();
       if (isAppointmentOrder.value) {
         loadAppointmentVerification();
       }
@@ -1571,13 +1558,6 @@ function getLogisticsSetting () {
       logisticsType.value = res.result;
     }
   });
-}
-function getOrderPrice () {
-  if (showPrices.value) {
-    showPrices.value = false
-  } else if (!showPrices.value) {
-    showPrices.value = true
-  }
 }
 function getContentPrice () {
   for (let i = 0; i < typeList.value.length; i++) {
@@ -2094,6 +2074,86 @@ function editAddressSubmit () {
     .flowPrice {
       color: #cc0000;
       font-size: 22px;
+    }
+  }
+
+  .el-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04), 0 2px 8px rgba(17, 24, 39, 0.06);
+  }
+
+  .div-item > .div-item-left {
+    color: #909399;
+  }
+
+  .order-toolbar {
+    display: flex;
+    align-items: center;
+
+    .toolbar-right {
+      margin-left: auto;
+    }
+  }
+
+  .info-group-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #303133;
+
+    &::before {
+      content: "";
+      width: 3px;
+      height: 13px;
+      border-radius: 2px;
+      background: var(--el-color-primary);
+    }
+  }
+
+  .order-fit-table tbody tr:hover td {
+    background: #f7f8fa;
+  }
+
+  .order-goods-img {
+    border: 1px solid #f0f0f0;
+    border-radius: 6px;
+  }
+
+  .order-goods-spec {
+    padding: 1px 6px;
+    margin-right: 6px;
+    background: #f4f4f5;
+    border-radius: 4px;
+  }
+
+  .total-row {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: #fef0f0;
+    border-radius: 6px;
+  }
+
+  .discount-detail-row {
+    .label,
+    .txt {
+      font-size: 12px;
+      color: #909399;
+    }
+
+    .label {
+      padding-left: 16px;
+      position: relative;
+
+      &::before {
+        content: "└";
+        position: absolute;
+        left: 4px;
+        color: #c0c4cc;
+      }
     }
   }
 }
