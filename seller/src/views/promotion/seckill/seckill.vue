@@ -76,7 +76,7 @@
           min-width="120"
           show-overflow-tooltip
         />
-        <el-table-column label="操作" width="120" align="center" fixed="right">
+        <el-table-column label="操作" width="120" align="right" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
               <a

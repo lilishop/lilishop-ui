@@ -49,7 +49,7 @@
             <el-table-column label="预警值" min-width="120">
               <template #default="{ row }">{{ row.alertQuantity || 0 }}</template>
             </el-table-column>
-            <el-table-column label="操作" width="120" align="center" fixed="right">
+            <el-table-column label="操作" width="120" align="right" fixed="right">
               <template #default="{ row }">
                 <a class="link-text" @click="openUpdataStockModal(row)">库存</a>
               </template>
@@ -116,7 +116,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center">
+        <el-table-column label="操作" width="200" align="right">
           <template #default="{ row }">
             <el-input-number v-model="row.quantity" :min="0" />
           </template>

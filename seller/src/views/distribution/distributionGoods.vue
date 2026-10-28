@@ -107,7 +107,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="添加时间" min-width="160" />
-        <el-table-column label="操作" min-width="120" align="center" fixed="right">
+        <el-table-column label="操作" min-width="120" align="right" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="edit(row)">编辑</a>
@@ -176,7 +176,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80" align="center">
+        <el-table-column label="操作" width="80" align="right">
           <template #default="{ $index }">
             <a
               v-if="selectedGoodsList.length > 1"

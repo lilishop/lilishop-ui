@@ -32,7 +32,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" align="center" fixed="right">
+        <el-table-column label="操作" width="150" align="right" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="handleEdit(row)">修改</a>

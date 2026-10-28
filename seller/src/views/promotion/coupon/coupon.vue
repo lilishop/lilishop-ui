@@ -132,7 +132,7 @@
           v-if="showActionColumn"
           label="操作"
           width="250"
-          align="center"
+          align="right"
           fixed="right"
         >
           <template #default="{ row }">

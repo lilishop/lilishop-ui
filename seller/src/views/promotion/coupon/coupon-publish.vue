@@ -1,6 +1,93 @@
 <template>
   <div>
-    <el-card>
+    <el-card v-if="disabled">
+      <h4>基本信息</h4>
+      <el-descriptions border :column="2" class="desc-block">
+        <el-descriptions-item label="活动名称">{{ form.promotionName }}</el-descriptions-item>
+        <el-descriptions-item label="优惠券名称">{{ form.couponName }}</el-descriptions-item>
+        <el-descriptions-item label="优惠券类型">
+          {{ form.couponType === "DISCOUNT" ? "打折" : "减免现金" }}
+        </el-descriptions-item>
+        <el-descriptions-item v-if="form.couponType === 'DISCOUNT'" label="折扣">
+          {{ form.couponDiscount }} 折
+        </el-descriptions-item>
+        <el-descriptions-item v-else label="面额">
+          {{ $filters.unitPrice(form.price, "￥") }}
+        </el-descriptions-item>
+        <el-descriptions-item label="活动类型">
+          {{ form.getType === "FREE" ? "免费领取" : "活动赠送" }}
+        </el-descriptions-item>
+        <template v-if="form.getType === 'FREE'">
+          <el-descriptions-item label="发放数量">
+            {{ form.publishNum ? form.publishNum : "不限" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="领取数量限制">
+            {{ form.couponLimitNum ? form.couponLimitNum : "不限" }}
+          </el-descriptions-item>
+        </template>
+      </el-descriptions>
+
+      <h4>使用限制</h4>
+      <el-descriptions border :column="2" class="desc-block">
+        <el-descriptions-item label="消费门槛">
+          {{ $filters.unitPrice(form.consumeThreshold, "￥") }}
+        </el-descriptions-item>
+        <el-descriptions-item label="有效期">
+          <span v-if="rangeTimeType === 1 && form.rangeTime && form.rangeTime.length === 2">
+            {{ formatTime(form.rangeTime[0]) }} ~ {{ formatTime(form.rangeTime[1]) }}
+          </span>
+          <span v-else>领取当天开始 {{ form.effectiveDays }} 天内有效</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="使用范围">{{ scopeTypeText }}</el-descriptions-item>
+        <el-descriptions-item
+          v-if="form.scopeType === 'PORTION_GOODS_CATEGORY'"
+          label="商品分类"
+          :span="2"
+        >
+          {{ scopeCategoryText }}
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <template v-if="form.scopeType === 'PORTION_GOODS'">
+        <h4>指定商品</h4>
+        <el-table border :data="form.promotionGoodsList" style="width: 100%">
+          <el-table-column label="商品名称" min-width="220">
+            <template #default="{ row }">
+              <div v-if="row" class="goods-cell">
+                <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+                <span class="goods-name">{{ row.goodsName }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row?.sn || "-" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="规格" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row?.simpleSpecs || "-" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="商品价格" width="110" align="right">
+            <template #default="{ row }">
+              <span v-if="row" :style="{ color: $mainColor }">
+                {{ $filters.unitPrice(row.price, "￥") }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="库存" width="90" align="right">
+            <template #default="{ row }">
+              <span v-if="row">{{ row.quantity }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </template>
+
+      <div class="foot-btn">
+        <el-button @click="closeCurrentPage">返回</el-button>
+      </div>
+    </el-card>
+    <el-card v-else>
       <el-form ref="formRef" :model="form" label-width="120px" :rules="formRule">
         <div class="base-info-item">
           <h4>基本信息</h4>
@@ -62,19 +149,6 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="店铺承担比例" prop="storeCommission">
-              <div class="form-field-block">
-                <el-input
-                  :disabled="disabled"
-                  v-model="form.storeCommission"
-                  placeholder="店铺承担比例"
-                  style="width: 260px"
-                >
-                  <template #append>%</template>
-                </el-input>
-                <div class="form-tip">店铺承担比例，输入0-100之间数值</div>
-              </div>
-            </el-form-item>
             <el-form-item label="发放数量" prop="publishNum" v-if="form.getType === 'FREE'">
               <div class="form-field-block">
                 <el-input
@@ -101,18 +175,6 @@
                 />
                 <div class="form-tip">如果领取数量为0时,则代表不限制领取数量</div>
               </div>
-            </el-form-item>
-            <el-form-item label="范围描述" prop="description">
-              <el-input
-                :disabled="disabled"
-                v-model="form.description"
-                type="textarea"
-                :rows="4"
-                maxlength="50"
-                show-word-limit
-                clearable
-                style="width: 260px"
-              />
             </el-form-item>
           </div>
           <h4>使用限制</h4>
@@ -185,19 +247,36 @@
                 @selection-change="changeSelect"
               >
                 <el-table-column type="selection" width="60" align="center" />
-                <el-table-column prop="goodsName" label="商品名称" min-width="120" show-overflow-tooltip />
-                <el-table-column label="商品价格" width="110">
+                <el-table-column label="商品名称" min-width="220">
+                  <template #default="{ row }">
+                    <div v-if="row" class="goods-cell">
+                      <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+                      <span class="goods-name">{{ row.goodsName }}</span>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+                  <template #default="{ row }">
+                    {{ row?.sn || "-" }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="规格" min-width="140" show-overflow-tooltip>
+                  <template #default="{ row }">
+                    {{ row?.simpleSpecs || "-" }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="商品价格" width="110" align="right">
                   <template #default="{ row }">
                     <span v-if="row" :style="{ color: $mainColor }">
                       {{ $filters.unitPrice(row.price, "￥") }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="库存" width="90">
+                <el-table-column label="库存" width="90" align="right">
                   <template #default="{ row }">
                     <span v-if="row">{{ row.quantity }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="100" align="center">
+                <el-table-column label="操作" width="100" align="right">
                   <template #default="{ $index }">
                     <el-button
                       :disabled="disabled"
@@ -237,7 +316,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { saveShopCoupon, getShopCoupon, editShopCoupon } from "@/api/promotion";
 import { getGoodsCategoryAll } from "@/api/goods";
@@ -283,7 +362,7 @@ const disabled = ref(route.query.onlyView);
 const rangeTimeType = ref(1);
 const modalType = ref(0);
 const form = ref({
-  storeCommission: 0,
+  storeCommission: 100,
   publishNum: 0,
   scopeType: "ALL",
   couponLimitNum: 1,
@@ -316,10 +395,6 @@ const formRule = reactive({
       message: "请输入0-10的数字,可有一位小数",
     },
   ],
-  storeCommission: [
-    { required: true, message: "请输入店铺承担比例" },
-    { pattern: regular.rate, message: "请输入0-100的正整数" },
-  ],
   publishNum: [
     { required: true, message: "请输入发放数量" },
     { pattern: regular.Integer, message: "请输入正整数" },
@@ -328,13 +403,45 @@ const formRule = reactive({
     { required: true, message: "领取限制不能为空" },
     { pattern: regular.Integer, message: "请输入正整数" },
   ],
-  description: [{ required: true, message: "请输入范围描述" }],
 });
 const options = {
   disabledDate(date) {
     return date && date.valueOf() < Date.now() - 86400000;
   },
 };
+
+const scopeTypeText = computed(() => {
+  const map = {
+    ALL: "全品类",
+    PORTION_GOODS: "指定商品",
+    PORTION_GOODS_CATEGORY: "部分商品分类",
+  };
+  return map[form.value.scopeType] || form.value.scopeType;
+});
+const scopeCategoryText = computed(() => {
+  const findLabel = (list, value) => {
+    for (const item of list) {
+      if (item.value === value) return item.label;
+      if (item.children) {
+        const hit = findLabel(item.children, value);
+        if (hit) return hit;
+      }
+    }
+    return null;
+  };
+  return (form.value.scopeIdGoods || [])
+    .map((path) => {
+      const ids = Array.isArray(path) ? path : [path];
+      return ids.map((i) => findLabel(goodsCategoryList.value, i)).filter(Boolean).join(" / ");
+    })
+    .filter(Boolean)
+    .join("；");
+});
+function formatTime(val) {
+  if (!val) return "-";
+  const d = val instanceof Date ? val : new Date(val);
+  return unixToDate(d.getTime() / 1000);
+}
 
 watch(
   () => form.value.getType,
@@ -541,6 +648,8 @@ function selectedGoodsData(item) {
       goodsType: e.goodsType,
       goodsId: e.goodsId,
       originPrice: e.price,
+      sn: e.sn,
+      simpleSpecs: e.simpleSpecs,
     });
   });
   form.value.promotionGoodsList = list;
@@ -603,6 +712,35 @@ h4 {
   font-size: 12px;
   margin-left: 10px;
   color: #999;
+}
+
+.desc-block {
+  margin-bottom: 10px;
+}
+
+.goods-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.goods-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.goods-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.foot-btn {
+  margin-top: 16px;
 }
 
 .form-field-block {

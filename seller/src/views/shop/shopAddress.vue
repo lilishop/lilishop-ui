@@ -13,7 +13,7 @@
         <el-table-column prop="address" label="详细地址" min-width="280" />
         <el-table-column prop="createTime" label="创建时间" min-width="120" sortable />
         <el-table-column prop="updateTime" label="修改时间" min-width="120" sortable />
-        <el-table-column label="操作" width="200" align="center">
+        <el-table-column label="操作" width="200" align="right">
           <template #default="{ row }">
             <a class="link-text" @click="edit(row)">修改</a>
             <span class="op-split">|</span>

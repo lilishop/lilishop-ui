@@ -26,7 +26,7 @@
         </el-table-column>
         <el-table-column prop="operatorName" label="操作人" width="120" show-overflow-tooltip />
         <el-table-column prop="inboundTime" label="入库时间" width="170" />
-        <el-table-column label="操作" width="100" align="center" fixed="right">
+        <el-table-column label="操作" width="100" align="right" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="goDetail(row)">查看</a>
           </template>

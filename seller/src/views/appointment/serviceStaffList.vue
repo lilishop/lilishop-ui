@@ -33,7 +33,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" min-width="170" />
-        <el-table-column label="操作" width="140" align="center" fixed="right">
+        <el-table-column label="操作" width="140" align="right" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="openEdit(row)">编辑</a>
             <span class="op-split">|</span>

@@ -41,7 +41,7 @@
         <el-table-column label="服务状态" width="110" align="center">
           <template #default="{ row }">{{ statusText(row.serviceStatus) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column align="right" label="操作" width="160" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="row.serviceStatus === 'PENDING_CLAIM'"

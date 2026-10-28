@@ -1,49 +1,65 @@
 <template>
   <div class="seckill-goods">
     <el-card>
-      <el-table border :data="data" style="width: 100%">
-        <el-table-column prop="promotionName" label="活动名称" min-width="120" />
-        <el-table-column prop="startTime" label="活动开始时间" min-width="160" />
-        <el-table-column label="报名截止时间" min-width="160">
-          <template #default="{ row }">
-            <span v-if="row">{{ unixDate(row.applyEndTime) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="时间场次" min-width="160">
-          <template #default="{ row }">
-            <template v-if="row">
-              <el-tag v-for="item in unixHours(row.hours)" :key="item" class="hour-tag">{{ item }}</el-tag>
-            </template>
-          </template>
-        </el-table-column>
-        <el-table-column label="活动状态" min-width="100">
-          <template #default="{ row }">
-            <el-tag v-if="row" :type="seckillStatusTagType(row.promotionStatus)">
-              {{ seckillStatusText(row.promotionStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-      </el-table>
+      <h4>活动详情</h4>
+      <el-descriptions v-if="data.length" border :column="3" class="activity-desc">
+        <el-descriptions-item label="活动名称">{{ data[0].promotionName }}</el-descriptions-item>
+        <el-descriptions-item label="活动开始时间">{{ data[0].startTime }}</el-descriptions-item>
+        <el-descriptions-item label="报名截止时间">{{ unixDate(data[0].applyEndTime) }}</el-descriptions-item>
+        <el-descriptions-item label="时间场次" :span="2">
+          <el-tag v-for="item in unixHours(data[0].hours)" :key="item" class="hour-tag">{{ item }}</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="活动状态">
+          <el-tag :type="seckillStatusTagType(data[0].promotionStatus)">
+            {{ seckillStatusText(data[0].promotionStatus) }}
+          </el-tag>
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <h4>活动商品</h4>
 
       <template v-if="!readonly">
         <div class="operation">
           <el-button type="primary" @click="openSkuList">选择商品</el-button>
+          <span v-if="goodsList.length" class="current-slot-tip">
+            当前场次：{{ goodsList[tabIndex]?.hour }}（选择商品将添加到该场次）
+          </span>
         </div>
         <el-tabs v-model="tabCurrent" type="card" class="operation">
           <el-tab-pane
             v-for="(tab, tabIndex) in goodsList"
             :key="tabIndex"
-            :label="tab.hour"
             :name="String(tabIndex)"
           >
+            <template #label>
+              {{ tab.hour }}
+              <span v-if="tab.list.length" class="tab-count">{{ tab.list.length }}</span>
+            </template>
             <el-table
               v-loading="loading"
               border
               :data="tab.list"
               style="width: 100%"
             >
-              <el-table-column prop="goodsName" label="商品名称" min-width="140" show-overflow-tooltip />
-              <el-table-column label="商品价格" width="110">
+              <el-table-column label="商品名称" min-width="220">
+                <template #default="{ row }">
+                  <div v-if="row" class="goods-cell">
+                    <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+                    <span class="goods-name">{{ row.goodsName }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+                <template #default="{ row }">
+                  {{ row?.sn || "-" }}
+                </template>
+              </el-table-column>
+              <el-table-column label="规格" min-width="120" show-overflow-tooltip>
+                <template #default="{ row }">
+                  {{ row?.simpleSpecs || "-" }}
+                </template>
+              </el-table-column>
+              <el-table-column label="商品价格" width="110" align="right">
                 <template #default="{ row }">
                   <span v-if="row" :style="{ color: $mainColor }">
                     {{ $filters.unitPrice(row.originalPrice, "￥") }}
@@ -57,8 +73,9 @@
                     v-model="row.quantity"
                     :min="1"
                     :disabled="row.promotionApplyStatus === 'PASS'"
-                    controls-position="right"
+                    :controls="false"
                     size="small"
+                    style="width: 100%"
                     @change="(val) => updateGoodsField(tabIndex, $index, 'quantity', val)"
                   />
                 </template>
@@ -71,29 +88,14 @@
                     :min="promotionPriceMin(row.goodsType)"
                     :precision="2"
                     :disabled="row.promotionApplyStatus === 'PASS'"
-                    controls-position="right"
+                    :controls="false"
                     size="small"
+                    style="width: 100%"
                     @change="(val) => updateGoodsField(tabIndex, $index, 'price', val)"
                   />
                 </template>
               </el-table-column>
-              <el-table-column label="状态" width="120">
-                <template #default="{ row }">
-                  <template v-if="row">
-                    <el-tag :type="applyStatusTagType(row.promotionApplyStatus)" size="small">
-                      {{ applyStatusText(row.promotionApplyStatus) }}
-                    </el-tag>
-                    <a
-                      v-if="row.promotionApplyStatus === 'REFUSE' && row.failReason"
-                      class="reason link-text"
-                      @click="showReason(row.failReason)"
-                    >
-                      拒绝原因
-                    </a>
-                  </template>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="90" align="center">
+              <el-table-column label="操作" width="90" align="right">
                 <template #default="{ row, $index }">
                   <a v-if="row" class="link-text" @click="delGoods(tabIndex, $index, row)">删除</a>
                 </template>
@@ -112,20 +114,37 @@
           :data="readonlyGoodsList"
           style="width: 100%"
         >
-          <el-table-column prop="goodsName" label="商品名称" min-width="140" show-overflow-tooltip />
-          <el-table-column label="商品价格" width="110">
+          <el-table-column label="商品名称" min-width="220">
+            <template #default="{ row }">
+              <div v-if="row" class="goods-cell">
+                <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+                <span class="goods-name">{{ row.goodsName }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row?.sn || "-" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="规格" min-width="120" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row?.simpleSpecs || "-" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="商品价格" width="110" align="right">
             <template #default="{ row }">
               <span v-if="row" :style="{ color: $mainColor }">
                 {{ $filters.unitPrice(row.originalPrice, "￥") }}
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="库存" width="90">
+          <el-table-column label="库存" width="90" align="right">
             <template #default="{ row }">
               <span v-if="row">{{ row.quantity }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="活动价格" width="100">
+          <el-table-column label="活动价格" width="100" align="right">
             <template #default="{ row }">
               <span v-if="row" :style="{ color: $mainColor }">
                 {{ $filters.unitPrice(row.price, "￥") }}
@@ -135,13 +154,6 @@
           <el-table-column label="活动场次" width="100">
             <template #default="{ row }">
               <el-tag v-if="row">{{ row.timeLine }}:00</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="状态" width="100">
-            <template #default="{ row }">
-              <el-tag v-if="row" :type="applyStatusTagType(row.promotionApplyStatus)" size="small">
-                {{ applyStatusText(row.promotionApplyStatus) }}
-              </el-tag>
             </template>
           </el-table-column>
         </el-table>
@@ -190,9 +202,11 @@ import liliDialog from "@/views/lili-dialog";
 import { promotionPriceMin } from "@/constants/goodsType";
 import { Message, Modal } from "@/utils/message";
 import { unixToDate } from "@/utils/filters";
+import { useAppStore } from "@/stores/app";
 
 const route = useRoute();
 const router = useRouter();
+const appStore = useAppStore();
 
 const tabCurrent = ref("0");
 const promotionStatus = ref("");
@@ -273,6 +287,11 @@ function getSeckillMsg() {
     if (res.success && res.result) {
       data.value = [res.result];
       promotionStatus.value = res.result.promotionStatus;
+      const tag = appStore.storeOpenedList.find((item) => item.name === "seckill-goods");
+      if (tag && res.result.promotionName) {
+        tag.title = `${res.result.promotionName}商品`;
+        localStorage.storeOpenedList = JSON.stringify(appStore.storeOpenedList);
+      }
       if (readonly.value) {
         getReadonlyGoodsList();
       } else {
@@ -346,6 +365,9 @@ function selectedGoodsData(selected) {
     }
     return {
       goodsName: item.goodsName,
+      sn: item.sn,
+      simpleSpecs: item.simpleSpecs,
+      thumbnail: item.thumbnail,
       price: item.price,
       originalPrice: item.price,
       promotionApplyStatus: item.promotionApplyStatus || "",
@@ -402,13 +424,17 @@ function save() {
   setSeckillGoods({
     seckillId: route.query.id,
     applyVos,
-  }).then((res) => {
-    submitLoading.value = false;
-    if (res?.success) {
-      Message.success("提交活动商品成功");
-      closeCurrentPage();
-    }
-  });
+  })
+    .then((res) => {
+      if (res?.success) {
+        Message.success("提交活动商品成功");
+        closeCurrentPage();
+      }
+    })
+    .catch(() => {})
+    .finally(() => {
+      submitLoading.value = false;
+    });
 }
 function showReason(reason) {
   Modal.info({
@@ -428,8 +454,64 @@ function unixHours(item) {
 </script>
 
 <style lang="scss" scoped>
+h4 {
+  margin: 20px 0;
+  padding: 0 10px;
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+  text-align: left;
+  border-left: 3px solid red;
+}
+
+.activity-desc {
+  margin: 10px 0;
+}
+
+.goods-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.goods-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.goods-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .operation {
   margin: 16px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.current-slot-tip {
+  color: #909399;
+  font-size: 12px;
+}
+
+.tab-count {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  margin-left: 4px;
+  line-height: 18px;
+  border-radius: 9px;
+  background: #f0f2f5;
+  color: #606266;
+  font-size: 12px;
+  text-align: center;
 }
 
 .hour-tag {

@@ -95,7 +95,7 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center">
+        <el-table-column label="操作" width="200" align="right">
           <template #default="{ row }">
             <template v-if="row">
               <a

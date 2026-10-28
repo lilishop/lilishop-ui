@@ -67,7 +67,7 @@
             <el-tag v-else type="success">已付款</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" fixed="right" width="100">
+        <el-table-column label="操作" align="right" fixed="right" width="100">
           <template #default="{ row }">
             <a class="link-text" @click="detail(row)">查看</a>
           </template>

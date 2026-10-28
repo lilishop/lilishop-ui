@@ -9,7 +9,7 @@
             <el-tag v-else type="success">开启</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="200">
+        <el-table-column label="操作" align="right" width="200">
           <template #default="{ row }">
             <template v-if="!row.selected">
               <a class="link-text" @click="open(row)">开启</a>

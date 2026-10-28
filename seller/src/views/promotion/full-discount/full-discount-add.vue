@@ -1,46 +1,142 @@
 <template>
-  <div>
-    <el-card>
-      <el-form ref="formRef" :model="form" label-width="120px" :rules="formRule">
-        <div class="base-info-item">
-          <h4>基本信息</h4>
-          <div class="form-item-view">
-            <el-form-item label="活动名称" prop="promotionName">
-              <el-input
-                v-model="form.promotionName"
-                :disabled="fieldDisabled"
-                placeholder="活动名称"
-                clearable
-                style="width: 260px"
-              />
-            </el-form-item>
-            <el-form-item label="活动时间" prop="rangeTime">
-              <el-date-picker
-                class="full-discount-range-picker"
-                type="datetimerange"
-                v-model="form.rangeTime"
-                :disabled="fieldDisabled"
-                format="YYYY-MM-DD HH:mm:ss"
-                start-placeholder="开始时间"
-                end-placeholder="结束时间"
-                placeholder="请选择"
-                :disabled-date="options.disabledDate"
-              />
-            </el-form-item>
-            <el-form-item label="活动描述" prop="description">
-              <el-input
-                v-model="form.description"
-                :disabled="fieldDisabled"
-                type="textarea"
-                :rows="4"
-                clearable
-                style="width: 260px"
-              />
-            </el-form-item>
-          </div>
+  <div class="full-discount-add">
+    <template v-if="fieldDisabled">
+      <el-card class="section-card" shadow="never">
+        <template #header>
+          <span class="section-title">基本信息</span>
+        </template>
+        <el-descriptions border :column="2">
+          <el-descriptions-item label="活动名称">{{ form.promotionName }}</el-descriptions-item>
+          <el-descriptions-item label="活动时间">
+            {{ form.startTime }} ~ {{ form.endTime }}
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-card>
 
-          <h4>优惠设置</h4>
-          <div class="form-item-view">
+      <el-card class="section-card" shadow="never">
+        <template #header>
+          <span class="section-title">优惠设置</span>
+        </template>
+        <el-descriptions border :column="2">
+          <el-descriptions-item label="优惠门槛">满 {{ form.fullMoney }} 元</el-descriptions-item>
+          <el-descriptions-item label="优惠方式">
+            {{ form.discountType === "fullMinusFlag" ? "减现金" : "打折" }}
+          </el-descriptions-item>
+          <el-descriptions-item v-if="form.discountType === 'fullMinusFlag'" label="优惠金额">
+            减 {{ form.fullMinus }} 元
+          </el-descriptions-item>
+          <el-descriptions-item v-else label="优惠折扣">{{ form.fullRate }} 折</el-descriptions-item>
+          <el-descriptions-item label="使用范围">
+            {{ form.scopeType === "ALL" ? "全品类" : "指定商品" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="额外赠送" :span="2">
+            <template v-if="extraGifts.length">
+              <el-tag v-for="gift in extraGifts" :key="gift" class="gift-tag" size="small">
+                {{ gift }}
+              </el-tag>
+            </template>
+            <span v-else>无</span>
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <el-table
+          v-if="form.scopeType == 'PORTION_GOODS'"
+          border
+          :data="form.promotionGoodsList"
+          style="width: 100%; margin-top: 16px"
+        >
+          <el-table-column label="商品名称" min-width="220">
+            <template #default="{ row }">
+              <div v-if="row" class="goods-cell">
+                <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+                <a class="link-text mr_10 goods-name" @click="linkTo(row.goodsId, row.skuId)">{{
+                  row.goodsName
+                }}</a>
+                <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                  <template #reference>
+                    <img
+                      src="../../../assets/qrcode.svg"
+                      style="vertical-align: middle"
+                      class="hover-pointer"
+                      width="20"
+                      height="20"
+                      alt=""
+                    />
+                  </template>
+                  <vue-qr
+                    :text="wapLinkTo(row.goodsId, row.skuId)"
+                    :margin="0"
+                    color-dark="#000"
+                    color-light="#fff"
+                    :size="150"
+                  />
+                </el-popover>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row?.sn || "-" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="规格" min-width="140" show-overflow-tooltip>
+            <template #default="{ row }">
+              {{ row?.simpleSpecs || "-" }}
+            </template>
+          </el-table-column>
+          <el-table-column label="商品价格" width="110" align="right">
+            <template #default="{ row }">
+              <span v-if="row" :style="{ color: $mainColor }">
+                {{ $filters.unitPrice(row.price, "￥") }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="库存" width="90" align="right">
+            <template #default="{ row }">
+              <span v-if="row">{{ row.quantity }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
+
+      <div class="foot-btn">
+        <el-button @click="closeCurrentPage">返回</el-button>
+      </div>
+    </template>
+
+    <el-form v-else ref="formRef" :model="form" label-width="120px" :rules="formRule">
+      <el-card class="section-card" shadow="never">
+        <template #header>
+          <span class="section-title">基本信息</span>
+        </template>
+        <el-form-item label="活动名称" prop="promotionName">
+          <el-input
+            v-model="form.promotionName"
+            :disabled="fieldDisabled"
+            placeholder="活动名称"
+            clearable
+            style="width: 260px"
+          />
+        </el-form-item>
+        <el-form-item label="活动时间" prop="rangeTime">
+          <el-date-picker
+            class="full-discount-range-picker"
+            type="datetimerange"
+            v-model="form.rangeTime"
+            :disabled="fieldDisabled"
+            format="YYYY-MM-DD HH:mm:ss"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            placeholder="请选择"
+            :disabled-date="options.disabledDate"
+          />
+        </el-form-item>
+      </el-card>
+
+      <el-card class="section-card" shadow="never">
+        <template #header>
+          <span class="section-title">优惠设置</span>
+        </template>
+        <div>
             <el-form-item label="优惠门槛" prop="fullMoney">
               <el-input
                 v-model="form.fullMoney"
@@ -168,10 +264,11 @@
                   width="60"
                   align="center"
                 />
-                <el-table-column label="商品名称" min-width="120" show-overflow-tooltip>
+                <el-table-column label="商品名称" min-width="220">
                   <template #default="{ row }">
-                    <template v-if="row">
-                      <a class="link-text mr_10" @click="linkTo(row.goodsId, row.skuId)">{{
+                    <div v-if="row" class="goods-cell">
+                      <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+                      <a class="link-text mr_10 goods-name" @click="linkTo(row.goodsId, row.skuId)">{{
                         row.goodsName
                       }}</a>
                       <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
@@ -193,21 +290,31 @@
                           :size="150"
                         />
                       </el-popover>
-                    </template>
+                    </div>
                   </template>
                 </el-table-column>
-                <el-table-column label="商品价格" width="110">
+                <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+                  <template #default="{ row }">
+                    {{ row?.sn || "-" }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="规格" min-width="140" show-overflow-tooltip>
+                  <template #default="{ row }">
+                    {{ row?.simpleSpecs || "-" }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="商品价格" width="110" align="right">
                   <template #default="{ row }">
                     <span v-if="row" :style="{ color: $mainColor }">
                       {{ $filters.unitPrice(row.price, "￥") }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="库存" width="90">
+                <el-table-column label="库存" width="90" align="right">
                   <template #default="{ row }">
                     <span v-if="row">{{ row.quantity }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column v-if="!fieldDisabled" label="操作" width="100" align="center">
+                <el-table-column v-if="!fieldDisabled" label="操作" width="100" align="right">
                   <template #default="{ $index }">
                     <a class="link-text" @click="delGoods($index)">删除</a>
                   </template>
@@ -215,21 +322,21 @@
               </el-table>
             </el-form-item>
 
-            <div>
-              <el-button @click="closeCurrentPage">返回</el-button>
-              <el-button
-                v-if="!fieldDisabled"
-                type="primary"
-                :loading="submitLoading"
-                @click="handleSubmit"
-              >
-                提交
-              </el-button>
-            </div>
-          </div>
         </div>
-      </el-form>
-    </el-card>
+      </el-card>
+
+      <div class="foot-btn">
+        <el-button @click="closeCurrentPage">返回</el-button>
+        <el-button
+          v-if="!fieldDisabled"
+          type="primary"
+          :loading="submitLoading"
+          @click="handleSubmit"
+        >
+          提交
+        </el-button>
+      </div>
+    </el-form>
     <liliDialog ref="liliDialogRef" @selectedGoodsData="selectedGoodsData" />
   </div>
 </template>
@@ -291,7 +398,6 @@ const couponLoading = ref(false);
 const formRule = {
   promotionName: [{ required: true, message: "活动名称不能为空" }],
   rangeTime: [{ required: true, message: "请选择活动时间" }],
-  description: [{ required: true, message: "请填写活动描述" }],
   fullMoney: [{ required: true, validator: checkWeight }],
   fullMinus: [
     { required: true, message: "请填写优惠金额" },
@@ -313,9 +419,31 @@ const fieldDisabled = computed(() => {
   return !!id.value && form.value.promotionStatus !== "NEW";
 });
 
+const extraGifts = computed(() => {
+  const list = [];
+  if (form.value.freeFreightFlag) {
+    list.push("免邮费");
+  }
+  if (form.value.couponFlag) {
+    const coupon = couponList.value.find((item) => item.id === form.value.couponId);
+    list.push(`送优惠券${coupon ? `（${coupon.couponName}）` : ""}`);
+  }
+  if (form.value.giftFlag) {
+    const gift = giftList.value.find((item) => item.id === form.value.giftId);
+    list.push(`送赠品${gift ? `（${gift.goodsName}）` : ""}`);
+  }
+  if (form.value.pointFlag) {
+    list.push(`送积分（${form.value.point}）`);
+  }
+  return list;
+});
+
 onMounted(() => {
   if (id.value) {
     getDetail();
+  } else {
+    const now = new Date();
+    form.value.rangeTime = [now, new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)];
   }
   getCouponList();
   getGiftList();
@@ -462,6 +590,8 @@ function selectedGoodsData(item) {
       skuId: e.id,
       goodsId: e.goodsId,
       goodsType: e.goodsType,
+      sn: e.sn,
+      simpleSpecs: e.simpleSpecs,
     });
   });
   form.value.promotionGoodsList = list;
@@ -502,17 +632,37 @@ function getGiftList(query) {
 </script>
 
 <style lang="scss" scoped>
-h4 {
-  margin-bottom: 10px;
-  padding: 0 10px;
-  border: 1px solid #ddd;
-  background-color: #f8f8f8;
+.section-card {
+  margin-bottom: 16px;
+}
+
+.section-title {
   font-weight: bold;
   color: #333;
   font-size: 14px;
-  line-height: 40px;
-  text-align: left;
 }
+
+.goods-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.goods-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.goods-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .describe {
   font-size: 12px;
   margin-left: 10px;
@@ -533,6 +683,15 @@ h4 {
   color: #409eff;
   cursor: pointer;
   text-decoration: none;
+}
+
+.foot-btn {
+  display: flex;
+  gap: 10px;
+}
+
+.gift-tag {
+  margin-right: 8px;
 }
 
 :deep(.full-discount-range-picker.el-date-editor--datetimerange) {

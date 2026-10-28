@@ -89,7 +89,7 @@
             <el-table-column label="库存" width="100">
               <template #default="{ row }">{{ row.quantity }}</template>
             </el-table-column>
-            <el-table-column label="操作" width="250">
+            <el-table-column align="right" label="操作" width="250">
               <template #default="{ row, $index }">
                 <div class="action">
                   <template v-if="liveStatus == 'NEW'">

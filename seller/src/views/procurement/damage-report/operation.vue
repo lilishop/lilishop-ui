@@ -130,7 +130,7 @@
         <el-table-column label="金额" width="100" align="right">
           <template #default="{ row }">￥{{ formatMoney(row.amount) }}</template>
         </el-table-column>
-        <el-table-column v-if="!readonly" label="操作" width="70" align="center" fixed="right">
+        <el-table-column v-if="!readonly" label="操作" width="70" align="right" fixed="right">
           <template #default="{ $index }">
             <a class="link-text" @click="removeItem($index)">删除</a>
           </template>

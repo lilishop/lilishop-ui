@@ -57,18 +57,70 @@
             </div>
           </div>
         </el-form-item>
-        <el-form-item label="拼团规则" prop="pintuanRule">
+        <el-form-item label="拼团商品">
           <div class="form-field-block">
-            <el-input
-              v-model="form.pintuanRule"
-              type="textarea"
-              :rows="4"
-              clearable
-              maxlength="255"
-              style="width: 260px"
-              placeholder="请输入拼团规则"
-            />
-            <div class="form-tip">拼团规则字数不能超过255字，将在WAP拼团详情页中显示</div>
+            <div class="operation">
+              <el-button type="primary" @click="openSkuList">选择商品</el-button>
+            </div>
+            <el-table v-if="goodsData.length" border :data="goodsData" style="width: 100%">
+              <el-table-column label="商品名称" min-width="200">
+                <template #default="{ row }">
+                  <div class="goods-cell">
+                    <img v-if="row?.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+                    <span class="goods-name">{{ row?.goodsName }}</span>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+                <template #default="{ row }">
+                  {{ row?.sn || "-" }}
+                </template>
+              </el-table-column>
+              <el-table-column label="规格" min-width="120" show-overflow-tooltip>
+                <template #default="{ row }">
+                  {{ row?.simpleSpecs || "-" }}
+                </template>
+              </el-table-column>
+              <el-table-column label="原价" width="110">
+                <template #default="{ row }">
+                  <span v-if="row">{{ $filters.unitPrice(row.originalPrice, "￥") }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="拼团价" width="160">
+                <template #default="{ row }">
+                  <el-input-number
+                    v-if="row"
+                    v-model="row.price"
+                    :min="promotionPriceMin(row.goodsType)"
+                    :precision="2"
+                    :controls="false"
+                    size="small"
+                    style="width: 100%"
+                  />
+                </template>
+              </el-table-column>
+              <el-table-column label="拼团库存" width="160">
+                <template #default="{ row }">
+                  <el-input-number
+                    v-if="row"
+                    v-model="row.quantity"
+                    :min="1"
+                    :precision="0"
+                    :controls="false"
+                    size="small"
+                    style="width: 100%"
+                  />
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="90" align="right">
+                <template #default="{ $index }">
+                  <a class="link-text" @click="delGoods($index)">删除</a>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="form-tip">
+              可不添加商品直接创建活动，后续通过拼团活动列表的「管理」入口添加商品
+            </div>
           </div>
         </el-form-item>
         <el-form-item>
@@ -77,6 +129,8 @@
         </el-form-item>
       </el-form>
     </el-card>
+
+    <liliDialog ref="liliDialogRef" @selectedGoodsData="selectedGoodsData" />
   </div>
 </template>
 
@@ -84,6 +138,8 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { savePintuan, editPintuan, getPintuanDetail } from "@/api/promotion";
+import liliDialog from "@/views/lili-dialog";
+import { promotionPriceMin } from "@/constants/goodsType";
 import { Message } from "@/utils/message";
 import { unixToDate } from "@/utils/filters";
 
@@ -94,7 +150,6 @@ const id = ref(route.query.id);
 const form = ref({
   promotionName: "",
   promotionTitle: "",
-  pintuanRule: "",
   requiredNum: "",
   fictitious: 0,
   limitNum: "",
@@ -130,16 +185,85 @@ const options = ref({
 });
 
 const formRef = ref(null);
+const liliDialogRef = ref(null);
+const goodsData = ref([]);
 
 onMounted(() => {
   if (id.value) {
     getDetail();
+  } else {
+    const now = new Date();
+    form.value.rangeTime = [now, new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)];
   }
 });
 
 function closeCurrentPage() {
   router.back();
 }
+
+function openSkuList() {
+  const data = JSON.parse(JSON.stringify(goodsData.value));
+  data.forEach((e) => {
+    e.id = e.skuId;
+  });
+  liliDialogRef.value.goodsData = data;
+  liliDialogRef.value.open("goods");
+}
+
+function selectedGoodsData(selected) {
+  const existingMap = new Map(goodsData.value.map((item) => [item.skuId, item]));
+  goodsData.value = selected.map((item) => {
+    const existed = existingMap.get(item.id);
+    if (existed) {
+      return existed;
+    }
+    return {
+      goodsName: item.goodsName,
+      sn: item.sn,
+      simpleSpecs: item.simpleSpecs,
+      price: item.price,
+      originalPrice: item.price,
+      quantity: item.quantity,
+      storeId: item.storeId,
+      sellerName: item.sellerName,
+      thumbnail: item.thumbnail,
+      skuId: item.id,
+      categoryPath: item.categoryPath,
+      goodsId: item.goodsId,
+      goodsType: item.goodsType,
+    };
+  });
+}
+
+function delGoods(index) {
+  goodsData.value.splice(index, 1);
+}
+
+function buildGoodsParams(params) {
+  if (!goodsData.value.length) {
+    delete params.promotionGoodsList;
+    return true;
+  }
+  for (const item of goodsData.value) {
+    if (item.price === "" || item.price === null || item.price === undefined) {
+      Message.warning(`请填写【${item.goodsName}】的拼团价`);
+      return false;
+    }
+    if (!item.quantity || item.quantity <= 0) {
+      Message.warning(`请填写【${item.goodsName}】的拼团库存`);
+      return false;
+    }
+  }
+  params.promotionGoodsList = goodsData.value.map((item) => ({
+    ...item,
+    promotionId: id.value,
+    startTime: params.startTime,
+    endTime: params.endTime,
+  }));
+  params.scopeId = goodsData.value.map((item) => item.skuId).join(",");
+  return true;
+}
+
 function handleSubmit() {
   formRef.value.validate((valid) => {
     if (!valid) return;
@@ -154,31 +278,37 @@ function handleSubmit() {
       submitLoading.value = false;
       return;
     }
-    if (new Date(params.startTime).getTime() < Date.now()) {
-      Message.error("拼团活动开始时间不能小于当前时间");
+
+    delete params.rangeTime;
+    if (!buildGoodsParams(params)) {
       submitLoading.value = false;
       return;
     }
-
-    delete params.rangeTime;
     if (!id.value) {
       delete params.id;
-      savePintuan(params).then((res) => {
-        submitLoading.value = false;
-        if (res.success) {
-          Message.success("拼团活动添加成功");
-          closeCurrentPage();
-        }
-      });
+      savePintuan(params)
+        .then((res) => {
+          if (res.success) {
+            Message.success("拼团活动添加成功");
+            closeCurrentPage();
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          submitLoading.value = false;
+        });
     } else {
-      if (params.promotionGoodsList === "") delete params.promotionGoodsList;
-      editPintuan(params).then((res) => {
-        submitLoading.value = false;
-        if (res.success) {
-          Message.success("编辑成功");
-          closeCurrentPage();
-        }
-      });
+      editPintuan(params)
+        .then((res) => {
+          if (res.success) {
+            Message.success("编辑成功");
+            closeCurrentPage();
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          submitLoading.value = false;
+        });
     }
   });
 }
@@ -186,6 +316,8 @@ function getDetail() {
   getPintuanDetail(id.value).then((res) => {
     if (res.success) {
       const data = res.result;
+      goodsData.value = data.promotionGoodsList || [];
+      delete data.promotionGoodsList;
       data.rangeTime = [new Date(data.startTime), new Date(data.endTime)];
       form.value = data;
       form.value.fictitious = data.fictitious ? 1 : 0;
@@ -221,5 +353,38 @@ function getDetail() {
   margin-top: 4px;
   width: 100%;
   max-width: 720px;
+}
+
+.operation {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.goods-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.goods-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.goods-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-text {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: none;
 }
 </style>

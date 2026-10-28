@@ -35,7 +35,7 @@
           <template #default="{ row }">{{ fieldCount(row.formSchema) }}</template>
         </el-table-column>
         <el-table-column prop="updateTime" label="更新时间" min-width="170" />
-        <el-table-column label="操作" width="160" align="center" fixed="right">
+        <el-table-column label="操作" width="160" align="right" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="goDesigner(row.id)">编辑</el-button>
             <el-button link type="danger" @click="handleDelete(row)">删除</el-button>

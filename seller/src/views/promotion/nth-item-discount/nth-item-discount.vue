@@ -33,7 +33,7 @@
             <el-tag :type="statusType(row.promotionStatus)">{{ statusText(row.promotionStatus) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="160" fixed="right">
+        <el-table-column align="right" label="操作" width="160" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="goEdit(row)">编辑</a>
             <span class="op-split">|</span>

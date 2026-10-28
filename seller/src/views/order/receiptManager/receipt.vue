@@ -61,7 +61,7 @@
             <el-tag :type="orderStatusTagType(row.orderStatus)">{{ orderStatusText(row.orderStatus) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="200" align="right" fixed="right">
           <template #default="{ row }">
             <a class="link-text" style="margin-right: 12px" @click="openReceiptModal(row, 'detail')">详情</a>
             <a

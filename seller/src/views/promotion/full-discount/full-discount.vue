@@ -74,7 +74,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="160" fixed="right">
+        <el-table-column label="操作" align="right" width="160" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="goDetail(row)">

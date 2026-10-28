@@ -44,7 +44,7 @@
             </template>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column align="right" label="操作">
           <template #default="{ row }">
             <a v-if="row" class="link-text" @click="getLiveDetail(row)">查看</a>
           </template>

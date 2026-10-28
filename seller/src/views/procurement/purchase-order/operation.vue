@@ -95,7 +95,7 @@
         <el-table-column v-if="orderDetail.id" label="已入库" width="80" align="center">
           <template #default="{ row }">{{ row.receivedQuantity || 0 }}</template>
         </el-table-column>
-        <el-table-column v-if="!readonly" label="操作" width="70" align="center" fixed="right">
+        <el-table-column v-if="!readonly" label="操作" width="70" align="right" fixed="right">
           <template #default="{ $index }">
             <a class="link-text" @click="removeItem($index)">删除</a>
           </template>

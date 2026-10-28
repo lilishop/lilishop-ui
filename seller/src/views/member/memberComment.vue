@@ -107,7 +107,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建日期" width="170" />
-        <el-table-column label="操作" align="center" fixed="right" width="100">
+        <el-table-column label="操作" align="right" fixed="right" width="100">
           <template #default="{ row }">
             <a class="link-text" @click="detail(row)">{{ row.replyStatus ? "查看" : "回复" }}</a>
           </template>

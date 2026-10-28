@@ -15,7 +15,7 @@
         style="width: 100%"
       >
         <el-table-column prop="name" label="分类名称" min-width="200" />
-        <el-table-column label="操作" min-width="220" fixed="right">
+        <el-table-column align="right" label="操作" min-width="220" fixed="right">
           <template #default="{ row }">
             <div v-if="row" class="ops">
               <a class="link-text" @click="edit(row)">编辑</a>

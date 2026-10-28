@@ -64,7 +64,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="180" sortable="custom" />
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="200" align="right" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="edit(row)">编辑</a>
             <span class="op-split">|</span>

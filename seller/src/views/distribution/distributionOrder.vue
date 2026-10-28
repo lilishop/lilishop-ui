@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="distribution-order">
     <el-card>
       <el-form
         ref="searchFormRef"
@@ -43,6 +43,12 @@
     </el-card>
 
     <el-card>
+      <el-tabs v-model="activeStatus" class="status-tabs" @tab-change="handleStatusChange">
+        <el-tab-pane label="全部" name="" />
+        <el-tab-pane label="未完成" name="NO_COMPLETED" />
+        <el-tab-pane label="完成" name="COMPLETE" />
+        <el-tab-pane label="退款" name="REFUND" />
+      </el-tabs>
       <el-table
         ref="table"
         v-loading="loading"
@@ -61,30 +67,30 @@
         <el-table-column label="商品信息" min-width="200">
           <template #default="{ row }">
             <div v-if="row" class="goods-msg">
-              <img :src="row.image" width="60" height="60" alt="" />
-              <div>
-                <div class="div-zoom">
+              <img :src="row.image" class="goods-thumb" alt="" />
+              <div class="goods-detail">
+                <div class="goods-name-line">
                   <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
-                </div>
-                <div style="color: #999; font-size: 10px">数量：x{{ row.num }}</div>
-                <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
-                  <template #reference>
-                    <img
-                      src="../../assets/qrcode.svg"
-                      class="hover-pointer"
-                      width="20"
-                      height="20"
-                      alt="qrcode"
+                  <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
+                    <template #reference>
+                      <img
+                        src="../../assets/qrcode.svg"
+                        class="hover-pointer qrcode-icon"
+                        width="16"
+                        height="16"
+                        alt="qrcode"
+                      />
+                    </template>
+                    <vue-qr
+                      :text="wapLinkTo(row.goodsId, row.skuId)"
+                      :margin="0"
+                      color-dark="#000"
+                      color-light="#fff"
+                      :size="150"
                     />
-                  </template>
-                  <vue-qr
-                    :text="wapLinkTo(row.goodsId, row.skuId)"
-                    :margin="0"
-                    color-dark="#000"
-                    color-light="#fff"
-                    :size="150"
-                  />
-                </el-popover>
+                  </el-popover>
+                </div>
+                <div class="goods-num">数量：x{{ row.num }}</div>
               </div>
             </div>
           </template>
@@ -135,6 +141,7 @@ defineOptions({ name: "distributionOrder" });
 const route = useRoute();
 
 const timeRange = ref([]);
+const activeStatus = ref("");
 const distributionId = ref(route.query.id);
 const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
   getDistributionOrder,
@@ -142,7 +149,7 @@ const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch
     pageSize: 20,
     sort: "create_time",
     order: "desc",
-    form: { orderSn: "", distributionName: "" },
+    form: { orderSn: "", distributionName: "", distributionOrderStatus: "" },
     beforeRequest: (p) => {
       const params = { ...p };
       if (distributionId.value) {
@@ -161,6 +168,11 @@ const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch
 function handleReset() {
   timeRange.value = [];
   resetSearch();
+}
+
+function handleStatusChange(status) {
+  searchForm.distributionOrderStatus = status;
+  handleSearch();
 }
 
 // searchFormRef：模板 ref 改名避免与响应式变量 searchForm 互相覆盖
@@ -211,11 +223,43 @@ function filterStatusTagType(status) {
 </script>
 
 <style lang="scss">
+.distribution-order {
+  .el-card + .el-card {
+    margin-top: 16px;
+  }
+}
+
 .goods-msg {
   display: flex;
   align-items: center;
-  > div {
+
+  .goods-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .goods-detail {
     margin-left: 10px;
+    min-width: 0;
+  }
+
+  .goods-name-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .qrcode-icon {
+    flex-shrink: 0;
+  }
+
+  .goods-num {
+    color: #999;
+    font-size: 12px;
+    margin-top: 2px;
   }
 }
 

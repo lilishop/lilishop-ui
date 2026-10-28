@@ -25,7 +25,13 @@
             </div>
             <div class="filter-row-field">
               <span class="filter-row-label">商品类型</span>
-              <el-select v-model="filterForm.goodsType" placeholder="请选择" clearable class="filter-control">
+              <el-select
+                v-model="filterForm.goodsType"
+                placeholder="请选择"
+                clearable
+                class="filter-control"
+                popper-class="goods-dialog-select-popper"
+              >
                 <el-option label="实物商品" value="PHYSICAL_GOODS" />
                 <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
                 <el-option label="电子卡券" value="E_COUPON" />
@@ -43,6 +49,7 @@
                 clearable
                 filterable
                 class="filter-control"
+                popper-class="goods-dialog-select-popper"
               >
                 <el-option v-for="item in brandList" :key="item.id" :label="item.name" :value="item.id" />
               </el-select>
@@ -54,6 +61,7 @@
                 :options="shopCategoryList"
                 :props="shopCategoryProps"
                 placeholder="请选择店铺分类"
+                popper-class="goods-dialog-cascader-popper"
                 clearable
                 filterable
                 class="filter-control"
@@ -129,7 +137,7 @@
           align="center"
           :reserve-selection="true"
         />
-        <el-table-column prop="id" label="ID" min-width="150" show-overflow-tooltip />
+        <el-table-column prop="sn" label="SKU编码" min-width="150" show-overflow-tooltip />
         <el-table-column label="商品图片" width="90" align="center">
           <template #default="{ row }">
             <img v-if="row" :src="row.thumbnail" class="goods-thumb" alt="" />
@@ -647,7 +655,8 @@ defineExpose({ type });
 }
 </style>
 <style lang="scss">
-.goods-dialog-cascader-popper {
+.goods-dialog-cascader-popper,
+.goods-dialog-select-popper {
   z-index: 10001 !important;
 }
 </style>

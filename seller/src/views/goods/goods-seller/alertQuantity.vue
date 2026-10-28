@@ -1,6 +1,6 @@
 <template>
   <div class="search">
-    <el-card>
+    <el-card class="search-card">
       <div @keyup.enter="handleSearch">
         <el-form ref="searchFormRef" :model="searchForm" inline label-width="70px" class="search-form">
           <el-form-item label="商品名称" prop="goodsName">
@@ -33,33 +33,33 @@
           </el-form-item>
         </el-form>
       </div>
+    </el-card>
 
+    <el-card>
       <div>
-        <div class="operation padding-row">
+        <div class="operation">
           <el-button type="primary" class="export" @click="exportStock">批量导出</el-button>
           <el-button class="export" @click="openImportStock">批量导入</el-button>
         </div>
         <el-table ref="tableRef" v-loading="loading" border :data="stockAllData" class="mt_10" style="width: 100%">
-          <el-table-column label="商品信息" min-width="400">
+          <el-table-column label="商品信息" min-width="220">
             <template #default="{ row }">
-              <div style="margin-top: 5px; height: 90px; display: flex">
-                <img :src="row.thumbnail" style="height: 80px; margin-top: 3px; width: 70px" alt="" />
-                <div style="margin-left: 13px; margin-top: 5px">
-                  <div class="div-zoom" style="color: black">{{ row.goodsName }}</div>
-                  <div class="div-zoom" style="margin-top: 5px">ID: {{ row.goodsId }}</div>
-                </div>
+              <div class="goods-cell">
+                <img :src="row.thumbnail" class="goods-thumb" alt="" />
+                <div class="goods-title">{{ row.goodsName }}</div>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="SKU信息" min-width="400">
-            <template #default="{ row }">
-              <div style="margin-top: 5px">
-                <div class="div-zoom" style="color: black">{{ row.simpleSpecs }}</div>
-                <div class="div-zoom" style="margin-top: 5px">ID: {{ row.id }}</div>
-              </div>
-            </template>
+          <el-table-column label="SPU编码" min-width="170" show-overflow-tooltip>
+            <template #default="{ row }">{{ row.goodsId }}</template>
           </el-table-column>
-          <el-table-column label="库存" min-width="120">
+          <el-table-column label="SKU信息" min-width="160" show-overflow-tooltip>
+            <template #default="{ row }">{{ row.simpleSpecs || "-" }}</template>
+          </el-table-column>
+          <el-table-column label="SKU编码" min-width="150" show-overflow-tooltip>
+            <template #default="{ row }">{{ row.sn || row.id }}</template>
+          </el-table-column>
+          <el-table-column label="库存" width="100" align="right">
             <template #default="{ row }">{{ row.quantity || 0 }}</template>
           </el-table-column>
         </el-table>
@@ -220,4 +220,34 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 @import "@/styles/table-common.scss";
+
+.search-card {
+  margin-bottom: 16px;
+}
+
+.operation {
+  margin-bottom: 10px;
+}
+
+.goods-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.goods-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.goods-title {
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
 </style>

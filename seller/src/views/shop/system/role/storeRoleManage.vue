@@ -22,7 +22,7 @@
         <el-table-column prop="createTime" label="创建时间" width="170" sortable="custom" />
         <el-table-column prop="updateTime" label="更新时间" width="170" sortable="custom" />
         <el-table-column prop="createBy" label="最后操作人" width="150" />
-        <el-table-column label="操作" width="230" align="center" fixed="right">
+        <el-table-column label="操作" width="230" align="right" fixed="right">
           <template #default="{ row }">
             <div v-if="row" class="ops">
               <a class="link-text" @click="editPerm(row)">菜单权限</a>

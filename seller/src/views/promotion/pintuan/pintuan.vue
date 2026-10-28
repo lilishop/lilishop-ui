@@ -74,7 +74,7 @@
         <el-table-column prop="storeName" label="所属店铺" min-width="120" show-overflow-tooltip />
         <el-table-column prop="startTime" label="活动开始时间" width="180" />
         <el-table-column prop="endTime" label="活动结束时间" width="180" />
-        <el-table-column label="操作" width="220" align="center" fixed="right">
+        <el-table-column label="操作" width="220" align="right" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
               <template v-if="row.promotionStatus === 'NEW'">

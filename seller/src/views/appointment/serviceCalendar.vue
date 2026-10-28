@@ -10,7 +10,7 @@
       <el-table v-loading="loading" :data="monthDays" border style="width: 100%">
         <el-table-column prop="date" label="日期" width="140" />
         <el-table-column prop="headcount" label="预约人数" width="120" />
-        <el-table-column label="操作" width="120">
+        <el-table-column align="right" label="操作" width="120">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDay(row.date)">查看明细</el-button>
           </template>

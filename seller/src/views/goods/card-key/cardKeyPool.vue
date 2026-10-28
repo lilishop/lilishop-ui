@@ -123,7 +123,7 @@
         <el-table-column prop="createTime" label="导入时间" width="170" />
         <el-table-column prop="allocatedTime" label="发卡时间" width="170" />
         <el-table-column prop="orderSn" label="订单号" min-width="160" show-overflow-tooltip />
-        <el-table-column label="操作" width="100" align="center" fixed="right">
+        <el-table-column label="操作" width="100" align="right" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="row && row.status === 'UNUSED'"

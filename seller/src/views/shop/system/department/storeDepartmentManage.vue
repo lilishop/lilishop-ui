@@ -22,7 +22,7 @@
         <el-table-column prop="sortOrder" label="排序值" width="90" align="center" />
         <el-table-column prop="createTime" label="创建时间" width="170" align="center" />
         <el-table-column prop="updateTime" label="修改时间" width="170" align="center" />
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="200" align="right" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="openAdd(row.id)">添加子级</a>
             <span class="op-split">|</span>
