@@ -3,7 +3,7 @@ var BASE = {
    * @description api请求基础路径
    */
   API_DEV: {
-    manager: "https://admin-api.pickmall.cn",
+    manager: "http://127.0.0.1:8887",
   },
   API_PROD: {
     manager: "https://admin-api.pickmall.cn"

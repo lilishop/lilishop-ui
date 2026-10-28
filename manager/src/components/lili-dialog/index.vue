@@ -26,17 +26,16 @@
     </template>
   </el-dialog>
 
-  <el-drawer
+  <el-dialog
     v-else
     v-model="flag"
-    class="link-selector-drawer"
-    direction="rtl"
-    size="1160px"
-    :with-header="false"
+    width="1160px"
+    top="80px"
     :z-index="10000"
     :close-on-click-modal="false"
     append-to-body
     destroy-on-close
+    class="link-selector-dialog"
     @close="clickClose"
   >
     <linkDialog
@@ -52,7 +51,7 @@
       <el-button @click="clickClose">取消</el-button>
       <el-button type="primary" @click="clickOK">确定</el-button>
     </template>
-  </el-drawer>
+  </el-dialog>
 </template>
 <script setup>
 import { ref } from "vue";

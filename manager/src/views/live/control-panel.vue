@@ -645,7 +645,7 @@ function loadOnlineUsers() {
     });
 }
 function buildShareUrl() {
-  const base = (wapUrl.value || BASE?.WAP_URL || config.website || "").replace(/\/?$/, "/");
+  const base = (wapUrl.value || BASE?.WAP_URL || localStorage.getItem("website") || config.website || "").replace(/\/?$/, "/");
   return `${base}pages/promotion/live/room?id=${liveId.value}`;
 }
 function handleShare() {

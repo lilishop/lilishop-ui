@@ -26,7 +26,7 @@ function applyFavicon(href) {
 function getSite() {
   getBaseSite().then((res) => {
     if (res.success && res.result && res.result.settingValue) {
-      const { domainLogo: logo, domainIcon, siteName } = JSON.parse(
+      const { domainLogo: logo, domainIcon, siteName, website } = JSON.parse(
         res.result.settingValue
       );
       domainLogo.value = logo || "";
@@ -35,6 +35,7 @@ function getSite() {
       localStorage.setItem("icon", logo || "");
       localStorage.setItem("domainIcon", domainIcon || "");
       localStorage.setItem("title", siteName || "");
+      localStorage.setItem("website", website || "");
       applyFavicon(domainIcon || logo);
       if (siteName) {
         window.document.title = siteName + " - 运营后台";

@@ -51,6 +51,11 @@ import {
   Star,
   Document,
   User,
+  UserFilled,
+  Service,
+  Ticket,
+  Bell,
+  OfficeBuilding,
   Promotion,
   PriceTag,
   Sunny,
@@ -61,27 +66,33 @@ import {
   ArrowRight,
   Check,
 } from "@element-plus/icons-vue";
+import { ElMessageBox } from "element-plus";
 
 const emit = defineEmits(["selected"]);
 
 const route = useRoute();
 
 const linkList = ref([
-  { title: "首页", icon: markRaw(House), ___type: "home" },
-  { title: "购物车", icon: markRaw(ShoppingCart), ___type: "cart" },
-  { title: "收藏商品", icon: markRaw(Star), ___type: "collection" },
-  { title: "我的订单", icon: markRaw(Document), ___type: "order" },
-  { title: "个人中心", icon: markRaw(User), ___type: "user" },
-  { title: "拼团频道", icon: markRaw(Promotion), ___type: "group" },
-  { title: "秒杀频道", icon: markRaw(Promotion), ___type: "seckill" },
-  { title: "领券中心", icon: markRaw(PriceTag), ___type: "coupon" },
-  { title: "签到", icon: markRaw(Sunny), ___type: "sign" },
-  { title: "小程序直播", icon: markRaw(VideoCamera), ___type: "live" },
-  { title: "砍价", icon: markRaw(Share), ___type: "kanjia" },
-  { title: "积分商城", icon: markRaw(ShoppingBag), ___type: "point" },
+  { title: "首页", icon: markRaw(House), url: "/", ___type: "home" },
+  { title: "购物车", icon: markRaw(ShoppingCart), url: "/cart", ___type: "cart" },
+  { title: "我的订单", icon: markRaw(Document), url: "/home/MyOrder", ___type: "order" },
+  { title: "个人中心", icon: markRaw(User), url: "/home", ___type: "user" },
+  { title: "基本信息", icon: markRaw(UserFilled), url: "/home/Profile", ___type: "userInfo" },
+  { title: "我的售后", icon: markRaw(Service), url: "/home/AfterSale", ___type: "afterSale" },
+  { title: "我的优惠券", icon: markRaw(Ticket), url: "/home/Coupons", ___type: "myCoupons" },
+  { title: "收藏商品", icon: markRaw(Star), url: "/home/Favorites", ___type: "collection" },
+  { title: "消息中心", icon: markRaw(Bell), url: "/home/MsgList", ___type: "msg" },
+  { title: "商家入驻", icon: markRaw(OfficeBuilding), url: "/shopEntry", ___type: "merchantEntry" },
+  { title: "领券中心", icon: markRaw(PriceTag), url: "/coupon", ___type: "coupon" },
+  { title: "秒杀频道", icon: markRaw(Promotion), url: "/seckill", ___type: "seckill" },
+  { title: "拼团频道", icon: markRaw(Promotion), url: "/group", ___type: "group" },
+  { title: "签到", icon: markRaw(Sunny), url: "/sign", ___type: "sign" },
+  { title: "小程序直播", icon: markRaw(VideoCamera), url: "/live", ___type: "live" },
+  { title: "砍价", icon: markRaw(Share), url: "/kanjia", ___type: "kanjia" },
+  { title: "积分商城", icon: markRaw(ShoppingBag), url: "/point", ___type: "point" },
 ]);
 const linkItem = ref({
-  title: "外部链接",
+  title: "自定义链接",
   icon: markRaw(Link),
   ___type: "link",
   url: "",
@@ -110,13 +121,37 @@ function showLinkItem(item) {
   );
 }
 function handleLink(val, index) {
-  val = { ...val, ___type: "other" };
+  if (val.title === "自定义链接" || val.title === "外部链接") {
+    ElMessageBox.prompt("请输入链接地址（支持站内相对路径如 /cart 或外部网址如 https://...）：", "自定义链接", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      inputValue: val.url || "",
+      inputPlaceholder: "例如 /cart 或 https://...",
+      inputPattern: /^\S+$/,
+      inputErrorMessage: "链接地址不能为空",
+    })
+      .then(({ value }) => {
+        const itemData = {
+          ...val,
+          title: "自定义链接",
+          url: value,
+          originalType: "link",
+          ___type: "other",
+        };
+        selectedIndex.value = index;
+        emit("selected", [itemData]);
+      })
+      .catch(() => {});
+    return;
+  }
+  const itemData = {
+    ...val,
+    originalType: val.___type,
+    ___type: "other",
+  };
   selectedIndex.value = index;
-  emit("selected", [val]);
+  emit("selected", [itemData]);
 }
-
-// 无 defineExpose：grep manager/src 全量确认无外部 ref/$refs/$parent 访问本组件成员
-// （link-dialog.vue 的 $refs["lili-component"][0].type 写入指向首个 tab 的 goods-dialog，与本组件无关）
 </script>
 <style lang="scss" scoped>
 @import "../style.scss";

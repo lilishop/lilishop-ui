@@ -54,7 +54,9 @@
     <el-dialog
       v-model="picModalFlag"
       title="选择图片"
-      width="1200px"
+      width="1160px"
+      top="16px"
+      class="pc-image-picker-dialog"
       append-to-body
       destroy-on-close
       @closed="resetPicModal"

@@ -17,10 +17,10 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="商品ID" prop="goodsId">
+        <el-form-item label="SPU编码" prop="goodsId">
           <el-input
             v-model="searchForm.goodsId"
-            placeholder="请输入商品ID"
+            placeholder="请输入SPU编码"
             clearable
             style="width: 240px"
           />
@@ -78,7 +78,7 @@
       >
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column prop="id" label="SKU ID" width="180" show-overflow-tooltip />
-        <el-table-column prop="goodsId" label="商品ID" width="180" show-overflow-tooltip />
+        <el-table-column prop="goodsId" label="SPU编码" width="180" show-overflow-tooltip />
         <el-table-column label="商品信息" min-width="360">
           <template #default="{ row }">
             <div v-if="row" class="goods-info">

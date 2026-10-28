@@ -64,6 +64,17 @@
       <el-form-item label="wap站点地址" prop="staticPageWapAddress">
         <el-input v-model="formValidate.staticPageWapAddress" />
       </el-form-item>
+      <el-form-item label="公司名称" prop="companyName">
+        <el-input style="width:350px;" v-model="formValidate.companyName" />
+        <span class="desc">页脚展示的公司名称</span>
+      </el-form-item>
+      <el-form-item label="公司链接" prop="companyUrl">
+        <el-input style="width:350px;" v-model="formValidate.companyUrl" />
+        <span class="desc">页脚公司名称的跳转链接</span>
+      </el-form-item>
+      <el-form-item label="官网地址" prop="website">
+        <el-input style="width:350px;" v-model="formValidate.website" />
+      </el-form-item>
       <div class="label-btns">
         <el-button type="primary" @click="submit('formValidateRef')">保存</el-button>
       </div>
@@ -102,12 +113,15 @@ const { proxy } = getCurrentInstance();
 const picModelFlag = ref(false);
 const formValidate = ref({
   buyerSideLogo: "",
+  companyName: "",
+  companyUrl: "",
   domainLogo: "",
   icp: "",
   storeSideLogo: "",
   siteName: "",
   staticPageAddress: "",
   staticPageWapAddress: "",
+  website: "",
 });
 const selected = ref("");
 const ruleValidate = reactive({});

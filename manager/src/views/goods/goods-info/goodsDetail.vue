@@ -105,7 +105,7 @@
           </div>
         </div>
         <div class="goods-section-bd">
-          <el-form-item label="商品ID">
+          <el-form-item label="SPU编码">
             <span class="detail-value">{{ goods.id || "—" }}</span>
           </el-form-item>
           <el-form-item label="店铺名称">

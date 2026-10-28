@@ -124,7 +124,7 @@
 
 </style>
 <template>
-  <div class="search">
+  <div class="search" :class="{ 'is-component-search': isComponent }">
     <el-card v-if="!isComponent" class="tabs-card">
       <el-tabs v-model="activeRoleTab" @tab-change="handleRoleTabChange">
         <el-tab-pane label="管理员" name="MANAGER" />
@@ -133,15 +133,15 @@
         <el-tab-pane label="客服" name="CUSTOMER" />
       </el-tabs>
     </el-card>
-    <el-card class="tabs-card category-tabs-card">
+    <el-card v-if="!isComponent" class="tabs-card category-tabs-card">
       <el-tabs v-model="activeCategoryTab" @tab-change="handleCategoryTabChange">
-        <el-tab-pane label="图片" name="IMAGE" />
-        <el-tab-pane label="视频" name="VIDEO" />
-        <el-tab-pane v-if="!isComponent" label="文件" name="FILE" />
+        <el-tab-pane v-if="allowImage" label="图片" name="IMAGE" />
+        <el-tab-pane v-if="allowVideo" label="视频" name="VIDEO" />
+        <el-tab-pane v-if="!isComponent && !onlyImage" label="文件" name="FILE" />
       </el-tabs>
     </el-card>
     <el-row>
-      <el-card>
+      <component :is="isComponent ? 'div' : 'el-card'" :class="{ 'is-component-card': isComponent }">
         <div>
           <el-row class="oss-manage-box">
             <el-col v-if="canShowGroups" :span="isComponent ? 5 : 4">
@@ -217,8 +217,7 @@
                             'custom-checkbox-card-checked': selectedOss.includes(item.id + ',' + item.url),
                             'oss-card-selectable': isComponent && selectImage,
                           }"
-                          @mouseenter="onMouseOver(item, index)"
-                          @mouseleave="onMouseOut(item, index)"
+
                           @click="handleCardClick(item, $event)"
                         >
                           <el-checkbox
@@ -236,29 +235,12 @@
                           <div v-else class="card-file">
                             <el-icon :size="28"><Document /></el-icon>
                           </div>
-                          <div v-if="item.isShowPreview" class="preview">
-                            <div @click.prevent="download(item)">
-                              <el-tooltip content="下载" placement="top">
-                                <el-icon :size="18"><Download /></el-icon>
-                              </el-tooltip>
-                            </div>
-                            <div @click.prevent="remove(item)">
-                              <el-tooltip content="删除" placement="top">
-                                <el-icon :size="18"><Delete /></el-icon>
-                              </el-tooltip>
-                            </div>
-                            <div
-                              @click.prevent="previewFile(item)"
-                            >
-                              <el-tooltip content="预览" placement="top">
-                                <el-icon :size="22"><View /></el-icon>
-                              </el-tooltip>
-                            </div>
-                          </div>
+
                         </div>
                         <el-tooltip :content="item.name" placement="bottom">
                           <div class="text">{{ item.name }}</div>
                         </el-tooltip>
+                        <div class="sub-info">{{ getFileSubInfo(item) }}</div>
                       </div>
                     </div>
                   </el-checkbox-group>
@@ -282,7 +264,7 @@
           </el-row>
 
         </div>
-      </el-card>
+      </component>
     </el-row>
     <el-dialog
       v-model="modalVisible"
@@ -427,6 +409,26 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  mediaType: {
+    type: String,
+    default: "",
+  },
+  onlyImage: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const allowVideo = computed(() => {
+  if (props.onlyImage || props.mediaType === "IMAGE") return false;
+  if (props.isComponent && fileType.value === "pic") return false;
+  return true;
+});
+
+const allowImage = computed(() => {
+  if (props.mediaType === "VIDEO") return false;
+  if (props.isComponent && fileType.value === "video") return false;
+  return true;
 });
 const emit = defineEmits(["callback", "selected"]);
 
@@ -834,7 +836,7 @@ const viewColumns = ref([
 ]);
 const data = ref([]); // 表单数据
 const total = ref(0); // 表单数据总数
-const pageSizeOpts = ref([5, 10, 20]); // 页码展示项
+const pageSizeOpts = ref([20, 40, 60]); // 页码展示项
 const list = ref([]); // 列表
 //树结构
 const treeData = ref([]);
@@ -921,6 +923,10 @@ watch(
       selectedOss.value = [];
       activeRoleTab.value = "MANAGER";
       searchForm.userEnums = "MANAGER";
+      if (!allowVideo.value) {
+        activeCategoryTab.value = "IMAGE";
+        searchForm.fileCategory = "IMAGE";
+      }
       delete searchForm.fileDirectoryId;
       selectedGroupData.value = "";
     }
@@ -994,13 +1000,8 @@ function onTreeDropdownCommand(cmd, data) {
     handleContextMenuDelete();
   }
 }
-function onMouseOver(item, index) {
-  data.value[index].isShowPreview = true;
-  proxy.$forceUpdate();
-}
-function onMouseOut(item, index) {
-  data.value[index].isShowPreview = false;
-}
+function onMouseOver() {}
+function onMouseOut() {}
 function handleRoleTabChange(name) {
   activeRoleTab.value = name;
   searchForm.pageNumber = 1;
@@ -1021,7 +1022,7 @@ function handleCategoryTabChange(name) {
   if (showType.value === "list") {
     searchForm.pageSize = 20;
   } else {
-    searchForm.pageSize = 12;
+    searchForm.pageSize = 20;
   }
   getDataList();
 }
@@ -1071,7 +1072,7 @@ function selectOssChange(e) {
 }
 function handleCardClick(item, event) {
   if (!(props.isComponent && selectImage.value)) return;
-  if (event?.target?.closest?.(".preview") || event?.target?.closest?.(".card-checkbox")) {
+  if (event?.target?.closest?.(".card-checkbox")) {
     return;
   }
   const key = `${item.id},${item.url}`;
@@ -1370,22 +1371,26 @@ function changeShowType() {
   if (showType.value == "list") {
     searchForm.pageSize = 20;
   } else {
-    searchForm.pageSize = 12;
+    searchForm.pageSize = 20;
   }
   getDataList();
 }
 // 获取列表数据
 function getDataList(type = null) {
   if (showType.value == "list") {
-    pageSizeOpts.value = [10, 20, 50];
+    pageSizeOpts.value = [20, 40, 60];
   } else {
-    pageSizeOpts.value = [12, 24, 48];
+    pageSizeOpts.value = [20, 40, 60];
   }
   loading.value = true;
   getFileListData(searchForm)
     .then((res) => {
       if (res && res.success && res.result) {
-        data.value = res.result.records || [];
+        let records = res.result.records || [];
+        if (!allowVideo.value) {
+          records = records.filter(item => !isVideoFile(item));
+        }
+        data.value = records;
         total.value = res.result.total || 0;
       } else {
         data.value = [];
@@ -1564,10 +1569,48 @@ onMounted(() => {
     // 是组件的话，初始化不调用接口
     init();
   } else {
-    searchForm.pageSize = 18; // 页面大小
+    searchForm.pageSize = 20; // 页面大小: 5列 x 4行 = 20
   }
 });
 
 // 父组件通过 ref 设置 selectImage 开启选图模式；decorate.vue 还会写 fileType 并调用 changeFileType
 defineExpose({ selectImage, fileType, changeFileType });
+function formatFileSize(size) {
+  if (!size || isNaN(size)) return '0 KB';
+  const num = Number(size);
+  if (num < 1024) return num + ' B';
+  if (num < 1024 * 1024) return Math.round(num / 1024) + ' KB';
+  return (num / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function getFileFormat(item) {
+  if (item?.fileType) {
+    const parts = item.fileType.split('/');
+    if (parts.length > 1 && parts[1]) {
+      return parts[1].toUpperCase();
+    }
+  }
+  if (item?.name) {
+    const ext = item.name.split('.').pop();
+    if (ext && ext !== item.name) {
+      return ext.toUpperCase();
+    }
+  }
+  return 'IMG';
+}
+
+function getFileDimension(item) {
+  if (item?.width && item?.height) {
+    return `${item.width}x${item.height}`;
+  }
+  return '未知尺寸';
+}
+
+function getFileSubInfo(item) {
+  const fmt = getFileFormat(item);
+  const dim = getFileDimension(item);
+  const size = formatFileSize(item.fileSize);
+  return `${fmt} · ${dim} · ${size}`;
+}
+
 </script>

@@ -262,62 +262,83 @@
             <!-- 遮罩层  -->
             <div v-if="isRead" class="mask">只读不可修改</div>
             <el-form-item label="经营类目" prop="goodsManagementCategory">
-              <div>
-                <el-checkbox
-                  v-model="checkAll"
-                  :indeterminate="indeterminate"
-                  @change="handleCheckAll"
-                  >全选
-                </el-checkbox>
+              <div class="category-panel">
+                <div class="category-toolbar">
+                  <el-checkbox
+                    v-model="checkAll"
+                    :indeterminate="indeterminate"
+                    @change="handleCheckAll"
+                    >全选
+                  </el-checkbox>
+                  <span class="category-count"
+                    >已选 {{ checkAllGroup.length }} / {{ categories.length }} 项</span
+                  >
+                </div>
+                <el-checkbox-group
+                  v-model="checkAllGroup"
+                  class="category-grid"
+                  @change="checkAllGroupChange"
+                >
+                  <el-checkbox
+                    v-for="(item, i) in categories"
+                    :key="i + 1"
+                    :value="String(item.id)"
+                    >{{ item.name }}
+                  </el-checkbox>
+                </el-checkbox-group>
               </div>
-              <el-checkbox-group v-model="checkAllGroup" @change="checkAllGroupChange">
-                <el-checkbox
-                  v-for="(item, i) in categories"
-                  :key="i + 1"
-                  :value="String(item.id)"
-                  >{{ item.name }}
-                </el-checkbox>
-              </el-checkbox-group>
             </el-form-item>
           </el-tab-pane>
 
           <el-tab-pane label="结算信息" class="tab" name="settlement">
-            <el-alert type="info" :closable="false" show-icon>
+            <el-alert type="info" :closable="false" show-icon class="settlement-alert">
               已添加<span class="theme_color">{{ settlementCycle.length }}</span
               >个结算日，最多可添加5个结算日，当月不包含所设日期时，将会顺延到下一个结算日
             </el-alert>
             <el-form-item label="结算日期">
-              <el-tag
-                v-for="item in settlementCycle"
-                :key="item"
-                closable
-                style="margin-left: 10px"
-                @close="removesettlementCycle(item)"
-                >{{ item }}
-              </el-tag>
-              <el-input-number
-                size="small"
-                :max="31"
-                :min="1"
-                v-model="day"
-                v-show="settlementShow"
-              />
-              <el-button
-                type="default"
-                @click="addsettlementCycle"
-                size="small"
-                v-if="addSettlementBtn && settlementCycle.length < 5"
-                style="margin-left: 8px"
-                >添加结算日期
-              </el-button>
-              <el-button
-                v-if="addSettlementConfirmBtn"
-                type="default"
-                @click="addsettlementCycleConfirm"
-                size="small"
-                style="margin-left: 8px"
-                >确认
-              </el-button>
+              <div class="settlement-panel">
+                <div class="settlement-tags">
+                  <el-tag
+                    v-for="item in settlementCycle"
+                    :key="item"
+                    closable
+                    class="settlement-tag"
+                    @close="removesettlementCycle(item)"
+                    >每月 {{ item }} 日
+                  </el-tag>
+                  <span v-if="!settlementCycle.length" class="settlement-empty"
+                    >暂未添加结算日</span
+                  >
+                </div>
+                <div class="settlement-actions">
+                  <template v-if="settlementShow">
+                    <el-input-number
+                      size="small"
+                      :max="31"
+                      :min="1"
+                      v-model="day"
+                    />
+                    <el-button
+                      v-if="addSettlementConfirmBtn"
+                      type="primary"
+                      @click="addsettlementCycleConfirm"
+                      size="small"
+                      >确认
+                    </el-button>
+                    <el-button type="default" @click="cancelSettlementCycle" size="small"
+                      >取消
+                    </el-button>
+                  </template>
+                  <el-button
+                    type="primary"
+                    plain
+                    @click="addsettlementCycle"
+                    size="small"
+                    v-if="addSettlementBtn && settlementCycle.length < 5"
+                    >+ 添加结算日期
+                  </el-button>
+                </div>
+              </div>
             </el-form-item>
           </el-tab-pane>
         </el-tabs>
@@ -605,6 +626,13 @@ function addsettlementCycleConfirm() {
   settlementShow.value = false;
   day.value = 1;
 }
+//取消添加结算日
+function cancelSettlementCycle() {
+  addSettlementConfirmBtn.value = false;
+  addSettlementBtn.value = true;
+  settlementShow.value = false;
+  day.value = 1;
+}
 // 选择公司地址
 function selectedRegion(val) {
   shopForm.value.companyAddressIdPath = val[0].toString();
@@ -846,9 +874,101 @@ init();
   position: relative;
 }
 
-.categories-checkbox {
+.category-panel {
+  width: 100%;
+  max-width: 960px;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.category-toolbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #f8f9fb;
+  border-bottom: 1px solid #e4e7ed;
+
+  :deep(.el-checkbox) {
+    height: 32px;
+  }
+}
+
+.category-count {
+  font-size: 12px;
+  color: #909399;
+}
+
+.settlement-alert {
+  margin-bottom: 16px;
+}
+
+.settlement-panel {
+  width: 100%;
+  max-width: 960px;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.settlement-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  min-height: 60px;
+}
+
+.settlement-tag {
+  margin: 0;
+}
+
+.settlement-empty {
+  color: #909399;
+  font-size: 13px;
+}
+
+.settlement-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid #ebeef5;
+  background: #f8f9fb;
+}
+
+.category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+
+  :deep(.el-checkbox) {
+    height: auto;
+    margin-right: 0;
+    padding: 5px 14px;
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    background: #fff;
+    transition: border-color 0.2s, background-color 0.2s;
+
+    &:hover {
+      border-color: var(--el-color-primary, #409eff);
+    }
+
+    &.is-checked {
+      border-color: var(--el-color-primary, #409eff);
+      background-color: var(--el-color-primary-light-9, #ecf5ff);
+    }
+
+    .el-checkbox__label {
+      padding-left: 6px;
+    }
+  }
 }
 
 .img {

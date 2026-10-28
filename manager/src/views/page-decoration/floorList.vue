@@ -10,12 +10,22 @@
         />
       </el-tabs>
       <div class="operation mb_10">
-        <el-button type="primary" @click="createTemp">添加页面</el-button>
+        <el-button type="primary" tag="a" :href="addHref" target="_blank" class="add-page-btn">添加页面</el-button>
       </div>
       <el-table v-loading="loading" :data="list" style="width: 100%">
         <el-table-column prop="name" label="页面名称" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <span v-if="row">{{ row.name || "暂无模板昵称" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="创建时间" width="180">
+          <template #default="{ row }">
+            {{ formatTime(row?.createTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="updateTime" label="修改时间" width="180">
+          <template #default="{ row }">
+            {{ formatTime(row?.updateTime) }}
           </template>
         </el-table-column>
         <el-table-column
@@ -35,12 +45,10 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column label="操作" width="160" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
-              <a class="link-text" @click="Template(row)">编辑</a>
-              <span class="op-split">|</span>
-              <a class="link-text" @click="decorate(row)">装修</a>
+              <a class="link-text" :href="decorateHref(row)" target="_blank">装修</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="confirmDel(row.id)">删除</a>
             </template>
@@ -61,43 +69,21 @@
         />
       </div>
     </el-card>
-    <el-dialog
-      v-model="showModal"
-      title="模板设置"
-      width="600px"
-      :close-on-click-modal="false"
-      append-to-body
-      destroy-on-close
-    >
-      <el-form ref="form" :model="formData" label-width="80px">
-        <el-form-item label="模板名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入模板名称" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="showModal = false">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="newTemplate">确定</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import * as API_floor from "@/api/other.js";
 import { Message, Modal } from "@/utils/message";
+import { unixToDate } from "@/utils/filters";
 
 defineOptions({ name: "floorList" });
 
 const router = useRouter();
 
-const showModal = ref(false);
 const total = ref(0);
-const formData = ref({
-  status: false,
-  name: "",
-});
 const searchForm = reactive({
   pageNumber: 1,
   pageSize: 20,
@@ -113,64 +99,54 @@ const pageTypes = ref([
 ]);
 const list = ref([]);
 
-const form = ref(null);
+const addHref = computed(() => {
+  return router.resolve({
+    path: "/floorList/renovation",
+    query: {
+      pageType: searchForm.pageType,
+      mode: "add",
+    },
+  }).href;
+});
+
+function decorateHref(row) {
+  return router.resolve({
+    path: "/floorList/renovation",
+    query: {
+      id: row.id,
+      name: row.name,
+      pageType: searchForm.pageType,
+    },
+  }).href;
+}
 
 onMounted(() => {
   getTemplateList();
+  window.addEventListener("focus", onWindowFocus);
 });
 
-function newTemplate() {
-  form.value.validate((valid) => {
-    if (valid) {
-      const data = formData.value;
-      data.status ? (data.pageShow = "OPEN") : (data.pageShow = "CLOSE");
-      delete data.status;
-      (data.pageType = searchForm.pageType),
-        (data.pageClientType = "PC");
-      if (data.id) {
-        API_floor.updateHome(data.id, data).then((res) => {
-          Message.success("编辑模板成功");
-          showModal.value = false;
-          getTemplateList();
-        });
-      } else {
-        API_floor.setHomeSetup(data).then((res) => {
-          Message.success("新建模板成功");
-          showModal.value = false;
-          getTemplateList();
-        });
-      }
-    } else {
-      loading.value = false;
-    }
-  });
+onBeforeUnmount(() => {
+  window.removeEventListener("focus", onWindowFocus);
+});
+
+function onWindowFocus() {
+  getTemplateList();
+}
+
+function formatTime(time) {
+  if (!time) return "—";
+  if (typeof time === "string" && time.includes("-")) {
+    return time;
+  }
+  const ts = new Date(time).getTime();
+  if (Number.isNaN(ts)) return time;
+  return unixToDate(ts / 1000);
 }
 
 function handleTabChange(type) {
   searchForm.pageNumber = 1;
   searchForm.pageType = type;
   getTemplateList();
-}
-
-function createTemp() {
-  form.value?.resetFields();
-  formData.value = { status: false, name: "" };
-  showModal.value = true;
-}
-
-function Template(item) {
-  item.status = item.pageShow;
-  formData.value = { ...item };
-  showModal.value = true;
-}
-
-function decorate(val) {
-  const data = { id: val.id, pageShow: val.pageShow, pageType: searchForm.pageType };
-
-  router.push({
-    name: "renovation",
-    query: data,
-  });
 }
 
 function changePageNum(val) {
@@ -186,9 +162,9 @@ function getTemplateList() {
   loading.value = true;
   API_floor.getHomeList(searchForm).then((res) => {
     loading.value = false;
-    if (res.success) {
-      total.value = res.result.total;
-      list.value = res.result.records;
+    if (res.success && res.result) {
+      total.value = res.result.total || 0;
+      list.value = res.result.records || [];
       list.value.forEach((e) => {
         if (e.pageShow === "OPEN") {
           e.pageShow = true;
@@ -197,6 +173,8 @@ function getTemplateList() {
         }
       });
     }
+  }).catch(() => {
+    loading.value = false;
   });
 }
 
@@ -223,6 +201,7 @@ function beforeRelease(row) {
     });
   });
 }
+
 function confirmDel(id) {
   Modal.confirm({
     title: "提示",
@@ -230,6 +209,7 @@ function confirmDel(id) {
     onOk: () => delTemplate(id),
   });
 }
+
 function delTemplate(id) {
   API_floor.removePageHome(id).then((res) => {
     if (res.success) {
@@ -243,5 +223,9 @@ function delTemplate(id) {
 <style lang="scss" scoped>
 .page-type-tabs {
   margin-bottom: 16px;
+}
+
+.add-page-btn {
+  text-decoration: none;
 }
 </style>

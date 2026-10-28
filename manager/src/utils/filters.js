@@ -271,6 +271,10 @@ export function formatLinkType (item) {
       break;
 
     case 'other':
+      if (item.url) {
+        url = item.url;
+        break;
+      }
       switch (item.title) {
         case '首页':
           url = '/';
@@ -281,13 +285,29 @@ export function formatLinkType (item) {
         case '我的订单':
           url = '/home/MyOrder';
           break;
-        case '收藏商品':
-          url = '/home/Favorites';
-          break;
         case '个人中心':
           url = '/home';
           break;
+        case '基本信息':
+          url = '/home/Profile';
+          break;
+        case '我的售后':
+          url = '/home/AfterSale';
+          break;
+        case '我的优惠券':
+          url = '/home/Coupons';
+          break;
+        case '收藏商品':
+          url = '/home/Favorites';
+          break;
+        case '消息中心':
+          url = '/home/MsgList';
+          break;
+        case '商家入驻':
+          url = '/shopEntry';
+          break;
         case '外部链接':
+        case '自定义链接':
           url = item.url;
           break;
         case '秒杀频道':

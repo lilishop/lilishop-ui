@@ -345,7 +345,6 @@ getGoodsList();
   }
 }
 
-}
 
 .goods-show-seller {
   // padding:3px 0;

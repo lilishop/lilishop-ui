@@ -24,31 +24,32 @@
     <!-- 固定头部 -->
     <hover-search class="hover-search" :class="{show: topSearchShow}"></hover-search>
     <!-- 顶部广告 -->
-    <FixedTopPage :data="topAdvert"></FixedTopPage>
+    <FixedTopPage :data="topAdvert" v-if="!isVersion2"></FixedTopPage>
     <!-- 头部 包括登录，我的订单等 -->
-    <BaseHeader></BaseHeader>
+    <BaseHeader v-if="!hasComponentInV2('topBar')"></BaseHeader>
     <!-- 搜索框、logo -->
-    <Search></Search>
+    <Search v-if="!hasComponentInV2('searchHeader')"></Search>
     <div class="index-main">
       <!-- 商品分类 + 楼层装修（同一宽度容器，保证与分类栏左缘对齐） -->
-      <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
+      <cateNav :showAlways="true" v-if="!isVersion2 && showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
       <model-form :data="modelFormData"></model-form>
     </div>
     <!-- 底部栏 -->
-    <BaseFooter></BaseFooter>
+    <BaseFooter v-if="!hasComponentInV2('footerNav')"></BaseFooter>
     <!-- 侧边栏 -->
     <fixedBar class="fixed-bar" :class="{'show-fixed': topSearchShow}"></fixedBar>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, computed } from "vue";
 import Search from '@/components/Search';
 import ModelForm from '@/components/indexDecorate/ModelForm';
 import HoverSearch from '@/components/header/hoverSearch';
 import fixedBar from '@/components/fixed/index';
 import storage from "@/plugins/storage";
 import { indexData, getAutoCoup } from '@/api/index.js';
+import { DOUBLE11_PAGE_DOCUMENT } from '@/components/indexDecorate/presets/double11Preset.js';
 import { seckillByDay } from '@/api/promotion';
 
 defineOptions({ name: "Index" });
@@ -68,6 +69,16 @@ const showNav = ref(false); // 是否展示分类栏
 const topSearchShow = ref(false); // 滚动后顶部搜索栏展示
 const carouselLarge = ref(false); // 不同轮播分类尺寸
 const carouselOpacity = ref(false); // 不同轮播分类样式
+
+const isVersion2 = computed(() => {
+  return modelFormData.value?.version === 2 || modelFormData.value?.version === '2.0';
+});
+
+const hasComponentInV2 = (type) => {
+  if (!isVersion2.value || !Array.isArray(modelFormData.value?.list)) return false;
+  return modelFormData.value.list.some(r => r.components && r.components.some(c => c.type === type));
+};
+
 
 // 优惠券可用范围
 function useScope(type, storeName) {
@@ -137,7 +148,7 @@ function handleReachBottom() {
 function getIndexData() {
   if (props.pageData) {
     parsePageData(JSON.stringify(props.pageData)).catch(() => {
-      // 装修数据解析失败时保持默认空楼层
+      modelFormData.value = DOUBLE11_PAGE_DOCUMENT;
     });
   } else {
     // 获取首页装修数据
@@ -146,11 +157,15 @@ function getIndexData() {
         try {
           await parsePageData(res.result.pageData);
         } catch {
-          // 装修数据解析失败时保持默认空楼层
+          modelFormData.value = DOUBLE11_PAGE_DOCUMENT;
         }
+      } else {
+        // 无服务端数据时默认展示双11平台首页
+        modelFormData.value = DOUBLE11_PAGE_DOCUMENT;
       }
     }).catch((err) => {
-      console.warn('获取首页装修数据失败', err);
+      console.warn('获取首页装修数据失败，启用双11平台首页预设', err);
+      modelFormData.value = DOUBLE11_PAGE_DOCUMENT;
     });
   }
 }
@@ -158,6 +173,10 @@ function getIndexData() {
 async function parsePageData(pageData) {
   const dataJson = typeof pageData === "string" ? JSON.parse(pageData) : pageData;
   if (!dataJson?.list?.length) {
+    return;
+  }
+  if (dataJson.version === 2 || dataJson.version === '2.0') {
+    modelFormData.value = dataJson;
     return;
   }
   // 秒杀活动不是装修的数据，需要调用接口判断是否有秒杀商品
