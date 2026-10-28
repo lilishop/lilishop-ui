@@ -3,27 +3,44 @@
     <div class="item-detail-show">
       <!-- 详情左侧展示数据、图片，收藏、举报 -->
       <div class="item-detail-left">
-        <!-- 大图、放大镜 -->
-        <!-- <div  id="dplayer"></div> -->
-        <div class="item-detail-big-img" v-if="imgList[imgIndex]">
+        <!-- 大图、放大镜（视频商品首项为视频） -->
+        <div class="item-detail-big-img" v-if="mediaList[mediaIndex]">
           <el-image
+            v-show="!isCurrentVideo"
             :src="currentImg"
             fit="cover"
             style="width: 100%; height: 100%"
           />
+          <div v-show="isCurrentVideo" class="goods-video-wrap">
+            <div class="goods-video-bg" :style="videoBgStyle"></div>
+            <div
+              v-show="hasVideo"
+              id="goodsVideoPlayer"
+              class="goods-video-player"
+            ></div>
+          </div>
         </div>
 
-        <!-- <div  id="dplayer"></div> -->
         <div class="item-detail-img-row">
-
           <div
             class="item-detail-img-small"
-            :class="{ 'is-active': imgIndex === index }"
-            @mouseover="imgIndex = index"
-            v-for="(item, index) in imgList"
+            :class="{ 'is-active': mediaIndex === index }"
+            @mouseover="switchMedia(index)"
+            v-for="(item, index) in mediaList"
             :key="index"
           >
-            <img :src="item.url || item"/>
+            <video
+              v-if="item.type === 'video'"
+              class="video-thumb"
+              :src="item.url"
+              muted
+              preload="metadata"
+              playsinline
+            ></video>
+            <img v-else :src="mediaThumb(item)"/>
+            <span v-if="item.type === 'video'" class="video-badge">
+              <img :src="playIcon" alt="" />
+            </span>
           </div>
         </div>
 
@@ -275,23 +292,17 @@
                   show-icon
                   :title="eCouponAfterSaleHint()"
                 />
-                <el-tooltip content="观看视频" v-if="skuDetail.goodsVideo">
-                  <img class="view-video" @click="showGoodsVideo = true" :src="playIcon" alt="">
-                </el-tooltip>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <el-dialog title="浏览视频" v-model="showGoodsVideo">
-          <div id="dplayer"></div>
-        </el-dialog>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import { StarFilled } from '@element-plus/icons-vue';
@@ -334,12 +345,11 @@ const emit = defineEmits(["handleClickSku"]);
 const route = useRoute();
 const router = useRouter();
 
-const showGoodsVideo = ref(false);
-const goodsVideo = ref("");
 const count = ref(1); // 商品数量
-const imgIndex = ref(0); // 展示图片下标
+const mediaIndex = ref(0); // 展示媒体下标（相册图片/视频）
 const currentSelceted = ref([]); // 当前商品sku
-const imgList = ref([]); // 商品图片列表
+const mediaList = ref([]); // 媒体列表：视频项在前，其后为图片字符串
+let dp = null; // DPlayer 实例，有视频时进页即创建（静音自动播放）
 const skuDetail = ref({
   specList: [],
 }); // sku详情
@@ -355,9 +365,23 @@ const skuList = ref([]); // formatSku 中赋值（原 data 未声明）
 // startCheckout 通过字符串 key 操作对应 loading
 const loadings = { loading, loading1, loadingPintuan };
 
+const currentMedia = computed(() => mediaList.value[mediaIndex.value] || null);
+const isCurrentVideo = computed(() => currentMedia.value?.type === "video");
+const hasVideo = computed(() =>
+  mediaList.value.some((item) => item.type === "video")
+);
+// 视频两侧用封面的高斯模糊填充，避免竖视频出现黑边
+const videoBgStyle = computed(() => {
+  const video = mediaList.value.find((item) => item.type === "video");
+  return video && video.poster
+    ? { backgroundImage: `url("${video.poster}")` }
+    : {};
+});
+
 const currentImg = computed(() => {
-  const item = imgList.value[imgIndex.value];
-  return item ? item.url || item : "";
+  const item = currentMedia.value;
+  if (!item) return "";
+  return item.type === "video" ? item.poster : item.url || item;
 });
 
 
@@ -399,23 +423,46 @@ watch(
   { deep: true, immediate: true }
 );
 
-watch(showGoodsVideo, (val) => {
-  if (val) {
-    initVideo();
-  }
-});
+// 天猫/淘宝风格：进页即在相册首位静音循环播放，用户可通过控制条开声音
+function initVideoPlayer() {
+  const video = mediaList.value[0];
+  if (!video || video.type !== "video") return;
+  nextTick(() => {
+    if (dp) return;
+    dp = new DPlayer({
+      container: document.getElementById("goodsVideoPlayer"),
+      autoplay: true,
+      loop: true,
+      muted: true,
+      video: {
+        url: video.url,
+        pic: video.poster,
+      },
+    });
+  });
+}
 
-// 初始化video
-function initVideo() {
-  if (!goodsVideo.value) {
-    setTimeout(() => {
-      goodsVideo.value = new DPlayer({
-        container: document.getElementById('dplayer'),
-        video: {
-          url: skuDetail.value.goodsVideo,
-        },
-      });
-    }, 100);
+// 悬停切换相册项：离开视频时暂停，回到视频时续播
+function switchMedia(index) {
+  if (index === mediaIndex.value) return;
+  const leavingVideo = isCurrentVideo.value;
+  mediaIndex.value = index;
+  if (leavingVideo && dp) {
+    dp.pause();
+  } else if (isCurrentVideo.value && dp) {
+    dp.play();
+  }
+}
+
+// 缩略图：视频用封面，图片兼容字符串与 { url } 两种形态
+function mediaThumb(item) {
+  return item.type === "video" ? item.poster : item.url || item;
+}
+
+function destroyVideo() {
+  if (dp) {
+    dp.destroy();
+    dp = null;
   }
 }
 
@@ -646,18 +693,29 @@ function promotion() {
   }
 }
 
-// 相册里会混进规格 JSON，只留图片地址；没有相册时用主图
+// 相册里会混进规格 JSON，只留图片地址；没有相册时用主图。有视频时视频排在相册第一项
 function swiperGoodsImg() {
+  destroyVideo();
+  mediaIndex.value = 0;
   const source = skuDetail.value.goodsGalleryList || [];
   const gallery = Array.from(source).filter((item) => {
     if (typeof item !== "string") return false;
     return item.indexOf('"url":') === -1 && item.indexOf('"status":') === -1;
   });
-  if (gallery.length) {
-    imgList.value = gallery;
-    return;
+  const images = gallery.length
+    ? gallery
+    : skuDetail.value.original
+      ? [skuDetail.value.original]
+      : [];
+  mediaList.value = [...images];
+  if (skuDetail.value.goodsVideo) {
+    mediaList.value.unshift({
+      type: "video",
+      url: skuDetail.value.goodsVideo,
+      poster: images[0] || "",
+    });
+    initVideoPlayer();
   }
-  imgList.value = skuDetail.value.original ? [skuDetail.value.original] : [];
 }
 
 onMounted(() => {
@@ -667,12 +725,18 @@ onMounted(() => {
       if (res.success && res.result) {
         isCollected.value = true;
       }
+    }).catch(() => {
+      // 收藏状态为可选数据，失败时静默
     });
   }
 
   formatSku(goodsSpecList.value);
   // promotion();
   document.title = skuDetail.value.goodsName;
+});
+
+onBeforeUnmount(() => {
+  destroyVideo();
 });
 </script>
 
@@ -737,10 +801,58 @@ onMounted(() => {
     object-fit: cover;
   }
 }
-#dplayer{
-    width: 100%;
-    height: 100%;
+.goods-video-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.goods-video-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(28px) brightness(0.85);
+  transform: scale(1.4);
+}
+
+.goods-video-player {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+
+  /* 播放器默认黑底改为透明，露出毛玻璃背景 */
+  :deep(.dplayer),
+  :deep(.dplayer-video-wrap) {
+    background: transparent;
   }
+}
+
+.video-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+
+  img {
+    width: 22px;
+    height: 22px;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+  }
+}
+
+.video-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
 
 .item-detail-img-row {
   margin-top: 0;
@@ -750,6 +862,7 @@ onMounted(() => {
 }
 
 .item-detail-img-small {
+  position: relative;
   width: 86px;
   height: 86px;
   border: 2px solid transparent;
@@ -1179,9 +1292,6 @@ onMounted(() => {
   color: #666;
   font-size: 15px;
   line-height: 22px;
-}
-.view-video{
-  cursor: pointer;
 }
 /******************商品图片及购买详情结束******************/
 </style>
