@@ -95,21 +95,25 @@ export function cancelStoreCollect (type, id) {
   });
 }
 
-// 查看是否收藏商品
+// 查看是否收藏商品（后台查询，token 失效时静默失败，不弹全局登录框）
 export function isCollection (type, goodsId) {
   return request({
     url: `/buyer/member/collection/isCollection/${type}/${goodsId}`,
     method: Method.GET,
-    needToken: true
+    needToken: true,
+    skipAuthHandler: true,
+    skipMessage: true
   });
 }
 
-// 查看是否收藏店铺
+// 查看是否收藏店铺（后台查询，token 失效时静默失败，不弹全局登录框）
 export function isStoreCollection (type, goodsId) {
   return request({
     url: `/buyer/member/storeCollection/isCollection/${type}/${goodsId}`,
     method: Method.GET,
-    needToken: true
+    needToken: true,
+    skipAuthHandler: true,
+    skipMessage: true
   });
 }
 
@@ -133,22 +137,26 @@ export function storeCollectList (params) {
   });
 }
 
-// 单个商品评价
+// 单个商品评价（需登录；token 失效时静默失败，不弹全局登录框）
 export function goodsComment (params) {
   return request({
     url: `/buyer/member/evaluation/${params.goodsId}/goodsEvaluation`,
     method: Method.GET,
-    needToken: false,
+    needToken: true,
+    skipAuthHandler: true,
+    skipMessage: true,
     params
   });
 }
 
-// 商品各评价类别数量
+// 商品各评价类别数量（需登录；token 失效时静默失败，不弹全局登录框）
 export function goodsCommentNum (goodsId) {
   return request({
     url: `/buyer/member/evaluation/${goodsId}/evaluationNumber`,
     method: Method.GET,
-    needToken: false
+    needToken: true,
+    skipAuthHandler: true,
+    skipMessage: true
   });
 }
 

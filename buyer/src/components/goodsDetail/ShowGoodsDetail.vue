@@ -100,7 +100,7 @@
               v-model:current-page="commentParams.pageNumber"
               v-model:page-size="commentParams.pageSize"
               :total="commentTotal"
-              small
+              size="small"
               @current-change="changePageNum"
               @size-change="changePageSize"
               layout="prev, pager, next"
@@ -136,6 +136,7 @@
 import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue';
 import { Refresh } from '@element-plus/icons-vue';
 import { goodsComment, goodsCommentNum } from '@/api/member.js';
+import storage from '@/plugins/storage.js';
 import StoreSide from './StoreSide.vue';
 
 defineOptions({ name: 'ShowGoodsDetail' });
@@ -246,17 +247,23 @@ function changePageSize (val) {
   getList();
 }
 function getList () {
+  // 评价接口需要登录，未登录时不发起请求
+  if (!storage.getItem('accessToken') || !storage.getItem('userInfo')) return;
   commentParams.goodsId = skuDetail.value.goodsId;
   goodsComment(commentParams).then(res => {
     if (res.success) {
       commentList.value = res.result.records;
       commentTotal.value = res.result.total;
     }
+  }).catch(() => {
+    // 评价为可选数据，加载失败时静默
   });
   goodsCommentNum(skuDetail.value.goodsId).then(res => {
     if (res.success) {
       commentTypeNum.value = res.result;
     }
+  }).catch(() => {
+    // 评价统计为可选数据，加载失败时静默
   });
 }
 function viewByGrade (grade) {
