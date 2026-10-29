@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
-    <BaseHeader></BaseHeader>
-    <Search @search="handleSearch"></Search>
+    <TopBar></TopBar>
+    <SearchHeader @search="handleSearch"></SearchHeader>
 
     <div class="container">
       <!-- 商品筛选栏 -->
@@ -115,6 +115,8 @@ import { ArrowDown, ArrowUp } from '@element-plus/icons-vue';
 import GoodsClassNav from "@/components/nav/GoodsClassNav";
 import GoodsThumb from "@/components/goods/GoodsThumb.vue";
 import * as apiGoods from "@/api/goods";
+import TopBar from '@/components/indexDecorate/components/TopBar.vue';
+import SearchHeader from '@/components/indexDecorate/components/SearchHeader.vue';
 
 const route = useRoute();
 const router = useRouter();

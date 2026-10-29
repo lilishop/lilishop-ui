@@ -82,11 +82,11 @@ const customStyle = computed(() => {
   const fontSize = opt.fontSize ? `${opt.fontSize}px` : '12px';
 
   return {
-    backgroundColor: s.backgroundColor || 'transparent',
+    backgroundColor: s.backgroundColor || '#f8fafc',
     color: textColor,
     fontSize: fontSize,
-    height: `${s.height || 36}px`,
-    lineHeight: `${s.height || 36}px`
+    height: `${s.height || 40}px`,
+    lineHeight: `${s.height || 40}px`
   };
 });
 </script>
@@ -98,19 +98,23 @@ const customStyle = computed(() => {
   box-sizing: border-box;
   font-size: 12px;
   overflow: hidden;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
 
   *, *::before, *::after {
     box-sizing: border-box;
   }
 
   .top-bar-inner {
-    width: 100%;
+    width: 1200px;
     max-width: 100%;
-    padding: 0 24px;
+    margin: 0 auto;
+    padding: 0 10px;
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 100%;
 
     .bar-left {
       display: flex;
@@ -129,7 +133,7 @@ const customStyle = computed(() => {
         white-space: nowrap;
 
         .auth-item {
-          color: #ff6a00;
+          color: #409EFF;
           text-decoration: none;
           cursor: pointer;
 
@@ -149,7 +153,7 @@ const customStyle = computed(() => {
           text-decoration: none;
 
           &:hover {
-            color: #ff6a00;
+            color: #409EFF;
           }
         }
       }
@@ -168,7 +172,7 @@ const customStyle = computed(() => {
         white-space: nowrap;
 
         &:hover {
-          color: #ff6a00;
+          color: #409EFF;
         }
       }
     }

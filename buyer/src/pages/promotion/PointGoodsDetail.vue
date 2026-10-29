@@ -1,7 +1,7 @@
 <template>
   <div style="background:#fff;">
-    <BaseHeader></BaseHeader>
-    <Search style="border-bottom:2px solid red;"></Search>
+    <TopBar></TopBar>
+    <SearchHeader></SearchHeader>
     <div class="base-width cate-container">
       <el-breadcrumb>
         <el-breadcrumb-item to="/">首页</el-breadcrumb-item>
@@ -106,7 +106,8 @@ export default {
 import { ref, computed, onMounted, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
-import Search from "@/components/Search";
+import TopBar from '@/components/indexDecorate/components/TopBar.vue';
+import SearchHeader from '@/components/indexDecorate/components/SearchHeader.vue';
 import { addCartGoods } from "@/api/cart.js";
 import { pointGoodsDetail } from "@/api/promotion";
 import {

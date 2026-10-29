@@ -1,7 +1,7 @@
 <template>
   <div class="goods-detail-page">
-    <BaseHeader></BaseHeader>
-    <Search></Search>
+    <TopBar></TopBar>
+    <SearchHeader></SearchHeader>
     <div class="shop-item-path">
       <div class="shop-nav-container">
         <el-breadcrumb>
@@ -44,7 +44,8 @@ import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
 import storage from "@/plugins/storage.js";
-import Search from "@/components/Search";
+import TopBar from '@/components/indexDecorate/components/TopBar.vue';
+import SearchHeader from '@/components/indexDecorate/components/SearchHeader.vue';
 import ShowGoods from "@/components/goodsDetail/ShowGoods";
 import empty from "@/components/empty/Main";
 import ShowGoodsDetail from "@/components/goodsDetail/ShowGoodsDetail";

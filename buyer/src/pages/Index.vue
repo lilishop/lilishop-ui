@@ -22,16 +22,21 @@
         </el-dialog>
 
     <!-- 固定头部 -->
-    <hover-search class="hover-search" :class="{show: topSearchShow}"></hover-search>
+    <hover-search class="hover-search" :class="{show: topSearchShow}" :options="searchHeaderOptions"></hover-search>
     <!-- 顶部广告 -->
     <FixedTopPage :data="topAdvert" v-if="!isVersion2"></FixedTopPage>
     <!-- 头部 包括登录，我的订单等 -->
     <BaseHeader v-if="!hasComponentInV2('topBar')"></BaseHeader>
     <!-- 搜索框、logo -->
     <Search v-if="!hasComponentInV2('searchHeader')"></Search>
-    <div class="index-main">
-      <!-- 商品分类 + 楼层装修（同一宽度容器，保证与分类栏左缘对齐） -->
-      <cateNav :showAlways="true" v-if="!isVersion2 && showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
+    <!-- Version 2 页面装修：全宽自由响应容器，由各行独立配置 rowStyle.width（如 100%、1920、1400、1200）实现全宽或精准居中 -->
+    <div v-if="isVersion2" class="v2-index-main">
+      <model-form :data="modelFormData"></model-form>
+    </div>
+
+    <!-- Version 1 历史旧版：保持 1200px 传统固定容器与分类栏 -->
+    <div v-else class="index-main">
+      <cateNav :showAlways="true" v-if="showNav" :large="carouselLarge" :opacity="carouselOpacity"></cateNav>
       <model-form :data="modelFormData"></model-form>
     </div>
     <!-- 底部栏 -->
@@ -72,6 +77,19 @@ const carouselOpacity = ref(false); // 不同轮播分类样式
 
 const isVersion2 = computed(() => {
   return modelFormData.value?.version === 2 || modelFormData.value?.version === '2.0';
+});
+
+const searchHeaderOptions = computed(() => {
+  if (!Array.isArray(modelFormData.value?.list)) return {};
+  for (const row of modelFormData.value.list) {
+    if (Array.isArray(row.components)) {
+      const target = row.components.find(c => c && c.type === 'searchHeader');
+      if (target?.options) {
+        return target.options;
+      }
+    }
+  }
+  return {};
 });
 
 const hasComponentInV2 = (type) => {
@@ -240,6 +258,11 @@ onUnmounted(() => {
 .container {
   @include sub_background_color($light_background_color);
 }
+.v2-index-main {
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+}
 </style>
 <style>
 .hover-search {
@@ -250,7 +273,8 @@ onUnmounted(() => {
   position: fixed;
   top: 0;
   z-index: 9999;
-  box-shadow:0 0 10px 2px rgb(90 90 90 / 60%);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  border-bottom: 1px solid #f1f5f9;
   transition: 0.35s;
 }
 .show {

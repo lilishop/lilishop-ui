@@ -45,7 +45,7 @@
       <div class="section-title">搜索设置</div>
       <div class="form-row">
         <span class="row-label">搜索占位</span>
-        <el-input v-model="options.placeholder" size="small" placeholder="请输入商品名称、品牌或型号" class="flex-1" />
+        <el-input v-model="options.placeholder" size="small" placeholder="请输入商品名称" class="flex-1" />
       </div>
 
       <div class="form-row mt-10 flex-between">
@@ -56,6 +56,24 @@
       <div class="form-row mt-10 flex-between">
         <span class="row-label">显示热门推荐词</span>
         <el-switch v-model="options.showHotWords" size="small" />
+      </div>
+
+      <div class="form-row mt-10 flex-between">
+        <span class="row-label">商品/店铺搜索切换</span>
+        <el-switch v-model="options.showSearchTypes" size="small" />
+      </div>
+
+      <div class="form-row mt-10" v-if="options.showSearchTypes !== false">
+        <span class="row-label">默认搜索类型</span>
+        <el-radio-group v-model="options.defaultSearchType" size="small">
+          <el-radio-button label="goods">商品</el-radio-button>
+          <el-radio-button label="store">店铺</el-radio-button>
+        </el-radio-group>
+      </div>
+
+      <div class="form-row mt-10" v-if="options.showSearchTypes !== false">
+        <span class="row-label">店铺占位文案</span>
+        <el-input v-model="options.storePlaceholder" size="small" placeholder="请输入店铺名称" class="flex-1" />
       </div>
     </div>
 
@@ -147,9 +165,19 @@ const props = defineProps({
     required: true
   }
 });
+if (props.options.showSearchTypes === undefined) {
+  props.options.showSearchTypes = true;
+}
+if (!props.options.defaultSearchType) {
+  props.options.defaultSearchType = 'goods';
+}
+if (!props.options.storePlaceholder) {
+  props.options.storePlaceholder = '请输入店铺名称';
+}
+
 
 if (props.options.logoLink === undefined) props.options.logoLink = '/';
-if (props.options.placeholder === undefined) props.options.placeholder = '请输入商品名称、品牌或型号';
+if (props.options.placeholder === undefined) props.options.placeholder = '请输入商品名称';
 if (props.options.showCart === undefined) props.options.showCart = true;
 if (props.options.showHotWords === undefined) props.options.showHotWords = true;
 if (props.options.cartText === undefined) props.options.cartText = '购物车';

@@ -12,10 +12,28 @@
         <span v-else class="text-logo">LiliShop</span>
       </div>
 
-      <!-- 2. 搜索核心区（紧凑居中，含搜索框和热门推荐词） -->
+      <!-- 2. 搜索核心区（紧凑居中，含商品/店铺 Tab、搜索框和热门推荐词） -->
       <div class="search-main">
+        <!-- 搜索类型切换：商品 / 店铺 -->
+        <div class="search-tabs" v-if="options.showSearchTypes !== false">
+          <span
+            class="tab-item"
+            :class="{ active: (activeTab || options.defaultSearchType || 'goods') === 'goods' }"
+            @click.stop="activeTab = 'goods'"
+          >
+            商品
+          </span>
+          <span
+            class="tab-item"
+            :class="{ active: (activeTab || options.defaultSearchType || 'goods') === 'store' }"
+            @click.stop="activeTab = 'store'"
+          >
+            店铺
+          </span>
+        </div>
+
         <!-- 搜索输入框与按钮 -->
-        <div class="search-box">
+        <div class="search-box" :class="{ 'tab-store-active': (activeTab || options.defaultSearchType || 'goods') === 'store' }">
           <input
             type="text"
             class="mock-input"
@@ -29,7 +47,7 @@
         </div>
 
         <!-- 热门推荐词 -->
-        <div class="hot-words" v-if="options.showHotWords !== false && hotWordsList.length">
+        <div class="hot-words" v-if="options.showHotWords !== false && (activeTab || options.defaultSearchType || 'goods') === 'goods' && hotWordsList.length">
           <span
             v-for="(w, idx) in hotWordsList"
             :key="idx"
@@ -55,7 +73,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Search, ShoppingCart } from '@element-plus/icons-vue';
 
 const props = defineProps({
@@ -69,8 +87,27 @@ const props = defineProps({
   }
 });
 
+const activeTab = ref(props.options?.defaultSearchType || 'goods');
+
+watch(
+  () => props.options?.defaultSearchType,
+  (v) => {
+    if (v) activeTab.value = v;
+  }
+);
+
 const placeholderText = computed(() => {
-  return props.options?.placeholder || '请输入商品名称、品牌或型号';
+  const currentType = activeTab.value || props.options?.defaultSearchType || 'goods';
+  if (currentType === 'store') {
+    const sph = props.options?.storePlaceholder;
+    if (!sph || sph === '请输入店铺名称、品牌或经营范围') return '请输入店铺名称';
+    return sph;
+  }
+  const ph = props.options?.placeholder;
+  if (!ph || ph === '搜索品牌或商品' || ph === '请输入商品名称、品牌或型号') {
+    return '请输入商品名称';
+  }
+  return ph;
 });
 
 const hotWordsList = computed(() => {
@@ -84,7 +121,7 @@ const customStyle = computed(() => {
   const s = props.componentStyle || {};
   return {
     backgroundColor: s.backgroundColor || '#ffffff',
-    minHeight: `${s.height || 90}px`
+    minHeight: `${s.height || 120}px`
   };
 });
 
@@ -110,11 +147,12 @@ const cartBtnStyle = computed(() => {
   .header-inner {
     width: 1200px;
     max-width: 100%;
-    padding: 18px 20px 14px;
+    margin: 0 auto;
+    padding: 16px 0 14px 0;
+    box-sizing: border-box;
     display: flex;
-    align-items: flex-start;
-    justify-content: center; /* 紧凑聚拢居中，Logo、搜索框、购物车不向大屏两端散落 */
-    gap: 42px; /* Logo、搜索框、购物车三者紧凑贴近 */
+    align-items: center;
+    justify-content: space-between;
 
     .logo-area {
       height: 40px;
@@ -140,16 +178,51 @@ const cartBtnStyle = computed(() => {
     }
 
     .search-main {
-      width: 560px;
+      width: 580px;
       flex-shrink: 0;
+      margin: 0 auto;
+
+      .search-tabs {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        margin-bottom: 0px;
+        padding-left: 2px;
+        z-index: 2;
+
+        .tab-item {
+          padding: 4px 16px;
+          font-size: 13px;
+          font-weight: 500;
+          color: #64748b;
+          cursor: pointer;
+          border-radius: 4px 4px 0 0;
+          transition: all 0.15s ease;
+          user-select: none;
+
+          &:hover {
+            color: #409EFF;
+          }
+
+          &.active {
+            color: #ffffff;
+            background: #409EFF;
+            font-weight: 600;
+          }
+        }
+      }
 
       .search-box {
         display: flex;
         border: 2px solid #409EFF;
-        border-radius: 4px;
+        border-radius: 0 4px 4px 4px;
         overflow: hidden;
         height: 40px;
         box-sizing: border-box;
+
+        &.tab-store-active {
+          border-radius: 4px;
+        }
 
         .mock-input {
           flex: 1;
@@ -185,7 +258,7 @@ const cartBtnStyle = computed(() => {
       }
 
       .hot-words {
-        margin-top: 8px;
+        margin-top: 6px;
         display: flex;
         align-items: center;
         gap: 12px;

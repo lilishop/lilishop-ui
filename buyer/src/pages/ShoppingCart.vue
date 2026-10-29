@@ -1,7 +1,7 @@
 <template>
   <div>
-    <BaseHeader></BaseHeader>
-    <Search></Search>
+    <TopBar></TopBar>
+    <SearchHeader></SearchHeader>
 
     <!-- 添加成功提示 -->
     <div class="add-info-box-container">
@@ -50,6 +50,8 @@ export default {
 
 <script setup>
 import { onMounted, ref } from "vue";
+import TopBar from '@/components/indexDecorate/components/TopBar.vue';
+import SearchHeader from '@/components/indexDecorate/components/SearchHeader.vue';
 import { useRoute } from "vue-router";
 
 const route = useRoute();

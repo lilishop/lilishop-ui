@@ -1,7 +1,7 @@
 <template>
   <div class="not-found-page">
-    <BaseHeader></BaseHeader>
-    <Search :show-tag="false"></Search>
+    <TopBar></TopBar>
+    <SearchHeader :options="{ showHotWords: false }"></SearchHeader>
     <div class="not-found">
       <h1>页面不存在</h1>
       <p>你访问的地址没有对应页面</p>
@@ -12,6 +12,9 @@
 </template>
 
 <script setup>
+import TopBar from '@/components/indexDecorate/components/TopBar.vue';
+import SearchHeader from '@/components/indexDecorate/components/SearchHeader.vue';
+
 defineOptions({ name: "NotFound" });
 </script>
 

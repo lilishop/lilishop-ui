@@ -1,7 +1,7 @@
 <template>
   <div class="point-mall">
-    <BaseHeader></BaseHeader>
-    <Search></Search>
+    <TopBar></TopBar>
+    <SearchHeader></SearchHeader>
     <cateNav></cateNav>
     <h3 class="promotion-decorate">积分商品</h3>
     <el-select @select="selectCate" size="small" class="cate-select-con" v-model="cateId">
@@ -46,6 +46,8 @@
 </template>
 <script setup>
 import { onMounted, reactive, ref } from "vue";
+import TopBar from '@/components/indexDecorate/components/TopBar.vue';
+import SearchHeader from '@/components/indexDecorate/components/SearchHeader.vue';
 import { useRoute, useRouter } from "vue-router";
 import { pointGoods, pointGoodsCategory } from "@/api/promotion.js";
 

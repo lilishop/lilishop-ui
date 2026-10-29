@@ -1,8 +1,8 @@
 <template>
   <div class="merchant">
-    <BaseHeader/>
+    <TopBar></TopBar>
     <!-- 搜索栏 -->
-    <Search :storeId="storeMsg.storeId || $route.query.id" @search="search"></Search>
+    <SearchHeader @search="search"></SearchHeader>
     <div class="store-head">
       <div class="store-head-main">
         <div class="shop-info">
@@ -129,7 +129,8 @@ import {
   isStoreCollection,
 } from "@/api/member";
 import {goodsList as goodsListApi} from "@/api/goods";
-import Search from "@/components/Search";
+import TopBar from '@/components/indexDecorate/components/TopBar.vue';
+import SearchHeader from '@/components/indexDecorate/components/SearchHeader.vue';
 import ModelForm from "@/components/indexDecorate/ModelForm";
 import storage from "@/plugins/storage";
 import {getFloorStoreData} from "@/api/index.js";

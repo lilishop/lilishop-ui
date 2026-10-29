@@ -245,10 +245,11 @@ function getCartList() {
 
 .box {
   width: 100%;
-  font-size: 14px;
+  font-size: 12px;
   height: 40px;
-  background: #333;
-  color: #fff;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  color: #64748b;
   display: flex;
   align-items: center;
 }
@@ -281,14 +282,19 @@ function getCartList() {
 
 .nav a,
 .nav-item {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: normal;
   text-decoration: none;
   cursor: pointer;
-  color: #fff;
+  color: #64748b;
   display: inline-flex;
   align-items: center;
   line-height: 1;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: #409EFF;
+  }
 }
 
 .nav-item {

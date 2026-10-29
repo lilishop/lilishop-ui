@@ -1,7 +1,7 @@
 <template>
   <div>
-    <BaseHeader></BaseHeader>
-    <Search></Search>
+    <TopBar></TopBar>
+    <SearchHeader></SearchHeader>
 
     <div class="container width_1200">
       <h1 class="page-title">文章帮助中心</h1>
@@ -50,6 +50,8 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import TopBar from '@/components/indexDecorate/components/TopBar.vue';
+import SearchHeader from '@/components/indexDecorate/components/SearchHeader.vue';
 import { useRoute } from 'vue-router'
 import { articleCateList, articleDetail, articleList as fetchArticleList } from '@/api/common.js'
 
