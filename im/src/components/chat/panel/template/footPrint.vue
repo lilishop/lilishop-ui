@@ -1,14 +1,14 @@
 <template>
-  <div class="box" :style="{height:toUser.storeFlag ? '858px' : '815px'}" @scroll="scrollBottom">
+  <div class="box" @scroll="scrollBottom">
     <div class="tab">
-      <el-tabs v-model="activeName" @tab-click="handleClick" :stretch=true>
+      <el-tabs v-model="activeName" @tab-click="handleClick" type="card" :stretch=true>
         <el-tab-pane label="最近浏览" name="goods">
           <dl v-if='list.length' class='base-list'>
             <dd :key="index"  @click="linkToGoods(item.goodsId, item.id)" v-for="(item,index) in list">
               <div class="base">
                 <div>
                   <img style="width: 60px; height: 60px;margin-left:20px;box-sizing: border-box;" :src="item.thumbnail"
-                    class="image" />
+                    :onerror="defaultAvatar" class="image" />
                 </div>
                 <div class="recent_views">
                   <a class="goods_name">{{ item.goodsName }}</a>
@@ -35,24 +35,8 @@
           <dl class='base-order-list' v-if='orderList.length'>
             <dd  v-for="(item, index) in orderList" :key="index">
               <div class="order-list">
-                <div class="order-top order-padding">
-                  <span class="order-sn" @click="linkToOrders(item.sn)">订单号:{{ item.sn }}</span>
-                </div>
-                <div class="order-section order-padding">
-                  <div class="order-items" v-for="(order,orderIndex) in item.orderItems" :key="orderIndex">
-                      <img :src="order.image" alt="">
-                      <span class="order-goods-name" @click="linkToOrders(item.sn)"> {{ order.name }}</span>
-                      <span class="price">{{ $filters.unitPrice(order.goodsPrice, "￥") }}</span>
-                  </div>
-                  <!-- <img  :src="item.groupImages" alt=""> -->
-                 
-                  <div class="order-btn ">
-                    <el-button class="store-button" v-if="item.btnHide == 1 && toUser.storeFlag"
-                      size="small" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
-                  </div>
-                </div>
-                <div class="order-footer order-padding">
-                  <span></span>
+                <div class="order-head">
+                  <span class="order-sn" :title="item.sn" @click="linkToOrders(item.sn)">订单号:{{ item.sn }}</span>
                   <el-tag  size="small" :type="col[item.orderStatus]">{{
                     item.orderStatus == 'STAY_PICKED_UP' ? '待自提'
                       : item.orderStatus == 'CANCELLED' ? '已取消' : item.orderStatus == 'UNPAID' ? '未付款' : item.orderStatus
@@ -62,9 +46,18 @@
                             ''
                   }}</el-tag>
                 </div>
-
+                <div class="order-items" v-for="(order,orderIndex) in item.orderItems" :key="orderIndex">
+                  <img :src="order.image" :onerror="defaultAvatar" alt="">
+                  <div class="order-item-info">
+                    <span class="order-goods-name" :title="order.name" @click="linkToOrders(item.sn)">{{ order.name }}</span>
+                    <span class="price">{{ $filters.unitPrice(order.goodsPrice, "￥") }}</span>
+                  </div>
+                </div>
+                <div class="order-foot" v-if="item.btnHide == 1 && toUser.storeFlag">
+                  <el-button class="store-button" size="small" @click="submitSendOrderMessage(item, index)" plain>发送</el-button>
+                </div>
               </div>
-            
+
             </dd>
           </dl>
           <div v-else class='no-more'>
@@ -80,9 +73,11 @@
 import { computed, onMounted, ref } from "vue";
 import { useTalkStore } from "@/stores/talk";
 import { useUserStore } from "@/stores/user";
+import { useAppStore } from "@/stores/app";
 
 const talkStore = useTalkStore();
 const userStore = useUserStore();
+const appStore = useAppStore();
 
 const emit = defineEmits(["loadMore", "sendMessage"]);
 
@@ -118,6 +113,8 @@ const col = ref({
 const talkItems = computed(() => talkStore.talkItems);
 const id = computed(() => userStore.id);
 const toUser = computed(() => userStore.toUser);
+// 图片加载失败时的默认图（onerror 属性值）
+const defaultAvatar = computed(() => appStore.defaultAvatar);
 
 //跳转订单列表
 
@@ -204,7 +201,9 @@ onMounted(() => {
 }
 
 .box {
-  max-width: 362px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 
   .top {
     text-align: center;
@@ -237,57 +236,51 @@ onMounted(() => {
 }
 
 .order-list {
-  padding: 9px;
-  transition: 0.35s;
-  cursor: pointer;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 10px;
   margin-bottom: 10px;
   background: #fff;
-  color: #5a606b;
-  box-sizing: border-box;
+  transition: border-color .2s;
+
+  &:hover {
+    border-color: #b3d3f9;
+  }
 }
 
+.order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.order-sn {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    color: #409eff;
+  }
+}
 
 .box::-webkit-scrollbar {
   width: 0px !important;
 }
-.order-section {
-  margin: 10px 0;
-  font-size: 12px;
-  img {
-    width: 60px;
-    height: 60px;
-  }
-}
 
-.order-footer {
-  font-size: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.order-goods-name {
-  width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  position: absolute;
-  margin-left: 10px;
-
-  font-weight: 500;
-}
-
-.orderSn {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap
-}
-
-.order-btn {
+.order-foot {
   display: flex;
   justify-content: flex-end;
-  position: relative;
-  bottom: 55px;
+  margin-top: 8px;
 }
 
 .goods_name {
@@ -300,7 +293,7 @@ onMounted(() => {
 
 :deep(.el-tabs__header ) {
   position: absolute;
-  width: 362px;
+  width: 100%;
   height: 50px;
   left: 0;
   z-index: 2;
@@ -329,10 +322,6 @@ onMounted(() => {
   // width: 350px;
 }
 
-.order-padding {
-  padding: 0 10px;
-}
-
 .base {
   padding: 8px;
   cursor: pointer;
@@ -354,12 +343,12 @@ onMounted(() => {
    
   }
 }
-.base:hover,.order-list:hover{
+.base:hover{
   background: #ededed;
   padding-left: 14px;
   >.review{
     opacity: 1;
-  
+
   }
 }
 .goods-price{
@@ -371,9 +360,6 @@ onMounted(() => {
 .separate {
   margin-top: 8px;
 }
-.order-sn{
-  font-size: 12px;
-}
 // .el-tabs--card {
 //   height: calc(100vh - 110px);
 //   overflow-y: auto; 
@@ -383,17 +369,54 @@ onMounted(() => {
 //   overflow-y: auto;
 // }
 .base-list{
-  padding-bottom: 120px;
+  padding: 10px 10px 12px;
 }
 .base-order-list{
-  padding-bottom: 100px;
-}
-.price{
-  color: red;
-  margin-left: 10px;
-  margin-bottom: 10px;
+  padding: 10px 10px 12px;
 }
 .order-items{
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  img {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    object-fit: cover;
+    background: #fafafa;
+  }
+
+  .order-item-info {
+    flex: 1;
+    min-width: 0;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .order-goods-name {
+    font-size: 12px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      color: #409eff;
+    }
+  }
+
+  .price {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #f23030;
+  }
 }
 </style>

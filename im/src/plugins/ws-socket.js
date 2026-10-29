@@ -273,22 +273,17 @@ class WsSocket {
    */
   onMessage(evt) {
     let result = this.onParse(evt);
-    if (
-      this.onParse(evt).text.includes("goodsName") ||
-      this.onParse(evt).text.includes("groupName")
-    ) {
-      let params = {
-        ...this.onParse(evt),
-        text: JSON.parse(this.onParse(evt).text),
-      };
-      this.onCallBacks["event_talk"](params);
-    } else {
-      let params = {
-        ...this.onParse(evt),
-        text: this.onParse(evt).text,
-      };
-      this.onCallBacks["event_talk"](params);
-    }
+    // 部分推送（在线状态、系统通知等）没有 text 字段，不做商品/群名解析直接透传
+    const text = result.text;
+    let params = {
+      ...result,
+      text:
+        typeof text === "string" &&
+        (text.includes("goodsName") || text.includes("groupName"))
+          ? JSON.parse(text)
+          : text,
+    };
+    this.onCallBacks["event_talk"](params);
     // 指定推送消息
   }
   /**

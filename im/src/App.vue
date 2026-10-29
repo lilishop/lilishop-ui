@@ -34,11 +34,12 @@ function unloadHandler (e) {
 
 onMounted(() => {
   setRefreshView(refreshView);
-  window.addEventListener('beforeunload', e => beforeunloadHandler(e))
-  window.addEventListener('unload', e => unloadHandler(e))
+  window.addEventListener('beforeunload', beforeunloadHandler)
+  // unload 事件已被 Chrome 弃用（Permissions-Policy 禁止），改用 pagehide
+  window.addEventListener('pagehide', unloadHandler)
 });
 onBeforeUnmount(() => {
-  window.removeEventListener('beforeunload', e => beforeunloadHandler(e))
-  window.removeEventListener('unload', e => unloadHandler(e))
+  window.removeEventListener('beforeunload', beforeunloadHandler)
+  window.removeEventListener('pagehide', unloadHandler)
 });
 </script>

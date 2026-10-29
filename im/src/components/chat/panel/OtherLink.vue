@@ -1,5 +1,5 @@
 <template>
-  <el-tabs v-model="activeName" @tab-click="handleClick" type="card" :stretch=true>
+  <el-tabs v-model="activeName" @tab-click="handleClick" :stretch=true>
     <el-tab-pane :label="toUser.storeFlag ? '正在咨询' : '他的足迹'" name="history">
       <div>
         <GoodsLink :goodsDetail="goodsDetail" v-if="toUser.userId === goodsDetail.storeId"
@@ -305,5 +305,21 @@ function formatDateToString(date) {
 }
 :deep(.el-tabs__header) {
   margin-bottom: 0;
+}
+
+/* 高度链：tabs 撑满面板，pane 高度传递给内部滚动容器 */
+:deep(.el-tabs) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.el-tabs__content) {
+  flex: 1;
+  min-height: 0;
+}
+
+:deep(.el-tab-pane) {
+  height: 100%;
 }
 </style>

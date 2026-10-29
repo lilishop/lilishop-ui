@@ -43,7 +43,7 @@
               </aside>
               <aside class="avatar-column">
                 <div class="avatar-box" v-if="item.float == 'right'">
-                  <face :text="face" v-if="face"></face>
+                  <face :text="userFace" v-if="userFace"></face>
                   <face-null :text="name" v-else></face-null>
                 </div>
                 <div class="avatar-box" v-if="item.float == 'left'">
@@ -53,14 +53,10 @@
               </aside>
               <main class="main-column">
                 <div class="talk-content">
-                  <span class="nickname">
-                    {{ item.float == "right" ? name : toUser.name }} |
-                    {{ unixToDate(item.createTime, "MM月dd日 hh:mm") }}
-                  </span>
                   <div class="flex flex-a-c">
                     <legacy-el-icon name="el-icon-refresh-left" class="again main-color" @click="againSendMessage(item)" v-if="item.webSocketStatus" />
                     <!-- 文本消息 -->
-                    <div v-if="item.messageType == 'MESSAGE'" style="background-color: #d0e9ff;color: black;"
+                    <div v-if="item.messageType == 'MESSAGE'"
                       class="text-message" :class="{
                         left: item.float == 'left',
                         right: item.float == 'right',
@@ -79,7 +75,7 @@
                   }">
                     <div class="base" @click="linkToGoods(item.text.goodsId, item.text.id)">
                       <div>
-                        <img :src="item.text.thumbnail" class="image" />
+                        <img :src="item.text.thumbnail" :onerror="defaultAvatar" class="image" />
                       </div>
                       <div>
                         <div class="goods_name">
@@ -106,7 +102,7 @@
                     <div class="goods-shared-box">
                      
                       <div class="goods-item" v-for="(order,orderIndex) in item.text.orderItems" :key="orderIndex">
-                        <img :src="order.image" style="height: 100px;width: 100px;" />
+                        <img :src="order.image" :onerror="defaultAvatar" style="height: 100px;width: 100px;" />
                         <div>
                           <span class="orderGoodsName">{{ order.name }}</span>
                           <div class="goods-item-price">
@@ -212,6 +208,7 @@ import SocketInstance from "@/im-server/socket-instance";
 import { SvgMentionDown } from "@/core/icons";
 import { formatTime, parseTime, copyTextToClipboard } from "@/utils/functions";
 import { useUserStore } from "@/stores/user";
+import { useAppStore } from "@/stores/app";
 import { useTalkStore } from "@/stores/talk";
 import { useNotifyStore } from "@/stores/notify";
 import { useSettingsStore } from "@/stores/settings";
@@ -259,6 +256,7 @@ const emit = defineEmits(["close-talk"]);
 const { proxy } = getCurrentInstance();
 
 const userStore = useUserStore();
+const appStore = useAppStore();
 const talkStore = useTalkStore();
 const notifyStore = useNotifyStore();
 const settingsStore = useSettingsStore();
@@ -306,13 +304,16 @@ const panelHeader = ref(null);
 
 const talkItems = computed(() => talkStore.talkItems);
 const name = computed(() => userStore.name);
-const face = computed(() => userStore.face);
+// 不能命名为 face：会遮蔽 <face> 组件解析，头像 URL 会被当作标签名渲染
+const userFace = computed(() => userStore.face);
 const unreadMessage = computed(() => talkStore.unreadMessage);
 const inputEvent = computed(() => notifyStore.inputEvent);
 const id = computed(() => userStore.id);
 const records = computed(() => dialogueStore.records);
 const index_name = computed(() => dialogueStore.index_name);
 const toUser = computed(() => userStore.toUser);
+// 商品/订单图片加载失败时的默认图（onerror 属性值）
+const defaultAvatar = computed(() => appStore.defaultAvatar);
 
 const sendTime = formatTime;
 
@@ -1147,7 +1148,7 @@ function talkPanelScrollBottom() {
       flex-shrink: 0;
       order: 1;
       user-select: none;
-      padding-top: 25px;
+      padding-top: 8px;
 
       i {
         color: #ccc;
@@ -1168,7 +1169,7 @@ function talkPanelScrollBottom() {
       align-items: center;
       order: 2;
       user-select: none;
-      padding-top: 22px;
+      padding-top: 5px;
       flex-direction: column;
     }
 
@@ -1206,13 +1207,6 @@ function talkPanelScrollBottom() {
         align-items: flex-start;
         box-sizing: border-box;
         width: 100%;
-
-        .nickname {
-          font-size: 12px;
-          color: #a7a0a0;
-          margin: -4px 0 4px -8px;
-          transform: scale(0.9);
-        }
       }
 
       &:hover {
@@ -1250,8 +1244,8 @@ function talkPanelScrollBottom() {
   }
 }
 
-@bg-left-color: #f5f5f5;
-@bg-right-color: #ffffff;
+@bg-left-color: #f2f2f2;
+@bg-right-color: #409eff;
 
 .text-message {
   position: relative;

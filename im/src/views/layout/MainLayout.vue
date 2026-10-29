@@ -6,7 +6,7 @@
           <el-header height="118px" class="logo-header">
             <div class="user-login" v-popover:usercard>
               <div class="user-box">
-                <face :text="face"></face>
+                <face :text="userFace"></face>
               </div>
             </div>
             <p class="user-status">
@@ -66,7 +66,8 @@ const userStore = useUserStore();
 const notifyStore = useNotifyStore();
 const settingsStore = useSettingsStore();
 
-const face = computed(() => userStore.face);
+// 不能命名为 face：会遮蔽 <face> 组件解析，头像 URL 会被当作标签名渲染
+const userFace = computed(() => userStore.face);
 const name = computed(() => userStore.name);
 const id = computed(() => userStore.id);
 const defaultAvatar = computed(() => appStore.defaultAvatar);
@@ -107,8 +108,8 @@ function setApplyNum () {
 <style lang="less" >
 .main-layout {
   position: fixed;
-  width: 80%;
-  height: 80%;
+  width: 88%;
+  height: 92%;
   top: 0;
   right: 0;
   bottom: 0;
@@ -119,8 +120,8 @@ function setApplyNum () {
   border-radius: 5px;
 
   &.full-mode {
-    width: 1200px;
-    height: 85%;
+    width: 92%;
+    height: 96%;
     border-radius: 0;
   }
 

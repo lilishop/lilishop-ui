@@ -391,6 +391,19 @@ export function hidePhone (phone) {
 }
 
 /**
+ * 根据名字生成稳定的头像底色（本地首字头像用，替代 dicebear 外链）
+ *
+ * @param {String} name
+ */
+export function avatarColor (name = "") {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  }
+  return `hsl(${hash % 360}, 55%, 55%)`;
+}
+
+/**
  * 人性化显示时间
  *
  * @param {Object} datetime
@@ -409,15 +422,15 @@ export function beautifyTime (datetime = "") {
   }
 
   if (time.getTime() < outTime.getTime()) {
-    return parseTime(outTime, "{y}/{m}/{d}");
+    return parseTime(outTime, "{y}-{m}-{d}");
   }
 
   if (time.getFullYear() != outTime.getFullYear()) {
-    return parseTime(outTime, "{y}/{m}/{d}");
+    return parseTime(outTime, "{y}-{m}-{d}");
   }
 
   if (time.getMonth() != outTime.getMonth()) {
-    return parseTime(outTime, "{m}/{d}");
+    return parseTime(outTime, "{m}-{d}");
   }
 
   if (time.getDate() != outTime.getDate()) {

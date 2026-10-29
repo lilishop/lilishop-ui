@@ -1,100 +1,157 @@
 <template>
-  <div style="width: 362px;">
+  <div class="store-card">
     <div class="base">
-      <div>
-        <img :src="storeInfo.storeLogo" class="image" />
-      </div>
+      <img :src="storeInfo.storeLogo" :onerror="onError" class="image" alt="" />
       <div class="store-detail">
-        <div>
-        <div class="div-zoom">
-          <span class="title_left_name"> 店铺名称:</span> <span class="title_right_name">{{ storeInfo.storeName }}</span>
-          <el-tag style="margin-left: 10px;" type="danger" v-if="storeInfo.selfOperated" size="small">自营</el-tag>
+        <div class="store-name">
+          <span class="name-text" :title="storeInfo.storeName">{{ storeInfo.storeName }}</span>
+          <el-tag type="danger" v-if="storeInfo.selfOperated" size="small">自营</el-tag>
         </div>
-        <div>
-          <span class="title_left_name"> 联系方式:</span> <span class="title_right_name">{{ storeInfo.memberName }}</span>
-        </div>
-        </div>
-        <div>
-          <el-button class="store-button" @click="linkToStore(storeInfo.id)" size="small"
-            plain>进入店铺</el-button>
+        <div class="store-actions">
+          <el-button @click="linkToStore(storeInfo.id)" size="small" plain>进入店铺</el-button>
         </div>
       </div>
     </div>
+    <div class="info-list">
+      <div class="info-row" v-for="row in infoRows" :key="row.label">
+        <span class="label">{{ row.label }}</span>
+        <span class="value" :title="row.value">{{ row.value || '—' }}</span>
+      </div>
+    </div>
     <div class="wrapper">
-      <div class="separate">店铺评分: <el-rate v-model="storeInfo.serviceScore" disabled show-score text-color="#ff9900"
-          score-template="{value}">
-        </el-rate></div>
-      <div class="separate">服务评分: <el-rate v-model="storeInfo.descriptionScore" disabled show-score text-color="#ff9900"
-          score-template="{value}">
-        </el-rate></div>
-      <div class="separate">物流评分: <el-rate v-model="storeInfo.deliveryScore" disabled show-score text-color="#ff9900"
-          score-template="{value}">
-        </el-rate></div>
+      <div class="rate-row" v-for="row in rates" :key="row.label">
+        <span class="rate-label">{{ row.label }}</span>
+        <el-rate :model-value="row.score" disabled show-score text-color="#ff9900" score-template="{value}" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed } from "vue";
+import { defaultAvatar } from "@/assets/images";
 
-defineProps({
+const props = defineProps({
   storeInfo: {
     type: Object,
-    default: null,
+    default: () => ({}),
   },
 });
 
-const value = ref(null);
-const colors = ref(['#99A9BF', '#F7BA2A', '#FF9900']);
+const onError = "this.src='" + defaultAvatar + "'";
+
+const infoRows = computed(() => [
+  { label: "店铺地址", value: props.storeInfo.storeAddressPath },
+  { label: "详细地址", value: props.storeInfo.storeAddressDetail },
+  { label: "店铺简介", value: props.storeInfo.storeDesc },
+]);
+
+// 与买家端字段口径一致：店铺评分=描述相符 descriptionScore，服务评分=serviceScore
+const rates = computed(() => [
+  { label: "店铺评分", score: Number(props.storeInfo.descriptionScore) || 0 },
+  { label: "服务评分", score: Number(props.storeInfo.serviceScore) || 0 },
+  { label: "物流评分", score: Number(props.storeInfo.deliveryScore) || 0 },
+]);
 </script>
 
 <style scoped lang="less">
-.wrapper{
+.store-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.base {
   padding: 16px;
-  border-top: 1px solid #f5eeee;
-}
-.title_left_name {
-  font-size: 12px;
-  color: #999;
+  display: flex;
+
+  .image {
+    height: 72px;
+    width: 72px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #fafafa;
+  }
 }
 
-.title_right_name {
-  font-size: 12px;
-  color: #343036;
-  
-}
-
-.store-button {
-  background-color: white;
-
-}
-.store-detail{
+.store-detail {
+  flex: 1;
+  min-width: 0;
   margin-left: 13px;
-  display:flex;
-
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-.base {
-  padding: 16px;
-  margin-top: 5px;
 
+.store-name {
   display: flex;
-  .image {
-    height: 100px;
+  align-items: center;
+  gap: 8px;
 
-    width: 100px
+  .name-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #343036;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-
 }
 
-.separate {
-  margin-top: 8px;
-  // display: inline;
+.store-actions {
   display: flex;
-  font-size: 12px;
-  align-items: center;
+}
 
-  color: #a1a6af;
+.info-list {
+  padding: 0 16px 12px;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 8px;
+
+  .label {
+    width: 60px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: #999;
+    line-height: 20px;
+  }
+
+  .value {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    color: #343036;
+    line-height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}
+
+.wrapper {
+  padding: 12px 16px 16px;
+  border-top: 1px solid #f5f5f5;
+}
+
+.rate-row {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  .rate-label {
+    width: 60px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: #a1a6af;
+  }
 }
 </style>

@@ -16,7 +16,7 @@
     "axios": "^1.7.9",
     "babel-plugin-prismjs": "^2.0.1",
     "core-js": "^3.49.0",
-    "element-plus": "^2.14.1",
+    "element-plus": "2.14.1",
     "js-audio-recorder": "^1.0.6",
     "js-base64": "^2.5.1",
     "nprogress": "^0.2.0",

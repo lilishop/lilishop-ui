@@ -3,7 +3,7 @@
     当前浏览
     <div class="base">
       <div>
-        <img :src="goodsDetail.thumbnail" class="image" />
+        <img :src="goodsDetail.thumbnail" :onerror="defaultAvatar" class="image" />
       </div>
       <div style="margin-left: 13px">
         <a @click="linkToGoods(goodsDetail.goodsId, goodsDetail.id)"> {{ goodsDetail.goodsName }} </a>
@@ -23,10 +23,12 @@
 import { computed, onMounted, nextTick, ref } from "vue";
 import SocketInstance from "@/im-server/socket-instance";
 import { useUserStore } from "@/stores/user";
+import { useAppStore } from "@/stores/app";
 import { useDialogueStore } from "@/stores/dialogue";
 import { useTalkStore } from "@/stores/talk";
 
 const userStore = useUserStore();
+const appStore = useAppStore();
 const dialogueStore = useDialogueStore();
 const talkStore = useTalkStore();
 
@@ -44,6 +46,8 @@ const talkItems = computed(() => talkStore.talkItems);
 const id = computed(() => userStore.id);
 const index_name = computed(() => dialogueStore.index_name);
 const toUser = computed(() => userStore.toUser);
+// 图片加载失败时的默认图（onerror 属性值）
+const defaultAvatar = computed(() => appStore.defaultAvatar);
 
 onMounted(() => {
   console.log(props.goodsDetail)

@@ -10,7 +10,7 @@
             <el-header height="60px" class="header">
               <div class="user-login">
                 <div class="user-box">
-                  <face :text="face" :name="name" class="user-face"></face>
+                  <face :text="userFace" :name="name" class="user-face"></face>
                 </div>
               </div>
               <p class="user-status">
@@ -20,7 +20,7 @@
             </el-header>
             <el-header height="60px" class="header">
               <div class="from-search">
-                <el-input v-model="input" :prefix-icon="$legacyIcon('el-icon-search')" placeholder="搜索好友" size="small" />
+                <el-input v-model="input" :prefix-icon="$legacyIcon('el-icon-search')" placeholder="搜索好友" size="small" clearable />
               </div>
             </el-header>
             <!-- <el-header height="118px" class="logo-header">
@@ -56,6 +56,10 @@
 
                 <p v-show="loadStatus === 1 && talkNum === 0" class="empty-data">
                   暂无聊天消息
+                </p>
+
+                <p v-show="loadStatus === 1 && talkNum > 0 && userTalkItem.length === 0" class="empty-data">
+                  没有找到相关好友
                 </p>
 
                 <p v-show="loadStatus === 1 && talkNum > 0" class="main-menu">
@@ -108,7 +112,7 @@
                         </div>
                       </div>
                       <div class="talk-message">
-                        <span v-if="item.lastMessageType === 'MESSAGE'">{{ item.lastTalkMessage }}</span>
+                        <span v-if="item.lastMessageType === 'MESSAGE'" v-html="textReplaceEmoji(item.lastTalkMessage)"></span>
                         <span v-if="item.lastMessageType === 'GOODS'">[商品链接]</span>
                         <span v-if="item.lastMessageType === 'ORDER'">[订单链接]</span>
                       </div>
@@ -156,6 +160,7 @@ import {
   getCurrentInstance,
   nextTick,
   onBeforeUnmount,
+  onMounted,
   ref,
   watch,
 } from "vue";
@@ -174,6 +179,7 @@ import {
 } from "@/api/chat";
 import { ServeDeleteContact, ServeEditContactRemark } from "@/api/contacts";
 import { beautifyTime } from "@/utils/functions";
+import { textReplaceEmoji } from "@/utils/emojis";
 import { formatTalkItem, findTalkIndex, getCacheIndexName } from "@/utils/talk";
 import { setToken } from "@/utils/auth";
 import { syncImTokenFromRoute } from "@/utils/im-mode";
@@ -243,7 +249,9 @@ const unreadNum = computed(() => talkStore.unreadNum);
 const talkNum = computed(() => talkStore.talkNum);
 
 // 原 vuex mapState
-const face = computed(() => userStore.face);
+// 注意：不能命名为 face——会与全局注册的 <face> 组件绑定冲突，
+// 模板里的 <face> 标签会被解析成这个 computed 的值（头像 base64 字符串）当作标签名渲染
+const userFace = computed(() => userStore.face);
 const name = computed(() => userStore.name);
 const talks = computed(() => talkStore.items);
 const id = computed(() => userStore.id);
@@ -655,10 +663,11 @@ watch(talkItems, (val) => {
 });
 
 // 搜索用户的时候 根据当前用户表进行模糊搜索
-watch(input, (val, oldVal) => {
-  console.log(val, oldVal);
+watch(input, (val) => {
   if (val) {
-    let str = ["", ...val, ""].join(".*");
+    // 转义正则元字符，避免输入 [ 等字符时构造 RegExp 抛异常
+    const keyword = val.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    let str = ["", ...keyword, ""].join(".*");
     let reg = new RegExp(str);
     userTalkItem.value = talkItems.value.filter((item) =>
       reg.test(item.name)
@@ -703,8 +712,10 @@ onBeforeRouteUpdate((to, from, next) => {
 // 原 beforeCreate
 syncImTokenFromRoute(route, setToken);
 
-// 原 async created（保持 await 顺序，但用 IIFE 避免 setup 变为异步）
-(async () => {
+// 原 async created。不能在 setup 同步执行：全局 mixin 的方法（initialize/
+// loadUserSetting）在 finishComponentSetup 的 applyOptions 阶段才挂到公共代理上，
+// 即 setup() 返回之后。故放到 onMounted 里执行。
+onMounted(async () => {
   await proxy.initialize();
   await proxy.loadUserSetting();
   // 初始化商品参数
@@ -714,7 +725,7 @@ syncImTokenFromRoute(route, setToken);
    * 所以创建会话 并请求用户列表
    * 如果没有id说明当前商家登录 直接请求用户列表
    */
-})();
+});
 
 onBeforeUnmount(() => {
   document.title = title;
@@ -747,8 +758,20 @@ onBeforeUnmount(() => {
       flex-shrink: 0;
       height: 40px;
 
-      :deep(.el-input .el-input__inner ) {
-        border-radius: 20px;
+      :deep(.el-input__wrapper) {
+        border-radius: 16px;
+        background-color: #f5f6f7;
+        box-shadow: none;
+        transition: box-shadow 0.2s;
+
+        &.is-focus {
+          background-color: #fff;
+          box-shadow: 0 0 0 1px #409eff inset;
+        }
+      }
+
+      :deep(.el-input__inner) {
+        font-size: 12px;
       }
     }
 
@@ -1058,6 +1081,12 @@ onBeforeUnmount(() => {
 .talk-message {
   font-size: 12px;
   color: #8f959e;
+
+  :deep(img) {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+  }
 }
 
 .user-face {
