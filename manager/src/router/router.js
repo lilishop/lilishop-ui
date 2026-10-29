@@ -42,6 +42,7 @@ export const otherRouter = {
       path: "home",
       title: '首页',
       name: "home_index",
+      meta: { firstRouterName: "home_index" },
       component: () => import("@/views/home/home.vue")
     },
     {

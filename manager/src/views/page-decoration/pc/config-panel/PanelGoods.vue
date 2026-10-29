@@ -167,7 +167,7 @@ const props = defineProps({
   }
 });
 
-const defaultThumb = '/static/goods/goods_1.png';
+const defaultThumb = 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png';
 const showGoodsModal = ref(false);
 
 if (props.component?.type === 'goodsList' && (props.options.columns === undefined || props.options.columns === 4)) {

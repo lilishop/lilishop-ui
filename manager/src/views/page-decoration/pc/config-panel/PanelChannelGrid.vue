@@ -255,7 +255,7 @@ function handleAddChannel() {
   props.options.items.push({
     title: `频道 ${nextNum}`,
     subtitle: '品质好物',
-    img: `/static/channel-grid/channel_${iconIdx}.png`,
+    img: `https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/channel-grid/channel_${iconIdx}.png`,
     url: `/goodsList?channel=${nextNum}`
   });
 }

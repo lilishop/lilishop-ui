@@ -1,12 +1,12 @@
 <template>
   <div class="decor-search-header" :style="customStyle">
     <div class="header-inner">
-      <!-- 商城 Logo -->
+      <!-- 1. 商城 Logo 区域 -->
       <div class="logo-area">
         <router-link to="/">
           <img
-            v-if="options.logoUrl"
-            :src="options.logoUrl"
+            v-if="logoSrc"
+            :src="logoSrc"
             alt="Logo"
             class="site-logo"
           />
@@ -14,28 +14,29 @@
         </router-link>
       </div>
 
-      <!-- 搜索主区域 -->
+      <!-- 2. 搜索核心区（紧凑居中，含搜索框和热门推荐词） -->
       <div class="search-main">
-        <div class="search-input-box">
-          <el-input
+        <!-- 搜索输入框与按钮 -->
+        <div class="search-box">
+          <input
             v-model="keyword"
-            size="large"
-            :placeholder="options.placeholder || '搜索品牌或商品'"
+            type="text"
+            class="search-input"
+            :placeholder="placeholderText"
             @keyup.enter="handleSearch"
-            class="input-control"
           />
           <button type="button" class="search-btn" @click="handleSearch">
-            <el-icon :size="18"><Search /></el-icon>
+            <el-icon><Search /></el-icon>
             <span>搜索</span>
           </button>
         </div>
 
         <!-- 热门推荐词 -->
-        <div class="hot-words" v-if="options.showHotWords && options.hotWords?.length">
+        <div class="hot-words" v-if="options.showHotWords !== false && hotWordsList.length">
           <span
-            v-for="(word, idx) in options.hotWords"
+            v-for="(word, idx) in hotWordsList"
             :key="idx"
-            class="hot-word"
+            class="hot-w"
             @click="quickSearch(word)"
           >
             {{ word }}
@@ -43,11 +44,12 @@
         </div>
       </div>
 
-      <!-- 购物车入口 -->
-      <div class="cart-entry" v-if="options.showCart">
-        <router-link to="/cart" class="cart-btn">
-          <el-icon :size="20" class="cart-icon"><ShoppingCart /></el-icon>
-          <span>我的购物车</span>
+      <!-- 3. 购物车入口（紧凑跟随在搜索框右侧，带数量徽标） -->
+      <div class="cart-entry" v-if="options.showCart !== false">
+        <router-link to="/cart" class="cart-btn" :style="cartBtnStyle">
+          <el-icon class="cart-icon"><ShoppingCart /></el-icon>
+          <span class="cart-text">{{ options.cartText || '购物车' }}</span>
+          <span class="cart-count">{{ cartCount }}</span>
         </router-link>
       </div>
     </div>
@@ -58,6 +60,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search, ShoppingCart } from '@element-plus/icons-vue';
+import { useAppStore } from '@/stores/app.js';
 
 const props = defineProps({
   options: {
@@ -71,12 +74,34 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const appStore = useAppStore();
 const keyword = ref('');
+
+const logoSrc = computed(() => {
+  return props.options?.logoUrl || appStore.logoImg || '';
+});
+
+const placeholderText = computed(() => {
+  return props.options?.placeholder || '请输入商品名称、品牌或型号';
+});
+
+const hotWordsList = computed(() => {
+  if (Array.isArray(props.options?.hotWords) && props.options.hotWords.length) {
+    return props.options.hotWords;
+  }
+  return ['iPhone 16 Pro', '小棕瓶', '戴森吹风机', '华为Mate 70', '五粮液', '跑鞋'];
+});
+
+const cartCount = computed(() => {
+  return appStore.cartNum || 0;
+});
 
 function handleSearch() {
   const kw = keyword.value.trim();
   if (kw) {
     router.push({ path: '/goodsList', query: { keyword: kw } });
+  } else if (props.options?.placeholder) {
+    router.push({ path: '/goodsList', query: { keyword: props.options.placeholder } });
   }
 }
 
@@ -92,6 +117,15 @@ const customStyle = computed(() => {
     minHeight: `${s.height || 90}px`
   };
 });
+
+const cartBtnStyle = computed(() => {
+  const o = props.options || {};
+  return {
+    backgroundColor: o.cartBgColor || '#ffffff',
+    borderColor: o.cartBorderColor || '#e2e8f0',
+    color: o.cartTextColor || '#334155'
+  };
+});
 </script>
 
 <style lang="scss" scoped>
@@ -99,85 +133,109 @@ const customStyle = computed(() => {
   width: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background: #ffffff;
 
   .header-inner {
-    max-width: 1600px;
-    width: 100%;
+    width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 16px 20px;
+    padding: 18px 20px 14px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
+    align-items: flex-start;
+    justify-content: center; /* 紧凑聚拢居中，杜绝两侧过度留白 */
+    gap: 42px; /* Logo、搜索框、购物车紧密贴近 */
 
     .logo-area {
+      height: 40px;
+      display: flex;
+      align-items: center;
       flex-shrink: 0;
 
+      a {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+      }
+
       .site-logo {
-        max-height: 52px;
-        max-width: 180px;
+        max-height: 40px;
+        max-width: 200px;
         object-fit: contain;
+        display: block;
       }
 
       .text-logo {
         font-size: 26px;
         font-weight: 800;
-        color: #e11d48;
+        color: #409EFF;
         letter-spacing: -0.5px;
+        line-height: 1;
       }
     }
 
     .search-main {
-      flex: 1;
-      max-width: 600px;
+      width: 560px;
+      flex-shrink: 0;
 
-      .search-input-box {
+      .search-box {
         display: flex;
-        align-items: center;
+        border: 2px solid #409EFF;
+        border-radius: 4px;
+        overflow: hidden;
+        height: 40px;
+        box-sizing: border-box;
 
-        :deep(.el-input__wrapper) {
-          border-top-right-radius: 0;
-          border-bottom-right-radius: 0;
-          border-color: #e11d48;
-          box-shadow: 0 0 0 1px #e11d48 inset !important;
+        .search-input {
+          flex: 1;
+          border: none;
+          padding: 0 14px;
+          font-size: 13px;
+          color: #334155;
+          outline: none;
+          background: #ffffff;
+
+          &::placeholder {
+            color: #94a3b8;
+          }
         }
 
         .search-btn {
-          height: 40px;
-          padding: 0 24px;
-          background: #e11d48;
+          background: #409EFF;
           color: #ffffff;
           border: none;
-          border-top-right-radius: 4px;
-          border-bottom-right-radius: 4px;
-          font-size: 15px;
-          font-weight: 500;
+          padding: 0 24px;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
+          font-size: 14px;
+          font-weight: 600;
           cursor: pointer;
-          transition: background 0.2s;
+          transition: background 0.15s;
 
           &:hover {
-            background: #be123c;
+            background: #66b1ff;
           }
         }
       }
 
       .hot-words {
-        margin-top: 6px;
+        margin-top: 8px;
         display: flex;
-        flex-wrap: wrap;
+        align-items: center;
         gap: 12px;
         font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
 
-        .hot-word {
+        .hot-w {
           color: #94a3b8;
           cursor: pointer;
-          transition: color 0.2s;
+          transition: color 0.15s;
 
           &:hover {
-            color: #e11d48;
+            color: #409EFF;
           }
         }
       }
@@ -187,28 +245,45 @@ const customStyle = computed(() => {
       flex-shrink: 0;
 
       .cart-btn {
+        height: 40px;
         display: flex;
         align-items: center;
         gap: 8px;
-        height: 40px;
-        padding: 0 18px;
+        padding: 0 16px;
         border: 1px solid #e2e8f0;
         border-radius: 4px;
-        color: #334155;
-        text-decoration: none;
         font-size: 13px;
-        font-weight: 500;
-        background: #f8fafc;
-        transition: all 0.2s;
-
-        &:hover {
-          border-color: #e11d48;
-          color: #e11d48;
-          background: #fff1f2;
-        }
+        color: #334155;
+        background: #ffffff;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        transition: all 0.15s ease;
+        box-sizing: border-box;
 
         .cart-icon {
-          color: #e11d48;
+          font-size: 16px;
+          color: #409EFF;
+        }
+
+        .cart-text {
+          font-weight: 500;
+        }
+
+        .cart-count {
+          background: #409EFF;
+          color: #ffffff;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 0 6px;
+          height: 18px;
+          line-height: 18px;
+          border-radius: 9px;
+        }
+
+        &:hover {
+          border-color: #409EFF;
+          color: #409EFF;
         }
       }
     }

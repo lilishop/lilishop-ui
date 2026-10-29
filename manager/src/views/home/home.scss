@@ -1,18 +1,26 @@
+.home-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
 .card {
   margin: 10px 10px 20px;
   padding: 0 20px 20px;
   background: #fff;
   border: 1px solid #e7e7e7;
-
   border-radius: 0.4em;
+  box-sizing: border-box;
+  max-width: calc(100% - 20px);
 }
 h4 {
   margin: 20px 0;
   font-size: 18px;
 }
 .icon {
-  margin-left: 40px;
-  margin-right: 40px;
+  margin-left: 0;
+  margin-right: 0;
 }
 .count-item,
 .todo-item,
@@ -29,6 +37,11 @@ h4 {
   margin-right: 20px;
 }
 
+.count-list {
+  flex-wrap: wrap;
+  gap: 16px;
+  box-sizing: border-box;
+}
 .todo-list {
   flex-wrap: wrap;
   gap: 12px;
@@ -68,10 +81,14 @@ h4 {
   cursor: pointer;
   color: #fff;
   justify-content: flex-start;
+  flex: 1 1 200px;
+  min-width: 180px;
+  margin-right: 0;
+  box-sizing: border-box;
 
   > div:first-child {
-    margin-left: 40px;
-    margin-right: 20px;
+    margin-left: 24px;
+    margin-right: 16px;
     flex-shrink: 0;
   }
 }
@@ -111,6 +128,7 @@ h4 {
   align-items: stretch;
   flex-wrap: wrap;
   gap: 20px;
+  box-sizing: border-box;
 }
 .svg {
   width: 20px;
@@ -118,8 +136,11 @@ h4 {
 }
 .flow-item {
   display: flex;
-  flex: 1 1 620px;
+  flex: 1 1 540px;
   min-width: 0;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 .flow {
   background: #ebebeb88 !important;
@@ -127,8 +148,10 @@ h4 {
   padding: 0;
 }
 .flow-member {
-  width: 200px;
-  margin-right: 20px;
+  width: 180px;
+  margin-right: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
   font-weight: bold;
 
   background: #fff;
@@ -149,12 +172,12 @@ h4 {
   }
 }
 .flow-box {
-  padding: 37px;
+  padding: 24px 16px;
   width: 100%;
   box-sizing: border-box;
   justify-content: space-between;
   margin: 10px 0 20px;
-  gap: 20px;
+  gap: 16px;
   > .flow-box-item {
     flex: 1;
     min-width: 0;
@@ -171,26 +194,27 @@ h4 {
 }
 .flow-splice {
   width: 100%;
-  gap: 20px;
+  gap: 16px;
+  box-sizing: border-box;
 }
 .flow-box-splice {
   background: #fff;
   flex: 1;
   min-width: 0;
-  margin-right: 20px;
-  padding: 36px;
+  margin-right: 0;
+  padding: 24px 16px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  flex-direction: column;
   > div {
     margin: 4px 0;
   }
   > .counts {
     color: #ffaa71;
   }
-
-  flex-direction: column;
 }
 .flow-box-splice:nth-last-of-type(1) {
   margin-right: 0;
@@ -207,16 +231,17 @@ h4 {
 }
 .flow-wrapper {
   background: #fff;
-  padding: 0 30px;
-  flex: 1;
+  padding: 0 20px 20px;
+  flex: 1 1 320px;
   min-width: 0;
+  box-sizing: border-box;
 }
 .today-box {
-  flex: 1 1 380px;
-  min-width: 380px;
+  flex: 1 1 340px;
+  min-width: 0;
   align-self: flex-start;
   background: #fff;
-  padding: 0 30px 20px;
+  padding: 0 20px 20px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -251,12 +276,21 @@ h4 {
 
 .charts {
   margin: 10px 10px 20px;
-  padding: 20px 20px 20px;
+  padding: 20px;
   background: #fff;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: calc(100% - 20px);
 }
 .chart-item {
-  width: 48%;
-  margin-right: 1%;
+  flex: 1 1 450px;
+  min-width: 0;
+  width: auto;
+  margin-right: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .today-list {
@@ -294,4 +328,19 @@ h4 {
   margin: 0 0 12px;
   color: #909399;
   font-size: 13px;
+}
+
+
+#historyMemberChart,
+#pvChart,
+#orderChart {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+
+  :deep(canvas),
+  canvas {
+    max-width: 100% !important;
+    display: block;
+  }
 }

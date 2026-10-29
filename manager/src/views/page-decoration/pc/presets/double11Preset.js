@@ -89,7 +89,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
             "backgroundColor": "#ffffff"
           },
           "options": {
-            "logoUrl": "/static/logo/logo.png",
+            "logoUrl": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/logo/logo.png",
             "logoAlt": "双11全球狂欢节",
             "placeholder": "双11爆款 5折封顶 · 跨店每满300减50",
             "hotWords": [
@@ -261,7 +261,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           "name": "轮播图",
           "componentStyle": {
             "widthRatio": "66.67%",
-            "backgroundColor": "transparent",
+            "backgroundColor": "#ffffff",
             "radius": [
               8,
               8,
@@ -282,29 +282,29 @@ export const DOUBLE11_PAGE_DOCUMENT = {
               {
                 "title": "双11全球狂欢 · 潮流数码甄选",
                 "subtitle": "定金膨胀100抵300 抢千元大额神券",
-                "image": "/static/carousel/banner_1.png",
+                "image": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png",
                 "url": "/goodsList"
               },
               {
                 "title": "奢宠美妆 · 经典护肤狂欢",
                 "subtitle": "买1赠1正装量 跨店每满300减50",
-                "image": "/static/carousel/banner_2.png",
+                "image": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png",
                 "url": "/goodsList"
               },
               {
                 "title": "运动潮流 · 破界开练",
                 "subtitle": "顶级碳板竞速 全场低至5折起",
-                "image": "/static/carousel/banner_3.png",
+                "image": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png",
                 "url": "/goodsList"
               },
               {
                 "title": "极简家居 · 美学生活",
                 "subtitle": "大牌家电以旧换新 至高补贴20%",
-                "image": "/static/carousel/banner_4.png",
+                "image": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png",
                 "url": "/goodsList"
               }
             ],
-            "fitMode": "cover"
+            "fitMode": "contain"
           }
         },
         {
@@ -652,7 +652,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
             ]
           },
           "options": {
-            "imageUrl": "/static/hot-zone/hotzone_default.png",
+            "imageUrl": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/hot-zone/hotzone_default.png",
             "hotzones": [
               {
                 "id": "hz1",
@@ -729,7 +729,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "id": "p1",
                 "title": "双11定金膨胀",
                 "subtitle": "100抵300 抢跑双11",
-                "image": "/static/promo/promo_1.png",
+                "image": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/promo-group/promo_1.png",
                 "tag": "预售锁定",
                 "url": "/goodsList"
               },
@@ -737,7 +737,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "id": "p2",
                 "title": "大牌狂欢买1送1",
                 "subtitle": "买大牌正装赠等量好礼",
-                "image": "/static/promo/promo_2.png",
+                "image": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/promo-group/promo_2.png",
                 "tag": "狂欢赠礼",
                 "url": "/goodsList"
               },
@@ -745,7 +745,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "id": "p3",
                 "title": "爆款百亿补贴",
                 "subtitle": "全网比价 买贵必赔",
-                "image": "/static/promo/promo_3.png",
+                "image": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/promo-group/promo_3.png",
                 "tag": "官方直补",
                 "url": "/goodsList"
               }
@@ -802,7 +802,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
             "badge": "立省600元",
             "price": "3999.00",
             "originalPrice": "4599.00",
-            "image": "/static/goods/goods_1.png",
+            "image": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png",
             "url": "/goods/1"
           }
         },
@@ -833,7 +833,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "goodsName": "无线头戴式深度主动降噪耳机 空间音频Hi-Res",
                 "price": "1099.00",
                 "originalPrice": "1499.00",
-                "thumbnail": "/static/goods/goods_2.png",
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png",
                 "tag": "降噪TOP1"
               },
               {
@@ -841,7 +841,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "goodsName": "14英寸全面屏轻薄笔记本电脑 酷睿i7 高刷防眩光",
                 "price": "5699.00",
                 "originalPrice": "6299.00",
-                "thumbnail": "/static/goods/goods_3.png",
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png",
                 "tag": "直降600"
               },
               {
@@ -849,7 +849,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "goodsName": "运动健康专业监测智能手表 心率血氧长续航防水",
                 "price": "899.00",
                 "originalPrice": "1199.00",
-                "thumbnail": "/static/goods/goods_4.png",
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png",
                 "tag": "抢购热卖"
               }
             ]
@@ -977,7 +977,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
             "floorNo": "1F",
             "title": "潮流数码狂欢",
             "subtitle": "DIGITAL & GADGETS",
-            "posterImage": "/static/banner-floor/floor_banner_1.png",
+            "posterImage": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/banner-floor/floor_banner_1.png",
             "posterTitle": "数码狂欢盛典",
             "posterSubtitle": "最高立省1000元",
             "goods": [
@@ -989,7 +989,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 15820,
                 "positiveRate": "99.8%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_1.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png"
               },
               {
                 "id": "2",
@@ -999,7 +999,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 28410,
                 "positiveRate": "99.5%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_2.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png"
               },
               {
                 "id": "3",
@@ -1009,7 +1009,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 9320,
                 "positiveRate": "99.2%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_3.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png"
               },
               {
                 "id": "4",
@@ -1019,7 +1019,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 19500,
                 "positiveRate": "99.6%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_4.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png"
               }
             ]
           }
@@ -1055,7 +1055,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
             "backgroundColor": "transparent"
           },
           "options": {
-            "bannerImage": "/static/banner-floor/floor_banner_1.png",
+            "bannerImage": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/banner-floor/floor_banner_1.png",
             "title": "双11大牌品质生活盛典",
             "subtitle": "以旧换新重磅补贴 跨店每满300减50",
             "goods": [
@@ -1067,7 +1067,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 34100,
                 "positiveRate": "99.9%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_5.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png"
               },
               {
                 "id": "6",
@@ -1077,7 +1077,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 8760,
                 "positiveRate": "99.1%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_6.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png"
               },
               {
                 "id": "7",
@@ -1087,7 +1087,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 22100,
                 "positiveRate": "99.4%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_7.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png"
               },
               {
                 "id": "8",
@@ -1097,7 +1097,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 14200,
                 "positiveRate": "99.0%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_8.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_8.png"
               }
             ]
           }
@@ -1135,7 +1135,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           "options": {
             "title": "双11智能生活场景馆",
             "subtitle": "SMART LIFE SHOWROOM",
-            "heroImage": "/static/promo/promo_1.png",
+            "heroImage": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/promo-group/promo_1.png",
             "heroTitle": "智能生活新时代",
             "heroSubtitle": "畅享未来智慧家庭科技",
             "goods": [
@@ -1147,7 +1147,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 15820,
                 "positiveRate": "99.8%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_1.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png"
               },
               {
                 "id": "3",
@@ -1157,7 +1157,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 9320,
                 "positiveRate": "99.2%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_3.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png"
               },
               {
                 "id": "6",
@@ -1167,7 +1167,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 8760,
                 "positiveRate": "99.1%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_6.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png"
               }
             ]
           }
@@ -1250,7 +1250,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 15820,
                 "positiveRate": "99.8%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_1.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png"
               },
               {
                 "id": "2",
@@ -1260,7 +1260,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 28410,
                 "positiveRate": "99.5%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_2.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png"
               },
               {
                 "id": "3",
@@ -1270,7 +1270,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 9320,
                 "positiveRate": "99.2%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_3.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png"
               },
               {
                 "id": "4",
@@ -1280,7 +1280,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 19500,
                 "positiveRate": "99.6%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_4.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png"
               },
               {
                 "id": "5",
@@ -1290,7 +1290,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 34100,
                 "positiveRate": "99.9%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_5.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png"
               },
               {
                 "id": "6",
@@ -1300,7 +1300,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 8760,
                 "positiveRate": "99.1%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_6.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png"
               },
               {
                 "id": "7",
@@ -1310,7 +1310,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 22100,
                 "positiveRate": "99.4%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_7.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png"
               },
               {
                 "id": "8",
@@ -1320,7 +1320,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 14200,
                 "positiveRate": "99.0%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_8.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_8.png"
               }
             ]
           }
@@ -1394,7 +1394,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           },
           "options": {
             "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
-            "coverUrl": "/static/video/video_cover.png",
+            "coverUrl": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/video/video_cover.png",
             "title": "双11全球狂欢发布盛典 · 年度旗舰好物真实开箱测评",
             "autoplay": false
           }
@@ -1471,25 +1471,25 @@ export const DOUBLE11_PAGE_DOCUMENT = {
               {
                 "id": "1",
                 "name": "Apple 官方旗舰店",
-                "logo": "/static/brand-wall/brand_1.png",
+                "logo": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/brand-wall/brand_1.png",
                 "tag": "正品补贴"
               },
               {
                 "id": "2",
                 "name": "Sony 索尼官方旗舰店",
-                "logo": "/static/brand-wall/brand_2.png",
+                "logo": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/brand-wall/brand_2.png",
                 "tag": "新品独家"
               },
               {
                 "id": "3",
                 "name": "Estee Lauder 雅诗兰黛",
-                "logo": "/static/brand-wall/brand_3.png",
+                "logo": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/brand-wall/brand_3.png",
                 "tag": "买1送1"
               },
               {
                 "id": "4",
                 "name": "Nike 耐克官方商城",
-                "logo": "/static/brand-wall/brand_4.png",
+                "logo": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/brand-wall/brand_4.png",
                 "tag": "低至5折"
               }
             ]
@@ -1647,7 +1647,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 15820,
                 "positiveRate": "99.8%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_1.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png"
               },
               {
                 "id": "2",
@@ -1657,7 +1657,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 28410,
                 "positiveRate": "99.5%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_2.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png"
               },
               {
                 "id": "3",
@@ -1667,7 +1667,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 9320,
                 "positiveRate": "99.2%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_3.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png"
               },
               {
                 "id": "4",
@@ -1677,7 +1677,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 19500,
                 "positiveRate": "99.6%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_4.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png"
               },
               {
                 "id": "5",
@@ -1687,7 +1687,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 34100,
                 "positiveRate": "99.9%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_5.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png"
               },
               {
                 "id": "6",
@@ -1697,7 +1697,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 8760,
                 "positiveRate": "99.1%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_6.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png"
               },
               {
                 "id": "7",
@@ -1707,7 +1707,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 22100,
                 "positiveRate": "99.4%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_7.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png"
               },
               {
                 "id": "8",
@@ -1717,7 +1717,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 14200,
                 "positiveRate": "99.0%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_8.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_8.png"
               }
             ]
           }
@@ -1800,7 +1800,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 15820,
                 "positiveRate": "99.8%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_1.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png"
               },
               {
                 "id": "2",
@@ -1810,7 +1810,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 28410,
                 "positiveRate": "99.5%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_2.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png"
               },
               {
                 "id": "3",
@@ -1820,7 +1820,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 9320,
                 "positiveRate": "99.2%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_3.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png"
               },
               {
                 "id": "4",
@@ -1830,7 +1830,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 19500,
                 "positiveRate": "99.6%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_4.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png"
               },
               {
                 "id": "5",
@@ -1840,7 +1840,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 34100,
                 "positiveRate": "99.9%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_5.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png"
               },
               {
                 "id": "6",
@@ -1850,7 +1850,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 8760,
                 "positiveRate": "99.1%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_6.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png"
               },
               {
                 "id": "7",
@@ -1860,7 +1860,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 22100,
                 "positiveRate": "99.4%",
                 "isSelf": true,
-                "thumbnail": "/static/goods/goods_7.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png"
               },
               {
                 "id": "8",
@@ -1870,7 +1870,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
                 "sales": 14200,
                 "positiveRate": "99.0%",
                 "isSelf": false,
-                "thumbnail": "/static/goods/goods_8.png"
+                "thumbnail": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_8.png"
               }
             ]
           }

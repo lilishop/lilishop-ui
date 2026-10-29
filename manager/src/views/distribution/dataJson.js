@@ -84,3 +84,7 @@ export const orderStatusList = [
         label:'提现完成'
     }
 ]
+
+// 兼容别名导出
+export const bindStatusList = relationStatusList;
+export const bindChangeTypeList = customerRelationChangeTypeList;

@@ -150,7 +150,7 @@ export const COMPONENT_DEFINITIONS = [
 
     defaultOptions: {
 
-      logoUrl: '/static/logo/logo.png',
+      logoUrl: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/logo/logo.png',
 
       placeholder: '搜索品牌或商品',
 
@@ -268,16 +268,16 @@ export const COMPONENT_DEFINITIONS = [
       textColor: '#334155',
       activeColor: '#e11d48',
       navItems: [
-        { title: '应急救援', img: '/static/category-nav/cat_1.png', url: '/goodsList?categoryId=1', badge: '' },
-        { title: '新鲜蔬菜', img: '/static/category-nav/cat_2.png', url: '/goodsList?categoryId=2', badge: '' },
-        { title: '乳品烘焙', img: '/static/category-nav/cat_3.png', url: '/goodsList?categoryId=3', badge: '' },
-        { title: '肉禽蛋品', img: '/static/category-nav/cat_4.png', url: '/goodsList?categoryId=4', badge: '' },
-        { title: '生鲜门店', img: '/static/category-nav/cat_5.png', url: '/goodsList?categoryId=5', badge: '' },
-        { title: '母婴育儿', img: '/static/category-nav/cat_6.png', url: '/goodsList?categoryId=6', badge: '' },
-        { title: '美护百货', img: '/static/category-nav/cat_7.png', url: '/goodsList?categoryId=7', badge: '' },
-        { title: '粮油调味', img: '/static/category-nav/cat_8.png', url: '/goodsList?categoryId=8', badge: '' },
-        { title: '酒水饮料', img: '/static/category-nav/cat_9.png', url: '/goodsList?categoryId=9', badge: '' },
-        { title: '海鲜水产', img: '/static/category-nav/cat_10.png', url: '/goodsList?categoryId=10', badge: '' }
+        { title: '应急救援', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_1.png', url: '/goodsList?categoryId=1', badge: '' },
+        { title: '新鲜蔬菜', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_2.png', url: '/goodsList?categoryId=2', badge: '' },
+        { title: '乳品烘焙', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_3.png', url: '/goodsList?categoryId=3', badge: '' },
+        { title: '肉禽蛋品', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_4.png', url: '/goodsList?categoryId=4', badge: '' },
+        { title: '生鲜门店', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_5.png', url: '/goodsList?categoryId=5', badge: '' },
+        { title: '母婴育儿', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_6.png', url: '/goodsList?categoryId=6', badge: '' },
+        { title: '美护百货', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_7.png', url: '/goodsList?categoryId=7', badge: '' },
+        { title: '粮油调味', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_8.png', url: '/goodsList?categoryId=8', badge: '' },
+        { title: '酒水饮料', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_9.png', url: '/goodsList?categoryId=9', badge: '' },
+        { title: '海鲜水产', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/category-nav/cat_10.png', url: '/goodsList?categoryId=10', badge: '' }
       ]
     },
     defaultComponentStyle: {
@@ -301,10 +301,10 @@ export const COMPONENT_DEFINITIONS = [
       imageRadius: 10,
       gap: 12,
       items: [
-        { title: '企业采购', subtitle: '批量省心', img: '/static/channel-grid/channel_1.png', url: '/goodsList?channel=1' },
-        { title: '领券中心', subtitle: '先领再买', img: '/static/channel-grid/channel_2.png', url: '/couponCenter' },
-        { title: '新品首发', subtitle: '每月上新', img: '/static/channel-grid/channel_3.png', url: '/goodsList?channel=3' },
-        { title: '品牌馆', subtitle: '精选好店', img: '/static/channel-grid/channel_4.png', url: '/brand' }
+        { title: '企业采购', subtitle: '批量省心', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/channel-grid/channel_1.png', url: '/goodsList?channel=1' },
+        { title: '领券中心', subtitle: '先领再买', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/channel-grid/channel_2.png', url: '/couponCenter' },
+        { title: '新品首发', subtitle: '每月上新', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/channel-grid/channel_3.png', url: '/goodsList?channel=3' },
+        { title: '品牌馆', subtitle: '精选好店', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/channel-grid/channel_4.png', url: '/brand' }
       ]
     },
     defaultComponentStyle: {
@@ -388,22 +388,22 @@ export const COMPONENT_DEFINITIONS = [
       height: 380,
       list: [
         {
-          img: '/static/carousel/banner_1.png',
+          img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png',
           title: '出游囤好货 · 迎接小长假',
           url: '/goodsList?seckill=1'
         },
         {
-          img: '/static/carousel/banner_2.png',
+          img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png',
           title: '爆款潮电 · 科技新品首发',
           url: '/goodsList?category=1'
         },
         {
-          img: '/static/carousel/banner_3.png',
+          img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png',
           title: '原产地直采 · 绿色鲜果集市',
           url: '/goodsList?category=2'
         },
         {
-          img: '/static/carousel/banner_4.png',
+          img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png',
           title: '甄选大牌美妆 · 唤醒肌肤活力',
           url: '/goodsList?category=3'
         }
@@ -428,10 +428,10 @@ export const COMPONENT_DEFINITIONS = [
       columns: 4,
       gap: 12,
       items: [
-        { title: '数码潮玩 · 爆款立减500', img: '/static/brand-wall/brand_1.png', url: '/goodsList?category=1' },
-        { title: '美妆奢宠 · 每满300减50', img: '/static/brand-wall/brand_2.png', url: '/goodsList?category=2' },
-        { title: '运动潮品 · 爆款低至5折', img: '/static/brand-wall/brand_3.png', url: '/goodsList?category=3' },
-        { title: '品质生活 · 限时第2件半价', img: '/static/brand-wall/brand_4.png', url: '/goodsList?category=4' }
+        { title: '数码潮玩 · 爆款立减500', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/brand-wall/brand_1.png', url: '/goodsList?category=1' },
+        { title: '美妆奢宠 · 每满300减50', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/brand-wall/brand_2.png', url: '/goodsList?category=2' },
+        { title: '运动潮品 · 爆款低至5折', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/brand-wall/brand_3.png', url: '/goodsList?category=3' },
+        { title: '品质生活 · 限时第2件半价', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/brand-wall/brand_4.png', url: '/goodsList?category=4' }
       ]
     },
     defaultComponentStyle: {
@@ -449,7 +449,7 @@ export const COMPONENT_DEFINITIONS = [
     icon: 'Aim',
     description: '一张大图框选多个跳转热区',
     defaultOptions: {
-      imageUrl: '/static/hot-zone/hotzone_default.png',
+      imageUrl: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/hot-zone/hotzone_default.png',
       zones: [
         {
           title: '大促主会场 · 领券中心',
@@ -532,9 +532,9 @@ export const COMPONENT_DEFINITIONS = [
       columns: 3,
 
       cards: [
-        { title: '限时秒杀', subtitle: '抢券立减50元 · 爆款直降', bgImg: '/static/promo-group/promo_1.png', url: '/goodsList?seckill=1' },
-        { title: '品牌特惠', subtitle: '大牌买一送一 · 领百元神券', bgImg: '/static/promo-group/promo_2.png', url: '/goodsList?brand=1' },
-        { title: '新品首发', subtitle: '首单专享特惠 · 1元起尝鲜', bgImg: '/static/promo-group/promo_3.png', url: '/goodsList?new=1' }
+        { title: '限时秒杀', subtitle: '抢券立减50元 · 爆款直降', bgImg: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/promo-group/promo_1.png', url: '/goodsList?seckill=1' },
+        { title: '品牌特惠', subtitle: '大牌买一送一 · 领百元神券', bgImg: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/promo-group/promo_2.png', url: '/goodsList?brand=1' },
+        { title: '新品首发', subtitle: '首单专享特惠 · 1元起尝鲜', bgImg: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/promo-group/promo_3.png', url: '/goodsList?new=1' }
       ]
 
     },
@@ -558,7 +558,7 @@ export const COMPONENT_DEFINITIONS = [
     description: '品牌宣传与商品视频播放',
     defaultOptions: {
       videoUrl: '',
-      coverUrl: '/static/video/video_cover.png',
+      coverUrl: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/video/video_cover.png',
       autoPlay: false,
       loop: false,
       controls: true,
@@ -603,84 +603,84 @@ export const COMPONENT_DEFINITIONS = [
           goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统',
           price: '3999.00',
           originalPrice: '4599.00',
-          thumbnail: '/static/goods/goods_1.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png'
         },
         {
           id: '2',
           goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res',
           price: '1099.00',
           originalPrice: '1499.00',
-          thumbnail: '/static/goods/goods_2.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png'
         },
         {
           id: '3',
           goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光',
           price: '5699.00',
           originalPrice: '6299.00',
-          thumbnail: '/static/goods/goods_3.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png'
         },
         {
           id: '4',
           goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水',
           price: '899.00',
           originalPrice: '1199.00',
-          thumbnail: '/static/goods/goods_4.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png'
         },
         {
           id: '5',
           goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养',
           price: '680.00',
           originalPrice: '890.00',
-          thumbnail: '/static/goods/goods_5.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png'
         },
         {
           id: '6',
           goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡',
           price: '899.00',
           originalPrice: '1280.00',
-          thumbnail: '/static/goods/goods_6.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png'
         },
         {
           id: '7',
           goodsName: '碳板专业竞速轻量缓震跑步鞋 透气防滑男女同款潮鞋',
           price: '459.00',
           originalPrice: '699.00',
-          thumbnail: '/static/goods/goods_7.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png'
         },
         {
           id: '8',
           goodsName: '极简静音无雾负离子香薰加湿器 大容量客厅卧室通用',
           price: '299.00',
           originalPrice: '399.00',
-          thumbnail: '/static/goods/goods_8.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_8.png'
         },
         {
           id: '9',
           goodsName: '智能降噪AI翻译蓝牙墨镜 超轻防紫外线偏光太阳镜',
           price: '599.00',
           originalPrice: '799.00',
-          thumbnail: '/static/goods/goods_1.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png'
         },
         {
           id: '10',
           goodsName: '15.6英寸 4K超高清便携式显示器 Type-C一线直连高色域',
           price: '1299.00',
           originalPrice: '1699.00',
-          thumbnail: '/static/goods/goods_3.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png'
         },
         {
           id: '11',
           goodsName: '国AA级减蓝光润眼长臂台灯 智能感光多档色温无极调光',
           price: '249.00',
           originalPrice: '359.00',
-          thumbnail: '/static/goods/goods_4.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png'
         },
         {
           id: '12',
           goodsName: '航空级铝镁合金静音万向轮拉杆登机箱 20英寸防刮耐磨',
           price: '499.00',
           originalPrice: '699.00',
-          thumbnail: '/static/goods/goods_7.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png'
         }
       ],
 
@@ -734,7 +734,7 @@ export const COMPONENT_DEFINITIONS = [
 
       showPoster: true,
 
-      posterImg: '/static/banner-floor/floor_banner_1.png',
+      posterImg: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/banner-floor/floor_banner_1.png',
 
       posterTitle: '数码潮电 酷玩季',
 
@@ -754,56 +754,56 @@ export const COMPONENT_DEFINITIONS = [
           goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统',
           price: '3999.00',
           originalPrice: '4599.00',
-          thumbnail: '/static/goods/goods_1.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png'
         },
         {
           id: '102',
           goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res',
           price: '1099.00',
           originalPrice: '1499.00',
-          thumbnail: '/static/goods/goods_2.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png'
         },
         {
           id: '103',
           goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光',
           price: '5699.00',
           originalPrice: '6299.00',
-          thumbnail: '/static/goods/goods_3.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png'
         },
         {
           id: '104',
           goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水',
           price: '899.00',
           originalPrice: '1199.00',
-          thumbnail: '/static/goods/goods_4.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png'
         },
         {
           id: '105',
           goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养',
           price: '680.00',
           originalPrice: '890.00',
-          thumbnail: '/static/goods/goods_5.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png'
         },
         {
           id: '106',
           goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡',
           price: '899.00',
           originalPrice: '1280.00',
-          thumbnail: '/static/goods/goods_6.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png'
         },
         {
           id: '107',
           goodsName: '碳板专业竞速轻量缓震跑步鞋 透气防滑男女同款潮鞋',
           price: '459.00',
           originalPrice: '699.00',
-          thumbnail: '/static/goods/goods_7.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png'
         },
         {
           id: '108',
           goodsName: '极简静音无雾负离子香薰加湿器 大容量客厅卧室通用',
           price: '299.00',
           originalPrice: '399.00',
-          thumbnail: '/static/goods/goods_8.png'
+          thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_8.png'
         }
       ]
 
@@ -836,16 +836,16 @@ export const COMPONENT_DEFINITIONS = [
       moreText: '查看全部',
       columns: 5,
       goods: [
-        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: '/static/goods/goods_1.png' },
-        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: '/static/goods/goods_2.png' },
-        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: '/static/goods/goods_3.png' },
-        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: '/static/goods/goods_4.png' },
-        { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: '/static/goods/goods_5.png' },
-        { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: '/static/goods/goods_6.png' },
-        { id: '7', goodsName: '碳板专业竞速轻量缓震跑步鞋 透气防滑男女同款潮鞋', price: '459.00', originalPrice: '699.00', thumbnail: '/static/goods/goods_7.png' },
-        { id: '8', goodsName: '极简静音无雾负离子香薰加湿器 大容量客厅卧室通用', price: '299.00', originalPrice: '399.00', thumbnail: '/static/goods/goods_8.png' },
-        { id: '9', goodsName: '折叠屏旗舰手机 典藏陶瓷白 悬停双旋水滴铰链', price: '6999.00', originalPrice: '7999.00', thumbnail: '/static/goods/goods_1.png' },
-        { id: '10', goodsName: '真无线触控降噪蓝牙耳机 超低延迟游戏降噪', price: '599.00', originalPrice: '799.00', thumbnail: '/static/goods/goods_2.png' }
+        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
+        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png' },
+        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png' },
+        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png' },
+        { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png' },
+        { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png' },
+        { id: '7', goodsName: '碳板专业竞速轻量缓震跑步鞋 透气防滑男女同款潮鞋', price: '459.00', originalPrice: '699.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png' },
+        { id: '8', goodsName: '极简静音无雾负离子香薰加湿器 大容量客厅卧室通用', price: '299.00', originalPrice: '399.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_8.png' },
+        { id: '9', goodsName: '折叠屏旗舰手机 典藏陶瓷白 悬停双旋水滴铰链', price: '6999.00', originalPrice: '7999.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
+        { id: '10', goodsName: '真无线触控降噪蓝牙耳机 超低延迟游戏降噪', price: '599.00', originalPrice: '799.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png' }
       ]
     },
 
@@ -875,12 +875,12 @@ export const COMPONENT_DEFINITIONS = [
 
     defaultOptions: {
       goodsId: '1',
-      goodsInfo: { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: '/static/goods/goods_1.png' },
+      goodsInfo: { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
       customTitle: '年度年度旗舰 · 科技美学',
       customDesc: '搭载新一代旗舰处理器，超光影三主摄影像，120Hz高刷原色护眼屏，重磅直降立减600元。',
       badge: '重磅首发',
       goods: [
-        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: '/static/goods/goods_1.png' }
+        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' }
       ]
     },
 
@@ -911,17 +911,17 @@ export const COMPONENT_DEFINITIONS = [
     defaultOptions: {
       title: '大牌热销榜',
       subtitle: '经典楼层 · 专享特惠',
-      bannerImg: '/static/banner-floor/floor_banner_1.png',
+      bannerImg: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/banner-floor/floor_banner_1.png',
       bannerUrl: '/goodsList?category=1',
       goodsCount: 6,
       columns: 3,
       goods: [
-        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: '/static/goods/goods_1.png' },
-        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: '/static/goods/goods_2.png' },
-        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: '/static/goods/goods_3.png' },
-        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: '/static/goods/goods_4.png' },
-        { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: '/static/goods/goods_5.png' },
-        { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: '/static/goods/goods_6.png' }
+        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
+        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png' },
+        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png' },
+        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png' },
+        { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png' },
+        { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png' }
       ]
     },
 
@@ -954,12 +954,12 @@ export const COMPONENT_DEFINITIONS = [
       subtitle: '每日人气尖货爆款直降',
       columns: 6,
       goods: [
-        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: '/static/goods/goods_1.png' },
-        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: '/static/goods/goods_2.png' },
-        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: '/static/goods/goods_3.png' },
-        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: '/static/goods/goods_4.png' },
-        { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: '/static/goods/goods_5.png' },
-        { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: '/static/goods/goods_6.png' }
+        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
+        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png' },
+        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png' },
+        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png' },
+        { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png' },
+        { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png' }
       ]
     },
 
@@ -989,7 +989,7 @@ export const COMPONENT_DEFINITIONS = [
       showTitle: true,
       title: '场景频道',
       subtitle: '主视觉 + 商品组合楼层',
-      heroImage: '/static/banner-floor/floor_banner_1.png',
+      heroImage: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/banner-floor/floor_banner_1.png',
       heroTitle: '品质生活馆',
       heroSubtitle: '精选场景好物，一站购齐',
       heroButtonText: '进入频道',
@@ -1001,12 +1001,12 @@ export const COMPONENT_DEFINITIONS = [
       ],
       goodsCount: 6,
       goods: [
-        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: '/static/goods/goods_1.png' },
-        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: '/static/goods/goods_2.png' },
-        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: '/static/goods/goods_3.png' },
-        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: '/static/goods/goods_4.png' },
-        { id: '5', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: '/static/goods/goods_6.png' },
-        { id: '6', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: '/static/goods/goods_5.png' }
+        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
+        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png' },
+        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png' },
+        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png' },
+        { id: '5', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png' },
+        { id: '6', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png' }
       ]
     },
 
@@ -1038,14 +1038,14 @@ export const COMPONENT_DEFINITIONS = [
       imageRadius: 10,
       gap: 12,
       goods: [
-        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: '/static/goods/goods_1.png' },
-        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: '/static/goods/goods_2.png' },
-        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: '/static/goods/goods_3.png' },
-        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: '/static/goods/goods_4.png' },
-        { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: '/static/goods/goods_5.png' },
-        { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: '/static/goods/goods_6.png' },
-        { id: '7', goodsName: '碳板专业竞速轻量缓震跑步鞋 透气防滑男女同款潮鞋', price: '459.00', originalPrice: '699.00', thumbnail: '/static/goods/goods_7.png' },
-        { id: '8', goodsName: '极简静音无雾负离子香薰加湿器 大容量客厅卧室通用', price: '299.00', originalPrice: '399.00', thumbnail: '/static/goods/goods_8.png' }
+        { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
+        { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', originalPrice: '1499.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png' },
+        { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', originalPrice: '6299.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png' },
+        { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', originalPrice: '1199.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png' },
+        { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', originalPrice: '890.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png' },
+        { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', originalPrice: '1280.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png' },
+        { id: '7', goodsName: '碳板专业竞速轻量缓震跑步鞋 透气防滑男女同款潮鞋', price: '459.00', originalPrice: '699.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png' },
+        { id: '8', goodsName: '极简静音无雾负离子香薰加湿器 大容量客厅卧室通用', price: '299.00', originalPrice: '399.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_8.png' }
       ]
     },
 

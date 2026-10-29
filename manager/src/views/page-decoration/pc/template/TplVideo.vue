@@ -1,7 +1,7 @@
 <template>
   <div class="tpl-video" :style="customStyle">
     <div class="video-preview-box">
-      <img :src="options.coverUrl || '/static/video/video_cover.png'" alt="cover" class="cover-img" />
+      <img :src="options.coverUrl || 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/video/video_cover.png'" alt="cover" class="cover-img" />
       <div class="play-btn">▶</div>
     </div>
   </div>

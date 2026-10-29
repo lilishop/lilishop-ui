@@ -70,11 +70,18 @@ const slidesList = computed(() => {
   if (Array.isArray(props.options.list) && props.options.list.length > 0) {
     return props.options.list;
   }
+  if (Array.isArray(props.options.banners) && props.options.banners.length > 0) {
+    return props.options.banners.map(b => ({
+      title: b.title,
+      img: b.image || b.img || b.url,
+      url: b.url || b.link
+    }));
+  }
   return [
-    { title: '出游囤好货', img: '/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },
-    { title: '科技新品', img: '/static/carousel/banner_2.png', url: '/goodsList?category=1' },
-    { title: '原产地直采', img: '/static/carousel/banner_3.png', url: '/goodsList?category=2' },
-    { title: '大牌美妆', img: '/static/carousel/banner_4.png', url: '/goodsList?category=3' }
+    { title: '出游囤好货', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },
+    { title: '科技新品', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png', url: '/goodsList?category=1' },
+    { title: '原产地直采', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png', url: '/goodsList?category=2' },
+    { title: '大牌美妆', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png', url: '/goodsList?category=3' }
   ];
 });
 
@@ -92,12 +99,13 @@ function getAspectRatioCss(ratio) {
 
 const customStyle = computed(() => {
   const s = props.componentStyle || {};
-  const fit = props.options.fitMode || 'cover';
+  const fit = props.options.fitMode || 'contain';
 
   const styleObj = {
     borderRadius: Array.isArray(s.radius)
       ? `${s.radius[0]}px ${s.radius[1]}px ${s.radius[2]}px ${s.radius[3]}px`
-      : '0px',
+      : '8px',
+    backgroundColor: s.backgroundColor || '#ffffff',
     '--carousel-fit': fit
   };
 
@@ -175,22 +183,35 @@ onBeforeUnmount(() => {
   position: relative;
   overflow: hidden;
   user-select: none;
-  background: #f8fafc;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   box-sizing: border-box;
 
   .carousel-container {
     width: 100%;
     height: 100%;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     .slide-view {
       width: 100%;
       height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
 
       .slide-img {
         width: 100%;
         height: 100%;
-        object-fit: var(--carousel-fit, contain);
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: var(--carousel-fit, contain) !important;
+        object-position: center;
         display: block;
       }
     }

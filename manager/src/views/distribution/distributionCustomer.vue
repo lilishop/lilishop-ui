@@ -171,9 +171,12 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import {
+  getCustomerRelations,
+  getCustomerRelationLogs,
   getDistributionCustomerPage,
   getDistributionBindLogPage,
   getDistributionListData,
+  rebindCustomerRelation,
   rebindDistributionCustomer,
 } from "@/api/distribution";
 import { bindStatusList, bindSourceList, bindChangeTypeList } from "./dataJson";

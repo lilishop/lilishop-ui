@@ -176,7 +176,7 @@ const customStyle = computed(() => {
         align-self: flex-start;
         padding: 1px 6px;
         background: #fff2e8;
-        color: #ff6000;
+        color: #409EFF;
         font-size: 10px;
         font-weight: 700;
         border-radius: 8px;
@@ -223,19 +223,19 @@ const customStyle = computed(() => {
       transition: all 0.15s ease;
 
       &.login-btn {
-        background: #ff6000;
+        background: #409EFF;
         color: #ffffff;
         box-shadow: 0 2px 6px rgba(255, 96, 0, 0.25);
 
         &:hover {
-          background: #e55600;
+          background: #66b1ff;
         }
       }
 
       &.register-btn {
         background: #ffffff;
-        color: #ff6000;
-        border: 1px solid #ff6000;
+        color: #409EFF;
+        border: 1px solid #409EFF;
 
         &:hover {
           background: #fff7ed;
@@ -273,7 +273,7 @@ const customStyle = computed(() => {
 
       &:hover {
         .metric-val, .metric-label {
-          color: #ff6000;
+          color: #409EFF;
         }
       }
     }
@@ -326,7 +326,7 @@ const customStyle = computed(() => {
         cursor: pointer;
 
         &:hover {
-          color: #ff6000;
+          color: #409EFF;
         }
       }
     }
@@ -347,7 +347,7 @@ const customStyle = computed(() => {
         transition: color 0.15s;
 
         .dot {
-          color: #ff6000;
+          color: #409EFF;
           font-weight: 700;
         }
 
@@ -358,7 +358,7 @@ const customStyle = computed(() => {
         }
 
         &:hover {
-          color: #ff6000;
+          color: #409EFF;
         }
       }
     }
@@ -391,7 +391,7 @@ const customStyle = computed(() => {
       }
 
       &:hover {
-        color: #ff6000;
+        color: #409EFF;
       }
     }
   }

@@ -47,11 +47,18 @@ const slidesList = computed(() => {
   if (Array.isArray(props.options.list) && props.options.list.length > 0) {
     return props.options.list;
   }
+  if (Array.isArray(props.options.banners) && props.options.banners.length > 0) {
+    return props.options.banners.map(b => ({
+      title: b.title,
+      img: b.image || b.img || b.url,
+      url: b.url || b.link
+    }));
+  }
   return [
-    { title: '出游囤好货', img: '/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },
-    { title: '科技新品', img: '/static/carousel/banner_2.png', url: '/goodsList?category=1' },
-    { title: '原产地直采', img: '/static/carousel/banner_3.png', url: '/goodsList?category=2' },
-    { title: '大牌美妆', img: '/static/carousel/banner_4.png', url: '/goodsList?category=3' }
+    { title: '出游囤好货', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },
+    { title: '科技新品', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png', url: '/goodsList?category=1' },
+    { title: '原产地直采', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png', url: '/goodsList?category=2' },
+    { title: '大牌美妆', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png', url: '/goodsList?category=3' }
   ];
 });
 
@@ -65,12 +72,13 @@ function getAspectRatioCss(ratio) {
 
 const customStyle = computed(() => {
   const s = props.componentStyle || {};
-  const fit = props.options.fitMode || 'cover';
+  const fit = props.options.fitMode || 'contain';
 
   const styleObj = {
     borderRadius: Array.isArray(s.radius)
       ? `${s.radius[0]}px ${s.radius[1]}px ${s.radius[2]}px ${s.radius[3]}px`
-      : '0px',
+      : '8px',
+    backgroundColor: s.backgroundColor || '#ffffff',
     '--carousel-fit': fit
   };
 
@@ -96,10 +104,12 @@ const customStyle = computed(() => {
 <style lang="scss" scoped>
 .decor-carousel {
   width: 100%;
-  aspect-ratio: var(--carousel-ratio, 2.5 / 1);
-  overflow: hidden;
   position: relative;
-  background: #f8fafc;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   box-sizing: border-box;
 
   .custom-carousel {
@@ -113,6 +123,7 @@ const customStyle = computed(() => {
 
     :deep(.el-carousel__indicators--horizontal) {
       bottom: 14px;
+      z-index: 10;
 
       .el-carousel__indicator {
         padding: 4px;
@@ -121,7 +132,7 @@ const customStyle = computed(() => {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background-color: rgba(255, 255, 255, 0.7);
+          background-color: rgba(0, 0, 0, 0.35);
           opacity: 1;
           transition: all 0.25s;
         }
@@ -135,14 +146,20 @@ const customStyle = computed(() => {
     }
 
     .slide-link {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
       height: 100%;
+      background: #ffffff;
 
       .slide-img {
         width: 100%;
         height: 100%;
-        object-fit: var(--carousel-fit, contain);
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: var(--carousel-fit, contain) !important;
+        object-position: center;
         display: block;
       }
     }

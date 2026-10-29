@@ -217,10 +217,10 @@ if (!props.options.aspectRatio) props.options.aspectRatio = '2.5:1';
 if (props.options.height === undefined) props.options.height = 380;
 if (!Array.isArray(props.options.list)) {
   props.options.list = [
-    { title: '出游囤好货', img: '/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },
-    { title: '科技新品', img: '/static/carousel/banner_2.png', url: '/goodsList?category=1' },
-    { title: '原产地直采', img: '/static/carousel/banner_3.png', url: '/goodsList?category=2' },
-    { title: '大牌美妆', img: '/static/carousel/banner_4.png', url: '/goodsList?category=3' }
+    { title: '出游囤好货', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },
+    { title: '科技新品', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png', url: '/goodsList?category=1' },
+    { title: '原产地直采', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png', url: '/goodsList?category=2' },
+    { title: '大牌美妆', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png', url: '/goodsList?category=3' }
   ];
 }
 
@@ -283,7 +283,7 @@ function handleAddSlide() {
   const iconIdx = ((nextNum - 1) % 4) + 1;
   props.options.list.push({
     title: `轮播图 ${nextNum}`,
-    img: `/static/carousel/banner_${iconIdx}.png`,
+    img: `https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_${iconIdx}.png`,
     url: '/goodsList'
   });
 }

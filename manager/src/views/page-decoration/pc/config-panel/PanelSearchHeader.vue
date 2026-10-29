@@ -48,19 +48,6 @@
         <el-input v-model="options.placeholder" size="small" placeholder="请输入商品名称、品牌或型号" class="flex-1" />
       </div>
 
-      <div class="form-row mt-10">
-        <span class="row-label">默认搜索类型</span>
-        <el-select v-model="options.searchType" size="small" class="flex-1">
-          <el-option label="商品搜索" value="goods" />
-          <el-option label="店铺搜索" value="shop" />
-        </el-select>
-      </div>
-
-      <div class="form-row mt-10 flex-between">
-        <span class="row-label">重置搜索类型</span>
-        <el-switch v-model="options.resetSearchType" size="small" />
-      </div>
-
       <div class="form-row mt-10 flex-between">
         <span class="row-label">显示右侧购物车</span>
         <el-switch v-model="options.showCart" size="small" />
@@ -73,6 +60,33 @@
     </div>
 
 
+
+    <!-- 3. 热门搜索词管理 -->
+    <div class="panel-section" v-if="options.showHotWords !== false">
+      <div class="section-title flex-between">
+        <span>热门推荐词</span>
+        <el-button type="primary" link size="small" @click="handleAddHotWord">
+          <el-icon><Plus /></el-icon>添加词
+        </el-button>
+      </div>
+      <div class="hot-words-list" v-if="options.hotWords && options.hotWords.length">
+        <div v-for="(word, idx) in options.hotWords" :key="idx" class="hot-word-item">
+          <el-input v-model="options.hotWords[idx]" size="small" class="word-edit-input" />
+          <div class="word-actions">
+            <el-button link size="small" :disabled="idx === 0" @click="moveHotWord(idx, -1)">
+              <el-icon><Top /></el-icon>
+            </el-button>
+            <el-button link size="small" :disabled="idx === options.hotWords.length - 1" @click="moveHotWord(idx, 1)">
+              <el-icon><Bottom /></el-icon>
+            </el-button>
+            <el-button link type="danger" size="small" @click="handleRemoveHotWord(idx)">
+              <el-icon><Delete /></el-icon>
+            </el-button>
+          </div>
+        </div>
+      </div>
+      <div class="empty-tip-text" v-else>暂无推荐词，点击右上角添加</div>
+    </div>
 
     <!-- 4. 购物车样式设置 -->
     <div class="panel-section" v-if="options.showCart !== false">
@@ -136,8 +150,6 @@ const props = defineProps({
 
 if (props.options.logoLink === undefined) props.options.logoLink = '/';
 if (props.options.placeholder === undefined) props.options.placeholder = '请输入商品名称、品牌或型号';
-if (props.options.searchType === undefined) props.options.searchType = 'goods';
-if (props.options.resetSearchType === undefined) props.options.resetSearchType = false;
 if (props.options.showCart === undefined) props.options.showCart = true;
 if (props.options.showHotWords === undefined) props.options.showHotWords = true;
 if (props.options.cartText === undefined) props.options.cartText = '购物车';

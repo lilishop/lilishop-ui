@@ -138,3 +138,19 @@ export const getDistributionCash = (params) => {
 export const auditDistributionCash = (id,params) => {
     return postRequest(`/distribution/cash/audit/${id}`, params)
 }
+
+// 兼容别名导出
+export const getDistributionCustomerPage = (params) => getCustomerRelations(params);
+export const getDistributionBindLogPage = (params) => {
+    if (params && params.id) {
+        return getCustomerRelationLogs(params.id);
+    }
+    return getRequest('/distribution/customerRelation/logs', params);
+};
+export const rebindDistributionCustomer = (params) => {
+    return rebindCustomerRelation({
+        memberId: params.memberId,
+        distributionId: params.distributionId,
+        reason: params.reason || params.remark
+    });
+};

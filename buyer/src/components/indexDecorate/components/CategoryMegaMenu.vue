@@ -14,7 +14,7 @@
         class="cat-item"
         :style="{
           '--text-color': options.textColor || '#334155',
-          '--active-color': options.activeColor || '#ff6000',
+          '--active-color': options.activeColor || '#409EFF',
           '--font-size': `${options.fontSize || 13}px`
         }"
       >
@@ -139,12 +139,12 @@ const customStyle = computed(() => {
         background: #fff7ed;
 
         .cat-name {
-          color: var(--active-color, #ff6000);
+          color: var(--active-color, #409EFF);
           font-weight: 600;
         }
 
         .arrow-icon {
-          color: var(--active-color, #ff6000);
+          color: var(--active-color, #409EFF);
           transform: translateX(2px);
         }
       }

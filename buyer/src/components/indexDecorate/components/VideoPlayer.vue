@@ -16,7 +16,7 @@
       class="video-placeholder"
       :style="{
         height: `${options.height || 450}px`,
-        backgroundImage: `url(${options.coverUrl || '/static/video/video_cover.png'})`
+        backgroundImage: `url(${options.coverUrl || 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/video/video_cover.png'})`
       }"
     >
       <div class="video-play-hint">

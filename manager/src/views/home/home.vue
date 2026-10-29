@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="home-container">
     <!-- 统计 -->
     <div class="card">
       <h4>基本信息</h4>
@@ -238,7 +238,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Picture, User, List, DataLine } from "@element-plus/icons-vue";
 import { homeStatistics, hotGoods, hotShops, getNoticePage } from "@/api/index";
@@ -599,6 +599,25 @@ function init() {
   initOrderChartList();
   initHistoryMemberChartList();
 }
+
+function destroyCharts() {
+  if (pvChart.value) {
+    pvChart.value.destroy();
+    pvChart.value = null;
+  }
+  if (orderChart.value) {
+    orderChart.value.destroy();
+    orderChart.value = null;
+  }
+  if (historyMemberChart.value) {
+    historyMemberChart.value.destroy();
+    historyMemberChart.value = null;
+  }
+}
+
+onBeforeUnmount(() => {
+  destroyCharts();
+});
 
 onMounted(() => {
   init();

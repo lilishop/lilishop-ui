@@ -61,19 +61,31 @@ const activeMenuName = computed(() => {
   return route.name;
 });
 
-watch(
-  () => route.fullPath,
-  () => {
-    if (
-      route.meta.firstRouterName &&
-      route.meta.firstRouterName !== currNav.value
-    ) {
-      selectNav(route.meta.firstRouterName);
+function selectNav(name) {
+  appStore.setCurrNav(name);
+  setStore("currNav", name);
+  if (name === 'home_index') {
+    appStore.updateMenulist([]);
+    if (route.name !== 'home_index') {
+      router.push({ name: 'home_index' });
+    }
+    return;
+  }
+  util.initRouter();
+}
+
+function findMenuByName(name) {
+  for (const item of menuList.value) {
+    for (const menu of item.children || []) {
+      if (menu.name === name) {
+        return menu;
+      }
     }
   }
-);
+  return null;
+}
 
-const changeMenu = (name) => {
+function changeMenu(name) {
   if (!name) return;
   if (router.hasRoute(name)) {
     router.push({ name });
@@ -93,29 +105,26 @@ const changeMenu = (name) => {
       Message.warning("菜单路由未就绪，请刷新页面后重试");
     }
   });
-};
+}
 
-const findMenuByName = (name) => {
-  for (const item of menuList.value) {
-    for (const menu of item.children || []) {
-      if (menu.name === name) {
-        return menu;
+watch(
+  () => route.fullPath,
+  () => {
+    if (route.name === 'home_index' || route.path === '/home') {
+      if (currNav.value !== 'home_index' || menuList.value.length > 0) {
+        selectNav('home_index');
       }
+      return;
     }
-  }
-  return null;
-};
-
-const selectNav = (name) => {
-  appStore.setCurrNav(name);
-  setStore("currNav", name);
-  if (name === 'home_index') {
-    appStore.updateMenulist([]);
-    router.push({ name: 'home_index' });
-    return;
-  }
-  util.initRouter();
-};
+    if (
+      route.meta?.firstRouterName &&
+      route.meta.firstRouterName !== currNav.value
+    ) {
+      selectNav(route.meta.firstRouterName);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>

@@ -63,17 +63,6 @@
       <div class="header-right">
 
         <el-button
-          type="warning"
-          plain
-          size="small"
-          @click="handleLoadDouble11Preset(true)"
-          title="一键加载包含全部25个组件的双11平台首页"
-        >
-          <el-icon><Star /></el-icon>
-          <span>加载双11平台首页</span>
-        </el-button>
-
-        <el-button
 
           type="primary"
 
@@ -395,9 +384,6 @@
               <el-button type="primary" @click="handleAddNewRow">
                 <el-icon><Plus /></el-icon> 添加新行
               </el-button>
-              <el-button type="warning" @click="handleLoadDouble11Preset(true)">
-                <el-icon><Star /></el-icon> 一键生成双11平台首页
-              </el-button>
             </div>
 
           </div>
@@ -499,7 +485,6 @@ import {
 import { Message, Modal } from '@/utils/message';
 
 import * as API_floor from '@/api/other.js';
-import { DOUBLE11_PAGE_DOCUMENT } from './presets/double11Preset.js';
 
 import {
 
@@ -1631,18 +1616,6 @@ function goBack() {
 
 }
 
-function handleLoadDouble11Preset(showMsg = true) {
-  pageDocument.value = JSON.parse(JSON.stringify(DOUBLE11_PAGE_DOCUMENT));
-  pageInfo.name = '双11 平台首页';
-  if (pageDocument.value.list && pageDocument.value.list.length > 0) {
-    selectedRowId.value = pageDocument.value.list[0].id;
-    selectedCompId.value = pageDocument.value.list[0].components[0]?.id || null;
-  }
-  markDirty();
-  if (showMsg) {
-    Message.success('已成功加载双11平台首页模板（全套25个组件）！');
-  }
-}
 
 onMounted(() => {
 
@@ -1660,11 +1633,11 @@ onMounted(() => {
 
     pageInfo.id = '';
 
-    pageInfo.name = route.query.name || '双11 平台首页';
+    pageInfo.name = route.query.name || '平台首页装修';
 
     pageInfo.pageShow = true;
 
-    handleLoadDouble11Preset(false);
+    handleAddNewRow();
 
   }
 

@@ -43,7 +43,7 @@ const defaultZones = [
 ];
 
 const displayImageUrl = computed(() => {
-  return props.options?.imageUrl || '/static/hot-zone/hotzone_default.png';
+  return props.options?.imageUrl || 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/hot-zone/hotzone_default.png';
 });
 
 const displayZones = computed(() => {
