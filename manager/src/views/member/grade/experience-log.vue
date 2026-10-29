@@ -1,24 +1,32 @@
 <template>
-  <div class="search">
-    <el-card>
+  <div class="member-experience-log-page search">
+    <!-- 顶部筛选表单 -->
+    <el-card shadow="never" class="filter-card">
       <el-form
         ref="searchFormRef"
         :model="searchForm"
         inline
-        label-width="90px"
+        label-width="84px"
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="客户手机号" prop="mobile">
+        <el-form-item label="客户手机号" prop="memberMobile">
           <el-input
             v-model="searchForm.memberMobile"
             clearable
             placeholder="请输入客户手机号"
-            style="width: 220px"
+            style="width: 200px"
           />
         </el-form-item>
-        <el-form-item label="规则" prop="ruleKey">
-          <el-select v-model="searchForm.ruleKey" clearable filterable style="width: 220px">
+        <el-form-item label="规则类型" prop="ruleKey">
+          <el-select
+            v-model="searchForm.ruleKey"
+            clearable
+            filterable
+            placeholder="全部规则"
+            style="width: 180px"
+          >
+            <el-option label="全部规则" value="" />
             <el-option
               v-for="item in ruleOptions"
               :key="item.value"
@@ -27,42 +35,103 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        <el-form-item class="form-actions">
+          <el-button type="primary" class="search-btn" @click="handleSearch">
+            搜索
+          </el-button>
+          <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card>
-      <el-table v-loading="loading" border :data="data" class="mt_10" style="width: 100%">
-        <el-table-column label="客户手机号" width="140" show-overflow-tooltip>
+    <!-- 经验值记录表格 -->
+    <el-card shadow="never" class="table-card mt_10">
+      <template #header>
+        <div class="card-header-bar">
+          <div class="header-title">
+            <span>客户经验值流水</span>
+          </div>
+          <div class="header-actions">
+            <el-button size="small" @click="getData">刷新</el-button>
+          </div>
+        </div>
+      </template>
+
+      <el-table
+        v-loading="loading"
+        border
+        stripe
+        :data="data"
+        style="width: 100%"
+      >
+        <!-- 客户ID -->
+        <el-table-column prop="memberId" label="客户ID" min-width="190" show-overflow-tooltip />
+
+        <!-- 客户名称 -->
+        <el-table-column prop="memberName" label="客户名称" min-width="130" show-overflow-tooltip />
+
+        <!-- 客户手机号 -->
+        <el-table-column label="客户手机号" width="130" align="center">
           <template #default="{ row }">
-            <span v-if="row">{{ row.memberMobile || row.mobile || "-" }}</span>
+            {{ row ? (row.memberMobile || row.mobile || "-") : "-" }}
           </template>
         </el-table-column>
-        <el-table-column label="规则名称" width="150" show-overflow-tooltip>
+
+        <!-- 规则名称 -->
+        <el-table-column label="规则名称" width="130" align="center">
           <template #default="{ row }">
-            <span v-if="row">{{ row.ruleName || findRuleName(row.ruleKey) || "-" }}</span>
+            {{ row ? (row.ruleName || findRuleName(row.ruleKey) || "-") : "-" }}
           </template>
         </el-table-column>
-        <el-table-column label="变化经验值" width="120">
+
+        <!-- 变动前经验值 -->
+        <el-table-column label="变动前经验值" width="120" align="right">
           <template #default="{ row }">
-            <span v-if="row">{{ formatExperienceValue(row) }}</span>
+            <span v-if="row">{{ row.beforeExperience != null ? formatNumber(row.beforeExperience) : "-" }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="经验值限额" width="120">
+
+        <!-- 变动经验值 -->
+        <el-table-column label="变动经验值" width="120" align="right">
           <template #default="{ row }">
-            <span v-if="row">{{ formatMaxValue(row) }}</span>
+            <span v-if="row" class="experience-increase">
+              +{{ formatNumber(row.variableExperience ?? row.value ?? 0) }}
+            </span>
           </template>
         </el-table-column>
+
+        <!-- 当前经验值 -->
+        <el-table-column label="变动后经验值" width="120" align="right">
+          <template #default="{ row }">
+            <span v-if="row" class="experience-after">
+              {{ formatNumber(row.experience ?? 0) }}
+            </span>
+          </template>
+        </el-table-column>
+
+        <!-- 操作说明 / 备注 -->
         <el-table-column label="操作说明" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <span v-if="row">{{ row.content || row.remark || row.description || "-" }}</span>
+            <span>{{ row ? row.content || row.remark || row.description || "-" : "-" }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="170" />
+
+        <!-- 创建时间 -->
+        <el-table-column prop="createTime" label="创建时间" width="170" align="center" />
+
+        <!-- 操作 -->
+        <el-table-column label="操作" width="110" align="center" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row">
+              <a v-if="row.memberId" class="link-text" @click="viewMemberDetail(row)">客户详情</a>
+              <span v-else>-</span>
+            </template>
+          </template>
+        </el-table-column>
       </el-table>
-      <div class="mt_10" style="display: flex; justify-content: flex-end">
+
+      <!-- 底部分页 -->
+      <div class="pagination-wrap mt_10">
         <el-pagination
           v-model:current-page="searchForm.pageNumber"
           v-model:page-size="searchForm.pageSize"
@@ -82,8 +151,10 @@
 import { onMounted, ref } from "vue";
 import { useTable } from "@/utils/useTable";
 import * as API_Member from "@/api/member";
+import { customRouterPush } from "@/utils/filters";
+import { ElMessage } from "element-plus";
 
-const RULE_OPTIONS = [
+const ruleOptions = [
   { value: "CONSUME", label: "消费" },
   { value: "REGISTER", label: "注册" },
   { value: "SIGN_IN", label: "签到" },
@@ -101,7 +172,7 @@ defineOptions({ name: "memberGradeExperienceLog" });
 
 const searchFormRef = ref(null);
 
-const { loading, data, total, searchForm, getDataList: getData } = useTable(
+const { loading, data, total, searchForm, getDataList: getData, resetSearch } = useTable(
   API_Member.getMemberExperienceByPage,
   {
     pageSize: 20,
@@ -111,45 +182,138 @@ const { loading, data, total, searchForm, getDataList: getData } = useTable(
   }
 );
 
-onMounted(() => {
-  init();
-});
+function formatNumber(val) {
+  const num = Number(val || 0);
+  return num.toLocaleString();
+}
 
-function formatExperienceValue(row) {
-  const v = row.value ?? row.variableExperience ?? row.experience ?? row.variableValue;
-  return v == null ? "-" : v;
-}
-function formatMaxValue(row) {
-  const v = row.maxValue ?? row.maxExperience ?? row.limitValue;
-  return v == null ? "-" : v;
-}
 function findRuleName(ruleKey) {
   const hit = ruleOptions.find((item) => item.value === ruleKey);
-  return hit ? hit.label : "";
+  return hit ? hit.label : ruleKey || "";
 }
-function init() {
-  getData();
+
+function viewMemberDetail(row) {
+  if (!row || !row.memberId) return;
+  customRouterPush({ name: "member-detail", query: { id: row.memberId } });
 }
+
 function buildParams(base = searchForm) {
   const params = {
     pageNumber: base.pageNumber,
     pageSize: base.pageSize,
   };
-  if (base.memberMobile) params.mobile = base.memberMobile;
+  if (base.memberMobile) params.mobile = base.memberMobile.trim();
   if (base.ruleKey) params.ruleKey = base.ruleKey;
   return params;
 }
+
 function handleSearch() {
   searchForm.pageNumber = 1;
   getData();
 }
+
+function handleReset() {
+  searchForm.memberMobile = "";
+  searchForm.ruleKey = "";
+  searchForm.pageNumber = 1;
+  resetSearch();
+}
+
 function changePage(v) {
   searchForm.pageNumber = v;
   getData();
 }
+
 function changePageSize(v) {
   searchForm.pageNumber = 1;
   searchForm.pageSize = v;
   getData();
 }
+
+onMounted(() => {
+  getData();
+});
 </script>
+
+<style lang="scss" scoped>
+.member-experience-log-page {
+  padding: 16px 20px;
+  background-color: #f6f8fa;
+  min-height: calc(100vh - 110px);
+}
+
+.font-mono {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.text-dark {
+  color: #303133;
+}
+
+.text-muted {
+  color: #909399;
+}
+
+/* 筛选卡片 */
+.filter-card {
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+
+  :deep(.el-card__body) {
+    padding: 16px 16px 2px;
+  }
+
+  .search-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    .el-form-item {
+      margin-bottom: 14px;
+      margin-right: 16px;
+    }
+
+    .form-actions {
+      margin-left: auto;
+    }
+  }
+}
+
+/* 表格卡片 */
+.table-card {
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+
+  .card-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #303133;
+    }
+  }
+}
+
+.experience-increase {
+  font-size: 13px;
+  color: #67c23a;
+}
+
+.experience-after {
+  font-size: 13px;
+  color: #e6a23c;
+}
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 6px;
+}
+</style>

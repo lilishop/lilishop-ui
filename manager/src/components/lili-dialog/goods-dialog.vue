@@ -1,100 +1,138 @@
 <template>
-  <div class="wrapper">
-    <div class="wap-content">
-      <div class="query-wrapper">
-        <div class="query-item">
-          <div>搜索范围</div>
-          <el-input
-            v-model="goodsParams.goodsName"
-            placeholder="商品名称"
-            clearable
-            style="width: 150px"
-            @clear="onSearchGoods"
-            @keyup.enter="onSearchGoods"
-          />
-        </div>
-        <div class="query-item">
-          <el-cascader
-            v-model="category"
-            :options="skuList"
-            placeholder="请选择商品分类"
-            popper-class="goods-dialog-cascader-popper"
-            style="width: 250px"
-            clearable
-          />
-        </div>
-        <div class="query-item">
-          <el-button type="primary" @click="onSearchGoods">搜索</el-button>
-        </div>
-      </div>
-      <div>
-        <el-table
-          ref="tableRef"
-          v-loading="loading"
-          class="goods-select-table"
-          :data="goodsData"
-          row-key="id"
-          height="340"
-          empty-text="暂无商品信息"
-          @selection-change="onSelectionChange"
-        >
-          <el-table-column
-            type="selection"
-            label="选择"
-            width="60"
-            align="center"
-            reserve-selection
-          />
-          <el-table-column label="商品图片" width="90" align="center">
-            <template #default="{ row }">
-              <img class="goods-thumb" :src="row.thumbnail" alt="" />
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="goodsName"
-            label="商品名称"
-            min-width="200"
-            show-overflow-tooltip
-          />
-          <el-table-column label="商品规格" min-width="140" show-overflow-tooltip>
-            <template #default="{ row }">
-              {{ row.simpleSpecs || "默认规格" }}
-            </template>
-          </el-table-column>
-          <el-table-column label="价格" width="110">
-            <template #default="{ row }">
-              <span class="goods-price">￥{{ $filters.unitPrice(row.price) }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="库存" width="90">
-            <template #default="{ row }">
-              {{ row.quantity != null ? row.quantity : "—" }}
-            </template>
-          </el-table-column>
-          <el-table-column label="销量" width="90">
-            <template #default="{ row }">
-              {{ row.buyCount != null ? row.buyCount : 0 }}
-            </template>
-          </el-table-column>
-          <el-table-column label="商品类型" width="110">
-            <template #default="{ row }">
-              {{ goodsTypeLabel(row.goodsType) }}
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-pagination
-          v-model:current-page="goodsParams.pageNumber"
-          class="pageration"
-          :total="total"
-          :page-size="goodsParams.pageSize"
-          layout="total, prev, pager, next"
-          size="small"
-          @current-change="changePageSize"
+  <div class="goods-dialog-wrapper">
+    <!-- 顶部搜索筛选栏 -->
+    <div class="goods-query-bar">
+      <div class="query-item">
+        <span class="query-label">商品名称：</span>
+        <el-input
+          v-model="goodsParams.goodsName"
+          placeholder="请输入商品名称"
+          clearable
+          style="width: 220px"
+          @clear="onSearchGoods"
+          @keyup.enter="onSearchGoods"
         />
       </div>
+      <div class="query-item">
+        <span class="query-label">商品编号：</span>
+        <el-input
+          v-model="goodsParams.sn"
+          placeholder="请输入商品编号/货号"
+          clearable
+          style="width: 190px"
+          @clear="onSearchGoods"
+          @keyup.enter="onSearchGoods"
+        />
+      </div>
+      <div class="query-item">
+        <span class="query-label">商品分类：</span>
+        <el-cascader
+          v-model="category"
+          :options="skuList"
+          placeholder="请选择商品分类"
+          popper-class="goods-dialog-cascader-popper"
+          style="width: 240px"
+          clearable
+        />
+      </div>
+      <div class="query-item query-actions">
+        <el-button type="primary" @click="onSearchGoods">搜索</el-button>
+        <el-button @click="onResetGoods">重置</el-button>
+      </div>
+    </div>
+
+    <!-- 表格展示区域 (自适应填充剩余高度) -->
+    <div class="goods-table-wrap">
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        class="goods-select-table"
+        :data="goodsData"
+        row-key="id"
+        height="100%"
+        stripe
+        border
+        empty-text="暂无匹配商品信息"
+        @selection-change="onSelectionChange"
+      >
+        <el-table-column
+          type="selection"
+          width="50"
+          align="center"
+          reserve-selection
+        />
+        <el-table-column label="商品图片" width="76" align="center">
+          <template #default="{ row }">
+            <el-image
+              class="goods-thumb"
+              :src="row.thumbnail"
+              fit="cover"
+              preview-teleported
+              :preview-src-list="row.thumbnail ? [row.thumbnail] : []"
+            >
+              <template #error>
+                <div class="thumb-slot">无图</div>
+              </template>
+            </el-image>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="goodsName"
+          label="商品名称"
+          min-width="260"
+          show-overflow-tooltip
+        >
+          <template #default="{ row }">
+            <div class="goods-title-line">{{ row.goodsName || "-" }}</div>
+            <div v-if="row.sn" class="goods-sn-line font-mono">货号: {{ row.sn }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品规格" min-width="140" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span>{{ row.simpleSpecs || "默认规格" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="销售价" width="120" align="right">
+          <template #default="{ row }">
+            <span class="goods-price font-semibold">
+              ¥ {{ Number(row.price || 0).toFixed(2) }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="可用库存" width="100" align="right">
+          <template #default="{ row }">
+            <span>{{ row.quantity != null ? row.quantity : "—" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="累计销量" width="100" align="right">
+          <template #default="{ row }">
+            <span>{{ row.buyCount != null ? row.buyCount : 0 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="商品类型" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag size="small" type="info">{{ goodsTypeLabel(row.goodsType) }}</el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+    <!-- 底部翻页栏 -->
+    <div class="goods-pagination-bar">
+      <el-pagination
+        v-model:current-page="goodsParams.pageNumber"
+        v-model:page-size="goodsParams.pageSize"
+        :total="total"
+        :page-sizes="[15, 30, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        size="small"
+        @current-change="changePage"
+        @size-change="onPageSizeChange"
+      />
     </div>
   </div>
 </template>
+
 <script setup>
 import { nextTick, onMounted, reactive, ref, watch } from "vue";
 import * as API_Goods from "@/api/goods";
@@ -131,6 +169,7 @@ const tableRef = ref(null);
 watch(category, (val) => {
   goodsParams.categoryPath = val && val.length ? val[2] : "";
 });
+
 watch(
   () => props.selectedWay,
   (val) => {
@@ -139,6 +178,7 @@ watch(
   },
   { deep: true, immediate: true }
 );
+
 watch(
   () => goodsParams.categoryPath,
   () => {
@@ -158,10 +198,27 @@ function onSearchGoods() {
   goodsParams.pageNumber = 1;
   getQueryGoodsList();
 }
-function changePageSize(v) {
+
+function onResetGoods() {
+  goodsParams.goodsName = "";
+  goodsParams.sn = "";
+  category.value = [];
+  goodsParams.categoryPath = "";
+  goodsParams.pageNumber = 1;
+  getQueryGoodsList();
+}
+
+function changePage(v) {
   goodsParams.pageNumber = v;
   getQueryGoodsList();
 }
+
+function onPageSizeChange(val) {
+  goodsParams.pageSize = val;
+  goodsParams.pageNumber = 1;
+  getQueryGoodsList();
+}
+
 function getQueryGoodsList() {
   loading.value = true;
   API_Goods.getGoodsSkuData(goodsParams)
@@ -172,6 +229,7 @@ function getQueryGoodsList() {
       loading.value = false;
     });
 }
+
 function initGoods(res) {
   const records = res?.result?.records || [];
   records.forEach((item) => {
@@ -181,6 +239,7 @@ function initGoods(res) {
   goodsData.value = records;
   nextTick(syncTableSelection);
 }
+
 function syncTableSelection() {
   const table = tableRef.value;
   if (!table) return;
@@ -189,16 +248,19 @@ function syncTableSelection() {
     return;
   }
   goodsData.value.forEach((item) => {
-    const selected = selectedList.value.some((e) => (e.id || e.skuId) && String(e.id || e.skuId) === String(item.id || item.skuId));
+    const selected = selectedList.value.some(
+      (e) => (e.id || e.skuId) && String(e.id || e.skuId) === String(item.id || item.skuId)
+    );
     table.toggleRowSelection(item, selected);
   });
 }
+
 function emitSelected(list) {
   selectedList.value = list;
   emit("selected", selectedList.value);
 }
+
 function onSelectionChange(rows) {
-  // 选择链接时为单选：保留最后勾选的一项，多选框交互不变
   if (type.value !== "multiple") {
     if (!rows.length) {
       emitSelected([]);
@@ -214,17 +276,18 @@ function onSelectionChange(rows) {
   }
   emitSelected(rows);
 }
+
 function init() {
-  API_Goods.getGoodsSkuData(goodsParams).then((res) => {
-    initGoods(res);
-  });
+  getQueryGoodsList();
   API_Goods.getCategoryTree({ deleteFlag: false }).then((res) => {
-    if (res.success) {
+    if (res.success && res.result) {
       deepGroup(res.result);
     }
   });
 }
+
 function deepGroup(val) {
+  skuList.value = [];
   val.forEach((item) => {
     let childWay = [];
     if (item.children) {
@@ -252,34 +315,102 @@ function deepGroup(val) {
   });
 }
 
-// 父组件 lili-dialog/index.vue 通过 $refs.goodsDialog.type = "single" 切换单选；
-// expose 的 ref 外部读写等价于原 data 字段
 defineExpose({ type });
 </script>
+
 <style scoped lang="scss">
-@import "./style.scss";
-.wap-content {
+.goods-dialog-wrapper {
   width: 100%;
-  flex: 1;
-  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
+
+.font-mono {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+/* 顶部搜索栏 */
+.goods-query-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 12px;
+  flex-shrink: 0;
+
+  .query-item {
+    display: flex;
+    align-items: center;
+
+    .query-label {
+      font-size: 13px;
+      color: #606266;
+      white-space: nowrap;
+      margin-right: 4px;
+    }
+  }
+
+  .query-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+}
+
+/* 表格容器 */
+.goods-table-wrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
 .goods-thumb {
   display: block;
   width: 48px;
   height: 48px;
   margin: 0 auto;
   border-radius: 4px;
-  object-fit: cover;
+  border: 1px solid #ebeef5;
 }
+
+.thumb-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 12px;
+  color: #c0c4cc;
+}
+
+.goods-title-line {
+  font-size: 13px;
+  color: #303133;
+  line-height: 1.4;
+}
+
+.goods-sn-line {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 2px;
+}
+
 .goods-price {
-  color: $theme_color;
+  color: #f56c6c;
 }
-.pageration {
+
+/* 底部翻页栏 */
+.goods-pagination-bar {
   display: flex;
   justify-content: flex-end;
-  width: 100%;
-  margin-top: 16px;
-  padding-right: 8px;
-  box-sizing: border-box;
+  align-items: center;
+  padding-top: 12px;
+  flex-shrink: 0;
 }
 </style>

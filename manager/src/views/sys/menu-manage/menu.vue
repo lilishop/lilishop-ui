@@ -1,245 +1,215 @@
 <template>
-  <div class="search">
-    <el-card>
-      <el-row class="operation">
-        <el-switch
-          v-model="strict"
-          class="selectModel"
-          active-text="级联"
-          inactive-text="单选"
-          style="margin-right: 5px"
-        />
-        <el-button @click="addRootMenu">添加顶级菜单</el-button>
-        <el-button type="primary" @click="addMenu">添加子菜单</el-button>
-        <el-button @click="delAll">批量删除</el-button>
-        <el-dropdown @command="handleDropdown">
-          <el-button>
-            更多操作
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+  <div class="menu-manage-container">
+    <el-card shadow="never" class="manage-card">
+      <!-- 顶部操作工具栏 -->
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <el-button type="primary" @click="addRootMenu">添加顶级菜单</el-button>
+          <el-button
+            type="danger"
+            plain
+            :disabled="selectCount === 0"
+            @click="delAll"
+          >
+            批量删除 {{ selectCount > 0 ? `(${selectCount})` : "" }}
           </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="refresh">刷新</el-dropdown-item>
-              <el-dropdown-item command="expandOne">收合所有</el-dropdown-item>
-              <el-dropdown-item command="expandTwo">展开一级</el-dropdown-item>
-              <el-dropdown-item command="expandThree">展开两级</el-dropdown-item>
-              <el-dropdown-item command="expandAll">展开所有</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </el-row>
-      <el-row type="flex" justify="start">
-        <el-col :md="8" :lg="8" :xl="6">
-          <el-alert type="info" show-icon :closable="false">
-            当前选择编辑：
-            <span class="select-title">{{ editTitle }}</span>
-            <a class="select-clear" v-if="form.id" @click="cancelEdit">取消选择</a>
-          </el-alert>
+          <el-button @click="toggleExpandAll">
+            {{ isAllExpanded ? "折叠全部" : "展开全部" }}
+          </el-button>
+          <el-button @click="getAllList">刷新</el-button>
+        </div>
+
+        <div class="toolbar-right">
           <el-input
-            v-model="searchKey"
+            v-model="searchQuery"
+            placeholder="按菜单名称筛选..."
             clearable
-            placeholder="输入菜单名搜索"
-            @input="search"
-            @clear="search"
+            :prefix-icon="Search"
+            class="search-input"
           />
-          <div v-loading="loading" class="tree-bar" :style="{ maxHeight: maxHeight }">
-            <el-tree
-              :key="treeKey"
-              ref="treeRef"
-              :data="data"
-              :props="treeProps"
-              node-key="id"
-              show-checkbox
-              highlight-current
-              :check-strictly="!strict"
-              :default-expanded-keys="expandedKeys"
-              :current-node-key="currentNodeKey"
-              @node-click="onNodeClick"
-              @check="onCheckChange"
-            >
-              <template #default="{ data: nodeData }">
-                <span class="tree-node-label">
-                  <el-icon v-if="nodeData.level == 0" class="tree-node-icon"><Menu /></el-icon>
-                  <el-icon v-else class="tree-node-icon"><List /></el-icon>
-                  <span>{{ nodeData.title }}</span>
-                </span>
-              </template>
-            </el-tree>
-          </div>
-        </el-col>
-        <el-col :md="15" :lg="13" :xl="9" style="margin-left: 10px">
-          <el-form ref="formRef" :model="form" label-width="110px" :rules="formValidate">
-            <el-form-item label="类型" prop="type">
-              <div v-show="form.level == 0">
-                <el-icon :size="16" style="margin-right: 5px"><Menu /></el-icon>
-                <span>顶级菜单</span>
-              </div>
-              <div v-show="form.level == 1 || form.level == 2">
-                <el-icon :size="16" style="margin-right: 5px"><List /></el-icon>
-                <span>页面菜单</span>
-              </div>
-            </el-form-item>
-            <el-form-item label="菜单名称" prop="title">
-              <el-input class="menu-input" v-model="form.title" />
-            </el-form-item>
-            <el-form-item
-              v-if="form.level != 0"
-              label="路由地址"
-              prop="path"
-              class="block-tool"
-            >
-              <el-tooltip placement="right" content="路由地址，英文唯一，跳转页面，路径展示用 ">
-                <el-input class="menu-input" v-model="form.path" />
-              </el-tooltip>
-            </el-form-item>
-            <el-form-item label="路由名称" prop="name" class="block-tool">
-              <el-tooltip placement="right" content="路由name，需英文唯一，跳转页面用">
-                <el-input class="menu-input" v-model="form.name" />
-              </el-tooltip>
-            </el-form-item>
-            <el-form-item v-if="form.level != 0" label="文件路径" prop="frontRoute">
-              <el-input class="menu-input" v-model="form.frontRoute" />
-            </el-form-item>
-            <el-form-item v-if="form.level != 0" label="权限url" class="block-tool">
-              <el-tooltip placement="right" content="*号模糊匹配，逗号分割">
-                <el-input
-                  class="menu-input"
-                  v-model="form.permission"
-                  type="textarea"
-                  maxlength="1000"
-                />
-              </el-tooltip>
-            </el-form-item>
-            <el-form-item label="排序值" prop="sortOrder">
-              <el-tooltip placement="right" content="值越小越靠前，支持小数">
-                <el-input-number v-model="form.sortOrder" :max="1000" :min="0" />
-              </el-tooltip>
-            </el-form-item>
-            <el-form-item>
-              <el-button
-                type="primary"
-                style="margin-right: 5px"
-                :loading="submitLoading"
-                @click="submitEdit"
-              >
-                保存
-              </el-button>
-              <el-button @click="handleReset">重置</el-button>
-            </el-form-item>
-          </el-form>
-        </el-col>
-      </el-row>
+        </div>
+      </div>
+
+      <!-- 纯列表树形表格 -->
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        :data="filteredData"
+        row-key="id"
+        default-expand-all
+        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+        border
+        stripe
+        class="menu-table"
+        @selection-change="onSelectionChange"
+      >
+        <el-table-column type="selection" width="50" align="center" />
+
+        <el-table-column prop="title" label="菜单名称" min-width="220" />
+
+        <el-table-column prop="level" label="类型" width="100" align="center">
+          <template #default="{ row }">
+            <span v-if="row">{{ row.level === 0 ? "顶级菜单" : row.level === 1 ? "一级页面" : "二级页面" }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="path" label="路由地址" min-width="160">
+          <template #default="{ row }">
+            <span>{{ row.path || "-" }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="name" label="路由名称" min-width="150">
+          <template #default="{ row }">
+            <span>{{ row.name || "-" }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="frontRoute" label="前端组件" min-width="180" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span>{{ row.frontRoute || "-" }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="sortOrder" label="排序值" width="90" align="center">
+          <template #default="{ row }">
+            <span>{{ row.sortOrder ?? 0 }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="180" fixed="right" align="center">
+          <template #default="{ row }">
+            <template v-if="row.level < 2">
+              <a class="link-text" @click="addChildMenu(row)">添加子菜单</a>
+              <span class="op-split">|</span>
+            </template>
+            <a class="link-text" @click="editRow(row)">编辑</a>
+            <span class="op-split">|</span>
+            <a class="link-text error-text" @click="deleteRow(row)">删除</a>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-card>
 
+    <!-- 菜单新建 / 编辑弹窗 -->
     <el-dialog
-      v-model="menuModalVisible"
+      v-model="modalVisible"
       :title="modalTitle"
-      width="500px"
-      align-center
-      append-to-body
+      width="560px"
       :close-on-click-modal="false"
-      class="menu-manage-dialog"
+      destroy-on-close
     >
-      <el-form ref="formAddRef" :model="formAdd" label-width="100px" :rules="formValidate">
-        <div v-if="showParent">
-          <el-form-item label="上级节点：">{{ parentTitle }}</el-form-item>
-        </div>
-        <el-form-item label="类型" prop="type">
-          <div v-show="formAdd.level == 0">
-            <el-icon :size="16" style="margin-right: 5px"><Menu /></el-icon>
-            <span>顶级菜单</span>
-          </div>
-          <div v-show="formAdd.level != 0">
-            <el-icon :size="16" style="margin-right: 5px"><List /></el-icon>
-            <span>页面菜单</span>
-          </div>
+      <el-form
+        ref="formRef"
+        :model="form"
+        label-width="100px"
+        :rules="formValidate"
+      >
+        <el-form-item v-if="parentTitle" label="上级菜单">
+          <el-input :model-value="parentTitle" disabled />
         </el-form-item>
+
+        <el-form-item label="菜单类型">
+          <el-tag v-if="form.level === 0" type="primary">顶级菜单</el-tag>
+          <el-tag v-else type="success">页面菜单 (Level {{ form.level }})</el-tag>
+        </el-form-item>
+
         <el-form-item label="菜单名称" prop="title">
-          <el-input class="menu-input" v-model="formAdd.title" />
+          <el-input v-model="form.title" placeholder="请输入菜单名称" />
         </el-form-item>
-        <el-form-item v-if="formAdd.level != 0" label="路由地址" prop="path">
-          <el-input v-model="formAdd.path" />
+
+        <el-form-item v-if="form.level != 0" label="路由地址" prop="path">
+          <el-input v-model="form.path" placeholder="英文唯一，如 /goods" />
         </el-form-item>
-        <el-form-item label="路由名称" prop="name" class="block-tool">
-          <el-tooltip placement="right" content="路由name，需英文唯一，跳转页面用">
-            <el-input v-model="formAdd.name" />
+
+        <el-form-item label="路由名称" prop="name">
+          <el-tooltip placement="right" content="英文唯一，用于路由跳转">
+            <el-input v-model="form.name" placeholder="请输入路由名称" />
           </el-tooltip>
         </el-form-item>
-        <el-form-item v-if="formAdd.level != 0" label="文件路径" prop="frontRoute">
-          <el-input v-model="formAdd.frontRoute" />
+
+        <el-form-item v-if="form.level != 0" label="前端组件" prop="frontRoute">
+          <el-input v-model="form.frontRoute" placeholder="例如 Main 或 views/goods/index" />
         </el-form-item>
-        <el-form-item v-if="formAdd.level != 0" label="权限url">
-          <el-input v-model="formAdd.permission" type="textarea" />
-          <div class="desc">*号模糊匹配，逗号分割</div>
+
+        <el-form-item v-if="form.level != 0" label="权限URL">
+          <el-input
+            v-model="form.permission"
+            type="textarea"
+            :rows="3"
+            placeholder="支持 * 号模糊匹配，多个用英文逗号分割"
+          />
         </el-form-item>
+
         <el-form-item label="排序值" prop="sortOrder">
-          <el-tooltip placement="right" content="值越小越靠前，支持小数">
-            <el-input-number v-model="formAdd.sortOrder" :max="1000" :min="0" />
+          <el-tooltip placement="right" content="值越小越靠前">
+            <el-input-number v-model="form.sortOrder" :min="0" :max="1000" />
           </el-tooltip>
         </el-form-item>
       </el-form>
+
       <template #footer>
-        <el-button @click="menuModalVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="submitAdd">提交</el-button>
+        <div class="dialog-footer">
+          <el-button @click="modalVisible = false">取消</el-button>
+          <el-button type="primary" :loading="submitLoading" @click="submitForm">
+            确定
+          </el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Menu, List, ArrowDown } from "@element-plus/icons-vue";
+import { Search } from "@element-plus/icons-vue";
 import {
   getAllPermissionList,
   addPermission,
   editPermission,
   deletePermission,
-  searchPermission,
 } from "@/api/index";
 import util from "@/libs/util.js";
 import { useAppStore } from "@/stores/app";
 
-defineOptions({ name: "menu-manage" });
+defineOptions({ name: "manager-menu-manage" });
 
 const appStore = useAppStore();
 
 const loading = ref(true);
-const strict = ref(true);
-const maxHeight = ref("500px");
-const expandLevel = ref(1);
-const menuModalVisible = ref(false);
+const submitLoading = ref(false);
+const modalVisible = ref(false);
+const modalTitle = ref("");
+const isEditMode = ref(false);
+const parentTitle = ref("");
+
+const data = ref([]);
 const selectList = ref([]);
 const selectCount = ref(0);
-const showParent = ref(false);
-const searchKey = ref("");
-const parentTitle = ref("");
-const editTitle = ref("");
-const modalTitle = ref("");
-const expandedKeys = ref([]);
-const currentNodeKey = ref(null);
-const treeKey = ref(0);
-const treeProps = reactive({
-  label: "title",
-  children: "children",
-});
+const searchQuery = ref("");
+const isAllExpanded = ref(true);
+
+const tableRef = ref(null);
+const formRef = ref(null);
+
 const form = ref({
   id: "",
   title: "",
   name: "",
   path: "",
   frontRoute: "",
-  parentId: "",
+  parentId: "0",
   sortOrder: 0,
   level: 0,
   permission: "",
 });
-const formAdd = ref({});
+
 const formValidate = reactive({
-  title: [{ required: true, message: "菜单名称名称不能为空", trigger: "blur" }],
+  title: [{ required: true, message: "菜单名称不能为空", trigger: "blur" }],
   name: [{ required: true, message: "路由名称不能为空", trigger: "blur" }],
   path: [{ required: true, message: "路由地址不能为空", trigger: "blur" }],
-  frontRoute: [{ required: true, message: "文件地址不能为空", trigger: "blur" }],
+  frontRoute: [{ required: true, message: "前端组件路径不能为空", trigger: "blur" }],
   sortOrder: [
     {
       required: true,
@@ -249,280 +219,217 @@ const formValidate = reactive({
     },
   ],
 });
-const submitLoading = ref(false);
-const data = ref([]);
 
-const treeRef = ref(null);
-const formRef = ref(null);
-const formAddRef = ref(null);
+// 前端树形过滤
+const filteredData = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) {
+    return data.value;
+  }
+  const filterTree = (nodes) => {
+    return nodes
+      .map((node) => {
+        const matches =
+          (node.title && node.title.toLowerCase().includes(query)) ||
+          (node.name && node.name.toLowerCase().includes(query)) ||
+          (node.path && node.path.toLowerCase().includes(query));
+        const filteredChildren = node.children ? filterTree(node.children) : [];
+        if (matches || filteredChildren.length > 0) {
+          return {
+            ...node,
+            children: filteredChildren.length > 0 ? filteredChildren : undefined,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+  };
+  return filterTree(data.value);
+});
 
 function init() {
   getAllList();
 }
 
-function collectExpandedKeys(nodes, keys = []) {
-  if (!nodes) return keys;
-  nodes.forEach((node) => {
-    if (node.expand === true) {
-      keys.push(node.id);
-    }
-    if (node.children && node.children.length > 0) {
-      collectExpandedKeys(node.children, keys);
-    }
-  });
-  return keys;
-}
-
-function handleDropdown(name) {
-  if (name == "expandOne") {
-    expandLevel.value = 1;
-    getAllList();
-  } else if (name == "expandTwo") {
-    expandLevel.value = 2;
-    getAllList();
-  } else if (name == "expandThree") {
-    expandLevel.value = 3;
-    getAllList();
-  }
-  if (name == "expandAll") {
-    expandLevel.value = 4;
-    getAllList();
-  } else if (name == "refresh") {
-    getAllList();
-  }
-}
-
 function getAllList() {
   loading.value = true;
-  getAllPermissionList().then((res) => {
-    loading.value = false;
-    if (res.success) {
-      const level = expandLevel.value;
-      res.result.forEach(function (e) {
-        if (level == 1) {
-          if (e.level == 0) {
-            e.expand = false;
-          }
-          if (e.children && e.children.length > 0) {
-            e.children.forEach(function (c) {
-              if (c.level == 1) {
-                c.expand = false;
-              }
-              if (c.children && c.children.length > 0) {
-                c.children.forEach(function (b) {
-                  if (b.level == 2) {
-                    b.expand = false;
-                  }
-                });
-              }
-            });
-          }
-        } else if (level == 2) {
-          if (e.level == 0) {
-            e.expand = true;
-          }
-          if (e.children && e.children.length > 0) {
-            e.children.forEach(function (c) {
-              if (c.level == 1) {
-                c.expand = false;
-              }
-              if (c.children && c.children.length > 0) {
-                c.children.forEach(function (b) {
-                  if (b.level == 2) {
-                    b.expand = false;
-                  }
-                });
-              }
-            });
-          }
-        } else if (level == 3) {
-          if (e.level == 0) {
-            e.expand = true;
-          }
-          if (e.children && e.children.length > 0) {
-            e.children.forEach(function (c) {
-              if (c.level == 1) {
-                c.expand = true;
-              }
-              if (c.children && c.children.length > 0) {
-                c.children.forEach(function (b) {
-                  if (b.level == 2) {
-                    b.expand = false;
-                  }
-                });
-              }
-            });
-          }
-        } else if (level == 4) {
-          if (e.level == 0) {
-            e.expand = true;
-          }
-          if (e.children && e.children.length > 0) {
-            e.children.forEach(function (c) {
-              if (c.level == 1) {
-                c.expand = true;
-              }
-              if (c.children && c.children.length > 0) {
-                c.children.forEach(function (b) {
-                  if (b.level == 2) {
-                    b.expand = true;
-                  }
-                });
-              }
-            });
-          }
-        }
-      });
-      data.value = res.result;
-      expandedKeys.value = collectExpandedKeys(res.result);
-      treeKey.value += 1;
-    }
-  });
-}
-
-function onNodeClick(nodeData) {
-  if (nodeData) {
-    const menu = JSON.parse(JSON.stringify(nodeData));
-    form.value = menu;
-    editTitle.value = menu.title;
-    currentNodeKey.value = menu.id;
-  } else {
-    cancelEdit();
-  }
-}
-
-function onCheckChange(_data, { checkedNodes }) {
-  selectList.value = checkedNodes;
-  selectCount.value = checkedNodes.length;
-}
-
-function search() {
-  if (searchKey.value) {
-    loading.value = true;
-    searchPermission({ title: searchKey.value }).then((res) => {
+  getAllPermissionList()
+    .then((res) => {
       loading.value = false;
       if (res.success) {
-        data.value = res.result;
-        expandedKeys.value = [];
-        treeKey.value += 1;
+        data.value = Array.isArray(res.result) ? res.result : [];
+      }
+    })
+    .catch(() => {
+      loading.value = false;
+    });
+}
+
+function onSelectionChange(selection) {
+  selectList.value = selection;
+  selectCount.value = selection.length;
+}
+
+function toggleExpandAll() {
+  isAllExpanded.value = !isAllExpanded.value;
+  const toggleRows = (rows) => {
+    rows.forEach((row) => {
+      tableRef.value?.toggleRowExpansion(row, isAllExpanded.value);
+      if (row.children && row.children.length) {
+        toggleRows(row.children);
       }
     });
-  } else {
-    getAllList();
-  }
+  };
+  toggleRows(data.value);
 }
 
-function cancelEdit() {
-  treeRef.value?.setCurrentKey(null);
-  currentNodeKey.value = null;
-  formRef.value.resetFields();
-  form.value.id = "";
-  editTitle.value = "";
-}
-
-function handleReset() {
-  formRef.value.resetFields();
-  form.value.frontRoute = "";
-}
-
-function submitEdit() {
-  formRef.value.validate((valid) => {
-    if (valid) {
-      if (!form.value.id) {
-        ElMessage.warning("请先点击选择要修改的菜单节点");
-        return;
-      }
-      submitLoading.value = true;
-      if (form.value.sortOrder == null) {
-        form.value.sortOrder = 0;
-      }
-      delete form.value.icon;
-      delete form.value.frontComponent;
-      delete form.value.buttonType;
-      delete form.value.updateTime;
-      delete form.value.selected;
-      delete form.value.description;
-      delete form.value.children;
-
-      editPermission(form.value).then((res) => {
-        submitLoading.value = false;
-        if (res.success) {
-          ElMessage.success("编辑成功");
-          appStore.setAdded(false);
-          util.initRouter();
-          init();
-          menuModalVisible.value = false;
-        }
-      });
-    }
-  });
-}
-
-function submitAdd() {
-  formAddRef.value.validate((valid) => {
-    if (valid) {
-      submitLoading.value = true;
-
-      addPermission(formAdd.value).then((res) => {
-        submitLoading.value = false;
-        if (res.success) {
-          ElMessage.success("添加成功");
-          appStore.setAdded(false);
-          util.initRouter();
-          init();
-          menuModalVisible.value = false;
-        }
-      });
-    }
-  });
-}
-
-function addMenu() {
-  if (!form.value.id) {
-    ElMessage.warning("请先点击选择一个菜单权限节点");
-    return;
-  }
-  parentTitle.value = form.value.title;
-  modalTitle.value = "添加子节点";
-  showParent.value = true;
-  if (form.value.level == 2) {
-    ElMessageBox.alert("仅支持2级菜单目录", "抱歉，不能添加啦", { type: "warning" });
-    return;
-  }
-  formAdd.value = {
-    parentId: form.value.id,
-    level: Number(form.value.level) + 1,
+// 添加顶级菜单
+function addRootMenu() {
+  isEditMode.value = false;
+  parentTitle.value = "";
+  modalTitle.value = "添加顶级菜单";
+  form.value = {
+    id: "",
+    title: "",
+    name: "",
+    path: "/",
+    frontRoute: "Main",
+    parentId: 0,
+    level: 0,
     sortOrder: 0,
     permission: "",
   };
-  if (form.value.level == 0) {
-    formAdd.value.path = "/";
-    formAdd.value.frontRoute = "Main";
+  modalVisible.value = true;
+}
+
+// 添加子菜单
+function addChildMenu(row) {
+  if (row.level >= 2) {
+    ElMessageBox.alert("仅支持2级菜单目录，不能再添加子菜单", "提示", {
+      type: "warning",
+    });
+    return;
   }
-  menuModalVisible.value = true;
-}
-
-function addRootMenu() {
-  modalTitle.value = "添加顶级菜单";
-  showParent.value = false;
-  formAdd.value = {
-    level: 0,
+  isEditMode.value = false;
+  parentTitle.value = row.title;
+  modalTitle.value = `添加子菜单 (上级: ${row.title})`;
+  form.value = {
+    id: "",
+    title: "",
+    name: "",
+    path: "",
+    frontRoute: "",
+    parentId: row.id,
+    level: Number(row.level) + 1,
     sortOrder: 0,
+    permission: "",
   };
-  menuModalVisible.value = true;
+  if (row.level === 0) {
+    form.value.path = "/";
+    form.value.frontRoute = "Main";
+  }
+  modalVisible.value = true;
 }
 
+// 编辑当前菜单
+function editRow(row) {
+  isEditMode.value = true;
+  parentTitle.value = "";
+  modalTitle.value = `编辑菜单 - ${row.title}`;
+  form.value = {
+    id: row.id,
+    title: row.title,
+    name: row.name,
+    path: row.path,
+    frontRoute: row.frontRoute,
+    parentId: row.parentId,
+    level: row.level,
+    sortOrder: row.sortOrder ?? 0,
+    permission: row.permission || "",
+  };
+  modalVisible.value = true;
+}
+
+// 提交保存
+function submitForm() {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      const payload = { ...form.value };
+      if (payload.sortOrder == null) {
+        payload.sortOrder = 0;
+      }
+      delete payload.children;
+      delete payload.icon;
+      delete payload.frontComponent;
+      delete payload.buttonType;
+      delete payload.updateTime;
+      delete payload.selected;
+      delete payload.description;
+
+      const request = isEditMode.value
+        ? editPermission(payload)
+        : addPermission(payload);
+
+      request
+        .then((res) => {
+          submitLoading.value = false;
+          if (res.success) {
+            ElMessage.success(isEditMode.value ? "编辑成功" : "添加成功");
+            appStore.setAdded(false);
+            util.initRouter();
+            modalVisible.value = false;
+            getAllList();
+          }
+        })
+        .catch(() => {
+          submitLoading.value = false;
+        });
+    }
+  });
+}
+
+// 删除单个
+function deleteRow(row) {
+  ElMessageBox.confirm(
+    `您确认要删除菜单 "${row.title}" 及其下级所有数据?`,
+    "确认删除",
+    {
+      type: "warning",
+      confirmButtonText: "确定删除",
+      cancelButtonText: "取消",
+    }
+  )
+    .then(() => {
+      deletePermission(row.id).then((res) => {
+        if (res.success) {
+          ElMessage.success("删除成功");
+          appStore.setAdded(false);
+          util.initRouter();
+          getAllList();
+        }
+      });
+    })
+    .catch(() => {});
+}
+
+// 批量删除
 function delAll() {
   if (selectCount.value <= 0) {
     ElMessage.warning("您还未勾选要删除的数据");
     return;
   }
-  ElMessageBox.confirm("您确认要删除所选的 " + selectCount.value + " 条数据?", "确认删除", { type: "warning" }).then(() => {
-      let ids = "";
-      selectList.value.forEach(function (e) {
-        ids += e.id + ",";
-      });
-      ids = ids.substring(0, ids.length - 1);
+  ElMessageBox.confirm(
+    `您确认要删除所选的 ${selectCount.value} 条数据?`,
+    "确认删除",
+    {
+      type: "warning",
+      confirmButtonText: "确定删除",
+      cancelButtonText: "取消",
+    }
+  )
+    .then(() => {
+      const ids = selectList.value.map((e) => e.id).join(",");
       deletePermission(ids).then((res) => {
         if (res.success) {
           ElMessage.success("删除成功");
@@ -530,42 +437,96 @@ function delAll() {
           util.initRouter();
           selectList.value = [];
           selectCount.value = 0;
-          cancelEdit();
-          init();
+          getAllList();
         }
       });
-  }).catch(() => {});
+    })
+    .catch(() => {});
 }
 
 onMounted(() => {
-  const height = document.documentElement.clientHeight;
-  maxHeight.value = Number(height - 287) + "px";
   init();
 });
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/tree-common.scss";
-.desc {
-  font-size: 12px;
-  color: #999;
-}
-.menu-input {
-  width: 362px;
-}
-.tree-node-icon {
-  margin-right: 8px;
-  vertical-align: middle;
-}
-.tree-node-label {
-  display: inline-flex;
-  align-items: center;
-}
-</style>
+.menu-manage-container {
+  width: 100%;
 
-<style lang="scss">
-.menu-manage-dialog .el-dialog__body {
-  max-height: calc(100vh - 220px);
-  overflow-y: auto;
+  .manage-card {
+    border-radius: 8px;
+    border: 1px solid #ebeef5;
+    background: #fff;
+
+    :deep(.el-card__body) {
+      padding: 18px 20px 24px;
+    }
+  }
+
+  .table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+
+      .search-input {
+        width: 240px;
+      }
+    }
+  }
+
+  .menu-table {
+    width: 100%;
+
+    :deep(.el-table__row) {
+      transition: background-color 0.2s ease;
+    }
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+}
+
+.link-text {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-block;
+
+  &:hover {
+    color: #57a3f3;
+  }
+
+  &.error-text {
+    color: #ed4014;
+
+    &:hover {
+      color: #f16643;
+    }
+  }
+}
+
+.op-split {
+  margin: 0 8px;
+  color: #dcdee2;
+  font-size: 14px;
 }
 </style>

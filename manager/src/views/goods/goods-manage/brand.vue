@@ -1,47 +1,82 @@
 <template>
-  <div class="search">
-    <el-card>
+  <div class="brand-manage-page search">
+    <!-- 顶部筛选表单 -->
+    <el-card shadow="never" class="filter-card">
       <el-form
         ref="searchFormRef"
         :model="searchForm"
         inline
-        label-width="70px"
+        label-width="76px"
         class="search-form"
         @keyup.enter="handleSearch"
       >
-        <el-form-item label="品牌名称">
+        <el-form-item label="品牌名称" prop="name">
           <el-input
             v-model="searchForm.name"
             placeholder="请输入品牌名称"
             clearable
-            style="width: 240px"
+            style="width: 220px"
+            @clear="handleSearch"
           />
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        <el-form-item class="form-actions">
+          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <el-card class="mt_10">
-      <div class="operation padding-row" style="margin-bottom: 10px;">
-        <el-button type="primary" @click="add">添加</el-button>
-      </div>
+    <!-- 品牌数据表格卡片 -->
+    <el-card shadow="never" class="table-card mt_10">
+      <template #header>
+        <div class="card-header-bar">
+          <div class="header-title">
+            <span>商品品牌列表</span>
+          </div>
+          <div class="header-actions">
+            <el-button size="small" @click="getDataList">刷新</el-button>
+            <el-button type="primary" size="small" @click="add">添加品牌</el-button>
+          </div>
+        </div>
+      </template>
 
-      <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
-        <el-table-column prop="name" label="品牌名称" width="200" />
-        <el-table-column label="品牌图标" align="left">
+      <el-table
+        ref="table"
+        v-loading="loading"
+        border
+        stripe
+        :data="data"
+        style="width: 100%"
+        class="custom-brand-table"
+      >
+        <!-- 品牌ID -->
+        <el-table-column prop="id" label="品牌ID" min-width="190" show-overflow-tooltip />
+
+        <!-- 品牌图标 -->
+        <el-table-column label="品牌图标" width="96" align="center">
           <template #default="{ row }">
-            <img
-              v-if="row"
-              :src="row.logo || ''"
-              alt="加载图片失败"
-              style="cursor: pointer; width: 80px; height: 60px; margin: 10px 0; object-fit: contain"
-            />
+            <div v-if="row && row.logo" class="logo-box">
+              <el-image
+                :src="row.logo"
+                fit="contain"
+                preview-teleported
+                :preview-src-list="[row.logo]"
+                class="brand-logo-img"
+              >
+                <template #error>
+                  <div class="logo-slot">无图</div>
+                </template>
+              </el-image>
+            </div>
+            <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" align="left" width="150">
+
+        <!-- 品牌名称 -->
+        <el-table-column prop="name" label="品牌名称" min-width="180" show-overflow-tooltip />
+
+        <!-- 状态 -->
+        <el-table-column label="状态" width="110" align="center">
           <template #default="{ row }">
             <el-switch
               v-if="row"
@@ -53,8 +88,12 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="170" show-overflow-tooltip />
-        <el-table-column label="操作" width="230" align="center" fixed="right">
+
+        <!-- 创建时间 -->
+        <el-table-column prop="createTime" label="创建时间" min-width="170" align="center" show-overflow-tooltip />
+
+        <!-- 操作栏 -->
+        <el-table-column label="操作" width="200" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="edit(row)">编辑</a>
@@ -67,7 +106,8 @@
         </el-table-column>
       </el-table>
 
-      <div class="mt_10" style="display: flex; justify-content: flex-end">
+      <!-- 底部分页 -->
+      <div class="pagination-wrap mt_10">
         <el-pagination
           v-model:current-page="searchForm.pageNumber"
           v-model:page-size="searchForm.pageSize"
@@ -81,24 +121,31 @@
       </div>
     </el-card>
 
+    <!-- 添加 / 编辑品牌弹窗 -->
     <el-dialog
       v-model="modalVisible"
       :title="modalTitle"
-      width="500px"
+      width="520px"
       :close-on-click-modal="false"
+      destroy-on-close
     >
-      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
+      <el-form ref="formRef" :model="form" label-width="90px" :rules="formValidate">
+        <el-form-item v-if="modalType === 1 && form.id" label="品牌ID">
+          <span class="font-mono text-dark">{{ form.id }}</span>
+        </el-form-item>
         <el-form-item label="品牌名称" prop="name">
-          <el-input v-model="form.name" style="width: 100%" />
+          <el-input v-model="form.name" placeholder="请输入品牌名称" style="width: 100%" />
         </el-form-item>
         <el-form-item label="品牌图标" prop="logo">
-          <div style="display: flex; align-items: center; gap: 8px">
-            <img
-              :src="form.logo || defaultPic"
-              alt=""
-              style="width: 60px; height: 60px; object-fit: contain; border: 1px solid #dcdfe6; border-radius: 4px"
-            />
-            <el-button type="primary" link @click="openLogoPicker">修改</el-button>
+          <div class="dialog-logo-picker">
+            <div class="logo-preview-box">
+              <img
+                :src="form.logo || defaultPic"
+                alt="品牌图标"
+                class="dialog-logo-img"
+              />
+            </div>
+            <el-button type="primary" link @click="openLogoPicker">上传/选择图标</el-button>
           </div>
         </el-form-item>
       </el-form>
@@ -108,7 +155,8 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="picModelFlag" width="1200px" :show-close="true">
+    <!-- OSS 图片选择组件弹窗 -->
+    <el-dialog v-model="picModelFlag" width="1200px" title="选择品牌图标" :show-close="true">
       <ossManage
         ref="ossManageRef"
         :is-component="true"
@@ -117,13 +165,15 @@
       />
     </el-dialog>
 
+    <!-- 关联分类弹窗 -->
     <el-dialog
       v-model="categoryModalVisible"
       :title="categoryModalTitle"
-      width="700px"
+      width="680px"
       :close-on-click-modal="false"
+      destroy-on-close
     >
-      <div v-loading="categoryTreeLoading" style="position: relative; max-height: 520px; overflow: auto">
+      <div v-loading="categoryTreeLoading" class="category-tree-wrap">
         <el-tree
           ref="categoryTree"
           :key="categoryTreeKey"
@@ -139,7 +189,7 @@
       <template #footer>
         <el-button @click="categoryModalVisible = false">取消</el-button>
         <el-button type="primary" :loading="categorySubmitLoading" @click="submitBrandCategory">
-          提交
+          提交关联
         </el-button>
       </template>
     </el-dialog>
@@ -299,7 +349,7 @@ function handleStatusSwitchChange(row, checked) {
 }
 
 function delBrand(row) {
-  ElMessageBox.confirm("您确认要删除 " + row.name + " ?", "确认删除", { type: "warning" }).then(() => {
+  ElMessageBox.confirm("您确认要删除品牌 " + row.name + " ?", "确认删除", { type: "warning" }).then(() => {
     return delBrandApi(row.id).then((res) => {
       if (res.success) {
         ElMessage.success("品牌删除成功!");
@@ -339,7 +389,7 @@ function handleSubmit() {
 
 function add() {
   modalType.value = 0;
-  modalTitle.value = "添加";
+  modalTitle.value = "添加品牌";
   formRef.value?.resetFields();
   delete form.value.id;
   modalVisible.value = true;
@@ -347,7 +397,7 @@ function add() {
 
 function edit(v) {
   modalType.value = 1;
-  modalTitle.value = "编辑";
+  modalTitle.value = "编辑品牌";
   formRef.value?.resetFields();
   for (const attr in v) {
     if (v[attr] === null) {
@@ -360,13 +410,129 @@ function edit(v) {
 </script>
 
 <style lang="scss" scoped>
-.link-text {
-  color: #409eff;
-  cursor: pointer;
-  text-decoration: none;
+.brand-manage-page {
+  .filter-card {
+    .search-form {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 0;
+
+      :deep(.el-form-item) {
+        margin-bottom: 0;
+        margin-right: 16px;
+      }
+
+      .form-actions {
+        margin-left: auto;
+      }
+    }
+  }
+
+  .card-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #303133;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  .font-mono {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+  }
+
+  .text-dark {
+    color: #303133;
+  }
+
+  .text-placeholder {
+    color: #c0c4cc;
+  }
+
+  .time-text {
+    font-size: 12px;
+    color: #909399;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  .custom-brand-table {
+    .logo-box {
+      width: 52px;
+      height: 40px;
+      margin: 0 auto;
+      border: 1px solid #ebeef5;
+      border-radius: 4px;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+
+      .brand-logo-img {
+        width: 48px;
+        height: 36px;
+      }
+
+      .logo-slot {
+        font-size: 11px;
+        color: #c0c4cc;
+      }
+    }
+  }
+
+  .pagination-wrap {
+    display: flex;
+    justify-content: flex-end;
+  }
 }
-.op-split {
-  margin: 0 8px;
-  color: #dcdee2;
+
+.dialog-logo-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .logo-preview-box {
+    width: 64px;
+    height: 48px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    .dialog-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+}
+
+.category-tree-wrap {
+  position: relative;
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 10px;
 }
 </style>

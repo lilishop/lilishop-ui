@@ -77,9 +77,9 @@
           <div class="counts">{{ notices.appointmentWorkOrder || 0 }}</div>
           <div>未完成预约工单</div>
         </div>
-        <div class="todo-item" @click="goProcurementAudit">
-          <div class="counts">{{ notices.procurementAudit || 0 }}</div>
-          <div>待审核采购单</div>
+        <div class="todo-item" @click="goMemberWithdrawApply">
+          <div class="counts">{{ notices.balanceCash || 0 }}</div>
+          <div>待审核会员提现</div>
         </div>
       </div>
     </div>
@@ -321,10 +321,10 @@ function goAppointmentWorkOrders() {
   });
 }
 
-function goProcurementAudit() {
+function goMemberWithdrawApply() {
   router.push({
-    name: "manager-procurement-order-list",
-    query: { status: "SUBMITTED" },
+    name: "withdrawApply",
+    query: { applyStatus: "APPLY" },
   });
 }
 

@@ -51,7 +51,6 @@
     <el-card class="mt_10">
       <el-alert
         type="info"
-        show-icon
         :closable="false"
         title="支持按规格逐条设置虚拟销量，列表总销量 = 真实销量 + 虚拟销量。"
         style="margin-bottom: 10px"
@@ -71,55 +70,65 @@
         ref="tableRef"
         v-loading="loading"
         :data="data"
+        border
         class="mt_10"
         style="width: 100%"
         @sort-change="changeSort"
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column prop="id" label="SKU ID" width="180" show-overflow-tooltip />
-        <el-table-column prop="goodsId" label="SPU编码" width="180" show-overflow-tooltip />
-        <el-table-column label="商品信息" min-width="360">
+        <el-table-column label="商品信息" min-width="320">
           <template #default="{ row }">
             <div v-if="row" class="goods-info">
-              <img
-                v-if="row.thumbnail"
-                :src="row.thumbnail"
-                class="goods-thumbnail"
-                alt=""
-              />
+              <div class="goods-thumb-box">
+                <el-image
+                  v-if="row.thumbnail"
+                  :src="row.thumbnail"
+                  fit="cover"
+                  preview-teleported
+                  :preview-src-list="[row.thumbnail]"
+                  class="goods-thumbnail"
+                >
+                  <template #error>
+                    <div class="thumb-slot">无图</div>
+                  </template>
+                </el-image>
+                <div v-else class="thumb-slot">无图</div>
+              </div>
               <div class="goods-text">
-                <div class="div-zoom">{{ row.goodsName }}</div>
-                <div v-if="row.simpleSpecs" class="sub-title">
+                <div class="goods-title" :title="row.goodsName">{{ row.goodsName || "-" }}</div>
+                <div v-if="row.simpleSpecs" class="goods-specs">
                   规格：{{ row.simpleSpecs.trim() || "-" }}
                 </div>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="真实销量" width="110">
+        <el-table-column prop="goodsId" label="SPU编码" width="160" show-overflow-tooltip />
+        <el-table-column prop="id" label="SKU ID" width="160" show-overflow-tooltip />
+        <el-table-column label="真实销量" width="110" align="right">
           <template #default="{ row }">
             <span v-if="row">{{ row.buyCount || 0 }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="虚拟销量" width="110">
+        <el-table-column label="虚拟销量" width="110" align="right">
           <template #default="{ row }">
             <span v-if="row">{{ row.virtualSalesInput || 0 }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="总销量" width="110">
+        <el-table-column label="总销量" width="110" align="right">
           <template #default="{ row }">
             <span v-if="row">{{ getTotalSales(row) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="100">
+        <el-table-column label="状态" width="90" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row" :type="row.marketEnable === 'UPPER' ? 'success' : 'warning'">
+            <span v-if="row">
               {{ row.marketEnable === "UPPER" ? "上架" : "下架" }}
-            </el-tag>
+            </span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" align="center" fixed="right">
+        <el-table-column label="操作" width="90" align="center" fixed="right">
           <template #default="{ row, $index }">
             <a
               v-if="row"
@@ -445,32 +454,63 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.sub-title {
-  margin-top: 6px;
-  color: #808695;
-  font-size: 12px;
-}
-
 .goods-info {
   display: flex;
   align-items: center;
-  margin: 5px 0;
-  padding: 10px 0;
+  padding: 4px 0;
+}
+
+.goods-thumb-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  margin-right: 12px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #ebeef5;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .goods-thumbnail {
-  width: 50px;
-  height: 50px;
-  margin-right: 12px;
-  object-fit: cover;
-  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: block;
+}
+
+.thumb-slot {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #909399;
+  background-color: #f5f7fa;
 }
 
 .goods-text {
   min-width: 0;
+  flex: 1;
 }
 
-.div-zoom {
+.goods-title {
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
+  font-weight: normal;
+}
+
+.goods-specs {
+  margin-top: 4px;
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -493,11 +533,28 @@ onMounted(() => {
 
 .sku-info-label {
   width: 90px;
-  color: #808695;
   flex-shrink: 0;
 }
 
 .mt_10 {
   margin-top: 10px;
+}
+
+.link-text {
+  color: #2d8cf0;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-block;
+
+  &:hover {
+    color: #57a3f3;
+  }
+
+  &.disabled {
+    color: #c5c8ce;
+    cursor: not-allowed;
+  }
 }
 </style>

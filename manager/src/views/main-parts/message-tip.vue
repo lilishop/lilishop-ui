@@ -7,8 +7,8 @@
       </a>
       <template #dropdown>
         <el-dropdown-menu v-if="value != 0">
-          <el-dropdown-item v-if="res.balanceCash" command="deposit">
-            <el-badge :value="res.balanceCash">待处理预存款提现申请</el-badge>
+          <el-dropdown-item v-if="res.balanceCash" command="withdrawApply">
+            <el-badge :value="res.balanceCash">待处理会员提现申请</el-badge>
           </el-dropdown-item>
           <el-dropdown-item v-if="res.complain" command="orderComplaint">
             <el-badge :value="res.complain">待处理投诉审核</el-badge>
@@ -27,9 +27,6 @@
           </el-dropdown-item>
           <el-dropdown-item v-if="res.appointmentWorkOrder" command="manager-appointment-work-orders">
             <el-badge :value="res.appointmentWorkOrder">未完成预约工单</el-badge>
-          </el-dropdown-item>
-          <el-dropdown-item v-if="res.procurementAudit" command="manager-procurement-order-list">
-            <el-badge :value="res.procurementAudit">待审核采购单</el-badge>
           </el-dropdown-item>
         </el-dropdown-menu>
       </template>
@@ -63,12 +60,12 @@ const value = computed(() => {
 });
 
 function navigateTo(name) {
-  if (name === "manager-appointment-work-orders") {
-    router.push({ name, query: { serviceStatus: "OPEN" } });
+  if (name === "withdrawApply") {
+    router.push({ name: "withdrawApply", query: { applyStatus: "APPLY" } });
     return;
   }
-  if (name === "manager-procurement-order-list") {
-    router.push({ name, query: { status: "SUBMITTED" } });
+  if (name === "manager-appointment-work-orders") {
+    router.push({ name, query: { serviceStatus: "OPEN" } });
     return;
   }
   router.push({ name });

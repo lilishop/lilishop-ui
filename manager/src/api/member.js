@@ -170,6 +170,10 @@ export const deleteMemberGroup = (id) => {
   return deleteRequest(`/member/memberGroup/delete/${id}`);
 };
 
+export const getMemberGroupUsers = (groupId, params) => {
+  return getRequest(`/member/memberGroup/${groupId}/users`, params);
+};
+
 export const addMemberGroupUsers = (groupId, memberIds) => {
   return postRequest(`/member/memberGroup/${groupId}/users`, {
     memberIds: Array.isArray(memberIds) ? memberIds.join(",") : memberIds,

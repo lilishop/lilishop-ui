@@ -308,6 +308,7 @@
 
 <script setup>
 import { ref, watch, nextTick, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { ArrowDown } from "@element-plus/icons-vue";
 import multipleMap from "@/components/map/multiple-map";
 import * as API_Member from "@/api/member.js";
@@ -319,6 +320,8 @@ import { md5 } from "@/utils/md5.js";
 import defaultPic from "@/assets/default.png";
 
 defineOptions({ name: "member" });
+
+const route = useRoute();
 
 const props = defineProps({
   selectedMember: {
@@ -511,7 +514,15 @@ function submitSetMemberGroup() {
     const groupId = memberGroupForm.value.groupId;
     memberGroupLoading.value = true;
     Promise.all(
-      memberIds.map((memberId) => API_Member.setMemberUserGroups(memberId, [groupId]))
+      memberIds.map((memberId) =>
+        API_Member.setMemberUserGroups(memberId, [groupId]).then((res) => {
+          if (!res || !res.success) {
+            // 后端 updateUserGroups 若因原无分组返回失败，自动降级尝试 addMemberGroupUsers
+            return API_Member.addMemberGroupUsers(groupId, [memberId]);
+          }
+          return res;
+        })
+      )
     )
       .then((results) => {
         memberGroupLoading.value = false;
@@ -758,10 +769,24 @@ function handleSubmitModal() {
 }
 
 onMounted(() => {
+  if (route.query && route.query.groupId) {
+    searchForm.value.groupId = String(route.query.groupId);
+  }
   getData();
   loadMemberGroupList();
   loadMemberGradeList();
 });
+
+watch(
+  () => route.query.groupId,
+  (val) => {
+    if (val !== undefined) {
+      searchForm.value.groupId = val ? String(val) : "";
+      searchForm.value.pageNumber = 1;
+      getData();
+    }
+  }
+);
 
 // 外部通过 ref 调用（promotions/coupon-activity/coupon-publish.vue 的 memberLayoutRef.getSelection()）
 defineExpose({ getSelection });

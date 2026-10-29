@@ -150,12 +150,11 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import * as API_Order from "@/api/order";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
-
-const QUERY_KEY = "manager-order-list-query";
 const PAGE_SIZES = [20, 50, 100];
 
 const PROMOTION_OPTIONS = [
@@ -201,36 +200,10 @@ function emptySearchForm(pageSize = 20) {
   };
 }
 
-function readSavedQuery() {
-  const raw = sessionStorage.getItem(QUERY_KEY);
-  if (!raw) return null;
-  try {
-    const saved = JSON.parse(raw);
-    const form = emptySearchForm();
-    const src = saved && saved.searchForm ? saved.searchForm : {};
-    Object.keys(form).forEach((key) => {
-      if (src[key] !== undefined && src[key] !== null) {
-        form[key] = src[key];
-      }
-    });
-    form.pageNumber = Number(form.pageNumber) || 1;
-    form.pageSize = PAGE_SIZES.includes(Number(form.pageSize)) ? Number(form.pageSize) : 20;
-    const currentStatus = saved.currentStatus || form.orderStatus || "ALL";
-    if (!currentStatus || currentStatus === "ALL") {
-      form.orderStatus = "";
-    }
-    return {
-      searchForm: form,
-      selectDate: Array.isArray(saved.selectDate) ? saved.selectDate : null,
-      currentStatus: currentStatus || "ALL",
-    };
-  } catch (e) {
-    sessionStorage.removeItem(QUERY_KEY);
-    return null;
-  }
-}
 
 defineOptions({ name: "orderList" });
+
+const route = useRoute();
 
 const searchFormRef = ref(null);
 const tableRef = ref(null);
@@ -247,6 +220,25 @@ const data = ref([]);
 const total = ref(0);
 const orderNumData = ref({});
 const currentStatus = ref("ALL");
+
+function applyRouteQuery() {
+  const q = route.query;
+  if (!q) return;
+  if (q.orderSn) searchForm.value.orderSn = String(q.orderSn);
+  if (q.buyerName) searchForm.value.buyerName = String(q.buyerName);
+  if (q.goodsName) searchForm.value.goodsName = String(q.goodsName);
+  if (q.storeName) searchForm.value.storeName = String(q.storeName);
+  if (q.orderType) searchForm.value.orderType = String(q.orderType);
+  if (q.orderStatus) {
+    searchForm.value.orderStatus = String(q.orderStatus);
+    currentStatus.value = String(q.orderStatus);
+  }
+  if (q.startDate && q.endDate) {
+    searchForm.value.startDate = String(q.startDate);
+    searchForm.value.endDate = String(q.endDate);
+    selectDate.value = [String(q.startDate), String(q.endDate)];
+  }
+}
 
 const orderStatusWithCount = computed(() => {
   const count = (value) => (value ? `(${value})` : "");
@@ -340,23 +332,6 @@ function orderStatusTagType(v) {
   };
   return map[v] || "info";
 }
-function rememberQuery() {
-  sessionStorage.setItem(
-    QUERY_KEY,
-    JSON.stringify({
-      searchForm: searchForm.value,
-      selectDate: selectDate.value,
-      currentStatus: currentStatus.value,
-    })
-  );
-}
-function restoreQuery() {
-  const saved = readSavedQuery();
-  if (!saved) return;
-  searchForm.value = saved.searchForm;
-  selectDate.value = saved.selectDate;
-  currentStatus.value = saved.currentStatus;
-}
 function init() {
   getDataList();
   getOrderNumData();
@@ -380,7 +355,6 @@ function handleReset() {
   searchForm.value = emptySearchForm(pageSize);
   selectDate.value = null;
   currentStatus.value = "ALL";
-  sessionStorage.removeItem(QUERY_KEY);
   init();
 }
 function selectDateRange(v) {
@@ -403,7 +377,6 @@ function countParams() {
 }
 function getDataList() {
   loading.value = true;
-  rememberQuery();
   API_Order.getOrderList(searchForm.value)
     .then((res) => {
       if (res.success) {
@@ -478,10 +451,24 @@ function getOrderNumData() {
     });
 }
 
-// created
-restoreQuery();
+watch(
+  () => route.query,
+  (newQuery) => {
+    if (newQuery && Object.keys(newQuery).length > 0) {
+      applyRouteQuery();
+      searchForm.value.pageNumber = 1;
+      init();
+    }
+  }
+);
 
 onMounted(() => {
+  try {
+    sessionStorage.removeItem("manager-order-list-query");
+  } catch (e) {
+    // ignore
+  }
+  applyRouteQuery();
   init();
 });
 </script>

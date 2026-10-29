@@ -9,7 +9,7 @@
     <el-card class="card">
       <div>
         <h4>交易概况</h4>
-        <div class="flex">
+        <div class="flex" style="align-items: flex-start;">
           <div class="transactionList">
             <div
               class="transaction-item"
@@ -98,45 +98,159 @@
             </div>
           </div>
           <div class="shap">
-            <div id="overViewChart">
-              <!-- 上 -->
-              <div class="block">
-                <div class="box">
-                  <span>访客数</span>
-                  <span>{{ overViewList.uvNum || 0 }}</span>
-                </div>
+            <div class="funnel-card">
+              <div class="funnel-header">
+                <h4>交易转化漏斗</h4>
+                <span class="funnel-sub">全链路转化分析</span>
               </div>
-              <!-- 中 -->
-              <div class="block">
-                <div class="box">
-                  <span>下单笔数</span>
-                  <span>{{ overViewList.orderNum || 0 }}</span>
-                </div>
-              </div>
-              <!-- 下 -->
-              <div class="block">
-                <div class="box">
-                  <span>付款笔数</span>
-                  <span>{{ overViewList.paymentOrderNum || 0 }}</span>
-                </div>
-              </div>
+              <div class="funnel-body">
+                <svg
+                  class="funnel-svg"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 460 236"
+                  width="460"
+                  height="236"
+                >
+                  <defs>
+                    <linearGradient id="gradTier1" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FF5C58" />
+                      <stop offset="100%" stop-color="#E83D39" />
+                    </linearGradient>
+                    <linearGradient id="gradTier2" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FF8259" />
+                      <stop offset="100%" stop-color="#F25B30" />
+                    </linearGradient>
+                    <linearGradient id="gradTier3" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#FFA454" />
+                      <stop offset="100%" stop-color="#F28528" />
+                    </linearGradient>
 
-              <!-- 线 -->
-              <div class="rightBorder"></div>
-              <div class="leftTopBorder"></div>
-              <div class="leftBottomBorder"></div>
-              <!--数据 -->
-              <div class="leftTopTips">
-                <div>下单转化率</div>
-                <div>{{ overViewList.orderConversionRate || "0%" }}</div>
+                    <filter id="funnelShadow" x="-10%" y="-10%" width="120%" height="130%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-opacity="0.12" />
+                    </filter>
+                    <filter id="badgeShadow" x="-10%" y="-10%" width="120%" height="130%">
+                      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.06" />
+                    </filter>
+                  </defs>
+
+                  <!-- 连线：左侧 访客 -> 下单 -->
+                  <path
+                    class="bracket-line"
+                    d="M 138 42 L 98 42 Q 90 42 90 50 L 90 102 Q 90 110 98 110 L 161 110"
+                  />
+
+                  <!-- 连线：左侧 下单 -> 付款 -->
+                  <path
+                    class="bracket-line"
+                    d="M 161 110 L 98 110 Q 90 110 90 118 L 90 170 Q 90 178 98 178 L 182 178"
+                  />
+
+                  <!-- 连线：右侧 全店转化率 -->
+                  <path
+                    class="bracket-line"
+                    d="M 322 42 L 362 42 Q 370 42 370 50 L 370 170 Q 370 178 362 178 L 278 178"
+                  />
+
+                  <!-- 漏斗层级 1：访客数 -->
+                  <g class="funnel-tier">
+                    <polygon
+                      points="128,14 332,14 312,70 148,70"
+                      fill="url(#gradTier1)"
+                      stroke="url(#gradTier1)"
+                      stroke-width="6"
+                      stroke-linejoin="round"
+                      filter="url(#funnelShadow)"
+                    />
+                    <text x="230" y="37" text-anchor="middle" class="funnel-label">访客数 UV</text>
+                    <text x="230" y="59" text-anchor="middle" class="funnel-value">
+                      {{ overViewList.uvNum || 0 }}
+                    </text>
+                  </g>
+
+                  <!-- 漏斗层级 2：下单笔数 -->
+                  <g class="funnel-tier">
+                    <polygon
+                      points="152,82 308,82 290,138 170,138"
+                      fill="url(#gradTier2)"
+                      stroke="url(#gradTier2)"
+                      stroke-width="6"
+                      stroke-linejoin="round"
+                      filter="url(#funnelShadow)"
+                    />
+                    <text x="230" y="105" text-anchor="middle" class="funnel-label">下单笔数</text>
+                    <text x="230" y="127" text-anchor="middle" class="funnel-value">
+                      {{ overViewList.orderNum || 0 }}
+                    </text>
+                  </g>
+
+                  <!-- 漏斗层级 3：付款笔数 -->
+                  <g class="funnel-tier">
+                    <polygon
+                      points="174,150 286,150 270,206 190,206"
+                      fill="url(#gradTier3)"
+                      stroke="url(#gradTier3)"
+                      stroke-width="6"
+                      stroke-linejoin="round"
+                      filter="url(#funnelShadow)"
+                    />
+                    <text x="230" y="173" text-anchor="middle" class="funnel-label">付款笔数</text>
+                    <text x="230" y="195" text-anchor="middle" class="funnel-value">
+                      {{ overViewList.paymentOrderNum || 0 }}
+                    </text>
+                  </g>
+
+                  <!-- 左侧卡片 1：下单转化率 -->
+                  <g transform="translate(6, 57)" filter="url(#badgeShadow)">
+                    <rect width="80" height="38" class="badge-bg" />
+                    <text x="40" y="16" text-anchor="middle" class="badge-title">下单转化率</text>
+                    <text x="40" y="31" text-anchor="middle" class="badge-value">
+                      {{ overViewList.orderConversionRate || "0%" }}
+                    </text>
+                  </g>
+
+                  <!-- 左侧卡片 2：付款转化率 -->
+                  <g transform="translate(6, 125)" filter="url(#badgeShadow)">
+                    <rect width="80" height="38" class="badge-bg" />
+                    <text x="40" y="16" text-anchor="middle" class="badge-title">付款转化率</text>
+                    <text x="40" y="31" text-anchor="middle" class="badge-value">
+                      {{ overViewList.paymentsConversionRate || "0%" }}
+                    </text>
+                  </g>
+
+                  <!-- 右侧卡片：全店转化率 -->
+                  <g transform="translate(374, 91)" filter="url(#badgeShadow)">
+                    <rect width="80" height="38" class="badge-bg-highlight" />
+                    <text x="40" y="16" text-anchor="middle" class="badge-title">全店转化率</text>
+                    <text x="40" y="31" text-anchor="middle" class="badge-value-highlight">
+                      {{ overViewList.overallConversionRate || "0%" }}
+                    </text>
+                  </g>
+                </svg>
               </div>
-              <div class="leftBottomTips">
-                <div>付款转化率</div>
-                <div>{{ overViewList.paymentsConversionRate || "0%" }}</div>
-              </div>
-              <div class="rightTips">
-                <div>整体转换率</div>
-                <div>{{ overViewList.overallConversionRate || "0%" }}</div>
+              <div class="funnel-summary">
+                <div class="summary-col">
+                  <div class="dot dot-tier1"></div>
+                  <div class="summary-text">
+                    <span class="label">访客UV</span>
+                    <span class="val">{{ overViewList.uvNum || 0 }}</span>
+                  </div>
+                </div>
+                <div class="summary-arrow">➔</div>
+                <div class="summary-col">
+                  <div class="dot dot-tier2"></div>
+                  <div class="summary-text">
+                    <span class="label">下单笔数</span>
+                    <span class="val">{{ overViewList.orderNum || 0 }}</span>
+                  </div>
+                </div>
+                <div class="summary-arrow">➔</div>
+                <div class="summary-col">
+                  <div class="dot dot-tier3"></div>
+                  <div class="summary-text">
+                    <span class="label">付款笔数</span>
+                    <span class="val">{{ overViewList.paymentOrderNum || 0 }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -553,128 +667,168 @@ onMounted(() => {
   text-align: right;
   margin: 20px 0;
 }
-#overViewChart {
+.shap {
+  width: 480px;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.funnel-card {
+  background: #fbfcfe;
+  border: 1px solid #ebedf0;
+  border-radius: 8px;
+  padding: 16px 14px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.funnel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 0 6px;
+
+  h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #303133;
+  }
+
+  .funnel-sub {
+    font-size: 12px;
+    color: #909399;
+  }
+}
+
+.funnel-body {
+  width: 100%;
   display: flex;
   justify-content: center;
-  flex-direction: column;
+}
+
+.funnel-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+
+  .funnel-label {
+    font-size: 13px;
+    fill: rgba(255, 255, 255, 0.94);
+    font-weight: 500;
+  }
+
+  .funnel-value {
+    font-size: 17px;
+    font-weight: 700;
+    fill: #ffffff;
+    letter-spacing: 0.5px;
+  }
+
+  .bracket-line {
+    fill: none;
+    stroke: #cbd5e1;
+    stroke-width: 1.5;
+    stroke-dasharray: 4, 3;
+  }
+
+  .badge-bg {
+    fill: #ffffff;
+    stroke: #e2e8f0;
+    stroke-width: 1;
+    rx: 6px;
+  }
+
+  .badge-bg-highlight {
+    fill: #fff7f6;
+    stroke: #ffccc7;
+    stroke-width: 1;
+    rx: 6px;
+  }
+
+  .badge-title {
+    font-size: 12px;
+    fill: #64748b;
+    font-weight: 400;
+  }
+
+  .badge-value {
+    font-size: 13px;
+    font-weight: 700;
+    fill: #1e293b;
+  }
+
+  .badge-value-highlight {
+    font-size: 13px;
+    font-weight: 700;
+    fill: #e83d39;
+  }
+}
+
+.funnel-tier {
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.04);
+  }
+}
+
+.funnel-summary {
+  display: flex;
   align-items: center;
-  position: relative;
-  margin-left: 20px;
-  > .leftTopTips {
-    position: absolute;
-    top: 68px;
-    left: -2px;
-    width: 85px;
-    text-align: center;
-    background: rgb(255, 255, 255);
-    z-index: 1;
-    padding: 5px 0px;
-  }
-  > .leftBottomTips {
-    position: absolute;
-    bottom: 100px;
-    left: -2px;
-    width: 85px;
-    text-align: center;
-    background: rgb(255, 255, 255);
-    z-index: 1;
-    padding: 5px 0px;
-  }
-  > .rightTips {
-    position: absolute;
-    bottom: 240px;
-    right: 0px;
-    width: 85px;
-    text-align: center;
-    background: rgb(255, 255, 255);
-    z-index: 1;
-    padding: 5px 0px;
-  }
-  > .rightBorder {
-    width: 110px;
-    position: absolute;
-    top: 30px;
-    right: 40px;
-    border: 2px solid #d9d9d9;
-    border-left: 0;
-    height: 280px;
-  }
-  > .leftTopBorder {
-    border: 2px solid #d9d9d9;
-    height: 118px;
-    width: 56px;
-    position: absolute;
-    left: 40px;
-    top: 30px;
-    border-right: 0;
-  }
-  > .leftBottomBorder {
-    width: 108px;
-    border: 2px solid #d9d9d9;
-    height: 150px;
-    position: absolute;
-    bottom: 45px;
-    left: 40px;
-    border-right: 0;
-  }
-  > .block {
-    height: 0px;
-    border-left: 30px solid transparent;
-    border-right: 30px solid transparent;
-    position: relative;
-    background: rgb(255, 255, 255);
-    z-index: 1;
-    position: relative;
-  }
-  > .block:nth-of-type(1) {
-    width: 240px;
-    border-top: 90px solid #ff4646;
-    > .box {
-      left: -30px;
-      top: -90px;
-      width: 240px;
-      height: 90px;
-    }
-  }
-  > .block:nth-of-type(2) {
-    width: 172px;
-    border-top: 100px solid #ff8585;
-    margin-top: 10px;
-    > .box {
-      left: -29px;
-      top: -100px;
-      width: 172px;
-      height: 100px;
-    }
-  }
-  > .block:nth-of-type(3) {
-    width: 100px;
-    margin-top: 10px;
-    border-top: 150px solid #ffb396;
-    border-left: 50px solid transparent;
-    border-right: 50px solid transparent;
+  justify-content: space-around;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #f0f2f5;
 
-    > .box {
-      left: -50px;
-      top: -150px;
-      width: 100px;
-      height: 120px;
-      z-index: 2;
+  .summary-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    &.dot-tier1 {
+      background: #ff5c58;
+    }
+    &.dot-tier2 {
+      background: #ff8259;
+    }
+    &.dot-tier3 {
+      background: #ffa454;
     }
   }
-  :deep(.box){
-    color: #fff;
-    position: absolute;
 
-    z-index: 2;
+  .summary-text {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    > span {
-      font-size: 16px;
-      font-weight: bold;
+
+    .label {
+      font-size: 11px;
+      color: #909399;
+      line-height: 1.2;
     }
+
+    .val {
+      font-size: 13px;
+      font-weight: 600;
+      color: #303133;
+      line-height: 1.3;
+    }
+  }
+
+  .summary-arrow {
+    color: #dcdfe6;
+    font-size: 12px;
   }
 }
 
@@ -685,13 +839,9 @@ h4 {
   margin: 0 0 20px 0;
 }
 .transactionList {
-  flex: 7;
-  padding: 0 20px;
-}
-.shap {
-  width: 400px;
-  margin-left: 20px;
-  margin-top: 50px;
+  flex: 1;
+  min-width: 0;
+  padding-right: 20px;
 }
 
 .transaction-card {
@@ -702,7 +852,7 @@ h4 {
 }
 .card-item-label {
   font-weight: bold;
-  font-size: #666;
+  color: #666;
   font-size: 15px;
   margin-bottom: 10px;
 }
