@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useTable } from "@/utils/useTable";
 import { getUserRecharge } from "@/api/member";
 
