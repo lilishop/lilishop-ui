@@ -6,7 +6,8 @@ import request, {
 export function shopList (params) {
   return request({
     url: '/buyer/store/store',
-    needToken: true,
+    needToken: false,
+    optionalToken: true,
     method: Method.GET,
     params
   })
@@ -52,6 +53,16 @@ export function getStoreById (id) {
 }
 
 // 店铺详情
+// 获取店铺工商/营业执照信息
+export function getLicencePhoto (id) {
+  return request({
+    url: `/buyer/store/store/get/licencePhoto/${id}`,
+    needToken: false,
+    optionalToken: true,
+    method: Method.GET
+  })
+}
+
 export function getDetailById (id) {
   return request({
     url: `/buyer/store/store/get/detail/${id}`,

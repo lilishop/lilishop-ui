@@ -1,11 +1,13 @@
 <template>
   <div class="goods-thumb" ref="rootEl" :class="{ 'is-loaded': loaded, 'is-error': error }">
     <img v-if="currentSrc" :src="currentSrc" :alt="alt" @load="loaded = true" @error="onError" />
+    <img v-else-if="error" :src="defaultImg" :alt="alt || '默认商品图片'" class="default-img" />
   </div>
 </template>
 
 <script setup>
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import defaultImg from "@/assets/images/default.png";
 
 defineOptions({ name: "GoodsThumb" });
 
@@ -26,6 +28,21 @@ const loaded = ref(false);
 const error = ref(false);
 let observer = null;
 
+function isValidUrl(url) {
+  if (!url || typeof url !== "string") return false;
+  const s = url.trim().toLowerCase();
+  if (
+    !s ||
+    s === "null" ||
+    s === "undefined" ||
+    s.startsWith("null?") ||
+    s.startsWith("undefined?")
+  ) {
+    return false;
+  }
+  return true;
+}
+
 watch(
   () => props.src,
   () => {
@@ -45,7 +62,7 @@ function observe() {
   currentSrc.value = "";
   loaded.value = false;
   error.value = false;
-  if (!props.src) {
+  if (!isValidUrl(props.src)) {
     error.value = true;
     return;
   }
@@ -109,6 +126,13 @@ onBeforeUnmount(() => {
   height: 100%;
   object-fit: cover;
   display: block;
+
+  &.default-img {
+    object-fit: contain;
+    padding: 14px;
+    box-sizing: border-box;
+    opacity: 0.55;
+  }
 }
 
 @keyframes goods-thumb-loading {

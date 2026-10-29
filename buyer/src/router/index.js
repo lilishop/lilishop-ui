@@ -53,6 +53,7 @@ const MyGiftCards = () => import("@/pages/home/userCenter/MyGiftCards");
 const Home = () => import("@/pages/user/Home");
 const UserCenter = () => import("@/pages/home/Main");
 const Merchant = () => import("@/pages/Merchant");
+const StoreList = () => import("@/pages/StoreList");
 const NotFound = () => import("@/pages/NotFound");
 const topic = () => import("@/pages/Topic");
 const ShopEntry = () => import("@/pages/shopEntry/ShopEntry");
@@ -337,6 +338,12 @@ export const router = createRouter({
       name: "Merchant",
       component: Merchant,
       meta: { title: "店铺" },
+    },
+    {
+      path: "/storeList",
+      name: "StoreList",
+      component: StoreList,
+      meta: { title: "店铺列表" },
     },
     {
       path: "/:pathMatch(.*)*",

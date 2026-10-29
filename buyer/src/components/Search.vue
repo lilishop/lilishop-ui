@@ -6,7 +6,7 @@
           v-model="searchData"
           size="large"
           class="search-input"
-          placeholder="输入你想查找的商品"
+          :placeholder="placeholderText"
           @focus="openPanel"
           @input="queueSuggest"
           @keyup.enter="search"
@@ -37,12 +37,22 @@
           @click="$router.push('/')"
         />
         <div class="search-box">
+          <!-- 搜索类型切换：商品 / 店铺（店铺内搜索时不展示） -->
+          <div v-if="showTypeSwitch" class="search-type">
+            <span
+              v-for="item in searchTypes"
+              :key="item.value"
+              class="search-type-item"
+              :class="{ active: searchType === item.value }"
+              @click="switchType(item.value)"
+            >{{ item.label }}</span>
+          </div>
           <div class="search">
             <el-input
               v-model="searchData"
               size="large"
               class="search-input"
-              placeholder="输入你想查找的商品"
+              :placeholder="placeholderText"
               @focus="openPanel"
               @input="queueSuggest"
               @keyup.enter="search"
@@ -165,7 +175,27 @@ const promotionTags = computed(() => {
   return parseHotWords(appStore.hotWordsList)
 })
 
+// 搜索类型：goods 商品 / store 店铺
+const searchTypes = [
+  { label: '商品', value: 'goods' },
+  { label: '店铺', value: 'store' },
+]
+const searchType = ref(route.path === '/storeList' ? 'store' : 'goods')
+// 店铺内搜索（传了 storeId）只能搜本店商品，不展示切换
+const showTypeSwitch = computed(() => !props.storeId && props.useClass !== 'fixed-show')
+const isStoreMode = computed(() => searchType.value === 'store' && !props.storeId)
+const placeholderText = computed(() => (isStoreMode.value ? '输入你想查找的店铺' : '输入你想查找的商品'))
+
+function switchType(type) {
+  if (searchType.value === type) return
+  searchType.value = type
+  suggestions.value = []
+  suggesting.value = false
+}
+
 const showPanel = computed(() => {
+  // 店铺搜索暂无联想/历史，不展示下拉面板
+  if (isStoreMode.value) return false
   if (!panelVisible.value) return false
   if (trimmedKeyword.value) return true
   return history.value.length > 0 || promotionTags.value.length > 0
@@ -179,6 +209,8 @@ watch(
 )
 
 function selectTags(item) {
+  // 热词/历史均为商品关键词，点击时按商品搜索
+  searchType.value = 'goods'
   searchData.value = item
   search()
 }
@@ -208,6 +240,7 @@ function onDocumentClick(event) {
 }
 
 function queueSuggest() {
+  if (isStoreMode.value) return
   panelVisible.value = true
   clearTimeout(suggestTimer)
   const keyword = trimmedKeyword.value
@@ -254,6 +287,14 @@ function search() {
   const keyword = trimmedKeyword.value
   searchData.value = keyword
   closePanel()
+  if (isStoreMode.value) {
+    if (route.path === '/storeList') {
+      emit('search', keyword)
+    } else {
+      router.push({ path: '/storeList', query: keyword ? { keyword } : {} })
+    }
+    return
+  }
   if (keyword) remember(keyword)
   const url = route.path
   if (url == '/goodsList') {
@@ -261,7 +302,7 @@ function search() {
   } else {
     const pushData = {
       path: '/goodsList',
-      query: { keyword },
+      query: keyword ? { keyword } : {},
     }
     if (props.storeId) pushData.query.storeId = props.storeId
 
@@ -346,9 +387,8 @@ onUnmounted(() => {
     width: 100%;
 
     :deep(.el-input__wrapper) {
-      border: 1.4px solid $theme_color;
-      box-sizing: border-box;
-      border-radius: 19.6px;
+      border: 2px solid #409EFF;
+      border-radius: 4px;
       padding-left: 26px;
       padding-right: calc(#{$btn-gap * 2} + #{$btn-width});
       font-size: 14px;
@@ -365,15 +405,20 @@ onUnmounted(() => {
     top: $btn-gap;
     bottom: $btn-gap;
     width: $btn-width;
-    border-radius: calc((#{$input-height} - #{$btn-gap * 2}) / 2);
+    border-radius: 0 3px 3px 0;
     cursor: pointer;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1;
-    background-color: $theme_color;
+    background-color: #409EFF;
     color: #ffffff;
+    transition: background 0.2s;
+
+    &:hover {
+      background-color: #66b1ff;
+    }
   }
 }
 
@@ -383,6 +428,38 @@ onUnmounted(() => {
 
 .search-box{
   margin-left: 28px;
+}
+
+.search-type {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 22px;
+  padding-left: 18px;
+  margin-top: 4px;
+}
+
+.search-type-item {
+  padding: 2px 10px;
+  border-radius: 4px 4px 0 0;
+  color: #666;
+  font-size: 13px;
+  line-height: 18px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: $theme_color;
+  }
+
+  &.active {
+    color: #fff;
+    background: $theme_color;
+  }
+}
+
+.search-type + .search {
+  margin-top: 0;
 }
 .logo-img {
   max-width: 150px;
