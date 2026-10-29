@@ -498,43 +498,179 @@
       </template>
     </el-dialog>
 
-    <!-- 弹窗：打印发货单 -->
-    <el-dialog v-model="printModal" width="540px">
+    <!-- 弹窗：打印发货单（标准出库发货单） -->
+    <el-dialog
+      v-model="printModal"
+      :width="'min(900px, 94vw)'"
+      top="4vh"
+      destroy-on-close
+      class="shipping-print-dialog"
+    >
       <template #header>
-        <div class="print-header-row">
-          <span>打印发货单</span>
-          <el-button size="small" plain @click="printHiddenInfo">
-            {{ printHiddenFlag ? "显示完整信息" : "脱敏敏感信息" }}
-          </el-button>
+        <div class="print-header-bar">
+          <div class="print-title-group">
+            <el-icon><Printer /></el-icon>
+            <span class="dialog-title">发货单打印预览</span>
+            <el-tag size="small" type="info" effect="plain">标准 A4 / 拣货出库联</el-tag>
+          </div>
+          <div class="print-header-actions">
+            <el-button size="small" :type="printHiddenFlag ? 'warning' : 'default'" plain @click="printHiddenInfo">
+              {{ printHiddenFlag ? "取消信息脱敏" : "敏感信息脱敏" }}
+            </el-button>
+          </div>
         </div>
       </template>
-      <div class="print-content-scroll">
-        <div id="printInfo">
-          <p v-if="orderInfo.order.remark" class="lineH30 f14">备注：{{ orderInfo.order.remark }}</p>
-          <p class="lineH30 f14">收件人：{{ orderInfo.order.consigneeName }}</p>
-          <p v-if="orderInfo.order.consigneeMobile" class="lineH30 f14">
-            手机号：{{ printHiddenFlag ? orderInfo.order.consigneeMobile.replace(/^(.{3})(?:\d+)(.{4})$/, "$1****$2") : orderInfo.order.consigneeMobile }}
-          </p>
-          <p class="lineH30 f14">收货地址：{{ orderInfo.order.consigneeAddressPath }}{{ orderInfo.order.consigneeDetail }}</p>
-          <p class="printgoodtitle">商品清单：</p>
-          <div class="printgoodinfo">
-            <div v-for="(item, index) in orderInfo.orderItems" :key="index" class="printgooditem">
-              <div class="printgoodname">
-                <p>{{ item.goodsName }}</p>
-                <div class="printgoodguid">
-                  <span v-for="(itemchild, keychild) in parseSpecs(item.specs)" :key="keychild" class="printgoodguiditem">
-                    {{ keychild }} : {{ itemchild }}
-                  </span>
+
+      <div class="print-preview-container">
+        <!-- 拟真纸张区域（也是打印捕获区域） -->
+        <div id="printInfo" class="shipping-invoice-paper">
+          <div class="invoice-wrap">
+            <!-- 1. 单据头部 -->
+            <div class="inv-header">
+              <div class="inv-title-box">
+                <h2>{{ orderInfo.order.storeName || "官方商城" }} · 发货出库清单</h2>
+                <div class="inv-sub-title">SHIPPING LIST & PACKING SLIP · 仓库出库拣货核验联</div>
+              </div>
+              <div class="inv-meta-right">
+                <!-- 真实 SVG 矢量条形码（打印机100%渲染） -->
+                <svg
+                  class="barcode-svg"
+                  :viewBox="`0 0 ${barcodeSvgBars.totalWidth} 34`"
+                  width="180"
+                  height="34"
+                >
+                  <rect
+                    v-for="(b, idx) in barcodeSvgBars.bars"
+                    :key="idx"
+                    :x="b.x"
+                    y="0"
+                    :width="b.width"
+                    height="34"
+                    fill="#000000"
+                  />
+                </svg>
+                <div class="barcode-text">{{ orderInfo.order.sn }}</div>
+              </div>
+            </div>
+
+            <!-- 2. 单据元数据规整表格（4列对齐，订单号和时间绝不折行） -->
+            <table class="inv-meta-table">
+              <tbody>
+                <tr>
+                  <td class="m-k">订单编号</td>
+                  <td class="m-v font-mono font-bold" style="width: 220px;">{{ orderInfo.order.sn }}</td>
+                  <td class="m-k">下单时间</td>
+                  <td class="m-v">{{ orderInfo.order.createTime }}</td>
+                </tr>
+                <tr>
+                  <td class="m-k">配送方式</td>
+                  <td class="m-v">{{ orderInfo.order.logisticsName || "普通快递" }}</td>
+                  <td class="m-k">物流单号</td>
+                  <td class="m-v font-mono">{{ orderInfo.order.logisticsNo || "待发货回传" }}</td>
+                </tr>
+                <tr>
+                  <td class="m-k">收件人</td>
+                  <td class="m-v font-bold">{{ orderInfo.order.consigneeName }}（{{ formattedPrintMobile }}）</td>
+                  <td class="m-k">收货地址</td>
+                  <td class="m-v">{{ orderInfo.order.consigneeAddressPath }}{{ orderInfo.order.consigneeDetail }}</td>
+                </tr>
+                <tr>
+                  <td class="m-k">买家备注</td>
+                  <td colspan="3" class="m-v font-bold">
+                    {{ orderInfo.order.remark || "（无客户特殊留言）" }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- 3. 商品清单明细表格 -->
+            <table class="inv-table">
+              <thead>
+                <tr>
+                  <th style="width: 42px;">序号</th>
+                  <th style="text-align: left; padding-left: 8px;">商品信息 / 规格</th>
+                  <th style="width: 75px;">单价</th>
+                  <th style="width: 50px;">订购数</th>
+                  <th style="width: 50px;">实发数</th>
+                  <th style="width: 45px;">核验</th>
+                  <th style="width: 85px; text-align: right; padding-right: 8px;">金额小计</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, index) in orderInfo.orderItems" :key="index">
+                  <td style="text-align: center;">{{ index + 1 }}</td>
+                  <td style="padding-left: 8px;">
+                    <div class="goods-title">{{ item.goodsName }}</div>
+                    <div v-if="item.specs" class="goods-specs">
+                      <span v-for="(val, key) in parseSpecs(item.specs)" :key="key" style="margin-right: 8px;">
+                        {{ key }}: {{ val }}
+                      </span>
+                    </div>
+                  </td>
+                  <td style="text-align: center;" class="font-mono">¥ {{ Number(item.unitPrice || 0).toFixed(2) }}</td>
+                  <td style="text-align: center; font-weight: bold;">{{ item.num }}</td>
+                  <td style="text-align: center; font-weight: bold;">{{ item.num }}</td>
+                  <td style="text-align: center;">
+                    <span class="check-box-square"></span>
+                  </td>
+                  <td style="text-align: right; font-weight: bold; padding-right: 8px;" class="font-mono">
+                    ¥ {{ Number(item.flowPrice || 0).toFixed(2) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- 4. 汇总行 -->
+            <div class="inv-summary-bar">
+              <div class="inv-summary-left">
+                共计 {{ orderInfo.orderItems ? orderInfo.orderItems.length : 0 }} 种商品 / {{ totalGoodsNum }} 件
+              </div>
+              <div class="inv-summary-right font-mono">
+                <div class="sum-item">
+                  <span>商品金额:</span>
+                  <span>¥ {{ unitPrice(orderPriceDetail.goodsPrice || orderInfo.order.goodsPrice || 0) }}</span>
+                </div>
+                <div class="sum-item">
+                  <span>运费:</span>
+                  <span>+ ¥ {{ unitPrice(orderInfo.order.freightPrice || 0) }}</span>
+                </div>
+                <div v-if="orderPriceDetail.discountPrice > 0" class="sum-item text-success">
+                  <span>优惠:</span>
+                  <span>- ¥ {{ unitPrice(orderPriceDetail.discountPrice) }}</span>
+                </div>
+                <div class="sum-item">
+                  <span style="font-weight: 700; color: #000;">订单应付总额:</span>
+                  <span class="sum-total">¥ {{ unitPrice(orderPriceDetail.flowPrice || orderInfo.order.flowPrice || 0) }}</span>
                 </div>
               </div>
-              <span class="printgoodnumber">× {{ item.num }}</span>
+            </div>
+
+            <!-- 5. 库房作业签字区 -->
+            <div class="inv-sign-area">
+              <div>拣货员: <span class="sign-line"></span></div>
+              <div>复核员: <span class="sign-line"></span></div>
+              <div>打包员: <span class="sign-line"></span></div>
+              <div>签收人: <span class="sign-line"></span></div>
+            </div>
+
+            <!-- 6. 底部售后说明 -->
+            <div class="inv-footer-note">
+              * 感谢您的惠顾！请在签收时仔细核对商品及外包装完好无损，如遇少件、错发或破损，请于签收后联系客服处理。
             </div>
           </div>
         </div>
       </div>
+
       <template #footer>
-        <el-button @click="printModal = false">关闭</el-button>
-        <el-button type="primary" :icon="Printer" @click="handlePrintInvoice">立即打印</el-button>
+        <div class="dialog-footer-actions">
+          <span class="print-tip-text">建议使用标准 A4 纸纵向打印</span>
+          <div>
+            <el-button @click="printModal = false">关闭</el-button>
+            <el-button type="primary" :icon="Printer" @click="handlePrintInvoice">
+              立即打印发货单
+            </el-button>
+          </div>
+        </div>
       </template>
     </el-dialog>
 
@@ -739,6 +875,30 @@ const orderPriceDetail = computed(() => {
     }
   }
   return p;
+});
+
+const formattedPrintMobile = computed(() => {
+  const m = orderInfo.value?.order?.consigneeMobile;
+  if (!m) return "-";
+  if (printHiddenFlag.value) {
+    return m.replace(/^(.{3})(?:\d+)(.{4})$/, "$1****$2");
+  }
+  return m;
+});
+
+const barcodeSvgBars = computed(() => {
+  const bars = [];
+  let currentX = 0;
+  // 黑白交替条纹序列（确保打印机 100% 渲染真实矢量黑色条码）
+  const widths = [2, 1, 3, 1, 2, 1, 1, 3, 2, 2, 1, 3, 1, 2, 1, 1, 2, 3, 1, 2, 3, 1, 1, 2, 2, 1, 3, 1, 2, 1, 3, 2, 1, 2, 1, 1, 3, 2, 1, 2, 3, 1, 2, 1, 3, 1];
+  for (let i = 0; i < widths.length; i++) {
+    const w = widths[i];
+    if (i % 2 === 0) {
+      bars.push({ x: currentX, width: w });
+    }
+    currentX += w;
+  }
+  return { bars, totalWidth: currentX };
 });
 
 const isECouponOrder = computed(() => {
@@ -1562,68 +1722,269 @@ onMounted(() => {
   .mt_16 { margin-top: 16px; }
   .mb_10 { margin-bottom: 10px; }
 }
-
-// 打印样式
-.print-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding-right: 20px;
-}
-
-.print-content-scroll {
-  max-height: 500px;
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  .lineH30 {
-    line-height: 30px;
-  }
-  .f14 {
-    font-size: 14px;
-    color: #333;
-  }
-  .printgoodtitle {
-    font-size: 14px;
-    line-height: 1.5;
-    margin-top: 15px;
-    font-weight: 600;
-  }
-  .printgoodinfo {
-    padding: 10px 0;
-
-    .printgooditem {
-      border-bottom: 1px solid #e8eaec;
-      display: flex;
-      align-items: flex-start;
-      line-height: 24px;
-      margin-bottom: 10px;
-      padding-bottom: 10px;
-
-      .printgoodname {
-        flex: 1;
-
-        .printgoodguid {
-          font-size: 12px;
-          color: #999;
-          .printgoodguiditem {
-            margin-right: 10px;
-          }
-        }
-      }
-
-      .printgoodnumber {
-        font-weight: 600;
-        margin-left: 15px;
-      }
-    }
-  }
-}
 </style>
 
 <style lang="scss">
-/* append-to-body 抽屉需非 scoped 样式 */
+/* append-to-body 抽屉与弹窗需非 scoped 样式 */
+.shipping-print-dialog {
+  .el-dialog__header {
+    margin-right: 0 !important;
+    padding: 14px 20px !important;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .el-dialog__body {
+    padding: 16px !important;
+    background: #f1f5f9 !important;
+  }
+  .el-dialog__footer {
+    padding: 12px 20px !important;
+    border-top: 1px solid #e2e8f0;
+    background: #ffffff;
+  }
+
+  .print-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+    .print-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .el-icon {
+        color: #ff6a00;
+        font-size: 18px;
+      }
+
+      .dialog-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+      }
+    }
+  }
+
+  .print-preview-container {
+    max-height: 72vh;
+    overflow-y: auto;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    padding: 12px 16px;
+
+    .shipping-invoice-paper {
+      width: 100%;
+      max-width: 820px;
+      min-width: 700px;
+      box-sizing: border-box !important;
+      background: #ffffff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+
+      * {
+        box-sizing: border-box !important;
+      }
+
+      .invoice-wrap {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        color: #000;
+        padding: 20px 20px;
+        background: #fff;
+        line-height: 1.4;
+        font-size: 12px;
+        width: 100% !important;
+        box-sizing: border-box !important;
+
+        .inv-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          padding-bottom: 12px;
+          border-bottom: 2px solid #000;
+          margin-bottom: 12px;
+
+          .inv-title-box h2 {
+            margin: 0 0 4px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+            letter-spacing: 1px;
+          }
+          .inv-sub-title {
+            font-size: 11px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .inv-meta-right {
+            text-align: right;
+
+            .barcode-svg {
+              display: inline-block;
+            }
+            .barcode-text {
+              font-family: monospace;
+              font-size: 13px;
+              font-weight: 700;
+              margin-top: 2px;
+              letter-spacing: 1px;
+              color: #000;
+            }
+          }
+        }
+
+        .inv-meta-table {
+          width: 100% !important;
+          table-layout: fixed !important;
+          border-collapse: collapse;
+          border: 1px solid #000;
+          margin-bottom: 12px;
+          box-sizing: border-box !important;
+
+          td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            font-size: 12px;
+            line-height: 18px;
+            word-break: break-all;
+            overflow-wrap: break-word;
+          }
+          .m-k {
+            width: 72px;
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #111;
+            text-align: center;
+            white-space: nowrap;
+          }
+          .m-v {
+            color: #000;
+          }
+        }
+
+        .inv-table {
+          width: 100% !important;
+          table-layout: fixed !important;
+          border-collapse: collapse;
+          border: 1px solid #000;
+          margin-bottom: 0 !important;
+          box-sizing: border-box !important;
+
+          th {
+            background: #f3f4f6;
+            color: #000;
+            font-weight: 700;
+            text-align: center;
+            padding: 7px 4px;
+            border: 1px solid #000;
+          }
+          td {
+            padding: 6px 4px;
+            border: 1px solid #000;
+            color: #000;
+            vertical-align: middle;
+            word-break: break-all;
+            overflow-wrap: break-word;
+          }
+          .goods-title {
+            font-weight: 600;
+            line-height: 1.35;
+          }
+          .goods-specs {
+            font-size: 11px;
+            color: #444;
+            margin-top: 2px;
+          }
+          .check-box-square {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid #000;
+            border-radius: 2px;
+          }
+        }
+
+        .inv-summary-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 12px;
+          background: #f9fafb;
+          border: 1px solid #000;
+          border-top: none;
+          margin-top: -1px;
+          margin-bottom: 16px;
+          font-size: 12px;
+          box-sizing: border-box !important;
+
+          .inv-summary-left {
+            color: #222;
+            font-weight: 600;
+          }
+          .inv-summary-right {
+            display: flex;
+            gap: 16px;
+            align-items: baseline;
+
+            .sum-item {
+              display: flex;
+              align-items: baseline;
+              gap: 4px;
+            }
+            .sum-total {
+              font-size: 15px;
+              font-weight: 700;
+              color: #000;
+            }
+          }
+        }
+
+        .inv-sign-area {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+          padding: 12px 6px 8px;
+          border-top: 1px dashed #666;
+          font-size: 12px;
+          color: #222;
+          margin-bottom: 8px;
+
+          .sign-line {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            width: 85px;
+            height: 16px;
+            vertical-align: middle;
+            margin-left: 4px;
+          }
+        }
+
+        .inv-footer-note {
+          text-align: center;
+          font-size: 11px;
+          color: #666;
+          padding-top: 6px;
+          border-top: 1px solid #e5e7eb;
+        }
+      }
+    }
+  }
+
+  .dialog-footer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .print-tip-text {
+      font-size: 13px;
+      color: #64748b;
+    }
+  }
+}
+
 .order-log-drawer {
   .el-drawer__header {
     margin-bottom: 0 !important;
