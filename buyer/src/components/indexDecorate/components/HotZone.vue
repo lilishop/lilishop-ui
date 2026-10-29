@@ -2,10 +2,9 @@
   <div class="decor-hot-zone" :style="customStyle">
     <div class="hot-zone-wrap" v-if="displayImageUrl">
       <img :src="displayImageUrl" alt="hotzone" class="base-image" />
-      <router-link
+      <div
         v-for="(zone, idx) in displayZones"
         :key="idx"
-        :to="zone.url || '/'"
         class="zone-link"
         :style="{
           top: `${zone.top || 0}%`,
@@ -14,6 +13,7 @@
           height: `${zone.height || 10}%`
         }"
         :title="zone.title"
+        @click="handleClickZone(zone)"
       />
     </div>
   </div>
@@ -21,6 +21,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
   options: {
@@ -63,6 +66,16 @@ const customStyle = computed(() => {
     overflow: 'hidden'
   };
 });
+
+function handleClickZone(zone) {
+  const url = zone?.url ? String(zone.url).trim() : '';
+  if (!url) return;
+  if (/^https?:\/\//i.test(url)) {
+    window.open(url, '_blank');
+  } else {
+    router.push(url);
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -79,21 +92,23 @@ const customStyle = computed(() => {
     overflow: hidden;
 
     .base-image {
-      width: 100%;
       display: block;
-      border-radius: inherit;
-      object-fit: cover;
+      width: 100%;
+      height: auto;
+      user-select: none;
+      pointer-events: none;
     }
 
     .zone-link {
       position: absolute;
       display: block;
       cursor: pointer;
-      border-radius: 6px;
-      transition: background 0.2s ease;
+      z-index: 2;
+      transition: background 0.2s, box-shadow 0.2s;
 
       &:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
       }
     }
   }

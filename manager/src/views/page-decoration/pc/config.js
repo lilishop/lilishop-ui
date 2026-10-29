@@ -93,6 +93,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'topBar',
+    defaultRowHeight: 40,
 
     name: '快捷栏',
 
@@ -130,7 +131,7 @@ export const COMPONENT_DEFINITIONS = [
 
       radius: [0, 0, 0, 0],
 
-      padding: [0, 16, 0, 16]
+      padding: [0, 0, 0, 0]
 
     }
 
@@ -139,6 +140,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'searchHeader',
+    defaultRowHeight: 120,
 
     name: '搜索头部',
 
@@ -152,7 +154,10 @@ export const COMPONENT_DEFINITIONS = [
 
       logoUrl: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/logo/logo.png',
 
-      placeholder: '搜索品牌或商品',
+      placeholder: '请输入商品名称',
+      showSearchTypes: true,
+      defaultSearchType: 'goods',
+      storePlaceholder: '请输入店铺名称',
 
       hotWords: ['手机', '数码家电', '秋季上新', '电脑整机', '智能手表'],
 
@@ -180,7 +185,7 @@ export const COMPONENT_DEFINITIONS = [
 
       radius: [0, 0, 0, 0],
 
-      padding: [16, 20, 16, 20]
+      padding: [16, 0, 16, 0]
 
     }
 
@@ -189,6 +194,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'footerNav',
+    defaultRowHeight: 450,
 
     name: '页脚导航',
 
@@ -257,6 +263,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'categoryNav',
+    defaultRowHeight: 48,
     name: '类目导航',
     group: 'navigation',
     icon: 'List',
@@ -292,6 +299,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'channelGrid',
+    defaultRowHeight: 120,
     name: '频道宫格',
     group: 'navigation',
     icon: 'Grid',
@@ -318,15 +326,17 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'categoryMegaMenu',
-    name: '类目弹层',
+    defaultRowHeight: 320,
+    name: '商品分类',
     group: 'navigation',
     icon: 'Fold',
     description: '垂直分类菜单与多级展开弹层',
     defaultOptions: {
-      title: '分类',
+      title: '商品分类',
+      source: 'system',
       textColor: '#111927',
       fontSize: 14,
-      activeColor: '#ea580c',
+      activeColor: '#409EFF',
       categories: [
         {
           name: '精选频道',
@@ -360,8 +370,8 @@ export const COMPONENT_DEFINITIONS = [
     },
     defaultComponentStyle: {
       widthRatio: '16.67%',
-      backgroundColor: 'transparent',
-      radius: [0, 0, 0, 0],
+      backgroundColor: '#ffffff',
+      radius: [8, 8, 8, 8],
       padding: [0, 0, 0, 0]
     }
   },
@@ -373,6 +383,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'carousel',
+    defaultRowHeight: 320,
     name: '轮播图',
     group: 'media',
     icon: 'PictureRounded',
@@ -385,7 +396,7 @@ export const COMPONENT_DEFINITIONS = [
       showIndicator: true,
       fitMode: 'contain',
       aspectRatio: '2.5:1',
-      height: 380,
+      height:  420,
       list: [
         {
           img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png',
@@ -411,8 +422,8 @@ export const COMPONENT_DEFINITIONS = [
     },
     defaultComponentStyle: {
       widthRatio: '66.67%',
-      backgroundColor: 'transparent',
-      radius: [0, 0, 0, 0],
+      backgroundColor: '#ffffff',
+      radius: [8, 8, 8, 8],
       padding: [0, 0, 0, 0]
     }
   },
@@ -420,6 +431,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'brandWall',
+    defaultRowHeight: 220,
     name: '品牌图',
     group: 'media',
     icon: 'Medal',
@@ -444,6 +456,7 @@ export const COMPONENT_DEFINITIONS = [
 
   {
     type: 'hotZone',
+    defaultRowHeight: 750,
     name: '热区图',
     group: 'media',
     icon: 'Aim',
@@ -488,6 +501,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'freeLayout',
+    defaultRowHeight: 450,
 
     name: '自由布局',
 
@@ -518,6 +532,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'promoGroup',
+    defaultRowHeight: 180,
 
     name: '活动卡组',
 
@@ -552,6 +567,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'video',
+    defaultRowHeight: 360,
     name: '视频',
     group: 'media',
     icon: 'VideoCamera',
@@ -559,6 +575,7 @@ export const COMPONENT_DEFINITIONS = [
     defaultOptions: {
       videoUrl: '',
       coverUrl: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/video/video_cover.png',
+      url: '',
       autoPlay: false,
       loop: false,
       controls: true,
@@ -580,6 +597,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'goodsList',
+    defaultRowHeight: 980,
 
     name: '商品列表',
 
@@ -709,6 +727,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'gridFloor',
+    defaultRowHeight: 560,
 
     name: '宫格楼层',
 
@@ -824,6 +843,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'goodsGrid',
+    defaultRowHeight: 420,
     name: '商品宫格',
     group: 'commerce',
     icon: 'Menu',
@@ -864,6 +884,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'goodsCard',
+    defaultRowHeight: 360,
 
     name: '商品卡片',
 
@@ -874,6 +895,8 @@ export const COMPONENT_DEFINITIONS = [
     description: '精选单品爆款特写大卡片',
 
     defaultOptions: {
+      type: 'goodsCard',
+      showSales: false,
       goodsId: '1',
       goodsInfo: { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', originalPrice: '4599.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
       customTitle: '年度年度旗舰 · 科技美学',
@@ -899,6 +922,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'bannerFloor',
+    defaultRowHeight: 560,
 
     name: '横幅楼层',
 
@@ -940,6 +964,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'goodsBar',
+    defaultRowHeight: 280,
 
     name: '商品条',
 
@@ -976,6 +1001,7 @@ export const COMPONENT_DEFINITIONS = [
   },
 
   {type: 'channelFloor',
+    defaultRowHeight: 620,
 
     name: '频道楼层',
 
@@ -1019,6 +1045,7 @@ export const COMPONENT_DEFINITIONS = [
 
   {
     type: 'recommendFeed',
+    defaultRowHeight: 1270,
 
     name: '推荐商品',
 
@@ -1059,6 +1086,7 @@ export const COMPONENT_DEFINITIONS = [
   // 5. 营销 (2个)
     {
     type: 'userBenefits',
+    defaultRowHeight: 320,
     name: '用户权益',
     group: 'marketing',
     icon: 'User',
@@ -1092,6 +1120,7 @@ export const COMPONENT_DEFINITIONS = [
   },
   {
     type: 'couponList',
+    defaultRowHeight: 160,
 
     name: '优惠券',
 
@@ -1131,6 +1160,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'titleBar',
+    defaultRowHeight: 48,
 
     name: '标题栏',
 
@@ -1165,6 +1195,7 @@ export const COMPONENT_DEFINITIONS = [
   },
 
   {type: 'articleContent',
+    defaultRowHeight: '',
     name: '文章内容',
     group: 'content',
     icon: 'Document',
@@ -1201,6 +1232,7 @@ export const COMPONENT_DEFINITIONS = [
 
   {
     type: 'noticeBar',
+    defaultRowHeight: 40,
 
     name: '公告快讯',
 
@@ -1234,7 +1266,7 @@ export const COMPONENT_DEFINITIONS = [
 
 export const DEFAULT_ROW_STYLE = {
   width: 1920,
-  height: 40,
+  height: '',
   gap: 0,
   margin: [0, 0, 0, 0],
   padding: [0, 0, 0, 0],
@@ -1250,27 +1282,32 @@ export const DEFAULT_ROW_STYLE = {
  */
 
 export function createRow(component = null) {
-
   const rowId = `row_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-
   const components = [];
+  let rowHeight = '';
 
   if (component) {
-
-    components.push(createComponent(component));
-
+    if (component.type && !component.componentStyle) {
+      // 传入的是组件定义 def
+      components.push(createComponent(component));
+      if (component.defaultRowHeight !== undefined && component.defaultRowHeight !== null) {
+        rowHeight = component.defaultRowHeight;
+      }
+    } else {
+      // 传入的是已有组件实例
+      components.push(component);
+      const def = COMPONENT_DEFINITIONS.find(d => d.type === component.type);
+      if (def?.defaultRowHeight !== undefined && def?.defaultRowHeight !== null) {
+        rowHeight = def.defaultRowHeight;
+      }
+    }
   }
 
   return {
-
     id: rowId,
-
-    rowStyle: { ...DEFAULT_ROW_STYLE },
-
+    rowStyle: { ...DEFAULT_ROW_STYLE, height: rowHeight },
     components
-
   };
-
 }
 
 

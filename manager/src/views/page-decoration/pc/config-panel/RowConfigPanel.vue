@@ -88,7 +88,7 @@
               type="text"
               v-model="row.rowStyle.height"
               class="dim-input"
-              placeholder="40"
+              placeholder="默认"
             />
           </div>
           <div class="dimension-item">

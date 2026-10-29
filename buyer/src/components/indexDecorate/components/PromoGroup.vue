@@ -4,25 +4,28 @@
       class="promo-grid"
       :style="{ gridTemplateColumns: `repeat(${actualColumns}, 1fr)` }"
     >
-      <router-link
+      <div
         v-for="(card, idx) in cardsList"
         :key="idx"
-        :to="card.url || '/goods'"
         class="promo-card"
         :style="card.bgImg ? { backgroundImage: `url(${card.bgImg})` } : {}"
+        @click="handleClickCard(card)"
       >
         <div class="card-inner">
           <h3 class="card-title">{{ card.title }}</h3>
           <p class="card-sub">{{ card.subtitle }}</p>
-          <span class="action-btn">立即查看 ></span>
+          <span class="action-btn">立即查看 &gt;</span>
         </div>
-      </router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
   options: {
@@ -75,6 +78,16 @@ const customStyle = computed(() => {
       : '10px 0'
   };
 });
+
+function handleClickCard(card) {
+  const url = card?.url ? String(card.url).trim() : '';
+  if (!url) return;
+  if (/^https?:\/\//i.test(url)) {
+    window.open(url, '_blank');
+  } else {
+    router.push(url);
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -98,6 +111,7 @@ const customStyle = computed(() => {
       flex-direction: column;
       justify-content: center;
       color: #ffffff;
+      cursor: pointer;
       transition: all 0.25s ease;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 

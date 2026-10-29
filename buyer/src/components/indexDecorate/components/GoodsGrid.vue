@@ -7,9 +7,9 @@
         <h3 class="grid-main-title">{{ options.title }}</h3>
         <span class="grid-sub-title" v-if="options.subtitle">{{ options.subtitle }}</span>
       </div>
-      <router-link :to="options.moreUrl || '/goods'" class="grid-more" v-if="options.showMoreLink !== false">
+      <a href="javascript:;" class="grid-more" v-if="options.showMoreLink !== false" @click="handleNavigate(options.moreUrl || '/goods')">
         {{ options.moreText || '查看全部' }} &gt;
-      </router-link>
+      </a>
     </div>
 
     <!-- 紧凑严谨的商品九宫格/矩阵网格 (Bordered Matrix Grid) -->
@@ -27,13 +27,13 @@
           <span class="rank-num">TOP {{ idx + 1 }}</span>
         </div>
 
-        <router-link :to="`/goods/${item.id || 1}`" class="cell-thumb-box">
+        <a href="javascript:;" class="cell-thumb-box" @click="handleNavigate(item.url || `/goods/${item.id || 1}`)">
           <img :src="item.thumbnail || defaultThumb" :alt="item.goodsName" class="cell-thumb" />
-        </router-link>
+        </a>
 
         <div class="cell-body">
           <h4 class="cell-name">
-            <router-link :to="`/goods/${item.id || 1}`">{{ item.goodsName }}</router-link>
+            <a href="javascript:;" @click="handleNavigate(item.url || `/goods/${item.id || 1}`)">{{ item.goodsName }}</a>
           </h4>
           <div class="cell-meta">
             <span class="badge-label">热卖好物</span>
@@ -54,6 +54,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 
 const props = defineProps({
@@ -255,10 +256,10 @@ function addToCart(item) {
         flex: 1;
 
         .cell-name {
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 500;
           line-height: 1.4;
-          height: 36px;
+          height: 40px;
           overflow: hidden;
           text-overflow: ellipsis;
           display: -webkit-box;

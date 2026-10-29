@@ -24,83 +24,52 @@
 
     <!-- 2. 登录 / 注册按钮组 -->
     <div class="action-btn-row">
-      <router-link :to="options.loginUrl || '/login'" class="action-btn login-btn">
+      <a href="javascript:;" class="action-btn login-btn" @click="handleNavigate(options.loginUrl || '/login')">
         {{ options.loginText || '登录' }}
-      </router-link>
-      <router-link :to="options.registerUrl || '/signUp'" class="action-btn register-btn">
+      </a>
+      <a href="javascript:;" class="action-btn register-btn" @click="handleNavigate(options.registerUrl || '/signUp')">
         {{ options.registerText || '注册' }}
-      </router-link>
+      </a>
     </div>
 
     <!-- 3. 指标数据卡 (购物车 / 优惠券 / 订单) -->
     <div class="metrics-cards-row">
-      <router-link :to="options.cartUrl || '/cart'" class="metric-card">
+      <a href="javascript:;" class="metric-card" v-if="options.showCart !== false" @click="handleNavigate(options.cartUrl || '/cart')">
         <div class="metric-val">0</div>
         <div class="metric-label">{{ options.cartText || '购物车' }}</div>
-      </router-link>
-      <router-link :to="options.couponUrl || '/member/coupon'" class="metric-card">
+      </a>
+      <a href="javascript:;" class="metric-card" v-if="options.showCoupons !== false" @click="handleNavigate(options.couponUrl || '/member/coupon')">
         <div class="metric-val">0</div>
         <div class="metric-label">{{ options.couponText || '优惠券' }}</div>
-      </router-link>
-      <router-link :to="options.orderUrl || '/member/order'" class="metric-card">
+      </a>
+      <a href="javascript:;" class="metric-card" v-if="options.showOrders !== false" @click="handleNavigate(options.orderUrl || '/member/order')">
         <div class="metric-val">0</div>
         <div class="metric-label">{{ options.orderText || '订单' }}</div>
-      </router-link>
+      </a>
     </div>
 
-    <!-- 4. 分隔线 -->
-    <div class="section-divider"></div>
-
-    <!-- 5. 热点快报（万米魔方标准组件底部模块） -->
-    <div class="news-section">
-      <div class="news-header">
-        <div class="news-title-wrap">
-          <span class="news-title">热点快报</span>
-          <span class="hot-badge">HOT</span>
-        </div>
-        <router-link to="/article" class="news-more">查看全部 &gt;</router-link>
-      </div>
-      <div class="news-list">
-        <router-link to="/article" class="news-item" title="精选优质好物 官方正品保障">
-          <span class="dot">·</span>
-          <span class="news-text">精选优质好物 官方正品保障</span>
-        </router-link>
-        <router-link to="/article" class="news-item" title="双11狂欢 跨店每满300减50">
-          <span class="dot">·</span>
-          <span class="news-text">双11狂欢 跨店每满300减50</span>
-        </router-link>
-        <router-link to="/article" class="news-item" title="新人专享好礼 注册立领大礼包">
-          <span class="dot">·</span>
-          <span class="news-text">新人专享好礼 注册立领大礼包</span>
-        </router-link>
-      </div>
-    </div>
-
-    <!-- 6. 快捷便民服务入口（底部图标排） -->
+    <!-- 4. 快捷便民服务入口（底部图标排） -->
     <div class="quick-service-row">
-      <router-link to="/member/favorites" class="service-item">
-        <el-icon class="service-icon"><Star /></el-icon>
-        <span class="service-name">收藏</span>
-      </router-link>
-      <router-link to="/member/footprint" class="service-item">
-        <el-icon class="service-icon"><Clock /></el-icon>
-        <span class="service-name">足迹</span>
-      </router-link>
-      <router-link to="/couponCenter" class="service-item">
-        <el-icon class="service-icon"><Present /></el-icon>
-        <span class="service-name">红包</span>
-      </router-link>
-      <router-link to="/article" class="service-item">
-        <el-icon class="service-icon"><Service /></el-icon>
-        <span class="service-name">客服</span>
-      </router-link>
+      <a
+        v-for="(srv, sIdx) in displayServices"
+        :key="sIdx"
+        href="javascript:;"
+        class="service-item"
+        @click="handleNavigate(srv.url)"
+      >
+        <el-icon class="service-icon"><component :is="getServiceIcon(srv.icon)" /></el-icon>
+        <span class="service-name">{{ srv.name }}</span>
+      </a>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { Star, Clock, Present, Service } from '@element-plus/icons-vue';
+
+const router = useRouter();
 
 const props = defineProps({
   options: {
@@ -110,16 +79,57 @@ const props = defineProps({
   componentStyle: {
     type: Object,
     default: () => ({})
+  },
+  rowStyle: {
+    type: Object,
+    default: () => ({})
   }
+});
+
+function handleNavigate(url) {
+  if (!url) return;
+  if (/^https?:\/\//i.test(url)) {
+    window.open(url, '_blank');
+  } else {
+    router.push(url);
+  }
+}
+
+const defaultServices = [
+  { name: '收藏', url: '/member/favorites', icon: 'Star' },
+  { name: '足迹', url: '/member/footprint', icon: 'Clock' },
+  { name: '红包', url: '/couponCenter', icon: 'Present' },
+  { name: '客服', url: '/article', icon: 'Service' }
+];
+
+const iconMap = {
+  Star,
+  Clock,
+  Present,
+  Service
+};
+
+function getServiceIcon(iconName) {
+  return iconMap[iconName] || Service;
+}
+
+const displayServices = computed(() => {
+  if (Array.isArray(props.options?.services) && props.options.services.length > 0) {
+    return props.options.services;
+  }
+  return defaultServices;
 });
 
 const customStyle = computed(() => {
   const s = props.componentStyle || {};
+  const hasRowHeight = Boolean(props.rowStyle?.height && Number(props.rowStyle.height) > 0);
   return {
-    backgroundColor: s.backgroundColor || '#ffffff',
-    borderRadius: Array.isArray(s.radius)
+    backgroundColor: (s.backgroundColor && s.backgroundColor !== 'transparent') ? s.backgroundColor : '#ffffff',
+    borderRadius: Array.isArray(s.radius) && s.radius.some(r => r > 0)
       ? `${s.radius[0]}px ${s.radius[1]}px ${s.radius[2]}px ${s.radius[3]}px`
-      : '8px'
+      : '8px',
+    height: '100%',
+    minHeight: hasRowHeight ? '0' : '420px'
   };
 });
 </script>
@@ -128,17 +138,18 @@ const customStyle = computed(() => {
 .decor-user-benefits {
   width: 100%;
   height: 100%;
-  min-height: 420px;
   box-sizing: border-box;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  padding: 14px 12px 10px;
+  padding: 24px 16px 20px;
+  gap: 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
 
   .user-main-info {
     display: flex;
@@ -146,8 +157,8 @@ const customStyle = computed(() => {
     gap: 8px;
 
     .avatar-box {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       overflow: hidden;
       flex-shrink: 0;
@@ -178,7 +189,7 @@ const customStyle = computed(() => {
       .badge-tag {
         align-self: flex-start;
         padding: 1px 6px;
-        background: #fff2e8;
+        background: #ecf5ff;
         color: #409EFF;
         font-size: 10px;
         font-weight: 700;
@@ -211,25 +222,25 @@ const customStyle = computed(() => {
   .action-btn-row {
     display: flex;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 8px;
 
     .action-btn {
       flex: 1;
-      height: 28px;
-      line-height: 28px;
+      height: 32px;
+      line-height: 32px;
       font-size: 12px;
       font-weight: 500;
       text-align: center;
       border-radius: 14px;
       cursor: pointer;
-      box-sizing: border-box;
       text-decoration: none;
+      box-sizing: border-box;
       transition: all 0.15s ease;
 
       &.login-btn {
         background: #409EFF;
         color: #ffffff;
-        box-shadow: 0 2px 6px rgba(255, 96, 0, 0.25);
+        box-shadow: 0 2px 6px rgba(64, 158, 255, 0.25);
 
         &:hover {
           background: #66b1ff;
@@ -242,7 +253,7 @@ const customStyle = computed(() => {
         border: 1px solid #409EFF;
 
         &:hover {
-          background: #fff7ed;
+          background: #ecf5ff;
         }
       }
     }
@@ -252,22 +263,23 @@ const customStyle = computed(() => {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 8px 0;
-    margin-top: 10px;
+    padding: 12px 0;
+    margin-top: 6px;
     background: #f8fafc;
     border-radius: 6px;
 
     .metric-card {
-      text-align: center;
-      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-decoration: none;
       cursor: pointer;
 
       .metric-val {
         font-size: 15px;
         font-weight: 700;
-        color: #0f172a;
-        line-height: 1.1;
+        color: #409EFF;
+        line-height: 1.2;
       }
 
       .metric-label {
@@ -275,131 +287,42 @@ const customStyle = computed(() => {
         color: #64748b;
         margin-top: 2px;
       }
-
-      &:hover {
-        .metric-val, .metric-label {
-          color: #409EFF;
-        }
-      }
-    }
-  }
-
-  .section-divider {
-    height: 1px;
-    background: #f1f5f9;
-    margin: 8px 0 6px;
-  }
-
-  .news-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 0 2px;
-
-    .news-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-
-      .news-title-wrap {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-
-        .news-title {
-          font-size: 12px;
-          font-weight: 700;
-          color: #1e293b;
-        }
-
-        .hot-badge {
-          background: #ef4444;
-          color: #ffffff;
-          font-size: 9px;
-          font-weight: 700;
-          padding: 0 3px;
-          border-radius: 2px;
-          line-height: 1.2;
-        }
-      }
-
-      .news-more {
-        font-size: 11px;
-        color: #94a3b8;
-        text-decoration: none;
-        cursor: pointer;
-
-        &:hover {
-          color: #409EFF;
-        }
-      }
-    }
-
-    .news-list {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-
-      .news-item {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 11px;
-        color: #475569;
-        text-decoration: none;
-        cursor: pointer;
-        line-height: 1.3;
-        transition: color 0.15s;
-
-        .dot {
-          color: #409EFF;
-          font-weight: 700;
-        }
-
-        .news-text {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        &:hover {
-          color: #409EFF;
-        }
-      }
     }
   }
 
   .quick-service-row {
     display: flex;
-    align-items: center;
     justify-content: space-around;
-    padding-top: 8px;
+    align-items: center;
+    padding-top: 14px;
     border-top: 1px dashed #f1f5f9;
-    margin-top: 4px;
+    margin-top: 6px;
 
     .service-item {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      text-decoration: none;
       cursor: pointer;
       color: #64748b;
-      transition: color 0.15s;
+      text-decoration: none;
+      transition: color 0.15s ease;
 
       .service-icon {
-        font-size: 14px;
+        font-size: 20px;
+        transition: transform 0.15s ease;
       }
 
       .service-name {
-        font-size: 10px;
-        line-height: 1;
+        font-size: 11px;
       }
 
       &:hover {
         color: #409EFF;
+
+        .service-icon {
+          transform: translateY(-2px);
+        }
       }
     }
   }

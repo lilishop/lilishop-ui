@@ -211,6 +211,20 @@
 
 import { ref, computed } from 'vue';
 
+import {
+  House, Compass, Picture, ShoppingBag, Ticket, Document, Menu, Bottom as BottomIcon,
+  List, Grid, Fold, PictureRounded, Medal, Aim, FullScreen, Files, VideoCamera,
+  Goods, Postcard, Reading, DArrowRight, CollectionTag, Star, Edit, Bell,
+  Search, User, Rank
+} from '@element-plus/icons-vue';
+
+const iconMap = {
+  House, Compass, Picture, ShoppingBag, Ticket, Document, Menu, Bottom: BottomIcon,
+  List, Grid, Fold, PictureRounded, Medal, Aim, FullScreen, Files, VideoCamera,
+  Goods, Postcard, Reading, DArrowRight, CollectionTag, Star, Edit, Bell,
+  Search, User, Rank
+};
+
 import RowConfigPanel from './RowConfigPanel.vue';
 
 import ComponentConfigPanel from './ComponentConfigPanel.vue';
@@ -367,19 +381,11 @@ const currentSelectedTitle = computed(() => {
 
 
 const currentSelectedIcon = computed(() => {
-
   if (props.selectedComponent) {
-
-    if (props.selectedComponent.icon) return props.selectedComponent.icon;
-
-    const def = COMPONENT_DEFINITIONS.find(d => d.type === props.selectedComponent.type);
-
-    return def?.icon || 'Grid';
-
+    const iconName = props.selectedComponent.icon || COMPONENT_DEFINITIONS.find(d => d.type === props.selectedComponent.type)?.icon;
+    return iconMap[iconName] || Grid;
   }
-
-  return 'Rank';
-
+  return Rank;
 });
 
 

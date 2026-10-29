@@ -57,6 +57,10 @@ const props = defineProps({
   componentStyle: {
     type: Object,
     default: () => ({})
+  },
+  rowStyle: {
+    type: Object,
+    default: () => ({})
   }
 });
 
@@ -78,10 +82,10 @@ const slidesList = computed(() => {
     }));
   }
   return [
-    { title: '出游囤好货', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },
-    { title: '科技新品', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png', url: '/goodsList?category=1' },
-    { title: '原产地直采', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png', url: '/goodsList?category=2' },
-    { title: '大牌美妆', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png', url: '/goodsList?category=3' }
+    { title: '潮流数码', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png', url: '/goodsList?category=1' },
+    { title: '奢宠美妆', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png', url: '/goodsList?category=2' },
+    { title: '运动潮流', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png', url: '/goodsList?category=3' },
+    { title: '居家生活', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png', url: '/goodsList?category=4' }
   ];
 });
 
@@ -89,41 +93,25 @@ const currentSlide = computed(() => {
   return slidesList.value[currentIdx.value] || slidesList.value[0];
 });
 
-function getAspectRatioCss(ratio) {
-  if (ratio === '16:9') return '16 / 9';
-  if (ratio === '2:1') return '2 / 1';
-  if (ratio === '3:1') return '3 / 1';
-  if (ratio === 'custom') return null;
-  return '2.5 / 1';
-}
-
 const customStyle = computed(() => {
   const s = props.componentStyle || {};
-  const fit = props.options.fitMode || 'contain';
+  const fit = props.options.fitMode || 'cover';
+  const hasRowHeight = Boolean(props.rowStyle?.height && Number(props.rowStyle.height) > 0);
 
   const styleObj = {
-    borderRadius: Array.isArray(s.radius)
+    borderRadius: Array.isArray(s.radius) && s.radius.some(r => r > 0)
       ? `${s.radius[0]}px ${s.radius[1]}px ${s.radius[2]}px ${s.radius[3]}px`
       : '8px',
-    backgroundColor: s.backgroundColor || '#ffffff',
-    '--carousel-fit': fit
+    backgroundColor: (s.backgroundColor && s.backgroundColor !== 'transparent') ? s.backgroundColor : '#ffffff',
+    '--carousel-fit': fit,
+    height: '100%',
+    minHeight: hasRowHeight ? '0' : '420px'
   };
 
-  if (props.options.height) {
+  if (props.options.aspectRatio === 'custom' && props.options.height) {
     styleObj.height = `${props.options.height}px`;
-    styleObj.aspectRatio = 'auto';
-  } else {
-    const ratio = props.options.aspectRatio || '2.5:1';
-    const ratioCss = getAspectRatioCss(ratio);
-    if (ratioCss) {
-      styleObj.aspectRatio = ratioCss;
-      styleObj['--carousel-ratio'] = ratioCss;
-    } else {
-      styleObj.height = `${s.height || 420}px`;
-      styleObj.aspectRatio = 'auto';
-    }
+    styleObj.minHeight = `${props.options.height}px`;
   }
-
   return styleObj;
 });
 
@@ -158,6 +146,7 @@ function stopTimer() {
 }
 
 function resetTimer() {
+  stopTimer();
   startTimer();
 }
 
@@ -180,6 +169,7 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .tpl-carousel {
   width: 100%;
+  height: 100%;
   position: relative;
   overflow: hidden;
   user-select: none;
@@ -188,10 +178,13 @@ onBeforeUnmount(() => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 
   .carousel-container {
     width: 100%;
     height: 100%;
+    flex: 1;
     position: relative;
     display: flex;
     align-items: center;
@@ -208,81 +201,68 @@ onBeforeUnmount(() => {
       .slide-img {
         width: 100%;
         height: 100%;
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: var(--carousel-fit, contain) !important;
-        object-position: center;
+        object-fit: var(--carousel-fit, cover);
         display: block;
       }
     }
 
-    // 切换动效
-    .carousel-fade-enter-active,
-    .carousel-fade-leave-active {
-      transition: opacity 0.4s ease;
-    }
-    .carousel-fade-enter-from,
-    .carousel-fade-leave-to {
-      opacity: 0;
-    }
-
-    // 左右箭头按钮
     .arrow-btn {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background: rgba(15, 23, 42, 0.35);
+      background: rgba(0, 0, 0, 0.35);
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       font-size: 16px;
-      transition: all 0.2s ease;
       z-index: 10;
-      backdrop-filter: blur(2px);
+      transition: all 0.2s;
 
       &:hover {
-        background: rgba(15, 23, 42, 0.65);
+        background: rgba(0, 0, 0, 0.65);
         transform: translateY(-50%) scale(1.08);
       }
 
       &.prev-btn {
-        left: 16px;
+        left: 12px;
       }
 
       &.next-btn {
-        right: 16px;
+        right: 12px;
       }
     }
 
-    // 底部指示点
     .carousel-indicators {
       position: absolute;
-      bottom: 14px;
+      bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       z-index: 10;
+      padding: 3px 8px;
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 10px;
+      backdrop-filter: blur(2px);
 
       .indicator-dot {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.65);
+        background: rgba(255, 255, 255, 0.6);
         cursor: pointer;
-        transition: all 0.25s ease;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        transition: all 0.25s;
 
         &.active {
-          width: 22px;
-          border-radius: 5px;
-          background: #ea580c;
+          width: 16px;
+          border-radius: 3px;
+          background: #409EFF;
         }
 
         &:hover:not(.active) {
@@ -292,42 +272,33 @@ onBeforeUnmount(() => {
     }
   }
 
-  &.is-compact {
+  &.is-mini {
     .arrow-btn {
-      width: 26px;
-      height: 26px;
-      font-size: 12px;
-      &.prev-btn { left: 8px; }
-      &.next-btn { right: 8px; }
+      width: 24px;
+      height: 24px;
+      font-size: 13px;
     }
     .carousel-indicators {
       bottom: 8px;
-      gap: 5px;
+      gap: 4px;
       .indicator-dot {
-        width: 6px;
-        height: 6px;
-        &.active { width: 14px; }
+        width: 5px;
+        height: 5px;
+        &.active {
+          width: 12px;
+        }
       }
     }
   }
+}
 
-  &.is-mini {
-    .arrow-btn {
-      width: 20px;
-      height: 20px;
-      font-size: 10px;
-      &.prev-btn { left: 4px; }
-      &.next-btn { right: 4px; }
-    }
-    .carousel-indicators {
-      bottom: 4px;
-      gap: 3px;
-      .indicator-dot {
-        width: 4px;
-        height: 4px;
-        &.active { width: 10px; }
-      }
-    }
-  }
+.carousel-fade-enter-active,
+.carousel-fade-leave-active {
+  transition: opacity 0.35s ease;
+}
+
+.carousel-fade-enter-from,
+.carousel-fade-leave-to {
+  opacity: 0;
 }
 </style>

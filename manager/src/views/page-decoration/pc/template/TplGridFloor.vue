@@ -122,7 +122,7 @@ const posterTags = computed(() => {
 });
 
 const posterImg = computed(() => {
-  return props.options?.posterImg || 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/banner-floor/floor_banner_1.png';
+  return props.options?.bannerImg || props.options?.posterImg || 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/banner-floor/floor_banner_1.png';
 });
 
 const showPoster = computed(() => {
@@ -444,11 +444,11 @@ const customStyle = computed(() => {
           flex: 1;
 
           .goods-name-line {
-            font-size: 13px;
+            font-size: 14px;
             color: #1e293b;
             font-weight: 500;
             line-height: 1.4;
-            height: 36px;
+            height: 40px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;

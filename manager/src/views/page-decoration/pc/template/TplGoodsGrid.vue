@@ -249,11 +249,11 @@ const customStyle = computed(() => {
         flex: 1;
 
         .cell-name {
-          font-size: 13px;
+          font-size: 14px;
           color: #334155;
           font-weight: 500;
           line-height: 1.4;
-          height: 36px;
+          height: 40px;
           overflow: hidden;
           text-overflow: ellipsis;
           display: -webkit-box;

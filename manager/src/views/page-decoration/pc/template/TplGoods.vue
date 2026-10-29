@@ -5,6 +5,9 @@
       <div class="title-left">
         <span class="main-title">{{ options.title }}</span>
         <span class="sub-title" v-if="options.subtitle">{{ options.subtitle }}</span>
+        <span class="category-tag-badge" v-if="options.dataSource === 'category' && (options.categoryName || options.categoryId)">
+          🏷️ {{ options.categoryName || `分类: ${options.categoryId}` }}
+        </span>
       </div>
       <span class="more-link" v-if="options.showMoreLink !== false">
         {{ options.moreText || '查看更多' }} &gt;
@@ -30,11 +33,6 @@
         <div class="card-body">
           <div class="goods-name" v-if="options.showTitle !== false">
             {{ g.goodsName }}
-          </div>
-
-          <div class="meta-row" v-if="options.showSales !== false">
-            <span class="sales-text">已售 {{ 120 + idx * 85 }}+ 件</span>
-            <span class="rate-text">99%好评</span>
           </div>
 
           <div class="price-row">
@@ -93,6 +91,10 @@ const defaultMockGoods = [
   { id: '12', goodsName: '航空级铝镁合金静音万向轮拉杆登机箱 20英寸防刮耐磨', price: '499.00', originalPrice: '699.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png' }
 ];
 
+const isGoodsCard = computed(() => {
+  return props.component?.type === 'goodsCard' || props.options?.type === 'goodsCard';
+});
+
 const actualColumns = computed(() => {
   // 商品列表整行默认 6 列
   let baseCols = Number(props.options?.columns) || 6;
@@ -126,7 +128,7 @@ const customStyle = computed(() => {
 });
 
 const sampleGoods = computed(() => {
-  if (Array.isArray(props.options.goods) && props.options.goods.length > 0) {
+  if (props.options.dataSource === 'manual' && Array.isArray(props.options.goods) && props.options.goods.length > 0) {
     return props.options.goods;
   }
   const count = props.options.goodsCount || (actualColumns.value * 2) || 12;
@@ -153,26 +155,30 @@ const sampleGoods = computed(() => {
       gap: 10px;
 
       .main-title {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
         color: #1e293b;
       }
 
       .sub-title {
-        font-size: 13px;
+        font-size: 12px;
         color: #94a3b8;
+      }
+
+      .category-tag-badge {
+        font-size: 11px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #2563eb;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 500;
       }
     }
 
     .more-link {
-      font-size: 13px;
+      font-size: 12px;
       color: #64748b;
-      cursor: pointer;
-      transition: color 0.2s;
-
-      &:hover {
-        color: #e11d48;
-      }
     }
   }
 
@@ -187,22 +193,6 @@ const sampleGoods = computed(() => {
       padding: 10px;
       display: flex;
       flex-direction: column;
-      transition: all 0.25s ease;
-
-      &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-        border-color: #e2e8f0;
-
-        .thumb-img {
-          transform: scale(1.05);
-        }
-
-        .add-cart-circle {
-          background: #e11d48;
-          color: #ffffff;
-        }
-      }
 
       .card-thumb-wrap {
         position: relative;
@@ -217,7 +207,6 @@ const sampleGoods = computed(() => {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.3s;
         }
 
         .self-tag {
@@ -239,10 +228,11 @@ const sampleGoods = computed(() => {
         flex: 1;
 
         .goods-name {
-          font-size: 12px;
+          font-size: 14px;
+          font-weight: 500;
           color: #1e293b;
           line-height: 1.4;
-          height: 34px;
+          height: 40px;
           overflow: hidden;
           text-overflow: ellipsis;
           display: -webkit-box;
@@ -302,8 +292,6 @@ const sampleGoods = computed(() => {
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
           }
         }
       }

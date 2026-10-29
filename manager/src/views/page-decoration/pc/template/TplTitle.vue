@@ -7,6 +7,12 @@
     ]"
   >
     <div class="title-content">
+      <img
+        v-if="options.titleImg || options.icon"
+        :src="options.titleImg || options.icon"
+        class="title-custom-icon"
+        alt="icon"
+      />
       <span class="main-t">{{ options.mainTitle || '楼层主标题' }}</span>
       <span class="sub-t" v-if="options.subtitle">{{ options.subtitle }}</span>
     </div>
@@ -53,10 +59,17 @@ const isCompact = computed(() => props.componentStyle?.widthRatio === '33.33%');
 
   .title-content {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 4px 10px;
+    gap: 8px 10px;
     min-width: 0;
+
+    .title-custom-icon {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
 
     .main-t {
       font-size: 22px;
@@ -84,6 +97,10 @@ const isCompact = computed(() => props.componentStyle?.widthRatio === '33.33%');
 
   &.is-compact {
     .title-content {
+      .title-custom-icon {
+        width: 20px;
+        height: 20px;
+      }
       .main-t {
         font-size: 18px;
       }
@@ -99,37 +116,31 @@ const isCompact = computed(() => props.componentStyle?.widthRatio === '33.33%');
   &.is-mini {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 6px;
 
     &.align-center {
       align-items: center;
       .more-link {
         position: static;
-        margin-top: 2px;
+        margin-top: 4px;
       }
     }
 
     .title-content {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-
+      .title-custom-icon {
+        width: 16px;
+        height: 16px;
+      }
       .main-t {
-        font-size: 16px;
+        font-size: 15px;
       }
       .sub-t {
-        font-size: 12px;
+        font-size: 11px;
       }
-    }
-
-    &.align-center .title-content {
-      align-items: center;
-      text-align: center;
     }
 
     .more-link {
-      font-size: 12px;
-      margin-top: 2px;
+      font-size: 11px;
     }
   }
 }

@@ -462,11 +462,11 @@ const customStyle = computed(() => {
           flex: 1;
 
           .goods-name {
-            font-size: 12px;
+            font-size: 14px;
             color: #1e293b;
             font-weight: 500;
             line-height: 1.4;
-            height: 34px;
+            height: 40px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;

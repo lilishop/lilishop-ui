@@ -46,9 +46,14 @@
     <div class="panel-section">
       <div class="section-title flex-between">
         <span>推荐商品池 ({{ options.goods?.length || 0 }} 件)</span>
-        <el-button type="primary" size="small" @click="showModal = true">
-          选择真实商品
-        </el-button>
+        <div class="btn-group">
+          <el-button v-if="options.goods?.length" link type="danger" size="small" @click="options.goods = []">
+            清空
+          </el-button>
+          <el-button type="primary" size="small" @click="handleOpenGoodsPicker">
+            选择商品
+          </el-button>
+        </div>
       </div>
 
       <div class="goods-list-preview" v-if="options.goods?.length">
@@ -56,7 +61,7 @@
           <span class="idx-tag">{{ idx === 0 ? '精选' : idx + 1 }}</span>
           <img :src="g.thumbnail || defaultThumb" class="g-thumb" alt="" />
           <div class="g-info">
-            <span class="g-name">{{ g.goodsName }}</span>
+            <span class="g-name" :title="g.goodsName">{{ g.goodsName }}</span>
             <span class="g-price">￥{{ g.price }}</span>
           </div>
           <el-button link type="danger" size="small" @click="options.goods.splice(idx, 1)">
@@ -64,36 +69,39 @@
           </el-button>
         </div>
       </div>
+      <div class="goods-empty-tip" v-else>
+        <span>暂未选择特定商品，前台将展示系统推荐商品</span>
+        <el-button type="primary" link size="small" @click="handleOpenGoodsPicker">
+          + 点击添加商品
+        </el-button>
+      </div>
     </div>
 
-    <!-- 商品选择弹窗 -->
-    <el-dialog v-model="showModal" title="选择推荐商品" width="600px" append-to-body>
-      <div class="modal-goods-pool">
-        <div
-          v-for="item in mockPool"
-          :key="item.id"
-          class="pool-item"
-          :class="{ selected: isSelected(item.id) }"
-          @click="toggleSelect(item)"
-        >
-          <img :src="item.thumbnail" class="pool-thumb" alt="" />
-          <div class="pool-meta">
-            <div class="pool-name">{{ item.goodsName }}</div>
-            <div class="pool-price">￥{{ item.price }}</div>
-          </div>
-          <el-icon v-if="isSelected(item.id)" class="check-icon"><Check /></el-icon>
-        </div>
-      </div>
+    <!-- 兜底商品选择弹窗（当未注入全局 openGoodsPicker 时生效） -->
+    <el-dialog
+      v-if="!openGoodsPicker && showModal"
+      v-model="showModal"
+      title="从商品库选择商品"
+      width="1160px"
+      append-to-body
+      destroy-on-close
+    >
+      <goods-dialog
+        :selectedWay="tempSelectedGoods"
+        @selected="(val) => { tempSelectedGoods = val; }"
+      />
       <template #footer>
-        <el-button @click="showModal = false">完成</el-button>
+        <el-button @click="showModal = false">取消</el-button>
+        <el-button type="primary" @click="confirmGoodsSelected">确定</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { Delete, Check } from '@element-plus/icons-vue';
+import { ref, inject } from 'vue';
+import GoodsDialog from '@/components/lili-dialog/goods-dialog.vue';
+import { Delete } from '@element-plus/icons-vue';
 
 const props = defineProps({
   component: {
@@ -108,6 +116,8 @@ const props = defineProps({
 
 const defaultThumb = 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png';
 const showModal = ref(false);
+const openGoodsPicker = inject('openGoodsPicker', null);
+const tempSelectedGoods = ref([]);
 
 if (!props.options.title) props.options.title = '猜你喜欢';
 if (!props.options.subtitle) props.options.subtitle = '真实推荐商品流';
@@ -128,26 +138,32 @@ if (!props.options.goods) {
   ];
 }
 
-const mockPool = [
-  { id: '1', goodsName: '旗舰 5G 智能手机 12GB+256GB 超光影影像系统', price: '3999.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_1.png' },
-  { id: '2', goodsName: '无线头戴式深度主动降噪蓝牙耳机 空间音频Hi-Res', price: '1099.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_2.png' },
-  { id: '3', goodsName: '14英寸 全面屏轻薄商务笔记本电脑 酷睿i7 高刷防眩光', price: '5699.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_3.png' },
-  { id: '4', goodsName: '运动健康专业监测智能手表 心率血氧长续航50米防水', price: '899.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_4.png' },
-  { id: '5', goodsName: '奢宠酵母焕活修护精华露 50ml 紧致淡纹抗皱滋养', price: '680.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_5.png' },
-  { id: '6', goodsName: '意式半自动家用复古咖啡机 20Bar高压恒温萃取蒸汽奶泡', price: '899.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_6.png' }
-];
-
-function isSelected(id) {
-  return props.options.goods?.some(g => String(g.id) === String(id));
+function handleOpenGoodsPicker() {
+  if (typeof openGoodsPicker === 'function') {
+    openGoodsPicker((selectedGoods) => {
+      applySelectedGoods(selectedGoods);
+    }, props.options.goods || []);
+  } else {
+    tempSelectedGoods.value = Array.isArray(props.options.goods) ? [...props.options.goods] : [];
+    showModal.value = true;
+  }
 }
 
-function toggleSelect(item) {
-  if (!Array.isArray(props.options.goods)) props.options.goods = [];
-  const idx = props.options.goods.findIndex(g => String(g.id) === String(item.id));
-  if (idx > -1) {
-    props.options.goods.splice(idx, 1);
-  } else {
-    props.options.goods.push({ ...item });
+function confirmGoodsSelected() {
+  applySelectedGoods(tempSelectedGoods.value);
+  showModal.value = false;
+}
+
+function applySelectedGoods(selectedGoods) {
+  if (Array.isArray(selectedGoods)) {
+    props.options.goods = selectedGoods.map(g => ({
+      id: g.id || g.skuId || g.goodsId,
+      goodsId: g.goodsId,
+      goodsName: g.goodsName || g.name,
+      price: g.price,
+      originalPrice: g.originalPrice || g.price,
+      thumbnail: g.thumbnail || g.pic || defaultThumb
+    }));
   }
 }
 </script>
@@ -172,6 +188,12 @@ function toggleSelect(item) {
         justify-content: space-between;
         align-items: center;
       }
+
+      .btn-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
     }
 
     .form-item {
@@ -190,7 +212,7 @@ function toggleSelect(item) {
   }
 
   .goods-list-preview {
-    max-height: 200px;
+    max-height: 260px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -204,14 +226,16 @@ function toggleSelect(item) {
       background: #f8fafc;
       padding: 6px 8px;
       border-radius: 6px;
+      border: 1px solid #f1f5f9;
 
       .idx-tag {
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
-        background: #fee2e2;
-        color: #dc2626;
-        padding: 2px 4px;
+        color: #64748b;
+        background: #e2e8f0;
+        padding: 1px 5px;
         border-radius: 3px;
+        white-space: nowrap;
       }
 
       .g-thumb {
@@ -243,60 +267,18 @@ function toggleSelect(item) {
       }
     }
   }
-}
 
-.modal-goods-pool {
-  max-height: 360px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  .pool-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    border: 1px solid #e2e8f0;
+  .goods-empty-tip {
+    padding: 16px;
+    text-align: center;
+    background: #f8fafc;
     border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      border-color: #ef4444;
-    }
-
-    &.selected {
-      background: #fef2f2;
-      border-color: #ef4444;
-    }
-
-    .pool-thumb {
-      width: 44px;
-      height: 44px;
-      border-radius: 4px;
-      object-fit: cover;
-    }
-
-    .pool-meta {
-      flex: 1;
-      .pool-name {
-        font-size: 13px;
-        color: #1e293b;
-        margin-bottom: 4px;
-      }
-      .pool-price {
-        font-size: 12px;
-        color: #e11d48;
-        font-weight: 700;
-      }
-    }
-
-    .check-icon {
-      color: #ef4444;
-      font-size: 18px;
-      font-weight: 800;
-    }
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
   }
 }
 </style>

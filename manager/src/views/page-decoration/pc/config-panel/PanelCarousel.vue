@@ -214,7 +214,7 @@ if (props.options.showIndicator === undefined) props.options.showIndicator = tru
 if (!props.options.effect) props.options.effect = 'fade';
 if (!props.options.fitMode) props.options.fitMode = 'contain';
 if (!props.options.aspectRatio) props.options.aspectRatio = '2.5:1';
-if (props.options.height === undefined) props.options.height = 380;
+if (props.options.height === undefined) props.options.height = 420;
 if (!Array.isArray(props.options.list)) {
   props.options.list = [
     { title: '出游囤好货', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },

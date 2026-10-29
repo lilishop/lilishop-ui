@@ -6,7 +6,11 @@
         <h3 class="main-title">{{ options.title }}</h3>
         <span class="sub-title" v-if="options.subtitle">{{ options.subtitle }}</span>
       </div>
-      <router-link :to="options.moreUrl || '/goods'" class="more-link" v-if="options.showMoreLink !== false">
+      <router-link
+        :to="options.moreUrl || (options.categoryId ? `/goodsList?categoryId=${options.categoryId}` : '/goodsList')"
+        class="more-link"
+        v-if="options.showMoreLink !== false"
+      >
         {{ options.moreText || '查看更多' }} &gt;
       </router-link>
     </div>
@@ -22,20 +26,20 @@
         :key="g.id || idx"
         class="goods-flow-card"
       >
-        <router-link :to="`/goods/${g.id || 1}`" class="card-thumb-wrap">
+        <router-link
+          :to="{ path: '/goodsDetail', query: { skuId: g.id, goodsId: g.goodsId || g.id } }"
+          class="card-thumb-wrap"
+        >
           <img :src="g.thumbnail || defaultThumb" :alt="g.goodsName" class="thumb-img" />
           <span class="self-tag" v-if="idx % 3 === 0">自营</span>
         </router-link>
 
         <div class="card-body">
           <h4 class="goods-name" v-if="options.showTitle !== false">
-            <router-link :to="`/goods/${g.id || 1}`">{{ g.goodsName }}</router-link>
+            <router-link :to="{ path: '/goodsDetail', query: { skuId: g.id, goodsId: g.goodsId || g.id } }">
+              {{ g.goodsName }}
+            </router-link>
           </h4>
-
-          <div class="meta-row" v-if="options.showSales !== false">
-            <span class="sales-text">已售 {{ 120 + idx * 85 }}+ 件</span>
-            <span class="rate-text">99%好评</span>
-          </div>
 
           <div class="price-row">
             <div class="price-box">
@@ -60,8 +64,37 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { goodsList } from '@/api/goods';
+
+const router = useRouter();
+
+function handleNavigateGoods(g) {
+  if (g.url) {
+    const url = String(g.url).trim();
+    if (/^https?:\/\//i.test(url)) {
+      window.open(url, '_blank');
+      return;
+    }
+    router.push(url);
+    return;
+  }
+  router.push({
+    path: '/goodsDetail',
+    query: { skuId: g.id, goodsId: g.goodsId || g.id }
+  });
+}
+
+function handleNavigateMore() {
+  const url = props.options?.moreUrl || (props.options?.categoryId ? `/goodsList?categoryId=${props.options.categoryId}` : '/goodsList');
+  if (/^https?:\/\//i.test(url)) {
+    window.open(url, '_blank');
+  } else {
+    router.push(url);
+  }
+}
 
 const props = defineProps({
   component: {
@@ -95,6 +128,75 @@ const defaultMockGoods = [
   { id: '12', goodsName: '航空级铝镁合金静音万向轮拉杆登机箱 20英寸防刮耐磨', price: '499.00', originalPrice: '699.00', thumbnail: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/goods/goods_7.png' }
 ];
 
+const categoryFetchedGoods = ref([]);
+const isFetching = ref(false);
+
+async function fetchGoodsByCategory() {
+  if (props.options.dataSource !== 'category') return;
+
+  const count = Number(props.options.goodsCount) || (props.component?.type === 'goodsCard' ? 1 : 6);
+  const params = {
+    pageNumber: 1,
+    pageSize: count
+  };
+
+  if (props.options.categoryId) {
+    const rawCat = String(props.options.categoryId);
+    const catParts = rawCat.split(',');
+    params.categoryId = catParts[catParts.length - 1];
+  }
+
+  // 排序参数映射
+  if (props.options.sortType === 'sales') {
+    params.sort = 'buyCount';
+    params.order = 'desc';
+  } else if (props.options.sortType === 'price_asc') {
+    params.sort = 'price';
+    params.order = 'asc';
+  } else if (props.options.sortType === 'price_desc') {
+    params.sort = 'price';
+    params.order = 'desc';
+  } else if (props.options.sortType === 'new') {
+    params.sort = 'releaseTime';
+    params.order = 'desc';
+  }
+
+  try {
+    isFetching.value = true;
+    const res = await goodsList(params);
+    const records = res?.data?.result?.records || res?.result?.records || res?.data?.records || [];
+    if (Array.isArray(records) && records.length > 0) {
+      categoryFetchedGoods.value = records.map(item => ({
+        id: item.id || item.goodsId || item.sn,
+        goodsId: item.goodsId || item.id,
+        goodsName: item.goodsName || item.name,
+        price: item.price,
+        originalPrice: item.originalPrice || item.price,
+        thumbnail: item.thumbnail || item.pic || defaultThumb
+      }));
+    }
+  } catch (err) {
+    console.warn('Fetch goods by category failed:', err);
+  } finally {
+    isFetching.value = false;
+  }
+}
+
+onMounted(() => {
+  fetchGoodsByCategory();
+});
+
+watch(
+  () => [props.options.dataSource, props.options.categoryId, props.options.goodsCount, props.options.sortType],
+  () => {
+    fetchGoodsByCategory();
+  }
+);
+
+const isGoodsCard = computed(() => {
+  return props.component?.type === 'goodsCard' || props.options?.type === 'goodsCard';
+});
+
 const actualColumns = computed(() => {
   let baseCols = Number(props.options?.columns) || 6;
   const ratio = props.componentStyle?.widthRatio || '100%';
@@ -127,6 +229,10 @@ const customStyle = computed(() => {
 });
 
 const sampleGoods = computed(() => {
+  if (props.options.dataSource === 'category' && categoryFetchedGoods.value.length > 0) {
+    const targetCount = Number(props.options.goodsCount) || (props.component?.type === 'goodsCard' ? 1 : 6);
+    return categoryFetchedGoods.value.slice(0, targetCount);
+  }
   if (Array.isArray(props.options.goods) && props.options.goods.length > 0) {
     return props.options.goods;
   }
@@ -170,6 +276,7 @@ function addToCart(item) {
     }
 
     .more-link {
+      cursor: pointer;
       font-size: 13px;
       color: #64748b;
       text-decoration: none;
@@ -210,6 +317,7 @@ function addToCart(item) {
       }
 
       .card-thumb-wrap {
+        cursor: pointer;
         display: block;
         position: relative;
         width: 100%;
@@ -245,10 +353,10 @@ function addToCart(item) {
         flex: 1;
 
         .goods-name {
-          font-size: 12px;
+          font-size: 14px;
           font-weight: 500;
           line-height: 1.4;
-          height: 34px;
+          height: 40px;
           overflow: hidden;
           text-overflow: ellipsis;
           display: -webkit-box;

@@ -10,7 +10,13 @@
   >
     <!-- 左侧快讯徽章 -->
     <div class="notice-badge-box">
-      <div class="badge-icon">
+      <img
+        v-if="options.badgeImg || options.icon"
+        :src="options.badgeImg || options.icon"
+        class="badge-custom-img"
+        alt="icon"
+      />
+      <div v-else class="badge-icon">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
           <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
         </svg>
@@ -146,161 +152,146 @@ const customStyle = computed(() => {
   align-items: center;
   box-sizing: border-box;
   user-select: none;
+  background: #ffffff;
   border: 1px solid #eef2f6;
   gap: 12px;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
 
-  /* 左侧徽章 */
+  &.is-mini {
+    gap: 6px;
+    padding: 0 8px !important;
+
+    .notice-badge-box {
+      .badge-title, .badge-divider {
+        display: none;
+      }
+    }
+  }
+
+  &.is-compact {
+    gap: 8px;
+    padding: 0 10px !important;
+
+    .notice-badge-box {
+      .badge-divider {
+        display: none;
+      }
+    }
+  }
+
   .notice-badge-box {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-shrink: 0;
 
     .badge-icon {
-      color: #ef4444;
+      color: #f97316;
       display: flex;
       align-items: center;
+      justify-content: center;
+    }
+
+    .badge-custom-img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
     }
 
     .badge-title {
-      font-size: 14px;
-      font-weight: 800;
+      font-size: 13px;
+      font-weight: 700;
       color: #0f172a;
       white-space: nowrap;
-      letter-spacing: -0.2px;
     }
 
     .badge-divider {
       width: 1px;
       height: 14px;
-      background: #e2e8f0;
-      margin-left: 6px;
+      background: #cbd5e1;
+      margin-left: 4px;
     }
   }
 
-  /* 中间快讯轮播视口 */
   .notice-content-viewport {
     flex: 1;
+    min-width: 0;
     height: 40px;
     overflow: hidden;
     position: relative;
-    min-width: 0;
 
     .notice-items-strip {
-      transition: transform 0.4s ease-in-out;
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      display: flex;
+      flex-direction: column;
 
       .notice-strip-item {
         height: 40px;
         display: flex;
         align-items: center;
         gap: 8px;
-        min-width: 0;
+        box-sizing: border-box;
 
         .notice-item-tag {
-          font-size: 10px;
-          font-weight: 700;
+          font-size: 11px;
           padding: 1px 6px;
-          border-radius: 3px;
+          border-radius: 4px;
+          font-weight: 600;
           flex-shrink: 0;
 
           &.tag-new {
-            background: #fee2e2;
-            color: #dc2626;
-          }
-          &.tag-promo {
-            background: #ffedd5;
-            color: #ea580c;
-          }
-          &.tag-notice {
             background: #eff6ff;
             color: #2563eb;
+            border: 1px solid #bfdbfe;
           }
+
+          &.tag-promo {
+            background: #fef2f2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+          }
+
+          &.tag-notice {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fde68a;
+          }
+
           &.tag-hot {
             background: #fdf2f8;
             color: #db2777;
+            border: 1px solid #fbcfe8;
           }
         }
 
         .notice-item-title {
           flex: 1;
+          min-width: 0;
           font-size: 13px;
           color: #334155;
-          overflow: hidden;
           white-space: nowrap;
+          overflow: hidden;
           text-overflow: ellipsis;
-          min-width: 0;
-          transition: color 0.2s;
         }
 
         .notice-item-time {
           font-size: 11px;
           color: #94a3b8;
-          white-space: nowrap;
           flex-shrink: 0;
-          margin-right: 4px;
         }
       }
     }
   }
 
-  /* 右侧更多 */
   .notice-more-action {
     flex-shrink: 0;
-    font-size: 12px;
-    color: #64748b;
-    cursor: pointer;
-    transition: color 0.2s;
 
-    &:hover {
-      color: #ef4444;
-    }
-  }
-
-  /* 紧凑形态 (三分之一) */
-  &.is-compact {
-    gap: 8px;
-
-    .notice-badge-box {
-      .badge-title {
-        font-size: 13px;
-      }
-      .badge-divider {
-        margin-left: 2px;
-      }
-    }
-
-    .notice-content-viewport {
-      .notice-strip-item {
-        .notice-item-title {
-          font-size: 12px;
-        }
-      }
-    }
-  }
-
-  /* 极简微缩形态 (六分之一) */
-  &.is-mini {
-    gap: 4px;
-    padding: 0 8px !important;
-
-    .notice-badge-box {
-      .badge-title {
-        display: none;
-      }
-      .badge-divider {
-        display: none;
-      }
-    }
-
-    .notice-content-viewport {
-      .notice-strip-item {
-        .notice-item-tag {
-          display: none;
-        }
-        .notice-item-title {
-          font-size: 11px;
-        }
-      }
+    .more-text {
+      font-size: 12px;
+      color: #64748b;
     }
   }
 }

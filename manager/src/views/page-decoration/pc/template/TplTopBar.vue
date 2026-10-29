@@ -72,13 +72,15 @@ const customStyle = computed(() => {
   }
 
   .bar-inner {
-    width: 100%;
+    width: 1200px;
     max-width: 100%;
-    padding: 0 24px;
+    margin: 0 auto;
+    padding: 0;
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 100%;
 
     .bar-left {
       display: flex;
@@ -98,7 +100,7 @@ const customStyle = computed(() => {
         white-space: nowrap;
 
         .auth-btn {
-          color: #ff6a00;
+          color: #409EFF;
           cursor: pointer;
           &:hover {
             text-decoration: underline;
@@ -120,7 +122,7 @@ const customStyle = computed(() => {
         white-space: nowrap;
 
         &:hover {
-          color: #ff6a00;
+          color: #409EFF;
         }
       }
     }

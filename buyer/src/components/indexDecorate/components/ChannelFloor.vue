@@ -98,7 +98,20 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+
+const router = useRouter();
+
+function handleNavigate(url) {
+  const target = url ? String(url).trim() : '/goods';
+  if (!target) return;
+  if (/^https?:\/\//i.test(target)) {
+    window.open(target, '_blank');
+  } else {
+    router.push(target);
+  }
+}
 
 const props = defineProps({
   component: {
@@ -479,10 +492,10 @@ function addToCart(item) {
           flex: 1;
 
           .goods-name {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
             line-height: 1.4;
-            height: 34px;
+            height: 40px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;

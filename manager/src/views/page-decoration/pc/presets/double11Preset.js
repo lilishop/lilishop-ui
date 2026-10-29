@@ -22,7 +22,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 40
       },
       "components": [
         {
@@ -77,7 +78,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           12,
           0
-        ]
+        ],
+        "height": 120
       },
       "components": [
         {
@@ -99,7 +101,10 @@ export const DOUBLE11_PAGE_DOCUMENT = {
               "华为Mate 70",
               "五粮液普五",
               "耐克碳板跑鞋"
-            ]
+            ],
+            "showSearchTypes": true,
+            "defaultSearchType": "goods",
+            "storePlaceholder": "请输入店铺名称"
           }
         }
       ]
@@ -120,7 +125,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -193,7 +199,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
         ],
         "justifyContent": "space-between",
         "alignItems": "stretch",
-        "gap": 12
+        "gap": 12,
+        "height": 320
       },
       "components": [
         {
@@ -366,7 +373,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           4,
           12
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 40
       },
       "components": [
         {
@@ -427,7 +435,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           14
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 120
       },
       "components": [
         {
@@ -532,7 +541,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -569,7 +579,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 160
       },
       "components": [
         {
@@ -634,7 +645,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 750
       },
       "components": [
         {
@@ -711,7 +723,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 180
       },
       "components": [
         {
@@ -771,7 +784,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0
         ],
-        "justifyContent": "space-between"
+        "justifyContent": "space-between",
+        "height": 360
       },
       "components": [
         {
@@ -874,7 +888,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           14,
           20
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 450
       },
       "components": [
         {
@@ -924,7 +939,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -962,7 +978,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           16
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 560
       },
       "components": [
         {
@@ -1043,7 +1060,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           16
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 560
       },
       "components": [
         {
@@ -1121,7 +1139,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           16
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 620
       },
       "components": [
         {
@@ -1190,7 +1209,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -1203,7 +1223,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           },
           "options": {
             "title": "双11爆款必买热销榜",
-            "subtitle": "TOP RANKINGS · 亿万买家真实下单好评热选",
+            "subtitle": "TOP RANKINGS · 平台高人气甄选热卖",
             "tag": "实时榜单",
             "moreText": "查看完整榜单 >",
             "moreUrl": "/goodsList"
@@ -1228,7 +1248,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           16
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 420
       },
       "components": [
         {
@@ -1343,7 +1364,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -1381,7 +1403,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           16
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 360
       },
       "components": [
         {
@@ -1395,6 +1418,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           "options": {
             "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
             "coverUrl": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/video/video_cover.png",
+            "url": "/goodsList?brand=1",
             "title": "双11全球狂欢发布盛典 · 年度旗舰好物真实开箱测评",
             "autoplay": false
           }
@@ -1417,7 +1441,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -1455,7 +1480,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           16
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 220
       },
       "components": [
         {
@@ -1513,7 +1539,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -1551,7 +1578,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           20,
           24
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": ""
       },
       "components": [
         {
@@ -1588,7 +1616,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -1626,7 +1655,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           16
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 980
       },
       "components": [
         {
@@ -1740,7 +1770,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0,
           0
-        ]
+        ],
+        "height": 48
       },
       "components": [
         {
@@ -1778,7 +1809,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16,
           16
         ],
-        "borderRadius": "8px"
+        "borderRadius": "8px",
+        "height": 1270
       },
       "components": [
         {
@@ -1893,7 +1925,8 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           24,
           0
-        ]
+        ],
+        "height": 450
       },
       "components": [
         {

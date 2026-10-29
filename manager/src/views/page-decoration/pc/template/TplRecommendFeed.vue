@@ -27,7 +27,40 @@
         </div>
         <div class="big-card-info">
           <div class="big-title">{{ featuredGoods.goodsName }}</div>
-          <div class="big-reason">99.8% 高好评 · 猜你对这款高人气科技数码感兴趣</div>
+          <div class="big-reason">官方甄选 · 猜你对这款高人气商品感兴趣</div>
+
+          <!-- 核心特色标签 -->
+          <div class="big-tags-row">
+            <span class="feat-tag highlight">🔥 镇店爆品</span>
+            <span class="feat-tag">🛡️ 官方正品</span>
+            <span class="feat-tag">⚡ 极速发货</span>
+            <span class="feat-tag">🏷️ 售后无忧</span>
+          </div>
+
+          <!-- 权威热度指标 -->
+          <div class="big-stats-bar">
+            <div class="stat-cell">
+              <span class="stat-val">100%</span>
+              <span class="stat-lbl">品质正品</span>
+            </div>
+            <div class="stat-line"></div>
+            <div class="stat-cell">
+              <span class="stat-val">极速达</span>
+              <span class="stat-lbl">顺丰速运</span>
+            </div>
+            <div class="stat-line"></div>
+            <div class="stat-cell">
+              <span class="stat-val">TOP 1</span>
+              <span class="stat-lbl">品类热榜</span>
+            </div>
+          </div>
+
+          <!-- 服务保障权益 -->
+          <div class="big-guarantees">
+            <div class="guar-item"><span class="guar-icon">✓</span> 7天无理由退换货</div>
+            <div class="guar-item"><span class="guar-icon">✓</span> 赠运费险 · 破损包赔</div>
+          </div>
+
           <div class="big-price-row">
             <div class="big-price">
               <span class="sym">￥</span>
@@ -86,8 +119,7 @@
         <div class="card-body">
           <div class="goods-title">{{ item.goodsName }}</div>
           <div class="recommend-meta">
-            <span class="sales-num">已售 {{ 200 + idx * 70 }}+</span>
-            <span class="rate-num">98%好评</span>
+            <span class="reason-tag">甄选推荐</span>
           </div>
           <div class="price-row">
             <div class="price-box">
@@ -312,8 +344,90 @@ const customStyle = computed(() => {
           background: #fff7ed;
           padding: 4px 8px;
           border-radius: 4px;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
           line-height: 1.3;
+        }
+
+        .big-tags-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 10px;
+
+          .feat-tag {
+            font-size: 11px;
+            color: #475569;
+            background: #f1f5f9;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-weight: 500;
+
+            &.highlight {
+              color: #dc2626;
+              background: #fee2e2;
+              font-weight: 600;
+            }
+          }
+        }
+
+        .big-stats-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 8px 6px;
+          margin-bottom: 10px;
+
+          .stat-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+
+            .stat-val {
+              font-size: 13px;
+              font-weight: 700;
+              color: #0f172a;
+            }
+
+            .stat-lbl {
+              font-size: 10px;
+              color: #64748b;
+            }
+          }
+
+          .stat-line {
+            width: 1px;
+            height: 20px;
+            background: #cbd5e1;
+          }
+        }
+
+        .big-guarantees {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding: 6px 10px;
+          background: #fbfbfb;
+          border-left: 3px solid #ef4444;
+          border-radius: 0 4px 4px 0;
+          margin-bottom: 12px;
+
+          .guar-item {
+            font-size: 11px;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            .guar-icon {
+              color: #16a34a;
+              font-weight: 700;
+              font-size: 11px;
+            }
+          }
         }
 
         .big-price-row {
@@ -438,10 +552,10 @@ const customStyle = computed(() => {
       flex: 1;
 
       .goods-title {
-        font-size: 12px;
+        font-size: 14px;
         color: #1e293b;
         line-height: 1.4;
-        height: 34px;
+        height: 40px;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;

@@ -27,6 +27,8 @@
 
           :component-style="comp.componentStyle || {}"
 
+          :row-style="row.rowStyle || {}"
+
         />
 
         <div v-else class="unknown-component-placeholder">
@@ -93,7 +95,9 @@ const rowWrapperStyle = computed(() => {
   if (s.height !== undefined && s.height !== '') {
     const h = String(s.height).trim();
     if (h && Number(h) > 0) {
-      style.minHeight = /^\d+$/.test(h) ? `${h}px` : h;
+      const hVal = /^\d+$/.test(h) ? `${h}px` : h;
+      style.height = hVal;
+      style.minHeight = hVal;
     }
   }
 
@@ -136,7 +140,7 @@ const rowInnerFlexStyle = computed(() => {
 
   const s = props.row.rowStyle || {};
 
-  return {
+  const styleObj = {
 
     display: 'flex',
 
@@ -150,9 +154,22 @@ const rowInnerFlexStyle = computed(() => {
 
     width: '100%',
 
+    height: '100%',
+
     gap: `${s.gap || 0}px`
 
   };
+
+  if (s.height !== undefined && s.height !== '') {
+    const h = String(s.height).trim();
+    if (h && Number(h) > 0) {
+      const hVal = /^\d+$/.test(h) ? `${h}px` : h;
+      styleObj.height = hVal;
+      styleObj.minHeight = hVal;
+    }
+  }
+
+  return styleObj;
 
 });
 
@@ -163,6 +180,15 @@ function getComponentCellStyle(style, rowStyle = {}, totalComps = 1) {
   if (!style) return { flex: '1 1 0%' };
 
   const s = {};
+
+  if (rowStyle?.height !== undefined && rowStyle?.height !== '') {
+    const rh = String(rowStyle.height).trim();
+    if (rh && Number(rh) > 0) {
+      const rhVal = /^\d+$/.test(rh) ? `${rh}px` : rh;
+      s.height = rhVal;
+      s.minHeight = rhVal;
+    }
+  }
   const gap = Number(rowStyle?.gap) || 0;
   const totalGap = (totalComps > 1 && gap > 0) ? gap * (totalComps - 1) : 0;
 
@@ -275,11 +301,21 @@ function getComponentCellStyle(style, rowStyle = {}, totalComps = 1) {
 
   box-sizing: border-box;
 
+  display: flex;
+
+  flex-direction: column;
+
 
 
   .row-inner-flex {
 
     box-sizing: border-box;
+
+    flex: 1;
+
+    height: 100%;
+
+    min-height: 0;
 
 
 
@@ -294,6 +330,13 @@ function getComponentCellStyle(style, rowStyle = {}, totalComps = 1) {
       flex-direction: column;
 
       height: 100%;
+
+      > * {
+        flex: 1;
+        height: 100%;
+        width: 100%;
+        box-sizing: border-box;
+      }
 
     }
 

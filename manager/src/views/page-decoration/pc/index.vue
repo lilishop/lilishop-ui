@@ -143,7 +143,7 @@
 
                     <el-icon :size="20" class="comp-icon">
 
-                      <component :is="iconMap[element.icon] || 'Grid'" />
+                      <component :is="iconMap[element.icon] || Grid" />
 
                     </el-icon>
 
@@ -329,9 +329,13 @@
 
                         v-if="resolveCanvasTemplate(comp.type)"
 
+                        :component="comp"
+
                         :options="comp.options || {}"
 
                         :component-style="comp.componentStyle || {}"
+
+                        :row-style="row.rowStyle || {}"
 
                       />
 
@@ -339,7 +343,7 @@
 
                         <el-icon :size="24" class="mock-icon">
 
-                          <component :is="iconMap[getCompIcon(comp.type)] || 'Grid'" />
+                          <component :is="iconMap[getCompIcon(comp.type)] || Grid" />
 
                         </el-icon>
 
@@ -435,7 +439,7 @@
       @selectedGoodsData="handleGlobalGoodsSelected"
     />
 
-    <!-- 全局图片选择器弹窗 -->
+    <!-- 全局媒体选择器弹窗（图片/视频） -->
     <el-dialog
       v-model="picModelFlag"
       width="1160px"
@@ -443,7 +447,7 @@
       class="pc-image-picker-dialog"
       append-to-body
       destroy-on-close
-      title="选择图片"
+      :title="currentPickerType === 'video' ? '选择视频' : '选择图片'"
       @close="handleImageDialogClose"
     >
       <ossManage
@@ -451,8 +455,8 @@
         :is-component="true"
         :initialize="picModelFlag"
         :max-select="1"
-        :only-image="true"
-        media-type="IMAGE"
+        :only-image="currentPickerType !== 'video'"
+        :media-type="currentPickerType === 'video' ? 'VIDEO' : 'IMAGE'"
         ref="ossManageRef"
       />
     </el-dialog>
@@ -478,7 +482,7 @@ import {
 
   List, Grid, Fold, PictureRounded, Medal, Aim, FullScreen, VideoCamera,
 
-  Goods, Postcard, Reading, DArrowRight, CollectionTag, Star, Edit, Bell
+  Goods, Postcard, Reading, DArrowRight, CollectionTag, Star, Edit, Bell, User
 
 } from '@element-plus/icons-vue';
 
@@ -516,7 +520,7 @@ const iconMap = {
 
   List, Grid, Fold, PictureRounded, Medal, Aim, FullScreen, Files, VideoCamera,
 
-  Goods, Postcard, Reading, DArrowRight, CollectionTag, Star, Edit, Bell
+  Goods, Postcard, Reading, DArrowRight, CollectionTag, Star, Edit, Bell, User, Search
 
 };
 
@@ -795,55 +799,26 @@ function clearSelection() {
 // 规范化：确保每个组件都是独立的一行（一个组件是一行）
 
 function normalizeRows(list) {
-
   if (!Array.isArray(list)) return [];
-
   const normalized = [];
-
   list.forEach(r => {
-
-    if (r.components && r.components.length > 1) {
-
-      r.components.forEach((c, idx) => {
-
-        const singleRow = createRow();
-
-        singleRow.id = idx === 0 ? r.id : `row_${Date.now()}_${Math.random().toString(36).substring(2, 6)}_${idx}`;
-
-        singleRow.rowStyle = JSON.parse(JSON.stringify(r.rowStyle || DEFAULT_ROW_STYLE));
-
-        singleRow.components = [c];
-
-        normalized.push(singleRow);
-
-      });
-
-    } else {
-
-      normalized.push(r);
-
+    if (!r) return;
+    if (r.rowStyle && (r.rowStyle.height === 40 || r.rowStyle.height === "40")) {
+      r.rowStyle.height = "";
     }
-
+    normalized.push(r);
   });
-
   return normalized;
-
 }
 
 // 拖拽克隆生成行（一个组件是一行）
 
 function handleCloneAsRow(def) {
-
   markDirty();
-
   const newComp = createComponent(def);
-
-  const newRow = createRow();
-
+  const newRow = createRow(def);
   newRow.components = [newComp];
-
   return newRow;
-
 }
 
 // 点击左侧「+」或组件卡片：追加新组件（支持同排自动合并）
@@ -857,15 +832,13 @@ function handleAppendComponent(def) {
   // 1. 若当前选中的是无组件的空白行，放入该行
 
   if (selectedRow.value && (!selectedRow.value.components || selectedRow.value.components.length === 0)) {
-
     selectedRow.value.components = [newComp];
-
+    if (def.defaultRowHeight !== undefined && def.defaultRowHeight !== null && def.defaultRowHeight !== '' && (!selectedRow.value.rowStyle.height || selectedRow.value.rowStyle.height === '')) {
+      selectedRow.value.rowStyle.height = def.defaultRowHeight;
+    }
     selectedCompId.value = newComp.id;
-
     configPanelRef.value?.selectComponentTab();
-
     return;
-
   }
 
   // 2. 若当前选中的行已有组件且宽度未满 100%（例如已有 50% 频道宫格，再点击则同行放置）
@@ -894,9 +867,7 @@ function handleAppendComponent(def) {
   }
 
   // 3. 否则新建独立行
-
-  const newRow = createRow();
-
+  const newRow = createRow(def);
   newRow.components = [newComp];
 
   if (selectedRowId.value) {
@@ -943,10 +914,14 @@ function openLinkPicker(callback) {
   }
 }
 
-function openGoodsPicker(callback) {
+function openGoodsPicker(callback, initialSelected = []) {
   pendingGoodsCallback.value = callback;
   if (liliDialogRef.value) {
-    liliDialogRef.value.clearGoodsSelected();
+    if (initialSelected && Array.isArray(initialSelected) && initialSelected.length) {
+      liliDialogRef.value.goodsData = initialSelected.map(item => ({ ...item }));
+    } else {
+      liliDialogRef.value.clearGoodsSelected();
+    }
     liliDialogRef.value.goodsFlag = true;
     liliDialogRef.value.flag = true;
   }
@@ -1021,14 +996,31 @@ provide('openGoodsPicker', openGoodsPicker);
 const picModelFlag = ref(false);
 const ossManageRef = ref(null);
 const pendingImageCallback = ref(null);
+const currentPickerType = ref('pic');
 
 function openImagePicker(callback) {
+  currentPickerType.value = 'pic';
   pendingImageCallback.value = callback;
   picModelFlag.value = true;
   nextTick(() => {
     if (ossManageRef.value) {
       ossManageRef.value.selectImage = true;
       ossManageRef.value.fileType = 'pic';
+      if (typeof ossManageRef.value.changeFileType === 'function') {
+        ossManageRef.value.changeFileType();
+      }
+    }
+  });
+}
+
+function openVideoPicker(callback) {
+  currentPickerType.value = 'video';
+  pendingImageCallback.value = callback;
+  picModelFlag.value = true;
+  nextTick(() => {
+    if (ossManageRef.value) {
+      ossManageRef.value.selectImage = true;
+      ossManageRef.value.fileType = 'video';
       if (typeof ossManageRef.value.changeFileType === 'function') {
         ossManageRef.value.changeFileType();
       }
@@ -1056,6 +1048,7 @@ function handleImageDialogClose() {
 }
 
 provide('openImagePicker', openImagePicker);
+provide('openVideoPicker', openVideoPicker);
 function handleAddNewRow() {
 
   markDirty();
@@ -1088,6 +1081,19 @@ function moveRow(index, offset) {
 
   list[target] = temp;
 
+}
+
+function moveRowTo(fromIndex, toIndex) {
+  if (fromIndex === undefined || fromIndex === null || fromIndex < 0) return;
+  if (toIndex === undefined || toIndex === null || toIndex < 0) return;
+  const list = pageDocument.value.list;
+  if (!Array.isArray(list) || fromIndex >= list.length || toIndex >= list.length) return;
+  if (fromIndex === toIndex) return;
+
+  markDirty();
+  const [removed] = list.splice(fromIndex, 1);
+  list.splice(toIndex, 0, removed);
+  selectedRowId.value = removed.id;
 }
 
 function moveRowToExtreme(index, direction) {
@@ -1211,7 +1217,7 @@ function handleDuplicateComp(row, cIndex, comp) {
     selectedCompId.value = clone.id;
     Message.success('已复制到当前行（同行展示）');
   } else {
-    const newRow = createRow();
+    const newRow = createRow(clone);
     newRow.components = [clone];
     const rIdx = pageDocument.value.list.findIndex(r => r.id === row.id);
     if (rIdx !== -1) {
@@ -1273,7 +1279,9 @@ function getRowWrapperStyle(style) {
   if (style.height !== undefined && style.height !== '') {
     const h = String(style.height).trim();
     if (h && Number(h) > 0) {
-      s.minHeight = /^\d+$/.test(h) ? `${h}px` : h;
+      const hVal = /^\d+$/.test(h) ? `${h}px` : h;
+      s.height = hVal;
+      s.minHeight = hVal;
     }
   }
 
@@ -1311,15 +1319,24 @@ function getRowWrapperStyle(style) {
 }
 
 function getRowFlexStyle(style) {
-  if (!style) return { display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', width: '100%' };
+  if (!style) return { display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', width: '100%', height: '100%' };
   const s = {
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'nowrap',
     alignItems: style.alignItems || 'stretch',
     justifyContent: style.justifyContent || 'flex-start',
-    width: '100%'
+    width: '100%',
+    height: '100%'
   };
+  if (style.height !== undefined && style.height !== '') {
+    const h = String(style.height).trim();
+    if (h && Number(h) > 0) {
+      const hVal = /^\d+$/.test(h) ? `${h}px` : h;
+      s.height = hVal;
+      s.minHeight = hVal;
+    }
+  }
   if (style.gap !== undefined && style.gap !== '') {
     const g = String(style.gap).trim();
     if (g && Number(g) > 0) {
@@ -1336,6 +1353,15 @@ function getCompWrapperStyle(style, rowStyle = {}, totalComps = 1) {
   if (!style) return {};
 
   const s = {};
+
+  if (rowStyle?.height !== undefined && rowStyle?.height !== '') {
+    const rh = String(rowStyle.height).trim();
+    if (rh && Number(rh) > 0) {
+      const rhVal = /^\d+$/.test(rh) ? `${rh}px` : rh;
+      s.height = rhVal;
+      s.minHeight = rhVal;
+    }
+  }
   const gap = Number(rowStyle?.gap) || 0;
   const totalGap = (totalComps > 1 && gap > 0) ? gap * (totalComps - 1) : 0;
 
@@ -2035,6 +2061,10 @@ onUnmounted(() => {
 
             box-sizing: border-box;
 
+            display: flex;
+
+            flex-direction: column;
+
             border: 2px solid transparent;
 
             transition: border-color 0.2s;
@@ -2241,7 +2271,7 @@ onUnmounted(() => {
 
                   box-sizing: border-box;
 
-                  overflow: hidden;
+                  overflow: visible;
 
                   flex: 1;
 
@@ -2250,6 +2280,13 @@ onUnmounted(() => {
                   flex-direction: column;
 
                   height: 100%;
+
+                  > * {
+                    flex: 1;
+                    height: 100%;
+                    width: 100%;
+                    box-sizing: border-box;
+                  }
 
                   .comp-mock-placeholder {
 

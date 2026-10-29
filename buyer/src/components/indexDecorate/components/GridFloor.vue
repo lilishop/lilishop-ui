@@ -22,9 +22,9 @@
             {{ tag }}
           </router-link>
         </div>
-        <router-link :to="options.moreUrl || '/goods'" class="more-link">
+        <a href="javascript:;" class="more-link" @click="handleNavigate(options.moreUrl || '/goods')">
           查看更多 &gt;
-        </router-link>
+        </a>
       </div>
     </div>
 
@@ -32,7 +32,7 @@
     <div class="floor-main-body" :class="{ 'no-poster': !showPoster }">
       <!-- 左侧营销大促海报 -->
       <div class="floor-left-poster" v-if="showPoster">
-        <router-link :to="options.posterUrl || '/goods'" class="poster-link">
+        <div class="poster-link" @click="handleNavigate(options.bannerUrl || options.posterUrl || '/goods')">
           <img :src="posterImg" alt="floor poster" class="poster-img" />
           <div class="poster-overlay">
             <div class="poster-top-badge">{{ options.floorNum || '1F' }} 甄选</div>
@@ -45,7 +45,7 @@
               <span>立即抢购 &gt;</span>
             </div>
           </div>
-        </router-link>
+        </div>
       </div>
 
       <!-- 右侧商品网格 (2行 x N列) -->
@@ -59,14 +59,14 @@
           :key="g.id || idx"
           class="floor-goods-card"
         >
-          <router-link :to="`/goods/${g.id || 1}`" class="card-thumb-wrap">
+          <a href="javascript:;" class="card-thumb-wrap" @click="handleNavigate(g.url || `/goods/${g.id || 1}`)">
             <img :src="g.thumbnail || defaultThumb" :alt="g.goodsName" class="goods-img" />
             <span class="corner-badge" v-if="idx < 3">HOT</span>
-          </router-link>
+          </a>
 
           <div class="card-detail">
             <h4 class="goods-name-line">
-              <router-link :to="`/goods/${g.id || 1}`">{{ g.goodsName }}</router-link>
+              <a href="javascript:;" @click="handleNavigate(g.url || `/goods/${g.id || 1}`)">{{ g.goodsName }}</a>
             </h4>
             <div class="goods-tag-row">
               <span class="mini-tag">官方直营</span>
@@ -98,7 +98,28 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+
+const router = useRouter();
+
+function handleNavigate(url) {
+  const target = url ? String(url).trim() : '/goods';
+  if (!target) return;
+  if (/^https?:\/\//i.test(target)) {
+    window.open(target, '_blank');
+  } else {
+    router.push(target);
+  }
+}
+
+function handleNavigateGoods(g) {
+  if (g.url) {
+    handleNavigate(g.url);
+    return;
+  }
+  router.push(`/goods/${g.id || 1}`);
+}
 
 const props = defineProps({
   component: {
@@ -268,6 +289,7 @@ function addToCart(item) {
       }
 
       .more-link {
+        cursor: pointer;
         font-size: 13px;
         color: #64748b;
         text-decoration: none;
@@ -303,6 +325,7 @@ function addToCart(item) {
       background: #1e293b;
 
       .poster-link {
+        cursor: pointer;
         display: block;
         position: relative;
         width: 100%;
@@ -456,10 +479,10 @@ function addToCart(item) {
           flex: 1;
 
           .goods-name-line {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             line-height: 1.4;
-            height: 36px;
+            height: 40px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;

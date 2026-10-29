@@ -7,9 +7,10 @@
     :style="customStyle"
   >
     <el-carousel
+      height="100%"
       :autoplay="options.autoPlay !== false"
       :interval="Number(options.interval) || 4000"
-      :arrow="options.showArrow ? 'hover' : 'never'"
+      :arrow="options.showArrow !== false ? 'hover' : 'never'"
       :indicator-position="options.showIndicator !== false ? '' : 'none'"
       class="custom-carousel"
     >
@@ -37,6 +38,10 @@ const props = defineProps({
   componentStyle: {
     type: Object,
     default: () => ({})
+  },
+  rowStyle: {
+    type: Object,
+    default: () => ({})
   }
 });
 
@@ -55,48 +60,32 @@ const slidesList = computed(() => {
     }));
   }
   return [
-    { title: '出游囤好货', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png', url: '/goodsList?seckill=1' },
-    { title: '科技新品', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png', url: '/goodsList?category=1' },
-    { title: '原产地直采', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png', url: '/goodsList?category=2' },
-    { title: '大牌美妆', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png', url: '/goodsList?category=3' }
+    { title: '潮流数码', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_1.png', url: '/goodsList?category=1' },
+    { title: '奢宠美妆', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_2.png', url: '/goodsList?category=2' },
+    { title: '运动潮流', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_3.png', url: '/goodsList?category=3' },
+    { title: '居家生活', img: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/carousel/banner_4.png', url: '/goodsList?category=4' }
   ];
 });
 
-function getAspectRatioCss(ratio) {
-  if (ratio === '16:9') return '16 / 9';
-  if (ratio === '2:1') return '2 / 1';
-  if (ratio === '3:1') return '3 / 1';
-  if (ratio === 'custom') return null;
-  return '2.5 / 1';
-}
-
 const customStyle = computed(() => {
   const s = props.componentStyle || {};
-  const fit = props.options.fitMode || 'contain';
+  const fit = props.options.fitMode || 'cover';
+  const hasRowHeight = Boolean(props.rowStyle?.height && Number(props.rowStyle.height) > 0);
 
   const styleObj = {
-    borderRadius: Array.isArray(s.radius)
+    borderRadius: Array.isArray(s.radius) && s.radius.some(r => r > 0)
       ? `${s.radius[0]}px ${s.radius[1]}px ${s.radius[2]}px ${s.radius[3]}px`
       : '8px',
-    backgroundColor: s.backgroundColor || '#ffffff',
-    '--carousel-fit': fit
+    backgroundColor: (s.backgroundColor && s.backgroundColor !== 'transparent') ? s.backgroundColor : '#ffffff',
+    '--carousel-fit': fit,
+    height: '100%',
+    minHeight: hasRowHeight ? '0' : '420px'
   };
 
-  if (props.options.height) {
+  if (props.options.aspectRatio === 'custom' && props.options.height) {
     styleObj.height = `${props.options.height}px`;
-    styleObj.aspectRatio = 'auto';
-  } else {
-    const ratio = props.options.aspectRatio || '2.5:1';
-    const ratioCss = getAspectRatioCss(ratio);
-    if (ratioCss) {
-      styleObj.aspectRatio = ratioCss;
-      styleObj['--carousel-ratio'] = ratioCss;
-    } else {
-      styleObj.height = `${s.height || 420}px`;
-      styleObj.aspectRatio = 'auto';
-    }
+    styleObj.minHeight = `${props.options.height}px`;
   }
-
   return styleObj;
 });
 </script>
@@ -104,6 +93,7 @@ const customStyle = computed(() => {
 <style lang="scss" scoped>
 .decor-carousel {
   width: 100%;
+  height: 100%;
   position: relative;
   overflow: hidden;
   background: #ffffff;
@@ -111,10 +101,13 @@ const customStyle = computed(() => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 
   .custom-carousel {
     width: 100%;
     height: 100%;
+    flex: 1;
 
     :deep(.el-carousel__container) {
       height: 100% !important;
@@ -122,25 +115,29 @@ const customStyle = computed(() => {
     }
 
     :deep(.el-carousel__indicators--horizontal) {
-      bottom: 14px;
+      bottom: 12px;
       z-index: 10;
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 10px;
+      padding: 3px 8px;
+      backdrop-filter: blur(2px);
 
       .el-carousel__indicator {
-        padding: 4px;
+        padding: 3px;
 
         .el-carousel__button {
-          width: 8px;
-          height: 8px;
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
-          background-color: rgba(0, 0, 0, 0.35);
+          background-color: rgba(255, 255, 255, 0.6);
           opacity: 1;
           transition: all 0.25s;
         }
 
         &.is-active .el-carousel__button {
-          width: 22px;
-          border-radius: 5px;
-          background-color: #ea580c;
+          width: 16px;
+          border-radius: 3px;
+          background-color: #409EFF;
         }
       }
     }
@@ -158,52 +155,15 @@ const customStyle = computed(() => {
         height: 100%;
         max-width: 100%;
         max-height: 100%;
-        object-fit: var(--carousel-fit, contain) !important;
-        object-position: center;
+        object-fit: var(--carousel-fit, cover);
         display: block;
       }
     }
   }
 
-  &.is-compact {
-    :deep(.el-carousel__arrow) {
-      width: 26px;
-      height: 26px;
-      font-size: 12px;
-    }
+  &.is-mini {
     :deep(.el-carousel__indicators--horizontal) {
       bottom: 8px;
-      .el-carousel__indicator {
-        padding: 2px;
-        .el-carousel__button {
-          width: 6px;
-          height: 6px;
-        }
-        &.is-active .el-carousel__button {
-          width: 14px;
-        }
-      }
-    }
-  }
-
-  &.is-mini {
-    :deep(.el-carousel__arrow) {
-      width: 20px;
-      height: 20px;
-      font-size: 10px;
-    }
-    :deep(.el-carousel__indicators--horizontal) {
-      bottom: 4px;
-      .el-carousel__indicator {
-        padding: 1px;
-        .el-carousel__button {
-          width: 4px;
-          height: 4px;
-        }
-        &.is-active .el-carousel__button {
-          width: 10px;
-        }
-      }
     }
   }
 }

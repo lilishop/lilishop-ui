@@ -6,7 +6,7 @@
         <div class="title-with-tip">
           <span>内容设置</span>
           <el-tooltip
-            content="设置类目弹层的文字颜色及显示字号"
+            content="设置商品分类的文字颜色及显示字号"
             placement="top"
           >
             <el-icon class="help-icon"><QuestionFilled /></el-icon>
@@ -69,14 +69,26 @@
           <el-input
             v-model="options.activeColor"
             size="small"
-            placeholder="#ea580c"
+            placeholder="#409EFF"
             class="color-input"
           />
         </div>
       </div>
 
-      <!-- 分类项列表 -->
-      <div class="categories-sub-section mt-20">
+      <!-- 数据来源 -->
+      <div class="form-row flex-col mt-16">
+        <span class="row-label">数据来源</span>
+        <el-radio-group v-model="options.source" size="small">
+          <el-radio-button label="system">系统分类 (自动)</el-radio-button>
+          <el-radio-button label="custom">手动自定义</el-radio-button>
+        </el-radio-group>
+        <span class="form-tip mt-6" v-if="options.source !== 'custom'">
+          已启用系统商品分类，前后台自动拉取商城最新分类及二级、三级悬浮大菜单。
+        </span>
+      </div>
+
+      <!-- 分类项列表 (仅自定义模式可见) -->
+      <div class="categories-sub-section mt-20" v-if="options.source === 'custom'">
         <div class="sub-header flex-between">
           <span class="sub-title">分类条目</span>
           <span class="sub-count">共 {{ (options.categories || []).length }} 项</span>
@@ -153,6 +165,7 @@ const props = defineProps({
 });
 
 // 初始化默认字段
+if (!props.options.source) props.options.source = 'system';
 if (!props.options.title) props.options.title = '分类';
 if (!props.options.textColor) props.options.textColor = '#111927';
 if (!props.options.fontSize) props.options.fontSize = 14;

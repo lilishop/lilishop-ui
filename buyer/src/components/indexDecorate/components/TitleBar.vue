@@ -6,18 +6,40 @@
       isMini ? 'is-mini' : (isCompact ? 'is-compact' : '')
     ]"
   >
-    <div class="title-wrap">
-      <h2 class="main-title">{{ options.mainTitle || '楼层标题' }}</h2>
-      <p class="subtitle" v-if="options.subtitle">{{ options.subtitle }}</p>
+    <div class="title-wrap" :class="{ 'with-icon': options.titleImg || options.icon }">
+      <img
+        v-if="options.titleImg || options.icon"
+        :src="options.titleImg || options.icon"
+        class="title-custom-icon"
+        alt="icon"
+      />
+      <div class="title-text-group">
+        <h2
+          class="main-title"
+          :class="{ 'clickable': Boolean(options.titleUrl) }"
+          @click="options.titleUrl && handleNavigate(options.titleUrl)"
+        >
+          {{ options.mainTitle || '楼层标题' }}
+        </h2>
+        <p class="subtitle" v-if="options.subtitle">{{ options.subtitle }}</p>
+      </div>
     </div>
-    <router-link :to="options.moreUrl || '/goods'" class="more-link" v-if="options.showMore">
+    <a
+      href="javascript:;"
+      class="more-link"
+      v-if="options.showMore"
+      @click="handleNavigate(options.moreUrl || '/goods')"
+    >
       {{ options.moreText || '查看更多 >' }}
-    </router-link>
+    </a>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
   options: {
@@ -29,6 +51,15 @@ const props = defineProps({
     default: () => ({})
   }
 });
+
+function handleNavigate(url) {
+  if (!url) return;
+  if (/^https?:\/\//i.test(url)) {
+    window.open(url, '_blank');
+  } else {
+    router.push(url);
+  }
+}
 
 const isMini = computed(() => props.componentStyle?.widthRatio === '16.67%');
 const isCompact = computed(() => props.componentStyle?.widthRatio === '33.33%');
@@ -57,21 +88,43 @@ const isCompact = computed(() => props.componentStyle?.widthRatio === '33.33%');
 
   .title-wrap {
     min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 
-    .main-title {
-      font-size: 26px;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0;
-      line-height: 1.2;
-      word-break: break-word;
+    .title-custom-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
+      flex-shrink: 0;
     }
 
-    .subtitle {
-      font-size: 14px;
-      color: #94a3b8;
-      margin: 6px 0 0 0;
-      word-break: break-word;
+    .title-text-group {
+      min-width: 0;
+
+      .main-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1.2;
+        word-break: break-word;
+
+        &.clickable {
+          cursor: pointer;
+          transition: color 0.15s ease;
+          &:hover {
+            color: #f97316;
+          }
+        }
+      }
+
+      .subtitle {
+        font-size: 14px;
+        color: #94a3b8;
+        margin: 6px 0 0 0;
+        word-break: break-word;
+      }
     }
   }
 
@@ -82,6 +135,7 @@ const isCompact = computed(() => props.componentStyle?.widthRatio === '33.33%');
     transition: color 0.2s;
     white-space: nowrap;
     flex-shrink: 0;
+    cursor: pointer;
 
     &:hover {
       color: #e11d48;
@@ -90,12 +144,19 @@ const isCompact = computed(() => props.componentStyle?.widthRatio === '33.33%');
 
   &.is-compact {
     .title-wrap {
-      .main-title {
-        font-size: 20px;
+      .title-custom-icon {
+        width: 22px;
+        height: 22px;
       }
-      .subtitle {
-        font-size: 13px;
-        margin-top: 4px;
+
+      .title-text-group {
+        .main-title {
+          font-size: 20px;
+        }
+        .subtitle {
+          font-size: 13px;
+          margin-top: 4px;
+        }
       }
     }
     .more-link {
@@ -119,12 +180,19 @@ const isCompact = computed(() => props.componentStyle?.widthRatio === '33.33%');
     }
 
     .title-wrap {
-      .main-title {
-        font-size: 16px;
+      .title-custom-icon {
+        width: 18px;
+        height: 18px;
       }
-      .subtitle {
-        font-size: 12px;
-        margin-top: 2px;
+
+      .title-text-group {
+        .main-title {
+          font-size: 16px;
+        }
+        .subtitle {
+          font-size: 12px;
+          margin-top: 2px;
+        }
       }
     }
 
