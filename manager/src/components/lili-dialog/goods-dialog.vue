@@ -189,7 +189,7 @@ function syncTableSelection() {
     return;
   }
   goodsData.value.forEach((item) => {
-    const selected = selectedList.value.some((e) => e.id && e.id === item.id);
+    const selected = selectedList.value.some((e) => (e.id || e.skuId) && String(e.id || e.skuId) === String(item.id || item.skuId));
     table.toggleRowSelection(item, selected);
   });
 }
