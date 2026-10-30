@@ -225,7 +225,7 @@
 
                 :class="{ 'is-row-selected': isCurrentRowSelected(row.id) }"
 
-                :style="getRowWrapperStyle(row.rowStyle)"
+                :style="getRowWrapperStyle(row.rowStyle, row.components)"
 
                 @click.stop="handleSelectRow(row, rIndex)"
 
@@ -289,14 +289,14 @@
                   group="pc-row-components"
                   item-key="id"
                   class="row-components-flex"
-                  :style="getRowFlexStyle(row.rowStyle)"
+                  :style="getRowFlexStyle(row.rowStyle, row.components)"
                   @change="markDirty"
                 >
                   <template #item="{ element: comp, index: cIndex }">
                     <div
                       class="canvas-comp-wrap"
                       :class="{ 'is-selected': selectedCompId === comp.id }"
-                      :style="getCompWrapperStyle(comp.componentStyle, row.rowStyle, row.components ? row.components.length : 1)"
+                      :style="getCompWrapperStyle(comp.componentStyle, row.rowStyle, row.components ? row.components.length : 1, comp.type)"
                       @click.stop="handleSelectComp(row, rIndex, comp)"
                     >
                       <!-- 选中的组件左上角名称标识徽标（万米魔方设计） -->
@@ -800,11 +800,19 @@ function clearSelection() {
 
 function normalizeRows(list) {
   if (!Array.isArray(list)) return [];
+  const autoCompTypes = ['goodsGrid', 'gridFloor', 'bannerFloor', 'goodsBar', 'channelFloor', 'goodsList', 'recommendFeed', 'articleContent', 'brandWall', 'channelGrid', 'couponList'];
+  const legacyHeights = [40, '40', 280, '280', 420, '420', 560, '560', 620, '620', 980, '980', 1270, '1270'];
   const normalized = [];
   list.forEach(r => {
     if (!r) return;
-    if (r.rowStyle && (r.rowStyle.height === 40 || r.rowStyle.height === "40")) {
-      r.rowStyle.height = "";
+    if (r.rowStyle) {
+      if (r.rowStyle.height === 40 || r.rowStyle.height === "40") {
+        r.rowStyle.height = "";
+      }
+      const hasAutoComp = Array.isArray(r.components) && r.components.some(c => autoCompTypes.includes(c?.type));
+      if (hasAutoComp && legacyHeights.includes(r.rowStyle.height)) {
+        r.rowStyle.height = "";
+      }
     }
     normalized.push(r);
   });
@@ -1252,7 +1260,8 @@ function getCompIcon(type) {
 
 // 计算行样式
 
-function getRowWrapperStyle(style) {
+function getRowWrapperStyle(style, components = []) {
+  const hasAutoComp = Array.isArray(components) && components.some(c => ['goodsGrid', 'gridFloor', 'bannerFloor', 'goodsBar', 'channelFloor', 'goodsList', 'recommendFeed', 'articleContent', 'brandWall', 'channelGrid', 'couponList'].includes(c?.type));
   if (!style) return { width: '100%' };
 
   const s = {};
@@ -1280,8 +1289,12 @@ function getRowWrapperStyle(style) {
     const h = String(style.height).trim();
     if (h && Number(h) > 0) {
       const hVal = /^\d+$/.test(h) ? `${h}px` : h;
-      s.height = hVal;
-      s.minHeight = hVal;
+      if (hasAutoComp) {
+        s.minHeight = hVal;
+      } else {
+        s.height = hVal;
+        s.minHeight = hVal;
+      }
     }
   }
 
@@ -1318,7 +1331,8 @@ function getRowWrapperStyle(style) {
   return s;
 }
 
-function getRowFlexStyle(style) {
+function getRowFlexStyle(style, components = []) {
+  const hasAutoComp = Array.isArray(components) && components.some(c => ['goodsGrid', 'gridFloor', 'bannerFloor', 'goodsBar', 'channelFloor', 'goodsList', 'recommendFeed', 'articleContent', 'brandWall', 'channelGrid', 'couponList'].includes(c?.type));
   if (!style) return { display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', width: '100%', height: '100%' };
   const s = {
     display: 'flex',
@@ -1333,8 +1347,12 @@ function getRowFlexStyle(style) {
     const h = String(style.height).trim();
     if (h && Number(h) > 0) {
       const hVal = /^\d+$/.test(h) ? `${h}px` : h;
-      s.height = hVal;
-      s.minHeight = hVal;
+      if (hasAutoComp) {
+        s.minHeight = hVal;
+      } else {
+        s.height = hVal;
+        s.minHeight = hVal;
+      }
     }
   }
   if (style.gap !== undefined && style.gap !== '') {
@@ -1348,7 +1366,8 @@ function getRowFlexStyle(style) {
 
 // 计算组件外层样式
 
-function getCompWrapperStyle(style, rowStyle = {}, totalComps = 1) {
+function getCompWrapperStyle(style, rowStyle = {}, totalComps = 1, compType = '') {
+  const isAutoHeightComp = compType && ['goodsGrid', 'gridFloor', 'bannerFloor', 'goodsBar', 'channelFloor', 'goodsList', 'recommendFeed', 'articleContent', 'brandWall', 'channelGrid', 'couponList'].includes(compType);
 
   if (!style) return {};
 
@@ -1358,8 +1377,12 @@ function getCompWrapperStyle(style, rowStyle = {}, totalComps = 1) {
     const rh = String(rowStyle.height).trim();
     if (rh && Number(rh) > 0) {
       const rhVal = /^\d+$/.test(rh) ? `${rh}px` : rh;
-      s.height = rhVal;
-      s.minHeight = rhVal;
+      if (isAutoHeightComp) {
+        s.minHeight = rhVal;
+      } else {
+        s.height = rhVal;
+        s.minHeight = rhVal;
+      }
     }
   }
   const gap = Number(rowStyle?.gap) || 0;
@@ -1612,7 +1635,11 @@ function goBack() {
 
     } else {
 
-      router.push('/pcFloor');
+      if (window.history.state?.back) {
+        router.go(-1);
+      } else {
+        window.close();
+      }
 
     }
 
@@ -1643,6 +1670,8 @@ function goBack() {
 }
 
 
+let autoSaveTimer = null;
+
 onMounted(() => {
 
   const id = route.query.id;
@@ -1671,7 +1700,10 @@ onMounted(() => {
 
 onUnmounted(() => {
 
-  if (autoSaveTimer) clearInterval(autoSaveTimer);
+  if (autoSaveTimer) {
+    clearInterval(autoSaveTimer);
+    autoSaveTimer = null;
+  }
 
 });
 

@@ -724,7 +724,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           0,
           0
         ],
-        "height": 180
+        "height": 220
       },
       "components": [
         {
@@ -901,6 +901,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
             "backgroundColor": "transparent"
           },
           "options": {
+            "height": 450,
             "elements": [
               {
                 "type": "badge",
@@ -979,7 +980,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16
         ],
         "borderRadius": "8px",
-        "height": 560
+        "height": ""
       },
       "components": [
         {
@@ -1061,7 +1062,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16
         ],
         "borderRadius": "8px",
-        "height": 560
+        "height": ""
       },
       "components": [
         {
@@ -1140,7 +1141,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16
         ],
         "borderRadius": "8px",
-        "height": 620
+        "height": ""
       },
       "components": [
         {
@@ -1249,7 +1250,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16
         ],
         "borderRadius": "8px",
-        "height": 420
+        "height": ""
       },
       "components": [
         {
@@ -1404,7 +1405,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16
         ],
         "borderRadius": "8px",
-        "height": 360
+        "height": 450
       },
       "components": [
         {
@@ -1417,6 +1418,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           },
           "options": {
             "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+            "height": 450,
             "coverUrl": "https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/video/video_cover.png",
             "url": "/goodsList?brand=1",
             "title": "双11全球狂欢发布盛典 · 年度旗舰好物真实开箱测评",
@@ -1481,7 +1483,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16
         ],
         "borderRadius": "8px",
-        "height": 220
+        "height": ""
       },
       "components": [
         {
@@ -1656,7 +1658,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16
         ],
         "borderRadius": "8px",
-        "height": 980
+        "height": ""
       },
       "components": [
         {
@@ -1810,7 +1812,7 @@ export const DOUBLE11_PAGE_DOCUMENT = {
           16
         ],
         "borderRadius": "8px",
-        "height": 1270
+        "height": ""
       },
       "components": [
         {

@@ -12,7 +12,7 @@
 
         class="component-cell"
 
-        :style="getComponentCellStyle(comp.componentStyle, row.rowStyle, row.components ? row.components.length : 1)"
+        :style="getComponentCellStyle(comp.componentStyle, row.rowStyle, row.components ? row.components.length : 1, comp.type)"
 
       >
 
@@ -69,6 +69,10 @@ const props = defineProps({
 
 
 
+const hasAutoComp = computed(() => {
+  return Array.isArray(props.row.components) && props.row.components.some(c => ['goodsGrid', 'gridFloor', 'bannerFloor', 'goodsBar', 'channelFloor', 'goodsList', 'recommendFeed', 'articleContent', 'brandWall', 'channelGrid', 'couponList'].includes(c?.type));
+});
+
 const rowWrapperStyle = computed(() => {
   const s = props.row.rowStyle || {};
   const style = {};
@@ -96,8 +100,12 @@ const rowWrapperStyle = computed(() => {
     const h = String(s.height).trim();
     if (h && Number(h) > 0) {
       const hVal = /^\d+$/.test(h) ? `${h}px` : h;
-      style.height = hVal;
-      style.minHeight = hVal;
+      if (hasAutoComp.value) {
+        style.minHeight = hVal;
+      } else {
+        style.height = hVal;
+        style.minHeight = hVal;
+      }
     }
   }
 
@@ -164,8 +172,12 @@ const rowInnerFlexStyle = computed(() => {
     const h = String(s.height).trim();
     if (h && Number(h) > 0) {
       const hVal = /^\d+$/.test(h) ? `${h}px` : h;
-      styleObj.height = hVal;
-      styleObj.minHeight = hVal;
+      if (hasAutoComp.value) {
+        styleObj.minHeight = hVal;
+      } else {
+        styleObj.height = hVal;
+        styleObj.minHeight = hVal;
+      }
     }
   }
 
@@ -175,7 +187,8 @@ const rowInnerFlexStyle = computed(() => {
 
 
 
-function getComponentCellStyle(style, rowStyle = {}, totalComps = 1) {
+function getComponentCellStyle(style, rowStyle = {}, totalComps = 1, compType = '') {
+  const isAutoHeightComp = compType && ['goodsGrid', 'gridFloor', 'bannerFloor', 'goodsBar', 'channelFloor', 'goodsList', 'recommendFeed', 'articleContent', 'brandWall', 'channelGrid', 'couponList'].includes(compType);
 
   if (!style) return { flex: '1 1 0%' };
 
@@ -185,8 +198,12 @@ function getComponentCellStyle(style, rowStyle = {}, totalComps = 1) {
     const rh = String(rowStyle.height).trim();
     if (rh && Number(rh) > 0) {
       const rhVal = /^\d+$/.test(rh) ? `${rh}px` : rh;
-      s.height = rhVal;
-      s.minHeight = rhVal;
+      if (isAutoHeightComp) {
+        s.minHeight = rhVal;
+      } else {
+        s.height = rhVal;
+        s.minHeight = rhVal;
+      }
     }
   }
   const gap = Number(rowStyle?.gap) || 0;

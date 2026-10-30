@@ -23,7 +23,7 @@ const props = defineProps({
 const customStyle = computed(() => {
   const s = props.componentStyle || {};
   return {
-    height: `${props.options?.height || 260}px`,
+    height: `${props.options?.height || 450}px`,
     backgroundColor: s.backgroundColor || '#f8fafc',
     borderRadius: Array.isArray(s.radius)
       ? `${s.radius[0]}px ${s.radius[1]}px ${s.radius[2]}px ${s.radius[3]}px`

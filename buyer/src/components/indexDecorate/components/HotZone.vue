@@ -7,10 +7,10 @@
         :key="idx"
         class="zone-link"
         :style="{
-          top: `${zone.top || 0}%`,
-          left: `${zone.left || 0}%`,
-          width: `${zone.width || 10}%`,
-          height: `${zone.height || 10}%`
+          top: `${zone.top !== undefined ? zone.top : ((zone.topPer || 0) * 100)}%`,
+          left: `${zone.left !== undefined ? zone.left : ((zone.leftPer || 0) * 100)}%`,
+          width: `${zone.width !== undefined ? zone.width : ((zone.widthPer || 0.1) * 100)}%`,
+          height: `${zone.height !== undefined ? zone.height : ((zone.heightPer || 0.1) * 100)}%`
         }"
         :title="zone.title"
         @click="handleClickZone(zone)"
@@ -68,7 +68,7 @@ const customStyle = computed(() => {
 });
 
 function handleClickZone(zone) {
-  const url = zone?.url ? String(zone.url).trim() : '';
+  const url = (zone?.url || zone?.link) ? String(zone.url || zone.link).trim() : '';
   if (!url) return;
   if (/^https?:\/\//i.test(url)) {
     window.open(url, '_blank');

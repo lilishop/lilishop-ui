@@ -7,10 +7,10 @@
         :key="idx"
         class="zone-mask"
         :style="{
-          top: `${zone.top || 0}%`,
-          left: `${zone.left || 0}%`,
-          width: `${zone.width || 10}%`,
-          height: `${zone.height || 10}%`
+          top: `${zone.top !== undefined ? zone.top : ((zone.topPer || 0) * 100)}%`,
+          left: `${zone.left !== undefined ? zone.left : ((zone.leftPer || 0) * 100)}%`,
+          width: `${zone.width !== undefined ? zone.width : ((zone.widthPer || 0.1) * 100)}%`,
+          height: `${zone.height !== undefined ? zone.height : ((zone.heightPer || 0.1) * 100)}%`
         }"
       >
         <span class="zone-label">{{ zone.title || `热区 ${idx + 1}` }}</span>

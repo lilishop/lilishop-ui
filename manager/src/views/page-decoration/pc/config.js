@@ -299,7 +299,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'channelGrid',
-    defaultRowHeight: 120,
+    defaultRowHeight: '',
     name: '频道宫格',
     group: 'navigation',
     icon: 'Grid',
@@ -431,7 +431,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'brandWall',
-    defaultRowHeight: 220,
+    defaultRowHeight: '',
     name: '品牌图',
     group: 'media',
     icon: 'Medal',
@@ -513,7 +513,7 @@ export const COMPONENT_DEFINITIONS = [
 
     defaultOptions: {
 
-      height: 320,
+      height: 450,
 
       elements: []
 
@@ -532,7 +532,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'promoGroup',
-    defaultRowHeight: 180,
+    defaultRowHeight: 220,
 
     name: '活动卡组',
 
@@ -567,13 +567,14 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'video',
-    defaultRowHeight: 360,
+    defaultRowHeight: 450,
     name: '视频',
     group: 'media',
     icon: 'VideoCamera',
     description: '品牌宣传与商品视频播放',
     defaultOptions: {
       videoUrl: '',
+      height: 450,
       coverUrl: 'https://lilishop-pc.oss-cn-beijing.aliyuncs.com/static/video/video_cover.png',
       url: '',
       autoPlay: false,
@@ -597,7 +598,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'goodsList',
-    defaultRowHeight: 980,
+    defaultRowHeight: '',
 
     name: '商品列表',
 
@@ -727,7 +728,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'gridFloor',
-    defaultRowHeight: 560,
+    defaultRowHeight: '',
 
     name: '宫格楼层',
 
@@ -843,7 +844,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'goodsGrid',
-    defaultRowHeight: 420,
+    defaultRowHeight: '',
     name: '商品宫格',
     group: 'commerce',
     icon: 'Menu',
@@ -922,7 +923,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'bannerFloor',
-    defaultRowHeight: 560,
+    defaultRowHeight: '',
 
     name: '横幅楼层',
 
@@ -964,7 +965,7 @@ export const COMPONENT_DEFINITIONS = [
   {
 
     type: 'goodsBar',
-    defaultRowHeight: 280,
+    defaultRowHeight: '',
 
     name: '商品条',
 
@@ -1001,7 +1002,7 @@ export const COMPONENT_DEFINITIONS = [
   },
 
   {type: 'channelFloor',
-    defaultRowHeight: 620,
+    defaultRowHeight: '',
 
     name: '频道楼层',
 
@@ -1045,7 +1046,7 @@ export const COMPONENT_DEFINITIONS = [
 
   {
     type: 'recommendFeed',
-    defaultRowHeight: 1270,
+    defaultRowHeight: '',
 
     name: '推荐商品',
 
@@ -1120,7 +1121,7 @@ export const COMPONENT_DEFINITIONS = [
   },
   {
     type: 'couponList',
-    defaultRowHeight: 160,
+    defaultRowHeight: '',
 
     name: '优惠券',
 

@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="flag"
-    width="800px"
+    :width="width"
     :close-on-click-modal="false"
     title="绘制热区"
     top="120px"
@@ -25,6 +25,13 @@
 <script setup>
 import { ref } from "vue";
 import hotzone from "./components/Hotzone.vue";
+
+const props = defineProps({
+  width: {
+    type: String,
+    default: "800px",
+  },
+});
 
 const emit = defineEmits(["changeZone", "closeFlag"]);
 

@@ -29,6 +29,10 @@
       <div class="hotzone-preview-box" v-if="options.imageUrl">
         <img :src="options.imageUrl" alt="hotzone" class="img-preview" />
         <div class="preview-actions-bar">
+          <el-button size="small" type="primary" @click="handleOpenHotzone">
+            <el-icon class="mr-4"><Aim /></el-icon>
+            绘制热区
+          </el-button>
           <el-button size="small" type="primary" plain @click="handleSelectImage">
             <el-icon class="mr-4"><Picture /></el-icon>
             更换底图
@@ -46,6 +50,9 @@
       <div class="section-title flex-between">
         <span>热区列表 ({{ options.zones?.length || 0 }})</span>
         <div class="header-action-group">
+          <el-button type="primary" plain size="small" @click="handleOpenHotzone">
+            <el-icon class="mr-4"><Aim /></el-icon> 绘制热区
+          </el-button>
           <el-button link type="primary" size="small" @click="handleAddZone">
             <el-icon><Plus /></el-icon> 添加热区
           </el-button>
@@ -204,16 +211,25 @@
       </div>
 
       <div class="empty-zones-box" v-else>
-        <span>暂无热区，请点击右上角“添加热区”</span>
+        <span>暂无热区，可点击“绘制热区”在底图上拖拽画热区</span>
+        <div class="mt-8">
+          <el-button type="primary" size="small" @click="handleOpenHotzone">
+            <el-icon class="mr-4"><Aim /></el-icon> 立即绘制热区
+          </el-button>
+        </div>
       </div>
-    </div>
+        </div>
+
+    <!-- 绘制热区弹窗（复用移动端热区绘制器） -->
+    <hotzone ref="hotzoneDialogRef" width="960px" @changeZone="handleChangeZone" />
   </div>
 </template>
 
 <script setup>
-import { inject } from 'vue';
-import { Plus, Delete, Link, Picture, Close, Top, Bottom } from '@element-plus/icons-vue';
-import { ElMessageBox } from 'element-plus';
+import { ref, inject } from 'vue';
+import { Plus, Delete, Link, Picture, Close, Top, Bottom, Aim } from '@element-plus/icons-vue';
+import { ElMessageBox, ElMessage } from 'element-plus';
+import hotzone from '@/components/hotzone';
 
 const props = defineProps({
   component: {
@@ -298,6 +314,68 @@ function handleAddZone() {
     height: 35
   });
 }
+
+const hotzoneDialogRef = ref(null);
+
+// 绘制热区弹窗打开
+function handleOpenHotzone() {
+  const imgUrl = props.options.imageUrl || '';
+  if (!imgUrl) {
+    ElMessage.warning('请先输入或选择热区底图');
+    return;
+  }
+  const zoneInfo = (props.options.zones || []).map((z, idx) => {
+    const leftPer = z.leftPer !== undefined ? z.leftPer : (Number(z.left) || 0) / 100;
+    const topPer = z.topPer !== undefined ? z.topPer : (Number(z.top) || 0) / 100;
+    const widthPer = z.widthPer !== undefined ? z.widthPer : (Number(z.width) || 20) / 100;
+    const heightPer = z.heightPer !== undefined ? z.heightPer : (Number(z.height) || 20) / 100;
+    const link = z.url || z.link || '';
+
+    return {
+      ...z,
+      leftPer,
+      topPer,
+      widthPer,
+      heightPer,
+      link,
+      title: z.title || `热区 ${idx + 1}`,
+      type: z.type || 'other'
+    };
+  });
+
+  if (hotzoneDialogRef.value) {
+    hotzoneDialogRef.value.open({
+      img: imgUrl,
+      zoneInfo
+    });
+  }
+}
+
+// 热区绘制器变更回调
+function handleChangeZone(zoneList) {
+  if (!Array.isArray(zoneList)) return;
+  props.options.zones = zoneList.map((z, idx) => {
+    const leftVal = z.leftPer !== undefined ? z.leftPer * 100 : (z.left !== undefined ? z.left : 0);
+    const topVal = z.topPer !== undefined ? z.topPer * 100 : (z.top !== undefined ? z.top : 0);
+    const widthVal = z.widthPer !== undefined ? z.widthPer * 100 : (z.width !== undefined ? z.width : 20);
+    const heightVal = z.heightPer !== undefined ? z.heightPer * 100 : (z.height !== undefined ? z.height : 20);
+    const linkVal = z.link || z.url || '';
+    const titleVal = z.title || `热区 ${idx + 1}`;
+
+    return {
+      ...z,
+      title: titleVal,
+      url: linkVal,
+      link: linkVal,
+      left: Math.round(leftVal * 10) / 10,
+      top: Math.round(topVal * 10) / 10,
+      width: Math.round(widthVal * 10) / 10,
+      height: Math.round(heightVal * 10) / 10,
+      type: z.type || 'other'
+    };
+  });
+}
+
 </script>
 
 <style lang="scss" scoped>
