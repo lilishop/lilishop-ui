@@ -2,6 +2,9 @@
   <div class="article-page">
     <div class="article-page__aside">
       <el-card class="article-category">
+        <template #header>
+          <span>文章分类</span>
+        </template>
         <el-tree
           :data="treeData"
           :props="{ label: 'title', children: 'children' }"
@@ -13,38 +16,43 @@
       </el-card>
     </div>
     <div class="article-page__main">
-      <el-card class="article-detail">
-          <el-form
-            ref="searchFormRef"
-            :model="searchForm"
-            inline
-            label-width="70px"
-            style="width: 100%"
-            class="search-form"
-            @keyup.enter="handleSearch"
-          >
-            <el-form-item label="文章标题" prop="title">
-              <el-input
-                v-model="searchForm.title"
-                placeholder="请输入文章标题"
-                clearable
-                style="width: 200px"
-              />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
-            </el-form-item>
-          </el-form>
+      <el-card class="article-search">
+        <el-form
+          ref="searchFormRef"
+          :model="searchForm"
+          inline
+          label-width="70px"
+          class="search-form"
+          @keyup.enter="handleSearch"
+        >
+          <el-form-item label="文章标题" prop="title">
+            <el-input
+              v-model="searchForm.title"
+              placeholder="请输入文章标题"
+              clearable
+              style="width: 200px"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          </el-form-item>
+        </el-form>
+      </el-card>
 
-          <div class="operation padding-row">
+      <el-card class="article-detail mt_10">
+          <div class="toolbar">
             <el-button v-if="!selected" type="primary" @click="add">添加</el-button>
           </div>
 
           <div class="article-table-wrap">
             <el-table ref="table" v-loading="loading" border :data="data" style="width: 100%">
             <el-table-column prop="articleCategoryName" label="分类名称" width="150" />
-            <el-table-column prop="title" label="文章标题" min-width="200" show-overflow-tooltip />
-            <el-table-column label="是否显示" width="100">
+            <el-table-column label="文章标题" min-width="200" show-overflow-tooltip>
+              <template #default="{ row }">
+                {{ decodeEntities(row.title) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="是否显示" width="100" align="center">
               <template #default="{ row }">
                 <el-switch
                   v-if="row"
@@ -56,10 +64,10 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column prop="sort" label="排序" width="100" />
-            <el-table-column label="操作" width="230" align="center">
+            <el-table-column prop="sort" label="排序" width="80" align="center" />
+            <el-table-column label="操作" width="160" align="right">
               <template #default="{ row, $index }">
-                <template v-if="row">
+                <div v-if="row" class="ops-row">
                   <a
                     v-if="selected"
                     class="link-text"
@@ -71,7 +79,7 @@
                   <a class="link-text" @click="edit(row)">编辑</a>
                   <span class="op-split">|</span>
                   <a class="link-text" @click="remove(row)">删除</a>
-                </template>
+                </div>
               </template>
             </el-table-column>
             </el-table>
@@ -91,91 +99,19 @@
           </div>
         </el-card>
     </div>
-
-    <el-dialog
-      v-if="!selected"
-      v-model="modalVisible"
-      :title="modalTitle"
-      width="1100px"
-      :close-on-click-modal="false"
-      destroy-on-close
-    >
-      <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
-        <el-form-item label="文章标题" prop="title">
-          <el-input v-model="form.title" clearable style="width: 40%" />
-        </el-form-item>
-        <el-form-item label="文章分类" prop="categoryId">
-          <el-tree-select
-            v-model="form.categoryId"
-            :data="treeDataDefault"
-            :props="{ label: 'title', value: 'value', children: 'children' }"
-            placeholder="请选择"
-            clearable
-            check-strictly
-            style="width: 180px"
-            @change="handleCategoryChange"
-          />
-        </el-form-item>
-        <el-form-item label="文章排序" prop="sort">
-          <el-input v-model="form.sort" type="number" clearable style="width: 10%" />
-        </el-form-item>
-        <el-form-item class="form-item-view-el" label="文章内容" prop="content">
-          <tinymec
-            v-if="modalVisible"
-            ref="editor"
-            open-xss
-            v-model="form.content"
-          />
-        </el-form-item>
-        <el-form-item label="是否展示" prop="openStatus">
-          <el-switch
-            v-model="form.openStatus"
-            inline-prompt
-            active-text="展示"
-            inactive-text="隐藏"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="modalVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import {
   getArticleCategory,
-  saveArticle,
   getArticle,
   delArticle,
-  updateArticle,
-  seeArticle,
   updateArticleStatus,
 } from "@/api/pages";
-import tinymec from "@/components/editor/index.vue";
-import { regular } from "@/utils";
 import { Message, Modal } from "@/utils/message";
-
-const validateArticleContent = (rule, value, callback) => {
-  const html = String(value || "").trim();
-  if (!html) {
-    callback(new Error("请填写文章内容"));
-    return;
-  }
-  const text = html
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/gi, " ")
-    .trim();
-  const hasImage = /<img[\s>]/i.test(html);
-  if (!text && !hasImage) {
-    callback(new Error("请填写文章内容"));
-    return;
-  }
-  callback();
-};
 
 defineProps({
   selected: {
@@ -185,19 +121,14 @@ defineProps({
 });
 const emit = defineEmits(["callbacked"]);
 
+const router = useRouter();
+
 // 模板 el-form 的 ref（原 ref="searchForm"，与 data 同名会互相覆盖，改名为 searchFormRef）
 const searchFormRef = ref(null);
 const table = ref(null);
-// 模板 el-form 的 ref（原 ref="form"，与 data 同名会互相覆盖，改名为 formRef）
-const formRef = ref(null);
-const editor = ref(null);
 
 const selectedIndex = ref(99999);
 const loading = ref(true);
-const modalType = ref(0);
-const modalVisible = ref(false);
-const modalTitle = ref("");
-const treeDataDefault = ref([]);
 const searchForm = ref({
   pageNumber: 1,
   pageSize: 20,
@@ -206,24 +137,7 @@ const searchForm = ref({
   categoryId: "",
 });
 const searchTreeValue = ref("");
-const form = ref({
-  openStatus: false,
-  title: "",
-  categoryId: "",
-  sort: 1,
-  content: "",
-  id: "",
-});
-const formValidate = ref({
-  title: [{ required: true, message: "请输入文章标题", trigger: "blur" }],
-  categoryId: [{ required: true, message: "请选择文章分类", trigger: "change" }],
-  sort: [regular.REQUIRED, regular.INTEGER],
-  content: [{ required: true, validator: validateArticleContent, trigger: "change" }],
-});
-const list = ref([]);
-const treeValue = ref("");
 const treeData = ref([]);
-const submitLoading = ref(false);
 const data = ref([]);
 const total = ref(0);
 
@@ -242,15 +156,6 @@ watch(
   { deep: true }
 );
 
-function getDefaultForm() {
-  return {
-    openStatus: false,
-    title: "",
-    categoryId: "",
-    sort: 1,
-    content: "",
-  };
-}
 function init() {
   getDataList();
   getAllList(0);
@@ -268,37 +173,13 @@ function handleCateChange(data) {
 }
 function changeSwitch(v) {
   const params = { status: v.openStatus };
-  updateArticleStatus(v.id, params).then((res) => {
-    submitLoading.value = false;
-    if (res.success) {
-    }
-  });
+  updateArticleStatus(v.id, params).then(() => {});
 }
-function handleCategoryChange(value) {
-  form.value.categoryId = value;
-  const findTitle = (nodes, id) => {
-    for (const node of nodes || []) {
-      if (node.value === id) return node.title;
-      const childTitle = findTitle(node.children, id);
-      if (childTitle) return childTitle;
-    }
-    return "";
-  };
-  treeValue.value = findTitle(treeDataDefault.value, value);
-}
-function handleCheckChange(data) {
-  let value = "";
-  let title = "";
-  list.value = [];
-  data.forEach((item) => {
-    value += `${item.value},`;
-    title += `${item.title},`;
-  });
-  value = value.substring(0, value.length - 1);
-  title = title.substring(0, title.length - 1);
-  list.value.push({ value, title });
-  form.value.categoryId = value;
-  treeValue.value = title;
+function decodeEntities(str) {
+  if (!str) return "";
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
 }
 function changePage(v) {
   searchForm.value.pageNumber = v;
@@ -320,7 +201,6 @@ function getAllList(parent_id) {
     loading.value = false;
     if (res.success) {
       treeData.value = getTree(res.result);
-      treeDataDefault.value = getTree(res.result);
       treeData.value.unshift({
         title: "全部",
         level: 0,
@@ -360,8 +240,7 @@ function buildArticleSearchParams() {
   }
   return params;
 }
-function getDataList(val) {
-  if (val) form.value = {};
+function getDataList() {
   loading.value = true;
   getArticle(buildArticleSearchParams())
     .then((res) => {
@@ -374,63 +253,11 @@ function getDataList(val) {
       loading.value = false;
     });
 }
-function handleSubmit() {
-  if (editor.value?.getContent) {
-    form.value.content = editor.value.getContent();
-  }
-  formRef.value.validate((valid) => {
-    if (valid) {
-      submitLoading.value = true;
-      if (modalType.value === 0) {
-        delete form.value.id;
-        saveArticle(form.value).then((res) => {
-          submitLoading.value = false;
-          if (res.success) {
-            Message.success("操作成功");
-            getDataList();
-            modalVisible.value = false;
-          }
-        });
-      } else {
-        updateArticle(form.value).then((res) => {
-          submitLoading.value = false;
-          if (res.success) {
-            Message.success("操作成功");
-            getDataList();
-            modalVisible.value = false;
-          }
-        });
-      }
-    }
-  });
-}
 function add() {
-  modalType.value = 0;
-  modalTitle.value = "添加文章";
-  treeValue.value = "";
-  form.value = getDefaultForm();
-  modalVisible.value = true;
-  nextTick(() => {
-    formRef.value?.clearValidate?.();
-  });
+  router.push({ name: "article-edit" });
 }
-function edit(data) {
-  modalType.value = 1;
-  modalTitle.value = "编辑文章";
-  treeValue.value = "";
-  form.value = getDefaultForm();
-  seeArticle(data.id).then((res) => {
-    if (res.result) {
-      modalVisible.value = true;
-      form.value.categoryId = res.result.categoryId;
-      treeValue.value = data.articleCategoryName;
-      form.value.id = data.id;
-      form.value.content = res.result.content;
-      form.value.title = res.result.title;
-      form.value.sort = res.result.sort;
-      form.value.openStatus = res.result.openStatus;
-    }
-  });
+function edit(row) {
+  router.push({ name: "article-edit", query: { id: row.id } });
 }
 function remove(v) {
   Modal.confirm({
@@ -458,7 +285,7 @@ onMounted(() => {
 .article-page {
   display: flex;
   gap: 10px;
-  align-items: flex-start;
+  align-items: stretch;
   width: 100%;
   min-width: 0;
 }
@@ -468,6 +295,8 @@ onMounted(() => {
   width: 220px;
   min-width: 180px;
   max-width: 260px;
+  display: flex;
+  flex-direction: column;
 }
 
 .article-page__main {
@@ -476,8 +305,23 @@ onMounted(() => {
 }
 
 .article-category,
+.article-search,
 .article-detail {
   width: 100%;
+}
+
+.article-category {
+  flex: 1;
+  height: 100%;
+}
+
+.toolbar {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.ops-row {
+  white-space: nowrap;
 }
 
 .article-table-wrap {

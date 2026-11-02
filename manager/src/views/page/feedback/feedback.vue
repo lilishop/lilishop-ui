@@ -45,7 +45,7 @@
       </div>
     </el-card>
 
-    <el-dialog v-model="detailVisible" title="详细信息" width="500px" destroy-on-close>
+    <el-drawer v-model="detailVisible" title="详细信息" size="500px" destroy-on-close append-to-body>
       <el-form ref="formValidate" :model="form" label-width="80px">
         <el-form-item label="用户名" prop="userName">
           <span>{{ form.userName }}</span>
@@ -84,7 +84,7 @@
       <template #footer>
         <el-button @click="detailVisible = false">取消</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 

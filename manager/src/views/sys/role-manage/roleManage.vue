@@ -49,10 +49,11 @@
       </div>
     </el-card>
 
-    <el-dialog
+    <el-drawer
       v-model="roleModalVisible"
       :title="modalTitle"
-      width="500px"
+      size="500px"
+      append-to-body
       :close-on-click-modal="false"
       destroy-on-close
     >
@@ -68,7 +69,7 @@
         <el-button @click="roleModalVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitLoading" @click="submitRole">提交</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
     <el-dialog
       v-model="permModalVisible"

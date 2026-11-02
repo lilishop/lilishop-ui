@@ -32,12 +32,13 @@
       </el-table>
     </el-card>
 
-    <el-dialog
+    <el-drawer
       v-model="modalVisible"
       :title="modalTitle"
-      width="500px"
+      size="500px"
       :close-on-click-modal="false"
       destroy-on-close
+      append-to-body
     >
       <el-form ref="formRef" :model="formAdd" label-width="100px" :rules="formValidate">
         <el-form-item v-if="showParent" label="上级分类" prop="parentId">
@@ -55,7 +56,7 @@
         <el-button @click="modalVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitLoading" @click="Submit">提交</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 

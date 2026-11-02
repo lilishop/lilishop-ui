@@ -472,6 +472,13 @@ export const otherRouter = {
       component: () => import("@/views/statistics/goods-sales-summary.vue")
     },
     {
+      path: "article-edit",
+      title: "文章编辑",
+      name: "article-edit",
+      meta: { title: "文章编辑" },
+      component: () => import("@/views/page/article-manage/articleEdit.vue")
+    },
+    {
       path: "distributionImportRecord",
       title: "分销员导入记录",
       name: "distributionImportRecord",

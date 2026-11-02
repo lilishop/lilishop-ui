@@ -14,7 +14,11 @@
     <el-card class="mt_10">
       <el-table v-loading="loading" border :data="data">
         <el-table-column prop="period" label="日期" width="120" />
-        <el-table-column prop="paymentName" label="支付方式" width="140" />
+        <el-table-column prop="paymentName" label="支付方式" width="140">
+          <template #default="{ row }">
+            {{ formatPaymentName(row.paymentName) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="payCount" label="支付笔数" width="100" />
         <el-table-column prop="payAmount" label="支付金额" width="120" />
         <el-table-column prop="refundCount" label="退款笔数" width="100" />
@@ -34,6 +38,17 @@ defineOptions({ name: "finance-payment-method" });
 const loading = ref(false);
 const dateRange = ref([]);
 const data = ref([]);
+
+const paymentNameMap = {
+  WECHAT: "微信支付",
+  ALIPAY: "支付宝",
+  WALLET: "余额支付",
+  BANK_TRANSFER: "线下转账",
+};
+
+function formatPaymentName(name) {
+  return paymentNameMap[name] || name || "-";
+}
 
 onMounted(() => {
   loadData();

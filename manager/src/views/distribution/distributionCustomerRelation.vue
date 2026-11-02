@@ -243,12 +243,13 @@
       </div>
     </el-drawer>
 
-    <el-dialog
+    <el-drawer
       v-model="rebindVisible"
       title="换绑客户关系"
-      width="520px"
+      size="520px"
       :close-on-click-modal="false"
       destroy-on-close
+      append-to-body
     >
       <el-form ref="rebindFormRef" :model="rebindForm" :rules="rebindRules" label-width="110px">
         <el-form-item label="客户">
@@ -273,7 +274,7 @@
         <el-button @click="rebindVisible = false">取消</el-button>
         <el-button type="primary" :loading="rebindLoading" @click="submitRebind">确定</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
     <distribution-selector
       v-model="distributorSelectorVisible"
@@ -281,12 +282,13 @@
       @confirm="onDistributorSelected"
     />
 
-    <el-dialog
+    <el-drawer
       v-model="unbindVisible"
       title="解绑客户关系"
-      width="520px"
+      size="520px"
       :close-on-click-modal="false"
       destroy-on-close
+      append-to-body
     >
       <el-form ref="unbindFormRef" :model="unbindForm" label-width="110px">
         <el-form-item label="客户">
@@ -300,7 +302,7 @@
         <el-button @click="unbindVisible = false">取消</el-button>
         <el-button type="primary" :loading="unbindLoading" @click="submitUnbind">确定</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 

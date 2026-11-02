@@ -142,11 +142,12 @@
       </el-table>
     </el-card>
 
-    <!-- 修改 Cron 表达式弹窗 -->
-    <el-dialog
+    <!-- 修改 Cron 表达式抽屉 -->
+    <el-drawer
       v-model="editDialogVisible"
       :title="`配置任务: ${currentRow?.name || ''}`"
-      width="540px"
+      size="540px"
+      append-to-body
       destroy-on-close
     >
       <el-form label-width="110px" style="margin-top: 10px">
@@ -192,7 +193,7 @@
         <el-button @click="editDialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 

@@ -65,10 +65,11 @@
       </div>
     </el-card>
 
-    <el-dialog
+    <el-drawer
       v-model="modalVisible"
       :title="modalTitle"
-      width="1000px"
+      size="1000px"
+      append-to-body
       :close-on-click-modal="false"
       destroy-on-close
     >
@@ -130,7 +131,7 @@
         <el-button @click="modalVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitLoading" @click="saveAppVersion">保存</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
     <el-dialog v-model="queryModalVisible" :title="queryModalTitle" width="700px">
       <el-form label-width="100px">

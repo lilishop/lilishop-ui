@@ -25,10 +25,10 @@
       <el-empty v-if="!data.length" description="暂无热词，点击上方按钮设置" :image-size="80" />
     </div>
 
-    <el-dialog
+    <el-drawer
       v-model="modalVisible"
       :title="modalTitle"
-      width="500px"
+      size="500px"
       :close-on-click-modal="false"
       append-to-body
       destroy-on-close
@@ -45,7 +45,7 @@
         <el-button @click="modalVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitLoading" @click="handleSubmit">提交</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 

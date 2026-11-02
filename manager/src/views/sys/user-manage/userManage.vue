@@ -90,11 +90,10 @@
       </div>
     </el-card>
 
-    <el-dialog
+    <el-drawer
       v-model="userModalVisible"
       :title="modalTitle"
-      width="500px"
-      align-center
+      size="500px"
       append-to-body
       :close-on-click-modal="false"
       destroy-on-close
@@ -132,7 +131,7 @@
         <el-button @click="userModalVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitLoading" @click="submitUser">提交</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
@@ -480,11 +479,6 @@ onMounted(() => {
 
 <style lang="scss">
 .user-manage-dialog {
-  .el-dialog__body {
-    max-height: calc(100vh - 220px);
-    overflow-y: auto;
-  }
-
   .el-input__wrapper {
     background-color: #fff !important;
     box-shadow: 0 0 0 1px var(--el-border-color) inset !important;

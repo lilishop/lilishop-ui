@@ -45,12 +45,13 @@
       </div>
     </el-card>
 
-    <el-dialog
+    <el-drawer
       v-model="modalVisible"
       :title="modalTitle"
-      width="500px"
+      size="500px"
       :close-on-click-modal="false"
       destroy-on-close
+      append-to-body
     >
       <el-form ref="formRef" :model="form" label-width="100px" :rules="formValidate">
         <el-form-item label="自定义分词" prop="name">
@@ -61,7 +62,7 @@
         <el-button @click="modalVisible = false">取消</el-button>
         <el-button type="primary" :loading="submitLoading" @click="handleSubmit">保存</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 

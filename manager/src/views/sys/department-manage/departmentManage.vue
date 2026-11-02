@@ -59,23 +59,28 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="180" fixed="right" align="center">
+        <el-table-column label="操作" width="210" fixed="right" align="center">
           <template #default="{ row }">
-            <a class="link-text" @click="addChild(row)">添加子部门</a>
-            <span class="op-split">|</span>
-            <a class="link-text" @click="editRow(row)">编辑</a>
-            <span class="op-split">|</span>
-            <a class="link-text error-text" @click="deleteRow(row)">删除</a>
+            <div class="ops-row">
+              <template v-if="row.parentId === 0 || row.parentId === '0'">
+                <a class="link-text" @click="addChild(row)">添加子部门</a>
+                <span class="op-split">|</span>
+              </template>
+              <a class="link-text" @click="editRow(row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text error-text" @click="deleteRow(row)">删除</a>
+            </div>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
 
-    <!-- 部门新建 / 编辑弹窗 -->
-    <el-dialog
+    <!-- 部门新建 / 编辑抽屉 -->
+    <el-drawer
       v-model="modalVisible"
       :title="modalTitle"
-      width="540px"
+      size="540px"
+      append-to-body
       :close-on-click-modal="false"
       destroy-on-close
     >
@@ -125,7 +130,7 @@
           </el-button>
         </div>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
@@ -519,6 +524,10 @@ onMounted(() => {
       color: #f16643;
     }
   }
+}
+
+.ops-row {
+  white-space: nowrap;
 }
 
 .op-split {

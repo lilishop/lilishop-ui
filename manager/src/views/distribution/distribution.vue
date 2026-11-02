@@ -127,9 +127,9 @@
           </template>
         </el-table-column>
         <el-table-column prop="joinTime" label="加入时间" min-width="160" />
-        <el-table-column label="操作" width="270" align="center" fixed="right">
+        <el-table-column label="操作" width="270" align="right" fixed="right">
           <template #default="{ row }">
-            <template v-if="row">
+            <div v-if="row" class="ops-row">
               <a class="link-text" @click="openEdit(row)">编辑</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="openDetail(row)">详情</a>
@@ -144,7 +144,7 @@
                 <a v-if="row.distributionStatus != 'RETREAT'" class="link-text" @click="retreat(row)">清退</a>
                 <a v-if="row.distributionStatus == 'RETREAT'" class="link-text" @click="resume(row)">恢复</a>
               </template>
-            </template>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -260,10 +260,10 @@
       </div>
     </el-drawer>
 
-    <el-dialog
+    <el-drawer
       v-model="editVisible"
       title="编辑分销员"
-      width="520px"
+      size="520px"
       :close-on-click-modal="false"
       destroy-on-close
       append-to-body
@@ -304,12 +304,12 @@
         <el-button @click="editVisible = false">取消</el-button>
         <el-button type="primary" :loading="editLoading" @click="submitEdit">保存</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
-    <el-dialog
+    <el-drawer
       v-model="createVisible"
       title="新增分销员"
-      width="520px"
+      size="520px"
       :close-on-click-modal="false"
       destroy-on-close
       append-to-body
@@ -345,12 +345,12 @@
         <el-button @click="createVisible = false">取消</el-button>
         <el-button type="primary" :loading="createLoading" @click="submitCreate">确定</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
-    <el-dialog
+    <el-drawer
       v-model="batchGradeVisible"
       title="批量设置等级"
-      width="480px"
+      size="480px"
       :close-on-click-modal="false"
       destroy-on-close
       append-to-body
@@ -380,12 +380,12 @@
         <el-button @click="batchGradeVisible = false">取消</el-button>
         <el-button type="primary" :loading="batchGradeLoading" @click="submitBatchGrade">确定</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
-    <el-dialog
+    <el-drawer
       v-model="importVisible"
       title="批量导入分销员"
-      width="520px"
+      size="520px"
       :close-on-click-modal="false"
       destroy-on-close
       append-to-body
@@ -416,7 +416,7 @@
           开始导入
         </el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
@@ -922,6 +922,9 @@ onMounted(() => {
   display: inline-block;
   margin: 0 8px;
   color: #dcdee2;
+}
+.ops-row {
+  white-space: nowrap;
 }
 .status-tabs {
   margin-bottom: 4px;
