@@ -1,304 +1,177 @@
 <template>
   <div class="order-detail-page">
-    <!-- 顶部导航与快捷操作栏 -->
-    <div class="page-top-nav">
-      <el-page-header :icon="ArrowLeft" title="返回订单列表" @back="goBack">
-        <template #content>
-          <div class="nav-content">
-            <span class="page-title">订单详情</span>
-            <span class="page-sn font-mono">{{ sn }}</span>
-          </div>
-        </template>
-        <template #extra>
-          <div class="nav-actions">
-            <el-button v-if="allowOperation.editPrice" @click="modifyPrice">调整价格</el-button>
-            <el-button v-if="allowOperation.editConsignee" plain type="primary" @click="editAddress">修改收件信息</el-button>
-            <el-button v-if="allowOperation.cancel" plain type="warning" @click="orderCancel">取消订单</el-button>
-            <el-button v-if="isAppointmentOrder && canPlatformRefund" plain type="danger" @click="openPlatformRefund">平台退款</el-button>
-            <el-button v-if="isAppointmentOrder && canNoShowRefund" plain type="danger" @click="openNoShowRefund">爽约退款</el-button>
-            <el-button v-if="orderInfo.order.orderStatus === 'UNPAID'" type="primary" @click="confirmPrice">确认收款</el-button>
-            <el-button plain :icon="Tickets" @click="orderLogDrawer = true">订单日志</el-button>
-            <el-button v-if="!isNonPhysicalOrder" plain type="primary" :icon="Printer" @click="printOrder">打印发货单</el-button>
-            <el-button :icon="Refresh" @click="getDataList">刷新</el-button>
-          </div>
-        </template>
-      </el-page-header>
-    </div>
-
-    <!-- 顶部状态看板 + 履约生命周期步骤条 -->
-    <el-card shadow="never" class="status-header-card">
-      <div class="header-main">
-        <div class="status-summary-left">
-          <div class="status-badge-wrap">
-            <el-tag
-              :type="getOrderStatusTagType(orderInfo.order.orderStatus)"
-              effect="dark"
-              size="large"
-              class="status-tag"
-            >
-              {{ orderInfo.orderStatusValue || "加载中..." }}
-            </el-tag>
-            <el-tag type="info" size="large" class="type-tag">
-              {{ clientTypeWay(orderInfo.order.clientType) }}
-            </el-tag>
-            <el-tag v-if="orderInfo.paymentMethodValue" type="success" size="large" class="type-tag">
-              {{ orderInfo.paymentMethodValue }}
-            </el-tag>
-          </div>
-
-          <div class="sn-info-wrap">
-            <span class="sn-label">订单编号：</span>
-            <span class="sn-text font-mono">{{ orderInfo.order.sn }}</span>
+    <!-- 顶部一体化状态与履约进度卡片 -->
+    <el-card shadow="never" class="top-overview-card">
+      <!-- 第一层：返回导航 + 核心状态/单号 + 操作按钮组 -->
+      <div class="overview-header">
+        <div class="header-left">
+          <el-button link class="back-btn" @click="goBack">
+            <el-icon><ArrowLeft /></el-icon>
+            <span>返回列表</span>
+          </el-button>
+          <div class="header-divider"></div>
+          <el-tag
+            :type="getOrderStatusTagType(orderInfo.order.orderStatus)"
+            effect="dark"
+             class="main-status-tag"
+          >
+            {{ orderInfo.orderStatusValue || "加载中..." }}
+          </el-tag>
+          <div class="sn-title-group">
+            <span class="sn-label">订单号：</span>
+            <span class="sn-value font-mono">{{ orderInfo.order.sn || sn }}</span>
             <el-tooltip content="复制订单编号" placement="top">
               <el-button
                 link
                 type="primary"
                 :icon="CopyDocument"
-                class="copy-btn"
-                @click="copyText(orderInfo.order.sn, '订单编号')"
+                class="copy-icon-btn"
+                @click="copyText(orderInfo.order.sn || sn, '订单编号')"
               />
             </el-tooltip>
           </div>
-
-          <div v-if="orderInfo.order.createTime" class="create-time-text">
-            下单时间：{{ orderInfo.order.createTime }}
+          <div class="meta-tags">
+            <el-tag v-if="orderInfo.order.clientType" size="small" type="info" effect="plain">
+              {{ clientTypeWay(orderInfo.order.clientType) }}
+            </el-tag>
+            <el-tag v-if="orderInfo.paymentMethodValue" size="small" type="success" effect="plain">
+              {{ orderInfo.paymentMethodValue }}
+            </el-tag>
           </div>
         </div>
 
-        <div class="status-metrics-right">
-          <div class="metric-block">
-            <span class="metric-label">订单应付总额</span>
-            <span class="metric-val text-danger">
-              ¥ {{ unitPrice(orderInfo.order.flowPrice) }}
-            </span>
-          </div>
-          <div class="metric-divider"></div>
-          <div class="metric-block">
-            <span class="metric-label">支付状态</span>
-            <span class="metric-val" :class="orderInfo.order.payStatus === 'PAID' ? 'text-success' : 'text-warning'">
-              {{ orderInfo.order.payStatus === 'PAID' ? '已付款' : '待付款' }}
-            </span>
-          </div>
-          <div class="metric-divider"></div>
-          <div class="metric-block">
-            <span class="metric-label">商品总件数</span>
-            <span class="metric-val text-dark">
-              {{ totalGoodsNum }} <small>件</small>
-            </span>
-          </div>
+        <div class="header-actions">
+          <el-button v-if="allowOperation.editPrice" size="default" @click="modifyPrice">调整价格</el-button>
+          <el-button v-if="allowOperation.editConsignee" size="default" plain type="primary" @click="editAddress">
+            修改收件信息
+          </el-button>
+          <el-button v-if="allowOperation.cancel" size="default" plain type="warning" @click="orderCancel">
+            取消订单
+          </el-button>
+          <el-button
+            v-if="isAppointmentOrder && canPlatformRefund"
+            size="default"
+            plain
+            type="danger"
+            @click="openPlatformRefund"
+          >
+            平台退款
+          </el-button>
+          <el-button
+            v-if="isAppointmentOrder && canNoShowRefund"
+            size="default"
+            plain
+            type="danger"
+            @click="openNoShowRefund"
+          >
+            爽约退款
+          </el-button>
+          <el-button v-if="orderInfo.order.orderStatus === 'UNPAID'" size="default" type="primary" @click="confirmPrice">
+            确认收款
+          </el-button>
+          <el-button size="default" plain :icon="Tickets" @click="orderLogDrawer = true">订单日志</el-button>
+          <el-button
+            v-if="!isNonPhysicalOrder"
+            size="default"
+            plain
+            type="primary"
+            :icon="Printer"
+            @click="printOrder"
+          >
+            打印发货单
+          </el-button>
+          <el-button size="default" :icon="Refresh" @click="getDataList">刷新</el-button>
         </div>
       </div>
 
-      <!-- 订单履约生命周期步骤条（带时间戳） -->
-      <div class="lifecycle-steps-wrap">
-        <el-steps
-          :active="currentStepIndex"
-          :status="stepProcessStatus"
-          finish-status="success"
-          align-center
+      <!-- 第二层：紧凑型横向履约步骤条 -->
+      <div class="fulfillment-stepper">
+        <div
+          v-for="(step, sIdx) in orderSteps"
+          :key="sIdx"
+          class="step-item"
+          :class="getStepStateClass(sIdx)"
         >
-          <el-step
-            v-for="(step, sIdx) in orderSteps"
-            :key="sIdx"
-            :title="step.title"
-            :description="step.desc"
-          />
-        </el-steps>
+          <div class="step-node">
+            <div class="step-circle">
+              <el-icon v-if="isStepFinished(sIdx)"><Check /></el-icon>
+              <span v-else>{{ sIdx + 1 }}</span>
+            </div>
+            <div class="step-text">
+              <div class="step-title">{{ step.title }}</div>
+              <div class="step-desc">{{ step.desc }}</div>
+            </div>
+          </div>
+          <div v-if="sIdx < orderSteps.length - 1" class="step-connector"></div>
+        </div>
       </div>
     </el-card>
 
-    <!-- 主体两栏布局 -->
-    <el-row :gutter="18" class="content-row">
-      <!-- 左侧：商品明细、费用结算、以及内嵌流转日志 -->
-      <el-col :xs="24" :sm="24" :md="15" :lg="15" :xl="16">
-        <!-- 1. 商品表格卡片 -->
-        <el-card shadow="never" class="section-card">
+    <!-- 中部：三列等高核心信息面板 -->
+    <el-row :gutter="16" class="info-grid-row">
+      <!-- 1. 订单与买家信息 -->
+      <el-col :xs="24" :sm="24" :md="8">
+        <el-card shadow="never" class="section-card equal-card">
           <template #header>
             <div class="card-title">
-              <el-icon><Goods /></el-icon>
-              <span>商品清单 ({{ data.length }} 项)</span>
+              <el-icon><User /></el-icon>
+              <span>订单与买家信息</span>
             </div>
           </template>
 
-          <el-table
-            v-loading="loading"
-            border
-            :data="data"
-            class="goods-table"
-            style="width: 100%"
-          >
-            <el-table-column label="商品信息" min-width="260">
-              <template #default="{ row }">
-                <div v-if="row" class="goods-item-cell">
-                  <el-image
-                    :src="row.image"
-                    :preview-src-list="[row.image]"
-                    fit="cover"
-                    class="goods-thumb"
-                  />
-                  <div class="goods-info">
-                    <div class="goods-name">
-                      <span>{{ row.goodsName }}</span>
-                    </div>
-                    <div v-if="row.specs" class="goods-specs">
-                      <span v-for="(val, key) in parseSpecs(row.specs)" :key="key" class="spec-tag">
-                        {{ key }}: {{ val }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="优惠活动" min-width="110" align="center">
-              <template #default="{ row }">
-                <el-tag v-if="getPromotionText(row) !== '未参与'" size="small" type="warning">
-                  {{ getPromotionText(row) }}
-                </el-tag>
-                <span v-else class="text-gray">-</span>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="单价" width="115" align="center">
-              <template #default="{ row }">
-                <span class="font-bold">¥ {{ Number(row.unitPrice || 0).toFixed(2) }}</span>
-              </template>
-            </el-table-column>
-
-            <el-table-column prop="num" label="数量" width="80" align="center" />
-
-            <el-table-column prop="returnGoodsNumber" label="已退款" width="85" align="center">
-              <template #default="{ row }">
-                <span :class="row.returnGoodsNumber > 0 ? 'text-danger font-bold' : 'text-gray'">
-                  {{ row.returnGoodsNumber || 0 }}
-                </span>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="小计" width="120" align="center">
-              <template #default="{ row }">
-                <span class="text-danger font-bold">¥ {{ Number(row.flowPrice || 0).toFixed(2) }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
-
-          <!-- 电子卡券卡密列表 -->
-          <div v-if="isECouponOrder" class="ecoupon-card-keys mt_16">
-            <div class="sub-header-title">
-              <el-icon><Tickets /></el-icon>
-              <span>卡密发放明细</span>
+          <div class="kv-list">
+            <div class="kv-row">
+              <span class="kv-label">买家账号</span>
+              <div class="kv-val">
+                <el-tooltip
+                  :content="orderInfo.order.memberName || '匿名买家'"
+                  placement="top"
+                  :disabled="!orderInfo.order.memberName || orderInfo.order.memberName.length < 20"
+                >
+                  <span class="member-name-text font-bold">{{ orderInfo.order.memberName || "匿名买家" }}</span>
+                </el-tooltip>
+              </div>
             </div>
-            <el-alert
-              v-if="!ecouponCardKeyDelivered"
-              type="info"
-              show-icon
-              :closable="false"
-              title="卡密尚未发放"
-              class="mb_10"
-            />
-            <el-table
-              v-else-if="ecouponCardKeyRows.length"
-              border
-              size="small"
-              :data="ecouponCardKeyRows"
-              style="width: 100%"
-            >
-              <el-table-column type="index" label="序号" width="60" align="center" />
-              <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
-              <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
-              <el-table-column prop="allocatedTime" label="发卡时间" width="170" align="center" />
-              <el-table-column label="状态" width="100" align="center">
-                <template #default="{ row }">
-                  <el-tag size="small" type="success">{{ formatCardKeyStatus(row.status || 'ALLOCATED') }}</el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="80" align="center">
-                <template #default="{ row }">
-                  <el-button link type="primary" size="small" @click="copyCardKey(row)">复制</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
 
-          <!-- 商品清单底部金额汇总与核算 -->
-          <div class="goods-summary-footer">
-            <div class="summary-rows">
-              <div class="summary-item">
-                <span class="label">商品总额</span>
-                <span class="value font-mono">¥ {{ unitPrice(orderPriceDetail.goodsPrice || orderInfo.order.goodsPrice || 0) }}</span>
-              </div>
+            <div class="kv-row">
+              <span class="kv-label">成交店铺</span>
+              <div class="kv-val font-bold text-dark">{{ orderInfo.order.storeName || "-" }}</div>
+            </div>
 
-              <div v-if="!isECouponOrder" class="summary-item">
-                <span class="label">运费</span>
-                <span class="value font-mono">+ ¥ {{ unitPrice(orderInfo.order.freightPrice || 0) }}</span>
-              </div>
+            <div class="kv-row">
+              <span class="kv-label">下单时间</span>
+              <div class="kv-val font-mono">{{ orderInfo.order.createTime || "-" }}</div>
+            </div>
 
-              <div v-if="orderPriceDetail.discountPrice > 0" class="summary-item">
-                <span class="label">活动优惠抵扣</span>
-                <span class="value text-success font-mono">- ¥ {{ unitPrice(orderPriceDetail.discountPrice) }}</span>
-              </div>
-
-              <div v-if="orderPriceDetail.couponPrice > 0" class="summary-item">
-                <span class="label">优惠券抵扣</span>
-                <span class="value text-success font-mono">- ¥ {{ unitPrice(orderPriceDetail.couponPrice) }}</span>
-              </div>
-
-              <div v-if="orderPriceDetail.giftCardPrice > 0" class="summary-item">
-                <span class="label">礼品卡抵扣</span>
-                <span class="value text-success font-mono">- ¥ {{ unitPrice(orderPriceDetail.giftCardPrice) }}</span>
-              </div>
-
-              <div v-if="orderPriceDetail.updatePrice" class="summary-item">
-                <span class="label">人工改价调整</span>
-                <span class="value font-mono">¥ {{ unitPrice(orderPriceDetail.updatePrice) }}</span>
-              </div>
-
-              <div v-if="orderPriceDetail.payPoint > 0" class="summary-item">
-                <span class="label">使用积分抵扣</span>
-                <span class="value font-mono">{{ orderPriceDetail.payPoint }} 积分</span>
-              </div>
-
-              <div class="summary-divider"></div>
-
-              <div class="summary-item final-total">
-                <span class="label">订单应付总额</span>
-                <span class="final-price text-danger font-mono">
-                  ¥ {{ unitPrice(orderPriceDetail.flowPrice || orderInfo.order.flowPrice || 0) }}
+            <div class="kv-row">
+              <span class="kv-label">支付状态</span>
+              <div class="kv-val">
+                <el-tag
+                  size="small"
+                  :type="orderInfo.order.payStatus === 'PAID' ? 'success' : 'warning'"
+                  effect="light"
+                >
+                  {{ orderInfo.order.payStatus === "PAID" ? "已付款" : "待付款" }}
+                </el-tag>
+                <span v-if="orderInfo.paymentMethodValue" class="sub-pay-method">
+                  （{{ orderInfo.paymentMethodValue }}）
                 </span>
+              </div>
+            </div>
+
+            <div class="kv-row">
+              <span class="kv-label">应付总额</span>
+              <div class="kv-val text-danger font-bold font-mono">
+                ¥ {{ unitPrice(orderInfo.order.flowPrice) }}
               </div>
             </div>
           </div>
         </el-card>
       </el-col>
 
-      <!-- 右侧：买家画像、收件信息、发票与预约 -->
-      <el-col :xs="24" :sm="24" :md="9" :lg="9" :xl="8">
-        <!-- 1. 买家画像卡片 -->
-        <el-card shadow="never" class="section-card side-card">
-          <template #header>
-            <div class="card-title">
-              <el-icon><User /></el-icon>
-              <span>买家信息</span>
-            </div>
-          </template>
-
-          <div class="side-info-list">
-            <div class="side-info-item">
-              <span class="item-label">买家账号</span>
-              <div class="item-value font-bold">
-                <span>{{ orderInfo.order.memberName || "匿名买家" }}</span>
-              </div>
-            </div>
-
-            <div v-if="orderInfo.order.storeName" class="side-info-item">
-              <span class="item-label">成交店铺</span>
-              <div class="item-value font-bold text-dark">{{ orderInfo.order.storeName }}</div>
-            </div>
-          </div>
-        </el-card>
-
-        <!-- 2. 收货与配送信息卡片 -->
-        <el-card shadow="never" class="section-card side-card">
+      <!-- 2. 收货与配送信息 -->
+      <el-col :xs="24" :sm="24" :md="8">
+        <el-card shadow="never" class="section-card equal-card">
           <template #header>
             <div class="card-title justify-between">
               <div class="flex-title">
@@ -318,16 +191,16 @@
             </div>
           </template>
 
-          <div class="side-info-list">
-            <template v-if="!isECouponOrder && orderInfo.order.deliveryMethod != 'SELF_PICK_UP'">
-              <div class="side-info-item">
-                <span class="item-label">收货人</span>
-                <div class="item-value font-bold">{{ orderInfo.order.consigneeName || "-" }}</div>
+          <div class="kv-list">
+            <template v-if="!isECouponOrder && orderInfo.order.deliveryMethod !== 'SELF_PICK_UP'">
+              <div class="kv-row">
+                <span class="kv-label">收货人</span>
+                <div class="kv-val font-bold">{{ orderInfo.order.consigneeName || "-" }}</div>
               </div>
 
-              <div class="side-info-item">
-                <span class="item-label">联系电话</span>
-                <div class="item-value">
+              <div class="kv-row">
+                <span class="kv-label">联系电话</span>
+                <div class="kv-val">
                   <span class="font-mono">{{ orderInfo.order.consigneeMobile || "-" }}</span>
                   <el-tooltip v-if="orderInfo.order.consigneeMobile" content="复制手机号" placement="top">
                     <el-button
@@ -340,100 +213,114 @@
                 </div>
               </div>
 
-              <div class="side-info-item">
-                <span class="item-label">收货详细地址</span>
-                <div class="item-value address-text">
-                  {{ orderInfo.order.consigneeAddressPath || "" }} {{ orderInfo.order.consigneeDetail || "" }}
+              <div class="kv-row">
+                <span class="kv-label">收货地址</span>
+                <div class="kv-val address-val">
+                  {{ formatAddress(orderInfo.order.consigneeAddressPath, orderInfo.order.consigneeDetail) }}
                 </div>
               </div>
             </template>
 
-            <div v-else-if="orderInfo.order.deliveryMethod === 'SELF_PICK_UP'" class="side-info-item">
-              <span class="item-label">履约方式</span>
-              <div class="item-value font-bold text-success">买家自提</div>
+            <div v-else-if="orderInfo.order.deliveryMethod === 'SELF_PICK_UP'" class="kv-row">
+              <span class="kv-label">履约方式</span>
+              <div class="kv-val font-bold text-success">买家自提</div>
             </div>
 
-            <div v-if="!isNonPhysicalOrder" class="side-info-item">
-              <span class="item-label">配送方式</span>
-              <div class="item-value">{{ orderInfo.deliveryMethodValue || "-" }}</div>
+            <div v-if="!isNonPhysicalOrder" class="kv-row">
+              <span class="kv-label">配送方式</span>
+              <div class="kv-val">{{ orderInfo.deliveryMethodValue || "-" }}</div>
             </div>
 
-            <div class="side-divider"></div>
-
-            <div class="side-info-item">
-              <span class="item-label">买家留言</span>
-              <div class="item-value remark-text">
+            <div class="kv-row">
+              <span class="kv-label">买家留言</span>
+              <div class="kv-val" :class="{ 'text-gray': !orderInfo.order.remark }">
                 {{ orderInfo.order.remark || "暂无买家留言" }}
               </div>
             </div>
           </div>
         </el-card>
+      </el-col>
 
-        <!-- 3. 发票信息卡片 -->
-        <el-card shadow="never" class="section-card side-card">
+      <!-- 3. 发票与扩展信息 -->
+      <el-col :xs="24" :sm="24" :md="8">
+        <el-card shadow="never" class="section-card equal-card">
           <template #header>
             <div class="card-title">
               <el-icon><Document /></el-icon>
-              <span>发票信息</span>
+              <span>{{ isAppointmentOrder ? "发票与预约信息" : "发票与备注信息" }}</span>
             </div>
           </template>
 
-          <div v-if="orderInfo.order.needReceipt" class="side-info-list">
-            <div class="side-info-item">
-              <span class="item-label">发票抬头</span>
-              <div class="item-value font-bold">{{ orderInfo.receipt?.receiptTitle || "-" }}</div>
-            </div>
+          <div class="kv-list">
+            <template v-if="orderInfo.order.needReceipt">
+              <div class="kv-row">
+                <span class="kv-label">开票状态</span>
+                <div class="kv-val">
+                  <el-tag size="small" :type="orderInfo.receipt?.receiptStatus === 1 ? 'success' : 'info'">
+                    {{ orderInfo.receipt?.receiptStatus === 1 ? "已开票" : "未开票" }}
+                  </el-tag>
+                </div>
+              </div>
 
-            <div v-if="orderInfo.receipt?.taxpayerId" class="side-info-item">
-              <span class="item-label">纳税人识别号</span>
-              <div class="item-value font-mono">{{ orderInfo.receipt.taxpayerId }}</div>
-            </div>
+              <div class="kv-row">
+                <span class="kv-label">发票抬头</span>
+                <div class="kv-val font-bold">{{ orderInfo.receipt?.receiptTitle || "-" }}</div>
+              </div>
 
-            <div class="side-info-item">
-              <span class="item-label">发票内容</span>
-              <div class="item-value">{{ orderInfo.receipt?.receiptContent || "-" }}</div>
-            </div>
+              <div v-if="orderInfo.receipt?.taxpayerId" class="kv-row">
+                <span class="kv-label">纳税人识别号</span>
+                <div class="kv-val font-mono">{{ orderInfo.receipt.taxpayerId }}</div>
+              </div>
 
-            <div class="side-info-item">
-              <span class="item-label">发票金额</span>
-              <div class="item-value text-danger font-bold font-mono">
-                ¥ {{ Number(orderInfo.receipt?.receiptPrice || 0).toFixed(2) }}
+              <div class="kv-row">
+                <span class="kv-label">发票内容</span>
+                <div class="kv-val">{{ orderInfo.receipt?.receiptContent || "-" }}</div>
+              </div>
+
+              <div class="kv-row">
+                <span class="kv-label">发票金额</span>
+                <div class="kv-val text-danger font-bold font-mono">
+                  ¥ {{ Number(orderInfo.receipt?.receiptPrice || 0).toFixed(2) }}
+                </div>
+              </div>
+            </template>
+
+            <template v-else>
+              <div class="kv-row">
+                <span class="kv-label">是否开票</span>
+                <div class="kv-val">
+                  <el-tag size="small" type="info" effect="plain">未申请开票</el-tag>
+                </div>
+              </div>
+              <div class="kv-row">
+                <span class="kv-label">发票抬头</span>
+                <div class="kv-val text-gray">-</div>
+              </div>
+              <div class="kv-row">
+                <span class="kv-label">发票内容</span>
+                <div class="kv-val text-gray">-</div>
+              </div>
+            </template>
+
+            <div class="kv-row">
+              <span class="kv-label">商家备注</span>
+              <div class="kv-val" :class="{ 'text-gray': !orderInfo.order.sellerRemark }">
+                {{ orderInfo.order.sellerRemark || "暂无商家备注" }}
               </div>
             </div>
 
-            <div class="side-info-item">
-              <span class="item-label">开票状态</span>
-              <div class="item-value">
-                <el-tag size="small" :type="orderInfo.receipt?.receiptStatus === 1 ? 'success' : 'info'">
-                  {{ orderInfo.receipt?.receiptStatus === 1 ? "已开票" : "未开票" }}
-                </el-tag>
+            <template v-if="isAppointmentOrder">
+              <div v-if="appointmentSlotText" class="kv-row">
+                <span class="kv-label">预约时段</span>
+                <div class="kv-val font-bold text-primary">{{ appointmentSlotText }}</div>
               </div>
-            </div>
-          </div>
-          <div v-else class="empty-receipt-box">
-            <span class="text-gray">本订单买家未申请发票</span>
-          </div>
-        </el-card>
-
-        <!-- 4. 预约订单信息（若是预约服务） -->
-        <el-card v-if="isAppointmentOrder" shadow="never" class="section-card side-card">
-          <template #header>
-            <div class="card-title">
-              <el-icon><Clock /></el-icon>
-              <span>预约服务信息</span>
-            </div>
-          </template>
-
-          <div class="side-info-list">
-            <div v-if="appointmentSlotText" class="side-info-item">
-              <span class="item-label">预约服务时段</span>
-              <div class="item-value font-bold text-primary">{{ appointmentSlotText }}</div>
-            </div>
-
-            <template v-for="(rows, gi) in appointmentFormGroups" :key="'form-' + gi">
-              <div class="side-info-item">
-                <span class="item-label">{{ appointmentFormGroups.length > 1 ? `补充信息 ${gi + 1}` : '预约补充信息' }}</span>
-                <div class="item-value flex-col">
+              <div
+                v-for="(rows, gi) in appointmentFormGroups"
+                :key="'form-' + gi"
+                class="kv-row"
+              >
+                <span class="kv-label">{{ appointmentFormGroups.length > 1 ? `补充信息${gi + 1}` : "补充信息" }}</span>
+                <div class="kv-val flex-col">
                   <div v-for="row in rows" :key="row.fieldKey" class="form-ans-line">
                     <span class="f-label">{{ row.fieldLabel }}：</span>
                     <span class="f-val">{{ row.value }}</span>
@@ -445,6 +332,172 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 底部：全宽商品清单与费用结算 -->
+    <el-card shadow="never" class="section-card goods-section-card">
+      <template #header>
+        <div class="card-title justify-between">
+          <div class="flex-title">
+            <el-icon><Goods /></el-icon>
+            <span>商品清单</span>
+            <el-tag size="small" type="info" effect="plain" round class="count-badge">
+              共 {{ data.length }} 种 / {{ totalGoodsNum }} 件
+            </el-tag>
+          </div>
+        </div>
+      </template>
+
+      <el-table
+        v-loading="loading"
+        border
+        :data="data"
+        class="goods-table"
+        style="width: 100%"
+      >
+        <el-table-column label="商品信息" min-width="320">
+          <template #default="{ row }">
+            <div v-if="row" class="goods-item-cell">
+              <el-image
+                :src="row.image"
+                :preview-src-list="[row.image]"
+                fit="cover"
+                class="goods-thumb"
+              />
+              <div class="goods-info">
+                <div class="goods-name">
+                  <span>{{ row.goodsName }}</span>
+                </div>
+                <div v-if="row.specs" class="goods-specs">
+                  <span v-for="(val, key) in parseSpecs(row.specs)" :key="key" class="spec-tag">
+                    {{ key }}: {{ val }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="优惠活动" min-width="140" align="center">
+          <template #default="{ row }">
+            <el-tag v-if="getPromotionText(row) !== '未参与'" size="small" type="warning">
+              {{ getPromotionText(row) }}
+            </el-tag>
+            <span v-else class="text-gray">-</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="单价" width="150" align="center">
+          <template #default="{ row }">
+            <span class="font-mono font-bold">¥ {{ Number(row.unitPrice || 0).toFixed(2) }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="num" label="数量" width="110" align="center" />
+
+        <el-table-column prop="returnGoodsNumber" label="已退款" width="110" align="center">
+          <template #default="{ row }">
+            <span :class="row.returnGoodsNumber > 0 ? 'text-danger font-bold' : 'text-gray'">
+              {{ row.returnGoodsNumber || 0 }}
+            </span>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="小计" width="160" align="right" header-align="center">
+          <template #default="{ row }">
+            <span class="text-danger font-bold font-mono pr_12">
+              ¥ {{ Number(row.flowPrice || 0).toFixed(2) }}
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 电子卡券卡密列表 -->
+      <div v-if="isECouponOrder" class="ecoupon-card-keys mt_16">
+        <div class="sub-header-title">
+          <el-icon><Tickets /></el-icon>
+          <span>卡密发放明细</span>
+        </div>
+        <el-alert
+          v-if="!ecouponCardKeyDelivered"
+          type="info"
+          show-icon
+          :closable="false"
+          title="卡密尚未发放"
+          class="mb_10"
+        />
+        <el-table
+          v-else-if="ecouponCardKeyRows.length"
+          border
+          size="small"
+          :data="ecouponCardKeyRows"
+          style="width: 100%"
+        >
+          <el-table-column type="index" label="序号" width="60" align="center" />
+          <el-table-column prop="cardNo" label="卡号" min-width="140" show-overflow-tooltip />
+          <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
+          <el-table-column prop="allocatedTime" label="发卡时间" width="170" align="center" />
+          <el-table-column label="状态" width="100" align="center">
+            <template #default="{ row }">
+              <el-tag size="small" type="success">{{ formatCardKeyStatus(row.status || 'ALLOCATED') }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="80" align="center">
+            <template #default="{ row }">
+              <el-button link type="primary" size="small" @click="copyCardKey(row)">复制</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <!-- 商品清单底部金额汇总与核算 -->
+      <div class="goods-summary-footer">
+        <div class="summary-rows">
+          <div class="summary-item">
+            <span class="label">商品总额</span>
+            <span class="value font-mono">¥ {{ unitPrice(orderPriceDetail.goodsPrice || orderInfo.order.goodsPrice || 0) }}</span>
+          </div>
+
+          <div v-if="!isECouponOrder" class="summary-item">
+            <span class="label">运费</span>
+            <span class="value font-mono">+ ¥ {{ unitPrice(orderInfo.order.freightPrice || 0) }}</span>
+          </div>
+
+          <div v-if="orderPriceDetail.discountPrice > 0" class="summary-item">
+            <span class="label">活动优惠抵扣</span>
+            <span class="value text-success font-mono">- ¥ {{ unitPrice(orderPriceDetail.discountPrice) }}</span>
+          </div>
+
+          <div v-if="orderPriceDetail.couponPrice > 0" class="summary-item">
+            <span class="label">优惠券抵扣</span>
+            <span class="value text-success font-mono">- ¥ {{ unitPrice(orderPriceDetail.couponPrice) }}</span>
+          </div>
+
+          <div v-if="orderPriceDetail.giftCardPrice > 0" class="summary-item">
+            <span class="label">礼品卡抵扣</span>
+            <span class="value text-success font-mono">- ¥ {{ unitPrice(orderPriceDetail.giftCardPrice) }}</span>
+          </div>
+
+          <div v-if="orderPriceDetail.updatePrice" class="summary-item">
+            <span class="label">人工改价调整</span>
+            <span class="value font-mono">¥ {{ unitPrice(orderPriceDetail.updatePrice) }}</span>
+          </div>
+
+          <div v-if="orderPriceDetail.payPoint > 0" class="summary-item">
+            <span class="label">使用积分抵扣</span>
+            <span class="value font-mono">{{ orderPriceDetail.payPoint }} 积分</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-item final-total">
+            <span class="label">订单应付总额</span>
+            <span class="final-price text-danger font-mono">
+              ¥ {{ unitPrice(orderPriceDetail.flowPrice || orderInfo.order.flowPrice || 0) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </el-card>
 
     <!-- 弹窗：修改金额 -->
     <el-dialog v-model="modal" title="调整订单金额" width="480px" destroy-on-close>
@@ -786,6 +839,7 @@ import {
   TopRight,
   User,
   Edit,
+  Check,
 } from "@element-plus/icons-vue";
 
 defineOptions({ name: "orderDetail" });
@@ -998,6 +1052,29 @@ function getOrderStatusTagType(status) {
     CANCELLED: "info",
   };
   return map[status] || "info";
+}
+
+function isStepFinished(sIdx) {
+  const status = orderInfo.value?.order?.orderStatus;
+  if (status === "CANCELLED") return sIdx === 0;
+  return sIdx < currentStepIndex.value;
+}
+
+function getStepStateClass(sIdx) {
+  const status = orderInfo.value?.order?.orderStatus;
+  if (status === "CANCELLED") {
+    return sIdx === 0 ? "is-done" : "is-cancelled";
+  }
+  if (sIdx < currentStepIndex.value) return "is-done";
+  if (sIdx === currentStepIndex.value) return "is-active";
+  return "is-pending";
+}
+
+function formatAddress(path, detail) {
+  const cleanPath = (path || "").replace(/,/g, " ").trim();
+  const cleanDetail = (detail || "").trim();
+  const full = [cleanPath, cleanDetail].filter(Boolean).join(" ");
+  return full || "-";
 }
 
 function parseSpecs(specs) {
@@ -1327,194 +1404,273 @@ onMounted(() => {
 <style lang="scss" scoped>
 .order-detail-page {
   width: 100%;
-  padding-bottom: 30px;
+  padding-bottom: 28px;
 
-  .page-top-nav {
-    margin-bottom: 14px;
-
-    :deep(.el-page-header__left) {
-      margin-right: 16px;
-    }
-
-    .nav-content {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-
-      .page-title {
-        font-size: 17px;
-        font-weight: 700;
-        color: #1e293b;
-      }
-
-      .page-sn {
-        font-size: 13px;
-        color: #94a3b8;
-      }
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-  }
-
-  .status-header-card {
+  // 顶部一体化状态与履约步骤卡片
+  .top-overview-card {
     border-radius: 10px;
-    border: 1px solid #ebeef5;
+    border: 1px solid #e2e8f0;
     background: #fff;
-    margin-bottom: 18px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
 
     :deep(.el-card__body) {
-      padding: 20px 24px;
+      padding: 16px 22px 18px;
     }
 
-    .header-main {
+    .overview-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px dashed #f1f5f9;
-    }
+      gap: 14px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
 
-    .status-summary-left {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      .status-badge-wrap {
+      .header-left {
         display: flex;
         align-items: center;
-        gap: 10px;
+        flex-wrap: wrap;
+        gap: 12px;
 
-        .status-tag {
+        .back-btn {
           font-size: 14px;
-          padding: 6px 14px;
-          height: auto;
           font-weight: 600;
-        }
+          color: #475569;
+          padding: 4px 2px;
 
-        .type-tag {
-          font-size: 13px;
-        }
-      }
+          &:hover {
+            color: var(--el-color-primary);
+          }
 
-      .sn-info-wrap {
-        display: flex;
-        align-items: center;
-        font-size: 14px;
-        color: #475569;
-
-        .sn-label {
-          color: #94a3b8;
-        }
-
-        .sn-text {
-          font-weight: 600;
-          color: #1e293b;
-          font-size: 15px;
-        }
-
-        .copy-btn {
-          margin-left: 6px;
-          font-size: 15px;
-        }
-      }
-
-      .create-time-text {
-        font-size: 12px;
-        color: #94a3b8;
-      }
-    }
-
-    .status-metrics-right {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      background: #f8fafc;
-      padding: 12px 20px;
-      border-radius: 8px;
-      border: 1px solid #edf2f7;
-
-      .metric-block {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        .metric-label {
-          font-size: 12px;
-          color: #64748b;
-        }
-
-        .metric-val {
-          font-size: 18px;
-          font-weight: 700;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-          small {
-            font-size: 12px;
-            font-weight: normal;
+          .el-icon {
+            margin-right: 4px;
+            font-size: 15px;
           }
         }
+
+        .header-divider {
+          width: 1px;
+          height: 16px;
+          background: #cbd5e1;
+        }
+
+        .main-status-tag {
+          font-size: 13px;
+          font-weight: 600;
+          padding: 0 12px;
+          height: 28px;
+          border-radius: 6px;
+        }
+
+        .sn-title-group {
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+
+          .sn-label {
+            color: #64748b;
+          }
+
+          .sn-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: 0.3px;
+          }
+
+          .copy-icon-btn {
+            margin-left: 4px;
+            font-size: 15px;
+          }
+        }
+
+        .meta-tags {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
       }
 
-      .metric-divider {
-        width: 1px;
-        height: 28px;
-        background: #e2e8f0;
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
       }
     }
 
-    .lifecycle-steps-wrap {
-      padding-top: 22px;
+    // 紧凑型横向履约进度条
+    .fulfillment-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding: 14px 24px;
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 8px;
+      gap: 12px;
 
-      :deep(.el-step__title) {
-        font-size: 14px;
-        font-weight: 600;
-      }
+      .step-item {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        min-width: 0;
 
-      :deep(.el-step__description) {
-        font-size: 12px;
+        &:last-child {
+          flex: 0 0 auto;
+        }
+
+        .step-node {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-shrink: 0;
+        }
+
+        .step-circle {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: 700;
+          border: 2px solid #cbd5e1;
+          background: #fff;
+          color: #94a3b8;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+        }
+
+        .step-text {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+
+          .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            line-height: 1.3;
+          }
+
+          .step-desc {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.3;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+          }
+        }
+
+        .step-connector {
+          flex: 1;
+          height: 2px;
+          background: #e2e8f0;
+          margin: 0 20px;
+          border-radius: 2px;
+          min-width: 30px;
+        }
+
+        // 已完成状态
+        &.is-done {
+          .step-circle {
+            border-color: #10b981;
+            background: #ecfdf5;
+            color: #10b981;
+          }
+          .step-text .step-title {
+            color: #0f172a;
+          }
+          .step-text .step-desc {
+            color: #10b981;
+          }
+          .step-connector {
+            background: #10b981;
+          }
+        }
+
+        // 当前进行中状态
+        &.is-active {
+          .step-circle {
+            border-color: #3b82f6;
+            background: #3b82f6;
+            color: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+          }
+          .step-text .step-title {
+            color: #1e293b;
+            font-weight: 700;
+          }
+          .step-text .step-desc {
+            color: #3b82f6;
+            font-weight: 500;
+          }
+        }
+
+        // 已取消状态
+        &.is-cancelled {
+          .step-circle {
+            border-color: #e2e8f0;
+            background: #f1f5f9;
+            color: #cbd5e1;
+          }
+        }
       }
     }
   }
 
-  .content-row {
-    margin-top: 0;
+  // 中部三列等高卡片网格
+  .info-grid-row {
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+
+    :deep(.el-col) {
+      display: flex;
+      margin-bottom: 0;
+    }
   }
 
   .section-card {
     border-radius: 10px;
-    border: 1px solid #ebeef5;
+    border: 1px solid #e2e8f0;
     background: #fff;
-    margin-bottom: 18px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+    width: 100%;
+
+    &.equal-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+
+      :deep(.el-card__body) {
+        flex: 1;
+      }
+    }
 
     :deep(.el-card__header) {
-      padding: 14px 20px;
+      padding: 13px 18px;
       border-bottom: 1px solid #f1f5f9;
-      background: #fafafa;
+      background: #fafbfc;
     }
 
     :deep(.el-card__body) {
-      padding: 18px 20px;
+      padding: 16px 18px;
     }
 
     .card-title {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       color: #1e293b;
 
       .el-icon {
-        font-size: 17px;
+        font-size: 16px;
         color: #ff6a00;
       }
 
@@ -1528,6 +1684,92 @@ onMounted(() => {
         align-items: center;
         gap: 8px;
       }
+
+      .count-badge {
+        margin-left: 4px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // 水平对齐键值对列表
+  .kv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .kv-row {
+      display: flex;
+      align-items: flex-start;
+      font-size: 13px;
+      line-height: 20px;
+
+      .kv-label {
+        width: 82px;
+        flex-shrink: 0;
+        color: #64748b;
+        font-weight: 400;
+      }
+
+      .kv-val {
+        flex: 1;
+        min-width: 0;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        word-break: break-all;
+
+        &.address-val {
+          line-height: 20px;
+          color: #334155;
+        }
+
+        &.flex-col {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+        }
+
+        .member-name-text {
+          display: inline-block;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          vertical-align: bottom;
+        }
+
+        .sub-pay-method {
+          font-size: 12px;
+          color: #64748b;
+        }
+      }
+
+      .form-ans-line {
+        font-size: 13px;
+        color: #334155;
+        line-height: 20px;
+
+        .f-label {
+          color: #64748b;
+        }
+      }
+    }
+  }
+
+  // 商品表格与底部结算卡
+  .goods-section-card {
+    margin-bottom: 0;
+
+    .goods-table {
+      :deep(th.el-table__cell) {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        height: 44px;
+      }
     }
   }
 
@@ -1536,11 +1778,11 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 6px 0;
+    padding: 4px 0;
 
     .goods-thumb {
-      width: 60px;
-      height: 60px;
+      width: 56px;
+      height: 56px;
       border-radius: 6px;
       border: 1px solid #e2e8f0;
       flex-shrink: 0;
@@ -1572,7 +1814,7 @@ onMounted(() => {
           color: #64748b;
           background: #f1f5f9;
           padding: 1px 6px;
-          border-radius: 3px;
+          border-radius: 4px;
         }
       }
     }
@@ -1596,15 +1838,17 @@ onMounted(() => {
   .goods-summary-footer {
     display: flex;
     justify-content: flex-end;
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px solid #f1f5f9;
+    margin-top: 16px;
 
     .summary-rows {
-      width: 330px;
+      width: 340px;
+      background: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 8px;
+      padding: 14px 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
 
       .summary-item {
         display: flex;
@@ -1622,17 +1866,17 @@ onMounted(() => {
         }
 
         &.final-total {
-          padding-top: 6px;
+          padding-top: 4px;
           align-items: baseline;
 
           .label {
             font-size: 14px;
             font-weight: 600;
-            color: #1e293b;
+            color: #0f172a;
           }
 
           .final-price {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
           }
         }
@@ -1643,65 +1887,6 @@ onMounted(() => {
         background: #e2e8f0;
         margin: 4px 0;
       }
-    }
-  }
-
-  // 侧边栏卡片
-  .side-card {
-    .side-info-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-
-      .side-info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        .item-label {
-          font-size: 12px;
-          color: #94a3b8;
-        }
-
-        .item-value {
-          font-size: 14px;
-          color: #1e293b;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-
-          &.address-text,
-          &.remark-text {
-            line-height: 20px;
-            color: #334155;
-          }
-
-          &.flex-col {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-        }
-
-        .form-ans-line {
-          font-size: 13px;
-          color: #334155;
-          line-height: 20px;
-
-          .f-label {
-            color: #64748b;
-          }
-        }
-      }
-
-      .side-divider {
-        height: 1px;
-        background: #f1f5f9;
-        margin: 4px 0;
-      }
-    }
-
-    .empty-receipt-box {
-      padding: 10px 0;
     }
   }
 
@@ -1718,9 +1903,10 @@ onMounted(() => {
   .text-gray { color: #94a3b8; }
   .text-dark { color: #0f172a; }
   .font-bold { font-weight: 600; }
-  .font-mono { font-family: monospace; }
+  .font-mono { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; }
   .mt_16 { margin-top: 16px; }
   .mb_10 { margin-bottom: 10px; }
+  .pr_12 { padding-right: 12px; }
 }
 </style>
 

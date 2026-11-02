@@ -39,6 +39,20 @@ export const otherRouter = {
   component: Main,
   children: [
     {
+      path: "messageTemplate",
+      title: "消息模板",
+      name: "messageTemplate",
+      meta: { title: "消息模板" },
+      component: () => import("@/views/sys/message/messageTemplate.vue")
+    },
+    {
+      path: "noticeMessageTemplate",
+      title: "消息模板",
+      name: "noticeMessageTemplate",
+      meta: { title: "消息模板" },
+      component: () => import("@/views/sys/message/messageTemplate.vue")
+    },
+    {
       path: "home",
       title: '首页',
       name: "home_index",

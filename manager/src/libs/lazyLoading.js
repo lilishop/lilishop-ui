@@ -4,6 +4,7 @@ const viewContext = require.context("@/views", true, /\.vue$/);
 const VIEW_ALIASES = {
   "customWords/index": "custom-words/index",
   "sensitiveWords/index": "sensitive-words/index",
+  "sys/message/noticeMessageTemplate": "sys/message/messageTemplate",
 };
 
 function resolveViewPath(url) {

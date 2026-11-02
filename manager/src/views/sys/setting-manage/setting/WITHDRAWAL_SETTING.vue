@@ -26,6 +26,7 @@
             v-model="formValidate.withdrawRule"
             type="textarea"
             :rows="6"
+            resize="none"
             placeholder="请输入提现规则说明（需包含可提现额度、每日提现次数、提现时间、到账时间等，以满足微信审核要求）"
           />
           <div class="rule-tip">展示在移动端/小程序提现页面底部，用于满足微信审核对提现规则公示的要求。</div>

@@ -1,50 +1,61 @@
 <template>
-  <div class="layout">
+  <div class="setting-page">
     <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <el-form-item label="消费1元赠送积分" prop="consumer">
-        <el-input type="number" v-model="formValidate.consumer">
-          <template #append>积分</template>
-        </el-input>
-      </el-form-item>
+      <div class="setting-section">
+        <div class="section-title">积分赠送</div>
+        <el-form-item label="消费1元赠送积分" prop="consumer">
+          <el-input class="w400" type="number" v-model="formValidate.consumer">
+            <template #append>积分</template>
+          </el-input>
+        </el-form-item>
 
-      <el-form-item label="注册账号" prop="register">
-        <el-input type="number" v-model="formValidate.register">
-          <template #append>积分</template>
-        </el-input>
-      </el-form-item>
+        <el-form-item label="注册账号" prop="register">
+          <el-input class="w400" type="number" v-model="formValidate.register">
+            <template #append>积分</template>
+          </el-input>
+        </el-form-item>
 
-      <el-form-item label="每日签到积分" prop="signIn">
-        <el-input type="number" v-model="formValidate.signIn">
-          <template #append>积分</template>
-        </el-input>
-      </el-form-item>
-      <el-form-item label="订单评价赠送积分" prop="comment">
-        <el-input type="number" v-model="formValidate.comment">
-          <template #append>积分</template>
-        </el-input>
-      </el-form-item>
+        <el-form-item label="订单评价赠送积分" prop="comment">
+          <el-input class="w400" type="number" v-model="formValidate.comment">
+            <template #append>积分</template>
+          </el-input>
+        </el-form-item>
+      </div>
 
-      <el-form-item
-        class="label-item"
-        v-for="(point, index) in formValidate.pointSettingItems"
-        :key="index"
-        :label="'签到设置' + (index + 1)"
-      >
-        <div class="label-item">
-          <el-input-number :min="1" v-model="point.day" />
-          <el-input-number :min="0" v-model="point.point" />
-          <el-button plain type="danger" @click="delSign(point, index)">删除</el-button>
-          <span class="ml_10"
-            >签到<span class="theme_color">{{ point.day }}</span
-            >天，赠送<span class="theme_color">{{ point.point }}</span
-            >积分</span
-          >
-        </div>
-      </el-form-item>
-      <el-form-item label="操作：">
-        <el-button @click="addSign">新增签到</el-button>
-      </el-form-item>
-      <div class="label-btns">
+      <div class="setting-section">
+        <div class="section-title">签到奖励</div>
+        <el-form-item label="每日签到积分" prop="signIn">
+          <el-input class="w400" type="number" v-model="formValidate.signIn">
+            <template #append>积分</template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="label-item"
+          v-for="(point, index) in formValidate.pointSettingItems"
+          :key="index"
+          :label="'签到设置' + (index + 1)"
+        >
+          <div class="label-item">
+            <el-input-number :min="1" v-model="point.day" />
+            <el-input-number :min="0" v-model="point.point" />
+            <el-button plain type="danger" @click="delSign(point, index)">删除</el-button>
+            <span class="ml_10"
+              >签到<span class="theme_color">{{ point.day }}</span
+              >天，赠送<span class="theme_color">{{ point.point }}</span
+              >积分</span
+            >
+          </div>
+        </el-form-item>
+        <el-form-item label=" ">
+          <div class="field-item">
+            <el-button @click="addSign">新增签到</el-button>
+            <span class="field-desc">连续签到满指定天数时，当天按规则赠送积分（替代当日基础签到积分），最多可添加4条</span>
+          </div>
+        </el-form-item>
+      </div>
+
+      <div class="submit-bar">
         <el-button type="primary" @click="submit('formValidate')">保存</el-button>
       </div>
     </el-form>
@@ -135,6 +146,38 @@ init();
 <style lang="scss" scoped>
 @import "./style.scss";
 
+.setting-page {
+  padding: 16px 0;
+}
+
+.setting-section {
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 20px 24px 4px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 20px;
+}
+
+.field-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.field-desc {
+  margin-top: 8px;
+  color: #999;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .label-item {
   display: flex;
 
@@ -147,25 +190,15 @@ init();
     width: 180px;
     margin-right: 5px;
   }
-
-  > .el-input {
-    width: 180px;
-    margin: 0 10px;
-  }
 }
 
-:deep(.el-input){
-  width: 180px !important;
+// 覆盖共享样式里 :deep(.el-input) 的 200px !important，仅统一普通输入框宽度，签到规则行内的数字框不受影响
+:deep(.el-input.w400) {
+  width: 400px !important;
 }
 
-.el-input {
-  width: 180px;
-  margin-right: 10px;
-}
-
-.label-btns {
-  :deep(.el-button){
-    margin-right: 10px;
-  }
+.submit-bar {
+  text-align: center;
+  margin: 24px 0 8px;
 }
 </style>

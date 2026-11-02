@@ -1,81 +1,57 @@
 <template>
-  <div class="layout">
+  <div class="setting-page">
     <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
-      <el-form-item label="站点名称" prop="siteName">
-        <el-input style="width:200px;" v-model="formValidate.siteName" />
-        <span class="desc">配置买家端站点名称</span>
-      </el-form-item>
-      <el-form-item label="icp" prop="icp">
-        <el-input v-model="formValidate.icp" />
-      </el-form-item>
+      <div class="setting-section">
+        <div class="section-title">商城信息</div>
+        <el-form-item label="商城名称" prop="siteName">
+          <el-input v-model="formValidate.siteName" />
+        </el-form-item>
+        <el-form-item label="站点地址" prop="staticPageAddress">
+          <el-input v-model="formValidate.staticPageAddress" />
+        </el-form-item>
+        <el-form-item label="wap站点地址" prop="staticPageWapAddress">
+          <el-input v-model="formValidate.staticPageWapAddress" />
+        </el-form-item>
 
-      <el-form-item label="后台Logo" prop="domainLogo">
-        <div class="label-item-upload">
-          <img alt="平台 Logo" v-if="formValidate.domainLogo" class="img" :src="formValidate.domainLogo" />
-          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
-          <el-button @click="onClickImg('domainLogo')">选择图片</el-button>
-          <span class="desc">后台管理左上角logo展示 	17∶6</span>
-        </div>
-      </el-form-item>
-      <el-form-item label="后台Icon" prop="domainIcon">
-        <div class="label-item-upload">
-          <img alt="平台图标" v-if="formValidate.domainIcon" class="img" :src="formValidate.domainIcon" />
-          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
-          <el-button @click="onClickImg('domainIcon')">选择图片</el-button>
-          <span class="desc">后台管理网站icon展示 	1∶1</span>
-        </div>
-      </el-form-item>
-      <el-form-item label="买家端Logo" prop="buyerSideLogo">
-        <div class="label-item-upload">
-          <img alt="买家端 Logo" v-if="formValidate.buyerSideLogo" class="img" :src="formValidate.buyerSideLogo" />
-          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
-          <el-button @click="onClickImg('buyerSideLogo')">选择图片</el-button>
-          <span class="desc">买家端logo展示 	17∶6</span>
-        </div>
-      </el-form-item>
-      <el-form-item label="买家端Icon" prop="buyerSideIcon">
-        <div class="label-item-upload">
-          <img alt="买家端图标" v-if="formValidate.buyerSideIcon" class="img" :src="formValidate.buyerSideIcon" />
-          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
-          <el-button @click="onClickImg('buyerSideIcon')">选择图片</el-button>
-          <span class="desc">买家端网站icon展示 	1∶1</span>
-        </div>
-      </el-form-item>
-      <el-form-item label="商家端Logo" prop="storeSideLogo">
-        <div class="label-item-upload">
-          <img alt="商家端 Logo" v-if="formValidate.storeSideLogo" class="img" :src="formValidate.storeSideLogo" />
-          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
-          <el-button @click="onClickImg('storeSideLogo')">选择图片</el-button>
-          <span class="desc">商家端logo展示 	17∶6</span>
-        </div>
-      </el-form-item>
-      <el-form-item label="商家端Icon" prop="storeSideIcon">
-        <div class="label-item-upload">
-          <img alt="商家端图标" v-if="formValidate.storeSideIcon" class="img" :src="formValidate.storeSideIcon" />
-          <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
-          <el-button @click="onClickImg('storeSideIcon')">选择图片</el-button>
-          <span class="desc">商家端icon展示 	1∶1</span>
-        </div>
-      </el-form-item>
+        <el-form-item label="商城Logo" prop="domainLogo">
+          <div class="upload-item">
+            <div class="upload-row">
+              <img alt="商城 Logo" v-if="formValidate.domainLogo" class="img img-logo" :src="formValidate.domainLogo" />
+              <img v-else class="img img-logo" src="../../../../assets/emptyImg.png" alt="" />
+              <el-button @click="onClickImg('domainLogo')">选择图片</el-button>
+            </div>
+            <span class="field-desc">各端logo统一展示，建议比例 17:6</span>
+          </div>
+        </el-form-item>
+        <el-form-item label="商城Icon" prop="domainIcon">
+          <div class="upload-item">
+            <div class="upload-row">
+              <img alt="商城图标" v-if="formValidate.domainIcon" class="img" :src="formValidate.domainIcon" />
+              <img v-else class="img" src="../../../../assets/emptyImg.png" alt="" />
+              <el-button @click="onClickImg('domainIcon')">选择图片</el-button>
+            </div>
+            <span class="field-desc">各端网站icon统一展示，建议比例 1:1</span>
+          </div>
+        </el-form-item>
+      </div>
 
-      <el-form-item label="站点地址" prop="staticPageAddress">
-        <el-input style="width:200px;" v-model="formValidate.staticPageAddress" />
-      </el-form-item>
-      <el-form-item label="wap站点地址" prop="staticPageWapAddress">
-        <el-input v-model="formValidate.staticPageWapAddress" />
-      </el-form-item>
-      <el-form-item label="公司名称" prop="companyName">
-        <el-input style="width:350px;" v-model="formValidate.companyName" />
-        <span class="desc">页脚展示的公司名称</span>
-      </el-form-item>
-      <el-form-item label="公司链接" prop="companyUrl">
-        <el-input style="width:350px;" v-model="formValidate.companyUrl" />
-        <span class="desc">页脚公司名称的跳转链接</span>
-      </el-form-item>
-      <el-form-item label="官网地址" prop="website">
-        <el-input style="width:350px;" v-model="formValidate.website" />
-      </el-form-item>
-      <div class="label-btns">
+      <div class="setting-section">
+        <div class="section-title">公司信息</div>
+        <el-form-item label="公司名称" prop="companyName">
+          <el-input v-model="formValidate.companyName" />
+        </el-form-item>
+        <el-form-item label="公司链接" prop="companyUrl">
+          <el-input v-model="formValidate.companyUrl" />
+        </el-form-item>
+        <el-form-item label="官网地址" prop="website">
+          <el-input v-model="formValidate.website" />
+        </el-form-item>
+        <el-form-item label="ICP备案号" prop="icp">
+          <el-input v-model="formValidate.icp" />
+        </el-form-item>
+      </div>
+
+      <div class="submit-bar">
         <el-button type="primary" @click="submit('formValidateRef')">保存</el-button>
       </div>
     </el-form>
@@ -152,6 +128,10 @@ function callbackSelected(val) {
   formValidate.value[selected.value] = val.url;
 }
 function setupSetting() {
+  formValidate.value.buyerSideLogo = formValidate.value.domainLogo;
+  formValidate.value.storeSideLogo = formValidate.value.domainLogo;
+  formValidate.value.buyerSideIcon = formValidate.value.domainIcon;
+  formValidate.value.storeSideIcon = formValidate.value.domainIcon;
   setSetting(props.type, formValidate.value).then((res) => {
     if (res.success) {
       ElMessage.success("保存成功!");
@@ -181,20 +161,65 @@ init();
 </script>
 <style scoped lang="scss">
 @import "./style.scss";
-.label-item {
-  display: flex;
-  > .el-input {
-    width: 200px;
-    margin: 0 10px;
-  }
+
+.setting-page {
+  padding: 16px 0;
 }
-.label-item-upload {
+
+.setting-section {
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 20px 24px 4px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 20px;
+}
+
+.field-desc {
+  margin-top: 8px;
+  color: #999;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.upload-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.upload-row {
   display: flex;
   align-items: flex-end;
   img {
     margin-right: 10px;
     width: 100px;
     height: 100px;
+    object-fit: contain;
   }
+  // Logo 按建议比例 17:6 展示
+  img.img-logo {
+    width: 170px;
+    height: 60px;
+    border: 1px solid #ebeef5;
+    border-radius: 4px;
+    background: #fafafa;
+  }
+}
+
+// 覆盖共享样式里 :deep(.el-input) 的 200px !important，统一输入框宽度
+:deep(.el-input) {
+  width: 400px !important;
+}
+
+.submit-bar {
+  text-align: center;
+  margin: 24px 0 8px;
 }
 </style>

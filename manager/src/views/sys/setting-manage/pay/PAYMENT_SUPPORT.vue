@@ -1,48 +1,32 @@
 <template>
-  <div class="layout">
-    <div class="row" v-for="(item, index) in formValidate" :key="index">
-      <div class="col">
-        <el-card shadow="never" :body-style="{ padding: '0 16px' }">
-          <div class="icon-item" v-if="item.client == 'APP'">
-            <img class="icon" src="../../../../assets/setting/app.svg" alt="" />
-          </div>
-          <div class="icon-item" v-if="item.client == 'PC'">
-            <img class="icon" src="../../../../assets/setting/pc.svg" alt="" />
-          </div>
-          <div class="icon-item" v-if="item.client == 'WECHAT_MP'">
-            <img class="icon" src="../../../../assets/setting/wechat_mp.svg" alt="" />
-          </div>
-          <div class="icon-item" v-if="item.client == 'H5'">
-            <img class="icon" src="../../../../assets/setting/h5.svg" alt="" />
-          </div>
-          <div class="pay-title">{{ way[item.client] }}</div>
-
-          <div>
-            <el-divider content-position="left">支付设置</el-divider>
-
-            <div class="pay-list">
-              <el-checkbox-group v-model="item.supports" @change="handleChangePayType">
-                <el-checkbox
-                  v-for="(support, i) in supportForm.payments"
-                  :key="i"
-                  :value="support"
-                >
-                  {{ payWay[support] || support }}
-                </el-checkbox>
-              </el-checkbox-group>
-            </div>
-          </div>
-        </el-card>
+  <div class="setting-page">
+    <div class="setting-section" v-for="(item, index) in formValidate" :key="index">
+      <div class="section-title">
+        <img class="client-icon" :src="clientIcons[item.client]" alt="" />
+        <span>{{ way[item.client] || item.client }}</span>
+      </div>
+      <div class="pay-options">
+        <el-checkbox
+          v-for="payment in paymentOptions"
+          :key="payment"
+          :model-value="item.supports.includes(payment)"
+          :label="payWay[payment] || payment"
+          @change="(val) => togglePay(item, payment, val)"
+        />
       </div>
     </div>
   </div>
 </template>
 <script setup>
-import { getCurrentInstance, ref } from "vue";
+import { computed, getCurrentInstance, ref } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { setSetting } from "@/api/index";
 import { handleSubmit } from "../setting/validate";
 import { getPaymentSupportForm } from "@/api/setting";
+import iconApp from "../../../../assets/setting/app.svg";
+import iconPc from "../../../../assets/setting/pc.svg";
+import iconWechatMp from "../../../../assets/setting/wechat_mp.svg";
+import iconH5 from "../../../../assets/setting/h5.svg";
 
 const DEFAULT_PAYMENT_SUPPORT_ITEMS = [
   { client: "PC", supports: [] },
@@ -58,10 +42,16 @@ const { proxy } = getCurrentInstance();
 
 const ruleValidate = ref({});
 const way = {
-  APP: "移动应用端",
-  H5: "移动端",
-  WECHAT_MP: "小程序端",
-  PC: "PC端",
+  APP: "APP",
+  H5: "手机网页",
+  WECHAT_MP: "微信小程序",
+  PC: "电脑网页",
+};
+const clientIcons = {
+  APP: iconApp,
+  PC: iconPc,
+  WECHAT_MP: iconWechatMp,
+  H5: iconH5,
 };
 const formValidate = ref([]);
 const payWay = {
@@ -70,7 +60,8 @@ const payWay = {
   WALLET: "余额支付",
 };
 const supportForm = ref("");
-const checkSupport = ref({});
+
+const paymentOptions = computed(() => supportForm.value.payments || []);
 
 function submit(name) {
   handleSubmit(proxy, name)
@@ -79,17 +70,21 @@ function submit(name) {
     })
     .catch(() => {});
 }
-function handleChangePayType(val) {
-  ElMessageBox.confirm("您是否修改此项？", "修改支付设置", { type: "warning" }).then(() => {
-    setupSetting();
-  }).catch(() => {
-    formValidate.value = JSON.parse(JSON.stringify(checkSupport.value));
-  });
+function togglePay(row, payment, checked) {
+  ElMessageBox.confirm("您是否修改此项？", "修改支付设置", { type: "warning" })
+    .then(() => {
+      if (checked) {
+        row.supports.push(payment);
+      } else {
+        row.supports = row.supports.filter((p) => p !== payment);
+      }
+      setupSetting();
+    })
+    .catch(() => {});
 }
 function setupSetting() {
   setSetting(props.type, { paymentSupportItems: formValidate.value }).then((res) => {
     if (res.success) {
-      checkSupport.value = JSON.parse(JSON.stringify(formValidate.value));
       ElMessage.success("保存成功!");
     } else {
       ElMessage.error("保存失败!");
@@ -101,7 +96,10 @@ function init() {
   const items = setting.paymentSupportItems;
   formValidate.value =
     Array.isArray(items) && items.length ? items : DEFAULT_PAYMENT_SUPPORT_ITEMS;
-  checkSupport.value = JSON.parse(JSON.stringify(formValidate.value));
+  // 清理历史已保存的失效支付方式，下次保存时一并去除
+  formValidate.value.forEach((item) => {
+    item.supports = (item.supports || []).filter((p) => p in payWay);
+  });
 
   getPaymentSupportForm().then((res) => {
     if (res.success && res.result) {
@@ -115,48 +113,37 @@ init();
 
 <style lang="scss" scoped>
 @import "../setting/style.scss";
-.pay-title {
-  text-align: center;
-  margin: 10px 0;
-}
-.layout {
-  padding: 20px;
 
+.setting-page {
+  padding: 16px;
+}
+
+.setting-section {
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.section-title {
   display: flex;
   align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 16px;
+}
+
+.client-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.pay-options {
+  display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
-}
-.row {
-  width: 300px;
-  margin-right: 20px;
-  display: flex;
-  margin-bottom: 20px;
-}
-
-.label-item {
-  display: flex;
-  align-items: center;
-}
-.pay-list {
-  display: flex;
-  justify-content: center;
-  padding-bottom: 10px;
-}
-.icon-item {
-  width: 100%;
-  padding: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-.el-form-item {
-  display: flex;
-  align-items: center;
-}
-.icon {
-  width: 100px;
-  height: 100px;
+  gap: 8px 32px;
 }
 </style>

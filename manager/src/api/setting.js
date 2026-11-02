@@ -22,37 +22,11 @@ export const editNoticeMessage = (id, params) => {
 export const wechatMessageSync = (params) => {
   return getRequest("/wechat/wechatMessage/init", params)
 }
-//分页获取微信消息
-export const getWechatMessagePage = (params) => {
-  return getRequest("/wechat/wechatMessage", params)
-}
-//编辑微信消息模版
-export const editWechatMessageTemplate = (id, params) => {
-  return putRequest(`/wechat/wechatMessage/${id}`, params)
-}
-//删除微信消息模版
-export const delWechatMessageTemplate = (id, params) => {
-  return deleteRequest(`/wechat/wechatMessage/${id}`, params)
-}
 
-
-//微信消息订阅同步
+//微信消息码同步
 export const wechatMPMessageSync = (params) => {
   return getRequest("/wechat/wechatMPMessage/init", params)
 }
-//分页获取微信消息订阅
-export const getWechatMPMessagePage = (params) => {
-  return getRequest("/wechat/wechatMPMessage", params)
-}
-//编辑微信消息订阅模版
-export const editWechatMPMessageTemplate = (id, params) => {
-  return putRequest(`/wechat/wechatMPMessage/${id}`, params)
-}
-//删除微信消息订阅模版
-export const delWechatMPMessageTemplate = (id, params) => {
-  return deleteRequest(`/wechat/wechatMPMessage/${id}`, params)
-}
-
 
 
 // 查询站内信模板信息
@@ -73,120 +47,135 @@ export const updateMessageStatus = (id,status) => {
 };
 //获取短信模板
 export const getSmsTemplatePage = (params) => {
-  return getRequest(`sms/template/querySmsTemplatePage`, params);
+  return getRequest("/sms/sms/template", params);
 };
-//添加短信模板
-export const addSmsTemplatePage = (params) => {
-  return postRequest(`sms/template`, params);
-};
-//删除短信模板
-export const deleteSmsTemplatePage = (params) => {
-  return deleteRequest(`sms/template`, params);
-};
-//删除短信模板
-export const editSmsTemplatePage = (params) => {
-  return putRequest(`sms/template/modifySmsTemplate`, params);
-};
-//分页查询短信签名
+//获取短信签名
 export const getSmsSignPage = (params) => {
-  return getRequest(`sms/sign/querySmsSignPage`, params);
+  return getRequest("/sms/sms/sign", params);
 };
-//更新短信模板
-export const syncTemplate = () => {
-  return putRequest(`sms/template/querySmsSign`);
+//获取设置
+export const getSetting = (key) => {
+  return getRequest(`/setting/setting/get/${key}`);
 };
-//更新短信模板
+//根据类型查看配置信息
+export const getSettingList = (params) => {
+  return getRequest(`/setting/setting/all`, params);
+};
+//设置配置信息
+export const setSetting = (key, params) => {
+  return postRequest(`/setting/setting/put/${key}`, params);
+};
+
+//查看短信签名
+export const getSmsSign = () => {
+  return getRequest(`/sms/sms/sign`);
+};
+//添加短信签名
 export const addSmsSign = (params) => {
-  return postRequest(`sms/sign`, params);
+  return postRequest(`/sms/sms/sign`, params);
 };
-//同步短信签名
-export const syncSign = () => {
-  return putRequest(`sms/sign/querySmsSign`);
+//修改短信签名
+export const editSmsSign = (params) => {
+  return putRequest(`/sms/sms/sign`, params);
 };
 //删除短信签名
-export const deleteSign = (id) => {
-  return deleteRequest(`sms/sign/${id}`);
+export const delSmsSign = (id) => {
+  return deleteRequest(`/sms/sms/sign/${id}`);
 };
-//更新短信签名
-export const editSmsSign = (params) => {
-  return putRequest(`sms/sign/modifySmsSign`, params);
+//添加短信模板
+export const addSmsTemplate = (params) => {
+  return postRequest(`/sms/sms/template`, params);
 };
-//查询签名详情
-export const smsSignDetail = (id) => {
-  return getRequest(`sms/sign/${id}`);
+//修改短信模板
+export const editSmsTemplate = (params) => {
+  return putRequest(`/sms/sms/template`, params);
 };
-
-//分页查询app版本信息
-export const appVersionPage = (params) => {
-  return getRequest(`/other/appVersion`, params);
+//删除短信模板
+export const delSmsTemplate = (id) => {
+  return deleteRequest(`/sms/sms/template/${id}`);
 };
-//添加app版本信息
-export const addVersion = (params) => {
-  return postRequest(`/other/appVersion`, params);
-};
-//修改app版本信息
-export const editVersion = (params, id) => {
-  return putRequest(`/other/appVersion/${id}`, params);
-};
-//删除app版本信息
-export const deleteVersion = (id) => {
-  return deleteRequest(`/other/appVersion/${id}`);
-};
-//查询同城配送列表
-export const getInstantDelivery = (params) => {
-  return getRequest(`instant-delivery/getByPage`, params);
-};
-
-//添加同城配送信息
-export const editInstantDelivery = (bean, params, headers) => {
-  return putRequest(`instant-delivery/${bean}/config`, params, headers);
-};
-//启用配送方案
-export const openInstantDelivery = (bean) => {
-  return putRequest(`instant-delivery/${bean}/open`);
-};
-
-//修改封面图片
-export const editInstantDeliveryImage = (bean, params) => {
-  return putRequest(`instant-delivery/${bean}/image`, params);
-};
-
 //查询短信发送记录
-export const getSmsPage = (params) => {
-  return getRequest(`sms/sms`, params);
+export const getSmsReachPage = (params) => {
+  return getRequest(`/sms/sms`, params);
+};
+//重新发送
+export const repeatSendSms = (id) => {
+  return postRequest(`/sms/sms/repeat/${id}`);
+};
+//获取设置
+export const getExperienceData = (key) => {
+  return getRequest(`/setting/experience/get/${key}`);
+};
+//保存
+export const setExperienceData = (key, params) => {
+  return postRequest(`/setting/experience/put/${key}`, params);
 };
 
-//发送短信
-export const sendSms = (params) => {
-  return postRequest(`sms/sms`, params);
+//根据类型获取积分设置
+export const getPointData = (key) => {
+  return getRequest(`/setting/point/get/${key}`);
 };
-/*
- * 获取 支付支持设置开关
- */
-export const getPaymentSupportForm = () => {
-  return getRequest(`setting/settingx/paymentSupport`);
-}
+//保存
+export const setPointData = (key, params) => {
+  return postRequest(`/setting/point/put/${key}`, params);
+};
 
-//  验证码源文件删除
-export const delVerification = (id) => {
-  return deleteRequest(`/other/verificationSource/${id}`)
-}
+//根据类型获取积分设置
+export const getKuaidiSetting = (key) => {
+  return getRequest(`/setting/kuaidi/get/${key}`);
+};
+//保存
+export const setKuaidiSetting = (key, params) => {
+  return postRequest(`/setting/kuaidi/put/${key}`, params);
+};
 
-//  添加验证码源文件
-export const addVerification = (params) => {
+//获取所有的物流公司
+export const getLogisticsList = () => {
+  return getRequest(`/setting/logistics/all`);
+};
+//分页获取物流公司
+export const getLogisticsPage = (params) => {
+  return getRequest(`/setting/logistics/getByPage`, params);
+};
+//添加物流公司
+export const addLogistics = (params) => {
+  return postRequest(`/setting/logistics`, params);
+};
+//获取物流公司详情
+export const getLogisticsDetail = (id) => {
+  return getRequest(`/setting/logistics/get/${id}`);
+};
+//编辑物流公司
+export const editLogistics = (id, params) => {
+  return putRequest(`/setting/logistics/${id}`, params);
+};
+//删除物流公司
+export const delLogistics = (id) => {
+  return deleteRequest(`/setting/logistics/delete/${id}`);
+};
+
+//禁用启用物流公司
+export const openLogistics = (id) => {
+  return putRequest(`/setting/logistics/open/${id}`);
+};
+
+//获取所有的物流公司
+export const getLogisticsAll = () => {
+  return getRequest(`/setting/logistics/all`);
+};
+
+// 验证码源文件添加
+export const createVerification = (params) => {
   return postRequest(`/other/verificationSource`, params)
 }
-
-//  修改验证码源文件
-export const editVerification = (id, params) => {
+// 验证码源文件修改
+export const updateVerification = (id, params) => {
   return putRequest(`/other/verificationSource/${id}`, params)
 }
-
-// 验证码源文件详情
-export const verificationDetail = (id) => {
-  return getRequest(`/other/verificationSource/${id}`)
+// 验证码源文件删除
+export const deleteVerification = (id) => {
+  return deleteRequest(`/other/verificationSource/${id}`)
 }
-
 // 验证码源文件列表
 export const verificationPage = (params) => {
   return getRequest(`/other/verificationSource`, params)
@@ -197,12 +186,94 @@ export const getNoticeMessageDetail = (id, params) => {
   return getRequest(`/setting/noticeMessage/${id}`, params)
 }
 
-// 消息模板聚合分页（站内信 + 微信服务号 + 小程序）
+// 统一消息模板聚合分页（站内信 + 短信 + 微信服务号 + 小程序订阅）
 export const getMessageTemplateAggregatePage = params => {
-  return getRequest("/setting/noticeMessage/aggregate", params);
+  return getRequest("/setting/messageTemplate/page", params);
 };
 
-// 修改通知类站内信邮箱渠道开关
-export const updateNoticeMessageEmailStatus = (id, status) => {
-  return putRequest(`/setting/noticeMessage/${id}/email/${status}`);
+// 快速切换渠道开关 (channel: NOTICE / SMS / WECHAT_OA / WECHAT_MP, status: OPEN / CLOSE)
+export const updateMessageChannelSwitch = params => {
+  return putRequest("/setting/messageTemplate/switch", params);
+};
+
+// 保存站内信配置 (title, content, status)
+export const updateNoticeMessageTemplate = params => {
+  return putRequest("/setting/messageTemplate/notice", params);
+};
+
+// 保存短信配置 (smsTemplateCode, status; 内容只读不可编辑)
+export const updateSmsMessageTemplateConfig = params => {
+  return putRequest("/setting/messageTemplate/sms", params);
+};
+
+// 保存微信公众号服务号配置 (code, enable; 内容只读)
+export const updateWechatOaMessageTemplate = params => {
+  return putRequest("/setting/messageTemplate/wechat-oa", params);
+};
+
+// 保存微信小程序订阅消息配置 (code, enable; 内容只读)
+export const updateWechatMpMessageTemplate = params => {
+  return putRequest("/setting/messageTemplate/wechat-mp", params);
+};
+
+
+// -------------------------------------------------------------
+// 补充缺失的系统配置、短信、版本及验证码 API
+// -------------------------------------------------------------
+
+// 短信任务发送与记录 (sms.vue)
+export const getSmsPage = (params) => {
+  return getRequest(`/sms/sms`, params);
+};
+export const sendSms = (params) => {
+  return postRequest(`/sms/sms`, params);
+};
+
+// 短信签名同步与详细 (sms.vue, smsSign.vue)
+export const syncSign = () => {
+  return putRequest(`/sms/sign/querySmsSign`);
+};
+export const deleteSign = (id) => {
+  return deleteRequest(`/sms/sign/${id}`);
+};
+export const smsSignDetail = (id) => {
+  return getRequest(`/sms/sign/${id}`);
+};
+
+// 短信模板管理与同步 (sms.vue)
+export const syncTemplate = () => {
+  return putRequest(`/sms/template/querySmsSign`);
+};
+export const addSmsTemplatePage = (params) => {
+  return postRequest(`/sms/template`, params);
+};
+export const editSmsTemplatePage = (params) => {
+  return putRequest(`/sms/template/modifySmsTemplate`, params);
+};
+export const deleteSmsTemplatePage = (params) => {
+  return deleteRequest(`/sms/template`, params);
+};
+
+// 支付支持方式表单 (PAYMENT_SUPPORT.vue)
+export const getPaymentSupportForm = () => {
+  return getRequest(`/setting/settingx/paymentSupport`);
+};
+
+// 验证码源管理别名 (slider.vue)
+export const addVerification = createVerification;
+export const editVerification = updateVerification;
+export const delVerification = deleteVerification;
+
+// APP版本管理 (appVersion.vue)
+export const appVersionPage = (params) => {
+  return getRequest(`/other/appVersion`, params);
+};
+export const addVersion = (params) => {
+  return postRequest(`/other/appVersion`, params);
+};
+export const editVersion = (params, id) => {
+  return putRequest(`/other/appVersion/${id}`, params);
+};
+export const deleteVersion = (id) => {
+  return deleteRequest(`/other/appVersion/${id}`);
 };
