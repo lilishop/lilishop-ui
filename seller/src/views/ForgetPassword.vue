@@ -99,15 +99,15 @@
       <div class="login-btn"><a @click="$router.push('login')">前往登录</a></div>
     </div>
     <div class="foot">
-      <el-row justify="space-around" class="help">
-        <a class="item" href="https://pickmall.cn/" target="_blank">帮助</a>
-        <a class="item" href="https://pickmall.cn/" target="_blank">隐私</a>
-        <a class="item" href="https://pickmall.cn/" target="_blank">条款</a>
+      <el-row v-if="website" justify="space-around" class="help">
+        <a class="item" :href="website" target="_blank">帮助</a>
+        <a class="item" :href="website" target="_blank">隐私</a>
+        <a class="item" :href="website" target="_blank">条款</a>
       </el-row>
       <el-row justify="center" class="copyright">
-        Copyright © {{ year }} - Present
-        <a href="https://pickmall.cn/" target="_blank" style="margin: 0 5px">{{
-          siteName
+        Copyright © {{ year }}
+        <a :href="website || undefined" target="_blank" style="margin: 0 5px">{{
+          copyrightOwner
         }}</a>
         版权所有
       </el-row>
@@ -124,7 +124,7 @@ import { md5 } from "@/utils/md5.js";
 import * as RegExp from "@/utils/regular.js";
 import * as apiLogin from "@/api/index.js";
 import { sendSms } from "@/api/common.js";
-import util from "@/libs/util.js";
+import { useSiteSettings } from "@/composables/useSiteSettings";
 import verify from "@/views/my-components/verify";
 import { useAppStore } from "@/stores/app";
 
@@ -146,8 +146,7 @@ const form = reactive({
   oncePasd: "",
 });
 const year = new Date().getFullYear();
-// 站点名优先取接口下发缓存，兜底用本地配置
-const siteName = util.getSiteName();
+const { website, copyrightOwner } = useSiteSettings();
 const step = ref(0);
 const ruleInline = {
   mobile: [

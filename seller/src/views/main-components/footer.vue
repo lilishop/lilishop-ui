@@ -2,46 +2,30 @@
   <div class="foot">
     <div class="information footer-bottom">
       <div class="icp">
-        <li v-if="config.icpCard">
-          <a
-            :href="
-              'https://tsm.miit.gov.cn/dxxzsp/xkz/xkzgl/resource/qiyesearch.jsp?num=' +
-              config.icpCard +
-              '&type=xuke'
-            "
-            target="_blank"
-          >
-            {{ config.icpCard }}
-          </a>
-        </li>
-        <li v-if="config.icpMessage" class="footer-bottom">
+        <li v-if="icp" class="footer-bottom">
           <a href="https://beian.miit.gov.cn/" target="_blank">
-            {{ config.icpMessage }}
+            {{ icp }}
           </a>
         </li>
       </div>
-      <a class="company-link" :href="companyUrl" target="_blank">
+      <a v-if="companyName" class="company-link" :href="companyUrl || undefined" target="_blank">
         <img class="zhizhao" :src="zhizhaoImg" alt="" />
         {{ companyName }}
       </a>
     </div>
 
     <div class="copyright">
-      <p>Copyright © {{ year }} {{ siteName }}</p>
+      <p>Copyright © {{ year }} {{ copyrightOwner }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import config from "@/config/index";
-import util from "@/libs/util.js";
+import { useSiteSettings } from "@/composables/useSiteSettings";
 import zhizhaoImg from "@/assets/images/zhizhao.jpg";
 
 const year = new Date().getFullYear();
-// 站点名/公司信息优先取接口下发缓存，兜底用本地配置
-const siteName = util.getSiteName();
-const companyName = localStorage.getItem("sellerCompanyName") || config.company.name;
-const companyUrl = localStorage.getItem("sellerCompanyUrl") || config.company.href;
+const { companyName, companyUrl, icp, copyrightOwner } = useSiteSettings();
 </script>
 
 <style lang="scss" scoped>

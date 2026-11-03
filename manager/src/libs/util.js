@@ -8,6 +8,8 @@ let util = {};
 /** 已弃用、前端未实现或已移除的菜单 frontRoute，注册路由时跳过 */
 const DEPRECATED_FRONT_ROUTES = new Set([
   "goods/goods-manage/spec",
+  "member/list/memberRecycle",
+  "order/order/fictitiousOrderList",
 ]);
 
 function isDeprecatedMenu(menu) {

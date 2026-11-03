@@ -11,7 +11,7 @@
           <li>多店铺管理与经营数据分析</li>
         </ul>
       </div>
-      <p class="brand-copyright">Copyright © {{ year }} Lilishop</p>
+      <p class="brand-copyright">Copyright © {{ year }} {{ copyrightOwner }}</p>
     </div>
 
     <div class="login-panel" @keyup.enter="submitLogin">
@@ -94,11 +94,13 @@ import verify from "@/components/verify";
 import { setStore } from "@/libs/storage";
 import { md5 } from "@/utils/md5.js";
 import { useAppStore } from "@/stores/app";
+import { useSiteSettings } from "@/composables/useSiteSettings";
 
 const router = useRouter();
 const appStore = useAppStore();
 
 const year = ref(new Date().getFullYear());
+const { copyrightOwner } = useSiteSettings();
 const loading = ref(false);
 const form = reactive({
   username: "",

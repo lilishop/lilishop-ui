@@ -69,10 +69,6 @@ export const saveCategoryBrand = (category_id, params) => {
 export const getBrandListData = params => {
   return getRequest("/goods/brand/all", params);
 };
-// 获取所有可用规格
-export const getSpecificationList = params => {
-  return getRequest("/goods/spec/all", params);
-};
 
 // 获取店铺分类列表数据
 export const getAllList = id => {

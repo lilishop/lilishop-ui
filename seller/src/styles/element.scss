@@ -113,9 +113,9 @@
   z-index: 4000 !important;
 }
 
-/* 全局禁止 textarea 拖拽改变大小 */
+/* 全局禁止多行输入框拖动缩放，覆盖组件生成的内联 resize 样式。 */
 .el-textarea__inner {
-  resize: none;
+  resize: none !important;
 }
 
 /* 统一空状态：表格 / 树 / 列表无数据时的展示（未自定义 #empty 插槽的页面均生效） */

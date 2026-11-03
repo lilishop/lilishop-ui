@@ -8,27 +8,15 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { getBaseSite } from "@/api/common.js";
+import { loadSiteSettings } from "@/composables/useSiteSettings";
 
 const storeSideLogo = ref(require("@/assets/logo-lilishop.png"));
 
 function init() {
-  if (
-    !localStorage.getItem("sellersiteName") ||
-    !localStorage.getItem("sellerlogoImg") ||
-    !localStorage.getItem("sellerIconImg") ||
-    !localStorage.getItem("seller_expiration_time")
-  ) {
-    getSite();
-  } else if (new Date() > localStorage.getItem("seller_expiration_time")) {
-    getSite();
-  } else {
-    storeSideLogo.value = localStorage.getItem("sellerlogoImg");
-    window.document.title = localStorage.getItem("sellersiteName");
-    applyFavicon(localStorage.getItem("sellerIconImg"));
-  }
+  getSite();
 }
 function applyFavicon(href) {
+  if (!href) return;
   const link =
     document.querySelector("link[rel*='icon']") ||
     document.createElement("link");
@@ -38,10 +26,9 @@ function applyFavicon(href) {
   document.getElementsByTagName("head")[0].appendChild(link);
 }
 function getSite() {
-  getBaseSite()
-    .then((res) => {
-      if (res.success && res.result.settingValue) {
-        const data = JSON.parse(res.result.settingValue);
+  loadSiteSettings()
+    .then((data) => {
+      if (data) {
         const expirationTime = new Date().setHours(new Date().getHours() + 1);
         localStorage.setItem("seller_expiration_time", expirationTime);
         localStorage.setItem("sellersiteName", data.siteName);
@@ -49,8 +36,8 @@ function getSite() {
         localStorage.setItem("sellerIconImg", data.storeSideIcon);
         localStorage.setItem("sellerCompanyName", data.companyName || "");
         localStorage.setItem("sellerCompanyUrl", data.companyUrl || "");
-        storeSideLogo.value = data.storeSideLogo;
-        window.document.title = data.siteName;
+        storeSideLogo.value = data.storeSideLogo || storeSideLogo.value;
+        if (data.siteName) window.document.title = data.siteName;
         applyFavicon(data.storeSideIcon);
       }
     })

@@ -49,6 +49,10 @@
         <el-form-item label="ICP备案号" prop="icp">
           <el-input v-model="formValidate.icp" />
         </el-form-item>
+        <el-form-item label="版权归属" prop="copyrightOwner">
+          <el-input v-model="formValidate.copyrightOwner" placeholder="留空时使用商城名称" maxlength="100" />
+          <span class="field-desc">仅填写版权归属名称，Copyright © 和当前年份由系统自动显示</span>
+        </el-form-item>
       </div>
 
       <div class="submit-bar">
@@ -91,6 +95,7 @@ const formValidate = ref({
   buyerSideLogo: "",
   companyName: "",
   companyUrl: "",
+  copyrightOwner: "",
   domainLogo: "",
   icp: "",
   storeSideLogo: "",
@@ -145,8 +150,9 @@ function setupSetting() {
 }
 function init() {
   result.value = JSON.parse(props.res);
-  formValidate.value = { ...result.value };
+  formValidate.value = { copyrightOwner: "", ...result.value };
   Object.keys(result.value).forEach((item) => {
+    if (item === "copyrightOwner") return;
     ruleValidate[item] = [
       {
         required: true,

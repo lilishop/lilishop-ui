@@ -48,6 +48,11 @@
     </el-card>
 
     <el-card>
+      <el-tabs v-if="!selectedMember" v-model="memberStatus" @tab-change="handleStatusChange">
+        <el-tab-pane label="全部" name="ALL" />
+        <el-tab-pane label="启用" name="OPEN" />
+        <el-tab-pane label="禁用" name="CLOSE" />
+      </el-tabs>
       <div v-if="!selectedMember" class="operation padding-row">
         <el-button type="primary" @click="addMember">添加会员</el-button>
         <el-button
@@ -88,6 +93,11 @@
         </el-table-column>
         <el-table-column prop="username" label="客户名称" min-width="150" show-overflow-tooltip />
         <el-table-column prop="nickName" label="会员昵称" min-width="120" show-overflow-tooltip />
+        <el-table-column v-if="!selectedMember" label="状态" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.disabled ? 'success' : 'info'">{{ row.disabled ? '启用' : '禁用' }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="联系方式" min-width="130">
           <template #default="{ row }">
             <span v-if="row">{{ row.mobile || "" }}</span>
@@ -142,7 +152,7 @@
                       <el-dropdown-item command="edit">编辑会员</el-dropdown-item>
                       <el-dropdown-item command="increaseWallet">增加余额</el-dropdown-item>
                       <el-dropdown-item command="updatePoint">修改积分</el-dropdown-item>
-                      <el-dropdown-item command="disabled">禁用会员</el-dropdown-item>
+                      <el-dropdown-item command="disabled">{{ row.disabled ? '禁用会员' : '启用会员' }}</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -359,6 +369,7 @@ const addMemberForm = ref({
   username: "",
   password: "",
 });
+const memberStatus = ref("ALL");
 const searchForm = ref({
   pageNumber: 1,
   pageSize: 20,
@@ -366,7 +377,7 @@ const searchForm = ref({
   id: "",
   username: "",
   mobile: "",
-  disabled: "OPEN",
+  disabled: props.selectedMember ? "OPEN" : "",
   groupId: "",
 });
 const picModelFlag = ref(false);
@@ -586,6 +597,11 @@ function handleSearch() {
   searchForm.value.pageSize = 20;
   getData();
 }
+function handleStatusChange(status) {
+  searchForm.value.disabled = status === "ALL" ? "" : status;
+  searchForm.value.pageNumber = 1;
+  getData();
+}
 function editPerm(val) {
   descTitle.value = `查看用户 ${val.username}`;
   descFlag.value = true;
@@ -609,20 +625,27 @@ function getMemberInfo(id) {
     }
   });
 }
+let memberListRequestId = 0;
 function getData() {
+  const requestId = ++memberListRequestId;
   loading.value = true;
   if (!props.selectedMember) {
     selectedRows.value = [];
     clearSelection();
   }
-  API_Member.getMemberListData(searchForm.value).then((res) => {
-    if (res.result.records) {
-      loading.value = false;
-      init(res.result.records);
-      total.value = res.result.total;
-      syncTableSelection();
-    }
-  });
+  API_Member.getMemberListData({ ...searchForm.value })
+    .then((res) => {
+      if (requestId !== memberListRequestId) return;
+      if (res.success && res.result) {
+        init(res.result.records || []);
+        total.value = res.result.total || 0;
+        syncTableSelection();
+      }
+    })
+    .catch(() => {})
+    .finally(() => {
+      if (requestId === memberListRequestId) loading.value = false;
+    });
 }
 function openPicSelector() {
   picModelFlag.value = true;
@@ -666,14 +689,15 @@ function detail(row) {
   customRouterPush({ name: "member-detail", query: { id: row.id } });
 }
 function disabled(v) {
+  const action = v.disabled ? "禁用" : "启用";
   let params = {
     memberIds: [v.id],
-    disabled: false,
+    disabled: !v.disabled,
   };
-  ElMessageBox.confirm("确认禁用此会员？", "提示", { type: "warning" }).then(() => {
+  ElMessageBox.confirm(`确认${action}此会员？`, "提示", { type: "warning" }).then(() => {
     API_Member.updateMemberStatus(params).then((res) => {
       if (res.success) {
-        ElMessage.success("禁用成功");
+        ElMessage.success(`${action}成功`);
         getData();
       }
     });

@@ -8,7 +8,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getBaseSite } from "@/api/common.js";
+import { loadSiteSettings } from "@/composables/useSiteSettings";
 
 const domainLogo = ref("");
 
@@ -24,11 +24,9 @@ function applyFavicon(href) {
 }
 
 function getSite() {
-  getBaseSite().then((res) => {
-    if (res.success && res.result && res.result.settingValue) {
-      const { domainLogo: logo, domainIcon, siteName, website } = JSON.parse(
-        res.result.settingValue
-      );
+  loadSiteSettings().then((data) => {
+    if (data) {
+      const { domainLogo: logo, domainIcon, siteName, website } = data;
       domainLogo.value = logo || "";
       const expirationTime = new Date().setHours(new Date().getHours() + 1);
       localStorage.setItem("icontitle_expiration_time", expirationTime);

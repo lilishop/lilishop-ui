@@ -119,7 +119,7 @@ function finished() {
   });
 }
 
-// 父组件（member/index、memberRecycle、memberDetail、orderDetail、shopOperation）通过 ref 调用 open() 打开弹窗
+// 父组件（member/index、memberDetail、orderDetail、shopOperation）通过 ref 调用 open() 打开弹窗
 defineExpose({ open });
 </script>
 

@@ -43,25 +43,20 @@
           </div>
         <div class="information footer-bottmom">
           <div class="icp">
-            <li v-if="config.icpCard">
-              <a :href='"https://tsm.miit.gov.cn/dxxzsp/xkz/xkzgl/resource/qiyesearch.jsp?num="+config.icpCard+"&type=xuke"' target="_blank">
-                {{config.icpCard}}
-              </a>
-            </li>
-            <li v-if="config.icpMessage" class="footer-bottmom">
+            <li v-if="icp" class="footer-bottmom">
               <a href="https://beian.miit.gov.cn/" target="_blank">
-                {{config.icpMessage}}
+                {{icp}}
               </a>
             </li>
           </div>
-          <a class="flex " :href="config.company.href">
-            <img class="zhizhao" src="@/assets/images/zhizhao.jpg" mode="" />{{config.company.name}}
+          <a v-if="companyName" class="flex " :href="companyUrl || undefined">
+            <img class="zhizhao" src="@/assets/images/zhizhao.jpg" mode="" />{{companyName}}
           </a>
         </div>
 
         <div class="clearfix"></div>
         <div class="copyright">
-          <p>Copyright © {{year}} {{config.title}}</p>
+          <p>Copyright © {{year}} {{copyrightOwner}}</p>
         </div>
       </div>
     </footer>
@@ -71,11 +66,12 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import config from '@/config'
+import { useSiteSettings } from '@/composables/useSiteSettings'
 
 defineOptions({ name: 'Footer' })
 
 const router = useRouter()
+const { companyName, companyUrl, icp, copyrightOwner } = useSiteSettings()
 
 const guideArr = ref([
   // 导航链接

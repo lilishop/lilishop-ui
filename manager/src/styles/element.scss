@@ -1,3 +1,8 @@
+/* 全局禁止多行输入框拖动缩放，覆盖组件生成的内联 resize 样式。 */
+.el-textarea__inner {
+  resize: none !important;
+}
+
 /* Element Plus 主题覆盖（对齐原 iView 主色） */
 :root {
   // --el-color-primary: #ff5c58;

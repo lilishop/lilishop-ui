@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { otherRouter } from "@/router/router";
 import i18n from "@/locale";
 
+const removedPageNames = new Set(["memberRecycle", "fictitiousOrderList"]);
+
 // 原 vuex app 模块 + 根 state（openStyleStore/openStoreId/notices）合并
 // mutation 全部转为同名 action；两个例外：
 // - pageOpenedList mutation 与 state 同名，改名 updateOpenedList
@@ -73,7 +75,8 @@ export const useAppStore = defineStore("app", {
     },
     initCachePage() {
       if (localStorage.cachePage) {
-        this.cachePage = JSON.parse(localStorage.cachePage);
+        this.cachePage = JSON.parse(localStorage.cachePage).filter((name) => !removedPageNames.has(name));
+        localStorage.cachePage = JSON.stringify(this.cachePage);
       }
     },
     removeTag(name) {
@@ -120,8 +123,9 @@ export const useAppStore = defineStore("app", {
     },
     setOpenedList() {
       this.pageOpenedList = localStorage.pageOpenedList
-        ? JSON.parse(localStorage.pageOpenedList)
+        ? JSON.parse(localStorage.pageOpenedList).filter((page) => !removedPageNames.has(page.name))
         : [otherRouter.children[0]];
+      localStorage.pageOpenedList = JSON.stringify(this.pageOpenedList);
     },
     setAvatarPath(path) {
       localStorage.avatorImgPath = path;

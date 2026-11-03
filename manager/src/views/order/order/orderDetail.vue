@@ -1,18 +1,20 @@
 <template>
   <div class="order-detail-page">
+    <div class="page-heading">
+      <div>
+        <h1>订单详情</h1>
+        <p>查看订单信息、商品明细与履约进度</p>
+      </div>
+      <el-button class="back-btn" :icon="ArrowLeft" @click="goBack">返回列表</el-button>
+    </div>
     <!-- 顶部一体化状态与履约进度卡片 -->
     <el-card shadow="never" class="top-overview-card">
       <!-- 第一层：返回导航 + 核心状态/单号 + 操作按钮组 -->
       <div class="overview-header">
         <div class="header-left">
-          <el-button link class="back-btn" @click="goBack">
-            <el-icon><ArrowLeft /></el-icon>
-            <span>返回列表</span>
-          </el-button>
-          <div class="header-divider"></div>
           <el-tag
             :type="getOrderStatusTagType(orderInfo.order.orderStatus)"
-            effect="dark"
+            effect="light"
              class="main-status-tag"
           >
             {{ orderInfo.orderStatusValue || "加载中..." }}
@@ -26,6 +28,7 @@
                 type="primary"
                 :icon="CopyDocument"
                 class="copy-icon-btn"
+                aria-label="复制订单编号"
                 @click="copyText(orderInfo.order.sn || sn, '订单编号')"
               />
             </el-tooltip>
@@ -207,6 +210,7 @@
                       link
                       type="primary"
                       :icon="CopyDocument"
+                      aria-label="复制手机号"
                       @click="copyText(orderInfo.order.consigneeMobile, '手机号')"
                     />
                   </el-tooltip>
@@ -349,7 +353,6 @@
 
       <el-table
         v-loading="loading"
-        border
         :data="data"
         class="goods-table"
         style="width: 100%"
@@ -517,7 +520,7 @@
     <el-dialog v-model="orderCancelModal" title="取消订单" width="480px" destroy-on-close>
       <el-form ref="orderCancelFormRef" :model="orderCancelForm" label-width="90px" :rules="orderCancelValidate">
         <el-form-item label="取消原因" prop="reason">
-          <el-input v-model="orderCancelForm.reason" type="textarea" :rows="3" placeholder="请输入取消订单的具体原因" />
+          <el-input v-model="orderCancelForm.reason" type="textarea" :rows="3" resize="none" placeholder="请输入取消订单的具体原因" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -1403,510 +1406,229 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .order-detail-page {
+  --detail-ink: #1e293b;
+  --detail-muted: #748196;
+  --detail-line: #e8edf4;
   width: 100%;
-  padding-bottom: 28px;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding: 8px 12px 32px;
+  box-sizing: border-box;
+  color: var(--detail-ink);
 
-  // 顶部一体化状态与履约步骤卡片
-  .top-overview-card {
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
-    margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-
-    :deep(.el-card__body) {
-      padding: 16px 22px 18px;
-    }
-
-    .overview-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 14px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #f1f5f9;
-
-      .header-left {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-
-        .back-btn {
-          font-size: 14px;
-          font-weight: 600;
-          color: #475569;
-          padding: 4px 2px;
-
-          &:hover {
-            color: var(--el-color-primary);
-          }
-
-          .el-icon {
-            margin-right: 4px;
-            font-size: 15px;
-          }
-        }
-
-        .header-divider {
-          width: 1px;
-          height: 16px;
-          background: #cbd5e1;
-        }
-
-        .main-status-tag {
-          font-size: 13px;
-          font-weight: 600;
-          padding: 0 12px;
-          height: 28px;
-          border-radius: 6px;
-        }
-
-        .sn-title-group {
-          display: flex;
-          align-items: center;
-          font-size: 14px;
-
-          .sn-label {
-            color: #64748b;
-          }
-
-          .sn-value {
-            font-size: 15px;
-            font-weight: 700;
-            color: #0f172a;
-            letter-spacing: 0.3px;
-          }
-
-          .copy-icon-btn {
-            margin-left: 4px;
-            font-size: 15px;
-          }
-        }
-
-        .meta-tags {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-      }
-
-      .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-    }
-
-    // 紧凑型横向履约进度条
-    .fulfillment-stepper {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 16px;
-      padding: 14px 24px;
-      background: #f8fafc;
-      border: 1px solid #f1f5f9;
-      border-radius: 8px;
-      gap: 12px;
-
-      .step-item {
-        display: flex;
-        align-items: center;
-        flex: 1;
-        min-width: 0;
-
-        &:last-child {
-          flex: 0 0 auto;
-        }
-
-        .step-node {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          flex-shrink: 0;
-        }
-
-        .step-circle {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 14px;
-          font-weight: 700;
-          border: 2px solid #cbd5e1;
-          background: #fff;
-          color: #94a3b8;
-          transition: all 0.2s ease;
-          flex-shrink: 0;
-        }
-
-        .step-text {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-
-          .step-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #64748b;
-            line-height: 1.3;
-          }
-
-          .step-desc {
-            font-size: 12px;
-            color: #94a3b8;
-            line-height: 1.3;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-          }
-        }
-
-        .step-connector {
-          flex: 1;
-          height: 2px;
-          background: #e2e8f0;
-          margin: 0 20px;
-          border-radius: 2px;
-          min-width: 30px;
-        }
-
-        // 已完成状态
-        &.is-done {
-          .step-circle {
-            border-color: #10b981;
-            background: #ecfdf5;
-            color: #10b981;
-          }
-          .step-text .step-title {
-            color: #0f172a;
-          }
-          .step-text .step-desc {
-            color: #10b981;
-          }
-          .step-connector {
-            background: #10b981;
-          }
-        }
-
-        // 当前进行中状态
-        &.is-active {
-          .step-circle {
-            border-color: #3b82f6;
-            background: #3b82f6;
-            color: #fff;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
-          }
-          .step-text .step-title {
-            color: #1e293b;
-            font-weight: 700;
-          }
-          .step-text .step-desc {
-            color: #3b82f6;
-            font-weight: 500;
-          }
-        }
-
-        // 已取消状态
-        &.is-cancelled {
-          .step-circle {
-            border-color: #e2e8f0;
-            background: #f1f5f9;
-            color: #cbd5e1;
-          }
-        }
-      }
-    }
-  }
-
-  // 中部三列等高卡片网格
-  .info-grid-row {
-    margin-bottom: 16px;
+  .page-heading {
     display: flex;
-    flex-wrap: wrap;
-
-    :deep(.el-col) {
-      display: flex;
-      margin-bottom: 0;
-    }
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+    h1 { margin: 0; font-size: 24px; font-weight: 650; line-height: 34px; letter-spacing: .5px; }
+    p { margin: 5px 0 0; color: var(--detail-muted); font-size: 13px; line-height: 22px; }
+    .back-btn { border-radius: 8px; color: #526078; }
   }
 
-  .section-card {
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
+  .top-overview-card, .section-card {
+    border: 1px solid var(--detail-line);
+    border-radius: 12px;
     background: #fff;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-    width: 100%;
+    box-shadow: 0 3px 12px rgba(31, 51, 82, .025);
+  }
 
-    &.equal-card {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
+  .top-overview-card {
+    margin-bottom: 20px;
+    background: linear-gradient(115deg, #f5f9ff 0, #fff 58%);
+    :deep(.el-card__body) { padding: 24px 26px; }
+  }
+  .overview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    min-width: 0;
+    .main-status-tag { height: 34px; padding: 0 14px; border-radius: 7px; font-size: 15px; font-weight: 600; }
+    .sn-title-group { display: flex; align-items: center; min-width: 0; font-size: 13px; }
+    .sn-label { color: var(--detail-muted); white-space: nowrap; }
+    .sn-value { color: #22324b; font-size: 16px; font-weight: 650; overflow-wrap: anywhere; }
+    .copy-icon-btn { margin-left: 4px; }
+    .meta-tags { display: flex; gap: 6px; }
+    .meta-tags .el-tag { background: #fff; border-color: #e1e8f0; color: #748196; border-radius: 4px; }
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    .el-button { margin: 0; border-radius: 7px; font-size: 13px; }
+  }
 
-      :deep(.el-card__body) {
-        flex: 1;
-      }
-    }
-
-    :deep(.el-card__header) {
-      padding: 13px 18px;
-      border-bottom: 1px solid #f1f5f9;
-      background: #fafbfc;
-    }
-
-    :deep(.el-card__body) {
-      padding: 16px 18px;
-    }
-
-    .card-title {
+  .fulfillment-stepper {
+    display: flex;
+    align-items: center;
+    margin-top: 24px;
+    padding: 24px 8px 2px;
+    border-top: 1px solid #e5edf8;
+    gap: 12px;
+    .step-item { display: flex; align-items: center; flex: 1; min-width: 0; }
+    .step-item:last-child { flex: 0 0 auto; }
+    .step-node { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .step-circle {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: 1px solid #dce3ed;
+      background: #f7f9fc;
+      color: #8b98ab;
       font-size: 14px;
       font-weight: 600;
-      color: #1e293b;
-
-      .el-icon {
-        font-size: 16px;
-        color: #ff6a00;
-      }
-
-      &.justify-between {
-        justify-content: space-between;
-        width: 100%;
-      }
-
-      .flex-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .count-badge {
-        margin-left: 4px;
-        font-weight: 500;
-      }
     }
+    .step-title { color: #8290a4; font-size: 14px; font-weight: 600; line-height: 22px; }
+    .step-desc { margin-top: 4px; color: #8b98ab; font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }
+    .step-connector { flex: 1; height: 2px; min-width: 16px; margin: 0 24px; background: #e8edf4; }
+    .is-done {
+      .step-circle { color: #20a684; background: #eaf8f2; border-color: #c7eadd; }
+      .step-title { color: #45566b; }
+      .step-connector { background: #b9e3d5; }
+    }
+    .is-active {
+      .step-circle { background: #3875ed; border-color: #3875ed; color: #fff; box-shadow: 0 0 0 5px #eaf1ff; }
+      .step-title, .step-desc { color: #326bdb; }
+    }
+    .is-cancelled .step-circle { color: #a3adbb; background: #f1f4f8; }
   }
 
-  // 水平对齐键值对列表
+  .info-grid-row {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 16px;
+    margin-bottom: 20px;
+    :deep(.el-col) { display: flex; }
+  }
+  .section-card {
+    width: 100%;
+    &.equal-card { display: flex; flex-direction: column; height: 100%; }
+    &.equal-card :deep(.el-card__body) { flex: 1; }
+    :deep(.el-card__header) { padding: 18px 22px; background: #fff; border-bottom: 1px solid var(--detail-line); }
+    :deep(.el-card__body) { padding: 20px 22px; }
+    .card-title, .flex-title { display: flex; align-items: center; gap: 10px; }
+    .card-title { min-height: 24px; color: #25354b; font-size: 15px; font-weight: 600; }
+    .card-title > .el-icon, .flex-title > .el-icon {
+      box-sizing: content-box;
+      padding: 6px;
+      font-size: 16px;
+      color: #4c7bdd;
+      background: #eff4ff;
+      border-radius: 7px;
+    }
+    .justify-between { justify-content: space-between; }
+    .count-badge { margin-left: 4px; font-size: 12px; font-weight: 400; color: #748196; border: 0; background: #f3f5f9; }
+  }
   .kv-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-
-    .kv-row {
-      display: flex;
-      align-items: flex-start;
-      font-size: 13px;
-      line-height: 20px;
-
-      .kv-label {
-        width: 82px;
-        flex-shrink: 0;
-        color: #64748b;
-        font-weight: 400;
-      }
-
-      .kv-val {
-        flex: 1;
-        min-width: 0;
-        color: #1e293b;
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 6px;
-        word-break: break-all;
-
-        &.address-val {
-          line-height: 20px;
-          color: #334155;
-        }
-
-        &.flex-col {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 4px;
-        }
-
-        .member-name-text {
-          display: inline-block;
-          max-width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          vertical-align: bottom;
-        }
-
-        .sub-pay-method {
-          font-size: 12px;
-          color: #64748b;
-        }
-      }
-
-      .form-ans-line {
-        font-size: 13px;
-        color: #334155;
-        line-height: 20px;
-
-        .f-label {
-          color: #64748b;
-        }
-      }
-    }
+    gap: 17px;
+    .kv-row { display: flex; align-items: flex-start; gap: 12px; font-size: 13px; line-height: 22px; }
+    .kv-label { width: 76px; flex-shrink: 0; color: var(--detail-muted); }
+    .kv-val { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .address-val { line-height: 23px; }
+    .flex-col { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .member-name-text { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sub-pay-method, .f-label { font-size: 12px; color: var(--detail-muted); }
+    .form-ans-line { font-size: 13px; line-height: 22px; }
   }
-
-  // 商品表格与底部结算卡
-  .goods-section-card {
-    margin-bottom: 0;
-
-    .goods-table {
-      :deep(th.el-table__cell) {
-        background-color: #f8fafc;
-        color: #475569;
-        font-weight: 600;
-        height: 44px;
-      }
-    }
+  .goods-table {
+    --el-table-border-color: #edf1f6;
+    --el-table-header-bg-color: #f7f9fc;
+    --el-table-row-hover-bg-color: #f8faff;
+    color: #43516a;
+    :deep(th.el-table__cell) { height: 46px; background: #f7f9fc; color: #6b788d; font-size: 12px; font-weight: 500; }
+    :deep(td.el-table__cell) { padding: 18px 0; }
+    :deep(.cell) { padding-left: 16px; padding-right: 16px; }
   }
-
-  // 商品列表单元格
   .goods-item-cell {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 4px 0;
-
-    .goods-thumb {
-      width: 56px;
-      height: 56px;
-      border-radius: 6px;
-      border: 1px solid #e2e8f0;
-      flex-shrink: 0;
-    }
-
-    .goods-info {
-      flex: 1;
-      min-width: 0;
-
-      .goods-name {
-        font-size: 13px;
-        font-weight: 600;
-        color: #1e293b;
-        line-height: 18px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-
-      .goods-specs {
-        margin-top: 6px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-
-        .spec-tag {
-          font-size: 11px;
-          color: #64748b;
-          background: #f1f5f9;
-          padding: 1px 6px;
-          border-radius: 4px;
-        }
-      }
-    }
+    gap: 16px;
+    .goods-thumb { width: 68px; height: 68px; border-radius: 8px; border: 1px solid #e8edf4; flex-shrink: 0; }
+    .goods-info { flex: 1; min-width: 0; }
+    .goods-name { color: #26364d; font-size: 14px; font-weight: 600; line-height: 22px; overflow-wrap: anywhere; }
+    .goods-specs { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .spec-tag { font-size: 12px; color: #7b8799; background: #f4f6f9; padding: 2px 8px; border-radius: 4px; }
   }
-
-  .sub-header-title {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 10px;
-
-    .el-icon {
-      color: #ff6a00;
-    }
-  }
-
-  // 商品清单底部金额汇总排版
+  .sub-header-title { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 14px; font-weight: 600; }
+  .sub-header-title .el-icon { color: #4c7bdd; }
   .goods-summary-footer {
     display: flex;
     justify-content: flex-end;
-    margin-top: 16px;
-
-    .summary-rows {
-      width: 340px;
-      background: #f8fafc;
-      border: 1px solid #f1f5f9;
-      border-radius: 8px;
-      padding: 14px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      .summary-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 13px;
-
-        .label {
-          color: #64748b;
-        }
-
-        .value {
-          color: #1e293b;
-          font-weight: 500;
-        }
-
-        &.final-total {
-          padding-top: 4px;
-          align-items: baseline;
-
-          .label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #0f172a;
-          }
-
-          .final-price {
-            font-size: 20px;
-            font-weight: 700;
-          }
-        }
-      }
-
-      .summary-divider {
-        height: 1px;
-        background: #e2e8f0;
-        margin: 4px 0;
-      }
-    }
+    margin-top: 24px;
+    .summary-rows { width: 360px; max-width: 100%; padding: 20px 24px; box-sizing: border-box; background: #f7f9fc; border: 1px solid #edf1f7; border-radius: 10px; display: flex; flex-direction: column; gap: 12px; }
+    .summary-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 13px; }
+    .label { color: var(--detail-muted); }
+    .value { font-weight: 500; }
+    .summary-divider { height: 1px; background: #e1e7f0; margin: 4px 0; }
+    .final-total { align-items: baseline; }
+    .final-total .label { color: #334155; font-size: 14px; font-weight: 600; }
+    .final-price { font-size: 26px; font-weight: 650; white-space: nowrap; letter-spacing: -.5px; }
   }
-
-  .addr-select-line {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .text-danger { color: #ef4444; }
-  .text-success { color: #10b981; }
-  .text-warning { color: #f59e0b; }
-  .text-primary { color: #2563eb; }
-  .text-gray { color: #94a3b8; }
-  .text-dark { color: #0f172a; }
+  .addr-select-line { display: flex; align-items: center; gap: 10px; }
+  .text-danger { color: #e45454; }
+  .text-success { color: #20a684; }
+  .text-warning { color: #d9972b; }
+  .text-primary { color: #3875ed; }
+  .text-gray { color: #8b98ab; }
+  .text-dark { color: #1e293b; }
   .font-bold { font-weight: 600; }
-  .font-mono { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; }
+  .font-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; font-variant-numeric: tabular-nums; }
   .mt_16 { margin-top: 16px; }
   .mb_10 { margin-bottom: 10px; }
   .pr_12 { padding-right: 12px; }
+
+  @media (max-width: 1440px) {
+    padding: 6px 4px 28px;
+    .overview-header { align-items: flex-start; }
+    .header-actions { width: 100%; padding-top: 16px; border-top: 1px solid #e5edf8; }
+    .fulfillment-stepper { margin-top: 20px; }
+    .section-card :deep(.el-card__header), .section-card :deep(.el-card__body) { padding-left: 18px; padding-right: 18px; }
+    .kv-list .kv-row { gap: 8px; }
+    .kv-list .kv-label { width: 70px; }
+    .fulfillment-stepper .step-connector { margin: 0 16px; }
+  }
+  @media (max-width: 1100px) {
+    .info-grid-row :deep(.el-col) { width: 100%; max-width: 100%; flex: 0 0 100%; }
+    .fulfillment-stepper .step-node { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .fulfillment-stepper .step-item { align-items: flex-start; }
+    .fulfillment-stepper .step-connector { margin-top: 17px; }
+    .fulfillment-stepper .step-desc { max-width: 120px; }
+  }
+  @media (max-width: 600px) {
+    padding: 4px 0 20px;
+    .page-heading { margin-bottom: 16px; }
+    .page-heading h1 { font-size: 21px; }
+    .page-heading p { max-width: 190px; }
+    .top-overview-card :deep(.el-card__body) { padding: 18px 16px; }
+    .header-left { gap: 10px; }
+    .header-left .sn-title-group { width: 100%; }
+    .header-left .sn-value { font-size: 13px; }
+    .fulfillment-stepper { align-items: stretch; flex-direction: column; gap: 20px; padding: 20px 4px 0; }
+    .fulfillment-stepper .step-item { flex: auto; }
+    .fulfillment-stepper .step-node { flex-direction: row; align-items: center; }
+    .fulfillment-stepper .step-desc { max-width: none; }
+    .fulfillment-stepper .step-connector { display: none; }
+    .goods-summary-footer .summary-rows { width: 100%; padding: 18px; }
+    .goods-summary-footer .final-price { font-size: 23px; }
+    .section-card .flex-title { flex-wrap: wrap; }
+  }
 }
 </style>
 

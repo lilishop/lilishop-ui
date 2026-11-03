@@ -37,7 +37,7 @@ a {
 }
 
 textarea {
-    resize: none;
+    resize: none !important;
     outline: 0;
     white-space: pre-wrap;
     word-wrap: break-word;

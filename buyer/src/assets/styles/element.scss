@@ -1,3 +1,8 @@
+/* 全局禁止多行输入框拖动缩放，覆盖组件生成的内联 resize 样式。 */
+.el-textarea__inner {
+  resize: none !important;
+}
+
 :root {
   --el-color-primary: var(--theme-color, #ff3c2a);
   --el-color-danger: var(--theme-color, #ff3c2a);
