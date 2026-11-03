@@ -49,6 +49,11 @@
     </el-card>
 
     <el-card class="mt_10">
+      <el-tabs v-model="salesTab" @tab-change="handleSalesTabChange">
+        <el-tab-pane label="全部" name="all" />
+        <el-tab-pane label="已设置" name="configured" />
+        <el-tab-pane label="未设置" name="unconfigured" />
+      </el-tabs>
       <el-alert
         type="info"
         :closable="false"
@@ -104,8 +109,8 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="goodsId" label="SPU编码" width="160" show-overflow-tooltip />
-        <el-table-column prop="id" label="SKU ID" width="160" show-overflow-tooltip />
+        <el-table-column prop="goodsId" label="SPU编码" width="220" show-overflow-tooltip />
+        <el-table-column prop="id" label="SKU ID" width="220" show-overflow-tooltip />
         <el-table-column label="真实销量" width="110" align="right">
           <template #default="{ row }">
             <span v-if="row">{{ row.buyCount || 0 }}</span>
@@ -156,14 +161,19 @@
       </div>
     </el-card>
 
-    <el-dialog
+    <el-drawer
       v-model="editModalVisible"
       :title="modalMode === 'batch' ? '批量设置虚拟销量' : '设置虚拟销量'"
-      width="480px"
+      class="virtual-sales-drawer"
+      direction="rtl"
+      size="min(480px, 100vw)"
+      append-to-body
+      :before-close="handleBeforeCloseVirtualSales"
       :close-on-click-modal="false"
       :close-on-press-escape="!modalSubmitting"
       :show-close="!modalSubmitting"
       destroy-on-close
+      @closed="resetVirtualSalesModal"
     >
       <div v-if="modalMode === 'single' && currentSku" class="virtual-sales-modal">
         <div class="sku-info-item">
@@ -208,12 +218,14 @@
         </el-form>
       </div>
       <template #footer>
-        <el-button :disabled="modalSubmitting" @click="handleCancelVirtualSales">取消</el-button>
-        <el-button type="primary" :loading="modalSubmitting" @click="handleSubmitVirtualSales">
-          提交
-        </el-button>
+        <div class="drawer-actions">
+          <el-button :disabled="modalSubmitting" @click="handleCancelVirtualSales">取消</el-button>
+          <el-button type="primary" :loading="modalSubmitting" @click="handleSubmitVirtualSales">
+            提交
+          </el-button>
+        </div>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
@@ -248,6 +260,7 @@ const modalMode = ref("single");
 const currentSku = ref(null);
 const currentIndex = ref(-1);
 const selectedRows = ref([]);
+const salesTab = ref("all");
 const editForm = reactive({
   virtualSales: 0,
 });
@@ -263,6 +276,7 @@ const searchForm = ref({
 });
 const data = ref([]);
 const total = ref(0);
+let dataRequestId = 0;
 
 function init() {
   getDataList();
@@ -278,6 +292,12 @@ function changePageSize(v) {
 }
 function handleSearch() {
   searchForm.value.pageNumber = 1;
+  getDataList();
+}
+function handleSalesTabChange() {
+  searchForm.value.pageNumber = 1;
+  selectedRows.value = [];
+  tableRef.value?.clearSelection();
   getDataList();
 }
 function handleReset() {
@@ -307,9 +327,15 @@ function handleSelectionChange(selection) {
   selectedRows.value = selection;
 }
 function getDataList() {
+  const requestId = ++dataRequestId;
   loading.value = true;
-  getGoodsSkuData(searchForm.value)
+  const params = { ...searchForm.value };
+  if (salesTab.value !== "all") {
+    params.virtualSalesSet = salesTab.value === "configured";
+  }
+  getGoodsSkuData(params)
     .then((res) => {
+      if (requestId !== dataRequestId) return;
       if (res && res.success && res.result) {
         data.value = (res.result.records || []).map((item) => ({
           ...item,
@@ -317,6 +343,10 @@ function getDataList() {
           saving: false,
         }));
         total.value = res.result.total || 0;
+        if (data.value.length === 0 && total.value > 0 && searchForm.value.pageNumber > 1) {
+          searchForm.value.pageNumber = Math.max(1, Math.ceil(total.value / searchForm.value.pageSize));
+          getDataList();
+        }
         selectedRows.value = [];
       } else {
         data.value = [];
@@ -326,13 +356,14 @@ function getDataList() {
       }
     })
     .catch(() => {
+      if (requestId !== dataRequestId) return;
       data.value = [];
       total.value = 0;
       selectedRows.value = [];
       ElMessage.error("加载规格列表失败");
     })
     .finally(() => {
-      loading.value = false;
+      if (requestId === dataRequestId) loading.value = false;
     });
 }
 function getVirtualSalesValue(row) {
@@ -362,6 +393,10 @@ function openBatchVirtualSalesModal() {
 function handleCancelVirtualSales() {
   if (modalSubmitting.value) return;
   resetVirtualSalesModal();
+}
+function handleBeforeCloseVirtualSales(done) {
+  if (modalSubmitting.value) return;
+  done();
 }
 function resetVirtualSalesModal() {
   editModalVisible.value = false;
@@ -397,6 +432,7 @@ function handleSubmitVirtualSales() {
         }
         ElMessage.success("虚拟销量设置成功");
         resetVirtualSalesModal();
+        getDataList();
       } else {
         ElMessage.error((res && res.message) || "规格虚拟销量设置失败");
       }
@@ -433,6 +469,7 @@ function handleBatchSubmitVirtualSales(virtualSales) {
         tableRef.value?.clearSelection();
         ElMessage.success("虚拟销量设置成功");
         resetVirtualSalesModal();
+        getDataList();
       } else {
         ElMessage.error((res && res.message) || "虚拟销量设置失败");
       }
@@ -454,6 +491,28 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.virtual-sales-drawer {
+  :deep(.el-drawer__header) {
+    margin-bottom: 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+  }
+
+  :deep(.el-drawer__footer) {
+    border-top: 1px solid var(--el-border-color-lighter);
+  }
+}
+
+.drawer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  :deep(.el-button + .el-button) {
+    margin-left: 0;
+  }
+}
+
 .goods-info {
   display: flex;
   align-items: center;

@@ -214,7 +214,8 @@ defineExpose({
   }
 }
 // 商品分类下拉挂载到 body，需要高于抽屉的 10000 层级
-.goods-dialog-cascader-popper {
+.goods-dialog-cascader-popper,
+.goods-dialog-pagination-popper {
   z-index: 10001 !important;
 }
 </style>

@@ -127,6 +127,12 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-manage/category.vue")
     },
     {
+      path: "goods-scheduled-upper",
+      title: "定时上架",
+      name: "goods-scheduled-upper",
+      component: () => import("@/views/goods/scheduled-upper/index.vue")
+    },
+    {
       path: "goods-group",
       title: "商品分组",
       name: "goods-group",
@@ -359,18 +365,6 @@ export const otherRouter = {
       title: "满减满折详情",
       name: "full-discount-detail",
       component: () => import("@/views/promotions/full-discount/full-discount-detail.vue")
-    },
-    {
-      path: "promotions/flash-discount",
-      title: "限时直降",
-      name: "flash-discount",
-      component: () => import("@/views/promotions/flash-discount/flash-discount.vue")
-    },
-    {
-      path: "promotions/nth-item-discount",
-      title: "第N件优惠",
-      name: "nth-item-discount",
-      component: () => import("@/views/promotions/nth-item-discount/nth-item-discount.vue")
     },
     {
       path: "promotions/seckill/manager-seckill-add",

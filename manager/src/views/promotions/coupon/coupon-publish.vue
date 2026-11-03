@@ -12,22 +12,12 @@
             <el-tag v-else-if="id" type="warning" size="small" effect="plain" class="mode-tag">
               编辑模式
             </el-tag>
-            <el-tag v-else type="success" size="small" effect="plain" class="mode-tag">
-              新建模式
-            </el-tag>
             <span v-if="id" class="coupon-id-tip font-mono">ID: {{ id }}</span>
           </div>
+          <p class="page-description">配置优惠内容、发放规则及适用商品范围。</p>
         </div>
         <div class="header-right">
-          <el-button @click="closeCurrentPage">返回</el-button>
-          <el-button
-            v-if="!isOnlyView"
-            type="primary"
-            :loading="submitLoading"
-            @click="handleSubmit"
-          >
-            保存提交
-          </el-button>
+          <el-button :icon="ArrowLeft" @click="closeCurrentPage">返回优惠券列表</el-button>
         </div>
       </div>
     </el-card>
@@ -44,7 +34,7 @@
         <!-- 模块一：基本信息 -->
         <div class="form-section">
           <div class="section-header">
-            <span class="section-indicator"></span>
+            <span class="section-number">01</span>
             <span class="section-title">基本信息</span>
             <span class="section-subtitle">配置活动名称、券面额及发放规则</span>
           </div>
@@ -107,13 +97,6 @@
               </el-input>
             </el-form-item>
 
-            <el-form-item label="活动类型" prop="getType">
-              <el-select :disabled="disabled" v-model="form.getType" style="width: 240px">
-                <el-option label="免费领取" value="FREE" />
-                <el-option label="活动赠送" value="ACTIVITY" />
-              </el-select>
-            </el-form-item>
-
             <el-form-item label="店铺承担比例" prop="storeCommission">
               <el-input
                 :disabled="disabled"
@@ -151,7 +134,7 @@
               <span class="form-describe">若设置为 0，则代表不限制每人领取数量</span>
             </el-form-item>
 
-            <el-form-item label="范围描述" prop="description">
+            <el-form-item label="范围描述" prop="description" class="form-item-wide">
               <el-input
                 :disabled="disabled"
                 v-model="form.description"
@@ -169,12 +152,12 @@
         <!-- 模块二：使用限制 -->
         <div class="form-section mt_10">
           <div class="section-header">
-            <span class="section-indicator"></span>
+            <span class="section-number">02</span>
             <span class="section-title">使用限制</span>
             <span class="section-subtitle">配置消费门槛、有效时间以及指定适用商品范围</span>
           </div>
 
-          <div class="section-body">
+          <div class="section-body usage-fields">
             <el-form-item label="消费门槛" prop="consumeThreshold">
               <el-input
                 :disabled="disabled"
@@ -189,37 +172,41 @@
             </el-form-item>
 
             <el-form-item label="有效期" prop="rangeTime">
-              <div v-if="form.getType == 'ACTIVITY'" class="mb_10">
-                <el-radio-group v-model="rangeTimeType">
-                  <el-radio :disabled="disabled" :value="1" v-if="form.getType !== 'ACTIVITY'">起止时间</el-radio>
-                  <el-radio :disabled="disabled" :value="0">固定有效天数</el-radio>
-                </el-radio-group>
-              </div>
+              <div class="validity-field">
+                <div v-if="form.getType == 'ACTIVITY'" class="validity-type">
+                  <el-radio-group v-model="rangeTimeType">
+                    <el-radio :disabled="disabled" :value="1" v-if="form.getType !== 'ACTIVITY'">起止时间</el-radio>
+                    <el-radio :disabled="disabled" :value="0">固定有效天数</el-radio>
+                  </el-radio-group>
+                </div>
 
-              <div v-if="rangeTimeType == 1">
-                <el-date-picker
-                  :disabled="disabled"
-                  type="datetimerange"
-                  v-model="form.rangeTime"
-                  format="YYYY-MM-DD HH:mm:ss"
-                  value-format="YYYY-MM-DD HH:mm:ss"
-                  start-placeholder="开始时间"
-                  end-placeholder="结束时间"
-                  :disabled-date="options.disabledDate"
-                  style="width: 380px"
-                />
-              </div>
+                <div v-if="rangeTimeType == 1">
+                  <el-date-picker
+                    :disabled="disabled"
+                    type="datetimerange"
+                    v-model="form.rangeTime"
+                    format="YYYY-MM-DD HH:mm:ss"
+                    value-format="YYYY-MM-DD HH:mm:ss"
+                    start-placeholder="开始时间"
+                    end-placeholder="结束时间"
+                    range-separator="至"
+                    :disabled-date="options.disabledDate"
+                    style="width: 380px"
+                  />
+                </div>
 
-              <div class="effectiveDays-row" v-if="rangeTimeType == 0">
-                <span class="days-label">领取当天开始</span>
-                <el-input-number
-                  :disabled="disabled"
-                  v-model="form.effectiveDays"
-                  :min="1"
-                  :max="365"
-                  style="width: 130px"
-                />
-                <span class="days-unit">天内有效（1-365天的整数）</span>
+                <div class="effectiveDays-row" v-if="rangeTimeType == 0">
+                  <span class="days-label">领取当天开始</span>
+                  <el-input-number
+                    :disabled="disabled"
+                    v-model="form.effectiveDays"
+                    :min="1"
+                    :max="365"
+                    style="width: 130px"
+                  />
+                  <span class="days-unit">天内有效</span>
+                </div>
+                <div v-if="rangeTimeType == 0" class="validity-help">有效天数为 1–365 天的整数</div>
               </div>
             </el-form-item>
 
@@ -234,29 +221,36 @@
             <!-- 指定适用商品表格 -->
             <el-form-item
               v-if="form.scopeType == 'PORTION_GOODS'"
-              label="指定商品"
-              style="width: 100%"
+              :label-width="0"
+              class="portion-goods-form-item"
             >
               <div class="portion-goods-wrapper">
-                <div v-if="!isOnlyView" class="portion-goods-toolbar">
-                  <el-button type="primary" @click="openSkuList">选择商品</el-button>
-                  <el-button
-                    type="danger"
-                    plain
-                    :disabled="selectedGoods.length === 0"
-                    @click="delSelectGoods"
-                  >
-                    批量删除 ({{ selectedGoods.length }})
-                  </el-button>
+                <div class="portion-goods-toolbar">
+                  <div class="portion-goods-heading">
+                    <h3>指定商品</h3>
+                    <span>已选 {{ form.promotionGoodsList.length }} 件商品</span>
+                  </div>
+                  <div v-if="!isOnlyView && form.promotionGoodsList.length" class="goods-toolbar-actions">
+                    <el-button
+                      v-if="selectedGoods.length"
+                      type="danger"
+                      plain
+                      @click="delSelectGoods"
+                    >
+                      批量删除 ({{ selectedGoods.length }})
+                    </el-button>
+                    <el-button type="primary" :icon="Plus" @click="openSkuList">选择商品</el-button>
+                  </div>
                 </div>
 
                 <el-table
-                  border
-                  stripe
+                  v-if="form.promotionGoodsList.length"
                   :data="form.promotionGoodsList"
                   style="width: 100%"
                   empty-text="暂无指定商品数据"
                   class="portion-goods-table"
+                  row-key="skuId"
+                  scrollbar-always-on
                   @selection-change="changeSelect"
                 >
                   <el-table-column
@@ -265,7 +259,7 @@
                     width="50"
                     align="center"
                   />
-                  <el-table-column label="商品图片" width="76" align="center">
+                  <el-table-column label="图片" width="76" align="center">
                     <template #default="{ row }">
                       <el-image
                         v-if="row && row.thumbnail"
@@ -285,9 +279,13 @@
                   <el-table-column
                     prop="goodsName"
                     label="商品名称"
-                    min-width="220"
-                    show-overflow-tooltip
-                  />
+                    min-width="280"
+                  >
+                    <template #default="{ row }">
+                      <div class="selected-goods-name" :title="row.goodsName">{{ row.goodsName || '-' }}</div>
+                      <div class="selected-goods-sku">SKU：{{ row.skuId }}</div>
+                    </template>
+                  </el-table-column>
                   <el-table-column label="商品单价" width="130" align="right">
                     <template #default="{ row }">
                       <span v-if="row" class="price-text font-mono font-semibold">
@@ -319,6 +317,12 @@
                     </template>
                   </el-table-column>
                 </el-table>
+                <div v-else class="portion-goods-empty">
+                  <div class="empty-icon"><el-icon :size="28"><ShoppingBag /></el-icon></div>
+                  <h3>选择优惠券适用的商品</h3>
+                  <p>{{ isOnlyView ? '暂无指定商品' : '仅选中的商品可使用该优惠券，可一次添加多个商品' }}</p>
+                  <el-button v-if="!isOnlyView" type="primary" :icon="Plus" @click="openSkuList">选择商品</el-button>
+                </div>
               </div>
             </el-form-item>
 
@@ -359,6 +363,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from "vue";
+import { ArrowLeft, Plus, ShoppingBag } from "@element-plus/icons-vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   savePlatformCoupon,
@@ -417,7 +422,7 @@ const form = ref({
   couponType: "PRICE",
   couponName: "",
   promotionName: "",
-  getType: "FREE",
+  getType: route.query.getType === "ACTIVITY" ? "ACTIVITY" : "FREE",
   promotionGoodsList: [],
   scopeIdGoods: [],
   rangeDayType: "",
@@ -470,6 +475,7 @@ watch(
   (val) => {
     if (val == "FREE") {
       rangeTimeType.value = 1;
+      formRule.rangeTime = [{ required: true, message: "请选择优惠券有效期" }];
     } else {
       rangeTimeType.value = 0;
     }
@@ -477,7 +483,7 @@ watch(
       delete formRule.rangeTime;
     }
   },
-  { deep: true }
+  { immediate: true }
 );
 
 watch(
@@ -488,6 +494,8 @@ watch(
       getCoupon();
     } else {
       formRef.value?.resetFields();
+      modalType.value = 0;
+      form.value.getType = e.getType === "ACTIVITY" ? "ACTIVITY" : "FREE";
     }
   }
 );
@@ -728,9 +736,14 @@ function filterCategoryId(list, idArr) {
 
 <style lang="scss" scoped>
 .coupon-publish-page {
-  padding-bottom: 20px;
+  max-width: 1640px;
+  padding: 12px 20px 24px;
+  margin: 0 auto;
 
   .header-card {
+    border: 0;
+    background: transparent;
+    :deep(.el-card__body) { padding: 8px 0 4px; }
     .page-header-row {
       display: flex;
       justify-content: space-between;
@@ -741,8 +754,8 @@ function filterCategoryId(list, idArr) {
           display: flex;
           align-items: center;
           gap: 10px;
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 22px;
+          font-weight: 500;
           color: #303133;
 
           .mode-tag {
@@ -769,15 +782,19 @@ function filterCategoryId(list, idArr) {
   }
 
   .form-card {
+    background: transparent;
+    border: 0;
+    :deep(.el-card__body) { padding: 0; }
     .custom-coupon-form {
-      padding: 10px 10px 0;
+      padding: 0;
     }
 
     .form-section {
       border: 1px solid #ebeef5;
-      border-radius: 6px;
-      padding: 18px 20px;
-      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 24px;
+      background-color: var(--el-bg-color);
+      margin-top: 16px;
 
       .section-header {
         display: flex;
@@ -787,16 +804,9 @@ function filterCategoryId(list, idArr) {
         margin-bottom: 16px;
         border-bottom: 1px solid #f0f2f5;
 
-        .section-indicator {
-          width: 4px;
-          height: 16px;
-          border-radius: 2px;
-          background-color: #409eff;
-        }
-
         .section-title {
           font-size: 15px;
-          font-weight: 600;
+          font-weight: 500;
           color: #303133;
         }
 
@@ -808,26 +818,55 @@ function filterCategoryId(list, idArr) {
       }
 
       .section-body {
-        max-width: 900px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 24px;
+        width: 100%;
+        min-width: 0;
       }
+      .section-body.usage-fields { display: block; }
     }
   }
 
   .form-describe {
     font-size: 12px;
-    margin-left: 10px;
+    margin-top: 6px;
+    width: 100%;
     color: #909399;
+  }
+
+  .validity-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .validity-help {
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--el-text-color-secondary);
   }
 
   .effectiveDays-row {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
+
+    :deep(.el-input-number) {
+      flex: 0 0 130px;
+      width: 130px !important;
+      max-width: 130px;
+    }
 
     .days-label,
     .days-unit {
       font-size: 13px;
       color: #606266;
+      white-space: nowrap;
     }
   }
 
@@ -837,8 +876,10 @@ function filterCategoryId(list, idArr) {
     .portion-goods-toolbar {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
     }
 
     .portion-goods-table {
@@ -867,9 +908,12 @@ function filterCategoryId(list, idArr) {
   }
 
   .footer-card {
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 10px;
+    margin-top: 16px;
     .footer-actions {
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
       gap: 14px;
     }
@@ -881,6 +925,39 @@ function filterCategoryId(list, idArr) {
 
   .font-semibold {
     font-weight: 600;
+  }
+  .page-description { margin: 8px 0 0; color: var(--el-text-color-secondary); font-size: 13px; }
+  .section-number { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 28px; height: 28px; border-radius: 7px; background: var(--el-color-primary-light-9); color: var(--el-color-primary); font-size: 12px; font-weight: 500; }
+  .section-header { flex-wrap: wrap; }
+  .section-body > .el-form-item { min-width: 0; margin-bottom: 22px; align-self: start; }
+  .form-item-wide { grid-column: 1 / -1; }
+  :deep(.el-form-item__content) { min-width: 0; }
+  .section-body :deep(.el-input), .section-body :deep(.el-select), .section-body :deep(.el-input-number), .section-body :deep(.el-cascader) { width: 100% !important; max-width: 360px; }
+  .section-body :deep(.el-textarea) { width: 100% !important; max-width: 720px; }
+  .usage-fields :deep(.el-date-editor.el-date-editor--datetimerange) { width: 520px !important; max-width: 100%; }
+
+  .portion-goods-form-item :deep(.el-form-item__content) { margin-left: 0 !important; }
+  .portion-goods-heading, .goods-toolbar-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .portion-goods-heading h3 { margin: 0; font-size: 15px; font-weight: 500; }
+  .portion-goods-heading span { color: var(--el-text-color-secondary); font-size: 13px; }
+  .goods-toolbar-actions :deep(.el-button + .el-button), .footer-actions :deep(.el-button + .el-button) { margin-left: 0; }
+  .selected-goods-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; }
+  .selected-goods-sku { margin-top: 4px; color: var(--el-text-color-secondary); font: 12px/1.5 Consolas, monospace; overflow-wrap: anywhere; }
+  .portion-goods-table :deep(.el-table__cell) { padding: 12px 0; }
+  .portion-goods-table :deep(th.el-table__cell) { background: var(--el-fill-color-light); font-weight: 400; }
+  .portion-goods-empty { display: flex; align-items: center; justify-content: center; flex-direction: column; min-height: 230px; padding: 24px 20px; box-sizing: border-box; border: 1px dashed var(--el-border-color); border-radius: 8px; background: var(--el-fill-color-lighter); text-align: center; }
+  .portion-goods-empty h3 { margin: 0; font-size: 16px; font-weight: 500; }
+  .portion-goods-empty p { margin: 8px 0 20px; font-size: 13px; color: var(--el-text-color-secondary); }
+  .empty-icon { display: grid; place-items: center; width: 60px; height: 60px; margin-bottom: 16px; border-radius: 16px; color: var(--el-color-primary); background: var(--el-color-primary-light-9); }
+  @media (max-width: 1100px) {
+    .form-card .form-section .section-body { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 768px) {
+    padding: 8px 8px 20px;
+    .page-header-row { flex-wrap: wrap; gap: 16px; }
+    .form-card .form-section { padding: 16px; }
+    .section-subtitle { width: 100%; }
+    .effectiveDays-row { flex-wrap: wrap; }
   }
 }
 </style>

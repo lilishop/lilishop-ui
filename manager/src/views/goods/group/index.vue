@@ -18,24 +18,17 @@
             <el-button @click="handleReset">重置</el-button>
           </el-form-item>
         </el-form>
-        <div class="toolbar-right">
-          <el-button type="primary" @click="openAdd">添加分组</el-button>
-        </div>
       </div>
     </el-card>
 
     <!-- 分组数据表格卡片 -->
     <el-card shadow="never" class="table-card mt_10">
-      <template #header>
-        <div class="card-header-bar">
-          <div class="header-title">
-            <span>商品分组列表</span>
-          </div>
-          <div class="header-actions">
-            <el-button size="small" @click="getData">刷新</el-button>
-          </div>
-        </div>
-      </template>
+      <list-action-bar>
+        <el-button type="primary" @click="openAdd">添加分组</el-button>
+        <template #right>
+          <el-button @click="getData">刷新</el-button>
+        </template>
+      </list-action-bar>
 
       <el-table
         ref="table"
@@ -166,6 +159,7 @@
 </template>
 
 <script setup>
+import ListActionBar from "@/components/list-action-bar.vue";
 import { ref, reactive, nextTick, onMounted } from "vue";
 import * as API_Goods from "@/api/goods.js";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -373,25 +367,6 @@ onMounted(() => {
       }
     }
 
-    .toolbar-right {
-      display: flex;
-      align-items: center;
-    }
-  }
-
-  .card-header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .header-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      color: #303133;
-    }
   }
 
   .pagination-wrap {

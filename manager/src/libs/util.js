@@ -10,6 +10,8 @@ const DEPRECATED_FRONT_ROUTES = new Set([
   "goods/goods-manage/spec",
   "member/list/memberRecycle",
   "order/order/fictitiousOrderList",
+  "promotions/flash-discount",
+  "promotions/nth-item-discount",
 ]);
 
 function isDeprecatedMenu(menu) {

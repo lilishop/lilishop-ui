@@ -47,6 +47,12 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-seller/goodsOperation.vue")
     },
     {
+      path: "goods-scheduled-upper",
+      title: "定时上架",
+      name: "goods-scheduled-upper",
+      component: () => import("@/views/goods/scheduled-upper/index.vue")
+    },
+    {
       path: "goods-operation-edit",
       title: "编辑商品",
       name: "goods-operation-edit",
@@ -195,18 +201,6 @@ export const otherRouter = {
       title: "添加满额活动",
       name: "full-discount-detail",
       component: () => import("@/views/promotion/full-discount/full-discount-add.vue")
-    },
-    {
-      path: "flash-discount-add",
-      title: "限时直降",
-      name: "flash-discount-add",
-      component: () => import("@/views/promotion/flash-discount/flash-discount-add.vue")
-    },
-    {
-      path: "nth-item-discount-add",
-      title: "第N件优惠",
-      name: "nth-item-discount-add",
-      component: () => import("@/views/promotion/nth-item-discount/nth-item-discount-add.vue")
     },
     {
       path: "export-order-deliver",

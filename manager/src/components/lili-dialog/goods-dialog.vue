@@ -61,7 +61,7 @@
           align="center"
           reserve-selection
         />
-        <el-table-column label="商品图片" width="76" align="center">
+        <el-table-column label="图片" width="76" align="center">
           <template #default="{ row }">
             <el-image
               class="goods-thumb"
@@ -124,6 +124,8 @@
         v-model:page-size="goodsParams.pageSize"
         :total="total"
         :page-sizes="[15, 30, 50, 100]"
+        popper-class="goods-dialog-pagination-popper"
+        :teleported="true"
         layout="total, sizes, prev, pager, next, jumper"
         size="small"
         @current-change="changePage"

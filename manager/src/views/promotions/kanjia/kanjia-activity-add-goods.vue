@@ -5,14 +5,12 @@
       <div class="page-header-row">
         <div class="header-left">
           <div class="header-title">
-            <span>添加砍价活动商品</span>
-            <el-tag size="small" effect="plain" type="primary" class="mode-tag">
-              新增活动
-            </el-tag>
+            <span>添加砍价活动</span>
           </div>
+          <p class="page-description">设置活动时间，选择参与商品并配置砍价规则。</p>
         </div>
         <div class="header-right">
-          <el-button @click="closeCurrentPage">返回砍价列表</el-button>
+          <el-button :icon="ArrowLeft" @click="closeCurrentPage">返回砍价列表</el-button>
         </div>
       </div>
     </el-card>
@@ -27,7 +25,7 @@
       <!-- 活动时间设置卡片 -->
       <el-card shadow="never" class="info-card mt_10">
         <div class="section-header">
-          <span class="section-indicator"></span>
+          <span class="section-number">01</span>
           <span class="section-title">活动时间设置</span>
         </div>
 
@@ -45,9 +43,10 @@
             end-placeholder="结束时间"
             placeholder="请选择砍价活动有效时间范围"
             :disabled-date="options.disabledDate"
-            style="width: 380px"
+            class="activity-date-picker"
+            range-separator="至"
           />
-          <span class="time-tip-text">请设置砍价活动开展的时间段</span>
+          <span class="time-tip-text">所有参与商品将使用同一活动时间</span>
         </el-form-item>
       </el-card>
 
@@ -55,7 +54,7 @@
       <el-card shadow="never" class="info-card mt_10">
         <div class="card-header-bar">
           <div class="header-title-group">
-            <span class="section-indicator"></span>
+            <span class="section-number">02</span>
             <span class="section-title">砍价活动商品</span>
             <span class="total-badge">已选 {{ form.promotionGoodsList.length }} 件商品</span>
           </div>
@@ -78,7 +77,7 @@
             >
               清空商品
             </el-button>
-            <el-button type="primary" size="small" @click="openSkuList">
+            <el-button v-if="form.promotionGoodsList.length" type="primary" :icon="Plus" @click="openSkuList">
               选择商品
             </el-button>
           </div>
@@ -86,8 +85,8 @@
 
         <el-form-item prop="promotionGoodsList" :label-width="0" class="table-form-item">
           <el-table
-            border
-            stripe
+            v-if="form.promotionGoodsList.length"
+            scrollbar-always-on
             class="kanjia-goods-table"
             :data="form.promotionGoodsList"
             style="width: 100%"
@@ -97,8 +96,9 @@
             <el-table-column type="selection" width="50" align="center" />
 
             <!-- 商品图片 -->
-            <el-table-column label="商品图片" width="76" align="center">
+            <el-table-column label="商品信息" min-width="290">
               <template #default="{ row }">
+                <div class="product-info">
                 <div v-if="row && row.thumbnail" class="goods-thumb-box">
                   <el-image
                     :src="row.thumbnail"
@@ -113,22 +113,12 @@
                   </el-image>
                 </div>
                 <div v-else class="goods-thumb-box thumb-slot">无图</div>
-              </template>
-            </el-table-column>
-
-            <!-- 商品名称与SKU -->
-            <el-table-column
-              prop="goodsName"
-              label="商品名称"
-              min-width="180"
-              show-overflow-tooltip
-            >
-              <template #default="{ row }">
-                <div v-if="row">
-                  <div class="font-semibold text-dark">{{ row.goodsName || "-" }}</div>
+                <div v-if="row" class="product-details">
+                  <div class="product-name text-dark" :title="row.goodsName">{{ row.goodsName || "-" }}</div>
                   <div v-if="row.skuId" class="sku-sub-text font-mono">
                     SKU: {{ row.skuId }}
                   </div>
+                </div>
                 </div>
               </template>
             </el-table-column>
@@ -168,7 +158,7 @@
                   v-model="form.promotionGoodsList[$index].settlementPrice"
                   :min="0"
                   :precision="2"
-                  controls-position="right"
+                  :controls="false"
                   class="kanjia-goods-input"
                   placeholder="结算价"
                 />
@@ -182,7 +172,7 @@
                   v-model="form.promotionGoodsList[$index].lowestPrice"
                   :min="0"
                   :precision="2"
-                  controls-position="right"
+                  :controls="false"
                   class="kanjia-goods-input"
                   placeholder="最低可砍"
                 />
@@ -196,7 +186,7 @@
                   v-model="form.promotionGoodsList[$index].highestPrice"
                   :min="0"
                   :precision="2"
-                  controls-position="right"
+                  :controls="false"
                   class="kanjia-goods-input"
                   placeholder="最高可砍"
                 />
@@ -210,7 +200,7 @@
                   v-model="form.promotionGoodsList[$index].stock"
                   :min="1"
                   :precision="0"
-                  controls-position="right"
+                  :controls="false"
                   class="kanjia-goods-input"
                   placeholder="活动库存"
                 />
@@ -230,12 +220,20 @@
               </template>
             </el-table-column>
           </el-table>
+          <div v-else class="goods-empty">
+            <div class="empty-icon"><el-icon :size="28"><ShoppingBag /></el-icon></div>
+            <h3>选择参与砍价的商品</h3>
+            <p>添加商品后，可逐项设置结算价格、可砍金额和活动库存</p>
+            <el-button type="primary" :icon="Plus" @click="openSkuList">选择活动商品</el-button>
+          </div>
         </el-form-item>
       </el-card>
 
       <!-- 底部操作栏 -->
       <el-card shadow="never" class="footer-card mt_10">
         <div class="footer-actions">
+          <span class="footer-summary">已选 <strong>{{ form.promotionGoodsList.length }}</strong> 件商品</span>
+          <div class="footer-buttons">
           <el-button @click="closeCurrentPage">取消</el-button>
           <el-button
             type="primary"
@@ -244,6 +242,7 @@
           >
             提交创建
           </el-button>
+          </div>
         </div>
       </el-card>
     </el-form>
@@ -254,6 +253,7 @@
 
 <script setup>
 import { nextTick, reactive, ref } from "vue";
+import { ArrowLeft, Plus, ShoppingBag } from "@element-plus/icons-vue";
 import { useRouter } from "vue-router";
 import { saveKanJiaActivityGoods } from "@/api/promotion";
 import { regular } from "@/utils";
@@ -268,9 +268,16 @@ defineOptions({ name: "add-kanjia-activity-goods" });
 const router = useRouter();
 const appStore = useAppStore();
 
+function getDefaultActivityTime() {
+  const start = new Date();
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+  return [unixToDate(start.getTime() / 1000), unixToDate(end.getTime() / 1000)];
+}
+
 const form = reactive({
   promotionGoodsList: [],
-  rangeTime: [],
+  rangeTime: getDefaultActivityTime(),
 });
 
 const submitLoading = ref(false);
@@ -485,13 +492,13 @@ function selectedGoodsData(item) {
 
 <style lang="scss" scoped>
 .kanjia-add-page {
-  padding: 16px 20px;
-  background-color: #f0f2f5;
-  min-height: 100vh;
+  padding: 12px 20px 24px;
+  max-width: 1640px;
+  margin: 0 auto;
   box-sizing: border-box;
 
   .mt_10 {
-    margin-top: 12px;
+    margin-top: 16px;
   }
 
   .font-mono {
@@ -513,9 +520,10 @@ function selectedGoodsData(item) {
   .header-card {
     border: none;
     border-radius: 4px;
+    background: transparent;
 
     :deep(.el-card__body) {
-      padding: 16px 20px;
+      padding: 8px 0 4px;
     }
 
     .page-header-row {
@@ -528,8 +536,8 @@ function selectedGoodsData(item) {
           display: flex;
           align-items: center;
           gap: 12px;
-          font-size: 18px;
-          font-weight: 600;
+          font-size: 22px;
+          font-weight: 500;
           color: #1f2d3d;
 
           .mode-tag {
@@ -551,11 +559,11 @@ function selectedGoodsData(item) {
   }
 
   .info-card {
-    border: none;
-    border-radius: 4px;
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 10px;
 
     :deep(.el-card__body) {
-      padding: 20px;
+      padding: 20px 24px;
     }
 
     .section-header {
@@ -573,7 +581,7 @@ function selectedGoodsData(item) {
 
       .section-title {
         font-size: 15px;
-        font-weight: 600;
+        font-weight: 500;
         color: #303133;
       }
     }
@@ -581,7 +589,8 @@ function selectedGoodsData(item) {
     .time-tip-text {
       font-size: 13px;
       color: #909399;
-      margin-left: 12px;
+      margin-top: 6px;
+      width: 100%;
     }
 
     .card-header-bar {
@@ -604,7 +613,7 @@ function selectedGoodsData(item) {
 
         .section-title {
           font-size: 15px;
-          font-weight: 600;
+          font-weight: 500;
           color: #303133;
         }
 
@@ -624,22 +633,24 @@ function selectedGoodsData(item) {
 
     .kanjia-goods-table {
       :deep(th.el-table__cell) {
-        background-color: #fafafa;
-        color: #303133;
-        font-weight: 600;
+        background-color: var(--el-fill-color-light);
+        color: var(--el-text-color-secondary);
+        font-weight: 400;
+        padding: 12px 0;
       }
 
       .goods-thumb-box {
-        width: 44px;
-        height: 44px;
-        border-radius: 4px;
+        width: 48px;
+        height: 48px;
+        flex: 0 0 48px;
+        border-radius: 6px;
         overflow: hidden;
         background-color: #f5f7fa;
         display: flex;
         align-items: center;
         justify-content: center;
         border: 1px solid #ebeef5;
-        margin: 0 auto;
+        margin: 0;
 
         .goods-thumb-img {
           width: 100%;
@@ -669,8 +680,9 @@ function selectedGoodsData(item) {
   }
 
   .footer-card {
-    border: none;
-    border-radius: 4px;
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgb(31 45 61 / 5%);
 
     :deep(.el-card__body) {
       padding: 16px 20px;
@@ -678,9 +690,37 @@ function selectedGoodsData(item) {
 
     .footer-actions {
       display: flex;
-      justify-content: center;
+      align-items: center;
+      justify-content: space-between;
       gap: 16px;
     }
+  }
+
+  .page-description { margin: 8px 0 0; color: var(--el-text-color-secondary); font-size: 13px; }
+  .section-number { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 28px; height: 28px; border-radius: 7px; background: var(--el-color-primary-light-9); color: var(--el-color-primary); font-size: 12px; font-weight: 500; }
+  .kanjia-activity-time-form-item { margin: 16px 0 0 36px; }
+  .kanjia-activity-time-form-item :deep(.el-form-item__content) { min-width: 0; }
+  :deep(.activity-date-picker.el-date-editor) { flex: 0 1 520px; width: 520px; max-width: 100%; }
+  .goods-empty { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 230px; border: 1px dashed var(--el-border-color); border-radius: 8px; background: var(--el-fill-color-lighter); padding: 24px 20px; text-align: center; }
+  .empty-icon { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 16px; color: var(--el-color-primary); background: var(--el-color-primary-light-9); margin-bottom: 16px; }
+  .goods-empty h3 { margin: 0; font-size: 16px; font-weight: 500; color: var(--el-text-color-primary); }
+  .goods-empty p { margin: 8px 0 20px; font-size: 13px; color: var(--el-text-color-secondary); line-height: 1.6; }
+  .product-info { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+  .product-details { min-width: 0; }
+  .product-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; }
+  .sku-sub-text { overflow-wrap: anywhere; }
+  .footer-summary { font-size: 13px; color: var(--el-text-color-secondary); }
+  .footer-summary strong { color: var(--el-color-primary); font-weight: 500; padding: 0 4px; }
+  .footer-buttons { display: flex; gap: 12px; }
+  .footer-buttons :deep(.el-button + .el-button) { margin-left: 0; }
+  @media (max-width: 768px) {
+    padding: 8px 8px 20px;
+    .page-header-row, .card-header-bar { flex-wrap: wrap; gap: 16px; }
+    .info-card :deep(.el-card__body) { padding: 16px; }
+    .kanjia-activity-time-form-item { margin-left: 0; }
+    .kanjia-activity-time-form-item :deep(.el-form-item__label) { width: 80px !important; }
+    .header-title-group { flex-wrap: wrap; }
+    .footer-card :deep(.el-card__body) { padding: 14px 16px; }
   }
 }
 </style>

@@ -111,7 +111,7 @@
     </el-card>
 
     <el-card>
-      <div class="goods-tab">
+      <div v-if="!scheduledOnly" class="goods-tab">
         <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
           <el-tab-pane
             v-for="(item, index) in goodsStatusWithCount"
@@ -169,6 +169,7 @@
             >{{ row.goodsName }}</a>
           </template>
         </el-table-column>
+        <el-table-column v-if="currentStatus === 'SCHEDULED_UPPER'" prop="scheduledUpperTime" label="计划上架时间" width="190" />
         <el-table-column label="价格" width="120">
           <template #default="{ row }">
             <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, '￥') }}</span>
@@ -265,6 +266,8 @@ import { customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "goods" });
 
+const props = defineProps({ scheduledOnly: { type: Boolean, default: false } });
+
 const route = useRoute();
 const router = useRouter();
 
@@ -315,7 +318,7 @@ const underForm = ref({
 const submitLoading = ref(false); // 添加或编辑提交状态
 const data = ref([]); // 表单数据
 const total = ref(0); // 表单数据总数
-const currentStatus = ref("ALL");
+const currentStatus = ref(props.scheduledOnly ? "SCHEDULED_UPPER" : "ALL");
 const goodsNumerData = ref({});
 const selectedRows = ref([]); // 选中的行数据
 const selectAll = ref(false); // 全选状态
@@ -433,6 +436,12 @@ function buildSearchParams(includeGoodsStatus = true) {
 
   if (!includeGoodsStatus) {
     delete params.goodsStatus;
+  } else if (props.scheduledOnly) {
+    params.goodsStatus = "SCHEDULED_UPPER";
+  }
+  if (includeGoodsStatus && currentStatus.value === "SCHEDULED_UPPER") {
+    params.sort = "scheduled_upper_time";
+    params.order = "asc";
   }
 
   if (createRange.value && createRange.value.length === 2) {
@@ -502,6 +511,7 @@ function getDataList() {
   });
 }
 function getNumberData() {
+  if (props.scheduledOnly) return;
   getGoodsNumerData(buildSearchParams(false)).then((res) => {
     if (res.success) {
       goodsNumerData.value = res.result;
@@ -583,6 +593,7 @@ function goodsStatusClick(name) {
   }
   selectedRows.value = [];
   clearTableSelection();
+  searchForm.value.pageNumber = 1;
   getDataList();
 }
 
@@ -663,7 +674,7 @@ function batchLower() {
 
 onMounted(() => {
   const goodsStatus = route.query.goodsStatus;
-  if (goodsStatus) {
+  if (goodsStatus && !props.scheduledOnly && goodsStatus !== "SCHEDULED_UPPER") {
     currentStatus.value = goodsStatus;
     searchForm.value.goodsStatus = goodsStatus;
   }

@@ -1,7 +1,7 @@
 <template>
   <div class="search">
-    <el-card>
-      <el-form ref="searchFormRef" :model="searchForm" inline>
+    <el-card class="parameter-filter-card">
+      <el-form ref="searchFormRef" :model="searchForm" inline class="search-form" @keyup.enter="handleSearch">
         <el-form-item label="参数名称" prop="paramName">
           <el-input
             v-model="searchForm.paramName"
@@ -16,9 +16,12 @@
           <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
-      <el-row class="operation" style="margin-bottom: 10px;">
+    </el-card>
+
+    <el-card class="parameter-list-card" style="margin-top: 10px">
+      <list-action-bar>
         <el-button type="primary" @click="goAdd">添加</el-button>
-      </el-row>
+      </list-action-bar>
       <el-table
         ref="tableRef"
         v-loading="loading"
@@ -72,6 +75,7 @@
   </div>
 </template>
 <script setup>
+import ListActionBar from "@/components/list-action-bar.vue";
 import { ref } from "vue";
 import { useTable } from "@/utils/useTable";
 import { useRouter } from "vue-router";

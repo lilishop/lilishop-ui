@@ -7,21 +7,13 @@
           <div class="header-title">
             <span>{{ pageTitle }}</span>
             <el-tag
+              v-if="onlyView || isEditMode"
               size="small"
               effect="plain"
               :type="onlyView ? 'info' : (isEditMode ? 'warning' : 'primary')"
               class="mode-tag"
             >
-              {{ onlyView ? "查看模式" : (isEditMode ? "编辑模式" : "新建模式") }}
-            </el-tag>
-            <el-tag
-              v-if="form.cardType"
-              size="small"
-              effect="dark"
-              type="primary"
-              class="type-tag"
-            >
-              {{ form.cardType === "CASH" ? "现金卡" : "提货卡" }}
+              {{ onlyView ? "查看模式" : "编辑模式" }}
             </el-tag>
             <span v-if="route.query.id" class="activity-id font-mono">
               ID: {{ route.query.id }}
@@ -499,8 +491,7 @@ onMounted(() => {
           font-weight: 600;
           color: #1f2d3d;
 
-          .mode-tag,
-          .type-tag {
+          .mode-tag {
             font-weight: normal;
           }
 

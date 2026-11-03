@@ -28,17 +28,12 @@
 
     <!-- 品牌数据表格卡片 -->
     <el-card shadow="never" class="table-card mt_10">
-      <template #header>
-        <div class="card-header-bar">
-          <div class="header-title">
-            <span>商品品牌列表</span>
-          </div>
-          <div class="header-actions">
-            <el-button size="small" @click="getDataList">刷新</el-button>
-            <el-button type="primary" size="small" @click="add">添加品牌</el-button>
-          </div>
-        </div>
-      </template>
+      <list-action-bar>
+        <el-button type="primary" @click="add">添加品牌</el-button>
+        <template #right>
+          <el-button @click="getDataList">刷新</el-button>
+        </template>
+      </list-action-bar>
 
       <el-table
         ref="table"
@@ -197,6 +192,7 @@
 </template>
 
 <script setup>
+import ListActionBar from "@/components/list-action-bar.vue";
 import { ref, reactive, nextTick, getCurrentInstance } from "vue";
 import { useTable } from "@/utils/useTable";
 import {
@@ -426,27 +422,6 @@ function edit(v) {
       .form-actions {
         margin-left: auto;
       }
-    }
-  }
-
-  .card-header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .header-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      color: #303133;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
   }
 

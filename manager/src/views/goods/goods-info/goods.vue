@@ -70,7 +70,7 @@
     </el-card>
 
     <el-card>
-      <div class="goods-tab">
+      <div v-if="!scheduledOnly" class="goods-tab">
         <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
           <el-tab-pane
             v-for="item in goodsStatusWithCount"
@@ -81,7 +81,7 @@
         </el-tabs>
       </div>
 
-      <div class="batch-operations" style="margin: 10px 0">
+      <div v-if="!readOnly" class="batch-operations" style="margin: 10px 0">
         <el-button
           type="primary"
           :disabled="selectedRows.length === 0"
@@ -125,7 +125,7 @@
         row-key="id"
         @selection-change="onSelectionChange"
       >
-        <el-table-column type="selection" width="100" align="center" />
+        <el-table-column v-if="!readOnly" type="selection" width="100" align="center" />
         <el-table-column prop="id" label="SPU编码" width="200" show-overflow-tooltip />
         <el-table-column label="商品图片" width="100" align="center">
           <template #default="{ row }">
@@ -141,6 +141,7 @@
             <a class="link-text" @click="linkTo(row.id, row.skuId)">{{ row.goodsName }}</a>
           </template>
         </el-table-column>
+        <el-table-column v-if="currentStatus === 'SCHEDULED_UPPER'" prop="scheduledUpperTime" label="计划上架时间" width="190" />
         <el-table-column label="价格" width="200">
           <template #default="{ row }">
             <span :style="{ color: $mainColor }">{{ unitPrice(row.price, '￥') }}</span>
@@ -164,7 +165,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="storeName" label="店铺名称" width="200" show-overflow-tooltip />
-        <el-table-column label="操作" width="200" align="center" fixed="right">
+        <el-table-column v-if="!readOnly" label="操作" width="200" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row.authFlag === 'TOBEAUDITED'">
               <a class="link-text" @click="openAuditModal(row)">审核</a>
@@ -298,6 +299,10 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "goods" });
+const props = defineProps({
+  scheduledOnly: { type: Boolean, default: false },
+  readOnly: { type: Boolean, default: false },
+});
 
 // 模板 ref（searchFormRef/underFormRef/batchAuditFormRef/goodsGroupFormRef 因与 data 同名改为 xxxRef）
 const searchFormRef = ref(null);
@@ -315,7 +320,7 @@ const auditModalVisible = ref(false);
 const auditSubmitLoading = ref(false);
 const currentAuditGoods = ref(null);
 const submitLoading = ref(false);
-const currentStatus = ref("ALL");
+const currentStatus = ref(props.scheduledOnly ? "SCHEDULED_UPPER" : "ALL");
 
 const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
   getGoodsListData,
@@ -333,8 +338,13 @@ const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch
     },
     beforeRequest: (p) => {
       const params = { ...p };
-      if (currentStatus.value && currentStatus.value !== "ALL") {
-        params.goodsStatus = currentStatus.value;
+      const status = props.scheduledOnly ? "SCHEDULED_UPPER" : currentStatus.value;
+      if (status && status !== "ALL") {
+        params.goodsStatus = status;
+        if (status === "SCHEDULED_UPPER") {
+          params.sort = "scheduled_upper_time";
+          params.order = "asc";
+        }
       } else {
         delete params.goodsStatus;
       }
@@ -347,7 +357,7 @@ const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch
 );
 
 function handleReset() {
-  currentStatus.value = "ALL";
+  currentStatus.value = props.scheduledOnly ? "SCHEDULED_UPPER" : "ALL";
   resetSearch();
 }
 const goodsNumerData = ref({});
@@ -415,6 +425,7 @@ function init() {
 // 搜索
 // 获取数据
 function getNumberData() {
+  if (props.scheduledOnly) return;
   // 创建一个不包含goodsStatus字段的搜索参数
   const { goodsStatus, ...searchParams } = searchForm;
   getGoodsNumerData(searchParams).then((res) => {
@@ -488,6 +499,7 @@ function goodsStatusClick(name) {
   }
   selectedRows.value = [];
   clearTableSelection();
+  searchForm.pageNumber = 1;
   getDataList();
 }
 function examine(v, authFlag) {

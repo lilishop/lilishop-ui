@@ -7,6 +7,12 @@ import { useAppStore } from "@/stores/app";
 
 let util = {};
 
+// 避免旧缓存中的已下线菜单重新注册路由。
+const DEPRECATED_FRONT_ROUTES = new Set([
+  "promotion/flash-discount/flash-discount",
+  "promotion/nth-item-discount/nth-item-discount",
+]);
+
 /** 店铺主页一级菜单 */
 export const HOME_NAV_NAME = "home";
 export const HOME_NAV_ITEM = { name: HOME_NAV_NAME, title: "主页" };
@@ -489,6 +495,9 @@ util.initMenuData = function (data) {
 
 util.initRouterNode = function (routers, data) {
   for (let item of data) {
+    if (DEPRECATED_FRONT_ROUTES.has(item.frontRoute)) {
+      continue;
+    }
     const menu = Object.assign({}, item);
     const hasChildren = item.children && item.children.length > 0;
 

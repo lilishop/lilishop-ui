@@ -55,6 +55,7 @@
     <el-card>
       <div class="operation padding-row" v-if="getType !== 'ACTIVITY'">
         <el-button type="primary" @click="add">添加优惠券</el-button>
+        <el-button class="activity-coupon-button" @click="addActivityCoupon">添加活动优惠券</el-button>
         <el-button @click="delAll">批量关闭</el-button>
         <el-button type="warning" @click="receivePage()">优惠券领取记录</el-button>
       </div>
@@ -383,6 +384,10 @@ function add() {
   router.push({ name: "add-coupon" });
 }
 
+function addActivityCoupon() {
+  router.push({ name: "add-coupon", query: { getType: "ACTIVITY" } });
+}
+
 function changePage(v) {
   searchForm.pageNumber = v;
   getDataList();
@@ -506,6 +511,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.activity-coupon-button {
+  --el-button-text-color: #b35c12;
+  --el-button-bg-color: #fff7ed;
+  --el-button-border-color: #fed7aa;
+  --el-button-hover-text-color: #9a4b0b;
+  --el-button-hover-bg-color: #ffedd5;
+  --el-button-hover-border-color: #fdba74;
+  --el-button-active-text-color: #9a4b0b;
+  --el-button-active-bg-color: #fed7aa;
+  --el-button-active-border-color: #fb923c;
+  font-weight: 500;
+}
+
 .link-text {
   color: #409eff;
   cursor: pointer;

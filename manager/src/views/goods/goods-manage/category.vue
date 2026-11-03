@@ -1,9 +1,9 @@
 <template>
   <div>
     <el-card>
-      <div class="mb_10">
+      <list-action-bar>
         <el-button type="primary" @click="addParent">添加一级分类</el-button>
-      </div>
+      </list-action-bar>
 
       <el-table
         v-loading="loading"
@@ -121,6 +121,7 @@
 </template>
 
 <script setup>
+import ListActionBar from "@/components/list-action-bar.vue";
 import { ref, reactive, onMounted } from "vue";
 import {
   delCategory,

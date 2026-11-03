@@ -1,10 +1,10 @@
 <template>
   <div class="search">
     <el-card>
-      <div class="operation">
+      <list-action-bar>
         <el-button type="primary" @click="add">添加</el-button>
         <el-button @click="delAll">批量删除</el-button>
-      </div>
+      </list-action-bar>
 
       <el-table
         ref="table"
@@ -66,6 +66,7 @@
 </template>
 
 <script setup>
+import ListActionBar from "@/components/list-action-bar.vue";
 import { ref, reactive, onMounted } from "vue";
 import {
   addGoodsUnit,

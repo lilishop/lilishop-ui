@@ -142,13 +142,6 @@
                 style="width: 260px"
               />
             </el-form-item>
-            <el-form-item label="活动类型" prop="getType">
-              <el-select :disabled="disabled" v-model="form.getType" style="width: 260px">
-                <el-option label="免费领取" value="FREE" />
-                <el-option label="活动赠送" value="ACTIVITY" />
-              </el-select>
-            </el-form-item>
-
             <el-form-item label="发放数量" prop="publishNum" v-if="form.getType === 'FREE'">
               <div class="form-field-block">
                 <el-input
@@ -369,7 +362,7 @@ const form = ref({
   couponType: "PRICE",
   couponName: "",
   promotionName: "",
-  getType: "FREE",
+  getType: route.query.getType === "ACTIVITY" ? "ACTIVITY" : "FREE",
   promotionGoodsList: [],
   scopeIdGoods: [],
   rangeDayType: "",
@@ -448,6 +441,7 @@ watch(
   (val) => {
     if (val == "FREE") {
       rangeTimeType.value = 1;
+      formRule.rangeTime = [{ required: true, message: "请选择优惠券有效期" }];
     } else {
       rangeTimeType.value = 0;
     }
@@ -455,7 +449,7 @@ watch(
       delete formRule.rangeTime;
     }
   },
-  { deep: true }
+  { immediate: true }
 );
 watch(
   () => route.query,
@@ -464,7 +458,9 @@ watch(
     if (id.value) {
       getCoupon();
     } else {
-      formRef.value.resetFields();
+      formRef.value?.resetFields();
+      modalType.value = 0;
+      form.value.getType = e.getType === "ACTIVITY" ? "ACTIVITY" : "FREE";
     }
   }
 );
