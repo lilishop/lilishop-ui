@@ -206,7 +206,11 @@ function getIndexData() {
 }
 
 async function parsePageData(pageData) {
-  const dataJson = JSON.parse(pageData);
+  const dataJson = typeof pageData === 'string' ? JSON.parse(pageData) : pageData;
+  if (dataJson.version === 2 || dataJson.version === '2.0') {
+    modelForm.value = dataJson;
+    return;
+  }
   for (let i = 0; i < dataJson.list.length; i++) {
     const type = dataJson.list[i].type;
     if (type === "carousel2") {

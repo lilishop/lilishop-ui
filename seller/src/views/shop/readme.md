@@ -1,20 +1,9 @@
-### 楼层装修页面
+# 店铺楼层装修
 
-#### floorList.vue  楼层列表
+- floorList.vue：PC 楼层页面列表。
+- renovation.vue：PC 装修入口，加载 pc/index.vue。
+- pc/：新版 PC 行布局装修器，包含组件配置、配置面板和画布模板。
+- wap/：移动端楼层装修。
+- hotzone/：装修图片热区编辑器。
 
-#### renovation.vue 楼层装修主页面
-
-#### singleConfig.vue  右侧配置项
-
-#### modelForm.vue  中间展示所选模块
-
-#### modelFormItem.vue  单个模块样式
-
-#### modelConfig.js 模块数据
-
-#### modelList文件夹为添加的模块
-
-### wap文件夹为移动端楼层装修
-
-
-### draggable中文文档 (http://www.itxst.com/vue-draggable/tutorial.html)
+旧版 PC 装修器及 modelList 组件已移除。

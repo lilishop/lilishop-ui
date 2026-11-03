@@ -124,8 +124,7 @@ function open(type, mutiple) {
 }
 // 外部通过 ref 访问的成员（grep seller/src 全量确认）：
 // - open：所有调用方打开弹窗（goods/link）
-// - singleGoods：shop/modelList/forYour.vue、mixModel.vue 直接调用
-// - clearGoodsSelected：shop/wap/decorate.vue、modelList/goodsAndType.vue 调用
+// - clearGoodsSelected：shop/wap/decorate.vue 调用
 // - goodsData：促销/采购/装修多处回写已选商品
 // - goodsFlag：shop/wap/decorate.vue 直接写入
 // - flag（可写 computed）：shop/wap/decorate.vue 写入触发弹层开关
