@@ -5,7 +5,7 @@
   <p>
     <a href="https://github.com/lilishop/lilishop"><img src="https://img.shields.io/github/stars/lilishop/lilishop.svg?style=social&logo=github" alt="GitHub Stars" /></a>
     <a href="https://gitee.com/beijing_hongye_huicheng/lilishop"><img src="https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark" alt="Gitee Stars" /></a>
-    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License" /></a>
     <a href="https://vuejs.org/"><img src="https://img.shields.io/badge/Vue-3.5-brightgreen.svg" alt="Vue 3" /></a>
     <a href="https://element-plus.org/"><img src="https://img.shields.io/badge/Element%20Plus-2.x-409EFF.svg" alt="Element Plus" /></a>
     <a href="https://pinia.vuejs.org/"><img src="https://img.shields.io/badge/Pinia-4.x-yellow.svg" alt="Pinia" /></a>
@@ -28,7 +28,7 @@
 **LILISHOP** 是基于 Spring Boot / Vue 3 / uni-app 开发的开源商城系统，支持 B2B2C 多商户商城、微信小程序商城、H5 商城、APP 商城、直播电商、分销返佣、秒杀活动。
 
 ### ✨ 为什么选择 Lilishop
-- 🟢 **真 MIT 协议**：支持免费商用与私有化闭源二开，无版权后顾之忧。
+- 🟢 **真 Apache-2.0 协议**：支持免费商用与私有化闭源二开，无版权后顾之忧。
 - 🚀 **Vue 3 全新栈**：全面基于 `Vue 3.5 + Pinia 4 + Vue Router 4 + Element Plus` 构建，告别老旧 Vue 2 架构。
 - 🧩 **四端合一生产级闭环**：完整覆盖 **PC 买家端 (`buyer`)**、**商家端 (`seller`)**、**平台运营管理端 (`manager`)** 与 **在线客服端 (`im`)**，支持拖拽式可视化楼层装修与多维数据统计报表。
 
@@ -146,7 +146,7 @@ lilishop-ui
 
 ## 6. 开源与授权
 
-本项目遵循 [MIT](./LICENSE) 开源协议，版权归 **北京宏业汇成科技有限公司** 所有。允许个人及企业免费用于学习、研究、修改和商业用途（需保留原始版权和许可声明）。
+本项目遵循 [Apache-2.0](./LICENSE) 开源协议，版权归 **北京宏业汇成科技有限公司** 所有。允许个人及企业免费用于学习、研究、修改和商业用途（需保留原始版权和许可声明）。
 
 ---
 

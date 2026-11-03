@@ -5,7 +5,7 @@
   <p>
     <a href="https://github.com/lilishop/lilishop"><img src="https://img.shields.io/github/stars/lilishop/lilishop.svg?style=social&logo=github" alt="GitHub Stars" /></a>
     <a href="https://gitee.com/beijing_hongye_huicheng/lilishop"><img src="https://gitee.com/beijing_hongye_huicheng/lilishop/badge/star.svg?theme=dark" alt="Gitee Stars" /></a>
-    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" /></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License" /></a>
     <a href="https://vuejs.org/"><img src="https://img.shields.io/badge/Vue-3.5-brightgreen.svg" alt="Vue 3" /></a>
     <a href="https://element-plus.org/"><img src="https://img.shields.io/badge/Element%20Plus-2.x-409EFF.svg" alt="Element Plus" /></a>
     <a href="https://pinia.vuejs.org/"><img src="https://img.shields.io/badge/Pinia-4.x-yellow.svg" alt="Pinia" /></a>
@@ -28,7 +28,7 @@
 **LILISHOP** is an open-source e-commerce system built with Spring Boot, Vue 3, and uni-app. It supports B2B2C multi-vendor marketplaces, WeChat Mini Programs, H5, Android/iOS Apps, live-streaming e-commerce, affiliate distribution, and flash sales.
 
 ### ✨ Why Choose Lilishop
-- 🟢 **True MIT License**: Free for commercial use and private secondary development without licensing concerns.
+- 🟢 **True Apache-2.0 License**: Free for commercial use and private secondary development without licensing concerns.
 - 🚀 **Modern Vue 3 Stack**: Built on `Vue 3.5 + Pinia 4 + Vue Router 4 + Element Plus`, leaving legacy Vue 2 templates behind.
 - 🧩 **4-in-1 Production Suite**: Covers **PC Buyer Mall (`buyer`)**, **Seller Portal (`seller`)**, **Platform Admin Panel (`manager`)**, and **IM Customer Service Web (`im`)**, complete with drag-and-drop visual storefront decoration and rich analytics.
 
@@ -141,4 +141,4 @@ lilishop-ui
 
 ## 6. License
 
-Lilishop is licensed under the [MIT](./LICENSE) License. Copyright © 2020-2026 **Beijing Hongye Huicheng Technology Co., Ltd.**
+Lilishop is licensed under the [Apache-2.0](./LICENSE) License. Copyright © 2020-2026 **Beijing Hongye Huicheng Technology Co., Ltd.**
