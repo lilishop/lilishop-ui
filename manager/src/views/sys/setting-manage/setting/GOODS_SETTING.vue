@@ -6,50 +6,15 @@
           <el-radio-button value="true">开启</el-radio-button>
           <el-radio-button value="false">关闭</el-radio-button>
         </el-radio-group>
-        <span class="desc">商品审核关闭后，商家添加商品则无需审核直接上架</span>
+        <span class="desc">控制非自营店商品是否需要审核</span>
       </el-form-item>
-      <div class="label-item">
-        <el-form-item class="label-item" label="缩略图宽" prop="abbreviationPictureWidth">
-          <el-input type="number" v-model="formValidate.abbreviationPictureWidth">
-            <template #prepend>宽</template>
-            <template #append>px</template>
-          </el-input>
-        </el-form-item>
-        <el-form-item class="label-item" label="缩略图高" prop="abbreviationPictureHeight">
-          <el-input type="number" v-model="formValidate.abbreviationPictureHeight">
-            <template #prepend>高</template>
-            <template #append>px</template>
-          </el-input>
-        </el-form-item>
-      </div>
-      <div class="label-item">
-        <el-form-item label="小图宽" prop="smallPictureWidth">
-          <el-input type="number" v-model="formValidate.smallPictureWidth">
-            <template #prepend>宽</template>
-            <template #append>px</template>
-          </el-input>
-        </el-form-item>
-        <el-form-item label="小图高" class="label-item" prop="smallPictureHeight">
-          <el-input type="number" v-model="formValidate.smallPictureHeight">
-            <template #prepend>高</template>
-            <template #append>px</template>
-          </el-input>
-        </el-form-item>
-      </div>
-      <div class="label-item">
-        <el-form-item class="label-item" label="原图宽高" prop="originalPictureWidth">
-          <el-input type="number" v-model="formValidate.originalPictureWidth">
-            <template #prepend>宽</template>
-            <template #append>px</template>
-          </el-input>
-        </el-form-item>
-        <el-form-item class="label-item" label="原图宽高" prop="originalPictureHeight">
-          <el-input type="number" v-model="formValidate.originalPictureHeight">
-            <template #prepend>高</template>
-            <template #append>px</template>
-          </el-input>
-        </el-form-item>
-      </div>
+      <el-form-item label="自营店商品审核" prop="selfOperatedGoodsCheck">
+        <el-radio-group v-model="formValidate.selfOperatedGoodsCheck">
+          <el-radio-button value="true">需要审核</el-radio-button>
+          <el-radio-button value="false">无需审核</el-radio-button>
+        </el-radio-group>
+        <span class="desc">独立控制自营店新增、编辑商品是否需要审核</span>
+      </el-form-item>
       <div class="label-btns goods-setting-btns">
         <div class="goods-setting-save-row">
           <el-button type="primary" @click="submit('formValidate')">保存</el-button>
@@ -67,13 +32,8 @@ const props = defineProps(["res", "type"]);
 
 // 表单数据（init 中整体替换）
 const formValidate = ref({
-  goodsCheck: 1,
-  smallPictureHeight: "0",
-  smallPictureWidth: "0",
-  abbreviationPictureWidth: "0",
-  abbreviationPictureHeight: "0",
-  originalPictureWidth: "0",
-  originalPictureHeight: "0",
+  goodsCheck: "false",
+  selfOperatedGoodsCheck: "false",
 });
 // 校验规则（只做属性合并）
 const ruleValidate = reactive({});
@@ -104,10 +64,11 @@ function setupSetting() {
 }
 function init() {
   result.value = JSON.parse(props.res);
-  Object.keys(result.value).map((item) => {
-    result.value[item] += "";
-  });
-  formValidate.value = { ...result.value };
+  const toBooleanText = (value) => String(value === true || value === "true");
+  formValidate.value = {
+    goodsCheck: toBooleanText(result.value.goodsCheck),
+    selfOperatedGoodsCheck: toBooleanText(result.value.selfOperatedGoodsCheck ?? result.value.goodsCheck),
+  };
   Object.keys(formValidate.value).forEach((item) => {
     ruleValidate[item] = [
       {

@@ -98,23 +98,11 @@
                   <el-radio-button value="CLOSE">关闭</el-radio-button>
                 </el-radio-group>
               </el-form-item>
-              <el-form-item label="商品页面小图宽度" prop="smallPictureWidth">
-                <el-input v-model="goods.smallPictureWidth" placeholder="商品页面小图宽度" style="width: 350px" />
-              </el-form-item>
-              <el-form-item label="商品页面小图高度" prop="smallPictureHeight">
-                <el-input v-model="goods.smallPictureHeight" placeholder="商品页面小图高度" style="width: 350px" />
-              </el-form-item>
-              <el-form-item label="缩略图宽度" prop="abbreviationPictureWidth">
-                <el-input v-model="goods.abbreviationPictureWidth" placeholder="缩略图宽度" style="width: 350px" />
-              </el-form-item>
-              <el-form-item label="缩略图高度" prop="abbreviationPictureHeight">
-                <el-input v-model="goods.abbreviationPictureHeight" placeholder="缩略图高度" style="width: 350px" />
-              </el-form-item>
-              <el-form-item label="原图宽" prop="originalPictureWidth">
-                 <el-input v-model="goods.originalPictureWidth" placeholder="原图宽" style="width: 350px" />
-              </el-form-item>
-              <el-form-item label="原图高" prop="originalPictureHeight">
-                <el-input v-model="goods.originalPictureHeight" placeholder="原图高" style="width: 350px" />
+              <el-form-item label="自营店商品审核" prop="selfOperatedGoodsCheck">
+                <el-radio-group v-model="goods.selfOperatedGoodsCheck">
+                  <el-radio-button value="OPEN">需要审核</el-radio-button>
+                  <el-radio-button value="CLOSE">无需审核</el-radio-button>
+                </el-radio-group>
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" style="width: 100px;margin-right:5px" :loading="saveLoading" @click="saveGoods">
@@ -162,12 +150,7 @@ const order = ref({
 });
 const goods = ref({
   goodsCheck: "OPEN",
-  smallPictureWidth: "",
-  smallPictureHeight: "",
-  abbreviationPictureWidth: "",
-  abbreviationPictureHeight: "",
-  originalPictureWidth: "",
-  originalPictureHeight: "",
+  selfOperatedGoodsCheck: "OPEN",
 });
 // 历史遗留：wechat/qq/weibo/alipay 未在 data 中声明，直接挂 this，且模板中无对应表单项
 let wechat;
@@ -262,86 +245,7 @@ const orderValidate = {
     },
   ],
 };
-const goodsValidate = {
-  smallPictureWidth: [
-    {
-      required: true,
-      validator: (rule, value, callback) => {
-        if (!regular.integer.test(value)) {
-          callback(new Error("请输入正整数，且不为零！"));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-  smallPictureHeight: [
-    {
-      required: true,
-      validator: (rule, value, callback) => {
-        if (!regular.integer.test(value)) {
-          callback(new Error("请输入正整数，且不为零！"));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-  abbreviationPictureWidth: [
-    {
-      required: true,
-      validator: (rule, value, callback) => {
-        if (!regular.integer.test(value)) {
-          callback(new Error("请输入正整数，且不为零！"));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-  abbreviationPictureHeight: [
-    {
-      required: true,
-      validator: (rule, value, callback) => {
-        if (!regular.integer.test(value)) {
-          callback(new Error("请输入正整数，且不为零！"));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-  originalPictureWidth: [
-    {
-      required: true,
-      validator: (rule, value, callback) => {
-        if (!regular.integer.test(value)) {
-          callback(new Error("请输入正整数，且不为零！"));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-  originalPictureHeight: [
-    {
-      required: true,
-      validator: (rule, value, callback) => {
-        if (!regular.integer.test(value)) {
-          callback(new Error("请输入正整数，且不为零！"));
-        } else {
-          callback();
-        }
-      },
-      trigger: "blur",
-    },
-  ],
-};
+const goodsValidate = {};
 
 const baseForm = ref(null);
 const pointForm = ref(null);
@@ -401,7 +305,10 @@ function initGoods() {
     if (res.success) {
       loading.value = false;
       if (res.result) {
-        goods.value = res.result;
+        goods.value = {
+          goodsCheck: res.result.goodsCheck,
+          selfOperatedGoodsCheck: res.result.selfOperatedGoodsCheck ?? res.result.goodsCheck,
+        };
       }
     }
   });
