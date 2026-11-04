@@ -534,8 +534,8 @@
           <div class="form-item-view">
             <el-form-item class="form-item-view-el" label="上下架" prop="release">
               <el-radio-group v-model="baseInfoForm.release">
-                <el-radio-button :value="1">立即上架</el-radio-button>
-                <el-radio-button :value="0">立即下架</el-radio-button>
+                <el-radio-button :value="1">上架</el-radio-button>
+                <el-radio-button :value="0">下架</el-radio-button>
                 <el-radio-button :value="2">定时上架</el-radio-button>
               </el-radio-group>
             </el-form-item>
@@ -1437,7 +1437,7 @@ async function GET_GoodData(id, draftId) {
   invalidGoodsGalleryFiles.value = [];
   baseInfoForm.value = { ...baseInfoForm.value, ...response.result };
   baseInfoForm.value.salesModel = "RETAIL";
-  baseInfoForm.value.release = 1; //即使是被放入仓库，修改的时候也会显示会立即发布
+  baseInfoForm.value.release = !draftId && !route.query.copyId && response.result.marketEnable === "DOWN" ? 0 : 1;
   // 已设置定时上架的商品，编辑时回显为定时上架
   if (!draftId && !route.query.copyId && response.result.scheduledUpperTime) {
     baseInfoForm.value.release = 2;

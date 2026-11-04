@@ -70,6 +70,7 @@
     </el-card>
 
     <el-card>
+      <slot v-if="scheduledOnly" name="scheduled-controls" />
       <div v-if="!scheduledOnly" class="goods-tab">
         <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
           <el-tab-pane
@@ -142,6 +143,7 @@
           </template>
         </el-table-column>
         <el-table-column v-if="currentStatus === 'SCHEDULED_UPPER'" prop="scheduledUpperTime" label="计划上架时间" width="190" />
+        <el-table-column v-if="currentStatus === 'SCHEDULED_DOWN'" prop="scheduledDownTime" label="计划下架时间" width="190" />
         <el-table-column label="价格" width="200">
           <template #default="{ row }">
             <span :style="{ color: $mainColor }">{{ unitPrice(row.price, '￥') }}</span>
@@ -154,7 +156,7 @@
             <span v-if="row">{{ goodsTypeText(row.goodsType) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="150">
+        <el-table-column v-if="!scheduledOnly" label="状态" width="150">
           <template #default="{ row }">
             <span v-if="row">{{ marketEnableText(row.marketEnable) }}</span>
           </template>
@@ -165,7 +167,12 @@
           </template>
         </el-table-column>
         <el-table-column prop="storeName" label="店铺名称" width="200" show-overflow-tooltip />
-        <el-table-column v-if="!readOnly" label="操作" width="200" align="center" fixed="right">
+        <el-table-column v-if="scheduledOnly" label="操作" width="100" align="center" fixed="right">
+          <template #default="{ row }">
+            <a class="link-text" @click="emit('delete-schedule', row)">删除</a>
+          </template>
+        </el-table-column>
+        <el-table-column v-else-if="!readOnly" label="操作" width="200" align="center" fixed="right">
           <template #default="{ row }">
             <template v-if="row.authFlag === 'TOBEAUDITED'">
               <a class="link-text" @click="openAuditModal(row)">审核</a>
@@ -299,7 +306,9 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "goods" });
+const emit = defineEmits(["delete-schedule"]);
 const props = defineProps({
+  scheduledStatus: { type: String, default: "SCHEDULED_UPPER" },
   scheduledOnly: { type: Boolean, default: false },
   readOnly: { type: Boolean, default: false },
 });
@@ -320,7 +329,7 @@ const auditModalVisible = ref(false);
 const auditSubmitLoading = ref(false);
 const currentAuditGoods = ref(null);
 const submitLoading = ref(false);
-const currentStatus = ref(props.scheduledOnly ? "SCHEDULED_UPPER" : "ALL");
+const currentStatus = ref(props.scheduledOnly ? props.scheduledStatus : "ALL");
 
 const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch } = useTable(
   getGoodsListData,
@@ -338,11 +347,11 @@ const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch
     },
     beforeRequest: (p) => {
       const params = { ...p };
-      const status = props.scheduledOnly ? "SCHEDULED_UPPER" : currentStatus.value;
+      const status = props.scheduledOnly ? props.scheduledStatus : currentStatus.value;
       if (status && status !== "ALL") {
         params.goodsStatus = status;
-        if (status === "SCHEDULED_UPPER") {
-          params.sort = "scheduled_upper_time";
+        if (["SCHEDULED_UPPER", "SCHEDULED_DOWN"].includes(status)) {
+          params.sort = status === "SCHEDULED_UPPER" ? "scheduled_upper_time" : "scheduled_down_time";
           params.order = "asc";
         }
       } else {
@@ -357,7 +366,7 @@ const { loading, data, total, searchForm, getDataList, handleSearch, resetSearch
 );
 
 function handleReset() {
-  currentStatus.value = props.scheduledOnly ? "SCHEDULED_UPPER" : "ALL";
+  currentStatus.value = props.scheduledOnly ? props.scheduledStatus : "ALL";
   resetSearch();
 }
 const goodsNumerData = ref({});

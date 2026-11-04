@@ -156,9 +156,10 @@ function handleTabChange(type) {
 }
 
 function createTemp() {
-  formRef.value?.resetFields();
-  formData.value = { status: false, name: "" };
-  showModal.value = true;
+  router.push({
+    name: "renovation",
+    query: { pageType: searchForm.pageType },
+  });
 }
 
 function Template(item) {

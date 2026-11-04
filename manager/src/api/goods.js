@@ -1,6 +1,10 @@
 // 统一请求路径前缀在libs/axios.js中修改
 import { getRequest, postRequest, putRequest, deleteRequest} from '@/libs/axios';
 
+export const cancelGoodsMarketSchedule = (goodsId, status) => {
+    return deleteRequest(`/goods/goods/schedule/market/${goodsId}`, { status });
+};
+
 //  获取商品品牌分页列表
 export const getManagerBrandPage = (params) => {
     return getRequest('/goods/brand/getByPage', params)

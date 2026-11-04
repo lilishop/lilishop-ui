@@ -35,17 +35,19 @@
                 <el-option label="实物商品" value="PHYSICAL_GOODS" />
                 <el-option label="虚拟商品" value="VIRTUAL_GOODS" />
                 <el-option label="电子卡券" value="E_COUPON" />
+                <el-option label="预约商品" value="APPOINTMENT_GOODS" />
               </el-select>
             </div>
           </div>
         </el-form-item>
-        <el-form-item label-width="0" class="filter-row-item">
+        <el-form-item v-if="showAdvanced" label-width="0" class="filter-row-item">
           <div class="filter-row">
             <div class="filter-row-field">
               <span class="filter-row-label">品牌</span>
               <el-select
                 v-model="filterForm.brandId"
-                placeholder="请选择品牌"
+                :placeholder="filterForm.categoryPath ? '请选择品牌' : '请先选择平台类目'"
+                :disabled="!filterForm.categoryPath"
                 clearable
                 filterable
                 class="filter-control"
@@ -82,7 +84,7 @@
             </div>
           </div>
         </el-form-item>
-        <el-form-item label-width="0" class="range-form-item range-filter-row-item">
+        <el-form-item v-if="showAdvanced" label-width="0" class="range-form-item range-filter-row-item">
           <div class="range-filter-row">
             <div class="range-group">
               <span class="filter-row-label">价格</span>
@@ -113,6 +115,7 @@
         <el-form-item>
           <el-button type="primary" @click="onSearchGoods">搜索</el-button>
           <el-button @click="resetFilter">重置</el-button>
+          <el-button link type="primary" @click="showAdvanced = !showAdvanced">{{ showAdvanced ? '收起筛选' : '更多筛选' }}</el-button>
         </el-form-item>
       </el-form>
       </div>
@@ -122,7 +125,6 @@
           ref="goodsTableRef"
           v-loading="loading"
           :data="goodsData"
-          border
           :height="tableHeight"
           :highlight-current-row="type !== 'multiple'"
           class="goods-sku-table"
@@ -137,38 +139,30 @@
           align="center"
           :reserve-selection="true"
         />
-        <el-table-column prop="sn" label="SKU编码" min-width="150" show-overflow-tooltip />
-        <el-table-column label="商品图片" width="90" align="center">
+        <el-table-column label="商品信息" min-width="320" class-name="goods-name-column">
           <template #default="{ row }">
-            <img v-if="row" :src="row.thumbnail" class="goods-thumb" alt="" />
+            <div v-if="row" class="goods-info">
+              <el-image :src="row.thumbnail || row.original" fit="contain" class="goods-thumb">
+                <template #error><span class="no-image">暂无图片</span></template>
+              </el-image>
+              <div class="goods-info-copy">
+                <div class="goods-name-text">{{ row.goodsName }}</div>
+                <div class="goods-code">{{ productMode ? 'SPU' : 'SKU' }}：{{ productMode ? row.id : (row.sn || row.id) }}</div>
+              </div>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column label="商品名称" min-width="160" class-name="goods-name-column">
-          <template #default="{ row }">
-            <span v-if="row" class="goods-name-text">{{ row.goodsName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="规格" min-width="120" show-overflow-tooltip>
+        <el-table-column v-if="!productMode" label="规格" min-width="120" show-overflow-tooltip>
           <template #default="{ row }">
             {{ row?.simpleSpecs || "-" }}
           </template>
         </el-table-column>
-        <el-table-column label="商品类型" width="100" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ goodsTypeText(row?.goodsType) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="店铺分类" min-width="120" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ storeCategoryText(row?.storeCategoryPath) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="平台类目" min-width="120" show-overflow-tooltip>
+        <el-table-column v-if="showAdvanced" label="平台类目" min-width="120" show-overflow-tooltip>
           <template #default="{ row }">
             {{ platformCategoryText(row?.categoryPath) }}
           </template>
         </el-table-column>
-        <el-table-column label="品牌" min-width="100" show-overflow-tooltip>
+        <el-table-column v-if="showAdvanced" label="品牌" min-width="100" show-overflow-tooltip>
           <template #default="{ row }">
             {{ brandText(row?.brandId) }}
           </template>
@@ -184,8 +178,13 @@
           </template>
         </el-table-column>
         <el-table-column prop="quantity" label="库存" width="80" align="center" />
+        <el-table-column v-if="productMode" label="审核状态" width="100">
+          <template #default="{ row }">
+            <span>{{ row.authFlag === 'PASS' ? '审核通过' : row.authFlag === 'REFUSE' ? '审核拒绝' : '待审核' }}</span>
+          </template>
+        </el-table-column>
         <template #empty>
-          <div class="empty">{{ loading ? "" : "暂无商品信息" }}</div>
+          <el-empty v-if="!loading" description="没有符合条件的商品，请调整筛选条件" :image-size="72" />
         </template>
       </el-table>
       </div>
@@ -222,6 +221,9 @@ const defaultFilterForm = () => ({
 });
 
 const props = defineProps({
+  productMode: { type: Boolean, default: false },
+  marketEnable: { type: String, default: "UPPER" },
+  authFlag: { type: String, default: "PASS" },
   selectedWay: {
     type: Array,
     default: () => [],
@@ -230,6 +232,7 @@ const props = defineProps({
 const emit = defineEmits(["selected"]);
 
 const type = ref("multiple");
+const showAdvanced = ref(false);
 const selectedList = ref([]);
 const platformCategoryList = ref([]);
 const shopCategoryList = ref([]);
@@ -250,13 +253,26 @@ const shopCategoryProps = {
   emitPath: false,
 };
 const filterForm = ref(defaultFilterForm());
+let brandRequest = 0;
+watch(() => filterForm.value.categoryPath, async (categoryId) => {
+  const request = ++brandRequest;
+  filterForm.value.brandId = "";
+  brandList.value = [];
+  if (!categoryId) return;
+  try {
+    const res = await API_Goods.getCategoryBrandListDataSeller(categoryId);
+    if (request === brandRequest) brandList.value = Array.isArray(res) ? res : res?.result || [];
+  } catch {
+    // 请求失败由统一拦截器提示。
+  }
+});
 const total = ref(0);
 const goodsParams = reactive({
   pageNumber: 1,
   pageSize: 20,
   order: "desc",
-  marketEnable: "UPPER",
-  authFlag: "PASS",
+  marketEnable: props.marketEnable,
+  authFlag: props.authFlag,
   sort: "createTime",
 });
 const goodsData = ref([]);
@@ -272,6 +288,7 @@ watch(
   () => props.selectedWay,
   (val) => {
     selectedList.value = Array.isArray(val) ? val.slice() : [];
+    syncTableSelectionFromSelected();
   },
   { deep: true, immediate: true }
 );
@@ -291,6 +308,13 @@ function onSearchGoods() {
 function resetFilter() {
   filterForm.value = defaultFilterForm();
   onSearchGoods();
+}
+function syncTableSelectionFromSelected() {
+  nextTick(() => {
+    const ids = new Set(selectedList.value.map(item => String(item.id || item.skuId)));
+    goodsData.value.forEach(item => { item.selected = ids.has(String(item.id)); });
+    syncTableSelection();
+  });
 }
 function changePageSize(v) {
   goodsParams.pageNumber = v;
@@ -330,7 +354,13 @@ function buildQueryParams() {
 }
 function getQueryGoodsList() {
   loading.value = true;
-  API_Goods.getGoodsSkuData(buildQueryParams())
+  const query = props.productMode ? API_Goods.getGoodsListData : API_Goods.getGoodsSkuData;
+  const params = buildQueryParams();
+  if (props.productMode) {
+    params.id = params.goodsId;
+    delete params.goodsId;
+  }
+  query(params)
     .then((res) => {
       initGoods(res);
     })
@@ -349,6 +379,7 @@ function initGoods(res) {
       .map(String)
   );
   records.forEach((item) => {
+    if (props.productMode) item.goodsId = item.id;
     item.___type = "goods";
     item.selected = selectedIds.has(String(item.id));
   });
@@ -412,12 +443,6 @@ function formatShopCategory(list) {
       item.children && item.children.length ? formatShopCategory(item.children) : undefined,
   }));
 }
-function goodsTypeText(value) {
-  if (value === "PHYSICAL_GOODS") return "实物商品";
-  if (value === "VIRTUAL_GOODS") return "虚拟商品";
-  if (value === "E_COUPON") return "电子卡券";
-  return "-";
-}
 function brandText(brandId) {
   if (!brandId) return "-";
   const brand = brandList.value.find((item) => String(item.id) === String(brandId));
@@ -432,18 +457,6 @@ function findTreeNodeLabel(tree, targetId, valueKey, labelKey) {
     if (childLabel) return childLabel;
   }
   return "";
-}
-function categoryPathText(path, tree, valueKey, labelKey) {
-  if (!path) return "-";
-  const ids = String(path).split(",").filter(Boolean);
-  if (!ids.length) return "-";
-  const labels = ids
-    .map((id) => findTreeNodeLabel(tree, id, valueKey, labelKey))
-    .filter(Boolean);
-  return labels.length ? labels.join(" / ") : "-";
-}
-function storeCategoryText(path) {
-  return categoryPathText(path, shopCategoryList.value, "value", "label");
 }
 function platformCategoryText(path) {
   if (!path) return "-";
@@ -469,12 +482,9 @@ function init() {
       }
     })
     .catch(() => {});
-  API_Goods.getBrandListData()
-    .then((res) => {
-      brandList.value = Array.isArray(res) ? res : res?.result || [];
-    })
-    .catch(() => {});
 }
+
+watch(showAdvanced, calcTableHeight);
 
 onMounted(() => {
   init();
@@ -555,6 +565,7 @@ defineExpose({ type });
 
 .filter-row {
   display: flex;
+  width: 100%;
   flex-wrap: nowrap;
   align-items: center;
   gap: 16px;
@@ -563,12 +574,14 @@ defineExpose({ type });
 .filter-row-field {
   display: inline-flex;
   align-items: center;
-  flex: 0 0 244px;
-  min-width: 244px;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .filter-control {
-  width: 160px;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
 }
 
 .filter-row-label {
@@ -585,6 +598,7 @@ defineExpose({ type });
 
 .range-filter-row {
   display: flex;
+  width: 100%;
   flex-wrap: nowrap;
   align-items: center;
   gap: 16px;
@@ -593,16 +607,20 @@ defineExpose({ type });
 .range-group {
   display: inline-flex;
   align-items: center;
-  flex: 0 0 244px;
-  min-width: 244px;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .range-group-inputs {
   display: inline-flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 
   :deep(.el-input) {
-    width: 72px;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
   }
 }
 
@@ -620,7 +638,15 @@ defineExpose({ type });
   white-space: normal;
   word-break: break-word;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+.goods-info { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.goods-info-copy { min-width: 0; }
+.goods-code { margin-top: 6px; font-size: 12px; color: #909399; overflow-wrap: anywhere; }
+.no-image { display: flex; height: 100%; align-items: center; justify-content: center; font-size: 11px; color: #a8abb2; background: #f5f7fa; }
 
 :deep(.goods-name-column .cell) {
   white-space: normal;
@@ -633,6 +659,9 @@ defineExpose({ type });
   height: 48px;
   object-fit: contain;
   vertical-align: middle;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid #ebeef5;
 }
 
 .goods-price {

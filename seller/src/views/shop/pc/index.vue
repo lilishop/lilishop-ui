@@ -1692,9 +1692,9 @@ onMounted(() => {
 
     pageInfo.id = '';
 
-    pageInfo.name = route.query.name || '平台首页装修';
+    pageInfo.name = route.query.name || (pageType === 'SPECIAL' ? '新建PC专题页' : '新建PC首页');
 
-    pageInfo.pageShow = true;
+    pageInfo.pageShow = false;
 
     handleAddNewRow();
 

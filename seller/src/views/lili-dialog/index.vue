@@ -1,19 +1,27 @@
 <template>
   <el-drawer
     v-model="goodsVisible"
-    title="选择商品"
     direction="rtl"
-    size="85%"
+    size="min(1180px, 94vw)"
     :z-index="10000"
     :close-on-click-modal="false"
     append-to-body
     destroy-on-close
     class="lili-goods-drawer"
   >
+    <template #header>
+      <div class="picker-heading">
+        <h3>选择商品</h3>
+        <p v-if="!productMode">选择需要的商品规格，支持跨页多选</p>
+      </div>
+    </template>
     <goodsDialog
       v-if="goodsVisible"
       ref="goodsDialogRef"
       :selectedWay="goodsData"
+      :market-enable="marketEnable"
+      :auth-flag="authFlag"
+      :product-mode="productMode"
       @selected="
         (val) => {
           goodsData = val;
@@ -21,8 +29,15 @@
       "
     />
     <template #footer>
-      <el-button @click="clickClose">取消</el-button>
-      <el-button type="primary" @click="clickOK">确定</el-button>
+      <div class="picker-footer">
+        <div class="picker-selection">已选 <strong>{{ goodsData.length }}</strong> {{ productMode ? '件商品' : '个规格' }}
+          <el-button v-if="goodsData.length" link type="primary" @click="clearGoodsSelected">清空</el-button>
+        </div>
+        <div>
+          <el-button @click="clickClose">取消</el-button>
+          <el-button type="primary" @click="clickOK">确认选择{{ goodsData.length ? `（${goodsData.length}）` : '' }}</el-button>
+        </div>
+      </div>
     </template>
   </el-drawer>
 
@@ -57,6 +72,11 @@ import goodsDialog from "./goods-dialog";
 import linkDialog from "./link-dialog";
 
 const emit = defineEmits(["closeFlag", "selectedGoodsData", "selectedLink"]);
+defineProps({
+  productMode: { type: Boolean, default: false },
+  marketEnable: { type: String, default: "UPPER" },
+  authFlag: { type: String, default: "PASS" },
+});
 
 const goodsVisible = ref(false);
 const linkVisible = ref(false);
@@ -138,11 +158,22 @@ defineExpose({
 });
 </script>
 <style scoped lang="scss">
+.picker-heading h3 { margin: 0 0 6px; color: #303133; font-size: 18px; }
+.picker-heading p { margin: 0; color: #909399; font-size: 13px; }
+.picker-footer { display: flex; justify-content: space-between; align-items: center; }
+.picker-selection { color: #606266; font-size: 14px; }
+.picker-selection strong { color: #409eff; margin: 0 4px; }
+.picker-selection .el-button { margin-left: 16px; }
 .lili-goods-drawer {
+  :deep(.el-drawer__header) {
+    margin-bottom: 0;
+    padding: 20px 20px 12px;
+  }
+
   :deep(.el-drawer__body) {
     display: flex;
     flex-direction: column;
-    padding: 12px 20px;
+    padding: 0 20px 12px;
     overflow: hidden;
   }
 

@@ -266,6 +266,10 @@ export const lowGoods = params => {
 };
 
 // 定时上下架商品
+export const cancelGoodsMarketSchedule = (goodsId, status) => {
+  return deleteRequest(`/goods/goods/schedule/market/${goodsId}`, { status });
+};
+
 export const scheduleGoodsMarket = params => {
   return postRequest(`/goods/goods/schedule/market`, params, {
     "Content-Type": "application/json"

@@ -111,6 +111,7 @@
     </el-card>
 
     <el-card>
+      <slot v-if="scheduledOnly" name="scheduled-controls" />
       <div v-if="!scheduledOnly" class="goods-tab">
         <el-tabs v-model="currentStatus" @tab-click="onStatusTabClick">
           <el-tab-pane
@@ -122,7 +123,7 @@
         </el-tabs>
       </div>
 
-      <div class="batch-operations" style="margin: 10px 0">
+      <div v-if="!scheduledOnly" class="batch-operations" style="margin: 10px 0">
         <el-button
           type="success"
           :disabled="selectedRows.length === 0"
@@ -149,7 +150,7 @@
         row-key="id"
         @selection-change="onSelectionChange"
       >
-        <el-table-column type="selection" width="100" align="center" />
+        <el-table-column v-if="!scheduledOnly" type="selection" width="100" align="center" />
         <el-table-column prop="id" label="SPU编码" width="200" show-overflow-tooltip />
         <el-table-column label="商品图片" width="100" align="center">
           <template #default="{ row }">
@@ -170,6 +171,7 @@
           </template>
         </el-table-column>
         <el-table-column v-if="currentStatus === 'SCHEDULED_UPPER'" prop="scheduledUpperTime" label="计划上架时间" width="190" />
+        <el-table-column v-if="currentStatus === 'SCHEDULED_DOWN'" prop="scheduledDownTime" label="计划下架时间" width="190" />
         <el-table-column label="价格" width="120">
           <template #default="{ row }">
             <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, '￥') }}</span>
@@ -187,7 +189,7 @@
             {{ platformCategoryText(row?.categoryPath) }}
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="150">
+        <el-table-column v-if="!scheduledOnly" label="状态" width="150">
           <template #default="{ row }">
             <span v-if="row">{{ marketEnableText(row.marketEnable) }}</span>
           </template>
@@ -197,9 +199,15 @@
             <span v-if="row">{{ authFlagText(row.authFlag) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="170" show-overflow-tooltip />
-        <el-table-column label="操作" width="320" align="right" fixed="right">
+        <el-table-column v-if="!scheduledOnly" prop="createTime" label="创建时间" width="170" show-overflow-tooltip />
+        <el-table-column label="操作" :width="scheduledOnly ? 150 : 320" align="right" fixed="right">
           <template #default="{ row }">
+            <template v-if="scheduledOnly">
+              <a class="link-text" @click="emit('edit-schedule', row)">编辑</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="emit('delete-schedule', row)">删除</a>
+            </template>
+            <template v-else>
             <template v-if="row.marketEnable === 'DOWN'">
               <a class="link-text" @click="upper(row)">上架</a>
               <span class="op-split">|</span>
@@ -216,6 +224,7 @@
             <template v-if="row.goodsType === 'E_COUPON'">
               <span class="op-split">|</span>
               <a class="link-text" @click="goCardKeyPool(row)">卡池管理</a>
+            </template>
             </template>
           </template>
         </el-table-column>
@@ -265,8 +274,9 @@ import { Message, Modal } from "@/utils/message";
 import { customRouterPush } from "@/utils/filters";
 
 defineOptions({ name: "goods" });
+const emit = defineEmits(["edit-schedule", "delete-schedule"]);
 
-const props = defineProps({ scheduledOnly: { type: Boolean, default: false } });
+const props = defineProps({ scheduledOnly: { type: Boolean, default: false }, scheduledStatus: { type: String, default: "SCHEDULED_UPPER" } });
 
 const route = useRoute();
 const router = useRouter();
@@ -318,7 +328,7 @@ const underForm = ref({
 const submitLoading = ref(false); // 添加或编辑提交状态
 const data = ref([]); // 表单数据
 const total = ref(0); // 表单数据总数
-const currentStatus = ref(props.scheduledOnly ? "SCHEDULED_UPPER" : "ALL");
+const currentStatus = ref(props.scheduledOnly ? props.scheduledStatus : "ALL");
 const goodsNumerData = ref({});
 const selectedRows = ref([]); // 选中的行数据
 const selectAll = ref(false); // 全选状态
@@ -437,10 +447,10 @@ function buildSearchParams(includeGoodsStatus = true) {
   if (!includeGoodsStatus) {
     delete params.goodsStatus;
   } else if (props.scheduledOnly) {
-    params.goodsStatus = "SCHEDULED_UPPER";
+    params.goodsStatus = props.scheduledStatus;
   }
-  if (includeGoodsStatus && currentStatus.value === "SCHEDULED_UPPER") {
-    params.sort = "scheduled_upper_time";
+  if (includeGoodsStatus && ["SCHEDULED_UPPER", "SCHEDULED_DOWN"].includes(currentStatus.value)) {
+    params.sort = currentStatus.value === "SCHEDULED_UPPER" ? "scheduled_upper_time" : "scheduled_down_time";
     params.order = "asc";
   }
 
