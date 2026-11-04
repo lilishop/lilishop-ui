@@ -1,6 +1,7 @@
 <template>
   <div class="coupon-center">
     <BaseHeader></BaseHeader>
+    <SearchHeader></SearchHeader>
     <div class="content">
       <h2 class="coupon-page-title">领券中心</h2>
 
@@ -48,6 +49,7 @@ import { onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Modal } from "@/utils/message";
 import storage from "@/plugins/storage";
+import SearchHeader from "@/components/indexDecorate/components/SearchHeader.vue";
 import { couponList, receiveCoupon } from "@/api/member.js";
 
 const route = useRoute();

@@ -81,7 +81,7 @@ watch(currIndex, (val) => {
   interval = null;
   nowHour.value = new Date().getHours();
   countDown(val);
-  goodsList.value = list.value[val].seckillGoodsList;
+  goodsList.value = list.value[val]?.seckillGoodsList || [];
 });
 
 watch(diffSeconds, (val) => {
@@ -108,11 +108,11 @@ watch(diffSeconds, (val) => {
 });
 
 function getListByDay () {
-  // 当天秒杀活动
+  // 当天秒杀活动；result 可能为空数组（当天无活动），需判空避免取下标 0 报错
   seckillByDay().then((res) => {
-    if (res.success) {
+    if (res.success && res.result && res.result.length) {
       list.value = res.result;
-      goodsList.value = list.value[0].seckillGoodsList;
+      goodsList.value = list.value[0].seckillGoodsList || [];
       countDown(currIndex.value);
     }
   });
