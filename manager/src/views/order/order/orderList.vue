@@ -37,7 +37,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="支付方式" prop="paymentMethod">
-          <el-select v-model="searchForm.paymentMethod" placeholder="请选择支付方式" clearable>
+          <el-select v-model="searchForm.paymentMethod" placeholder="请选择支付方式" :disabled="!!fixedPaymentMethod" :clearable="!fixedPaymentMethod">
             <el-option v-for="item in paymentOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
@@ -70,7 +70,7 @@
           />
         </el-tabs>
       </div>
-      <div>
+      <div v-if="allowExport">
         <el-button type="warning" class="export" :loading="exporting" @click="exportOrder">导出订单</el-button>
       </div>
 
@@ -157,6 +157,13 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { unitPrice, customRouterPush } from "@/utils/filters";
 const PAGE_SIZES = [20, 50, 100];
 
+// 独立渠道页面复用列表，来源限制不从地址栏或可重置表单中读取。
+const props = defineProps({
+  fixedClientType: { type: String, default: "" },
+  fixedPaymentMethod: { type: String, default: "" },
+  allowExport: { type: Boolean, default: true },
+});
+
 const PROMOTION_OPTIONS = [
   { label: "普通订单", value: "NORMAL" },
   { label: "拼团订单", value: "PINTUAN" },
@@ -195,7 +202,7 @@ function emptySearchForm(pageSize = 20) {
     consigneeMobile: "",
     storeName: "",
     orderStatus: "",
-    paymentMethod: "",
+    paymentMethod: props.fixedPaymentMethod,
     orderPromotionType: "",
   };
 }
@@ -367,7 +374,7 @@ function selectDateRange(v) {
   }
 }
 function countParams() {
-  const params = { ...searchForm.value };
+  const params = listParams();
   delete params.orderStatus;
   delete params.pageNumber;
   delete params.pageSize;
@@ -375,9 +382,15 @@ function countParams() {
   delete params.order;
   return params;
 }
+function listParams() {
+  const params = { ...searchForm.value };
+  if (props.fixedClientType) params.clientType = props.fixedClientType;
+  if (props.fixedPaymentMethod) params.paymentMethod = props.fixedPaymentMethod;
+  return params;
+}
 function getDataList() {
   loading.value = true;
-  API_Order.getOrderList(searchForm.value)
+  API_Order.getOrderList(listParams())
     .then((res) => {
       if (res.success) {
         data.value = res.result.records;
@@ -395,6 +408,7 @@ function detail(v) {
   });
 }
 async function exportOrder() {
+  if (!props.allowExport) return;
   if (!searchForm.value.startDate || !searchForm.value.endDate) {
     try {
       await ElMessageBox.confirm(
@@ -407,7 +421,7 @@ async function exportOrder() {
     }
   }
   exporting.value = true;
-  API_Order.exportOrder(searchForm.value)
+  API_Order.exportOrder(listParams())
     .then((res) => {
       const blob = new Blob([res], {
         type: "application/vnd.ms-excel;charset=utf-8",

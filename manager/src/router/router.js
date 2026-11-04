@@ -170,6 +170,12 @@ export const otherRouter = {
       component: () => import("@/views/order/order/orderDetail.vue")
     },
     {
+      path: "wechat-order-list",
+      title: "小程序订单",
+      name: "wechat-order-list",
+      component: () => import("@/views/order/wechat/orderList.vue")
+    },
+    {
       path: "appointment/work-orders",
       title: "预约工单",
       name: "manager-appointment-work-orders",

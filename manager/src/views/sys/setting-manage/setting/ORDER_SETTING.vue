@@ -1,6 +1,11 @@
 <template>
   <div class="layout">
     <el-form ref="formValidateRef" label-width="150px" label-position="right" :model="formValidate" :rules="ruleValidate">
+      <el-form-item label="微信订单自动上报" prop="wechatOrderAutoUploadEnabled">
+        <el-switch v-model="formValidate.wechatOrderAutoUploadEnabled" inline-prompt active-text="开启" inactive-text="关闭" />
+        <span class="desc wechat-order-desc">{{ formValidate.wechatOrderAutoUploadEnabled ? "已开启：符合条件的小程序订单自动上报发货信息并发送收货通知。" : "已关闭：停止微信发货上报和收货通知，商城正常发货不受影响。" }}</span>
+        <span class="desc wechat-order-desc">关闭此开关不会关闭微信平台侧的订单管理要求；如需上报，请通过微信后台处理。修改后点击保存生效。</span>
+      </el-form-item>
       <el-form-item label="订单自动取消" prop="autoCancel">
         <el-input type="number" v-model="formValidate.autoCancel">
           <template #append>分</template>
@@ -58,6 +63,7 @@ const formValidate = ref({
   autoReceive: "",
   closeAfterSale: "",
   closeComplaint: "",
+  wechatOrderAutoUploadEnabled: true,
 });
 const result = ref("");
 
@@ -83,10 +89,16 @@ function setupSetting() {
 function init() {
   result.value = JSON.parse(props.res);
   Object.keys(result.value).map((item) => {
+    if (item === "wechatOrderAutoUploadEnabled") return;
     result.value[item] += "";
   });
-  formValidate.value = { ...result.value };
+  formValidate.value = {
+    ...formValidate.value,
+    ...result.value,
+    wechatOrderAutoUploadEnabled: result.value.wechatOrderAutoUploadEnabled !== false && result.value.wechatOrderAutoUploadEnabled !== "false",
+  };
   Object.keys(formValidate.value).forEach((item) => {
+    if (item === "wechatOrderAutoUploadEnabled") return;
     ruleValidate[item] = [
       {
         required: true,
@@ -129,5 +141,11 @@ init();
 .desc {
   font-size: 12px;
   color: #999;
+}
+
+.wechat-order-desc {
+  display: block;
+  width: 100%;
+  line-height: 20px;
 }
 </style>
