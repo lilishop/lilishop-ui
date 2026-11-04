@@ -75,7 +75,7 @@
                       >￥{{ item.price }}</span>
                     <span v-if="item.couponType === 'DISCOUNT'"
                       >{{ item.couponDiscount }}折</span>
-                    <span>满{{ item.consumeThreshold }}元可用</span>
+                    <span>{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '元可用' : '无门槛使用' }}</span>
                     <el-button
                       class="coupon-btn"
                       size="small"

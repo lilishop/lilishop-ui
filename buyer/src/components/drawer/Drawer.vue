@@ -39,7 +39,7 @@
               <div>
                 <span v-if="coupon.couponType === 'PRICE'" class="fontsize_12 global_color">￥<span class="price">{{ $filters.unitPrice(coupon.price) }}</span></span>
                 <span v-if="coupon.couponType === 'DISCOUNT'" class="fontsize_12 global_color"><span class="price">{{coupon.couponDiscount}}</span>折</span>
-                <span class="describe">满{{coupon.consumeThreshold}}元可用</span>
+                <span class="describe">{{ coupon.consumeThreshold > 0 ? '满' + coupon.consumeThreshold + '元可用' : '无门槛使用' }}</span>
               </div>
               <p>使用范围：{{useScope(coupon.scopeType, coupon.storeName)}}</p>
               <p>有效期：{{coupon.endTime}}</p>

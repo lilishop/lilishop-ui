@@ -10,7 +10,7 @@
           <span class="val">{{ cp.price }}</span>
         </div>
         <div class="right-info">
-          <span class="title">满{{ cp.consumeThreshold }}可用</span>
+          <span class="title">{{ cp.consumeThreshold > 0 ? '满' + cp.consumeThreshold + '可用' : '无门槛使用' }}</span>
           <span class="scope" v-if="cp.title">{{ cp.title }}</span>
           <span class="btn">立即领取</span>
         </div>

@@ -93,7 +93,7 @@
         <el-table-column label="面额/折扣" width="150">
           <template #default="{ row }">
             <span v-if="row">
-              <span v-if="row.price" :style="{ color: $mainColor }">
+              <span v-if="row.couponType === 'PRICE'" :style="{ color: $mainColor }">
                 {{ $filters.unitPrice(row.price, "￥") }}</span>
               <span v-else>{{ row.couponDiscount }}折</span>
             </span>
@@ -118,7 +118,7 @@
         <el-table-column label="优惠券类型" width="120">
           <template #default="{ row }">
             <el-tag v-if="row" :type="couponTypeTagType(row.couponType)">
-              {{ couponTypeText(row.couponType) }}
+              {{ couponTypeText(row) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -362,12 +362,10 @@ function getTypeTagType(type) {
   };
   return map[type] || "";
 }
-function couponTypeText(type) {
-  const map = {
-    DISCOUNT: "打折",
-    PRICE: "减免现金",
-  };
-  return map[type] || "未知";
+function couponTypeText(row) {
+  if (row.couponType === "DISCOUNT") return "满折优惠券";
+  if (row.couponType === "PRICE") return Number(row.consumeThreshold) === 0 ? "立减优惠券" : "满减优惠券";
+  return "未知";
 }
 function couponTypeTagType(type) {
   const map = {

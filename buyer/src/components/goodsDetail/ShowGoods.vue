@@ -100,7 +100,7 @@
                   @click="handleReceiveCoupon(item.id)"
                 >
                   <span v-if="item.couponType == 'PRICE'"
-                    >满{{ item.consumeThreshold }}减{{ item.price }}</span>
+                    >{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '减' + item.price : '无门槛，立减' + item.price + '元' }}</span>
                   <span v-if="item.couponType == 'DISCOUNT'"
                     >满{{ item.consumeThreshold }}打{{
                       item.couponDiscount
@@ -117,7 +117,7 @@
                       @click="handleReceiveCoupon(item.id)"
                     >
                       <span v-if="item.couponType == 'PRICE'"
-                        >满{{ item.consumeThreshold }}减{{ item.price }}</span>
+                        >{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '减' + item.price : '无门槛，立减' + item.price + '元' }}</span>
                       <span v-if="item.couponType == 'DISCOUNT'"
                         >满{{ item.consumeThreshold }}打{{
                           item.couponDiscount

@@ -202,7 +202,7 @@
               <template v-else>{{ item.discount }}折</template>
             </div>
             <div class="pay-coupon-info">
-              <p>满{{ item.consumeThreshold }}元可用</p>
+              <p>{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '元可用' : '无门槛使用' }}</p>
               <p>使用范围：{{ useScope(item.scopeType, item.storeName) }}</p>
               <p>有效期：{{ item.endTime }}</p>
             </div>

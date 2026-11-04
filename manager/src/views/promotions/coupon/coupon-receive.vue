@@ -72,7 +72,7 @@
         <el-table-column label="面额/折扣" width="100">
           <template #default="{ row }">
             <priceColorScheme
-              v-if="row && row.price"
+              v-if="row && row.couponType === 'PRICE'"
               :value="row.price"
               :color="$mainColor"
             />

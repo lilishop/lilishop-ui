@@ -91,7 +91,7 @@
         <el-table-column label="优惠券类型" width="130" align="center">
           <template #default="{ row }">
             <el-tag v-if="row" size="small" effect="light" :type="row.couponType === 'DISCOUNT' ? 'warning' : 'danger'">
-              {{ couponTypeText(row.couponType) }}
+              {{ couponTypeText(row) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -181,9 +181,9 @@ onMounted(() => {
   getCouponActivity();
 });
 
-function couponTypeText(v) {
-  if (v === "DISCOUNT") return "打折券";
-  if (v === "PRICE") return "减免现金券";
+function couponTypeText(row) {
+  if (row.couponType === "DISCOUNT") return "满折优惠券";
+  if (row.couponType === "PRICE") return Number(row.consumeThreshold) === 0 ? "立减优惠券" : "满减优惠券";
   return "未知类型";
 }
 

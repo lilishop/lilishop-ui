@@ -11,7 +11,7 @@
                       <el-card shadow="never" v-for="(item, index) in autoCoupList" :key="index" style="margin: 10px 15px">
                             <span v-if="item.couponType === 'PRICE'" class="fontsize_12 global_color" style="font-size: 15px;">￥<span class="price">{{ $filters.unitPrice(item.price) }}</span></span>
                             <span v-if="item.couponType === 'DISCOUNT'" class="fontsize_12 global_color" style="font-size: 15px;"><span class="price">{{item.discount}}</span>折</span>
-                            <span class="describe" style="font-size: 15px;margin-left: 5px;">满{{item.consumeThreshold}}元可用</span>
+                            <span class="describe" style="font-size: 15px;margin-left: 5px;">{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '元可用' : '无门槛使用' }}</span>
                             <p style="font-size: 14px;">使用范围：{{useScope(item.scopeType, item.storeName)}}</p>
                             <p style="font-size: 14px;">有效期：{{item.endTime}}</p>
                       </el-card>

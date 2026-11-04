@@ -25,13 +25,6 @@
               />
             </el-form-item>
 
-            <el-form-item label="优惠券活动类型" prop="couponActivityType">
-              <el-radio-group v-model="form.couponActivityType">
-                <el-radio-button value="REGISTERED">新人发券</el-radio-button>
-                <el-radio-button value="SPECIFY">精确发券</el-radio-button>
-                <el-radio-button value="AUTO_COUPON">自动赠券</el-radio-button>
-              </el-radio-group>
-            </el-form-item>
             <el-form-item
               label="领取频率"
               v-if="form.couponActivityType === 'AUTO_COUPON'"
@@ -170,8 +163,8 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
-import { useRouter } from "vue-router";
+import { ref, reactive, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import couponTemplate from "@/views/promotions/coupon/coupon";
 import userList from "@/views/member/list/index";
 import { saveActivityCoupon } from "@/api/promotion";
@@ -182,6 +175,7 @@ import { unixToDate } from "@/utils/filters";
 defineOptions({ name: "add-coupon-activity" });
 
 const router = useRouter();
+const route = useRoute();
 const appStore = useAppStore();
 
 const options = reactive({
@@ -205,6 +199,15 @@ const form = reactive({
   couponActivityItems: [],
   couponFrequencyEnum: "",
 });
+watch(
+  () => route.query.couponActivityType,
+  (type) => {
+    if (["REGISTERED", "SPECIFY", "AUTO_COUPON"].includes(type)) {
+      form.couponActivityType = type;
+    }
+  },
+  { immediate: true }
+);
 const submitLoading = ref(false);
 const selectCouponList = ref([]);
 const formRule = reactive({

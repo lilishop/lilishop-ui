@@ -17,10 +17,10 @@
             style="width: 240px"
           />
         </el-form-item>
-        <el-form-item label="获取方式" prop="getType">
-          <el-select v-model="searchForm.getType" placeholder="请选择" clearable style="width: 240px">
-            <el-option label="免费获取" value="FREE" />
-            <el-option label="活动获取" value="ACTIVITY" />
+        <el-form-item label="优惠券类型" prop="couponType">
+          <el-select v-model="searchForm.couponType" placeholder="请选择" clearable style="width: 240px">
+            <el-option label="满减优惠券" value="PRICE" />
+            <el-option label="满折优惠券" value="DISCOUNT" />
           </el-select>
         </el-form-item>
         <el-form-item label="活动状态" prop="promotionStatus">
@@ -75,7 +75,7 @@
         <el-table-column label="面额/折扣" width="150">
           <template #default="{ row }">
             <span v-if="row">
-              <span v-if="row.price" :style="{ color: $mainColor }">
+              <span v-if="row.couponType === 'PRICE'" :style="{ color: $mainColor }">
                 {{ $filters.unitPrice(row.price, "￥") }}</span>
               <span v-else>{{ row.couponDiscount }}折</span>
             </span>
@@ -94,21 +94,17 @@
         </el-table-column>
         <el-table-column label="获取方式" width="120">
           <template #default="{ row }">
-            <el-tag v-if="row" :type="getTypeTagType(row.getType)">{{ getTypeText(row.getType) }}</el-tag>
+            <span v-if="row">{{ getTypeText(row.getType) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="优惠券类型" width="120">
           <template #default="{ row }">
-            <el-tag v-if="row" :type="couponTypeTagType(row.couponType)">
-              {{ couponTypeText(row.couponType) }}
-            </el-tag>
+            <span v-if="row">{{ couponTypeText(row) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="品类描述" width="120">
           <template #default="{ row }">
-            <el-tag v-if="row" :type="scopeTypeTagType(row.scopeType)">
-              {{ scopeTypeText(row.scopeType) }}
-            </el-tag>
+            <span v-if="row">{{ scopeTypeText(row.scopeType) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="活动时间" width="200">
@@ -124,9 +120,7 @@
           fixed="right"
         >
           <template #default="{ row }">
-            <el-tag v-if="row" :type="promotionStatusTagType(row.promotionStatus)">
-              {{ promotionStatusText(row.promotionStatus) }}
-            </el-tag>
+            <span v-if="row">{{ promotionStatusText(row.promotionStatus) }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -269,15 +263,6 @@ function promotionStatusText(status) {
   return map[status] || "未知";
 }
 
-function promotionStatusTagType(status) {
-  const map = {
-    NEW: "info",
-    START: "success",
-    END: "danger",
-    CLOSE: "danger",
-  };
-  return map[status] || "danger";
-}
 
 function scopeTypeText(type) {
   const map = {
@@ -289,15 +274,6 @@ function scopeTypeText(type) {
   return map[type] || "未知";
 }
 
-function scopeTypeTagType(type) {
-  const map = {
-    ALL: "info",
-    PORTION_GOODS_CATEGORY: "warning",
-    PORTION_SHOP_CATEGORY: "warning",
-    PORTION_GOODS: "primary",
-  };
-  return map[type] || "danger";
-}
 
 function getTypeText(type) {
   const map = {
@@ -309,31 +285,13 @@ function getTypeText(type) {
   return map[type] || "未知";
 }
 
-function getTypeTagType(type) {
-  const map = {
-    FREE: "danger",
-    ACTIVITY: "warning",
-    INSIDE: "success",
-    IGAME: "success",
-  };
-  return map[type] || "info";
+
+function couponTypeText(row) {
+  if (row.couponType === "DISCOUNT") return "满折优惠券";
+  if (row.couponType === "PRICE") return Number(row.consumeThreshold) === 0 ? "立减优惠券" : "满减优惠券";
+  return "未知";
 }
 
-function couponTypeText(type) {
-  const map = {
-    DISCOUNT: "打折",
-    PRICE: "减免现金",
-  };
-  return map[type] || "未知";
-}
-
-function couponTypeTagType(type) {
-  const map = {
-    DISCOUNT: "primary",
-    PRICE: "info",
-  };
-  return map[type] || "info";
-}
 
 function isSameSelection(next, current) {
   const a = next || [];

@@ -2,7 +2,9 @@
   <div class="search">
     <el-card>
       <div class="operation padding-row">
-        <el-button type="primary" @click="add">添加活动</el-button>
+        <el-button type="primary" plain @click="addRegistered">注册赠券</el-button>
+        <el-button type="primary" plain @click="addSpecify">精准发券</el-button>
+        <el-button type="primary" plain @click="addAutoCoupon">自动赠券</el-button>
       </div>
 
       <el-table
@@ -105,7 +107,7 @@ function activityTypeText(type) {
     REGISTERED: "注册赠券",
     AUTO_COUPON: "自动发券",
   };
-  return map[type] || "精确发券";
+  return map[type] || "精准发券";
 }
 function activityScopeText(scope) {
   return scope === "DESIGNATED" ? "指定会员" : "全部会员";
@@ -145,8 +147,23 @@ function promotionStatusTagType(status) {
 function init() {
   getDataList();
 }
-function add() {
-  router.push({ name: "add-coupon-activity" });
+function addRegistered() {
+  router.push({
+    name: "add-coupon-activity",
+    query: { couponActivityType: "REGISTERED" },
+  });
+}
+function addSpecify() {
+  router.push({
+    name: "add-coupon-activity",
+    query: { couponActivityType: "SPECIFY" },
+  });
+}
+function addAutoCoupon() {
+  router.push({
+    name: "add-coupon-activity",
+    query: { couponActivityType: "AUTO_COUPON" },
+  });
 }
 function info(v) {
   router.push({ name: "coupon-activity-info", query: { id: v.id } });

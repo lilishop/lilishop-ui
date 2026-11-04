@@ -2,29 +2,12 @@
 
   <div class="search member-benefit">
 
-    <el-card shadow="never" class="table-card">
+    <el-card>
 
-      <template #header>
-
-        <div class="card-header-bar">
-
-          <div class="header-title">
-
-            <span>客户权益列表</span>
-
-          </div>
-
-          <div class="header-actions">
-
-            <el-button size="small" @click="getData">刷新</el-button>
-
-            <el-button type="primary" size="small" @click="openAdd">添加权益设置</el-button>
-
-          </div>
-
-        </div>
-
-      </template>
+      <div class="operation padding-row benefit-actions">
+        <el-button type="primary" @click="openAdd">添加权益设置</el-button>
+        <el-button @click="getData">刷新</el-button>
+      </div>
 
 
 
@@ -33,16 +16,14 @@
         <el-table
 
           v-loading="loading"
-
-          stripe
-
           border
 
           :data="data"
 
           empty-text="暂无数据"
 
-          class="custom-benefit-table"
+          class="custom-benefit-table mt_10"
+          row-key="id"
 
           style="width: 100%"
 
@@ -50,13 +31,13 @@
 
           <!-- 权益ID -->
 
-          <el-table-column prop="id" label="权益ID" min-width="190" show-overflow-tooltip />
+          <el-table-column prop="id" label="权益ID" min-width="150" show-overflow-tooltip />
 
 
 
           <!-- 权益LOGO -->
 
-          <el-table-column label="权益LOGO" width="86" align="center">
+          <el-table-column label="权益LOGO" width="100" align="center">
 
             <template #default="{ row }">
 
@@ -96,7 +77,7 @@
 
           <!-- 权益名称 -->
 
-          <el-table-column prop="benefitName" label="权益名称" min-width="180" show-overflow-tooltip />
+          <el-table-column prop="benefitName" label="权益名称" min-width="150" show-overflow-tooltip />
 
 
 
@@ -108,7 +89,7 @@
 
           <!-- 权益类型 -->
 
-          <el-table-column label="权益类型" width="140" align="center">
+          <el-table-column label="权益类型" width="120" align="center">
 
             <template #default="{ row }">
 
@@ -122,13 +103,13 @@
 
           <!-- 排序 -->
 
-          <el-table-column prop="benefitSort" label="排序" width="80" align="center" />
+          <el-table-column prop="benefitSort" label="排序" width="70" align="center" />
 
 
 
           <!-- 状态 -->
 
-          <el-table-column label="状态" width="110" align="center">
+          <el-table-column label="状态" width="100" align="center">
 
             <template #default="{ row }">
 
@@ -158,7 +139,7 @@
 
           <!-- 操作 -->
 
-          <el-table-column label="操作" width="140" align="center" fixed="right">
+          <el-table-column label="操作" width="120" align="center" fixed="right">
 
             <template #default="{ row }">
 
@@ -484,13 +465,15 @@
 
       </el-form>
 
-      <div class="benefit-drawer-footer-btns">
+      <template #footer>
+        <div class="benefit-drawer-footer-btns">
 
         <el-button @click="addFlag = false">取消</el-button>
 
         <el-button type="primary" :loading="submitAddLoading" @click="submitAdd">提交</el-button>
 
-      </div>
+        </div>
+      </template>
 
     </el-drawer>
 
@@ -724,13 +707,15 @@
 
       </el-form>
 
-      <div class="benefit-drawer-footer-btns">
+      <template #footer>
+        <div class="benefit-drawer-footer-btns">
 
         <el-button @click="editFlag = false">取消</el-button>
 
         <el-button type="primary" :loading="submitEditLoading" @click="submitEdit">提交</el-button>
 
-      </div>
+        </div>
+      </template>
 
     </el-drawer>
 
@@ -1770,47 +1755,15 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 
-.card-header-bar {
-
+.benefit-actions {
   display: flex;
-
-  justify-content: space-between;
-
   align-items: center;
-
-
-
-  .header-title {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    font-size: 15px;
-
-    font-weight: 600;
-
-    color: #303133;
-
-  }
-
-
-
-  .header-actions {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-  }
-
+  flex-wrap: wrap;
+  gap: 10px;
 }
-
-
+.benefit-actions .el-button + .el-button {
+  margin-left: 0;
+}
 
 .font-mono {
 
@@ -1913,21 +1866,13 @@ onMounted(() => {
 
 
 .benefit-drawer-footer-btns {
-
-  margin-top: 24px;
-
-  padding-top: 16px;
-
-  border-top: 1px solid #e8eaec;
-
-  text-align: right;
-
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .benefit-drawer-footer-btns .el-button + .el-button {
-
-  margin-left: 8px;
-
+  margin-left: 0;
 }
 
 .link-text {
@@ -1953,6 +1898,21 @@ onMounted(() => {
 
 
 <style lang="scss">
+.benefit-form-drawer {
+  max-width: 100vw;
+  .el-drawer__header {
+    margin-bottom: 0;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+  }
+  .el-drawer__body { padding: 24px; }
+  .el-drawer__footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--el-border-color-lighter);
+  }
+  .el-form-item__content { min-width: 0; }
+}
+
 
 .benefit-logo-thumb {
 

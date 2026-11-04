@@ -23,7 +23,7 @@
               v-if="item.couponType === 'DISCOUNT'"
               class="global_color coupon-amount"
               ><span class="price">{{ item.discount }}</span>折</span>
-            <span class="describe">满{{ item.consumeThreshold }}元可用</span>
+            <span class="describe">{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '元可用' : '无门槛使用' }}</span>
           </div>
           <p>使用范围：{{ useScope(item.scopeType, item.storeName) }}</p>
           <p class="coupon-expire">有效期：{{ formatValidity(item) }}</p>
