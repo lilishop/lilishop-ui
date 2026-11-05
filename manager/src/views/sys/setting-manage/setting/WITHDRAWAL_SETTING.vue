@@ -6,7 +6,7 @@
       </el-form-item>
 
       <el-form-item label="最低提现金额" prop="minPrice">
-        ￥<el-input class="label-appkey" v-model="formValidate.minPrice" />
+        ￥<el-input-number class="label-appkey" v-model="formValidate.minPrice" :min="0" :precision="2" :controls="false" />
       </el-form-item>
 
       <el-form-item label="提现方式" prop="type">
@@ -57,12 +57,21 @@ const props = defineProps(["res", "type"]);
 // handleSubmit(that, name) 通过 that.$refs[name] 取表单实例
 const { proxy } = getCurrentInstance();
 
-const result = ref("");
-// 只做属性合并的成组对象
-const ruleValidate = reactive({});
+const ruleValidate = reactive({
+  minPrice: [
+    { required: true, message: "请填写最低提现金额", trigger: "blur" },
+    { type: "number", min: 0, message: "最低提现金额必须是非负数字", trigger: "change" },
+  ],
+  type: [{ required: true, message: "请选择提现方式", trigger: "change" }],
+  wechatAppId: [{
+    validator: (rule, value, callback) => {
+      if (formValidate.value.type === "WECHAT" && !value?.trim()) callback(new Error("请填写微信提现应用ID"));
+      else callback();
+    },
+    trigger: "blur",
+  }],
+});
 const formValidate = ref({});
-// 历史遗留：声明后未在模板使用，原样保留
-const switchTitle = ref("提现审核是否开启");
 
 // 模板 ref 与 data 同名会互相覆盖，改名 formValidateRef 并同步改 script
 const formValidateRef = ref(null);
@@ -83,51 +92,23 @@ function setupSetting() {
     }
   });
 }
+/** 保留字段真实类型，并兼容旧配置中的字符串数字、布尔值和字符串 null。 */
 function init() {
-  result.value = JSON.parse(props.res || "{}");
-  Object.keys(result.value).map((item) => {
-    result.value[item] += "";
-  });
-  formValidate.value = { ...result.value };
-  if (!formValidate.value.withdrawRule) {
-    formValidate.value.withdrawRule = DEFAULT_WITHDRAW_RULE;
-  }
-  Object.keys(formValidate.value).forEach((item) => {
-    if (item === "minPrice") {
-      ruleValidate[item] = [
-        {
-          required: true,
-          message: "请填写必填项",
-          trigger: "blur",
-        },
-        {
-          validator: (rule, value, callback) => {
-            if (Number(value) < 0) {
-              callback(new Error("不能输入负数！"));
-            } else {
-              callback();
-            }
-          },
-          trigger: "change",
-        },
-      ];
-    } else if (item === "withdrawRule") {
-      ruleValidate[item] = [
-        {
-          required: false,
-          trigger: "blur",
-        },
-      ];
-    } else {
-      ruleValidate[item] = [
-        {
-          required: true,
-          message: "请填写必填项",
-          trigger: "blur",
-        },
-      ];
-    }
-  });
+  const data = JSON.parse(props.res || "{}");
+  const values = Object.fromEntries(Object.entries(data).map(([key, value]) => {
+    const text = typeof value === "string" ? value.trim() : value;
+    return [key, text === "" || text === "null" ? null : text];
+  }));
+  formValidate.value = {
+    ...values,
+    minPrice: values.minPrice == null ? undefined : Number(values.minPrice),
+    fee: values.fee == null ? null : Number(values.fee),
+    apply: values.apply === true || values.apply === "true",
+    type: values.type || "WECHAT",
+    wechatAppId: values.wechatAppId || "",
+    wechatAppIdSource: values.wechatAppIdSource || null,
+    withdrawRule: values.withdrawRule || DEFAULT_WITHDRAW_RULE,
+  };
 }
 
 init();
