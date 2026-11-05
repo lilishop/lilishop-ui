@@ -3,10 +3,38 @@
   <div class="search member-benefit">
 
     <el-card>
+      <el-form
+        :model="searchForm"
+        inline
+        label-width="70px"
+        class="search-form"
+        @submit.prevent
+        @keyup.enter="searchBenefits"
+      >
+        <el-form-item label="权益名称" prop="keyword">
+          <el-input
+            v-model="searchForm.keyword"
+            placeholder="请输入权益名称"
+            clearable
+            style="width: 240px"
+          />
+        </el-form-item>
+        <el-form-item label="状态" prop="state">
+          <el-select v-model="searchForm.state" placeholder="全部状态" clearable style="width: 240px">
+            <el-option label="开启" value="OPEN" />
+            <el-option label="关闭" value="CLOSE" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" class="search-btn" @click="searchBenefits">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-      <div class="operation padding-row benefit-actions">
+    <el-card>
+      <div class="operation padding-row">
         <el-button type="primary" @click="openAdd">添加权益设置</el-button>
-        <el-button @click="getData">刷新</el-button>
+        <el-button type="primary" @click="router.push({ name: 'member-benefit-deliveries' })">发放明细</el-button>
       </div>
 
 
@@ -31,7 +59,7 @@
 
           <!-- 权益ID -->
 
-          <el-table-column prop="id" label="权益ID" min-width="150" show-overflow-tooltip />
+          <el-table-column prop="id" label="权益ID" width="100" align="center" show-overflow-tooltip />
 
 
 
@@ -83,7 +111,7 @@
 
           <!-- 权益编码 -->
 
-          <el-table-column prop="benefitCode" label="权益编码" min-width="140" show-overflow-tooltip />
+
 
 
 
@@ -161,32 +189,6 @@
 
       </div>
 
-
-
-      <div class="pagination-wrap mt_10">
-
-        <el-pagination
-
-          v-model:current-page="searchForm.pageNumber"
-
-          v-model:page-size="searchForm.pageSize"
-
-          :total="total"
-
-          :page-sizes="[20, 30, 50]"
-
-          layout="total, sizes, prev, pager, next, jumper"
-
-          size="small"
-
-          @current-change="changePage"
-
-          @size-change="changePageSize"
-
-        />
-
-      </div>
-
     </el-card>
 
 
@@ -240,483 +242,53 @@
 
 
     <el-drawer
-
-      v-model="addFlag"
-
-      title="添加权益设置"
-
-      size="1120px"
-
-      direction="rtl"
-
-      :z-index="950"
-
-      :close-on-click-modal="false"
-
-      append-to-body
-
-      destroy-on-close
-
-      class="benefit-form-drawer"
-
+      v-model="addFlag" title="添加权益设置" size="1040px" direction="rtl"
+      :z-index="950" :close-on-click-modal="false" append-to-body destroy-on-close class="benefit-form-drawer"
     >
-
-      <el-form ref="addForm" :model="formAdd" :rules="rulesAdd" label-width="110px">
-
-        <el-form-item label="权益类型" prop="benefitType">
-
-          <el-select
-
-            v-model="formAdd.benefitType"
-
-            clearable
-
-            placeholder="请选择权益类型"
-
-            style="width: 100%"
-
-            @change="onAddBenefitTypeChange"
-
-          >
-
-            <el-option
-
-              v-for="item in benefitTypeOptions"
-
-              :key="item.value"
-
-              :value="item.value"
-
-              :label="item.description"
-
-            />
-
-          </el-select>
-
-        </el-form-item>
-
-        <el-form-item
-
-          v-show="formAdd.benefitType === 'GIFT_POINT'"
-
-          label="赠送积分"
-
-          prop="giftPoint"
-
-          :required="formAdd.benefitType === 'GIFT_POINT'"
-
-        >
-
-          <el-input-number
-
-            v-model="formAdd.giftPoint"
-
-            :min="0"
-
-            :max="99999"
-
-            :precision="0"
-
-            style="width: 220px"
-
-            placeholder="必填，范围 0-99999"
-
-          />
-
-        </el-form-item>
-
-        <el-form-item
-
-          v-show="formAdd.benefitType === 'COUPON_PACKAGE'"
-
-          class="benefit-coupon-form-item"
-
-          label="赠送优惠券"
-
-          prop="couponPackageRows"
-
-          :required="formAdd.benefitType === 'COUPON_PACKAGE'"
-
-        >
-
-          <div class="benefit-coupon-field">
-
-            <el-button plain class="mb_10" @click="openCouponPicker('add')">添加优惠券</el-button>
-
-            <el-table
-
-              border
-
-              size="small"
-
-              class="benefit-coupon-table"
-
-              :data="formAdd.couponPackageRows"
-
-              empty-text="请添加优惠券"
-
-            >
-
-              <el-table-column prop="couponName" label="优惠券名称" min-width="180" show-overflow-tooltip />
-
-              <el-table-column label="有效期" min-width="280">
-
-                <template #default="{ row }">
-
-                  <span v-if="row" v-html="row.validRange || '-'" />
-
-                </template>
-
-              </el-table-column>
-
-              <el-table-column prop="faceValueLabel" label="面额" min-width="100" />
-
-              <el-table-column label="赠送张数" width="150">
-
-                <template #default="{ row, $index }">
-
-                  <el-input-number
-
-                    v-if="row"
-
-                    :model-value="row.quantity"
-
-                    :min="1"
-
-                    :max="10"
-
-                    :precision="0"
-
-                    style="width: 100px"
-
-                    @change="(val) => onCouponQuantityChange('add', $index, val)"
-
-                  />
-
-                </template>
-
-              </el-table-column>
-
-              <el-table-column label="操作" width="90" align="center">
-
-                <template #default="{ row, $index }">
-
-                  <a v-if="row" class="link-text" @click="removeCouponRow('add', $index)">删除</a>
-
-                </template>
-
-              </el-table-column>
-
-            </el-table>
-
-          </div>
-
-        </el-form-item>
-
-        <el-form-item label="权益名称" prop="benefitName">
-
-          <el-input v-model="formAdd.benefitName" maxlength="50" placeholder="请输入权益名称" />
-
-        </el-form-item>
-
-        <el-form-item label="权益LOGO" prop="benefitLogo">
-
-          <div class="benefit-logo-field">
-
-            <div v-if="formAdd.benefitLogo" class="benefit-logo-thumb">
-
-              <img :src="formAdd.benefitLogo" alt="" />
-
-            </div>
-
-            <div class="benefit-logo-upload">
-
-              <upload-pic-input v-model="formAdd.benefitLogo" placeholder="请上传权益 LOGO 图片地址" style="width: 100%" />
-
-            </div>
-
-          </div>
-
-        </el-form-item>
-
-        <el-form-item label="权益介绍" prop="benefitDesc">
-
-          <el-input v-model="formAdd.benefitDesc" type="textarea" :rows="4" maxlength="500" placeholder="请输入权益介绍" />
-
-        </el-form-item>
-
-        <el-form-item label="启用状态" prop="benefitState">
-
-          <el-radio-group v-model="formAdd.benefitState">
-
-            <el-radio value="OPEN">开启</el-radio>
-
-            <el-radio value="CLOSE">关闭</el-radio>
-
-          </el-radio-group>
-
-        </el-form-item>
-
-        <el-form-item label="排序" prop="benefitSort">
-
-          <el-input-number v-model="formAdd.benefitSort" :min="1" :max="9999" :precision="0" style="width: 220px" />
-
-        </el-form-item>
-
-      </el-form>
-
-      <template #footer>
-        <div class="benefit-drawer-footer-btns">
-
-        <el-button @click="addFlag = false">取消</el-button>
-
-        <el-button type="primary" :loading="submitAddLoading" @click="submitAdd">提交</el-button>
-
+      <template #header="{ titleId, titleClass }">
+        <div class="benefit-drawer-heading">
+          <h2 :id="titleId" :class="titleClass">添加权益设置</h2>
+          <p>配置权益规则、展示内容及发布状态</p>
         </div>
       </template>
-
+      <el-form ref="addForm" :model="formAdd" :rules="rulesAdd" label-position="top" class="benefit-editor-form" @submit.prevent>
+        <BenefitFormFields
+          :form="formAdd" :type-options="benefitTypeOptions" which="add"
+          @type-change="onAddBenefitTypeChange" @select-coupons="openCouponPicker"
+          @quantity-change="onCouponQuantityChange" @remove-coupon="removeCouponRow"
+        />
+      </el-form>
+      <template #footer>
+        <div class="benefit-drawer-footer-btns">
+          <el-button @click="addFlag = false">取消</el-button>
+          <el-button type="primary" :loading="submitAddLoading" @click="submitAdd">保存权益</el-button>
+        </div>
+      </template>
     </el-drawer>
 
-
-
     <el-drawer
-
-      v-model="editFlag"
-
-      title="编辑权益设置"
-
-      size="1120px"
-
-      direction="rtl"
-
-      :z-index="950"
-
-      :close-on-click-modal="false"
-
-      append-to-body
-
-      destroy-on-close
-
-      class="benefit-form-drawer"
-
+      v-model="editFlag" title="编辑权益设置" size="1040px" direction="rtl"
+      :z-index="950" :close-on-click-modal="false" append-to-body destroy-on-close class="benefit-form-drawer"
     >
-
-      <el-form ref="editForm" :model="formEdit" :rules="rulesEdit" label-width="110px">
-
-        <el-input v-model="formEdit.id" v-show="false" />
-
-        <el-form-item label="权益类型" prop="benefitType">
-
-          <el-select
-
-            v-model="formEdit.benefitType"
-
-            clearable
-
-            placeholder="请选择权益类型"
-
-            style="width: 100%"
-
-            @change="onEditBenefitTypeChange"
-
-          >
-
-            <el-option
-
-              v-for="item in benefitTypeOptions"
-
-              :key="item.value"
-
-              :value="item.value"
-
-              :label="item.description"
-
-            />
-
-          </el-select>
-
-        </el-form-item>
-
-        <el-form-item
-
-          v-show="formEdit.benefitType === 'GIFT_POINT'"
-
-          label="赠送积分"
-
-          prop="giftPoint"
-
-          :required="formEdit.benefitType === 'GIFT_POINT'"
-
-        >
-
-          <el-input-number
-
-            v-model="formEdit.giftPoint"
-
-            :min="0"
-
-            :max="99999"
-
-            :precision="0"
-
-            style="width: 220px"
-
-            placeholder="必填，范围 0-99999"
-
-          />
-
-        </el-form-item>
-
-        <el-form-item
-
-          v-show="formEdit.benefitType === 'COUPON_PACKAGE'"
-
-          class="benefit-coupon-form-item"
-
-          label="赠送优惠券"
-
-          prop="couponPackageRows"
-
-          :required="formEdit.benefitType === 'COUPON_PACKAGE'"
-
-        >
-
-          <div class="benefit-coupon-field">
-
-            <el-button plain class="mb_10" @click="openCouponPicker('edit')">添加优惠券</el-button>
-
-            <el-table
-
-              border
-
-              size="small"
-
-              class="benefit-coupon-table"
-
-              :data="formEdit.couponPackageRows"
-
-              empty-text="请添加优惠券"
-
-            >
-
-              <el-table-column prop="couponName" label="优惠券名称" min-width="180" show-overflow-tooltip />
-
-              <el-table-column label="有效期" min-width="280">
-
-                <template #default="{ row }">
-
-                  <span v-if="row" v-html="row.validRange || '-'" />
-
-                </template>
-
-              </el-table-column>
-
-              <el-table-column prop="faceValueLabel" label="面额" min-width="100" />
-
-              <el-table-column label="赠送张数" width="150">
-
-                <template #default="{ row, $index }">
-
-                  <el-input-number
-
-                    v-if="row"
-
-                    :model-value="row.quantity"
-
-                    :min="1"
-
-                    :max="10"
-
-                    :precision="0"
-
-                    style="width: 100px"
-
-                    @change="(val) => onCouponQuantityChange('edit', $index, val)"
-
-                  />
-
-                </template>
-
-              </el-table-column>
-
-              <el-table-column label="操作" width="90" align="center">
-
-                <template #default="{ row, $index }">
-
-                  <a v-if="row" class="link-text" @click="removeCouponRow('edit', $index)">删除</a>
-
-                </template>
-
-              </el-table-column>
-
-            </el-table>
-
-          </div>
-
-        </el-form-item>
-
-        <el-form-item label="权益名称" prop="benefitName">
-
-          <el-input v-model="formEdit.benefitName" maxlength="50" placeholder="请输入权益名称" />
-
-        </el-form-item>
-
-        <el-form-item label="权益LOGO" prop="benefitLogo">
-
-          <div class="benefit-logo-field">
-
-            <div v-if="formEdit.benefitLogo" class="benefit-logo-thumb">
-
-              <img :src="formEdit.benefitLogo" alt="" />
-
-            </div>
-
-            <div class="benefit-logo-upload">
-
-              <upload-pic-input v-model="formEdit.benefitLogo" placeholder="请上传权益 LOGO 图片地址" style="width: 100%" />
-
-            </div>
-
-          </div>
-
-        </el-form-item>
-
-        <el-form-item label="权益介绍" prop="benefitDesc">
-
-          <el-input v-model="formEdit.benefitDesc" type="textarea" :rows="4" maxlength="500" placeholder="请输入权益介绍" />
-
-        </el-form-item>
-
-        <el-form-item label="启用状态" prop="benefitState">
-
-          <el-radio-group v-model="formEdit.benefitState">
-
-            <el-radio value="OPEN">开启</el-radio>
-
-            <el-radio value="CLOSE">关闭</el-radio>
-
-          </el-radio-group>
-
-        </el-form-item>
-
-        <el-form-item label="排序" prop="benefitSort">
-
-          <el-input-number v-model="formEdit.benefitSort" :min="1" :max="9999" :precision="0" style="width: 220px" />
-
-        </el-form-item>
-
-      </el-form>
-
-      <template #footer>
-        <div class="benefit-drawer-footer-btns">
-
-        <el-button @click="editFlag = false">取消</el-button>
-
-        <el-button type="primary" :loading="submitEditLoading" @click="submitEdit">提交</el-button>
-
+      <template #header="{ titleId, titleClass }">
+        <div class="benefit-drawer-heading">
+          <h2 :id="titleId" :class="titleClass">编辑权益设置</h2>
+          <p>配置权益规则、展示内容及发布状态</p>
         </div>
       </template>
-
+      <el-form ref="editForm" :model="formEdit" :rules="rulesEdit" label-position="top" class="benefit-editor-form" @submit.prevent>
+        <BenefitFormFields
+          :form="formEdit" :type-options="benefitTypeOptions" which="edit" editing
+          @type-change="onEditBenefitTypeChange" @select-coupons="openCouponPicker"
+          @quantity-change="onCouponQuantityChange" @remove-coupon="removeCouponRow"
+        />
+      </el-form>
+      <template #footer>
+        <div class="benefit-drawer-footer-btns">
+          <el-button @click="editFlag = false">取消</el-button>
+          <el-button type="primary" :loading="submitEditLoading" @click="submitEdit">保存修改</el-button>
+        </div>
+      </template>
     </el-drawer>
 
   </div>
@@ -737,8 +309,8 @@ import { formatPromotionCouponValidityHtml } from "@/utils/promotions";
 
 import couponTemplate from "@/views/promotions/coupon/coupon.vue";
 
-import uploadPicInput from "@/components/lili/upload-pic-input.vue";
-
+import BenefitFormFields from './BenefitFormFields.vue';
+import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from "element-plus";
 
 
@@ -746,6 +318,8 @@ import { ElMessage, ElMessageBox } from "element-plus";
 defineOptions({ name: "memberBenefit" });
 
 
+
+const router = useRouter();
 
 const GIFT_POINT = "GIFT_POINT";
 
@@ -774,6 +348,10 @@ const buildDefaultForm = () => ({
   benefitConfig: "",
 
   giftPoint: null,
+  multiplier: 1,
+  grantRule: "ONCE",
+  grantDay: 1,
+  periodMonths: 1,
 
   couponPackageRows: [],
 
@@ -799,13 +377,11 @@ const benefitTypeOptions = ref([]);
 
 const loading = ref(false);
 
-const total = ref(0);
-
 const searchForm = ref({
 
-  pageNumber: 1,
+  keyword: "",
 
-  pageSize: 20,
+  state: "",
 
 });
 
@@ -903,6 +479,7 @@ function buildFormRules(which) {
 
     benefitType: [{ required: true, message: "请选择权益类型", trigger: "change" }],
 
+    benefitDesc: [{ required: true, message: "请输入权益介绍", trigger: "change" }],
     benefitName: [{ required: true, message: "请输入权益名称", trigger: "blur" }],
 
     benefitLogo: [{ required: true, message: "请配置权益LOGO", trigger: "change" }],
@@ -979,6 +556,8 @@ function validateCouponPackage(form, callback) {
 
   const rows = form.couponPackageRows || [];
 
+  if (rows.length > 10) return callback(new Error("最多选择10张优惠券"));
+
   if (!rows.length) {
 
     return callback(new Error("请添加至少一张优惠券"));
@@ -989,7 +568,7 @@ function validateCouponPackage(form, callback) {
 
     const q = Number(rows[i].quantity);
 
-    if (Number.isNaN(q) || q < 1 || q > 10) {
+    if (!Number.isInteger(q) || q < 1 || q > 10) {
 
       return callback(new Error("每张券赠送张数需在 1～10 之间"));
 
@@ -1047,32 +626,14 @@ function buildCouponDisplayRow(detail, quantity) {
 
 }
 
-function buildBenefitConfigString(slice) {
-
-  const { benefitType, giftPoint, couponPackageRows } = slice;
-
-  if (benefitType === GIFT_POINT) {
-
-    return JSON.stringify({ giftPoint: Number(giftPoint) });
-
-  }
-
-  if (benefitType === COUPON_PACKAGE) {
-
-    const coupons = (couponPackageRows || []).map((r) => ({
-
-      couponId: String(r.couponId),
-
-      quantity: Math.min(10, Math.max(1, Number(r.quantity) || 1)),
-
-    }));
-
-    return JSON.stringify({ coupons });
-
-  }
-
-  return "";
-
+function buildBenefitConfigString(form) {
+  if(form.benefitType === GIFT_POINT) return JSON.stringify({giftPoint:Number(form.giftPoint)});
+  if(form.benefitType === 'POINT_MULTIPLIER') return JSON.stringify({multiplier:Number(form.multiplier)});
+  if(form.benefitType === COUPON_PACKAGE) return JSON.stringify({
+    grantRule:form.grantRule, grantDay:form.grantDay, periodMonths:form.periodMonths,
+    coupons:(form.couponPackageRows || []).map(r=>({couponId:String(r.couponId),quantity:Number(r.quantity)}))
+  });
+  return '{}';
 }
 
 function parseGiftPointFromConfig(benefitType, benefitConfigStr) {
@@ -1317,6 +878,11 @@ function confirmCouponPicker() {
 
   const list = couponPicker.value?.getSelection?.() || [];
 
+  if (list.length > 10) {
+    ElMessage.warning("最多选择10张优惠券");
+    return;
+  }
+
   if (!list.length) {
 
     ElMessage.warning("请至少选择一张优惠券");
@@ -1395,29 +961,11 @@ function loadBenefitTypes() {
 
 }
 
-function changePage(page) {
-
-  searchForm.value.pageNumber = page;
-
-  getData();
-
-}
-
-function changePageSize(size) {
-
-  searchForm.value.pageSize = size;
-
-  searchForm.value.pageNumber = 1;
-
-  getData();
-
-}
-
 function getData() {
 
   loading.value = true;
 
-  const params = { ...searchForm.value };
+  const params = { ...searchForm.value, pageNumber: 1, pageSize: 999 };
 
   API_Member.getMemberBenefitByPage(params).then((res) => {
 
@@ -1427,19 +975,17 @@ function getData() {
 
       data.value = Array.isArray(res.result.records) ? res.result.records : [];
 
-      total.value = Number(res.result.total) || 0;
-
     } else {
 
       data.value = [];
-
-      total.value = 0;
 
     }
 
   });
 
 }
+
+function searchBenefits() { getData(); }
 
 function openAdd() {
 
@@ -1479,15 +1025,7 @@ function submitAdd() {
 
       ...rest,
 
-      benefitConfig: buildBenefitConfigString({
-
-        benefitType: formAdd.value.benefitType,
-
-        giftPoint,
-
-        couponPackageRows,
-
-      }),
+      benefitConfig: buildBenefitConfigString(formAdd.value),
 
     };
 
@@ -1549,6 +1087,8 @@ function openEdit(row) {
 
       const bt = detail.benefitType || "";
 
+      let extension = {};
+      try { extension = JSON.parse(detail.benefitConfig || '{}'); } catch { /* 旧数据按默认配置回显 */ }
       const parsed = parseGiftPointFromConfig(bt, detail.benefitConfig || "");
 
       const couponSnippets = parseCouponsFromConfig(detail.benefitConfig || "");
@@ -1574,6 +1114,10 @@ function openEdit(row) {
         benefitCode: detail.benefitCode || "",
 
         benefitType: bt,
+        multiplier: extension.multiplier ?? 1,
+        grantRule: extension.grantRule || "ONCE",
+        grantDay: extension.grantDay || 1,
+        periodMonths: extension.periodMonths || 1,
 
         benefitLogo: detail.benefitLogo || "",
 
@@ -1627,15 +1171,7 @@ function submitEdit() {
 
       ...rest,
 
-      benefitConfig: buildBenefitConfigString({
-
-        benefitType: formEdit.value.benefitType,
-
-        giftPoint,
-
-        couponPackageRows,
-
-      }),
+      benefitConfig: buildBenefitConfigString(formEdit.value),
 
     };
 
@@ -1755,16 +1291,6 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 
-.benefit-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.benefit-actions .el-button + .el-button {
-  margin-left: 0;
-}
-
 .font-mono {
 
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -1853,18 +1379,6 @@ onMounted(() => {
 
 }
 
-
-
-.pagination-wrap {
-
-  display: flex;
-
-  justify-content: flex-end;
-
-}
-
-
-
 .benefit-drawer-footer-btns {
   display: flex;
   justify-content: flex-end;
@@ -1902,15 +1416,21 @@ onMounted(() => {
   max-width: 100vw;
   .el-drawer__header {
     margin-bottom: 0;
-    padding: 20px 24px;
+    padding: 22px 28px;
     border-bottom: 1px solid var(--el-border-color-lighter);
   }
-  .el-drawer__body { padding: 24px; }
+  .el-drawer__body { padding: 20px 24px; background: #f5f7fa; }
   .el-drawer__footer {
-    padding: 16px 24px;
+    padding: 16px 28px;
+    background: #fff;
     border-top: 1px solid var(--el-border-color-lighter);
   }
   .el-form-item__content { min-width: 0; }
+  .benefit-drawer-heading h2 { margin: 0; color: var(--el-text-color-primary); font-size: 18px; font-weight: 600; line-height: 26px; }
+  .benefit-drawer-heading p { margin: 6px 0 0; color: var(--el-text-color-secondary); font-size: 12px; line-height: 20px; }
+  .benefit-drawer-footer-btns .el-button { min-width: 92px; }
+  .benefit-editor-form .tinymce-container { width: 100%; }
+  .benefit-editor-form .tinymce-container > .wrapper { margin-bottom: 10px; }
 }
 
 
@@ -2065,30 +1585,3 @@ onMounted(() => {
 }
 
 </style>
-
-
-
-<style lang="scss" scoped>
-
-.benefit-logo-field {
-
-  display: flex;
-
-  align-items: flex-start;
-
-  gap: 12px;
-
-  flex-wrap: wrap;
-
-}
-
-.benefit-logo-upload {
-
-  flex: 1;
-
-  min-width: 200px;
-
-}
-
-</style>
-

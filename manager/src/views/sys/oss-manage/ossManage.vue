@@ -986,7 +986,9 @@ function handleSelectConfirm() {
     return;
   }
   const last = selectedOss.value[selectedOss.value.length - 1];
-  emit("callback", { url: last.split(",")[1] });
+  const separator = last.indexOf(",");
+  const id = last.slice(0, separator);
+  emit("callback", { url: last.slice(separator + 1), file: data.value.find(item => String(item.id) === id) });
 }
 
 function handleSelectCancel() {

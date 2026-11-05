@@ -225,6 +225,12 @@ export const otherRouter = {
       component: () => import("@/views/member/benefit/index.vue")
     },
     {
+      path: "member-benefit-deliveries",
+      title: "权益发放明细",
+      name: "member-benefit-deliveries",
+      component: () => import("@/views/member/benefit/BenefitDeliveryRecords.vue")
+    },
+    {
       path: "member-grade-experience",
       title: "等级权益设置",
       name: "member-grade-experience",
@@ -236,7 +242,7 @@ export const otherRouter = {
       name: "member-grade-experience-log",
       component: () => import("@/views/member/grade/experience-log.vue")
     },
-    
+
 
     {
       path: "goods/goods-info/goodsDetail",

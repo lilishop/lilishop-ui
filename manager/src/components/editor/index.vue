@@ -3,7 +3,7 @@
     <!-- 使用 fullscreen 类来控制是否全屏显示 -->
     <div :class="{ fullscreen: fullscreen }" class="tinymce-container">
       <!-- 使用 tinymce-textarea 类作为编辑器的文本区域 -->
-      <uploadImage @callback="insertImage" />
+      <uploadImage :use-image-picker="imagePicker" @callback="insertImage" />
       <textarea :id="tinymceId" class="tinymce-textarea" />
     </div>
   </div>
@@ -21,10 +21,15 @@ import {
 } from "vue";
 import { initEditor } from "@/components/editor/config";
 import uploadImage from "@/components/editor/upload-image.vue";
+import { useFormItem } from "element-plus";
 
 defineOptions({ name: "Tinymce" });
 
 const props = defineProps({
+  imagePicker: {
+    type: Boolean,
+    default: false,
+  },
   modelValue: {
     type: String,
     default: "",
@@ -39,6 +44,7 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["update:modelValue", "input"]);
+const { formItem } = useFormItem();
 
 // 引入编辑器的配置（data 中的 initEditor 与 import 同名，直接使用 import）
 const hasChange = ref(false); // 标记内容是否有更改
@@ -66,6 +72,9 @@ watch(editorContent, (val) => {
 function emitContent(content) {
   emit("update:modelValue", content);
   emit("input", content);
+  if (props.imagePicker && content) {
+    nextTick(() => formItem?.validate("change").catch(() => {}));
+  }
 }
 // 数据返回并给富文本框插入图片
 function insertImage(arr) {

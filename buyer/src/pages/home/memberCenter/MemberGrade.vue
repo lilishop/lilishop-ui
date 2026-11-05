@@ -25,6 +25,8 @@
       </div>
     </div>
 
+    <MemberBenefitPanel :grade-details="gradeDetails" :current-grade-id="String(currentGradeId)" />
+
     <div class="grade-panel">
       <div class="grade-tabs">
         <div class="grade-tab" :class="{ active: activeGradeTab === 'rules' }" @click="activeGradeTab = 'rules'">获取经验值方式</div>
@@ -87,6 +89,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import MemberBenefitPanel from './MemberBenefitPanel.vue'
 import { memberGradeCurrent, memberGradeList, memberGradeRules } from '@/api/member.js'
 
 defineOptions({ name: 'MemberGrade' })

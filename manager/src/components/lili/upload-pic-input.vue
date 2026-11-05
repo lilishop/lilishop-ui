@@ -105,6 +105,7 @@ const props = defineProps({
     default: false,
   },
   maxlength: Number,
+  beforeSelect: Function,
 });
 const emit = defineEmits(["update:modelValue", "input", "on-change"]);
 const attrs = useAttrs();
@@ -131,6 +132,7 @@ function handleCLickImg(val, index) {
   });
 }
 function handleOssCallback(item) {
+  if (item?.url && props.beforeSelect && props.beforeSelect(item) === false) return;
   picModalFlag.value = false;
   if (!item?.url) return;
   currentValue.value = item.url;

@@ -239,3 +239,6 @@ export const deleteMemberBenefit = (id) => {
 export const getMemberBenefitTypes = () => {
   return getRequest("/member/benefit/types");
 };
+
+export const getMemberBenefitDeliveries = params => getRequest('/member/benefit/deliveries', params);
+export const retryMemberBenefitDelivery = id => postRequest('/member/benefit/deliveries/' + id + '/retry');

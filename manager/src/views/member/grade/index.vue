@@ -76,9 +76,11 @@
         </el-form-item>
         <el-form-item label="等级图标" prop="gradeImage">
           <upload-pic-input v-model="formAdd.gradeImage" />
+          <div class="image-size-hint">推荐 100 × 100 像素，使用透明背景 PNG。</div>
         </el-form-item>
         <el-form-item label="等级背景图" prop="gradeBackground">
           <upload-pic-input v-model="formAdd.gradeBackground" />
+          <div class="image-size-hint">推荐 750 × 460 像素</div>
         </el-form-item>
         <el-form-item label="字体颜色" prop="gradeFontColor">
           <el-input v-model="formAdd.gradeFontColor" maxlength="20" placeholder="如：#333333" />
@@ -133,9 +135,11 @@
         </el-form-item>
         <el-form-item label="等级图标" prop="gradeImage">
           <upload-pic-input v-model="formEdit.gradeImage" />
+          <div class="image-size-hint">推荐 100 × 100 像素，使用透明背景 PNG。</div>
         </el-form-item>
         <el-form-item label="等级背景图" prop="gradeBackground">
           <upload-pic-input v-model="formEdit.gradeBackground" />
+          <div class="image-size-hint">推荐 750 × 460 像素</div>
         </el-form-item>
         <el-form-item label="字体颜色" prop="gradeFontColor">
           <el-input v-model="formEdit.gradeFontColor" maxlength="20" placeholder="如：#333333" />
@@ -456,6 +460,13 @@ onMounted(() => {
 });
 </script>
 <style scoped>
+.image-size-hint {
+  width: 100%;
+  margin-top: 6px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  line-height: 20px;
+}
 .ops a {
   color: #2d8cf0;
   cursor: pointer;

@@ -57,6 +57,7 @@
 
     <el-dialog
       v-model="showOssManager"
+      title="选择图片"
       width="1000px"
       append-to-body
       :z-index="3600"
@@ -94,6 +95,7 @@ import { Message } from "@/utils/message";
 import OssManage from "@/views/sys/oss-manage/ossManage.vue";
 
 defineOptions({ name: "upload-image" });
+const props = defineProps({ useImagePicker: { type: Boolean, default: false } });
 
 const emit = defineEmits(["callback"]);
 
@@ -120,6 +122,10 @@ function draggableItemKey(item) {
   return item?.url || item;
 }
 function handleClickUploadImage() {
+  if (props.useImagePicker) {
+    importOSS();
+    return;
+  }
   show.value = true;
 }
 function handleView(url) {
@@ -158,7 +164,16 @@ function handleUploadError(err) {
   Message.error(err?.message || String(err));
 }
 function confirmUrls() {
-  applySelectedImages();
+  if (props.useImagePicker) {
+    const urls = [...new Set(selectedImage.value.map(parseOssSelectionUrl).filter(Boolean))];
+    if (!urls.length) {
+      Message.warning("请选择图片");
+      return;
+    }
+    emit("callback", urls);
+  } else {
+    applySelectedImages();
+  }
   showOssManager.value = false;
 }
 function cancelOssImport() {
