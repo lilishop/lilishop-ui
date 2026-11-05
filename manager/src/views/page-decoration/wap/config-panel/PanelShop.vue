@@ -80,7 +80,7 @@
           <div class="ctrl-row">
             <div class="ctrl-label">选择店铺</div>
             <div class="ctrl-body">
-              <el-button plain type="primary" @click="shopDialogVisible = true">选择店铺</el-button>
+              <el-button plain type="primary" @click="openShops">选择店铺</el-button>
             </div>
           </div>
           <div class="shop-chips" v-if="firstItem.shopList && firstItem.shopList.length">
@@ -176,38 +176,7 @@
       />
     </el-dialog>
 
-    <el-dialog
-      v-model="shopDialogVisible"
-      title="选择店铺"
-      width="720px"
-      append-to-body
-      destroy-on-close
-      @open="loadShops"
-    >
-      <el-table
-        :data="shopOptions"
-        v-loading="shopLoading"
-        max-height="400"
-        @selection-change="onShopSelection"
-      >
-        <el-table-column type="selection" width="50" />
-        <el-table-column label="店铺" min-width="220">
-          <template #default="{ row }">
-            <div class="shop-cell">
-              <img :src="row.storeLogo" class="shop-cell-logo" alt="" />
-              <span>{{ row.storeName }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="类型" width="100">
-          <template #default="{ row }">{{ row.selfOperated ? "自营" : "旗舰店" }}</template>
-        </el-table-column>
-      </el-table>
-      <template #footer>
-        <el-button @click="shopDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmShops">确定</el-button>
-      </template>
-    </el-dialog>
+    <StoreSelector ref="storeSelector" :query-params="{ storeDisable: 'OPEN' }" @selected="confirmShops" />
   </div>
 </template>
 
@@ -217,7 +186,7 @@ import ColorField from "../controls/ColorField.vue";
 import SliderField from "../controls/SliderField.vue";
 import ossManage from "@/views/sys/oss-manage/ossManage";
 import ways from "@/components/lili-dialog/wap.js";
-import { getShopListData } from "@/api/shops";
+import StoreSelector from "@/components/store-selector/index.vue";
 
 const DEFAULTS = {
   bgColor1: "#FFFFFF",
@@ -247,7 +216,7 @@ const DEFAULT_ITEM = {
 export default {
   name: "PanelShop",
   hideDecorateTitle: true,
-  components: { GradientField, ColorField, SliderField, ossManage },
+  components: { GradientField, ColorField, SliderField, ossManage, StoreSelector },
   props: {
     res: { type: Object, required: true },
   },
@@ -260,10 +229,6 @@ export default {
         { key: "style", title: "样式" },
       ],
       picModelFlag: false,
-      shopDialogVisible: false,
-      shopLoading: false,
-      shopOptions: [],
-      selectedShops: [],
     };
   },
   computed: {
@@ -284,30 +249,15 @@ export default {
     if (!Array.isArray(item.shopList)) item.shopList = [];
   },
   methods: {
-    // 加载店铺列表供选择
-    loadShops() {
-      this.shopLoading = true;
-      this.selectedShops = [];
-      getShopListData({ pageNumber: 1, pageSize: 100, status: "OPEN" })
-        .then((res) => {
-          this.shopOptions = (res && res.result && res.result.records) || [];
-        })
-        .finally(() => {
-          this.shopLoading = false;
-        });
-    },
-    onShopSelection(rows) {
-      this.selectedShops = rows;
-    },
-    confirmShops() {
-      this.firstItem.shopList = this.selectedShops.map((s) => ({
+    openShops() { this.$refs.storeSelector.open(this.firstItem.shopList); },
+    confirmShops(rows) {
+      this.firstItem.shopList = rows.map((s) => ({
         id: s.id,
         storeName: s.storeName,
         storeLogo: s.storeLogo,
         selfOperated: s.selfOperated,
         storeBanner: s.storeBanner || "",
       }));
-      this.shopDialogVisible = false;
     },
     removeShop(index) {
       this.firstItem.shopList.splice(index, 1);

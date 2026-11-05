@@ -16,6 +16,8 @@
       v-if="flag"
       ref="goodsDialogRef"
       :selectedWay="goodsData"
+      :goods-loader="goodsLoader"
+      :query-params="queryParams"
       @selected="
         (val) => {
           goodsData = val;
@@ -69,6 +71,7 @@ import goodsDialog from "./goods-dialog";
 import linkDialog from "./link-dialog";
 
 const emit = defineEmits(["closeFlag", "selectedGoodsData", "selectedLink"]);
+defineProps({ goodsLoader: { type: Function, default: null }, queryParams: { type: Object, default: () => ({}) } });
 
 const goodsFlag = ref(false); // 是否商品选择器
 const goodsData = ref([]); // 选择的商品

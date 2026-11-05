@@ -92,6 +92,9 @@
             <span>{{ row.simpleSpecs || "默认规格" }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="店铺名称" prop="storeName" min-width="160" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.storeName || '—' }}</template>
+        </el-table-column>
         <el-table-column label="销售价" width="120" align="right">
           <template #default="{ row }">
             <span class="goods-price font-semibold">
@@ -111,7 +114,7 @@
         </el-table-column>
         <el-table-column label="商品类型" width="100" align="center">
           <template #default="{ row }">
-            <el-tag size="small" type="info">{{ goodsTypeLabel(row.goodsType) }}</el-tag>
+            <span>{{ goodsTypeLabel(row.goodsType) }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -136,11 +139,13 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, reactive, ref, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import * as API_Goods from "@/api/goods";
 import { goodsTypeLabel } from "@/constants/goodsType";
 
 const props = defineProps({
+  goodsLoader: { type: Function, default: null },
+  queryParams: { type: Object, default: () => ({}) },
   selectedWay: {
     type: Array,
     default: () => [],
@@ -167,6 +172,8 @@ const category = ref([]);
 const goodsData = ref([]);
 const loading = ref(false);
 const tableRef = ref(null);
+let syncingSelection = false;
+let querySequence = 0;
 
 watch(category, (val) => {
   goodsParams.categoryPath = val && val.length ? val[2] : "";
@@ -194,6 +201,8 @@ watch(
 onMounted(() => {
   init();
 });
+watch(() => props.queryParams, onSearchGoods, { deep: true });
+onUnmounted(() => { querySequence++; });
 
 function onSearchGoods() {
   goodsData.value = [];
@@ -222,13 +231,14 @@ function onPageSizeChange(val) {
 }
 
 function getQueryGoodsList() {
+  const sequence = ++querySequence;
   loading.value = true;
-  API_Goods.getGoodsSkuData(goodsParams)
+  (props.goodsLoader || API_Goods.getGoodsSkuData)({ ...goodsParams, ...props.queryParams })
     .then((res) => {
-      initGoods(res);
+      if (sequence === querySequence) initGoods(res);
     })
     .finally(() => {
-      loading.value = false;
+      if (sequence === querySequence) loading.value = false;
     });
 }
 
@@ -245,16 +255,18 @@ function initGoods(res) {
 function syncTableSelection() {
   const table = tableRef.value;
   if (!table) return;
-  if (!selectedList.value.length) {
+  // 将不在当前页的已选 SKU 也加入保留选择，避免翻页回显时丢失。
+  syncingSelection = true;
+  try {
     table.clearSelection();
-    return;
+    selectedList.value.forEach((item) => {
+      const id = String(item.id || item.skuId);
+      const current = goodsData.value.find(row => String(row.id || row.skuId) === id);
+      table.toggleRowSelection(current || item, true);
+    });
+  } finally {
+    syncingSelection = false;
   }
-  goodsData.value.forEach((item) => {
-    const selected = selectedList.value.some(
-      (e) => (e.id || e.skuId) && String(e.id || e.skuId) === String(item.id || item.skuId)
-    );
-    table.toggleRowSelection(item, selected);
-  });
 }
 
 function emitSelected(list) {
@@ -263,6 +275,7 @@ function emitSelected(list) {
 }
 
 function onSelectionChange(rows) {
+  if (syncingSelection) return;
   if (type.value !== "multiple") {
     if (!rows.length) {
       emitSelected([]);
