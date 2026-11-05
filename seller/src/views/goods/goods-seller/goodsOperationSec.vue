@@ -2539,7 +2539,6 @@ function save() {
       }
 
       baseInfoForm.value.salesModel = "RETAIL";
-      baseInfoForm.value.wholesaleList = [];
 
       // 判断是否是复制商品（复制商品时不复用原有 goodsId，重新生成）
       if (!route.query.copyId) {
@@ -2550,7 +2549,6 @@ function save() {
       syncIntroFromEditors();
       let submit = JSON.parse(JSON.stringify(baseInfoForm.value));
       submit.salesModel = "RETAIL";
-      submit.wholesaleList = [];
 
       // 5. 商品主图相册校验
       if (
@@ -3355,51 +3353,6 @@ onBeforeUnmount(() => {
 
 .refresh-icon {
   margin-left: 10px;
-}
-
-.wholesale-rule-form-item {
-  width: 100% !important;
-  min-width: 900px;
-}
-
-.wholesale-preview-table {
-  width: 480px;
-}
-
-.wholesale-preview-table :deep(.el-table__cell .cell) {
-  overflow: visible;
-  white-space: nowrap;
-}
-
-.wholesale-rule-form-item :deep(.el-form-item__content) {
-  width: 100%;
-}
-
-.wholesale-num-input {
-  width: 190px;
-}
-
-.wholesale-num-input :deep(.el-input__wrapper) {
-  min-width: 140px;
-}
-
-.wholesale-price-cell {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.wholesale-price-input {
-  width: 190px;
-}
-
-.wholesale-price-del {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-left: 100px;
-  transform: translateY(-50%);
 }
 
 /* 单/多规格切换与单规格表格样式 */

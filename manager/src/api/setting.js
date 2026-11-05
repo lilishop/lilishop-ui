@@ -5,14 +5,10 @@ import {
   postRequest
 } from '@/libs/axios';
 
-// 查询短信站内信信息
+// 查询站内信信息
 export const getMessageData = params => {
   return getRequest("/other/message", params);
 };
-//修改短信模板
-export const editSmsMessageTemplate = (id, params) => {
-  return putRequest(`/sms/sms/${id}`, params)
-}
 //修改站内信模板
 export const editNoticeMessage = (id, params) => {
   return putRequest(`/setting/noticeMessage/${id}`, params)
@@ -45,14 +41,6 @@ export const openNoticeMessage = (id) => {
 export const updateMessageStatus = (id,status) => {
   return putRequest(`/setting/noticeMessage/${id}/${status}`);
 };
-//获取短信模板
-export const getSmsTemplatePage = (params) => {
-  return getRequest("/sms/sms/template", params);
-};
-//获取短信签名
-export const getSmsSignPage = (params) => {
-  return getRequest("/sms/sms/sign", params);
-};
 //获取设置
 export const getSetting = (key) => {
   return getRequest(`/setting/setting/get/${key}`);
@@ -66,42 +54,6 @@ export const setSetting = (key, params) => {
   return postRequest(`/setting/setting/put/${key}`, params);
 };
 
-//查看短信签名
-export const getSmsSign = () => {
-  return getRequest(`/sms/sms/sign`);
-};
-//添加短信签名
-export const addSmsSign = (params) => {
-  return postRequest(`/sms/sms/sign`, params);
-};
-//修改短信签名
-export const editSmsSign = (params) => {
-  return putRequest(`/sms/sms/sign`, params);
-};
-//删除短信签名
-export const delSmsSign = (id) => {
-  return deleteRequest(`/sms/sms/sign/${id}`);
-};
-//添加短信模板
-export const addSmsTemplate = (params) => {
-  return postRequest(`/sms/sms/template`, params);
-};
-//修改短信模板
-export const editSmsTemplate = (params) => {
-  return putRequest(`/sms/sms/template`, params);
-};
-//删除短信模板
-export const delSmsTemplate = (id) => {
-  return deleteRequest(`/sms/sms/template/${id}`);
-};
-//查询短信发送记录
-export const getSmsReachPage = (params) => {
-  return getRequest(`/sms/sms`, params);
-};
-//重新发送
-export const repeatSendSms = (id) => {
-  return postRequest(`/sms/sms/repeat/${id}`);
-};
 //获取设置
 export const getExperienceData = (key) => {
   return getRequest(`/setting/experience/get/${key}`);
@@ -218,41 +170,11 @@ export const updateWechatMpMessageTemplate = params => {
 
 
 // -------------------------------------------------------------
-// 补充缺失的系统配置、短信、版本及验证码 API
+// 补充缺失的系统配置、版本及验证码 API
 // -------------------------------------------------------------
 
-// 短信任务发送与记录 (sms.vue)
-export const getSmsPage = (params) => {
-  return getRequest(`/sms/sms`, params);
-};
-export const sendSms = (params) => {
-  return postRequest(`/sms/sms`, params);
-};
 
-// 短信签名同步与详细 (sms.vue, smsSign.vue)
-export const syncSign = () => {
-  return putRequest(`/sms/sign/querySmsSign`);
-};
-export const deleteSign = (id) => {
-  return deleteRequest(`/sms/sign/${id}`);
-};
-export const smsSignDetail = (id) => {
-  return getRequest(`/sms/sign/${id}`);
-};
 
-// 短信模板管理与同步 (sms.vue)
-export const syncTemplate = () => {
-  return putRequest(`/sms/template/querySmsSign`);
-};
-export const addSmsTemplatePage = (params) => {
-  return postRequest(`/sms/template`, params);
-};
-export const editSmsTemplatePage = (params) => {
-  return putRequest(`/sms/template/modifySmsTemplate`, params);
-};
-export const deleteSmsTemplatePage = (params) => {
-  return deleteRequest(`/sms/template`, params);
-};
 
 // 支付支持方式表单 (PAYMENT_SUPPORT.vue)
 export const getPaymentSupportForm = () => {

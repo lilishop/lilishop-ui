@@ -14,7 +14,7 @@ export const E_COUPON_ORDER_TYPE = "E_COUPON";
 /** 单次购买数量上限（O-09 默认：min(quantity, 999)） */
 export const E_COUPON_MAX_BUY_NUM = 999;
 
-/** 常规立即购买（秒杀/满减/券/限时/第N件等） */
+/** 常规立即购买（秒杀/满减/券等） */
 export const E_COUPON_CART_BUY_NOW = "BUY_NOW";
 export const E_COUPON_CART_PINTUAN = "PINTUAN";
 export const E_COUPON_CART_POINTS = "POINTS";
@@ -72,8 +72,6 @@ export function createEmptyPromotionMap() {
     SECKILL: null,
     FULL_DISCOUNT: null,
     COUPON: [],
-    DISCOUNT: null,
-    NTH: null,
     PINTUAN: null,
     KANJIA: null,
   };

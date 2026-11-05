@@ -127,26 +127,6 @@
                 </div>
               </div>
             </div>
-            <!-- 限时折扣 -->
-            <div class="item-price-row" v-if="promotionMap['DISCOUNT']">
-              <p>
-                <span class="item-price-title">促销</span>
-                <span class="item-promotion">限时折扣</span>
-                <span class="item-desc-pintuan" v-if="promotionMap['DISCOUNT'].discount">
-                  享 {{ promotionMap["DISCOUNT"].discount }} 折
-                </span>
-              </p>
-            </div>
-            <!-- 第N件优惠 -->
-            <div class="item-price-row" v-if="promotionMap['NTH']">
-              <p>
-                <span class="item-price-title">促销</span>
-                <span class="item-promotion">第N件</span>
-                <span class="item-desc-pintuan">
-                  第 {{ promotionMap["NTH"].nthNum || promotionMap["NTH"].num }} 件优惠
-                </span>
-              </p>
-            </div>
             <!-- 拼团 -->
             <div class="item-price-row" v-if="promotionMap['PINTUAN']">
               <p>
