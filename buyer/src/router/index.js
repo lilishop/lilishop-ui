@@ -201,6 +201,12 @@ export const router = createRouter({
           meta: { title: "我的余额" },
         },
         {
+          path: "PickupCard",
+          name: "PickupCard",
+          component: () => import("@/pages/home/userCenter/PickupCard.vue"),
+          meta: { title: "提货卡兑换" },
+        },
+        {
           path: "MyGiftCards",
           name: "MyGiftCards",
           component: MyGiftCards,

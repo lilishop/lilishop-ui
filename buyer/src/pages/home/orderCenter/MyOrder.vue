@@ -176,6 +176,7 @@
       <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
     </div>
     <el-dialog v-model="cancelAvail" title="请选择取消订单原因">
+      <el-alert v-if="cancelIsPickup" title="此订单使用提货卡兑换，取消不退还提货权益，无法再次兑换。" type="warning" :closable="false" style="margin-bottom:16px" />
       <el-radio-group v-model="cancelParams.reason">
         <el-radio :label="item.reason" v-for="item in cancelReason" :key="item.id">
           {{ item.reason }}
@@ -227,6 +228,7 @@ const changeWay = ref(['全部', '待付款', '待发货', '待收货/使用']);
 const activeOrderTab = ref(0);
 const total = ref(0); // 数据总数
 const spinShow = ref(false); // 加载状态
+const cancelIsPickup = ref(false);
 const cancelAvail = ref(false); // 取消订单modal控制
 const cancelReason = ref([]); // 取消订单原因
 
@@ -365,6 +367,7 @@ function changePageSize (val) { // 修改页数
 }
 function handleCancelOrder (sn) {
   // 取消订单
+  cancelIsPickup.value = !!orderList.value.find(order => order.sn === sn)?.pickupCardId;
   cancelParams.orderSn = sn;
   afterSaleReason('CANCEL').then(res => {
     if (res.success) {

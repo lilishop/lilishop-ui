@@ -25,7 +25,8 @@
 
     <el-card>
       <div class="operation padding-row">
-        <el-button type="primary" @click="addActivity">添加礼品卡</el-button>
+        <el-button type="primary" @click="addActivity('PICKUP')">添加提货卡</el-button>
+        <el-button type="primary" @click="addActivity('CASH')">添加现金卡</el-button>
       </div>
 
       <el-table
@@ -45,10 +46,11 @@
           <template #default="{ row }">
             <span v-if="row">
               <span
-                v-if="row.faceValue != null && row.faceValue !== ''"
+                v-if="row.cardType !== 'PICKUP' && row.faceValue != null && row.faceValue !== ''"
                 :style="{ color: $mainColor }"
               >
                 {{ $filters.unitPrice(row.faceValue, "￥") }}</span>
+              <span v-else-if="row.cardType === 'PICKUP'">兑换 {{ row.pickupCount }} 种</span>
               <span v-else>-</span>
             </span>
           </template>
@@ -387,8 +389,9 @@ function formatValidity(row) {
   }
   return parts.join(" ");
 }
-function addActivity() {
-  router.push({ name: "add-gift-card-cash-activity" });
+/** 从独立入口创建指定类型的卡，类型在创建页固定展示。 */
+function addActivity(cardType) {
+  router.push({ name: "add-gift-card-cash-activity", query: { cardType } });
 }
 function goEdit(row) {
   if (!canEdit(row)) {

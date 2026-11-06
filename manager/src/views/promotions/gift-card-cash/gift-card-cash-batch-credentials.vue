@@ -2,52 +2,56 @@
   <div class="search gcc-batch-credentials">
     <el-card>
       <div class="gcc-records-toolbar">
-        <el-button type="primary" class="gcc-records-back" @click="closePage">返回</el-button>
-      </div>
-      <div v-if="giftCardName" class="gcc-records-meta mb_10">
-        <strong>礼品卡：</strong>{{ giftCardName }}
-      </div>
-      <div class="gcc-records-meta mb_10">
-        <strong>{{ batchTypeLabel }}：</strong>{{ batchIdDisplay || "—" }}
-        <span v-if="batchRemark" style="margin-left: 12px">
-          <strong>本批备注：</strong>{{ batchRemark }}</span>
+        <div class="gcc-batch-heading">
+          <h3>{{ giftCardName || "批次凭证" }}</h3>
+          <div class="gcc-records-meta">
+            <span>{{ batchTypeLabel }}：{{ batchIdDisplay || "—" }}</span>
+            <span v-if="batchRemark">本批备注：{{ batchRemark }}</span>
+          </div>
+        </div>
+        <div class="gcc-batch-actions">
+          <el-button
+            v-if="activityId && createBatchId && !isIssueBatchMode"
+            type="primary"
+            :loading="exporting"
+            title="导出当前制卡批次全部卡号、卡密，不受筛选和分页限制"
+            @click="handleExport"
+          >导出卡密</el-button>
+          <el-button @click="closePage">返回</el-button>
+        </div>
       </div>
       <el-alert v-if="!activityId || !hasBatchId" type="warning" show-icon :closable="false">
         缺少活动或批次参数，请从{{ batchSourceLabel }}进入。
       </el-alert>
       <template v-else>
-        <div class="gcc-status-tabs">
-          <span
+        <el-tabs :model-value="lifecycleTab" class="gcc-status-tabs" @tab-change="onLifecycleTab">
+          <el-tab-pane
             v-for="t in statusTabList"
             :key="t.key"
-            :class="{ active: lifecycleTab === t.key }"
-            @click="onLifecycleTab(t.key)"
-          >
-            {{ t.label }}</span>
-        </div>
-        <el-form ref="searchFormRef" :model="searchForm" inline class="search-form mb_10 gcc-filter-form">
-          <el-form-item label="卡号" prop="cardNo" label-width="60px">
+            :name="t.key"
+            :label="t.label"
+          />
+        </el-tabs>
+        <el-form ref="searchFormRef" :model="searchForm" label-width="72px" class="gcc-filter-form">
+          <el-form-item label="卡号" prop="cardNo">
             <el-input
               v-model="searchForm.cardNo"
               placeholder="请输入卡号"
               clearable
-              style="width: 160px"
             />
           </el-form-item>
-          <el-form-item label-width="0" class="gcc-combo-item">
-            <span class="gcc-combo-label">兑换会员</span>
-            <el-select v-model="searchForm.redeemMemberField" style="width: 130px">
-              <el-option label="兑换会员昵称" value="nickName" />
-              <el-option label="兑换会员手机" value="mobile" />
+          <el-form-item label="兑换会员" class="gcc-combo-item">
+            <el-select v-model="searchForm.redeemMemberField" aria-label="兑换会员查询方式">
+              <el-option label="昵称" value="nickName" />
+              <el-option label="手机号" value="mobile" />
             </el-select>
             <el-input
               v-model="searchForm.redeemMemberKeyword"
               placeholder="请输入"
               clearable
-              style="width: 140px; margin-left: 4px"
             />
           </el-form-item>
-          <el-form-item label="兑换时间" prop="redeemDateRange" label-width="72px">
+          <el-form-item label="兑换时间" prop="redeemDateRange">
             <el-date-picker
               v-model="redeemDateRange"
               type="daterange"
@@ -55,23 +59,20 @@
               value-format="YYYY-MM-DD"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              style="width: 240px"
             />
           </el-form-item>
-          <el-form-item label-width="0" class="gcc-combo-item">
-            <span class="gcc-combo-label">激活会员</span>
-            <el-select v-model="searchForm.activateMemberField" style="width: 130px">
-              <el-option label="激活会员昵称" value="nickName" />
-              <el-option label="激活会员手机" value="mobile" />
+          <el-form-item label="激活会员" class="gcc-combo-item">
+            <el-select v-model="searchForm.activateMemberField" aria-label="激活会员查询方式">
+              <el-option label="昵称" value="nickName" />
+              <el-option label="手机号" value="mobile" />
             </el-select>
             <el-input
               v-model="searchForm.activateMemberKeyword"
               placeholder="请输入"
               clearable
-              style="width: 140px; margin-left: 4px"
             />
           </el-form-item>
-          <el-form-item label="激活时间" prop="activateDateRange" label-width="72px">
+          <el-form-item label="激活时间" prop="activateDateRange">
             <el-date-picker
               v-model="activateDateRange"
               type="daterange"
@@ -79,10 +80,11 @@
               value-format="YYYY-MM-DD"
               start-placeholder="开始日期"
               end-placeholder="结束日期"
-              style="width: 240px"
             />
           </el-form-item>
-          <el-button type="primary" class="search-btn" @click="handleSearch">搜索</el-button>
+          <el-form-item label-width="0" class="gcc-filter-actions">
+            <el-button type="primary" @click="handleSearch">搜索</el-button>
+          </el-form-item>
         </el-form>
 
         <el-table v-if="!isIssueBatchMode" v-loading="loading" :data="data" style="width: 100%">
@@ -90,12 +92,19 @@
           <el-table-column prop="cardSecret" label="卡密" min-width="120" show-overflow-tooltip />
           <el-table-column label="面额" prop="faceValue" width="90" align="right">
             <template #default="{ row }">
-              <span v-if="row">{{ formatPrice(row.faceValue) }}</span>
+              <template v-if="row">
+                <span v-if="row.cardType === 'PICKUP'">提货权益</span>
+                <priceColorScheme v-else-if="hasValue(row.faceValue)" :value="row.faceValue" :color="$mainColor" />
+                <span v-else>—</span>
+              </template>
             </template>
           </el-table-column>
           <el-table-column label="余额" prop="balance" width="90" align="right">
             <template #default="{ row }">
-              <span v-if="row">{{ formatPrice(row.balance) }}</span>
+              <template v-if="row">
+                <priceColorScheme v-if="row.cardType !== 'PICKUP' && hasValue(row.balance)" :value="row.balance" :color="$mainColor" />
+                <span v-else>—</span>
+              </template>
             </template>
           </el-table-column>
           <el-table-column label="状态" prop="status" width="90" align="center">
@@ -143,14 +152,13 @@
           </el-table-column>
         </el-table>
 
-        <div class="mt_10" style="display: flex; justify-content: flex-end">
+        <div class="gcc-pagination">
           <el-pagination
             v-model:current-page="searchForm.pageNumber"
             v-model:page-size="searchForm.pageSize"
             :page-sizes="[20, 50, 100]"
             :total="total"
             layout="total, sizes, prev, pager, next, jumper"
-            size="small"
             @current-change="changePage"
             @size-change="changePageSize"
           />
@@ -163,8 +171,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getGiftCardCashCredentialPage } from "@/api/promotion";
-import { unitPrice } from "@/utils/filters";
+import { exportGiftCardCashCreateBatch, getGiftCardCashCredentialPage } from "@/api/promotion";
+import { downloadBlob } from "@/utils/downloadBlob";
+import { Message } from "@/utils/message";
 import { useAppStore } from "@/stores/app";
 
 const route = useRoute();
@@ -177,6 +186,7 @@ const STATUS_LABEL = {
   UNACTIVATED: "未激活",
   BOUND: "已激活",
   ACTIVATED: "已激活",
+  REDEEMED: "已提货",
   VOIDED: "已销卡",
   EXPIRED: "已过期",
 };
@@ -206,10 +216,12 @@ const statusTabList = ref([
   { key: "activated", label: "已激活", status: "BOUND" },
   { key: "cancelled", label: "已销卡", status: "VOIDED" },
   { key: "expired", label: "已过期", status: "EXPIRED" },
+  { key: "redeemed", label: "已提货", status: "REDEEMED" },
 ]);
 const redeemDateRange = ref([]);
 const activateDateRange = ref([]);
 const loading = ref(false);
+const exporting = ref(false);
 const total = ref(0);
 const data = ref([]);
 const searchForm = reactive({
@@ -267,11 +279,9 @@ watch(
   }
 );
 
-function formatPrice(value) {
-  if (value === null || value === undefined || value === "") {
-    return "—";
-  }
-  return unitPrice(value, "￥");
+/** 判断金额是否存在，保留零金额的有效展示。 */
+function hasValue(value) {
+  return value !== null && value !== undefined && value !== "";
 }
 function formatStatus(status) {
   return STATUS_LABEL[status] || status || "—";
@@ -306,6 +316,30 @@ function closePage() {
   appStore.removeTag("gift-card-cash-batch-credentials");
   localStorage.pageOpenedList = JSON.stringify(appStore.pageOpenedList);
   router.go(-1);
+}
+/** 导出当前制卡批次全部凭证，复用后端 Excel 接口；错误响应不保存为文件。 */
+async function handleExport() {
+  if (exporting.value || !activityId.value || !createBatchId.value || isIssueBatchMode.value) return;
+  const batchId = createBatchId.value;
+  exporting.value = true;
+  try {
+    const blob = await exportGiftCardCashCreateBatch(batchId);
+    if (!(blob instanceof Blob) || !blob.size) {
+      Message.error(blob?.message || "导出失败，请重试");
+      return;
+    }
+    if (blob.type.includes("json")) {
+      const result = JSON.parse(await blob.text());
+      Message.error(result.message || "导出失败，请重试");
+      return;
+    }
+    downloadBlob(blob, `制卡导出_${batchId}.xlsx`);
+    Message.success("已开始下载");
+  } catch {
+    Message.error("导出失败，请重试");
+  } finally {
+    exporting.value = false;
+  }
 }
 function formatMemberText(name, mobile) {
   const n = name != null && name !== "" ? String(name) : "";
@@ -474,64 +508,83 @@ function loadList() {
 </script>
 
 <style scoped>
-.gcc-batch-credentials .gcc-records-toolbar {
-  margin-bottom: 22px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e8eaec;
-}
-.gcc-batch-credentials .gcc-records-back {
-  font-weight: 500;
-}
-.gcc-batch-credentials .gcc-records-meta {
-  line-height: 1.6;
-  color: #515a6e;
-}
-.gcc-batch-credentials .gcc-status-tabs {
+.gcc-records-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  border-bottom: 1px solid #e8eaec;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
   margin-bottom: 16px;
-  gap: 4px 8px;
 }
-.gcc-batch-credentials .gcc-status-tabs span {
-  padding: 10px 14px 12px;
-  cursor: pointer;
-  color: #808695;
-  font-size: 14px;
-  position: relative;
-  user-select: none;
+.gcc-batch-heading {
+  min-width: 0;
 }
-.gcc-batch-credentials .gcc-status-tabs span:hover {
-  color: #515a6e;
+.gcc-batch-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
 }
-.gcc-batch-credentials .gcc-status-tabs span.active {
-  color: #ff6600;
-  font-weight: 500;
+.gcc-batch-heading h3 {
+  margin: 0 0 10px;
+  color: #303133;
+  font-size: 16px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
-.gcc-batch-credentials .gcc-status-tabs span.active::after {
-  content: "";
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 0;
-  height: 3px;
-  background: #ff6600;
-  border-radius: 2px 2px 0 0;
-}
-.gcc-batch-credentials .gcc-filter-form {
+.gcc-records-meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  gap: 8px 24px;
+  color: #909399;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
 }
-.gcc-batch-credentials .gcc-combo-item {
-  margin-right: 12px;
+.gcc-status-tabs {
+  margin-bottom: 16px;
 }
-.gcc-batch-credentials .gcc-combo-label {
-  display: inline-block;
-  margin-right: 6px;
-  color: #515a6e;
-  font-size: 14px;
-  vertical-align: middle;
+.gcc-status-tabs :deep(.el-tabs__header) {
+  margin-bottom: 0;
+}
+.gcc-filter-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  align-items: start;
+  gap: 16px 24px;
+  margin-bottom: 20px;
+}
+.gcc-filter-form :deep(.el-form-item) {
+  margin: 0;
+  min-width: 0;
+}
+.gcc-filter-form :deep(.el-form-item__content) {
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 8px;
+}
+.gcc-filter-form :deep(.el-input),
+.gcc-filter-form :deep(.el-date-editor) {
+  width: 100%;
+  min-width: 0;
+}
+.gcc-combo-item :deep(.el-select) {
+  flex: 0 0 88px;
+  width: 88px;
+}
+.gcc-combo-item :deep(.el-input) {
+  flex: 1;
+}
+.gcc-filter-actions :deep(.el-form-item__content) {
+  padding-left: 72px;
+}
+.gcc-pagination {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  overflow-x: auto;
+}
+@media (max-width: 600px) {
+  .gcc-filter-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

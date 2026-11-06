@@ -341,6 +341,7 @@
       v-model="cancelAvail"
       title="请选择取消订单原因"
     >
+      <el-alert v-if="order.order?.pickupCardId" title="此订单使用提货卡兑换，取消不退还提货权益，无法再次兑换。" type="warning" :closable="false" style="margin-bottom:16px" />
       <el-radio-group
         v-model="cancelParams.reason"
       >

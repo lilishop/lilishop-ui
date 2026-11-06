@@ -319,6 +319,11 @@ export const giftCardCashBatchCreate = (activityId, params) => {
   );
 };
 
+/** 导出指定制卡批次的全部卡号、卡密，不受页面筛选和分页限制。 */
+export const exportGiftCardCashCreateBatch = (createBatchId) => {
+  return getRequest(`/promotion/giftCardCash/createBatch/${encodeURIComponent(createBatchId)}/export`, {}, "blob");
+};
+
 // 下载批量发卡 Excel 模板
 export const downloadGiftCardCashIssueTemplate = () => {
   return getRequest("/promotion/giftCardCash/issue/template", {}, "blob");

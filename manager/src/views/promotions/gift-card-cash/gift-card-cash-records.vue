@@ -261,6 +261,7 @@
               <el-form-item label="交易类型" prop="transactionType">
                 <el-select v-model="usageSearchForm.transactionType" clearable style="width: 150px">
                   <el-option label="订单抵扣" value="ORDER_DEDUCT" />
+                  <el-option label="提货兑换" value="PICKUP_REDEEM" />
                   <el-option label="订单退款" value="ORDER_REFUND" />
                   <el-option label="订单取消" value="ORDER_CANCEL" />
                 </el-select>
@@ -277,7 +278,7 @@
                 </template>
               </el-table-column>
               <el-table-column prop="cardNo" label="卡号" min-width="150" show-overflow-tooltip />
-              <el-table-column label="现金卡信息" min-width="180">
+              <el-table-column label="礼品卡信息" min-width="180">
                 <template #default="{ row }">
                   <template v-if="row">
                     <div>{{ formatUsageGiftCardName(row) }}</div>
@@ -403,6 +404,7 @@ const issueSearchForm = reactive({
 const usageLoading = ref(false);
 const usageTotal = ref(0);
 const usageData = ref([]);
+let usageRequestId = 0;
 const usageSearchForm = reactive({
   pageNumber: 1,
   pageSize: 20,
@@ -446,7 +448,7 @@ function formatExpireTime(v) {
 }
 
 function formatUsageGiftCardName(row) {
-  return row.giftCardName || giftCardName.value || "-";
+  return row.giftCardName || "-";
 }
 
 function formatUsageFaceValue(row) {
@@ -703,12 +705,13 @@ function formatUsageBizType(type) {
     ORDER_REFUND: "订单退款",
     ORDER_CANCEL: "订单取消",
     CARD_ACTIVATE: "卡激活",
+    PICKUP_REDEEM: "提货兑换",
   };
   return map[type] || type || "-";
 }
 
 function getUsageAmountDisplay(row) {
-  const raw =
+  const raw = row.bizType === "PICKUP_REDEEM" || row.transactionType === "PICKUP_REDEEM" ? row.deductAmount :
     row.changeAmount != null && row.changeAmount !== "" ? row.changeAmount : row.deductAmount;
   if (raw === null || raw === undefined || raw === "") {
     return null;
@@ -728,11 +731,16 @@ function getUsageAmountDisplay(row) {
 }
 
 function loadUsageRecordList() {
+  const requestId = ++usageRequestId;
+  usageData.value = [];
+  usageTotal.value = 0;
   if (!activityId.value) {
+    usageLoading.value = false;
     return;
   }
   usageLoading.value = true;
   const params = {
+    activityId: activityId.value,
     pageNumber: usageSearchForm.pageNumber,
     pageSize: usageSearchForm.pageSize,
     sort: usageSearchForm.sort,
@@ -749,6 +757,7 @@ function loadUsageRecordList() {
   );
   getGiftCardCashUsageRecordPage(params)
     .then((res) => {
+      if (requestId !== usageRequestId || params.activityId !== activityId.value) return;
       usageLoading.value = false;
       if (res.success && res.result) {
         const r = res.result;
@@ -757,6 +766,7 @@ function loadUsageRecordList() {
       }
     })
     .catch(() => {
+      if (requestId !== usageRequestId || params.activityId !== activityId.value) return;
       usageLoading.value = false;
     });
 }
