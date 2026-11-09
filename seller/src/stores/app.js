@@ -12,6 +12,7 @@ export const useAppStore = defineStore("app", {
     loading: false,
     added: false,
     navList: [],
+    navigationMenus: [],
     currNav: "",
     lang: "",
     openedSubmenuArr: [],
@@ -28,6 +29,11 @@ export const useAppStore = defineStore("app", {
     refMenu: "",
   }),
   actions: {
+    /** 清理账号绑定的路由与标签目录，保留静态页面，防止切换账号后复用旧菜单。 */
+    resetNavigationRoutes() {
+      this.routers = [otherRouter];
+      this.tagsList = [...otherRouter.children];
+    },
     childrenMenu(v) {
       this.refMenu = v;
     },

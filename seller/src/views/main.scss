@@ -29,10 +29,11 @@
     top: 0;
     left: 0;
     z-index: 21;
-    width: 180px;
+    width: 300px;
     transition: width 0.3s; // background: rgb(73, 80, 96)
     background: #fff;
-    box-shadow: rgba(0, 21, 41, 0.35) 2px 0px 6px;
+    border-right: 1px solid #e9ecf2;
+    box-shadow: none;
   }
 
   .layout-text {
@@ -53,11 +54,12 @@
     box-sizing: border-box;
     position: fixed;
     display: block;
-    padding-left: 180px;
+    padding-left: 300px;
     width: 100%;
     height: 106px;
     z-index: 20;
-    box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
+    border-bottom: 1px solid #e9ecf2;
+    box-shadow: none;
     transition: padding 0.3s;
   }
 
@@ -84,7 +86,7 @@
   .tags-con {
     height: 46px;
     z-index: -1;
-    background: #f0f0f0;
+    background: #f7f8fa;
     display: flex;
     align-items: center;
 
@@ -123,10 +125,11 @@
   }
 
   &-header {
-    min-width: 740px;
+    min-width: 0;
     height: 60px;
     background: #fff;
-    box-shadow: 0 2px 1px 1px rgba(100, 100, 100, 0.1);
+    border-bottom: 1px solid #e9ecf2;
+    box-shadow: none;
     position: relative;
     z-index: 11;
 
@@ -153,7 +156,8 @@
       display: flex;
       align-items: center;
 
-      padding: 0 30px;
+      padding: 0 24px;
+      gap: 20px;
       justify-content: space-between;
       height: 100%;
 
@@ -227,7 +231,7 @@
 
   .single-page-con {
     position: absolute;
-    left: 180px;
+    left: 300px;
     right: 0;
     top: 106px;
     bottom: 0;
@@ -235,7 +239,7 @@
     min-width: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    background-color: #f0f0f0;
+    background-color: #f7f8fa;
     z-index: 1;
     transition: left 0.3s;
     box-sizing: border-box;
@@ -244,22 +248,6 @@
       position: relative;
       margin: 10px;
       max-width: 100%;
-    }
-  }
-
-  &.menu-collapsed {
-    .sidebar-menu-con {
-      width: 80px;
-    }
-
-    .main-header-con {
-      padding-left: 80px;
-    }
-
-    .single-page-con {
-      left: 80px;
-      right: 0;
-      width: auto;
     }
   }
 
@@ -276,19 +264,23 @@
 
 .logo-con {
   width: 100%;
-  height: 60px;
-  padding: 8px;
-  text-align: center;
-  border-bottom: 1px solid #eee;
+  height: 64px;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  border-bottom: 1px solid #e9ecf2;
   img {
-    height: 44px;
-    width: auto;
+    max-height: 36px;
+    max-width: 48px;
+    object-fit: contain;
   }
 }
 
 .menu-bar {
-  overflow: auto;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .menu-bar::-webkit-scrollbar {
@@ -338,4 +330,33 @@
   align-items: center;
   justify-content: center;
   z-index: 999;
+}
+
+// 导航与顶部栏的样式局限于商家外层布局，不覆盖业务页面的组件主题。
+.main {
+  .brand-caption { color: #252b3a; font-size: 15px; font-weight: 600; white-space: nowrap; }
+  .header-page-info { display: flex; align-items: center; gap: 12px; min-width: 0; font-size: 13px;
+    strong { color: #303749; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+  .workspace-label { color: #969cab; white-space: nowrap; }
+  .header-divider { color: #d9dde6; }
+  .user-dropdown-innercon { flex-wrap: nowrap; gap: 16px; }
+  .header-store-name { margin-left: 9px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: #525a6b; }
+  .header-avator-con .nav-item { margin: 0; width: auto; height: auto; border: 0; border-radius: 0; }
+  .header-icon-button { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid #eceef3; border-radius: 6px; background: #fff; color: #626879; cursor: pointer;
+    &:hover { background: #f5f7fb; color: #315efb; }
+    &:focus-visible { outline: 2px solid #315efb; }
+  }
+  .single-page-con .single-page { margin: 16px; }
+}
+@media (max-width: 1200px) {
+  .main {
+    .header-avator-con { padding: 0 16px; gap: 12px; }
+    .user-dropdown-innercon { gap: 10px; }
+    .workspace-label, .header-divider, .header-store-name { display: none; }
+    .single-page-con .single-page { margin: 12px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .main .sidebar-menu-con, .main-header-con, .main .single-page-con { transition: none; }
 }

@@ -31,6 +31,6 @@ module.exports = {
    */
   mainColor: "#ff5c58", //主题色
   setting: {
-    isUseTabsRouter: true, //多标签Tab页模式
+    isUseTabsRouter: false, // 多标签页内嵌模式默认关闭，用户可在页面配置中开启。
   },
 };

@@ -150,9 +150,9 @@
         row-key="id"
         @selection-change="onSelectionChange"
       >
-        <el-table-column v-if="!scheduledOnly" type="selection" width="100" align="center" />
-        <el-table-column prop="id" label="SPU编码" width="200" show-overflow-tooltip />
-        <el-table-column label="商品图片" width="100" align="center">
+        <el-table-column v-if="!scheduledOnly" type="selection" width="48" align="center" />
+        <el-table-column prop="id" label="SPU编码" width="180" show-overflow-tooltip />
+        <el-table-column label="商品图片" width="80" align="center">
           <template #default="{ row }">
             <img alt="商品图片"
               v-if="row && row.original"
@@ -172,60 +172,57 @@
         </el-table-column>
         <el-table-column v-if="currentStatus === 'SCHEDULED_UPPER'" prop="scheduledUpperTime" label="计划上架时间" width="190" />
         <el-table-column v-if="currentStatus === 'SCHEDULED_DOWN'" prop="scheduledDownTime" label="计划下架时间" width="190" />
-        <el-table-column label="价格" width="120">
+        <el-table-column label="价格" width="110">
           <template #default="{ row }">
             <span :style="{ color: $mainColor }">{{ $filters.unitPrice(row.price, '￥') }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="buyCount" label="销量" width="90" />
-        <el-table-column prop="quantity" label="库存" width="90" />
-        <el-table-column label="商品类型" width="150">
+        <el-table-column prop="buyCount" label="销量" width="70" />
+        <el-table-column prop="quantity" label="库存" width="70" />
+        <el-table-column label="商品类型" width="100">
           <template #default="{ row }">
             <span v-if="row">{{ goodsTypeText(row.goodsType) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="商品分类" min-width="200" show-overflow-tooltip>
+        <el-table-column label="商品分类" min-width="240" class-name="goods-category-column">
           <template #default="{ row }">
             {{ platformCategoryText(row?.categoryPath) }}
           </template>
         </el-table-column>
-        <el-table-column v-if="!scheduledOnly" label="状态" width="150">
+        <el-table-column v-if="!scheduledOnly" label="状态" width="80">
           <template #default="{ row }">
             <span v-if="row">{{ marketEnableText(row.marketEnable) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="审核状态" width="150">
+        <el-table-column label="审核状态" width="90">
           <template #default="{ row }">
             <span v-if="row">{{ authFlagText(row.authFlag) }}</span>
           </template>
         </el-table-column>
         <el-table-column v-if="!scheduledOnly" prop="createTime" label="创建时间" width="170" show-overflow-tooltip />
-        <el-table-column label="操作" :width="scheduledOnly ? 150 : 320" align="right" fixed="right">
+        <el-table-column label="操作" :width="scheduledOnly ? 100 : 190" align="right" fixed="right">
           <template #default="{ row }">
-            <template v-if="scheduledOnly">
-              <a class="link-text" @click="emit('edit-schedule', row)">编辑</a>
-              <span class="op-split">|</span>
-              <a class="link-text" @click="emit('delete-schedule', row)">删除</a>
-            </template>
-            <template v-else>
-            <template v-if="row.marketEnable === 'DOWN'">
-              <a class="link-text" @click="upper(row)">上架</a>
-              <span class="op-split">|</span>
-              <a class="link-text" @click="editGoods(row)">编辑</a>
-            </template>
-            <template v-else>
-              <a class="link-text" @click="edit(row)">下架</a>
-              <span class="op-split">|</span>
-              <a class="link-text" @click="editGoods(row)">编辑</a>
-            </template>
-            <span class="op-split">|</span>
-            <a class="link-text" @click="copyGoods(row)">复制商品</a>
-            <!-- E_COUPON 专属：卡池管理入口（原型 P-03） -->
-            <template v-if="row.goodsType === 'E_COUPON'">
-              <span class="op-split">|</span>
-              <a class="link-text" @click="goCardKeyPool(row)">卡池管理</a>
-            </template>
-            </template>
+            <div class="goods-actions">
+              <template v-if="scheduledOnly">
+                <a class="link-text" @click="emit('edit-schedule', row)">编辑</a>
+                <a class="link-text" @click="emit('delete-schedule', row)">删除</a>
+              </template>
+              <template v-else>
+                <template v-if="row.marketEnable === 'DOWN'">
+                  <a class="link-text" @click="upper(row)">上架</a>
+                  <a class="link-text" @click="editGoods(row)">编辑</a>
+                </template>
+                <template v-else>
+                  <a class="link-text" @click="edit(row)">下架</a>
+                  <a class="link-text" @click="editGoods(row)">编辑</a>
+                </template>
+                <a class="link-text" @click="copyGoods(row)">复制商品</a>
+                <!-- E_COUPON 专属：卡池管理入口（原型 P-03） -->
+                <template v-if="row.goodsType === 'E_COUPON'">
+                  <a class="link-text" @click="goCardKeyPool(row)">卡池管理</a>
+                </template>
+              </template>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -752,6 +749,19 @@ onMounted(() => {
 :deep(.goods-name-column .cell) {
   white-space: normal;
   line-height: 1.5;
+}
+// 分类完整换行，不使用省略号；操作按钮保持可读，额外入口允许换行。
+:deep(.goods-category-column .cell) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.goods-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  .link-text { white-space: nowrap; }
 }
 .link-text {
   color: #409eff;

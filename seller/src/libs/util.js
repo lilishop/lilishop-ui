@@ -450,47 +450,29 @@ util.initAllMenuData = function (constRoutes, data) {
 
 util.initMenuData = function (data) {
   const appStore = useAppStore();
-  const menuRoutes = [];
-  let menuData = data;
+  // 全量导航与搜索只使用当前账号权限接口返回的菜单，沿用已下线菜单过滤规则。
+  appStore.navigationMenus = data.map((top) => {
+    const children = [];
+    util.initRouterNode(children, top.children || []);
+    return { ...top, children: children.filter((group) => group.children?.length) };
+  }).filter((top) => top.children.length);
   let navList = [HOME_NAV_ITEM];
-  menuData.forEach((e) => {
+  appStore.navigationMenus.forEach((e) => {
     navList.push({ name: e.name, title: e.title });
   });
-  if (navList.length < 1) {
-    return;
-  }
   appStore.setNavList(navList);
   let currNav = window.localStorage.getItem("currNav");
-  if (!currNav) {
+  if (!navList.some((item) => item.name === currNav)) {
     currNav = HOME_NAV_NAME;
   }
   appStore.setCurrNav(currNav);
 
-  if (currNav === HOME_NAV_NAME) {
-    appStore.updateMenulist([]);
-    return;
-  }
+  // 首页也必须准备全部标签入口；切换栏目只更新展示，不能依赖再次初始化路由补齐标签。
+  appStore.tagsList = appStore.routers.flatMap((item) => item.children || []);
 
-  for (let item of menuData) {
-    if (item.name == currNav) {
-      menuData = item.children;
-      break;
-    }
-  }
-  util.initRouterNode(menuRoutes, menuData);
   appStore.updateMenulist(
-    menuRoutes.filter((item) => item.children.length > 0)
+    appStore.navigationMenus.find((item) => item.name === currNav)?.children || []
   );
-
-  let tagsList = [];
-  appStore.routers.map((item) => {
-    if (item.children.length <= 1) {
-      tagsList.push(item.children[0]);
-    } else {
-      tagsList.push(...item.children);
-    }
-  });
-  appStore.setTagsList(tagsList);
 };
 
 util.initRouterNode = function (routers, data) {
