@@ -222,6 +222,11 @@ export const queryExportStock = (params) => {
   return getRequest(`/goods/goods/queryExportStock`, params,'blob')
 }
 
+// 下载商品库存导入模板
+export const downloadStockTemplate = () => {
+  return getRequest(`/goods/goods/downloadStockTemplate`, {}, 'blob');
+};
+
 // 上传商品库存列表
 export const importStockExcel = params => {
   return postRequestWithNoForm(`/goods/goods/importStockExcel`, params );
