@@ -17,7 +17,9 @@
         </div>
       </template>
     <!-- 列表 -->
-    <empty v-if="orderList.length === 0"/>
+    <el-skeleton v-if="spinShow" :rows="5" animated />
+    <el-empty v-else-if="queryFailed" description="加载失败，请重试"><el-button type="primary" @click="getList">重新加载</el-button></el-empty>
+    <empty v-else-if="orderList.length === 0" />
     <div class="order-content" v-else>
       <div class="order-cols">
         <span>订单详情</span>
@@ -77,7 +79,7 @@
           </div>
         </div>
       </div>
-      <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
+
     </div>
     <!-- 分页 -->
     <div class="page-size">
@@ -134,6 +136,7 @@
 </template>
 
 <script setup>
+import { catchHandledRequestError } from "@/utils/requestError";
 import { nextTick, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
@@ -157,6 +160,8 @@ const params = reactive({ // 请求参数
   order: 'desc'
 });
 const total = ref(0); // 订单总数
+const queryFailed = ref(false); // 区分加载失败与暂无记录，支持重新查询
+let listRequestVersion = 0; // 仅允许最后一次查询更新列表与加载状态
 const spinShow = ref(false); // 加载状态
 const companyList = ref([]); // 物流公司列表
 const logisticsShow = ref(false); // 物流信息modal
@@ -230,14 +235,27 @@ function change(index) {
   getList()
 }
 function getList() { // 获取售后列表
+  const version = ++listRequestVersion;
+  queryFailed.value = false;
   spinShow.value = true;
   let paramsData = JSON.parse(JSON.stringify(params))
   afterSaleList(paramsData).then(res => {
-    spinShow.value = false
+    if (version !== listRequestVersion) return;
     if (res.success) {
       orderList.value = res.result.records;
       total.value = res.result.total;
     }
+  }).catch((error) => {
+    if (version !== listRequestVersion) {
+      catchHandledRequestError(error);
+      return;
+    }
+    queryFailed.value = true;
+    orderList.value = [];
+    total.value = 0;
+    catchHandledRequestError(error);
+  }).finally(() => {
+    if (version === listRequestVersion) spinShow.value = false;
   });
 }
 function changePageNum(val) { // 修改页码

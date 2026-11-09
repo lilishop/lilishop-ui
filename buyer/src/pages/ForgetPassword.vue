@@ -200,7 +200,7 @@ function handleSubmit () { // 提交密码
           Message.success('修改密码成功');
           router.push('login');
         }
-      }).catch(() => { loading.value = false; });
+      }).catch(() => { loading1.value = false; });
     };
   });
 }

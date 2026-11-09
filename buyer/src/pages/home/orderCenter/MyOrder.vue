@@ -21,7 +21,9 @@
       </template>
 
       <!-- 订单列表 -->
-      <empty v-if="orderList.length === 0" />
+      <el-skeleton v-if="spinShow" :rows="5" animated />
+    <el-empty v-else-if="queryFailed" description="加载失败，请重试"><el-button type="primary" @click="getList">重新加载</el-button></el-empty>
+    <empty v-else-if="orderList.length === 0" />
       <div class="order-content" v-else>
         <div class="order-cols">
           <span>订单详情</span>
@@ -91,7 +93,7 @@
             </div>
           </div>
         </div>
-        <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
+
       </div>
 
       <!-- 分页 -->
@@ -103,7 +105,9 @@
     </UserCenterLayout>
 
     <!-- 个人中心首页订单列表 -->
-    <empty v-if="homePage && orderList.length === 0" />
+    <el-skeleton v-if="homePage && spinShow" :rows="5" animated />
+    <el-empty v-else-if="homePage && queryFailed" description="加载失败，请重试"><el-button type="primary" @click="getList">重新加载</el-button></el-empty>
+    <empty v-else-if="homePage && orderList.length === 0" />
     <div class="order-content" v-else-if="homePage">
       <div class="order-cols">
         <span>订单详情</span>
@@ -173,7 +177,7 @@
           </div>
         </div>
       </div>
-      <el-skeleton size="large" fix v-if="spinShow"></el-skeleton>
+
     </div>
     <el-dialog v-model="cancelAvail" title="请选择取消订单原因">
       <el-alert v-if="cancelIsPickup" title="此订单使用提货卡兑换，取消不退还提货权益，无法再次兑换。" type="warning" :closable="false" style="margin-bottom:16px" />
@@ -193,6 +197,7 @@
 </template>
 
 <script setup>
+import { catchHandledRequestError } from "@/utils/requestError";
 import { onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
@@ -227,6 +232,8 @@ const cancelParams = reactive({ // 取消售后参数
 const changeWay = ref(['全部', '待付款', '待发货', '待收货/使用']);
 const activeOrderTab = ref(0);
 const total = ref(0); // 数据总数
+const queryFailed = ref(false); // 区分加载失败与暂无记录，支持重新查询
+let listRequestVersion = 0; // 仅允许最后一次查询更新列表与加载状态
 const spinShow = ref(false); // 加载状态
 const cancelIsPickup = ref(false);
 const cancelAvail = ref(false); // 取消订单modal控制
@@ -322,17 +329,30 @@ function delOrder (sn) { // 删除订单
   });
 }
 function getList () {
+  const version = ++listRequestVersion;
+  queryFailed.value = false;
   spinShow.value = true;
   let _params = JSON.parse(JSON.stringify(params))
   if (_params.orderStatus === 'ALL') {
     delete _params.orderStatus
   }
   getOrderList(_params).then(res => {
-    spinShow.value = false
+    if (version !== listRequestVersion) return;
     if (res.success) {
       orderList.value = res.result.records;
       total.value = res.result.total;
     }
+  }).catch((error) => {
+    if (version !== listRequestVersion) {
+      catchHandledRequestError(error);
+      return;
+    }
+    queryFailed.value = true;
+    orderList.value = [];
+    total.value = 0;
+    catchHandledRequestError(error);
+  }).finally(() => {
+    if (version === listRequestVersion) spinShow.value = false;
   });
 }
 function mapAfterSaleOrder (item) {

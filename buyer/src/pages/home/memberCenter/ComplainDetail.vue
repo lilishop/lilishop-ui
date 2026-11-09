@@ -137,6 +137,7 @@
 </template>
 
 <script setup>
+import { catchHandledRequestError } from "@/utils/requestError";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Message } from "@/utils/message";
@@ -230,6 +231,8 @@ function handleSubmit() {
       params.content = "";
       getDetail();
     }
+  }).catch(catchHandledRequestError).finally(() => {
+    submitLoading.value = false;
   });
 }
 

@@ -163,6 +163,7 @@ function getGoodsDetail() {
       }
     })
     .catch(() => {
+      isLoading.value = false;
       router.push("/");
     });
 }

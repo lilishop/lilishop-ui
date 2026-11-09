@@ -33,6 +33,12 @@ module.exports = {
   },
   devServer: {
     port: configs.port,
+    client: {
+      overlay: {
+        // 保留编译错误和程序异常遮罩，仅跳过请求层已向用户提示的错误。
+        runtimeErrors: (error) => error?.[Symbol.for("lilishop.buyer.handledRequestError")] !== true,
+      },
+    },
   },
   productionSourceMap: false,
   configureWebpack: {

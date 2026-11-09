@@ -1,3 +1,4 @@
+import { setupRequestErrorHandling } from "@/utils/requestError";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import "core-js/stable";
@@ -24,6 +25,7 @@ if (aMapSecurityJsCode) {
 }
 
 const app = createApp(App);
+setupRequestErrorHandling(app);
 
 setupElementPlus(app);
 setupLegacyMessage(app);

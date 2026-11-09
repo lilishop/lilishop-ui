@@ -5,7 +5,9 @@
         <el-button class="del-btn" @click="clearAll" type="primary">删除全部</el-button>
       </template>
     <!-- 订单列表 -->
-    <empty v-if="list.length === 0" />
+    <el-skeleton v-if="spinShow" :rows="5" animated />
+    <el-empty v-else-if="queryFailed" description="加载失败，请重试"><el-button type="primary" @click="getList">重新加载</el-button></el-empty>
+    <empty v-else-if="list.length === 0" />
     <ul class="track-list" v-else>
       <li
         v-for="(item, index) in list"
@@ -39,6 +41,7 @@
 </template>
 
 <script setup>
+import { catchHandledRequestError } from "@/utils/requestError";
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
@@ -50,6 +53,8 @@ defineOptions({ name: "MyTrack" });
 const router = useRouter();
 
 const list = ref([]); // 我的足迹，商品列表
+const queryFailed = ref(false); // 区分加载失败与暂无记录，支持重新查询
+let listRequestVersion = 0; // 仅允许最后一次查询更新列表与加载状态
 const spinShow = ref(false); // 控制loading是否加载
 const params = reactive({
   pageNumber: 1,
@@ -118,9 +123,11 @@ function changePageSize(val) {
 
 function getList() {
   // 获取足迹列表
+  const version = ++listRequestVersion;
+  queryFailed.value = false;
   spinShow.value = true;
   tracksList(params).then((res) => {
-    spinShow.value = false;
+    if (version !== listRequestVersion) return;
     if (res.success && res.result.records.length) {
       list.value = res.result.records.filter(item =>{
         return item != null
@@ -129,6 +136,17 @@ function getList() {
     } else {
       list.value = [];
     }
+  }).catch((error) => {
+    if (version !== listRequestVersion) {
+      catchHandledRequestError(error);
+      return;
+    }
+    queryFailed.value = true;
+    list.value = [];
+    total.value = 0;
+    catchHandledRequestError(error);
+  }).finally(() => {
+    if (version === listRequestVersion) spinShow.value = false;
   });
 }
 
