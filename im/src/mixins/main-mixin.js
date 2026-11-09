@@ -38,6 +38,8 @@ export default {
                 await this.createTalk(this.$route.query.id);
               } else if (typeof this.loadChatList === "function") {
                 await this.loadChatList();
+              } else if (typeof this.loadChatListInJs === "function") {
+                await this.loadChatListInJs();
               }
             }
             if(this.$route.query.goodsId && this.$route.query.skuId && this.goodsParams){
@@ -104,8 +106,8 @@ export default {
           items: result.map((item) => formatTalkItem(item)),
         });
 
-        // 判断
-        if (this.$route.query.id) {
+        // 判断（仅在挂载了 clickTab 的页面组件实例上自动切换会话）
+        if (this.$route.query.id && typeof this.clickTab === "function") {
           let takeData, takeIndex;
           result.forEach((take, index) => {
             if (take.id == this.$route.query.id) {
@@ -113,9 +115,13 @@ export default {
               takeIndex = index;
             }
           });
-          this.$nextTick(() =>
-            this.clickTab(this.$route.query.id, takeData, takeIndex)
-          );
+          if (typeof this.$nextTick === "function") {
+            this.$nextTick(() =>
+              this.clickTab(this.$route.query.id, takeData, takeIndex)
+            );
+          } else {
+            this.clickTab(this.$route.query.id, takeData, takeIndex);
+          }
         }
       }).finally(() => {
         this.loadStatus = 1;

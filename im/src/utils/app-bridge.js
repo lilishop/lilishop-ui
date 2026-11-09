@@ -28,6 +28,8 @@ const mixinCtx = {
     return router.currentRoute.value;
   },
 };
+mixinCtx.loadChatListInJs = MainMixin.methods.loadChatListInJs.bind(mixinCtx);
+mixinCtx.loadStoreChatList = MainMixin.methods.loadStoreChatList.bind(mixinCtx);
 
 export function setRefreshView(fn) {
   refreshViewFn = fn;

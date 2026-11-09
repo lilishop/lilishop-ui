@@ -43,7 +43,8 @@ class Talk extends Base {
     super();
     this.sender_id = resource.fromUser; //发送
     this.receiver_id = resource.toUser; //接收
-    this.talk_type = resource.messageType; //类型
+    // 后端推送的 messageType 是消息内容类型（MESSAGE/PICTURE/GOODS/ORDERS），私聊会话类型固定为 1
+    this.talk_type = Number(resource.talk_type) || 1;
 
     this.resource = resource;
 
@@ -94,11 +95,21 @@ class Talk extends Base {
   }
 
   /**
+   * 获取消息内容类型（MESSAGE/PICTURE/GOODS/ORDERS）
+   */
+  getMessageType () {
+    return this.resource.messageType || this.resource.msg_type || "MESSAGE";
+  }
+
+  /**
    * 获取聊天列表左侧的对话信息
    */
   getTalkText () {
     let text = this.resource.content || this.resource.text;
-    switch (this.resource.msg_type) {
+    switch (this.getMessageType()) {
+      case 'PICTURE':
+        text = "[图片]";
+        break;
       case 'GOODS':
         text = "[商品链接]";
         break;
@@ -224,10 +235,15 @@ class Talk extends Base {
     }
     // console.log("%c 准备更新...UPDATE_TALK_ITEM ", "color:red");
 
+    const nowTime = parseTime(new Date());
+    const msgText = this.getTalkText() || record.text;
     talkStore.UPDATE_TALK_ITEM({
       index_name: this.getIndexName(),
-      msg_text: this.getTalkText() || record.text,
-      updated_at: parseTime(new Date()),
+      msg_text: msgText,
+      lastTalkMessage: msgText,
+      lastTalkTime: nowTime,
+      lastMessageType: this.getMessageType(),
+      updated_at: nowTime,
     });
 
     if (this.talk_type == 1 && this.getAccountId() !== this.sender_id) {
@@ -248,6 +264,7 @@ class Talk extends Base {
     useTalkStore().UPDATE_TALK_MESSAGE({
       index_name: this.getIndexName(),
       msg_text: this.getTalkText(),
+      lastMessageType: this.getMessageType(),
       updated_at: parseTime(new Date()),
     });
   }

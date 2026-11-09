@@ -71,11 +71,17 @@ export const useTalkStore = defineStore("talks", {
     UPDATE_TALK_MESSAGE(resource) {
       let enableGetTalkList = true;
       this.items.forEach((item) => {
-        if (item.userId == resource.index_name.split("_")[1]) {
+        if (
+          item.index_name === resource.index_name ||
+          item.userId == resource.index_name.split("_")[1]
+        ) {
           item.unread++;
           item.msg_text = resource.msg_text;
           item.lastTalkTime = resource.updated_at;
           item.lastTalkMessage = resource.msg_text;
+          if (resource.lastMessageType) {
+            item.lastMessageType = resource.lastMessageType;
+          }
           item.updated_at = resource.updated_at;
           enableGetTalkList = false;
         }

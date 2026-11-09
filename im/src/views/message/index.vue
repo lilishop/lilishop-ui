@@ -113,8 +113,9 @@
                       </div>
                       <div class="talk-message">
                         <span v-if="item.lastMessageType === 'MESSAGE'" v-html="textReplaceEmoji(item.lastTalkMessage)"></span>
-                        <span v-if="item.lastMessageType === 'GOODS'">[商品链接]</span>
-                        <span v-if="item.lastMessageType === 'ORDER'">[订单链接]</span>
+                        <span v-else-if="item.lastMessageType === 'PICTURE'">[图片]</span>
+                        <span v-else-if="item.lastMessageType === 'GOODS'">[商品链接]</span>
+                        <span v-else-if="item.lastMessageType === 'ORDERS' || item.lastMessageType === 'ORDER'">[订单链接]</span>
                       </div>
                       <div class="content">
                         <template v-if="index_name != item.index_name && item.draft_text">
@@ -428,7 +429,7 @@ function clickTab(id, val, index) {
     if (id == index_name.value.split("_")[1]) {
       talkStore.UPDATE_TALK_ITEM({
         userId: id,
-        index_name: "MESSAGE_" + index_name.value.split("_")[1],
+        index_name: index_name.value,
         unread: 0,
       });
     }
