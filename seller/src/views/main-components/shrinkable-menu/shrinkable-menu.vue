@@ -78,7 +78,7 @@ watch([() => route.fullPath, () => appStore.navigationMenus], syncRouteMenu, { i
 
 <style lang="scss" scoped>
 // 隐藏滚动条但保留滚轮、触控和键盘滚动，确保下方栏目仍可访问。
-.seller-navigation { height: calc(100% - 64px); box-sizing: border-box; padding: 18px 14px 32px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; background: #fff;
+.seller-navigation { height: 100%; box-sizing: border-box; padding: 18px 14px 32px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; background: #fff;
   &::-webkit-scrollbar { display: none; width: 0; height: 0; }
 }
 .nav-heading { width: 100%; display: flex; align-items: center; gap: 13px; min-height: 46px; padding: 11px 14px; border: 0; border-radius: 6px; background: transparent; color: #242832; text-align: left; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer;

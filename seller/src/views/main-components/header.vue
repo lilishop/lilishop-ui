@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row class="header">
-      <img alt="店铺 Logo" class="logo" :src="storeSideLogo" />
+      <img alt="平台 Logo" class="logo" :src="storeSideLogo" />
     </el-row>
   </div>
 </template>
@@ -16,7 +16,7 @@ function init() {
   getSite();
 }
 function applyFavicon(href) {
-  if (!href) return;
+  if (!href || href === "undefined" || href === "null") return;
   const link =
     document.querySelector("link[rel*='icon']") ||
     document.createElement("link");
@@ -29,16 +29,18 @@ function getSite() {
   loadSiteSettings()
     .then((data) => {
       if (data) {
+        const logo = data.storeSideLogo || data.domainLogo || "";
+        const icon = data.storeSideIcon || data.domainIcon || "";
         const expirationTime = new Date().setHours(new Date().getHours() + 1);
         localStorage.setItem("seller_expiration_time", expirationTime);
-        localStorage.setItem("sellersiteName", data.siteName);
-        localStorage.setItem("sellerlogoImg", data.storeSideLogo);
-        localStorage.setItem("sellerIconImg", data.storeSideIcon);
+        localStorage.setItem("sellersiteName", data.siteName || "");
+        if (logo) localStorage.setItem("sellerlogoImg", logo);
+        if (icon) localStorage.setItem("sellerIconImg", icon);
         localStorage.setItem("sellerCompanyName", data.companyName || "");
         localStorage.setItem("sellerCompanyUrl", data.companyUrl || "");
-        storeSideLogo.value = data.storeSideLogo || storeSideLogo.value;
+        storeSideLogo.value = logo || storeSideLogo.value;
         if (data.siteName) window.document.title = data.siteName;
-        applyFavicon(data.storeSideIcon);
+        applyFavicon(icon);
       }
     })
     .catch(() => {});

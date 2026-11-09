@@ -84,10 +84,12 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { Bell, ChatDotRound, Clock, Delete } from "@element-plus/icons-vue";
 import * as API_Index from "@/api/index";
+import { useAppStore } from "@/stores/app";
 
 defineOptions({ name: "message_index" });
 
 const route = useRoute();
+const appStore = useAppStore();
 
 const loading = ref(true);
 const mesTypeList = ref([
@@ -153,7 +155,10 @@ function refreshMessage() {
 }
 function refreshUnreadCount() {
   API_Index.getAllMessage(params).then((res) => {
-    if (res.success) unReadCount.value = res.result.UN_READY.total;
+    if (res.success) {
+      unReadCount.value = res.result.UN_READY.total;
+      appStore.setUnreadMessageCount(unReadCount.value);
+    }
   });
 }
 function getAll() {
@@ -161,6 +166,7 @@ function getAll() {
     loading.value = false;
     if (res.success) {
       unReadCount.value = res.result.UN_READY.total;
+      appStore.setUnreadMessageCount(unReadCount.value);
       currentMesList.value = res.result.UN_READY.records;
     }
   });

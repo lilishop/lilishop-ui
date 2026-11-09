@@ -1,6 +1,6 @@
 {
   "setting": {
-    "isUseTabsRouter": true,
+    "isUseTabsRouter": false,
     "showFooter": false
   }
 }

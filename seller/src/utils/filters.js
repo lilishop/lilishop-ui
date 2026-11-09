@@ -51,21 +51,12 @@ export function enCode(v1) {
 
 import {router} from "@/router/index";
 /**
- * 自定义跳转
+ * 打开详情页面；商家后台固定关闭多标签页内嵌模式，不再读取旧浏览器偏好。
+ * @param push Vue Router 路由位置
  */
 export function customRouterPush(push){
-  const setting = window.localStorage.getItem('setting') ? JSON.parse(window.localStorage.getItem('setting')) : {};
-
-  if(setting.isUseTabsRouter){
-    router.push(push)
-  }
-  else{
-    if(Object.keys(setting).length == 0){router.push(push)}
-    else{
-      let url = router.resolve(push);
-      window.open(url.href, '_blank');
-    }
-  }
+  const url = router.resolve(push);
+  window.open(url.href, '_blank');
 }
 
 

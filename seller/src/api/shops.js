@@ -87,6 +87,11 @@ export const getShopInfo = () => {
   return getRequest(`/settings/storeSettings`)
 }
 
+// 获取商家入驻详细信息
+export const getShopEntryDetail = () => {
+  return getRequest(`/settings/storeSettings/storeDetail`)
+}
+
 // 保存商家详细信息
 export const saveShopInfo = (params) => {
   return putRequest(`/settings/storeSettings`, params)
@@ -127,5 +132,3 @@ export const editShipTemplate = (id, params, headers) => {
 export const editChecked = (logisticsId,params) => {
   return putRequest(`/other/logistics/${logisticsId}/updateStoreLogistics`,params)
 }
-
-

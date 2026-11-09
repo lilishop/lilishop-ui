@@ -24,15 +24,15 @@
   }
 
   .sidebar-menu-con {
-    height: 100%;
+    height: calc(100% - 60px);
     position: fixed;
-    top: 0;
+    top: 60px;
     left: 0;
     z-index: 21;
     width: 300px;
     transition: width 0.3s; // background: rgb(73, 80, 96)
     background: #fff;
-    border-right: 1px solid #e9ecf2;
+    border-right: 1px solid #e4e7ed;
     box-shadow: none;
   }
 
@@ -53,12 +53,15 @@
   &-header-con {
     box-sizing: border-box;
     position: fixed;
-    display: block;
-    padding-left: 300px;
+    display: flex;
+    align-items: stretch;
+    top: 0;
+    left: 0;
+    background: #fff;
     width: 100%;
-    height: 106px;
-    z-index: 20;
-    border-bottom: 1px solid #e9ecf2;
+    height: 60px;
+    z-index: 22;
+    border-bottom: 1px solid #e4e7ed;
     box-shadow: none;
     transition: padding 0.3s;
   }
@@ -125,10 +128,10 @@
   }
 
   &-header {
+    flex: 1;
     min-width: 0;
-    height: 60px;
-    background: #fff;
-    border-bottom: 1px solid #e9ecf2;
+    height: 100%;
+    background: transparent;
     box-shadow: none;
     position: relative;
     z-index: 11;
@@ -158,7 +161,7 @@
 
       padding: 0 24px;
       gap: 20px;
-      justify-content: space-between;
+      justify-content: flex-end;
       height: 100%;
 
 
@@ -233,7 +236,7 @@
     position: absolute;
     left: 300px;
     right: 0;
-    top: 106px;
+    top: 60px;
     bottom: 0;
     width: auto;
     min-width: 0;
@@ -262,19 +265,21 @@
   transition: transform 0.3s;
 }
 
-.logo-con {
-  width: 100%;
-  height: 64px;
+.main .logo-con {
+  flex: 0 0 300px;
+  height: 100%;
   box-sizing: border-box;
-  padding: 12px 16px;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: flex-start;
   overflow: hidden;
-  border-bottom: 1px solid #e9ecf2;
   img {
-    max-height: 36px;
-    max-width: 48px;
+    display: block;
+    max-height: 44px;
+    max-width: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
   }
 }
@@ -295,6 +300,7 @@
 .menu-bar::-webkit-scrollbar-track {
   background: #fff;
 }
+
 
 .nav-item {
   font-size: 14px;
@@ -334,8 +340,19 @@
 
 // 导航与顶部栏的样式局限于商家外层布局，不覆盖业务页面的组件主题。
 .main {
-  .brand-caption { color: #252b3a; font-size: 15px; font-weight: 600; white-space: nowrap; }
-  .header-page-info { display: flex; align-items: center; gap: 12px; min-width: 0; font-size: 13px;
+  .page-path-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 8px 20px;
+    box-sizing: border-box;
+    background: #fff;
+    border-bottom: 1px solid #e4e7ed;
+  }
+  .header-page-info { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px;
     strong { color: #303749; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   }
   .workspace-label { color: #969cab; white-space: nowrap; }
@@ -347,13 +364,20 @@
     &:hover { background: #f5f7fb; color: #315efb; }
     &:focus-visible { outline: 2px solid #315efb; }
   }
+  .header-message-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
   .single-page-con .single-page { margin: 16px; }
 }
 @media (max-width: 1200px) {
   .main {
     .header-avator-con { padding: 0 16px; gap: 12px; }
+    .page-path-bar { padding: 8px 14px; }
     .user-dropdown-innercon { gap: 10px; }
-    .workspace-label, .header-divider, .header-store-name { display: none; }
+    .header-store-name { display: none; }
     .single-page-con .single-page { margin: 12px; }
   }
 }

@@ -27,8 +27,13 @@ export const useAppStore = defineStore("app", {
     routers: [otherRouter],
     tagsList: [...otherRouter.children],
     refMenu: "",
+    unreadMessageCount: 0,
   }),
   actions: {
+    /** 更新顶部未读消息数量。 */
+    setUnreadMessageCount(count) {
+      this.unreadMessageCount = Math.max(0, Number(count) || 0);
+    },
     /** 清理账号绑定的路由与标签目录，保留静态页面，防止切换账号后复用旧菜单。 */
     resetNavigationRoutes() {
       this.routers = [otherRouter];
