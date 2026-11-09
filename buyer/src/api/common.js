@@ -45,32 +45,36 @@ export function getRegion (id) {
 
 /**
  * 分页获取文章列表
- * @param cateId 文章分类id
+ * @param params 分页及分类查询条件
+ * @param options 请求选项，skipMessage 为 true 时由页面展示错误
  */
-export function articleList (params) {
+export function articleList (params, options = {}) {
   return request({
     url: `/buyer/other/article`,
     method: Method.GET,
-    params
+    params,
+    skipMessage: options.skipMessage
   });
 }
 
 /**
  * 获取帮助中心文章分类列表
- * @param cateId 文章分类id
+ * @param options 请求选项，skipMessage 为 true 时由页面展示错误
  */
-export function articleCateList () {
+export function articleCateList (options = {}) {
   return request({
     url: `/buyer/other/article/articleCategory/list`,
-    method: Method.GET
+    method: Method.GET,
+    skipMessage: options.skipMessage
   });
 }
 
-// 通过id获取文章
-export function articleDetail (id) {
+/** 通过文章 ID 获取正文；可由页面接管错误提示。 */
+export function articleDetail (id, options = {}) {
   return request({
     url: `/buyer/other/article/get/${id}`,
-    method: Method.GET
+    method: Method.GET,
+    skipMessage: options.skipMessage
   });
 }
 

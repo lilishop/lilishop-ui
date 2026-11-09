@@ -8,6 +8,11 @@
       <div class="layoutAll">
         <el-aside class="side-bar" width="220px">
           <div class="article-cate">文章分类</div>
+          <p v-if="categoryError" role="alert" class="load-message">
+            分类加载失败，可先浏览全部文章。
+            <el-button link type="primary" :loading="categoryLoading" @click="getCateList">重试分类</el-button>
+          </p>
+          <el-button link type="primary" @click="onSelect('')">全部文章</el-button>
           <el-menu
             class="side-menu"
             :key="menuKey"
@@ -31,14 +36,22 @@
           </el-menu>
         </el-aside>
         <el-main class="content">
-          <ul class="article-list" v-show="showList">
+          <div v-if="contentError" role="alert" class="load-message">
+            {{ contentError }}
+            <el-button link type="primary" @click="retryContent">重新加载</el-button>
+          </div>
+          <el-skeleton v-if="contentLoading" :rows="5" animated />
+          <ul class="article-list" v-show="showList && !contentLoading && !contentError">
             <li v-if="!articleList.length" class="article-empty">暂无文章</li>
             <li v-for="(article, index) in articleList" :key="article.id || index" @click="getDetail(article.id)">
               {{ article.title }}
             </li>
           </ul>
-          <div v-show="!showList" class="article-detail">
-            <button type="button" class="back-btn" @click="showList = true">返回列表</button>
+          <el-pagination v-if="showList && !contentLoading && !contentError && total > params.pageSize"
+            :current-page="params.pageNumber" :page-size="params.pageSize" :total="total"
+            layout="prev, pager, next" @current-change="changePage" />
+          <div v-show="!showList && !contentLoading && !contentError" class="article-detail">
+            <button type="button" class="back-btn" @click="getList()">返回列表</button>
             <h2>{{ detail.title }}</h2>
             <div class="article-html" v-html="detail.content"></div>
           </div>
@@ -60,82 +73,111 @@ defineOptions({ name: 'ArticleIndex' })
 const route = useRoute()
 
 const list = ref([])
-const detail = ref('')
+const detail = ref({})
 const articleList = ref([])
-const activeName = ref('1347456734864367616')
+const activeName = ref('')
 const openName = ref([])
 const menuKey = ref(0)
-const params = reactive({
-  pageNumber: 1,
-  pageSize: 100,
-  categoryId: '',
-  sort: 'sort'
-})
+const params = reactive({ pageNumber: 1, pageSize: 20, categoryId: '', sort: 'sort' })
 const showList = ref(true)
+const total = ref(0)
+const categoryError = ref(false)
+const categoryLoading = ref(false)
+const contentError = ref('')
+const contentLoading = ref(false)
+const detailId = ref('')
+let contentRequestId = 0
 
-function onSelect (id) {
-  getList(id)
-  detail.value = ''
-  showList.value = true
+/** 切换分类时重置分页，并使之前的列表或正文请求失效。 */
+function onSelect(id) {
+  activeName.value = id
+  params.pageNumber = 1
+  return getList(id)
 }
 
-function getCateList () {
-  articleCateList().then(res => {
-    if (res.success) {
-      list.value = res.result || []
-      openName.value = []
-      if (route.query.id && detail.value && detail.value.categoryId) {
-        activeName.value = detail.value.categoryId
-        list.value.forEach(e => {
-          const children = e.children || []
-          const hitParent = String(e.id) === String(activeName.value)
-          const hitChild = children.some(i => i && String(i.id) === String(activeName.value))
-          if ((hitParent || hitChild) && children.length) {
-            openName.value.push(String(e.id))
-          }
-        })
-      } else if (list.value[0] && list.value[0].id) {
-        activeName.value = list.value[0].id
-        if (list.value[0].children && list.value[0].children.length) {
-          openName.value.push(String(list.value[0].id))
-        }
-      }
-      menuKey.value++
-      if (activeName.value) {
-        getList(activeName.value)
-      }
-    }
-  })
-}
-
-function getList (id) {
-  params.categoryId = id
-  fetchArticleList(params).then(res => {
-    if (res.success) {
-      articleList.value = res.result.records
-    }
-  })
-}
-
-async function getDetail (id) {
-  await articleDetail(id).then(res => {
-    if (res.success) {
-      detail.value = res.result
-      showList.value = false
-    }
-  })
-}
-
-onMounted(async () => {
-  const articleId = route.query.id
-  if (articleId) {
-    await getDetail(articleId)
+/** 独立加载分类；分类服务不可用时保留全部文章入口，不阻断正文和列表。 */
+async function getCateList() {
+  if (categoryLoading.value) return
+  categoryLoading.value = true
+  categoryError.value = false
+  try {
+    const res = await articleCateList({ skipMessage: true })
+    if (!res.success || !Array.isArray(res.result)) throw new Error('分类响应无效')
+    list.value = res.result
+    openName.value = list.value.filter(item => Array.isArray(item.children) && item.children.length)
+      .map(item => String(item.id))
+    menuKey.value++
+  } catch {
+    categoryError.value = true
+  } finally {
+    categoryLoading.value = false
   }
+}
+
+/** 按分类分页查询公开文章；只接收最新一次请求结果，失败不冒充空列表。 */
+async function getList(id = activeName.value) {
+  const requestId = ++contentRequestId
+  showList.value = true
+  contentLoading.value = true
+  contentError.value = ''
+  params.categoryId = id || ''
+  try {
+    const res = await fetchArticleList({ ...params }, { skipMessage: true })
+    if (!res.success || !Array.isArray(res.result?.records)) throw new Error('列表响应无效')
+    if (requestId !== contentRequestId) return
+    articleList.value = res.result.records
+    total.value = Number(res.result.total) || 0
+  } catch {
+    if (requestId === contentRequestId) contentError.value = '文章加载失败，请稍后重试。'
+  } finally {
+    if (requestId === contentRequestId) contentLoading.value = false
+  }
+}
+
+/** 加载指定文章；失败可原地重试，过时的正文响应不得覆盖用户新选择。 */
+async function getDetail(id) {
+  const requestId = ++contentRequestId
+  detailId.value = id
+  showList.value = false
+  contentLoading.value = true
+  contentError.value = ''
+  try {
+    const res = await articleDetail(id, { skipMessage: true })
+    if (!res.success || !res.result) throw new Error('文章不存在')
+    if (requestId !== contentRequestId) return
+    detail.value = res.result
+  } catch {
+    if (requestId === contentRequestId) contentError.value = '文章详情加载失败或已不存在，请稍后重试。'
+  } finally {
+    if (requestId === contentRequestId) contentLoading.value = false
+  }
+}
+
+/** 重试当前列表或正文，保留分类和分页条件。 */
+function retryContent() {
+  return showList.value ? getList() : getDetail(detailId.value)
+}
+
+/** 切换文章列表页码，沿用当前分类。 */
+function changePage(page) {
+  params.pageNumber = page
+  return getList()
+}
+
+onMounted(() => {
   getCateList()
+  if (route.query.id) getDetail(route.query.id)
+  else getList()
 })
 </script>
 
 <style scoped lang="scss">
+.load-message {
+  padding: 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+
 .container {
   margin: 0 auto;
   padding: 20px 0 40px;

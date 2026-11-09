@@ -78,10 +78,10 @@ const props = defineProps({
 });
 
 const defaultServices = [
-  { name: '收藏', url: '/member/favorites', icon: 'Star' },
-  { name: '足迹', url: '/member/footprint', icon: 'Clock' },
-  { name: '红包', url: '/couponCenter', icon: 'Present' },
-  { name: '客服', url: '/article', icon: 'Service' }
+  { name: '收藏', url: '/home/Favorites', icon: 'Star' },
+  { name: '足迹', url: '/home/MyTracks', icon: 'Clock' },
+  { name: '领券', url: '/coupon', icon: 'Present' },
+  { name: '帮助', url: '/article', icon: 'Service' }
 ];
 
 const iconMap = {

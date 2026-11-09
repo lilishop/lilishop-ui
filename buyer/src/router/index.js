@@ -280,6 +280,10 @@ export const router = createRouter({
           meta: { title: "我的等级" },
         },
         {
+          path: "UserInfo",
+          redirect: { name: "Profile" },
+        },
+        {
           path: "Profile",
           name: "Profile",
           component: Profile,
@@ -306,6 +310,11 @@ export const router = createRouter({
           path: "AddAddress",
           name: "AddAddress",
           component: AddAddress,
+        },
+        {
+          // 兼容已保存的装修顶部菜单中的旧消息地址，统一进入现有消息列表。
+          path: "Msg",
+          redirect: { name: "MsgList" },
         },
         {
           path: "MsgList",

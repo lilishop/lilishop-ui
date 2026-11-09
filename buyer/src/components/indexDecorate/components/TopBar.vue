@@ -50,10 +50,10 @@ const props = defineProps({
 });
 
 const defaultMenus = [
-  { title: '基本信息', url: '/home/UserInfo' },
+  { title: '基本信息', url: '/home/Profile' },
   { title: '我的订单', url: '/home/MyOrder' },
   { title: '账户安全', url: '/home/AccountSafe' },
-  { title: '消息', url: '/home/Msg' }
+  { title: '消息', url: '/home/MsgList' }
 ];
 
 const username = computed(() => {
