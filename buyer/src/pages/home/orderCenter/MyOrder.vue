@@ -67,7 +67,10 @@
                   />
                 </div>
                 <div class="goods-info">
-                  <div class="goods-name hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
+                  <div class="goods-name hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">
+                    <el-tag v-if="isGiftItem(goods)" size="small" type="danger" effect="plain" class="mr_5">赠品</el-tag>
+                    {{ goods.name }}
+                  </div>
                   <div class="goods-num">共{{ goods.num }}件</div>
                   <div class="goods-extra">
                     <el-tag v-if="refundPriceList(goods.isRefund) && !isUnpaid(order)" type="warning" size="small">{{ refundPriceList(goods.isRefund) }}</el-tag>
@@ -151,7 +154,10 @@
                 />
               </div>
               <div class="goods-info">
-                <div class="goods-name hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">{{ goods.name }}</div>
+                <div class="goods-name hover-color" @click="goodsDetail(goods.skuId, goods.goodsId)">
+                  <el-tag v-if="isGiftItem(goods)" size="small" type="danger" effect="plain" class="mr_5">赠品</el-tag>
+                  {{ goods.name }}
+                </div>
                 <div class="goods-num">共{{ goods.num }}件</div>
                 <div class="goods-extra">
                   <el-tag v-if="refundPriceList(goods.isRefund) && !isUnpaid(order)" type="warning" size="small">{{ refundPriceList(goods.isRefund) }}</el-tag>
@@ -240,6 +246,10 @@ const cancelAvail = ref(false); // 取消订单modal控制
 const cancelReason = ref([]); // 取消订单原因
 
 // 退款状态枚举
+function isGiftItem(goods) {
+  if (!goods) return false;
+  return goods.promotionType === 'GIFT' || (Number(goods.flowPrice) === 0 && goods.promotionType === 'GIFT');
+}
 function refundPriceList(status) {
   switch (status) {
     case 'ALL_REFUND':

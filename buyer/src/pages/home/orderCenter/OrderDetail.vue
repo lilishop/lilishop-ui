@@ -269,40 +269,54 @@
               @click="goodsDetail(goods.skuId, goods.goodsId)"
               class="hover-color goods-name"
             >
+              <el-tag v-if="isGiftItem(goods)" size="small" type="danger" effect="plain" class="mr_5">赠品</el-tag>
               {{ goods.goodsName }}
             </p>
             <p class="goods-sn">货号：{{ goods.id }}</p>
           </div>
           <div class="goods-price">
-            <span class="unit-price">
-              {{ $filters.unitPrice(goods.goodsPrice, "￥") }} × {{ goods.num }}
-            </span>
-            <span class="subtotal">{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</span>
+            <template v-if="isGiftItem(goods)">
+              <span class="unit-price gift-original-price">
+                {{ $filters.unitPrice(goods.goodsPrice, "￥") }}
+              </span>
+              <span class="subtotal gift-subtotal">赠品 (¥0.00 × {{ goods.num }})</span>
+            </template>
+            <template v-else>
+              <span class="unit-price">
+                {{ $filters.unitPrice(goods.goodsPrice, "￥") }} × {{ goods.num }}
+              </span>
+              <span class="subtotal">{{ $filters.unitPrice((goods.goodsPrice * goods.num), "￥") }}</span>
+            </template>
           </div>
           <div class="goods-actions">
-            <button
-              v-if="goods.commentStatus == 'UNFINISHED'"
-              type="button"
-              class="comment-text"
-              @click="comment(order.order.sn, goodsIndex)"
-            >评价</button>
-            <el-button
-              v-if="goods.complainStatus == 'NO_APPLY'"
-              @click="complain(order.order.sn, goodsIndex)"
-              type="danger"
-              size="small"
-              >投诉</el-button
-            >
-            <el-button
-              v-if="
-                !isECouponOrder &&
-                (goods.afterSaleStatus.includes('NOT_APPLIED') ||
-                  goods.afterSaleStatus.includes('PART_AFTER_SALE'))
-              "
-              @click="applyAfterSale(goods.sn)"
-              size="small"
-              >申请售后</el-button
-            >
+            <template v-if="!isGiftItem(goods)">
+              <button
+                v-if="goods.commentStatus == 'UNFINISHED'"
+                type="button"
+                class="comment-text"
+                @click="comment(order.order.sn, goodsIndex)"
+              >评价</button>
+              <el-button
+                v-if="goods.complainStatus == 'NO_APPLY'"
+                @click="complain(order.order.sn, goodsIndex)"
+                type="danger"
+                size="small"
+                >投诉</el-button
+              >
+              <el-button
+                v-if="
+                  !isECouponOrder &&
+                  (goods.afterSaleStatus.includes('NOT_APPLIED') ||
+                    goods.afterSaleStatus.includes('PART_AFTER_SALE'))
+                "
+                @click="applyAfterSale(goods.sn)"
+                size="small"
+                >申请售后</el-button
+              >
+            </template>
+            <template v-else>
+              <span class="gift-action-tip">随单赠送，不支持售后</span>
+            </template>
           </div>
         </div>
       </div>
@@ -724,6 +738,11 @@ function goPay(sn) {
     path: "/payment",
     query: { orderType: "ORDER", sn },
   });
+}
+
+function isGiftItem(goods) {
+  if (!goods) return false;
+  return goods.promotionType === 'GIFT' || (Number(goods.flowPrice) === 0 && goods.promotionType === 'GIFT');
 }
 
 function applyAfterSale(sn) {
@@ -1177,5 +1196,17 @@ onMounted(() => {
       display: flex;
     }
   }
+}
+.gift-original-price {
+  text-decoration: line-through;
+  color: #999;
+}
+.gift-subtotal {
+  color: #e4393c;
+  font-weight: bold;
+}
+.gift-action-tip {
+  color: #999;
+  font-size: 12px;
 }
 </style>

@@ -368,6 +368,7 @@
               />
               <div class="goods-info">
                 <div class="goods-name">
+                  <el-tag v-if="isGiftItem(row)" size="small" type="danger" effect="plain" class="mr_5">赠品</el-tag>
                   <span>{{ row.goodsName }}</span>
                 </div>
                 <div v-if="row.specs" class="goods-specs">
@@ -391,7 +392,11 @@
 
         <el-table-column label="单价" width="150" align="center">
           <template #default="{ row }">
-            <span class="font-mono font-bold">¥ {{ Number(row.unitPrice || 0).toFixed(2) }}</span>
+            <template v-if="isGiftItem(row)">
+              <div class="font-mono text-gray" style="text-decoration: line-through;">¥ {{ Number(row.unitPrice || 0).toFixed(2) }}</div>
+              <div class="text-danger font-bold">赠品 ¥ 0.00</div>
+            </template>
+            <span v-else class="font-mono font-bold">¥ {{ Number(row.unitPrice || 0).toFixed(2) }}</span>
           </template>
         </el-table-column>
 
@@ -1159,10 +1164,16 @@ function formatOperatorType(type) {
   return map[type] || type || "系统";
 }
 
+function isGiftItem(row) {
+  if (!row) return false;
+  return row.promotionType === 'GIFT' || (Number(row.flowPrice) === 0 && row.promotionType === 'GIFT');
+}
+
 function getPromotionText(row) {
   let resultText = "";
   if (row && row.promotionType) {
     const type = row.promotionType.split(",");
+    if (type.indexOf("GIFT") !== -1) resultText += "满赠赠品 ";
     if (type.indexOf("PINTUAN") !== -1) resultText += "拼团 ";
     if (type.indexOf("SECKILL") !== -1) resultText += "秒杀 ";
     if (type.indexOf("COUPON") !== -1) resultText += "优惠券 ";

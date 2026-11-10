@@ -147,6 +147,24 @@
                 <span>{{ goods.goodsSku?.quantity > 0 ? "有货" : "无货" }}</span>
                 <span class="goods-price">{{ $filters.unitPrice(goods.subTotal, "￥") }}</span>
               </div>
+              <!-- 随单实物赠品行 -->
+              <div
+                class="goods-item gift-item"
+                v-for="(gift, giftIndex) in getShopGifts(shop)"
+                :key="'gift-' + (gift.skuId || giftIndex)"
+              >
+                <span class="goods-main hover-color" @click="goGoodsDetail(gift.skuId, gift.goodsId)">
+                  <img :src="gift.thumbnail || gift.image" alt="" />
+                  <span class="goods-name">
+                    <el-tag size="small" type="danger" effect="plain" class="mr_5">赠品</el-tag>
+                    {{ gift.goodsName || gift.name || '随单实物赠品' }}
+                  </span>
+                </span>
+                <span class="goods-price gift-zero-price">¥0.00</span>
+                <span>{{ gift.num || 1 }}</span>
+                <span>有货</span>
+                <span class="goods-price gift-zero-price">¥0.00</span>
+              </div>
             </div>
             <div class="order-mark">
               <div v-if="isRemarkOpen(shop)" class="mark-field">
@@ -875,6 +893,13 @@ function delAddress(item) {
     },
     onCancel: () => { },
   });
+}
+function getShopGifts(shop) {
+  if (!shop) return [];
+  if (Array.isArray(shop.giftItemList) && shop.giftItemList.length > 0) {
+    return shop.giftItemList;
+  }
+  return [];
 }
 function goGoodsDetail(skuId, goodsId) {
   // 跳转商品详情
@@ -1799,5 +1824,9 @@ function useScope(type, storeName) {
 }
 .pay-gcc-notice-foot {
   text-align: right;
+}
+.gift-zero-price {
+  color: #e4393c !important;
+  font-weight: 500;
 }
 </style>

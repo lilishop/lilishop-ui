@@ -70,7 +70,7 @@
           v-if="promotionMap['SECKILL']"
           :time="promotionMap['SECKILL'].endTime"
         ></Promotion>
-        <!-- 商品详细 价格、优惠券、促销 -->
+        <!-- 商品详细 价格 -->
         <div class="item-detail-price-row">
           <div class="item-price-left">
             <!-- 秒杀价格 -->
@@ -89,76 +89,6 @@
             <div class="item-price-row" v-else>
               <span class="item-price">{{ $filters.unitPrice(skuDetail.price, "￥") }}</span>
             </div>
-            <!-- 优惠券展示 -->
-            <div class="item-price-coupon-row" v-if="promotionMap['COUPON'].length">
-              <span class="item-price-title">优惠券</span>
-              <div class="coupon-tags">
-                <span
-                  class="item-coupon"
-                  v-for="(item, index) in promotionMap['COUPON'].slice(0, 6)"
-                  :key="index"
-                  @click="handleReceiveCoupon(item.id)"
-                >
-                  <span v-if="item.couponType == 'PRICE'"
-                    >{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '减' + item.price : '无门槛，立减' + item.price + '元' }}</span>
-                  <span v-if="item.couponType == 'DISCOUNT'"
-                    >满{{ item.consumeThreshold }}打{{
-                      item.couponDiscount
-                    }}折</span>
-                </span>
-
-                <div class="dropdown" v-if="promotionMap['COUPON'].length > 6">
-                  <span class="dropdown-more">展开更多 ▾</span>
-                  <div class="dropdown-content">
-                    <span
-                      class="item-coupon"
-                      v-for="(item, index) in promotionMap['COUPON'].slice(6, promotionMap['COUPON'].length)"
-                      :key="index"
-                      @click="handleReceiveCoupon(item.id)"
-                    >
-                      <span v-if="item.couponType == 'PRICE'"
-                        >{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '减' + item.price : '无门槛，立减' + item.price + '元' }}</span>
-                      <span v-if="item.couponType == 'DISCOUNT'"
-                        >满{{ item.consumeThreshold }}打{{
-                          item.couponDiscount
-                        }}折</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- 拼团 -->
-            <div class="item-price-row" v-if="promotionMap['PINTUAN']">
-              <p>
-                <span class="item-price-title">拼团</span>
-                <span class="item-promotion">拼团价</span>
-                <span class="item-desc-pintuan" v-if="promotionMap['PINTUAN'].price">
-                  {{ $filters.unitPrice(promotionMap["PINTUAN"].price, "￥") }}
-                </span>
-              </p>
-            </div>
-            <!-- 满减展示 -->
-            <div class="item-price-row" v-if="promotionMap['FULL_DISCOUNT']">
-              <p>
-                <span class="item-price-title">促销</span>
-                <span class="item-promotion">满减</span>
-                <span
-                  class="item-desc-pintuan"
-                  v-if="promotionMap['FULL_DISCOUNT'].fullMinus"
-                  >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立减现金{{
-                    promotionMap["FULL_DISCOUNT"].fullMinus
-                  }}元</span>
-                <span
-                  class="item-desc-pintuan"
-                  v-if="
-                    promotionMap['FULL_DISCOUNT'].fullRate &&
-                    promotionMap['FULL_DISCOUNT'].fullRateFlag
-                  "
-                  >满{{ promotionMap["FULL_DISCOUNT"].fullMoney }}元，立享{{
-                    promotionMap["FULL_DISCOUNT"].fullRate
-                  }}折</span>
-              </p>
-            </div>
           </div>
           <div class="item-price-right">
             <div class="item-remarks-sum">
@@ -167,6 +97,69 @@
                 <span class="item-remarks-num"
                   >{{ skuDetail.commentNum || 0 }} 条</span>
               </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 独立促销与优惠模块 -->
+        <div class="goods-promotions-box" v-if="hasPromotions">
+          <!-- 优惠券展示 -->
+          <div class="promo-item-row" v-if="promotionMap['COUPON'] && promotionMap['COUPON'].length">
+            <span class="promo-title">优惠券</span>
+            <div class="coupon-tags">
+              <span
+                class="item-coupon"
+                v-for="(item, index) in promotionMap['COUPON'].slice(0, 6)"
+                :key="index"
+                @click="handleReceiveCoupon(item.id)"
+              >
+                <span v-if="item.couponType == 'PRICE'"
+                  >{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '减' + item.price : '无门槛，立减' + item.price + '元' }}</span>
+                <span v-if="item.couponType == 'DISCOUNT'"
+                  >满{{ item.consumeThreshold }}打{{
+                    item.couponDiscount
+                  }}折</span>
+              </span>
+
+              <div class="dropdown" v-if="promotionMap['COUPON'].length > 6">
+                <span class="dropdown-more">展开更多 ▾</span>
+                <div class="dropdown-content">
+                  <span
+                    class="item-coupon"
+                    v-for="(item, index) in promotionMap['COUPON'].slice(6, promotionMap['COUPON'].length)"
+                    :key="index"
+                    @click="handleReceiveCoupon(item.id)"
+                  >
+                    <span v-if="item.couponType == 'PRICE'"
+                      >{{ item.consumeThreshold > 0 ? '满' + item.consumeThreshold + '减' + item.price : '无门槛，立减' + item.price + '元' }}</span>
+                    <span v-if="item.couponType == 'DISCOUNT'"
+                      >满{{ item.consumeThreshold }}打{{
+                        item.couponDiscount
+                      }}折</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 促销活动行（满减/满折/满赠、拼团） -->
+          <div class="promo-item-row" v-if="promotionMap['FULL_DISCOUNT'] || promotionMap['PINTUAN']">
+            <span class="promo-title">促&emsp;销</span>
+            <div class="promo-content-column">
+              <!-- 满减/满折/满赠 -->
+              <div class="promo-activity-entry" v-if="promotionMap['FULL_DISCOUNT']">
+                <span class="promo-badge">{{ getFullDiscountTag(promotionMap['FULL_DISCOUNT']) }}</span>
+                <span class="promo-desc">{{ formatFullDiscountDesc(promotionMap['FULL_DISCOUNT']) }}</span>
+              </div>
+              <!-- 拼团 -->
+              <div class="promo-activity-entry" v-if="promotionMap['PINTUAN']">
+                <span class="promo-badge">拼团</span>
+                <span class="promo-desc">
+                  拼团价
+                  <span class="promo-price-text">{{ $filters.unitPrice(promotionMap["PINTUAN"].price, "￥") }}</span>
+                  ，多人拼单更实惠
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -364,6 +357,14 @@ const currentImg = computed(() => {
   return item.type === "video" ? item.poster : item.url || item;
 });
 
+/** 是否包含有效促销/优惠（优惠券、满减/满折/满赠、拼团） */
+const hasPromotions = computed(() => {
+  const hasCoupon = Array.isArray(promotionMap.value?.COUPON) && promotionMap.value.COUPON.length > 0;
+  const hasFullDiscount = !!promotionMap.value?.FULL_DISCOUNT;
+  const hasPintuan = !!promotionMap.value?.PINTUAN;
+  return hasCoupon || hasFullDiscount || hasPintuan;
+});
+
 
 /** 卡密商品：禁加购，仅立即购买；库存读 quantity（M-02 起支持促销） */
 const isECouponGoods = computed(() => {
@@ -531,6 +532,53 @@ function pintuanBuy() {
 
 function pointPay() {
   startCheckout(E_COUPON_CART_POINTS, "loading");
+}
+
+function getFullDiscountTag(fd) {
+  if (!fd) return "满优惠";
+  if (fd.activityType === "FULL_RATE") return "满折";
+  if (fd.activityType === "FULL_GIFT") return "满赠";
+  if (fd.activityType === "FULL_MINUS") return "满减";
+  if (fd.fullRateFlag) return "满折";
+  if (fd.giftFlag) return "满赠";
+  return "满减";
+}
+
+function formatFullDiscountDesc(fd) {
+  if (!fd) return "";
+  let rules = fd.ruleList;
+  if (!rules && fd.rulesJson) {
+    try {
+      rules = JSON.parse(fd.rulesJson);
+    } catch (e) {
+      rules = null;
+    }
+  }
+  if (Array.isArray(rules) && rules.length > 0) {
+    return rules
+      .map((rule) => {
+        if (fd.activityType === "FULL_RATE") {
+          return `满${rule.fullMoney}元打${rule.fullRate}折`;
+        }
+        if (fd.activityType === "FULL_GIFT") {
+          const gifts = Array.isArray(rule.giftItems)
+            ? rule.giftItems
+                .map((g) => `${g.goodsName || "赠品"}x${g.num || 1}`)
+                .join("、")
+            : "赠品";
+          return `满${rule.fullMoney}元送${gifts}`;
+        }
+        return `满${rule.fullMoney}元减${rule.fullMinus}元`;
+      })
+      .join("；");
+  }
+  if (fd.fullMinusFlag && fd.fullMinus) {
+    return `满${fd.fullMoney}元，立减现金${fd.fullMinus}元`;
+  }
+  if (fd.fullRateFlag && fd.fullRate) {
+    return `满${fd.fullMoney}元，立享${fd.fullRate}折`;
+  }
+  return fd.title || "";
 }
 
 function startCheckout(action, loadingKey) {
@@ -906,6 +954,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
   background: #fafafa;
   border-radius: 4px;
 }
@@ -948,15 +997,70 @@ onBeforeUnmount(() => {
   margin-left: 5px;
 }
 
-.item-price-coupon-row {
+/* 促销与优惠独立展示模块 */
+.goods-promotions-box {
+  margin-top: 12px;
+  padding: 12px 20px;
+  background: #fafafa;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.promo-item-row {
   display: flex;
   align-items: flex-start;
-  margin: 8px 0px;
+  line-height: 24px;
+}
 
-  .item-price-title {
-    flex-shrink: 0;
-    line-height: 22px;
-  }
+.promo-title {
+  flex-shrink: 0;
+  width: 56px;
+  margin-right: 12px;
+  color: #666;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: left;
+}
+
+.promo-content-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.promo-activity-entry {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  line-height: 22px;
+}
+
+.promo-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 12px;
+  line-height: 18px;
+  color: $theme_color;
+  background: rgba(235, 69, 73, 0.08);
+  border: 1px solid $theme_color;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.promo-desc {
+  font-size: 13px;
+  color: #333;
+  line-height: 22px;
+  word-break: break-all;
+}
+
+.promo-price-text {
+  color: $theme_color;
+  font-weight: 600;
 }
 
 .coupon-tags {

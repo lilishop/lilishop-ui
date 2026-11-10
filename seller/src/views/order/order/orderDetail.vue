@@ -191,32 +191,152 @@
         </div>
         </div>
       </el-card>
-      <el-card v-if="showDelivery && orderPackages.length" class="mt_10 order-goods-card">
-        <el-divider content-position="left">发货记录</el-divider>
-        <el-table :data="orderPackages" border style="width: 100%">
-          <el-table-column label="发货方式" width="120">
-            <template #default="{ row }">{{ getFulfillmentModeLabel(row.fulfillmentMode) }}</template>
-          </el-table-column>
-          <el-table-column label="物流信息" min-width="220">
-            <template #default="{ row }">
-              <template v-if="isNoDeliveryPackage(row)">
-                <span>无需配送</span>
-                <span v-if="row.deliveryRemark" class="delivery-remark-text">（{{ row.deliveryRemark }}）</span>
-              </template>
-              <template v-else>
-                {{ row.logisticsName || "-" }} / {{ row.logisticsNo || "-" }}
-              </template>
-            </template>
-          </el-table-column>
-          <el-table-column prop="logisticsTime" label="发货时间" width="170" />
-          <el-table-column label="商品明细" min-width="260">
-            <template #default="{ row }">
-              <div v-for="(item, idx) in row.orderPackageItemList || []" :key="idx" class="package-item-line">
-                {{ item.goodsName }} × {{ item.deliverNumber }}
+      <el-card v-if="showDelivery && orderPackages.length" class="mt_10 delivery-record-card">
+        <div class="delivery-section-header">
+          <div class="delivery-section-title-wrap">
+            <span class="delivery-title-bar"></span>
+            <span class="delivery-section-title">发货记录</span>
+            <el-tag size="small" type="primary" effect="plain" round class="delivery-count-badge">
+              共 {{ orderPackages.length }} 个包裹
+            </el-tag>
+          </div>
+        </div>
+
+        <div class="delivery-package-list">
+          <div
+            v-for="(pkg, pkgIdx) in orderPackages"
+            :key="pkg.packageNo || pkg.id || pkgIdx"
+            class="delivery-package-item"
+          >
+            <!-- 包裹顶部信息栏 -->
+            <div class="pkg-bar">
+              <div class="pkg-bar-left">
+                <div class="pkg-index-tag">
+                  <el-icon class="pkg-icon"><Box /></el-icon>
+                  <span>包裹 {{ orderPackages.length > 1 ? `#${pkgIdx + 1}` : '' }}</span>
+                </div>
+
+                <el-tag
+                  size="small"
+                  :type="getFulfillmentTagType(pkg.fulfillmentMode)"
+                  effect="light"
+                  class="pkg-mode-tag"
+                >
+                  {{ getFulfillmentModeLabel(pkg.fulfillmentMode) }}
+                </el-tag>
+
+                <div v-if="!isNoDeliveryPackage(pkg)" class="pkg-express-group">
+                  <span class="express-name">{{ pkg.logisticsName || "快递物流" }}</span>
+                  <span class="express-divider">/</span>
+                  <span class="express-no-label">运单号：</span>
+                  <span class="express-no">{{ pkg.logisticsNo || "-" }}</span>
+                  <el-tooltip content="复制运单号" placement="top" v-if="pkg.logisticsNo">
+                    <span
+                      class="copy-icon-btn"
+                      @click="copyText(pkg.logisticsNo, '运单号')"
+                    >
+                      <el-icon><DocumentCopy /></el-icon>
+                    </span>
+                  </el-tooltip>
+                </div>
+
+                <div v-else class="pkg-no-express-group">
+                  <span class="no-express-text">无需物流配送</span>
+                  <span v-if="pkg.deliveryRemark" class="no-express-remark">（备注：{{ pkg.deliveryRemark }}）</span>
+                </div>
               </div>
-            </template>
-          </el-table-column>
-        </el-table>
+
+              <div class="pkg-bar-right">
+                <div v-if="pkg.logisticsTime" class="pkg-time">
+                  <el-icon class="clock-icon" style="margin-right: 4px;"><Clock /></el-icon>
+                  <span>发货时间：{{ pkg.logisticsTime }}</span>
+                </div>
+                <el-button
+                  v-if="!isNoDeliveryPackage(pkg) && pkg.logisticsNo"
+                  type="primary"
+                  link
+                  size="small"
+                  class="pkg-track-btn"
+                  @click="checkLogistics"
+                >
+                  <el-icon style="margin-right: 3px;"><Van /></el-icon>查看物流
+                </el-button>
+              </div>
+            </div>
+
+            <!-- 包裹内商品明细 -->
+            <div class="pkg-goods-container">
+              <div
+                v-for="(item, itemIdx) in pkg.orderPackageItemList || []"
+                :key="item.orderItemSn || item.id || itemIdx"
+                class="pkg-goods-row"
+              >
+                <!-- 商品缩略图 -->
+                <div class="pkg-goods-img-box">
+                  <img
+                    :src="getPackageItemThumb(item)"
+                    class="pkg-goods-img"
+                    alt="商品图片"
+                  />
+                </div>
+
+                <!-- 商品详情 -->
+                <div class="pkg-goods-detail">
+                  <div class="pkg-goods-title" :title="item.goodsName">
+                    {{ item.goodsName }}
+                  </div>
+                  <div v-if="getPackageItemSpecsText(item)" class="pkg-goods-specs">
+                    {{ getPackageItemSpecsText(item) }}
+                  </div>
+                </div>
+
+                <!-- 发货数量 -->
+                <div class="pkg-goods-num-col">
+                  <span class="pkg-num-label">发货数量</span>
+                  <span class="pkg-num-val">× {{ item.deliverNumber || 1 }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 物流信息与动态跟踪栏 -->
+            <div class="pkg-logistics-footer">
+              <template v-if="!isNoDeliveryPackage(pkg)">
+                <!-- 若已有物流轨迹节点 -->
+                <div v-if="hasPackageTraces(pkg)" class="pkg-trace-content">
+                  <el-tag size="small" type="success" effect="light" class="trace-status-tag">最新轨迹</el-tag>
+                  <span class="trace-time">{{ getLatestTrace(pkg).AcceptTime || getLatestTrace(pkg).acceptTime }}</span>
+                  <span class="trace-desc" :title="getLatestTrace(pkg).AcceptStation || getLatestTrace(pkg).remark">
+                    {{ getLatestTrace(pkg).AcceptStation || getLatestTrace(pkg).remark }}
+                  </span>
+                  <el-button type="primary" link size="small" class="trace-more-btn" @click="checkLogistics">
+                    查看完整轨迹
+                  </el-button>
+                </div>
+
+                <!-- 暂无第三方轨迹更新时 -->
+                <div v-else class="pkg-trace-content">
+                  <el-tag size="small" type="info" effect="light" class="trace-status-tag">物流动态</el-tag>
+                  <span class="trace-desc">
+                    已生成 {{ pkg.logisticsName || "快递" }} 运单（{{ pkg.logisticsNo }}），等待快递网点揽收更新
+                  </span>
+                  <el-button type="primary" link size="small" class="trace-more-btn" @click="checkLogistics">
+                    查看物流
+                  </el-button>
+                </div>
+              </template>
+
+              <!-- 无需配送 -->
+              <template v-else>
+                <div class="pkg-trace-content">
+                  <el-tag size="small" type="warning" effect="light" class="trace-status-tag">配送说明</el-tag>
+                  <span class="trace-desc">
+                    {{ pkg.deliveryRemark ? `配送说明：${pkg.deliveryRemark}` : "无需物流配送，商家已完成线上/线下交付" }}
+                  </span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
       </el-card>
       <el-card class="mt_10 order-goods-card">
         <div v-loading="loading" class="order-fit-wrap">
@@ -246,6 +366,7 @@
                     <img alt="商品图片" :src="row.image" class="order-goods-img" />
                     <div class="order-goods-meta">
                       <div class="div-zoom">
+                        <el-tag v-if="isGiftItem(row)" size="small" type="danger" effect="plain" style="margin-right: 5px;">赠品</el-tag>
                         <a class="link-text" @click="linkTo(row.goodsId, row.skuId)">{{ row.goodsName }}</a>
                       </div>
                       <span v-for="(item, key) in parseOrderItemSpecs(row.specs)" :key="key">
@@ -497,7 +618,10 @@
                   <div class="part-delivery-goods">
                     <img :src="row.image" class="part-delivery-goods-img" alt="" />
                     <div class="part-delivery-goods-info">
-                      <div class="part-delivery-goods-name">{{ row.goodsName }}</div>
+                      <div class="part-delivery-goods-name">
+                        <el-tag v-if="isGiftItem(row)" size="small" type="danger" effect="plain" style="margin-right: 5px;">赠品</el-tag>
+                        {{ row.goodsName }}
+                      </div>
                       <div
                         v-for="(specValue, specKey) in parseOrderItemSpecs(row.specs)"
                         :key="specKey"
@@ -546,7 +670,10 @@
                   <div class="part-delivery-goods">
                     <img :src="row.image" class="part-delivery-goods-img" alt="" />
                     <div class="part-delivery-goods-info">
-                      <div class="part-delivery-goods-name">{{ row.goodsName }}</div>
+                      <div class="part-delivery-goods-name">
+                        <el-tag v-if="isGiftItem(row)" size="small" type="danger" effect="plain" style="margin-right: 5px;">赠品</el-tag>
+                        {{ row.goodsName }}
+                      </div>
                       <div
                         v-for="(specValue, specKey) in parseOrderItemSpecs(row.specs)"
                         :key="specKey"
@@ -849,6 +976,7 @@
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
+import { Box, DocumentCopy, Clock, Van } from "@element-plus/icons-vue";
 import * as API_Order from "@/api/order";
 import * as API_Logistics from "@/api/logistics";
 import * as RegExp from "@/libs/RegExp.js";
@@ -1120,22 +1248,33 @@ onBeforeRouteLeave((to, from, next) => {
 function lineCardKeyRows(line) {
   return line.cardKeys || [];
 }
-function copySn() {
-  const text = orderInfo.value?.order?.sn || "";
+function copyText(text, label = "内容") {
   if (!text) return;
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
-      Message.success("订单号已复制");
+    navigator.clipboard.writeText(String(text)).then(() => {
+      Message.success(`${label}已复制`);
+    }).catch(() => {
+      fallbackCopyText(String(text), label);
     });
   } else {
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    Message.success("订单号已复制");
+    fallbackCopyText(String(text), label);
   }
+}
+
+function fallbackCopyText(text, label = "内容") {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand("copy");
+  document.body.removeChild(ta);
+  Message.success(`${label}已复制`);
+}
+
+function copySn() {
+  copyText(orderInfo.value?.order?.sn, "订单号");
 }
 function copyCardKey(row) {
   const text = `卡号：${row.cardNo || ""}\n卡密：${row.cardSecret || ""}`;
@@ -1153,10 +1292,15 @@ function copyCardKey(row) {
     Message.success("已复制到剪贴板");
   }
 }
+function isGiftItem(row) {
+  if (!row) return false;
+  return row.promotionType === 'GIFT' || (Number(row.flowPrice) === 0 && row.promotionType === 'GIFT');
+}
 function getPromotionText(row) {
   let resultText = "";
   if (row && row.promotionType) {
     const type = row.promotionType.split(",");
+    if (type.indexOf("GIFT") != -1) resultText += "满赠赠品 ";
     if (type.indexOf("PINTUAN") != -1) resultText += "拼团 ";
     if (type.indexOf("SECKILL") != -1) resultText += "秒杀 ";
     if (type.indexOf("COUPON") != -1) resultText += "优惠券 ";
@@ -1218,6 +1362,40 @@ function isPackageItemMatch(orderItem, pkgItem) {
     .filter(Boolean)
     .map(String);
   return pkgKeys.some((key) => orderKeys.includes(key));
+}
+function getPackageItemThumb(item) {
+  if (item && item.thumbnail) {
+    return item.thumbnail;
+  }
+  const match = (data.value || []).find((row) => isPackageItemMatch(row, item));
+  return match?.image || match?.goodsImage || "";
+}
+function getPackageItemSpecsText(item) {
+  const match = (data.value || []).find((row) => isPackageItemMatch(row, item));
+  if (!match || !match.specs) return "";
+  try {
+    const specsObj = parseOrderItemSpecs(match.specs);
+    if (!specsObj || typeof specsObj !== "object") return "";
+    return Object.entries(specsObj)
+      .filter(([k]) => k !== "images")
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("  |  ");
+  } catch (e) {
+    return "";
+  }
+}
+function getFulfillmentTagType(mode) {
+  if (mode === "NO_DELIVERY") return "info";
+  if (mode === "SPLIT") return "warning";
+  return "primary";
+}
+function hasPackageTraces(pkg) {
+  return Boolean(pkg && pkg.traces && Array.isArray(pkg.traces.traces) && pkg.traces.traces.length > 0);
+}
+function getLatestTrace(pkg) {
+  if (!hasPackageTraces(pkg)) return {};
+  const list = pkg.traces.traces;
+  return list[0] || {};
 }
 function getRemainingDeliveryNum(item) {
   if (item != null && item.remainDeliverNumber != null && item.remainDeliverNumber !== "") {
@@ -1966,6 +2144,324 @@ function editAddressSubmit () {
 .fulfill-mode-tip {
   margin-bottom: 12px;
   color: #606266;
+}
+
+.delivery-record-card {
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+
+  :deep(.el-card__body) {
+    padding: 16px 20px 20px;
+  }
+}
+
+.delivery-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f2f5;
+
+  .delivery-section-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .delivery-title-bar {
+    width: 3px;
+    height: 15px;
+    background: #409eff;
+    border-radius: 2px;
+  }
+
+  .delivery-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1;
+  }
+
+  .delivery-count-badge {
+    margin-left: 4px;
+    font-size: 12px;
+    height: 22px;
+    line-height: 20px;
+  }
+}
+
+.delivery-package-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.delivery-package-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .pkg-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+
+    .pkg-bar-left {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pkg-index-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+
+      .pkg-icon {
+        font-size: 15px;
+        color: #3b82f6;
+      }
+    }
+
+    .pkg-mode-tag {
+      font-size: 12px;
+      height: 22px;
+      line-height: 20px;
+      padding: 0 8px;
+    }
+
+    .pkg-express-group {
+      display: inline-flex;
+      align-items: center;
+      font-size: 13px;
+      background: #f1f5f9;
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+
+      .express-name {
+        font-weight: 500;
+        color: #334155;
+      }
+
+      .express-divider {
+        margin: 0 6px;
+        color: #94a3b8;
+      }
+
+      .express-no-label {
+        color: #64748b;
+      }
+
+      .express-no {
+        font-family: Consolas, Monaco, "Courier New", monospace;
+        font-weight: 600;
+        color: #0284c7;
+        letter-spacing: 0.5px;
+      }
+
+      .copy-icon-btn {
+        margin-left: 6px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        color: #3b82f6;
+        transition: transform 0.15s ease, color 0.15s ease;
+
+        &:hover {
+          color: #2563eb;
+          transform: scale(1.15);
+        }
+      }
+    }
+
+    .pkg-no-express-group {
+      display: inline-flex;
+      align-items: center;
+      font-size: 13px;
+      color: #64748b;
+
+      .no-express-text {
+        font-weight: 500;
+        color: #475569;
+      }
+
+      .no-express-remark {
+        color: #94a3b8;
+        margin-left: 4px;
+      }
+    }
+
+    .pkg-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+
+      .pkg-time {
+        display: inline-flex;
+        align-items: center;
+        color: #64748b;
+
+        .clock-icon {
+          font-size: 13px;
+        }
+      }
+
+      .pkg-track-btn {
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0;
+      }
+    }
+  }
+
+  .pkg-goods-container {
+    padding: 6px 16px;
+    background: #ffffff;
+
+    .pkg-goods-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed #f1f5f9;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .pkg-goods-img-box {
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .pkg-goods-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+      }
+
+      .pkg-goods-detail {
+        flex: 1;
+        min-width: 0;
+        margin-left: 12px;
+        margin-right: 16px;
+
+        .pkg-goods-title {
+          font-size: 13px;
+          font-weight: 500;
+          color: #1e293b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.4;
+        }
+
+        .pkg-goods-specs {
+          margin-top: 3px;
+          font-size: 12px;
+          color: #64748b;
+          background: #f8fafc;
+          display: inline-block;
+          padding: 1px 6px;
+          border-radius: 3px;
+          border: 1px solid #edf2f7;
+          line-height: 1.4;
+        }
+      }
+
+      .pkg-goods-num-col {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+
+        .pkg-num-label {
+          font-size: 11px;
+          color: #94a3b8;
+        }
+
+        .pkg-num-val {
+          font-size: 14px;
+          font-weight: 600;
+          color: #0f172a;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+
+  .pkg-logistics-footer {
+    padding: 9px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+
+    .pkg-trace-content {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+
+      .trace-status-tag {
+        font-size: 11px;
+        height: 20px;
+        line-height: 18px;
+        padding: 0 6px;
+      }
+
+      .trace-time {
+        color: #64748b;
+        font-family: Consolas, Monaco, monospace;
+      }
+
+      .trace-desc {
+        color: #334155;
+        font-weight: 500;
+        flex: 1;
+        min-width: 160px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .trace-more-btn {
+        font-size: 12px;
+        padding: 0;
+        margin-left: auto;
+      }
+    }
+  }
 }
 
 .package-item-line {
