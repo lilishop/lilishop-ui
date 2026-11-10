@@ -449,12 +449,12 @@ onUnmounted(() => {
   user-select: none;
 
   &:hover {
-    color: $theme_color;
+    color: #409EFF;
   }
 
   &.active {
     color: #fff;
-    background: $theme_color;
+    background: #409EFF;
   }
 }
 
