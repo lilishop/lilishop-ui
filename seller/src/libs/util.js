@@ -30,6 +30,27 @@ const STATIC_ROUTE_NAMES = new Set([
 
 util.dynamicRouteNames = [];
 
+/**
+ * 提取商家端会话必需的基础展示字段，避免超长经营范围或入驻详情导致 Cookie 超限
+ *
+ * @param {Object} raw 商家信息对象
+ * @returns {Object} 核心会话档案对象
+ */
+util.pickSellerProfile = function (raw) {
+  if (!raw) return {};
+  return {
+    id: raw.id,
+    storeId: raw.storeId || raw.id,
+    storeName: raw.storeName,
+    storeLogo: raw.storeLogo,
+    nickName: raw.nickName,
+    storeDisable: raw.storeDisable,
+    serviceScore: raw.serviceScore,
+    deliveryScore: raw.deliveryScore,
+    descriptionScore: raw.descriptionScore,
+  };
+};
+
 util.clearDynamicRoutes = function () {
   util.dynamicRouteNames.forEach((name) => {
     if (STATIC_ROUTE_NAMES.has(name)) {

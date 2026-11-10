@@ -48,6 +48,7 @@ import { validateMobile } from "@/libs/validate";
 import uploadPicThumb from "@/views/my-components/lili/upload-pic-thumb";
 import multipleMap from "@/views/my-components/map/multiple-map";
 import Cookies from "js-cookie";
+import util from "@/libs/util.js";
 import { Message } from "@/utils/message";
 
 defineOptions({ name: "shopSetting" });
@@ -158,7 +159,7 @@ function getShopInfo() {
       form.value = res.result;
       storeName.value = res.result.storeName;
       form.value.storeCenter = res.result.storeCenter;
-      Cookies.set("userInfoSeller", JSON.stringify(res.result));
+      Cookies.set("userInfoSeller", JSON.stringify(util.pickSellerProfile(res.result)));
     }
   });
 }

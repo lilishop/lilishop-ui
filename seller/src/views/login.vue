@@ -212,12 +212,13 @@ function afterLogin(res) {
     .then((res) => {
       if (res.success) {
         setStore("saveLogin", saveLogin.value);
+        const profile = util.pickSellerProfile(res.result);
         if (saveLogin.value) {
-          Cookies.set("userInfoSeller", JSON.stringify(res.result), {
+          Cookies.set("userInfoSeller", JSON.stringify(profile), {
             expires: 7,
           });
         } else {
-          Cookies.set("userInfoSeller", JSON.stringify(res.result));
+          Cookies.set("userInfoSeller", JSON.stringify(profile));
         }
 
         util.initRouter();
