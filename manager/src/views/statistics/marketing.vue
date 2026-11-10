@@ -57,7 +57,9 @@ const activityMetrics = ref([
   { key: "couponActiveNum", label: "进行中优惠券" },
   { key: "seckillActiveNum", label: "进行中秒杀" },
   { key: "pintuanActiveNum", label: "进行中拼团" },
-  { key: "fullDiscountActiveNum", label: "进行中满减" },
+  { key: "fullMinusActiveNum", label: "进行中满减" },
+  { key: "fullRateActiveNum", label: "进行中满折" },
+  { key: "fullGiftActiveNum", label: "进行中满赠" },
   { key: "kanjiaActiveNum", label: "进行中砍价商品" },
   { key: "pointsGoodsActiveNum", label: "进行中积分商品" },
 ]);
@@ -128,7 +130,7 @@ h4 {
 }
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 .metric-item {

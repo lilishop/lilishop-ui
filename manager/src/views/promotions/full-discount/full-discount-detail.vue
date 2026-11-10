@@ -1,3 +1,8 @@
+<!--
+  管理端-满减/满折/满赠活动详情只读视图（适配 1~3 级阶梯及满赠多赠品展示）
+  @author Bulbasaur
+  @since 2026-11-09
+-->
 <template>
   <div class="full-discount-detail-page">
     <!-- 顶部标题与返回栏 -->
@@ -5,7 +10,7 @@
       <div class="page-header-row">
         <div class="header-left">
           <div class="header-title">
-            <span>满优惠活动详情</span>
+            <span>{{ activityTypeTitle }}详情</span>
             <el-tag type="info" size="small" effect="plain" class="mode-tag">
               只读模式
             </el-tag>
@@ -30,13 +35,17 @@
           <span class="font-semibold text-dark">{{ form.promotionName || "-" }}</span>
         </el-descriptions-item>
 
+        <el-descriptions-item label="活动类型">
+          <el-tag size="small" :type="activityTagType">{{ activityTypeTitle }}</el-tag>
+        </el-descriptions-item>
+
         <el-descriptions-item label="活动范围">
           <el-tag size="small" effect="light" :type="form.scopeType === 'ALL' ? 'success' : 'primary'">
             {{ form.scopeType === "ALL" ? "全品类通用" : "指定商品适用" }}
           </el-tag>
         </el-descriptions-item>
 
-        <el-descriptions-item label="活动时间" :span="2">
+        <el-descriptions-item label="活动时间">
           <span class="font-mono text-dark">
             {{ form.startTime || "-" }} 至 {{ form.endTime || "-" }}
           </span>
@@ -48,66 +57,49 @@
       </el-descriptions>
     </el-card>
 
-    <!-- 优惠规则与赠品权益卡片 -->
+    <!-- 阶梯优惠规则卡片 -->
     <el-card shadow="never" class="info-card mt_10">
       <div class="section-header">
         <span class="section-indicator"></span>
-        <span class="section-title">优惠规则与权益</span>
+        <span class="section-title">阶梯优惠规则</span>
+        <span class="section-badge">共 {{ (form.ruleList || []).length }} 级阶梯（仅生效满足的最高一级）</span>
       </div>
 
-      <el-descriptions :column="2" border class="custom-descriptions">
-        <el-descriptions-item label="优惠门槛">
+      <el-descriptions :column="1" border class="custom-descriptions">
+        <el-descriptions-item
+          v-for="(tier, idx) in form.ruleList || []"
+          :key="idx"
+          :label="`第 ${idx + 1} 级阶梯`"
+        >
           <span class="money-highlight font-mono font-semibold">
-            满 ¥ {{ Number(form.fullMoney || 0).toFixed(2) }}
+            满 ¥ {{ Number(tier.fullMoney || 0).toFixed(2) }}
           </span>
-          <span class="text-secondary ml_10" style="font-size: 12px">（达到当前金额可享优惠）</span>
-        </el-descriptions-item>
-
-        <el-descriptions-item label="优惠形式">
-          <template v-if="form.discountType === 'fullMinusFlag'">
-            <el-tag size="small" effect="light" type="danger">减现金</el-tag>
+          <template v-if="form.activityType === 'FULL_MINUS'">
+            <el-tag size="small" effect="light" type="danger" class="ml_10">减现金</el-tag>
             <span class="money-highlight font-mono font-semibold ml_10">
-              减 ¥ {{ Number(form.fullMinus || 0).toFixed(2) }}
+              立减 ¥ {{ Number(tier.fullMinus || 0).toFixed(2) }}
             </span>
           </template>
-          <template v-else-if="form.discountType === 'fullRateFlag'">
-            <el-tag size="small" effect="light" type="warning">打折</el-tag>
+          <template v-else-if="form.activityType === 'FULL_RATE'">
+            <el-tag size="small" effect="light" type="warning" class="ml_10">打折</el-tag>
             <span class="money-highlight font-mono font-semibold ml_10">
-              打 {{ form.fullRate }} 折
+              打 {{ tier.fullRate }} 折
             </span>
           </template>
-          <template v-else>
-            <span class="text-secondary">无直接立减/打折</span>
+          <template v-else-if="form.activityType === 'FULL_GIFT'">
+            <el-tag size="small" effect="light" type="success" class="ml_10">满赠</el-tag>
+            <div class="tier-gift-tags">
+              <el-tag
+                v-for="(gift, gIdx) in tier.giftItems || []"
+                :key="gIdx"
+                size="small"
+                type="success"
+                effect="plain"
+              >
+                {{ formatGiftName(gift) }} × {{ gift.num || 1 }}件
+              </el-tag>
+            </div>
           </template>
-        </el-descriptions-item>
-
-        <el-descriptions-item label="附加赠送权益" :span="2">
-          <div class="extra-rights-row">
-            <el-tag :type="form.freeFreightFlag ? 'success' : 'info'" effect="plain" size="small">
-              {{ form.freeFreightFlag ? "✓ 包邮（免运费）" : "不包邮" }}
-            </el-tag>
-            <el-tag :type="form.couponFlag ? 'success' : 'info'" effect="plain" size="small">
-              {{ form.couponFlag ? "✓ 赠送优惠券" : "不送券" }}
-            </el-tag>
-            <el-tag :type="form.giftFlag ? 'success' : 'info'" effect="plain" size="small">
-              {{ form.giftFlag ? "✓ 赠送赠品" : "不送赠品" }}
-            </el-tag>
-            <el-tag :type="form.pointFlag ? 'success' : 'info'" effect="plain" size="small">
-              {{ form.pointFlag ? "✓ 赠送积分" : "不送积分" }}
-            </el-tag>
-          </div>
-        </el-descriptions-item>
-
-        <el-descriptions-item v-if="form.couponFlag" label="赠送优惠券" :span="2">
-          <span class="font-semibold text-dark">{{ couponNameText }}</span>
-        </el-descriptions-item>
-
-        <el-descriptions-item v-if="form.giftFlag" label="赠品信息" :span="2">
-          <span class="font-semibold text-dark">{{ giftNameText }}</span>
-        </el-descriptions-item>
-
-        <el-descriptions-item v-if="form.pointFlag" label="赠送积分数" :span="2">
-          <span class="font-mono font-semibold text-dark">{{ form.point ?? 0 }} 积分</span>
         </el-descriptions-item>
       </el-descriptions>
     </el-card>
@@ -186,7 +178,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getPlatformCouponList, getFullDiscountById } from "@/api/promotion";
+import { getFullDiscountById } from "@/api/promotion";
 import { getGoodsSkuData } from "@/api/goods";
 import { useAppStore } from "@/stores/app";
 
@@ -198,60 +190,79 @@ const appStore = useAppStore();
 
 const id = ref(route.query.id);
 const form = ref({
-  discountType: "fullMinusFlag",
+  activityType: "FULL_MINUS",
   scopeType: "ALL",
   promotionGoodsList: [],
+  ruleList: [],
 });
-const couponList = ref([]);
 const giftList = ref([]);
 
-const couponNameText = computed(() => {
-  if (!form.value.couponId) return "未指定优惠券";
-  const found = couponList.value.find((c) => String(c.id) === String(form.value.couponId));
-  return found ? found.couponName : `优惠券 ID: ${form.value.couponId}`;
+const activityTypeTitle = computed(() => {
+  if (form.value.activityType === "FULL_RATE") return "满折活动";
+  if (form.value.activityType === "FULL_GIFT") return "满赠活动";
+  return "满减活动";
 });
 
-const giftNameText = computed(() => {
-  if (!form.value.giftId) return "未指定赠品";
-  const found = giftList.value.find((g) => String(g.id) === String(form.value.giftId));
-  return found ? found.goodsName : `赠品 ID: ${form.value.giftId}`;
+const activityTagType = computed(() => {
+  if (form.value.activityType === "FULL_RATE") return "warning";
+  if (form.value.activityType === "FULL_GIFT") return "success";
+  return "danger";
 });
 
 onMounted(() => {
   if (id.value) {
     getDetail();
   }
-  getCouponList();
   getGiftList();
 });
+
+function formatGiftName(gift) {
+  if (gift?.goodsName) return gift.goodsName;
+  const found = giftList.value.find((g) => String(g.id) === String(gift?.skuId));
+  return found ? found.goodsName : `赠品 ID: ${gift?.skuId || "-"}`;
+}
 
 function getDetail() {
   getFullDiscountById(id.value).then((res) => {
     if (res && res.success && res.result) {
-      let data = res.result;
+      const data = res.result;
       if (data.scopeType !== "PORTION_GOODS") {
         data.promotionGoodsList = [];
       }
-      if (data.fullRateFlag) {
-        data.discountType = "fullRateFlag";
-      } else {
-        data.discountType = "fullMinusFlag";
+      if (!data.activityType) {
+        if (data.fullRateFlag) {
+          data.activityType = "FULL_RATE";
+        } else if (!data.fullMinusFlag && data.giftFlag) {
+          data.activityType = "FULL_GIFT";
+        } else {
+          data.activityType = "FULL_MINUS";
+        }
+      }
+      if (!Array.isArray(data.ruleList) || !data.ruleList.length) {
+        if (data.rulesJson) {
+          try {
+            data.ruleList = JSON.parse(data.rulesJson);
+          } catch (e) {
+            data.ruleList = [];
+          }
+        }
+        if (!data.ruleList || !data.ruleList.length) {
+          data.ruleList = [
+            {
+              fullMoney: data.fullMoney,
+              fullMinus: data.fullMinus,
+              fullRate: data.fullRate,
+              giftItems: data.giftId
+                ? String(data.giftId)
+                    .split(",")
+                    .filter(Boolean)
+                    .map((skuId) => ({ skuId, goodsName: data.giftSkuName, num: 1 }))
+                : [],
+            },
+          ];
+        }
       }
       form.value = data;
-    }
-  });
-}
-
-function getCouponList() {
-  const params = {
-    pageSize: 50,
-    pageNumber: 1,
-    getType: "ACTIVITY",
-    promotionStatus: "START",
-  };
-  getPlatformCouponList(params).then((res) => {
-    if (res && res.success && res.result) {
-      couponList.value = res.result.records || [];
     }
   });
 }
@@ -357,11 +368,11 @@ function back() {
       font-size: 14px;
     }
 
-    .extra-rights-row {
+    .tier-gift-tags {
+      margin-top: 8px;
       display: flex;
-      align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
     }
 
     .custom-table {

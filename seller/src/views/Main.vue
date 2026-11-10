@@ -128,10 +128,19 @@ const load = ref(false);
 const loading = computed(() => appStore.loading);
 const unreadMessageCount = computed(() => appStore.unreadMessageCount);
 const pageTagsList = computed(() => appStore.storeOpenedList);
-const currentPageTitle = computed(() => route.meta.title || pageTagsList.value.find((item) => item.name === route.name)?.title || '工作台');
+const currentPageTitle = computed(() => {
+  if (route.name === "full-discount-detail") {
+    const type = route.query?.activityType;
+    const isDetail = Boolean(route.query?.id);
+    if (type === "FULL_GIFT") return isDetail ? "满赠活动详情" : "添加满赠活动";
+    if (type === "FULL_RATE") return isDetail ? "满折活动详情" : "添加满折活动";
+    return isDetail ? "满减活动详情" : "添加满减活动";
+  }
+  return route.meta.title || pageTagsList.value.find((item) => item.name === route.name)?.title || '工作台';
+});
 const navigationItems = computed(() => flattenNavigation(appStore.navigationMenus || []));
 const currentPathParts = computed(() => {
-  const matched = findNavigationItem(navigationItems.value, route.name);
+  const matched = findNavigationItem(navigationItems.value, route.name, route.query);
   const rawParts = matched
     ? [
         matched.topTitle,

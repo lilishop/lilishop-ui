@@ -1,8 +1,13 @@
+<!--
+  楼层装修链接选择器-营销活动选择面板（满额活动拆分为满减、满折、满赠三项）
+  @author Bulbasaur
+  @since 2026-11-09
+-->
 <template>
   <div class="wrapper">
     <div class="list">
       <div
-        v-for="(item, index) in Object.keys(promotionList)"
+        v-for="(item, index) in promotionKeys"
         :key="index"
         class="list-item"
         :class="{ active: selectedIndex == index }"
@@ -76,7 +81,7 @@ const emit = defineEmits(["selected"]);
 
 const totals = ref("");
 const loading = ref(true);
-const promotionList = ref("");
+const promotionList = ref({});
 const selectedIndex = ref(0);
 const promotions = ref("");
 const index = ref(999);
@@ -85,6 +90,12 @@ const params = ref({
   pageSize: 20,
 });
 const showPromotionList = ref([]);
+
+const promotionKeys = computed(() => {
+  return Object.keys(promotionList.value || {}).filter(
+    (k) => k !== "FULL_DISCOUNT" && Boolean(typeOption(k).title)
+  );
+});
 
 const isSeckillMode = computed(() => {
   return promotions.value === "SECKILL";
@@ -106,12 +117,18 @@ function seckillStatusText(v) {
 }
 function sortGoods(type) {
   loading.value = false;
-  showPromotionList.value = promotionList.value[type];
+  showPromotionList.value = promotionList.value[type] || [];
 }
 function typeOption(type) {
   switch (type) {
+    case "FULL_MINUS":
+      return { title: "满减活动", methodsed: () => { showPromotionList.value = []; sortGoods("FULL_MINUS"); } };
+    case "FULL_RATE":
+      return { title: "满折活动", methodsed: () => { showPromotionList.value = []; sortGoods("FULL_RATE"); } };
+    case "FULL_GIFT":
+      return { title: "满赠活动", methodsed: () => { showPromotionList.value = []; sortGoods("FULL_GIFT"); } };
     case "FULL_DISCOUNT":
-      return { title: "满减", methodsed: () => { showPromotionList.value = []; sortGoods("FULL_DISCOUNT"); } };
+      return { title: "满减活动", methodsed: () => { showPromotionList.value = []; sortGoods("FULL_DISCOUNT"); } };
     case "PINTUAN":
       return { title: "拼团", methodsed: () => { showPromotionList.value = []; sortGoods("PINTUAN"); } };
     case "KANJIA":
@@ -143,15 +160,18 @@ function getPromotion(res) {
   if (res.result) {
     promotionList.value = res.result;
     delete promotionList.value.COUPON;
-    Object.keys(res.result)[0] && typeOption(Object.keys(res.result)[0]).methodsed();
-    promotions.value = Object.keys(res.result)[0];
+    const keys = promotionKeys.value;
+    if (keys.length) {
+      promotions.value = keys[0];
+      typeOption(keys[0]) && typeOption(keys[0]).methodsed();
+    }
   }
 }
 function clickPromotion(val, i) {
   promotions.value = val;
   selectedIndex.value = i;
   params.value.pageNumber = 1;
-  typeOption(val) && typeOption(val).methodsed(promotionList.value[val].id);
+  typeOption(val) && typeOption(val).methodsed(promotionList.value[val]?.id);
 }
 
 onMounted(() => {

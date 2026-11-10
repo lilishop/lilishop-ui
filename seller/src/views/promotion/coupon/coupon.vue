@@ -55,7 +55,7 @@
     <el-card>
       <div class="operation padding-row" v-if="getType !== 'ACTIVITY'">
         <el-button type="primary" @click="add">添加优惠券</el-button>
-        <el-button class="activity-coupon-button" @click="addActivityCoupon">添加活动优惠券</el-button>
+        <el-button v-if="false" class="activity-coupon-button" @click="addActivityCoupon">添加活动优惠券</el-button>
         <el-button @click="delAll">批量关闭</el-button>
         <el-button type="warning" @click="receivePage()">优惠券领取记录</el-button>
       </div>

@@ -44,7 +44,7 @@ const route = useRoute();
 const router = useRouter();
 const closedSections = ref([]);
 const allItems = computed(() => flattenNavigation(appStore.navigationMenus).filter((item) => router.hasRoute(item.name)));
-const activeItem = computed(() => findNavigationItem(allItems.value, route.name));
+const activeItem = computed(() => findNavigationItem(allItems.value, route.name, route.query));
 const sections = computed(() => appStore.navigationMenus.map((top) => ({
   ...top, items: allItems.value.filter((item) => item.topName === top.name),
 })).filter((top) => top.items.length));

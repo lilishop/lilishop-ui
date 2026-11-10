@@ -1,46 +1,71 @@
+<!--
+  商家端-满减/满折/满赠活动新增、编辑与详情页（支持 1~3 级阶梯，满赠每阶梯最多 3 个赠品 × 1~10 件）
+  @author Bulbasaur
+  @since 2026-11-09
+-->
 <template>
   <div class="full-discount-add">
     <template v-if="fieldDisabled">
       <el-card class="section-card" shadow="never">
         <template #header>
-          <span class="section-title">基本信息</span>
+          <span class="section-title">基本信息（{{ activityTypeLabel }}）</span>
         </template>
         <el-descriptions border :column="2">
           <el-descriptions-item label="活动名称">{{ form.promotionName }}</el-descriptions-item>
-          <el-descriptions-item label="活动时间">
+          <el-descriptions-item label="活动类型">
+            <el-tag size="small" :type="activityTagType">{{ activityTypeLabel }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="活动时间" :span="2">
             {{ form.startTime }} ~ {{ form.endTime }}
+          </el-descriptions-item>
+          <el-descriptions-item label="活动说明" :span="2">
+            {{ form.description || "-" }}
           </el-descriptions-item>
         </el-descriptions>
       </el-card>
 
       <el-card class="section-card" shadow="never">
         <template #header>
-          <span class="section-title">优惠设置</span>
+          <span class="section-title">阶梯优惠设置（共 {{ form.ruleList.length }} 级阶梯）</span>
         </template>
-        <el-descriptions border :column="2">
-          <el-descriptions-item label="优惠门槛">满 {{ form.fullMoney }} 元</el-descriptions-item>
-          <el-descriptions-item label="优惠方式">
-            {{ form.discountType === "fullMinusFlag" ? "减现金" : "打折" }}
-          </el-descriptions-item>
-          <el-descriptions-item v-if="form.discountType === 'fullMinusFlag'" label="优惠金额">
-            减 {{ form.fullMinus }} 元
-          </el-descriptions-item>
-          <el-descriptions-item v-else label="优惠折扣">{{ form.fullRate }} 折</el-descriptions-item>
-          <el-descriptions-item label="使用范围">
-            {{ form.scopeType === "ALL" ? "全品类" : "指定商品" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="额外赠送" :span="2">
-            <template v-if="extraGifts.length">
-              <el-tag v-for="gift in extraGifts" :key="gift" class="gift-tag" size="small">
-                {{ gift }}
-              </el-tag>
+        <el-descriptions border :column="1">
+          <el-descriptions-item
+            v-for="(tier, idx) in form.ruleList"
+            :key="idx"
+            :label="`第 ${idx + 1} 级阶梯`"
+          >
+            <template v-if="form.activityType === 'FULL_MINUS'">
+              满 <strong>{{ tier.fullMoney }}</strong> 元，立减现金
+              <strong style="color: #f56c6c">{{ tier.fullMinus }}</strong> 元
             </template>
-            <span v-else>无</span>
+            <template v-else-if="form.activityType === 'FULL_RATE'">
+              满 <strong>{{ tier.fullMoney }}</strong> 元，立享
+              <strong style="color: #e6a23c">{{ tier.fullRate }}</strong> 折
+            </template>
+            <template v-else-if="form.activityType === 'FULL_GIFT'">
+              <div>
+                满 <strong>{{ tier.fullMoney }}</strong> 元，赠送以下商品：
+              </div>
+              <div class="readonly-gift-list">
+                <el-tag
+                  v-for="(g, gIdx) in tier.giftItems || []"
+                  :key="gIdx"
+                  size="small"
+                  type="success"
+                  class="gift-tag"
+                >
+                  {{ formatGiftDisplayName(g) }} × {{ g.num || 1 }}件
+                </el-tag>
+              </div>
+            </template>
+          </el-descriptions-item>
+          <el-descriptions-item label="适用商品范围">
+            {{ form.scopeType === "ALL" ? "全品类" : "指定商品" }}
           </el-descriptions-item>
         </el-descriptions>
 
         <el-table
-          v-if="form.scopeType == 'PORTION_GOODS'"
+          v-if="form.scopeType === 'PORTION_GOODS'"
           border
           :data="form.promotionGoodsList"
           style="width: 100%; margin-top: 16px"
@@ -49,45 +74,23 @@
             <template #default="{ row }">
               <div v-if="row" class="goods-cell">
                 <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
-                <a class="link-text mr_10 goods-name" @click="linkTo(row.goodsId, row.skuId)">{{
-                  row.goodsName
-                }}</a>
-                <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
-                  <template #reference>
-                    <img
-                      src="../../../assets/qrcode.svg"
-                      style="vertical-align: middle"
-                      class="hover-pointer"
-                      width="20"
-                      height="20"
-                      alt=""
-                    />
-                  </template>
-                  <vue-qr
-                    :text="wapLinkTo(row.goodsId, row.skuId)"
-                    :margin="0"
-                    color-dark="#000"
-                    color-light="#fff"
-                    :size="150"
-                  />
-                </el-popover>
+                <a class="link-text mr_10 goods-name" @click="linkTo(row.goodsId, row.skuId)">
+                  {{ row.goodsName }}
+                </a>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
-            <template #default="{ row }">
-              {{ row?.sn || "-" }}
-            </template>
+            <template #default="{ row }">{{ row?.sn || "-" }}</template>
           </el-table-column>
           <el-table-column label="规格" min-width="140" show-overflow-tooltip>
-            <template #default="{ row }">
-              {{ row?.simpleSpecs || "-" }}
-            </template>
+            <template #default="{ row }">{{ row?.simpleSpecs || "-" }}</template>
           </el-table-column>
           <el-table-column label="商品价格" width="110" align="right">
             <template #default="{ row }">
               <span v-if="row" :style="{ color: $mainColor }">
-                {{ $filters.unitPrice(row.price, "￥") }}</span>
+                {{ $filters.unitPrice(row.price, "￥") }}
+              </span>
             </template>
           </el-table-column>
           <el-table-column label="库存" width="90" align="right">
@@ -106,20 +109,23 @@
     <el-form v-else ref="formRef" :model="form" label-width="120px" :rules="formRule">
       <el-card class="section-card" shadow="never">
         <template #header>
-          <span class="section-title">基本信息</span>
+          <span class="section-title">基本信息（{{ activityTypeLabel }}）</span>
         </template>
+        <el-form-item label="活动类型">
+          <el-tag :type="activityTagType">{{ activityTypeLabel }}</el-tag>
+        </el-form-item>
         <el-form-item label="活动名称" prop="promotionName">
           <el-input
             v-model="form.promotionName"
             :disabled="fieldDisabled"
-            placeholder="活动名称"
+            placeholder="请输入活动名称"
             clearable
-            style="width: 260px"
+            class="basic-form-control"
           />
         </el-form-item>
         <el-form-item label="活动时间" prop="rangeTime">
           <el-date-picker
-            class="full-discount-range-picker"
+            class="full-discount-range-picker basic-form-control"
             type="datetimerange"
             v-model="form.rangeTime"
             :disabled="fieldDisabled"
@@ -130,199 +136,224 @@
             :disabled-date="options.disabledDate"
           />
         </el-form-item>
+        <el-form-item label="活动说明">
+          <el-input
+            v-model="form.description"
+            type="textarea"
+            :rows="2"
+            placeholder="选填，活动补充说明"
+            class="basic-form-control"
+          />
+        </el-form-item>
       </el-card>
 
       <el-card class="section-card" shadow="never">
         <template #header>
-          <span class="section-title">优惠设置</span>
+          <div class="tier-card-header">
+            <span class="section-title">阶梯优惠设置（最多支持 3 级阶梯）</span>
+            <el-button
+              v-if="form.ruleList.length < 3"
+              type="primary"
+              @click="addTier"
+            >
+              添加阶梯（{{ form.ruleList.length }}/3）
+            </el-button>
+          </div>
         </template>
-        <div>
-            <el-form-item label="优惠门槛" prop="fullMoney">
-              <el-input
-                v-model="form.fullMoney"
-                :disabled="fieldDisabled"
-                placeholder="优惠门槛"
-                clearable
-                style="width: 260px"
-              />
-              <span class="describe">消费达到当前金额可以参与优惠</span>
-            </el-form-item>
-            <el-form-item label="优惠方式">
-              <el-radio-group v-model="form.discountType" :disabled="fieldDisabled">
-                <el-radio-button value="fullMinusFlag">减现金</el-radio-button>
-                <el-radio-button value="fullRateFlag">打折</el-radio-button>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item
-              v-if="form.discountType == 'fullMinusFlag'"
-              label="优惠金额"
-              prop="fullMinus"
-            >
-              <el-input
-                :disabled="fieldDisabled"
-                v-model="form.fullMinus"
-                placeholder="优惠金额"
-                clearable
-                style="width: 260px"
-              />
-            </el-form-item>
-            <el-form-item
-              v-if="form.discountType == 'fullRateFlag'"
-              label="优惠折扣"
-              prop="fullRate"
-            >
-              <el-input-number
-                :disabled="fieldDisabled"
-                v-model="form.fullRate"
-                placeholder="优惠折扣"
-                :min="0.1"
-                :max="9.9"
-                :step="0.1"
-                :precision="1"
-                style="width: 260px"
-              />
-              <span class="describe">优惠折扣为0-10之间数字，可有一位小数</span>
-            </el-form-item>
-            <el-form-item label="额外赠送">
-              <el-checkbox v-model="form.freeFreightFlag" :disabled="fieldDisabled">免邮费</el-checkbox>
-              <el-checkbox v-model="form.couponFlag" :disabled="fieldDisabled">送优惠券</el-checkbox>
-              <el-checkbox v-model="form.giftFlag" :disabled="fieldDisabled">送赠品</el-checkbox>
-              <el-checkbox v-model="form.pointFlag" :disabled="fieldDisabled">送积分</el-checkbox>
-            </el-form-item>
-            <el-form-item v-if="form.couponFlag" label="赠送优惠券" prop="couponId">
-              <el-select
-                v-model="form.couponId"
-                :disabled="fieldDisabled"
-                filterable
-                remote
-                :remote-method="getCouponList"
-                placeholder="输入优惠券名称搜索"
-                :loading="couponLoading"
-                style="width: 280px"
-              >
-                <el-option
-                  v-for="item in couponList"
-                  :value="item.id"
-                  :key="item.id"
-                  :label="item.couponName"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item v-if="form.giftFlag" label="赠品" prop="giftId">
-              <div class="gift-field">
-                <el-select
-                  v-model="form.giftId"
-                  filterable
-                  remote
-                  :remote-method="getGiftList"
-                  placeholder="输入赠品名称搜索"
-                  :disabled="fieldDisabled"
-                  :loading="giftLoading"
-                  style="width: 260px"
-                >
-                  <el-option
-                    v-for="item in giftList"
-                    :value="item.id"
-                    :key="item.id"
-                    :label="giftOptionLabel(item)"
-                  />
-                </el-select>
-                <p class="describe describe-block">电子卡券赠品支付后自动发卡；卡池不足时仅取消赠品子单，不影响主订单。</p>
-              </div>
-            </el-form-item>
-            <el-form-item v-if="form.pointFlag" label="赠积分" prop="point">
-              <el-input
-                v-model="form.point"
-                type="number"
-                :disabled="fieldDisabled"
-                style="width: 260px"
-              />
-            </el-form-item>
-            <el-form-item label="使用范围" prop="scopeType">
-              <el-radio-group v-model="form.scopeType" :disabled="fieldDisabled">
-                <el-radio-button value="ALL">全品类</el-radio-button>
-                <el-radio-button value="PORTION_GOODS">指定商品</el-radio-button>
-              </el-radio-group>
-            </el-form-item>
 
-            <el-form-item style="width: 100%" v-if="form.scopeType == 'PORTION_GOODS'">
-              <div v-if="!fieldDisabled" style="display: flex; margin-bottom: 10px">
-                <el-button type="primary" @click="openSkuList">选择商品</el-button>
-                <el-button type="danger" plain style="margin-left: 10px" @click="delSelectGoods">
-                  批量删除
+        <div
+          v-for="(tier, tierIdx) in form.ruleList"
+          :key="tierIdx"
+          class="tier-block"
+        >
+          <div class="tier-block-title">
+            <span>第 {{ tierIdx + 1 }} 级阶梯</span>
+            <el-button
+              v-if="form.ruleList.length > 1"
+              type="danger"
+              link
+              @click="removeTier(tierIdx)"
+            >
+              删除此阶梯
+            </el-button>
+          </div>
+
+          <el-form-item label="优惠门槛" required>
+            <span class="inline-prefix">满</span>
+            <el-input-number
+              v-model="tier.fullMoney"
+              :min="0.01"
+              :max="99999999"
+              :precision="2"
+              :step="10"
+              controls-position="right"
+              placeholder="门槛金额"
+              style="width: 180px"
+            />
+            <span class="inline-suffix">元</span>
+            <span class="describe">须大于上一级阶梯门槛金额</span>
+          </el-form-item>
+
+          <!-- 满减活动专属字段 -->
+          <el-form-item v-if="form.activityType === 'FULL_MINUS'" label="优惠金额" required>
+            <span class="inline-prefix">减</span>
+            <el-input-number
+              v-model="tier.fullMinus"
+              :min="0.01"
+              :max="99999999"
+              :precision="2"
+              :step="5"
+              controls-position="right"
+              placeholder="立减金额"
+              style="width: 180px"
+            />
+            <span class="inline-suffix">元</span>
+            <span class="describe">须小于当前阶梯门槛，且随阶梯递增</span>
+          </el-form-item>
+
+          <!-- 满折活动专属字段 -->
+          <el-form-item v-if="form.activityType === 'FULL_RATE'" label="优惠折扣" required>
+            <span class="inline-prefix">打</span>
+            <el-input-number
+              v-model="tier.fullRate"
+              :min="0.1"
+              :max="9.9"
+              :step="0.1"
+              :precision="1"
+              controls-position="right"
+              placeholder="优惠折扣"
+              style="width: 180px"
+            />
+            <span class="inline-suffix">折</span>
+            <span class="describe">0.1~9.9 折，阶梯越高折扣数值须越小（如 9折 → 8折 → 7折）</span>
+          </el-form-item>
+
+          <!-- 满赠活动专属字段：每阶梯最多3个赠品，每个最多10件 -->
+          <el-form-item v-if="form.activityType === 'FULL_GIFT'" label="赠送商品" required>
+            <div class="gift-tier-panel">
+              <div class="gift-tier-footer">
+                <el-button
+                  type="primary"
+                  @click="openGiftSkuPicker(tierIdx)"
+                >
+                  选择赠品（{{ (tier.giftItems || []).length }}/3）
                 </el-button>
+                <span class="describe">
+                  每级阶梯最多可选 3 个赠品，单品最多 10 件；支付时若赠品库存不足，将按实际可用库存部分赠送。
+                </span>
               </div>
               <el-table
+                v-if="tier.giftItems && tier.giftItems.length"
                 border
-                :data="form.promotionGoodsList"
+                :data="tier.giftItems"
                 style="width: 100%"
-                @selection-change="changeSelect"
               >
-                <el-table-column
-                  v-if="!fieldDisabled"
-                  type="selection"
-                  width="60"
-                  align="center"
-                />
-                <el-table-column label="商品名称" min-width="220">
+                <el-table-column label="赠品名称" min-width="220">
                   <template #default="{ row }">
                     <div v-if="row" class="goods-cell">
                       <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
-                      <a class="link-text mr_10 goods-name" @click="linkTo(row.goodsId, row.skuId)">{{
-                        row.goodsName
-                      }}</a>
-                      <el-popover trigger="hover" title="扫码在手机中查看" placement="top" width="180">
-                        <template #reference>
-                          <img
-                            src="../../../assets/qrcode.svg"
-                            style="vertical-align: middle"
-                            class="hover-pointer"
-                            width="20"
-                            height="20"
-                            alt=""
-                          />
-                        </template>
-                        <vue-qr
-                          :text="wapLinkTo(row.goodsId, row.skuId)"
-                          :margin="0"
-                          color-dark="#000"
-                          color-light="#fff"
-                          :size="150"
-                        />
-                      </el-popover>
+                      <span class="goods-name">{{ formatGiftDisplayName(row) }}</span>
                     </div>
                   </template>
                 </el-table-column>
-                <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+                <el-table-column label="规格" min-width="120" show-overflow-tooltip>
+                  <template #default="{ row }">{{ row?.simpleSpecs || "-" }}</template>
+                </el-table-column>
+                <el-table-column label="单价" width="110" align="right">
                   <template #default="{ row }">
-                    {{ row?.sn || "-" }}
+                    <span v-if="row && row.price != null" :style="{ color: $mainColor }">
+                      {{ $filters.unitPrice(row.price, "￥") }}
+                    </span>
+                    <span v-else>-</span>
                   </template>
                 </el-table-column>
-                <el-table-column label="规格" min-width="140" show-overflow-tooltip>
+                <el-table-column label="赠送数量（件）" width="170" align="center">
                   <template #default="{ row }">
-                    {{ row?.simpleSpecs || "-" }}
+                    <el-input-number
+                      v-model="row.num"
+                      :min="1"
+                      :max="10"
+                      :step="1"
+                      :precision="0"
+                      controls-position="right"
+                      style="width: 130px"
+                    />
                   </template>
                 </el-table-column>
-                <el-table-column label="商品价格" width="110" align="right">
-                  <template #default="{ row }">
-                    <span v-if="row" :style="{ color: $mainColor }">
-                      {{ $filters.unitPrice(row.price, "￥") }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column label="库存" width="90" align="right">
-                  <template #default="{ row }">
-                    <span v-if="row">{{ row.quantity }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column v-if="!fieldDisabled" label="操作" width="100" align="right">
+                <el-table-column label="操作" width="90" align="right">
                   <template #default="{ $index }">
-                    <a class="link-text" @click="delGoods($index)">删除</a>
+                    <a class="link-text" @click="removeGiftFromTier(tier, $index)">删除</a>
                   </template>
                 </el-table-column>
               </el-table>
-            </el-form-item>
-
+            </div>
+          </el-form-item>
         </div>
+
+        <el-form-item label="适用范围" prop="scopeType" style="margin-top: 16px">
+          <el-radio-group v-model="form.scopeType" :disabled="fieldDisabled">
+            <el-radio-button value="ALL">全品类</el-radio-button>
+            <el-radio-button value="PORTION_GOODS">指定商品</el-radio-button>
+          </el-radio-group>
+          <span class="describe">
+            同一时段内全品类活动互斥；指定商品活动只要所选商品不重叠即可同时开启
+          </span>
+        </el-form-item>
+
+        <el-form-item style="width: 100%" v-if="form.scopeType === 'PORTION_GOODS'">
+          <div v-if="!fieldDisabled" style="display: flex; margin-bottom: 10px">
+            <el-button type="primary" @click="openSkuList">选择商品</el-button>
+            <el-button type="danger" plain style="margin-left: 10px" @click="delSelectGoods">
+              批量删除
+            </el-button>
+          </div>
+          <el-table
+            border
+            :data="form.promotionGoodsList"
+            style="width: 100%"
+            @selection-change="changeSelect"
+          >
+            <el-table-column
+              v-if="!fieldDisabled"
+              type="selection"
+              width="60"
+              align="center"
+            />
+            <el-table-column label="商品名称" min-width="220">
+              <template #default="{ row }">
+                <div v-if="row" class="goods-cell">
+                  <img v-if="row.thumbnail" :src="row.thumbnail" class="goods-thumb" alt="" />
+                  <a class="link-text mr_10 goods-name" @click="linkTo(row.goodsId, row.skuId)">
+                    {{ row.goodsName }}
+                  </a>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="SKU编码" min-width="140" show-overflow-tooltip>
+              <template #default="{ row }">{{ row?.sn || "-" }}</template>
+            </el-table-column>
+            <el-table-column label="规格" min-width="140" show-overflow-tooltip>
+              <template #default="{ row }">{{ row?.simpleSpecs || "-" }}</template>
+            </el-table-column>
+            <el-table-column label="商品价格" width="110" align="right">
+              <template #default="{ row }">
+                <span v-if="row" :style="{ color: $mainColor }">
+                  {{ $filters.unitPrice(row.price, "￥") }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column label="库存" width="90" align="right">
+              <template #default="{ row }">
+                <span v-if="row">{{ row.quantity }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column v-if="!fieldDisabled" label="操作" width="100" align="right">
+              <template #default="{ $index }">
+                <a class="link-text" @click="delGoods($index)">删除</a>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-form-item>
       </el-card>
 
       <div class="foot-btn">
@@ -345,14 +376,10 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
-  getShopCouponList,
   getFullDiscountById,
   newFullDiscount,
   editFullDiscount,
 } from "@/api/promotion";
-import { getGoodsSkuListDataSeller } from "@/api/goods";
-import { regular } from "@/utils";
-import { goodsTypeLabel } from "@/constants/goodsType";
 import { Message, Modal } from "@/utils/message";
 import { unixToDate } from "@/utils/filters";
 
@@ -361,57 +388,46 @@ defineOptions({ name: "add-full-discount" });
 const route = useRoute();
 const router = useRouter();
 
-const checkWeight = (rule, value, callback) => {
-  if (!value && typeof value !== "number") {
-    callback(new Error("优惠门槛不能为空"));
-  } else if (!regular.money.test(value)) {
-    callback(new Error("请输入正整数或者两位小数"));
-  } else if (parseFloat(value) > 99999999) {
-    callback(new Error("优惠门槛设置超过上限值"));
-  } else {
-    callback();
+const id = ref(route.query.id);
+const initialActivityType = String(route.query.activityType || "FULL_MINUS");
+
+function createEmptyTier(activityType) {
+  if (activityType === "FULL_RATE") {
+    return { fullMoney: 100, fullRate: 9.0 };
   }
-};
-const checkDiscount = (rule, value, callback) => {
-  if (value === null || value === undefined || value === "") {
-    callback(new Error("请填写优惠折扣"));
-  } else if (value < 0.1 || value > 9.9) {
-    callback(new Error("请输入0-10的数字,可有一位小数"));
-  } else {
-    callback();
+  if (activityType === "FULL_GIFT") {
+    return {
+      fullMoney: 100,
+      giftItems: [],
+    };
   }
-};
+  return { fullMoney: 100, fullMinus: 10 };
+}
 
 const form = ref({
-  discountType: "fullMinusFlag",
+  activityType: initialActivityType,
   scopeType: "ALL",
   promotionGoodsList: [],
   promotionStatus: "NEW",
+  description: "",
+  ruleList: [createEmptyTier(initialActivityType)],
 });
-const id = ref(route.query.id);
+
 const submitLoading = ref(false);
 const selectedGoods = ref([]);
-const couponList = ref([]);
-const giftList = ref([]);
-const giftLoading = ref(false);
-const couponLoading = ref(false);
+const pickerTargetTierIndex = ref(null);
+
 const formRule = {
   promotionName: [{ required: true, message: "活动名称不能为空" }],
   rangeTime: [{ required: true, message: "请选择活动时间" }],
-  fullMoney: [{ required: true, validator: checkWeight }],
-  fullMinus: [
-    { required: true, message: "请填写优惠金额" },
-    { pattern: regular.money, message: "请输入正确金额" },
-  ],
-  fullRate: [{ required: true, validator: checkDiscount }],
 };
+
 const options = {
   disabledDate(date) {
     return date && date.valueOf() < Date.now() - 86400000;
   },
 };
 
-// formRef：模板 ref 改名避免与顶层变量互相覆盖
 const formRef = ref(null);
 const liliDialogRef = ref(null);
 
@@ -419,23 +435,16 @@ const fieldDisabled = computed(() => {
   return !!id.value && form.value.promotionStatus !== "NEW";
 });
 
-const extraGifts = computed(() => {
-  const list = [];
-  if (form.value.freeFreightFlag) {
-    list.push("免邮费");
-  }
-  if (form.value.couponFlag) {
-    const coupon = couponList.value.find((item) => item.id === form.value.couponId);
-    list.push(`送优惠券${coupon ? `（${coupon.couponName}）` : ""}`);
-  }
-  if (form.value.giftFlag) {
-    const gift = giftList.value.find((item) => item.id === form.value.giftId);
-    list.push(`送赠品${gift ? `（${gift.goodsName}）` : ""}`);
-  }
-  if (form.value.pointFlag) {
-    list.push(`送积分（${form.value.point}）`);
-  }
-  return list;
+const activityTypeLabel = computed(() => {
+  if (form.value.activityType === "FULL_RATE") return "满折活动";
+  if (form.value.activityType === "FULL_GIFT") return "满赠活动";
+  return "满减活动";
+});
+
+const activityTagType = computed(() => {
+  if (form.value.activityType === "FULL_RATE") return "warning";
+  if (form.value.activityType === "FULL_GIFT") return "success";
+  return "danger";
 });
 
 onMounted(() => {
@@ -445,71 +454,224 @@ onMounted(() => {
     const now = new Date();
     form.value.rangeTime = [now, new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)];
   }
-  getCouponList();
-  getGiftList();
 });
 
-function giftOptionLabel(item) {
-  if (!item) return "";
-  const typeLabel =
-    item.goodsType === "E_COUPON" ? ` [${goodsTypeLabel(item.goodsType)}]` : "";
-  const stock =
-    item.goodsType === "E_COUPON" && item.quantity != null
-      ? ` · 库存${item.quantity}`
-      : "";
-  return `${item.goodsName || ""}${typeLabel}${stock}`;
+function addTier() {
+  if (form.value.ruleList.length >= 3) return;
+  const lastTier = form.value.ruleList[form.value.ruleList.length - 1];
+  const nextMoney = lastTier && lastTier.fullMoney ? Number(lastTier.fullMoney) + 100 : 200;
+  if (form.value.activityType === "FULL_RATE") {
+    const prevRate = lastTier && lastTier.fullRate ? Number(lastTier.fullRate) : 9.0;
+    const nextRate = Math.max(0.1, Number((prevRate - 1.0).toFixed(1)));
+    form.value.ruleList.push({ fullMoney: nextMoney, fullRate: nextRate });
+  } else if (form.value.activityType === "FULL_GIFT") {
+    form.value.ruleList.push({
+      fullMoney: nextMoney,
+      giftItems: [],
+    });
+  } else {
+    const prevMinus = lastTier && lastTier.fullMinus ? Number(lastTier.fullMinus) : 10;
+    form.value.ruleList.push({ fullMoney: nextMoney, fullMinus: prevMinus + 10 });
+  }
 }
+
+function removeTier(index) {
+  if (form.value.ruleList.length <= 1) return;
+  form.value.ruleList.splice(index, 1);
+}
+
+function openGiftSkuPicker(tierIdx) {
+  pickerTargetTierIndex.value = tierIdx;
+  const tier = form.value.ruleList[tierIdx];
+  const currentGifts = ((tier && tier.giftItems) || [])
+    .filter((g) => g && g.skuId)
+    .map((g) => ({
+      ...g,
+      id: g.skuId,
+    }));
+  liliDialogRef.value.goodsData = JSON.parse(JSON.stringify(currentGifts));
+  liliDialogRef.value.open("goods");
+}
+
+function removeGiftFromTier(tier, index) {
+  if (!tier.giftItems) return;
+  tier.giftItems.splice(index, 1);
+}
+
+/**
+ * 赠品展示名称：优先使用商品选择器回填或后端快照的名称，缺失时回退显示 SKU ID。
+ * @param {object} giftItem 赠品项
+ * @returns {string} 展示名称
+ */
+function formatGiftDisplayName(giftItem) {
+  if (giftItem?.goodsName) return giftItem.goodsName;
+  return `SKU:${giftItem?.skuId || "-"}`;
+}
+
 function closeCurrentPage() {
   router.back();
 }
+
 function openSkuList() {
+  pickerTargetTierIndex.value = null;
   const data = JSON.parse(JSON.stringify(form.value.promotionGoodsList || []));
   data.forEach((e) => {
     e.id = e.skuId || e.id;
   });
-  // 先写入已选商品，再打开选择器，保证回显时 selectedWay 已就绪
   liliDialogRef.value.goodsData = data;
   liliDialogRef.value.open("goods");
 }
+
+function normalizeDetailRules(data) {
+  const type =
+    data.activityType ||
+    (data.fullRateFlag
+      ? "FULL_RATE"
+      : !data.fullMinusFlag && data.giftFlag
+        ? "FULL_GIFT"
+        : "FULL_MINUS");
+  data.activityType = type;
+
+  let rules = Array.isArray(data.ruleList) && data.ruleList.length ? data.ruleList : null;
+  if (!rules && data.rulesJson) {
+    try {
+      rules = JSON.parse(data.rulesJson);
+    } catch (e) {
+      rules = null;
+    }
+  }
+  if (!rules || !rules.length) {
+    if (type === "FULL_RATE") {
+      rules = [{ fullMoney: data.fullMoney || 100, fullRate: data.fullRate || 9.0 }];
+    } else if (type === "FULL_GIFT") {
+      const ids = String(data.giftId || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      rules = [
+        {
+          fullMoney: data.fullMoney || 100,
+          giftItems: ids.map((skuId) => ({ skuId, goodsName: data.giftSkuName || "", num: 1 })),
+        },
+      ];
+    } else {
+      rules = [{ fullMoney: data.fullMoney || 100, fullMinus: data.fullMinus || 10 }];
+    }
+  }
+  rules.forEach((r) => {
+    if (type === "FULL_GIFT") {
+      // 赠品统一由商品选择器维护，过滤历史数据中的空 SKU 占位项
+      r.giftItems = (Array.isArray(r.giftItems) ? r.giftItems : []).filter((g) => g && g.skuId);
+    }
+  });
+  data.ruleList = rules;
+}
+
 function getDetail() {
   getFullDiscountById(id.value).then((res) => {
     const data = res.result;
     if (data.scopeType === "ALL") {
       data.promotionGoodsList = [];
     }
-    if (data.fullMinusFlag) {
-      data.discountType = "fullMinusFlag";
-      delete data.fullMinusFlag;
-    } else {
-      data.discountType = "fullRateFlag";
-      delete data.fullRateFlag;
-    }
+    normalizeDetailRules(data);
     data.rangeTime = [new Date(data.startTime), new Date(data.endTime)];
-    if (data.fullRate !== null && data.fullRate !== undefined && data.fullRate !== "") {
-      data.fullRate = parseFloat(Number(data.fullRate).toFixed(1));
-    }
     form.value = data;
+    if (data.activityType && route.query.activityType !== data.activityType) {
+      router.replace({
+        query: { ...route.query, activityType: data.activityType },
+      });
+    }
   });
 }
+
+function validateTiers(activityType, ruleList) {
+  if (!Array.isArray(ruleList) || ruleList.length < 1 || ruleList.length > 3) {
+    Message.warning("请配置 1 至 3 级阶梯优惠");
+    return false;
+  }
+  let prevMoney = 0;
+  let prevMinus = 0;
+  let prevRate = 10;
+
+  for (let i = 0; i < ruleList.length; i++) {
+    const tier = ruleList[i];
+    const label = `第 ${i + 1} 级阶梯`;
+    const money = Number(tier.fullMoney);
+    if (!money || money <= 0 || money > 99999999) {
+      Message.warning(`${label}：请填写有效的优惠门槛金额`);
+      return false;
+    }
+    if (i > 0 && money <= prevMoney) {
+      Message.warning(`${label}：优惠门槛金额必须大于上一级阶梯（>${prevMoney}元）`);
+      return false;
+    }
+    prevMoney = money;
+
+    if (activityType === "FULL_MINUS") {
+      const minus = Number(tier.fullMinus);
+      if (!minus || minus <= 0) {
+        Message.warning(`${label}：请填写有效的优惠金额`);
+        return false;
+      }
+      if (minus >= money) {
+        Message.warning(`${label}：优惠金额必须小于当前阶梯门槛金额`);
+        return false;
+      }
+      if (i > 0 && minus <= prevMinus) {
+        Message.warning(`${label}：优惠金额必须大于上一级阶梯（>${prevMinus}元）`);
+        return false;
+      }
+      prevMinus = minus;
+    } else if (activityType === "FULL_RATE") {
+      const rate = Number(tier.fullRate);
+      if (!rate || rate < 0.1 || rate > 9.9) {
+        Message.warning(`${label}：优惠折扣须在 0.1 至 9.9 折之间`);
+        return false;
+      }
+      if (i > 0 && rate >= prevRate) {
+        Message.warning(`${label}：折扣数值须小于上一级阶梯（<${prevRate}折），以保证折扣力度递增`);
+        return false;
+      }
+      prevRate = rate;
+    } else if (activityType === "FULL_GIFT") {
+      const gifts = tier.giftItems || [];
+      if (!gifts.length || gifts.length > 3) {
+        Message.warning(`${label}：请选择 1 至 3 个赠品`);
+        return false;
+      }
+      const seenSku = new Set();
+      for (let gIdx = 0; gIdx < gifts.length; gIdx++) {
+        const g = gifts[gIdx];
+        if (!g.skuId) {
+          Message.warning(`${label}：第 ${gIdx + 1} 个赠品尚未选择`);
+          return false;
+        }
+        if (seenSku.has(g.skuId)) {
+          Message.warning(`${label}：同一阶梯内不能重复选择相同的赠品 SKU`);
+          return false;
+        }
+        seenSku.add(g.skuId);
+        const num = Number(g.num);
+        if (!num || num < 1 || num > 10) {
+          Message.warning(`${label}：单个赠品赠送数量须在 1 至 10 件之间`);
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
 function handleSubmit() {
   formRef.value.validate((valid) => {
     if (!valid) return;
+    if (!validateTiers(form.value.activityType, form.value.ruleList)) {
+      return;
+    }
+
     const params = JSON.parse(JSON.stringify(form.value));
     params.startTime = unixToDate(form.value.rangeTime[0] / 1000);
     params.endTime = unixToDate(form.value.rangeTime[1] / 1000);
-
-    if (params.couponFlag && !params.couponId) {
-      Message.warning("请选择优惠券");
-      return;
-    }
-    if (params.giftFlag && !params.giftId) {
-      Message.warning("请选择赠品");
-      return;
-    }
-    if (params.pointFlag && !params.point) {
-      Message.warning("请填写积分");
-      return;
-    }
 
     if (
       params.scopeType === "PORTION_GOODS" &&
@@ -531,12 +693,28 @@ function handleSubmit() {
       });
       params.scopeId = scopeId.toString();
     }
-    if (params.discountType === "fullMinusFlag") {
+
+    // 同步首档冗余字段以保持接口兼容
+    const firstTier = params.ruleList[0];
+    params.fullMoney = firstTier.fullMoney;
+    if (params.activityType === "FULL_MINUS") {
       params.fullMinusFlag = true;
-    } else {
+      params.fullMinus = firstTier.fullMinus;
+      params.fullRateFlag = false;
+      params.giftFlag = false;
+    } else if (params.activityType === "FULL_RATE") {
+      params.fullMinusFlag = false;
       params.fullRateFlag = true;
+      params.fullRate = firstTier.fullRate;
+      params.giftFlag = false;
+    } else if (params.activityType === "FULL_GIFT") {
+      params.fullMinusFlag = false;
+      params.fullRateFlag = false;
+      params.giftFlag = true;
+      params.giftId = (firstTier.giftItems || []).map((g) => g.skuId).join(",");
     }
-    delete params.discountType;
+    params.rulesJson = JSON.stringify(params.ruleList);
+
     delete params.rangeTime;
     if (!id.value) {
       delete params.id;
@@ -546,18 +724,24 @@ function handleSubmit() {
 
     submitLoading.value = true;
     const request = id.value ? editFullDiscount(params) : newFullDiscount(params);
-    request.then((res) => {
-      submitLoading.value = false;
-      if (res.success) {
-        Message.success(id.value ? "编辑活动成功" : "添加活动成功");
-        closeCurrentPage();
-      }
-    });
+    request
+      .then((res) => {
+        submitLoading.value = false;
+        if (res.success) {
+          Message.success(id.value ? "编辑活动成功" : "添加活动成功");
+          closeCurrentPage();
+        }
+      })
+      .catch(() => {
+        submitLoading.value = false;
+      });
   });
 }
+
 function changeSelect(e) {
   selectedGoods.value = e;
 }
+
 function delSelectGoods() {
   if (selectedGoods.value.length <= 0) {
     Message.warning("您还未选择要删除的数据");
@@ -574,10 +758,43 @@ function delSelectGoods() {
     },
   });
 }
+
 function delGoods(index) {
   form.value.promotionGoodsList.splice(index, 1);
 }
+
 function selectedGoodsData(item) {
+  if (pickerTargetTierIndex.value !== null) {
+    const tier = form.value.ruleList[pickerTargetTierIndex.value];
+    pickerTargetTierIndex.value = null;
+    if (!tier) return;
+    let selectedList = Array.isArray(item) ? item : [];
+    if (selectedList.length > 3) {
+      Message.warning("每级阶梯最多只能选择 3 个赠品，已为您保留前 3 个");
+      selectedList = selectedList.slice(0, 3);
+    }
+    const prevNumMap = new Map(
+      (tier.giftItems || [])
+        .filter((g) => g && g.skuId)
+        .map((g) => [String(g.skuId), g.num || 1])
+    );
+    tier.giftItems = selectedList.map((e) => {
+      const skuId = e.id || e.skuId;
+      return {
+        skuId,
+        goodsId: e.goodsId,
+        goodsName: e.goodsName,
+        thumbnail: e.thumbnail || e.small,
+        simpleSpecs: e.simpleSpecs,
+        goodsType: e.goodsType,
+        price: e.price,
+        quantity: e.quantity,
+        num: prevNumMap.get(String(skuId)) || 1,
+      };
+    });
+    return;
+  }
+
   const list = [];
   item.forEach((e) => {
     list.push({
@@ -596,39 +813,6 @@ function selectedGoodsData(item) {
   });
   form.value.promotionGoodsList = list;
 }
-function getCouponList(query) {
-  const params = {
-    pageSize: 20,
-    pageNumber: 1,
-    getType: "ACTIVITY",
-    couponName: query,
-    promotionStatus: "START",
-  };
-  couponLoading.value = true;
-  getShopCouponList(params).then((res) => {
-    couponLoading.value = false;
-    if (res.success) {
-      couponList.value = res.result.records;
-    }
-  });
-}
-function getGiftList(query) {
-  const params = {
-    pageSize: 20,
-    pageNumber: 1,
-    id: query === form.value.giftId ? form.value.giftId : null,
-    goodsName: query === form.value.giftId ? null : query,
-    marketEnable: "UPPER",
-    authFlag: "PASS",
-  };
-  giftLoading.value = true;
-  getGoodsSkuListDataSeller(params).then((res) => {
-    giftLoading.value = false;
-    if (res.success) {
-      giftList.value = res.result.records;
-    }
-  });
-}
 </script>
 
 <style lang="scss" scoped>
@@ -640,6 +824,70 @@ function getGiftList(query) {
   font-weight: bold;
   color: #333;
   font-size: 14px;
+}
+
+.tier-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tier-block {
+  border: 1px dashed #dcdfe6;
+  border-radius: 6px;
+  padding: 16px 16px 4px;
+  margin-bottom: 14px;
+  background-color: #fafafa;
+
+  .tier-block-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 13px;
+    color: #303133;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ebeef5;
+  }
+}
+
+.inline-prefix {
+  margin-right: 8px;
+  color: #606266;
+}
+
+.inline-suffix {
+  margin-left: 8px;
+  color: #606266;
+}
+
+.gift-tier-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+
+  .gift-item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .gift-tier-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+}
+
+.readonly-gift-list {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .goods-cell {
@@ -668,17 +916,7 @@ function getGiftList(query) {
   margin-left: 10px;
   color: #999;
 }
-.describe-block {
-  margin-left: 0;
-  margin-top: 4px;
-  line-height: 1.5;
-  max-width: 260px;
-}
-.gift-field {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
+
 .link-text {
   color: #409eff;
   cursor: pointer;
@@ -694,10 +932,17 @@ function getGiftList(query) {
   margin-right: 8px;
 }
 
+.basic-form-control {
+  width: 420px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 :deep(.full-discount-range-picker.el-date-editor--datetimerange) {
-  width: 380px;
-  max-width: 380px;
+  width: 420px;
+  max-width: 100%;
   flex-grow: 0;
-  --el-date-editor-width: 380px;
+  box-sizing: border-box;
+  --el-date-editor-width: 420px;
 }
 </style>

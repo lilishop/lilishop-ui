@@ -433,8 +433,14 @@
                 <!-- 当选择完活动之后的其他回调 -->
                 <span v-if="item.url.___type == 'marketing'">
                   <span v-if="item.url.___promotion == 'SECKILL'"> 秒杀 </span>
-                  <span v-if="item.url.___promotion == 'FULL_DISCOUNT'">
+                  <span v-if="item.url.___promotion == 'FULL_DISCOUNT' || item.url.___promotion == 'FULL_MINUS'">
                     满减
+                  </span>
+                  <span v-if="item.url.___promotion == 'FULL_RATE'">
+                    满折
+                  </span>
+                  <span v-if="item.url.___promotion == 'FULL_GIFT'">
+                    满赠
                   </span>
                   <span v-if="item.url.___promotion == 'PINTUAN'"> 拼团 </span>
                   {{ item.url.title || item.url.goodsName }}</span>

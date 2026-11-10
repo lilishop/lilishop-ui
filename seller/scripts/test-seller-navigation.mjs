@@ -45,3 +45,16 @@ test('搜索清空与空权限账号正确处理', () => {
   assert.deepEqual(searchNavigation(flattenNavigation([]), ''), []);
   assert.equal(findNavigationItem(items, 'unknown-detail'), null);
 });
+test('满减/满折/满赠详情页按 activityType 定位对应左侧菜单', () => {
+  const promoMenus = [
+    { name: 'promotion', title: '营销', children: [{ title: '店铺活动', children: [
+      { name: 'full-discount', path: 'full-discount', title: '满减活动', component },
+      { name: 'store-full-rate', path: 'full-rate', title: '满折活动', component },
+      { name: 'store-full-gift', path: 'full-gift', title: '满赠活动', component },
+    ] }] },
+  ];
+  const promoItems = flattenNavigation(promoMenus);
+  assert.equal(findNavigationItem(promoItems, 'full-discount-detail', { activityType: 'FULL_GIFT' })?.name, 'store-full-gift');
+  assert.equal(findNavigationItem(promoItems, 'full-discount-detail', { activityType: 'FULL_RATE' })?.name, 'store-full-rate');
+  assert.equal(findNavigationItem(promoItems, 'full-discount-detail', { activityType: 'FULL_MINUS' })?.name, 'full-discount');
+});

@@ -408,6 +408,15 @@ util.initRouterNode = function(routers, data) {
     }
     const menu = Object.assign({}, item);
     const hasChildren = item.children && item.children.length > 0;
+    if (
+      !hasChildren &&
+      (menu.frontRoute === "promotions/full-discount/full-discount" ||
+        menu.name === "full-discount" ||
+        menu.name === "full-cut-activity") &&
+      menu.title === "满额活动"
+    ) {
+      menu.title = "满减活动";
+    }
 
     if (hasChildren) {
       menu.children = [];

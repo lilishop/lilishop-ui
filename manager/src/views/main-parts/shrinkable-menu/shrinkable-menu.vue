@@ -49,6 +49,24 @@ const menuList = computed(() => appStore.menuList);
 const navList = computed(() => appStore.navList);
 const currNav = computed(() => appStore.currNav);
 const activeMenuName = computed(() => {
+  if (route.name === "full-discount-detail") {
+    const type = route.query?.activityType;
+    const candidates =
+      type === "FULL_GIFT"
+        ? ["manager-full-gift", "full-gift", "full-discount", "full-cut-activity"]
+        : type === "FULL_RATE"
+        ? ["manager-full-rate", "full-rate", "full-discount", "full-cut-activity"]
+        : ["full-discount", "full-cut-activity"];
+    for (const candidate of candidates) {
+      for (const item of menuList.value) {
+        for (const menu of item.children || []) {
+          if (menu.name === candidate || menu.path === candidate) {
+            return menu.name;
+          }
+        }
+      }
+    }
+  }
   const routePath = util.normalizeRoutePath(route.path);
   for (const item of menuList.value) {
     for (const menu of item.children || []) {
