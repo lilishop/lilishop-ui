@@ -140,6 +140,9 @@
         >
           批量下架
         </el-button>
+        <el-button type="primary" @click="importDialogVisible = true">
+          批量导入
+        </el-button>
       </div>
 
       <el-table
@@ -252,6 +255,9 @@
         <el-button type="primary" :loading="submitLoading" @click="lower">提交</el-button>
       </template>
     </el-dialog>
+
+    <!-- 商品批量导入（多规格v2） -->
+    <GoodsImportDialog v-model="importDialogVisible" @imported="onGoodsImported" />
   </div>
 </template>
 
@@ -269,6 +275,7 @@ import {
 } from "@/api/goods";
 import { Message, Modal } from "@/utils/message";
 import { customRouterPush } from "@/utils/filters";
+import GoodsImportDialog from "./components/GoodsImportDialog.vue";
 
 defineOptions({ name: "goods" });
 const emit = defineEmits(["edit-schedule", "delete-schedule"]);
@@ -329,6 +336,7 @@ const currentStatus = ref(props.scheduledOnly ? props.scheduledStatus : "ALL");
 const goodsNumerData = ref({});
 const selectedRows = ref([]); // 选中的行数据
 const selectAll = ref(false); // 全选状态
+const importDialogVisible = ref(false); // 批量导入弹窗显示状态
 
 const goodsStatusWithCount = computed(() => {
   return [
@@ -524,6 +532,11 @@ function getNumberData() {
       goodsNumerData.value = res.result;
     }
   })
+}
+// 批量导入完成，刷新列表与状态数量
+function onGoodsImported() {
+  getDataList();
+  getNumberData();
 }
 // 编辑
 function edit(v) {

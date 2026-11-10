@@ -4,8 +4,10 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
-  postRequestWithNoForm
+  postRequestWithNoForm,
+  uploadFileRequest
 } from "@/libs/axios";
+import { downloadBlob } from "@/utils/downloadBlob";
 // 获取数据字典
 export const getDictData = "/dictData/getByType/";
 // Websocket
@@ -385,4 +387,24 @@ export const downLoadGoods = () => {
 // 上传待发货的订单列表
 export const uploadGoodsExcel = params => {
   return postRequestWithNoForm(`/goods/import/import`, params );
+};
+
+/**
+ * 下载商品批量导入（多规格）模板（v2，同步文件流）
+ * @returns {Promise<void>} 成功时直接触发浏览器下载「商品导入模板.xlsx」
+ */
+export const downloadGoodsImportTemplate = async () => {
+  const blob = await getRequest('/goods/import/downLoad/v2', {}, 'blob');
+  downloadBlob(blob, '商品导入模板.xlsx');
+};
+
+/**
+ * 批量导入商品（多规格）Excel（v2）
+ * @param {File} file 待导入的 .xlsx 文件，multipart 字段名 files
+ * @returns {Promise<any>} 返回 {success, result: {successCount, failCount, failList: [{goodsNo, rows, reason}]}}
+ */
+export const importGoodsExcel = file => {
+  const formData = new FormData();
+  formData.append('files', file);
+  return uploadFileRequest('/goods/import/import/v2', formData);
 };
