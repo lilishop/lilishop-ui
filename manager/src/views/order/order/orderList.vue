@@ -52,6 +52,7 @@
             @change="selectDateRange"
           />
         </el-form-item>
+        <slot name="extra-filters" :form="searchForm" />
         <el-form-item class="order-search-action">
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="handleReset">重置</el-button>
@@ -74,6 +75,9 @@
         <el-button type="warning" class="export" :loading="exporting" @click="exportOrder">导出订单</el-button>
       </div>
 
+      <el-alert v-if="loadError" title="订单加载失败，请重试" type="error" :closable="false" show-icon>
+        <el-button link type="primary" @click="init">重新加载</el-button>
+      </el-alert>
       <el-table v-loading="loading" :data="data" ref="tableRef" class="mt_10" style="width: 100%">
         <el-table-column prop="sn" label="订单号" min-width="200" show-overflow-tooltip />
         <el-table-column label="商品" min-width="280">
@@ -126,9 +130,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="下单时间" width="170" />
-        <el-table-column label="操作" width="80" align="center" fixed="right">
+        <slot name="extra-columns" />
+        <el-table-column label="操作" :width="actionWidth" align="center" fixed="right">
           <template #default="{ row }">
             <a class="link-text" @click="detail(row)">查看</a>
+            <slot name="extra-actions" :row="row" />
           </template>
         </el-table-column>
       </el-table>
@@ -162,6 +168,8 @@ const props = defineProps({
   fixedClientType: { type: String, default: "" },
   fixedPaymentMethod: { type: String, default: "" },
   allowExport: { type: Boolean, default: true },
+  wechatSync: { type: Boolean, default: false },
+  actionWidth: { type: Number, default: 80 },
 });
 
 const PROMOTION_OPTIONS = [
@@ -204,6 +212,7 @@ function emptySearchForm(pageSize = 20) {
     orderStatus: "",
     paymentMethod: props.fixedPaymentMethod,
     orderPromotionType: "",
+    ...(props.wechatSync ? { wechatSyncStatus: "" } : {}),
   };
 }
 
@@ -216,6 +225,9 @@ const searchFormRef = ref(null);
 const tableRef = ref(null);
 
 const loading = ref(true);
+const loadError = ref(false);
+let listRequestSeq = 0;
+let countRequestSeq = 0;
 const exporting = ref(false);
 const pageSizes = ref(PAGE_SIZES);
 const promotionOptions = ref(PROMOTION_OPTIONS);
@@ -389,16 +401,28 @@ function listParams() {
   return params;
 }
 function getDataList() {
+  const requestId = ++listRequestSeq;
   loading.value = true;
-  API_Order.getOrderList(listParams())
+  loadError.value = false;
+  const fetchList = props.wechatSync ? API_Order.getWechatOrderList : API_Order.getOrderList;
+  fetchList(listParams())
     .then((res) => {
+      if (requestId !== listRequestSeq) return;
       if (res.success) {
         data.value = res.result.records;
         total.value = res.result.total;
+      } else {
+        throw new Error("订单查询失败");
       }
     })
+    .catch(() => {
+      if (requestId !== listRequestSeq) return;
+      data.value = [];
+      total.value = 0;
+      loadError.value = true;
+    })
     .finally(() => {
-      loading.value = false;
+      if (requestId === listRequestSeq) loading.value = false;
     });
 }
 function detail(v) {
@@ -454,14 +478,19 @@ function orderStatusClick(name) {
   getDataList();
 }
 function getOrderNumData() {
-  API_Order.getOrderNum(countParams())
+  const requestId = ++countRequestSeq;
+  const fetchCount = props.wechatSync ? API_Order.getWechatOrderNum : API_Order.getOrderNum;
+  fetchCount(countParams())
     .then((res) => {
+      if (requestId !== countRequestSeq) return;
       if (res.success) {
         orderNumData.value = res.result;
+      } else {
+        orderNumData.value = {};
       }
     })
     .catch(() => {
-      orderNumData.value = {};
+      if (requestId === countRequestSeq) orderNumData.value = {};
     });
 }
 
@@ -475,6 +504,9 @@ watch(
     }
   }
 );
+
+// 补报完成后刷新当前筛选和页码，不清空运营人员已选条件。
+defineExpose({ reload: init });
 
 onMounted(() => {
   try {

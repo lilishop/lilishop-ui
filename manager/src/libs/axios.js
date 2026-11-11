@@ -182,10 +182,12 @@ export const postBlobRequest = (url, data) => {
   });
 };
 
-export const postRequest = (url, params, headers) => {
+// 个别需等待外部平台的操作可传超时毫秒数，现有调用保持 8 秒默认值。
+export const postRequest = (url, params, headers, timeout = 8000) => {
   let accessToken = getStore("accessToken");
   return service({
     method: "post",
+    timeout,
     url: `${url}`,
     data: params,
     transformRequest: headers

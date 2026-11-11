@@ -78,6 +78,15 @@ export const getOrderList = (params) => {
   return getRequest(`/order/order`, params)
 }
 
+// 小程序专用接口由服务端固定来源与微信支付范围，并回填本地上报结果。
+export const getWechatOrderList = (params) => getRequest('/order/order/wechat', params)
+// 状态统计与专用列表共用上报状态筛选。
+export const getWechatOrderNum = (params) => getRequest('/order/order/wechat/orderNum', params)
+// 人工补报复用支付流水锁和真实履约校验，不受自动上报开关限制。
+export const retryWechatOrder = (sn) => postRequest(`/order/order/wechat/${encodeURIComponent(sn)}/retry`, {}, undefined, 120000)
+// 查询同笔微信支付下的操作日志，不返回原始支付和物流凭据。
+export const getWechatOrderLogs = (sn, params) => getRequest(`/order/order/wechat/${encodeURIComponent(sn)}/logs`, params)
+
 //  导出订单列表
 export const exportOrder = (params) => {
   return getRequest(`/order/order/queryExportOrder`, params,'blob')
