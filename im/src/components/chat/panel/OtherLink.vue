@@ -295,7 +295,7 @@ function formatDateToString(date) {
   // margin-left: 12px;
 }
 :deep(.el-tabs__nav-scroll) {
-  min-width: 362px;
+  min-width: 0;
 }
 :deep(.el-tabs__item) {
   height: 100%;

@@ -272,6 +272,12 @@ class WsSocket {
    * @param {Object} evt Websocket 消息
    */
   onMessage(evt) {
+    // 图片权限校验失败属于系统反馈，不能当成聊天消息插入记录。
+    const envelope = JSON.parse(evt.data);
+    if (envelope.messageResultType === "SYSTEM_TIPS") {
+      this.onCallBacks["event_error"]?.(envelope.result);
+      return;
+    }
     let result = this.onParse(evt);
     // 部分推送（在线状态、系统通知等）没有 text 字段，不做商品/群名解析直接透传
     const text = result.text;

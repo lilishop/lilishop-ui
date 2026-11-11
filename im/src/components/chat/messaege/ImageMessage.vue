@@ -1,11 +1,11 @@
 <template>
   <div class="image-message no-select">
     <el-image
-      fit="cover"
+      fit="contain"
       :src="src"
-      :lazy="true"
       :style="getImgStyle(src)"
       :preview-src-list="[src]"
+      preview-teleported
     >
       <template #error>
         <div class="image-slot">图片加载失败...</div>
@@ -29,6 +29,10 @@ defineProps({
 })
 
 function getImgStyle(url) {
+  // 商城上传地址不携带尺寸，提供可见的预览区域；原尺寸后缀仍沿用旧展示规则。
+  if (!/\d+x\d+/.test(url.split('_').pop())) {
+    return { width: '200px', height: '200px', maxWidth: '100%' }
+  }
   return imgZoom(url, 200)
 }
 </script>

@@ -153,10 +153,12 @@ export const del = (url, data = {}, options = {}) => {
  * @returns {Promise<any>}
  */
 export const upload = (url, data = {}, options = {}) => {
+  // 默认沿用买家上传地址；客服图片显式选择 IM 服务，不将文件发往通用上传入口。
+  const { apiBase = config.BASE_BUYER, ...requestOptions } = options;
   return request({
-    url: config.BASE_BUYER + url,
+    url: apiBase + url,
     method: "post",
     data: data,
-    ...options,
+    ...requestOptions,
   });
 };

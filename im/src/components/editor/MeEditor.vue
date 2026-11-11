@@ -21,11 +21,11 @@
             <legacy-el-icon name="el-icon-headset" />
             <p class="tip-title">语音消息</p>
           </li> -->
-          <!-- #TODO 发图片功能暂时隐藏 此处会涉及到token过期 -->
-          <!-- <li @click="$refs.restFile.click()">
+          <li role="button" tabindex="0" aria-label="发送图片" @click="restFile.click()"
+            @keydown.enter="restFile.click()" @keydown.space.prevent="restFile.click()">
             <legacy-el-icon name="el-icon-picture-outline-round" />
             <p class="tip-title">图片</p>
-          </li> -->
+          </li>
           <!-- <li @click="$refs.restFile2.click()">
             <legacy-el-icon name="el-icon-folder" />
             <p class="tip-title">附件</p>
@@ -117,8 +117,12 @@ import {
 } from "@/api/chat";
 
 defineOptions({ name: "MeEditor" });
+const props = defineProps({
+  // 后端 li_im_talk.id；不使用接收方 ID 代替会话 ID，避免图片存入错误会话。
+  talkId: { type: String, default: "" },
+});
 
-const emit = defineEmits(["keyboard-event", "send"]);
+const emit = defineEmits(["keyboard-event", "send", "send-image"]);
 
 const dialogueStore = useDialogueStore();
 
@@ -141,6 +145,10 @@ const imageViewer = reactive({
   isShow: false,
   file: null,
 });
+// 预览绑定原会话，上传期间切换会话后不发送，避免图片误发。
+let imageTalk = null;
+let imageTalkId = null;
+let uploadingImage = false;
 
 const codeBlock = reactive({
   isShow: false,
@@ -165,6 +173,8 @@ const sendtime = ref(0);
 const interval = ref(1000);
 
 watch(talkUser, (n_index_name) => {
+  imageViewer.isShow = false;
+  imageViewer.file = null;
   fileManageRef.value?.clear();
   editorText.value = getDraftText(n_index_name);
 });
@@ -253,6 +263,21 @@ function uploadFileChange(e) {
 
 // 打开图片查看器
 function openImageViewer(file) {
+  if (!file || uploadingImage) return;
+  if (!props.talkId) {
+    ElNotification.warning({ message: "会话尚未就绪，请稍后重试" });
+    return;
+  }
+  if (!/^image\/(png|jpeg|gif|webp)$/i.test(file.type) || !file.size) {
+    ElNotification.warning({ message: "请选择有效的 PNG、JPG、GIF 或 WebP 图片" });
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    ElNotification.warning({ message: "图片不能大于10MB" });
+    return;
+  }
+  imageTalk = talkUser.value;
+  imageTalkId = props.talkId;
   imageViewer.isShow = true;
   imageViewer.file = file;
 }
@@ -278,29 +303,34 @@ function confirmCodeBlock(data) {
   });
 }
 
-// 确认上传图片消息回调事件
-function confirmUploadImage() {
-  let fileData = new FormData();
-  fileData.append("file", imageViewer.file);
-
-  let imageView = imageViewerRef.value;
-
-  ServeSendTalkImage(fileData)
-    .then((res) => {
-      imageView.loading = false;
-      if (res.code == 200) {
-        imageView.closeBox();
-      } else {
-        ElNotification({
-          title: "友情提示",
-          message: res.message,
-          type: "warning",
-        });
-      }
-    })
-    .finally(() => {
-      imageView.loading = false;
-    });
+// 上传返回地址后通过现有消息通道发送；失败保留预览以便重试。
+async function confirmUploadImage() {
+  if (uploadingImage) return;
+  const imageView = imageViewerRef.value;
+  const targetTalk = imageTalk;
+  const targetTalkId = imageTalkId;
+  uploadingImage = true;
+  try {
+    const fileData = new FormData();
+    fileData.append("file", imageViewer.file);
+    fileData.append("talkId", targetTalkId);
+    const res = await ServeSendTalkImage(fileData);
+    if (res.code !== 200 || typeof res.result !== "string" || !/^https?:\/\//i.test(res.result)) {
+      throw new Error(res.message || "图片上传失败，请重试");
+    }
+    if (targetTalk !== talkUser.value || targetTalkId !== props.talkId || !imageViewer.isShow) {
+      ElNotification.warning({ message: "会话已切换，图片未发送，请在目标会话重新选择" });
+      return;
+    }
+    emit("send-image", res.result);
+    imageView.loading = false;
+    imageView.closeBox();
+  } catch (error) {
+    ElNotification.error({ message: error.message || "图片上传失败，请重试" });
+  } finally {
+    uploadingImage = false;
+    imageView.loading = false;
+  }
 }
 
 // 选中表情包回调事件

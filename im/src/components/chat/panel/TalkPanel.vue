@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <el-container class="ov-hidden flex-10 full-height ">
+    <el-container class="ov-hidden flex-10 full-height chat-main">
       <PanelHeader ref="panelHeader" :data="params" :online="isOnline" :keyboard="inputEvent"
         @event="handleHeaderEvent" />
       <!-- 主体信息 -->
@@ -65,7 +65,7 @@
                       <pre v-if="!emojistwo.includes(item.text)" v-html="item.text" />
                       <pre v-if="emojistwo.includes(item.text)" v-html="textReplaceEmoji(item.text)" />
                     </div>
-                   
+                    <ImageMessage v-if="item.messageType === 'PICTURE'" :src="item.text" />
                   </div>
                    <div v-if="item.webSocketStatus" class="tips">网络异常发送失败，请重新发送。</div>
 
@@ -163,7 +163,7 @@
       <!-- 页脚信息 -->
       <el-footer class="footer-box" height="180">
         <template v-if="multiSelect.isOpen === false">
-          <MeEditor @send="submitSendMessage" @keyboard-event="onKeyboardEvent" />
+          <MeEditor :talk-id="params.talkId" @send="submitSendMessage" @send-image="submitSendImage" @keyboard-event="onKeyboardEvent" />
         </template>
         <template v-else>
           <PanelToolbar v-model="multiSelect.items.length" @event="handleMultiMode" />
@@ -185,7 +185,7 @@
     </transition>
 
     <!-- 链接信息 -->
-    <OtherLink :toUser="toUser" :id="id" :goodsParams="goodsParams" class="flex-4" />
+    <OtherLink :toUser="toUser" :id="id" :goodsParams="goodsParams" class="chat-sidebar" />
   </div>
 </template>
 <script setup>
@@ -202,6 +202,7 @@ import { textReplaceEmoji, emojistwo } from "@/utils/emojis";
 import OtherLink from "@/components/chat/panel/OtherLink.vue";
 import TalkSearchRecord from "@/components/chat/TalkSearchRecord";
 import MeEditor from "@/components/editor/MeEditor";
+import ImageMessage from "@/components/chat/messaege/ImageMessage.vue";
 import PanelHeader from "./PanelHeader";
 import PanelToolbar from "./PanelToolbar";
 import SocketInstance from "@/im-server/socket-instance";
@@ -414,16 +415,21 @@ function formateDateAndTimeToString(date) {
 // 重新发送消息
 function againSendMessage(val) {
 
-  submitSendMessage(val.text)
+  submitSendMessage(val.text, val.messageType)
 }
 
-// 回车键发送消息回调事件
-function submitSendMessage(content) {
+// 发送已上传图片，复用消息发送和失败重发流程。
+function submitSendImage(url) {
+  submitSendMessage(url, "PICTURE");
+}
+
+// 发送文本或图片，重发保持原类型，发送图片时保留文字草稿。
+function submitSendMessage(content, messageType = "MESSAGE") {
   const record = {
     operation_type: "MESSAGE",
     to: props.params.receiver_id,
     from: id.value,
-    message_type: "MESSAGE",
+    message_type: messageType,
     context: content,
     talk_id: props.params.talkId,
   };
@@ -434,7 +440,7 @@ function submitSendMessage(content) {
 
   talkStore.UPDATE_TALK_ITEM({
     index_name: index_name.value,
-    draft_text: "",
+    ...(messageType === "MESSAGE" ? { draft_text: "" } : {}),
   });
 
   /**
@@ -445,7 +451,8 @@ function submitSendMessage(content) {
     fromUser: id.value,
     toUser: record.to,
     isRead: false,
-    messageType: "MESSAGE",
+    messageType,
+    talkId: record.talk_id,
     text: content,
     float: "right",
   };
@@ -465,7 +472,7 @@ function submitSendMessage(content) {
     });
   } else {
     talkStore.SET_TLAK_UNREAD_MESSAGE({
-      content: content,
+      content: messageType === "PICTURE" ? "[图片]" : content,
       nickname: record.name,
     });
   }
@@ -889,6 +896,17 @@ function talkPanelScrollBottom() {
 }
 </script>
 <style lang="less" scoped>
+/* 固定侧栏宽度，防止 tab 内容最小宽度挤压聊天区域。 */
+.chat-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.chat-sidebar {
+  flex: 0 0 362px;
+  width: 362px;
+  min-width: 0;
+  overflow: hidden;
+}
 .flex-a-c{
   align-items: center;
   >div{

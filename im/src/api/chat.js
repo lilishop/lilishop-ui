@@ -1,4 +1,5 @@
 import { post, get, upload, del } from "@/utils/request";
+import config from "@/config/config";
 
 // 获取聊天列表服务接口
 export const ServeGetTalkList = (data) => {
@@ -69,9 +70,9 @@ export const ServeSendTalkFile = (data) => {
   return post("/im/talk/message/file", data);
 };
 
-// 发送聊天图片服务接口
+// 上传客服图片到独立 OSS；FormData 必须包含会话 ID，店铺及目录由后端推导。
 export const ServeSendTalkImage = (data) => {
-  return upload("/buyer/common/upload/file", data);
+  return upload("/im/message/image", data, { apiBase: config.BASE_API_URL });
 };
 
 // 发送表情包服务接口

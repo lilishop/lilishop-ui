@@ -62,7 +62,10 @@ function closeBox() {
   emit('close', false)
 }
 
+// 清理切换会话后的预览，仅对有效文件读取内容。
 function loadFile(file) {
+  src.value = ''
+  if (!file) return
   let reader = new FileReader()
   fileSize.value = Math.ceil(file.size / 1024)
   fileName.value = file.name
@@ -75,6 +78,7 @@ function loadFile(file) {
 
 // 确认按钮事件
 function uploadImage() {
+  if (loading.value || !src.value) return
   loading.value = true
   emit('confirm')
 }

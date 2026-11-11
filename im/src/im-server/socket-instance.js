@@ -1,4 +1,5 @@
 import { useAppStore } from "@/stores/app";
+import { useDialogueStore } from "@/stores/dialogue";
 import config from "@/config/config";
 import WsSocket from "@/plugins/ws-socket";
 import { getToken } from "@/utils/auth";
@@ -86,6 +87,15 @@ class SocketInstance {
     });
 
     this.socket.on("event_error", (data) => {
+      // 将被服务端拒绝的图片标记为失败，避免乐观展示被误认为发送成功。
+      if (data.pictureUrl) {
+        useDialogueStore().records.forEach((record) => {
+          if (record.messageType === "PICTURE" && record.float === "right"
+              && record.talkId === data.talkId && record.text === data.pictureUrl) {
+            record.webSocketStatus = true;
+          }
+        });
+      }
       ElNotification({
         title: "友情提示",
         message: data.message,
