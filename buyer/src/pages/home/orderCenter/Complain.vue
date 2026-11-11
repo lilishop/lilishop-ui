@@ -90,6 +90,11 @@ const reasonList = ref([]); // 投诉原因
 
 function getOrderDetail() { // 获取订单详情
   orderDetail(route.query.sn).then(res => {
+    if (res.result?.order?.orderStatus === 'CANCELLED') {
+      Message.warning('订单已取消，无法发起投诉');
+      router.push({ name: 'MyOrder' });
+      return;
+    }
     order.value = res.result
     orderGoods.value = res.result.orderItems[route.query.index]
     orderGoods.value.uploadList = []

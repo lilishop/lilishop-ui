@@ -297,7 +297,11 @@
                 @click="comment(order.order.sn, goodsIndex)"
               >评价</button>
               <el-button
-                v-if="goods.complainStatus == 'NO_APPLY'"
+                v-if="
+                  order.order?.orderStatus !== 'CANCELLED' &&
+                  order.order?.payStatus === 'PAID' &&
+                  goods.complainStatus == 'NO_APPLY'
+                "
                 @click="complain(order.order.sn, goodsIndex)"
                 type="danger"
                 size="small"
@@ -306,6 +310,7 @@
               <el-button
                 v-if="
                   !isECouponOrder &&
+                  order.order?.orderStatus !== 'CANCELLED' &&
                   (goods.afterSaleStatus.includes('NOT_APPLIED') ||
                     goods.afterSaleStatus.includes('PART_AFTER_SALE'))
                 "
