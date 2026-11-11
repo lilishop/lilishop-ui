@@ -317,12 +317,14 @@ watch(() => appStore.tagsList, () => {
 appStore.setOpenedList();
 
 onMounted(() => {
+  document.body.classList.add("seller-has-sidebar");
   init();
   resize();
   window.addEventListener("resize", resize);
 });
 
 onBeforeUnmount(() => {
+  document.body.classList.remove("seller-has-sidebar");
   window.removeEventListener("resize", resize);
 });
 </script>

@@ -559,7 +559,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="fulfillModal" title="订单发货" width="1200px">
+    <el-dialog v-model="fulfillModal" title="订单发货" width="1200px" append-to-body>
       <div v-if="showFulfillModeSelector" class="fulfill-mode-selector">
         <el-radio-group v-model="fulfillForm.fulfillmentMode">
           <el-radio v-if="allowOperation.fulfillWhole" label="WHOLE">整单发货</el-radio>

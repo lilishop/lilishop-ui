@@ -144,3 +144,40 @@
       url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23c0c4cc' stroke-width='2' stroke-linejoin='round'><path d='M8 36l8-20h32l8 20v12a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V36z'/><path d='M8 36h16a8 8 0 0 0 16 0h16'/></svg>");
   }
 }
+
+
+/*
+ * 商家端固定左侧 300px 菜单布局下的 Dialog 弹窗居中与边界保护 (Issue #IKUDFL)
+ * 1. 扣除左侧 300px 菜单宽度，将弹窗容器限定在右侧内容工作区内，使得弹窗自然以工作区为中心水平居中，不再全屏居中；
+ * 2. 弹窗最大宽度限制在 calc(100% - 40px)，在中低分辨率（如 1440px/1600px）下左右预留各 20px 边距，避免大尺寸弹窗（如 1200px）溢出或贴紧菜单；
+ * 3. 兼容未挂载至 body 的弹窗，当内容区内弹窗展开时提升 .single-page-con 层级，避免被菜单(z-index: 21)遮挡。
+ */
+body.seller-has-sidebar,
+.main {
+  .el-overlay-dialog {
+    left: 300px;
+    width: calc(100vw - 300px);
+    box-sizing: border-box;
+  }
+
+  .el-overlay-dialog .el-dialog {
+    max-width: calc(100% - 40px);
+    box-sizing: border-box;
+  }
+}
+
+/* 移动端/极窄屏兜底：若宽度小于等于 768px 则恢复全屏居中 */
+@media (max-width: 768px) {
+  body.seller-has-sidebar,
+  .main {
+    .el-overlay-dialog {
+      left: 0;
+      width: 100vw;
+    }
+  }
+}
+
+/* 未使用 append-to-body 挂载的局部弹窗，在打开时提升内容区层叠上下文，避免被菜单栏或顶栏压盖 */
+.single-page-con:has(.el-overlay:not([style*="display: none"])) {
+  z-index: 2000;
+}
