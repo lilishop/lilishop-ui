@@ -37,6 +37,8 @@
 <script setup>
 import { computed } from 'vue';
 import Cookies from 'js-cookie';
+import storage from '@/plugins/storage';
+import { logout } from '@/api/account';
 
 const props = defineProps({
   options: {
@@ -69,10 +71,20 @@ const username = computed(() => {
   return '';
 });
 
-function handleLogout() {
+function clearLocalAuth() {
+  storage.removeItem('userInfo');
+  storage.removeItem('accessToken');
+  storage.removeItem('refreshToken');
+  storage.removeItem('cartNum');
   Cookies.remove('userInfo');
   Cookies.remove('accessToken');
   window.location.reload();
+}
+
+function handleLogout() {
+  logout().finally(() => {
+    clearLocalAuth();
+  });
 }
 
 const customStyle = computed(() => {

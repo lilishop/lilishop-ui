@@ -2,11 +2,14 @@ import { computed, onMounted, ref } from "vue";
 import { getBaseSite } from "@/api/common.js";
 import config from "@/config";
 
-// 同页的页头、页脚共享请求；每次重新进入页面时刷新，避免旧缓存覆盖后台设置。
+// 全局共享站点配置；应用生命周期内仅拉取一次，同页与切页均复用请求与结果。
 const settings = ref(null);
-let pendingRequest;
+let pendingRequest = null;
 
 export function loadSiteSettings() {
+  if (settings.value) {
+    return Promise.resolve(settings.value);
+  }
   if (!pendingRequest) {
     pendingRequest = getBaseSite()
       .then((res) => {
@@ -16,7 +19,9 @@ export function loadSiteSettings() {
         return settings.value;
       })
       .catch(() => settings.value)
-      .finally(() => { pendingRequest = null; });
+      .finally(() => {
+        pendingRequest = null;
+      });
   }
   return pendingRequest;
 }

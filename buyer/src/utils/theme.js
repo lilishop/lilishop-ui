@@ -69,27 +69,39 @@ export function normalizeTheme(data = {}) {
   };
 }
 
+let pendingThemeRequest = null;
+
 export async function fetchAndApplyTheme(requestFn) {
   const cachedTheme = loadCachedTheme();
   if (cachedTheme) {
     applyThemeToDocument(normalizeTheme(cachedTheme));
   }
 
-  try {
-    const res = await requestFn();
-    if (res?.success && res?.result?.settingValue) {
-      const data = JSON.parse(res.result.settingValue);
-      const normalized = normalizeTheme(data);
-      applyThemeToDocument(normalized);
-      cacheTheme(normalized);
-      return normalized;
-    }
-  } catch (error) {
-    console.warn(
-      "[theme] 主题色加载失败，请确认 buyer-api 已启动且站点主题配置可用",
-      error
-    );
+  if (pendingThemeRequest) {
+    return pendingThemeRequest;
   }
 
-  return cachedTheme ? normalizeTheme(cachedTheme) : normalizeTheme();
+  pendingThemeRequest = (async () => {
+    try {
+      const res = await requestFn();
+      if (res?.success && res?.result?.settingValue) {
+        const data = JSON.parse(res.result.settingValue);
+        const normalized = normalizeTheme(data);
+        applyThemeToDocument(normalized);
+        cacheTheme(normalized);
+        return normalized;
+      }
+    } catch (error) {
+      console.warn(
+        "[theme] 主题色加载失败，请确认 buyer-api 已启动且站点主题配置可用",
+        error
+      );
+    } finally {
+      pendingThemeRequest = null;
+    }
+
+    return cachedTheme ? normalizeTheme(cachedTheme) : normalizeTheme();
+  })();
+
+  return pendingThemeRequest;
 }

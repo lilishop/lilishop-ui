@@ -8,8 +8,7 @@
 import { onMounted } from "vue";
 import { useRoute } from "vue-router";
 import storage from "@/plugins/storage";
-import { getBaseSite, getThemeSetting } from "@/api/common.js";
-import { fetchAndApplyTheme } from "@/utils/theme";
+import { loadSiteSettings } from "@/composables/useSiteSettings";
 import { useAppStore } from "@/stores/app";
 
 defineOptions({ name: "App" });
@@ -49,27 +48,15 @@ function init() {
     });
   }
   getSite();
-  getTheme();
 }
 
 function getSite() {
-  getBaseSite().then((res) => {
-    if (res.success && res.result.settingValue) {
-      try {
-        const data = JSON.parse(res.result.settingValue);
-        applySiteInfo(data);
-      } catch {
-        // 站点配置解析失败时使用缓存
-      }
+  loadSiteSettings().then((data) => {
+    if (data) {
+      applySiteInfo(data);
     }
   }).catch((err) => {
-    console.warn('获取站点配置失败', err);
-  });
-}
-
-function getTheme() {
-  fetchAndApplyTheme(getThemeSetting).catch((err) => {
-    console.warn('获取主题配置失败', err);
+    console.warn("获取站点配置失败", err);
   });
 }
 
