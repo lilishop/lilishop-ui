@@ -33,8 +33,8 @@
             <el-input v-model="item.title" maxlength="10" />
           </div>
           <div class="btn-row">
-            <el-button plain type="primary" @click="pickImage(item)">选择照片</el-button>
-            <el-button plain type="primary" @click="pickLink(item)">选择链接</el-button>
+            <el-button plain type="primary" size="small" @click="pickImage(item)">选择照片</el-button>
+            <el-button plain type="primary" size="small" @click="pickLink(item)">选择链接</el-button>
           </div>
           <div class="link-view" v-if="item.url && item.url.___type">
             已选链接：{{ linkText(item.url) }}
@@ -312,7 +312,13 @@ export default {
 }
 .btn-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  :deep(.el-button),
+  .el-button {
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+  }
 }
 .link-view {
   margin-top: 8px;

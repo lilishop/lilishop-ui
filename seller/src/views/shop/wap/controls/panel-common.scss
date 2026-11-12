@@ -177,3 +177,14 @@
     box-sizing: border-box;
   }
 }
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  :deep(.el-button),
+  .el-button {
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+  }
+}

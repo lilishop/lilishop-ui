@@ -23,8 +23,8 @@
         </div>
         <div class="img-placeholder" v-else>尺寸不限</div>
         <div class="btn-row">
-          <el-button plain type="primary" @click="pickImage">选择照片</el-button>
-          <el-button plain type="primary" @click="openHotzone">绘制热区</el-button>
+          <el-button plain type="primary" size="small" @click="pickImage">选择照片</el-button>
+          <el-button plain type="primary" size="small" @click="openHotzone">绘制热区</el-button>
         </div>
       </div>
     </template>
@@ -263,6 +263,12 @@ export default {
 }
 .btn-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  :deep(.el-button),
+  .el-button {
+    flex: 1;
+    min-width: 0;
+    margin: 0 !important;
+  }
 }
 </style>

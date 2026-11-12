@@ -73,8 +73,8 @@
 
 .decorate {
   padding: 0 20px;
-  height: calc(100vh - 96px);
-  overflow-y: auto;
+  min-height: 100%;
+  box-sizing: border-box;
   background: #f5f7fa;
 }
 

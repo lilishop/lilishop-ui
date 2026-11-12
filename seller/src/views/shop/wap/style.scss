@@ -5,8 +5,8 @@
   min-width: 0;
   overflow-x: auto;
   .model-view-menu {
-    flex: 1.5;
-    min-width: 250px;
+    flex: 0 0 250px;
+    width: 250px;
     overflow-y: auto;
     background: #ffffff;
     border-radius: 8px;
@@ -41,13 +41,16 @@
       }
     }
   }
-  .model-config {
-    flex: 2.5;
-    min-width: 380px;
-  }
   .model-view-content {
-    flex: 6;
-    min-width: 400px;
+    flex: 1;
+    min-width: 520px;
+  }
+  .model-config {
+    flex: 0 0 420px;
+    width: 420px;
+    min-width: 420px;
+    overflow-y: auto;
+    box-sizing: border-box;
   }
   .model-item {
     line-height: 1.4;
