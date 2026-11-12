@@ -10,7 +10,7 @@
         />
       </el-tabs>
       <div class="operation mb_10">
-        <el-button type="primary" @click="createTemp">添加页面</el-button>
+        <el-button type="primary" tag="a" :href="addHref" target="_blank" class="add-page-btn">添加页面</el-button>
       </div>
       <el-table v-loading="loading" :data="list" style="width: 100%">
         <el-table-column prop="name" label="页面名称" min-width="180" show-overflow-tooltip>
@@ -42,7 +42,7 @@
             <template v-if="row">
               <a class="link-text" @click="Template(row)">编辑</a>
               <span class="op-split">|</span>
-              <a class="link-text" @click="decorate(row)">装修</a>
+              <a class="link-text" :href="decorateHref(row)" target="_blank">装修</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="confirmDel(row.id)">删除</a>
             </template>
@@ -85,7 +85,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import * as API_floor from "@/api/other.js";
 import { Message, Modal } from "@/utils/message";
@@ -155,12 +155,22 @@ function handleTabChange(type) {
   getTemplateList();
 }
 
-function createTemp() {
-  router.push({
+const addHref = computed(
+  () =>
+    router.resolve({
+      name: "renovation",
+      query: { pageType: searchForm.pageType },
+    }).href
+);
+
+function decorateHref(val) {
+  const data = { id: val.id, pageShow: val.pageShow, pageType: searchForm.pageType };
+  return router.resolve({
     name: "renovation",
-    query: { pageType: searchForm.pageType },
-  });
+    query: data,
+  }).href;
 }
+
 
 function Template(item) {
   item.status = item.pageShow;
@@ -168,14 +178,6 @@ function Template(item) {
   showModal.value = true;
 }
 
-function decorate(val) {
-  const data = { id: val.id, pageShow: val.pageShow, pageType: searchForm.pageType };
-
-  router.push({
-    name: "renovation",
-    query: data,
-  });
-}
 
 function changePageNum(val) {
   searchForm.pageNumber = val;
@@ -247,5 +249,8 @@ function delTemplate(id) {
 <style lang="scss" scoped>
 .page-type-tabs {
   margin-bottom: 16px;
+}
+.add-page-btn {
+  text-decoration: none;
 }
 </style>

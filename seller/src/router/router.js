@@ -15,6 +15,26 @@ export const forgetPasswordRouter = {
   component: () => import("@/views/ForgetPassword.vue")
 };
 
+// 移动端楼层装修编辑器：全屏独立页，不在 Main（左侧菜单）布局内
+export const floorDecorationRouter = {
+  path: "/floorList/main",
+  name: "main",
+  meta: {
+    title: "移动装修"
+  },
+  component: () => import("@/views/shop/wap/main.vue")
+};
+
+// PC端楼层装修编辑器：全屏独立页，不在 Main（左侧菜单）布局内
+export const pcFloorDecorationRouter = {
+  path: "/pcFloorList/main",
+  name: "renovation",
+  meta: {
+    title: "PC装修"
+  },
+  component: () => import("@/views/shop/renovation.vue")
+};
+
 // 作为Main组件的子页面展示但是不在左侧菜单显示的路由写在otherRouter里
 export const otherRouter = {
   path: "/",
@@ -169,20 +189,6 @@ export const otherRouter = {
       component: () => import("@/views/order/order/orderVerification.vue")
     },
     {
-      path: "/floorList/main",
-      title: "移动装修",
-      name: "main",
-      meta: { title: "移动装修" },
-      component: () => import("@/views/shop/wap/main.vue"),
-    },
-    {
-      path: "/pcFloorList/main",
-      title: "PC装修",
-      name: "renovation",
-      meta: { title: "PC装修" },
-      component: () => import("@/views/shop/renovation.vue"),
-    },
-    {
       path: "order-complaint-detail",
       title: "投诉详情",
       name: "order-complaint-detail",
@@ -279,6 +285,27 @@ export const otherRouter = {
       component: () => import("@/views/procurement/damage-report/operation.vue")
     },
     {
+      path: "stock/outbound/list",
+      title: "领用出库",
+      name: "stockOutboundList",
+      meta: { title: "领用出库" },
+      component: () => import("@/views/stock/outbound/list.vue")
+    },
+    {
+      path: "stock/outbound/operation",
+      title: "出库单操作",
+      name: "stock-outbound-operation",
+      meta: { title: "出库单操作" },
+      component: () => import("@/views/stock/outbound/operation.vue")
+    },
+    {
+      path: "stock/flow/list",
+      title: "库存流水",
+      name: "stockFlowList",
+      meta: { title: "库存流水" },
+      component: () => import("@/views/stock/flow/list.vue")
+    },
+    {
       path: "alertQuantityWarnList",
       title: "预警商品",
       name: "alertQuantityWarnList",
@@ -342,4 +369,4 @@ export const page500 = {
   component: () => import("@/views/error-page/500.vue")
 };
 // 所有上面定义的路由都要写在下面的routers里
-export const routers = [loginRouter, forgetPasswordRouter, otherRouter, page500, page403];
+export const routers = [loginRouter, forgetPasswordRouter, floorDecorationRouter, pcFloorDecorationRouter, otherRouter, page500, page403];

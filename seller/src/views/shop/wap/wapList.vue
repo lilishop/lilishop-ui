@@ -10,7 +10,7 @@
         />
       </el-tabs>
       <div class="operation mb_10">
-        <el-button type="primary" @click="handleAdd()">添加页面</el-button>
+        <el-button type="primary" tag="a" :href="addHref" target="_blank" class="add-page-btn">添加页面</el-button>
       </div>
       <el-table v-loading="loading" :data="list" style="width: 100%">
         <el-table-column prop="name" label="页面名称" min-width="180" show-overflow-tooltip>
@@ -35,7 +35,7 @@
         <el-table-column label="操作" width="150" align="right" fixed="right">
           <template #default="{ row }">
             <template v-if="row">
-              <a class="link-text" @click="handleEdit(row)">修改</a>
+              <a class="link-text" :href="editHref(row)" target="_blank">修改</a>
               <span class="op-split">|</span>
               <a class="link-text" @click="confirmDel(row)">删除</a>
             </template>
@@ -59,7 +59,7 @@
   </div>
 </template>
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Message, Modal } from "@/utils/message";
 import * as API_Other from "@/api/other.js";
@@ -152,8 +152,16 @@ function init() {
   });
 }
 
-function handleEdit(val) {
-  router.push({
+const addHref = computed(
+  () =>
+    router.resolve({
+      path: "/floorList/main",
+      query: { pagetype: params.pageType, mode: "add" },
+    }).href
+);
+
+function editHref(val) {
+  const { href } = router.resolve({
     path: "/floorList/main",
     query: {
       id: val.id,
@@ -162,14 +170,9 @@ function handleEdit(val) {
       pagetype: params.pageType,
     },
   });
+  return href;
 }
 
-function handleAdd() {
-  router.push({
-    path: "/floorList/main",
-    query: { pagetype: params.pageType },
-  });
-}
 
 function changePageSize(v) {
   params.pageNumber = 1;
@@ -199,5 +202,8 @@ function handleDel(val) {
 <style scoped lang="scss">
 .page-type-tabs {
   margin-bottom: 16px;
+}
+.add-page-btn {
+  text-decoration: none;
 }
 </style>

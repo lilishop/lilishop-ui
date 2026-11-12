@@ -2,6 +2,8 @@
   display: flex;
   gap: 12px;
   height: calc(100vh - 96px);
+  min-width: 0;
+  overflow-x: auto;
   .model-view-menu {
     flex: 1.5;
     min-width: 250px;
@@ -41,9 +43,11 @@
   }
   .model-config {
     flex: 2.5;
+    min-width: 380px;
   }
   .model-view-content {
     flex: 6;
+    min-width: 400px;
   }
   .model-item {
     line-height: 1.4;

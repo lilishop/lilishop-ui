@@ -177,6 +177,7 @@ const layoutOptions = computed(() => {
   ];
 });
 
+/* eslint-disable vue/no-side-effects-in-computed-properties */
 const compStyle = computed(() => {
   if (!props.component) return {};
   if (!props.component.componentStyle) {

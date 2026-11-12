@@ -254,6 +254,7 @@ function goBack() {
   if (window.history.state?.back) {
     router.go(-1);
   } else {
+    window.close();
     router.push("/wapList");
   }
 }

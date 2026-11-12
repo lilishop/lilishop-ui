@@ -419,8 +419,7 @@ const ALL_COMPONENT_DEFINITIONS = [
       url: '',
       autoPlay: false,
       loop: false,
-      controls: true,
-      height: 450
+      controls: true
     },
 
     defaultComponentStyle: {
