@@ -284,27 +284,7 @@ export const otherRouter = {
       name: "procurement-damage-report-operation",
       component: () => import("@/views/procurement/damage-report/operation.vue")
     },
-    {
-      path: "stock/outbound/list",
-      title: "领用出库",
-      name: "stockOutboundList",
-      meta: { title: "领用出库" },
-      component: () => import("@/views/stock/outbound/list.vue")
-    },
-    {
-      path: "stock/outbound/operation",
-      title: "出库单操作",
-      name: "stock-outbound-operation",
-      meta: { title: "出库单操作" },
-      component: () => import("@/views/stock/outbound/operation.vue")
-    },
-    {
-      path: "stock/flow/list",
-      title: "库存流水",
-      name: "stockFlowList",
-      meta: { title: "库存流水" },
-      component: () => import("@/views/stock/flow/list.vue")
-    },
+
     {
       path: "alertQuantityWarnList",
       title: "预警商品",
