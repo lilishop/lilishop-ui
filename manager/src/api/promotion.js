@@ -147,6 +147,11 @@ export const getCouponActivityList = params => {
   return getRequest("/promotion/couponActivity", params);
 };
 // 关闭优惠券活动
+// 获取优惠券礼包H5推广二维码及链接
+export const getCouponPackageQrCode = (id, params) => {
+  return getRequest(`/promotion/couponActivity/package/qrcode/${id}`, params);
+};
+
 export const closeActivity = id => {
   return deleteRequest(`/promotion/couponActivity/${id}`);
 };

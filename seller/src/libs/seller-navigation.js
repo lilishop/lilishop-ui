@@ -29,6 +29,7 @@ const DETAIL_MENUS = {
   "procurement-inbound-operation": ["procurementInboundList"],
   "procurement-inventory-count-detail": ["procurementInventoryCountList"],
   "procurement-damage-report-operation": ["procurementDamageReportList"],
+  "stock-outbound-operation": ["stockOutboundList"],
 };
 
 /** 将权限树展开为带栏目与分组信息的可跳转菜单，用于搜索和路由定位。 */

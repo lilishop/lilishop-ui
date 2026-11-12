@@ -202,7 +202,11 @@ const form = reactive({
 watch(
   () => route.query.couponActivityType,
   (type) => {
-    if (["REGISTERED", "SPECIFY", "AUTO_COUPON"].includes(type)) {
+    if (["REGISTERED", "SPECIFY", "AUTO_COUPON", "COUPON_PACKAGE"].includes(type)) {
+      if (type === "COUPON_PACKAGE") {
+        form.couponFrequencyEnum = "DAY";
+        form.activityScope = "ALL";
+      }
       form.couponActivityType = type;
     }
   },

@@ -5,6 +5,7 @@
         <el-button type="primary" plain @click="addRegistered">注册赠券</el-button>
         <el-button type="primary" plain @click="addSpecify">精准发券</el-button>
         <el-button type="primary" plain @click="addAutoCoupon">自动赠券</el-button>
+        <el-button type="success" plain @click="addCouponPackage">创建券礼包</el-button>
       </div>
 
       <el-table
@@ -47,6 +48,8 @@
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="info(row)">查看</a>
+              <span class="op-split">|</span>
+              <a class="link-text" @click="openQrCode(row)">推广码</a>
               <template
                 v-if="(!checked && row.promotionStatus === 'START') || row.promotionStatus === 'NEW'"
               >
@@ -70,6 +73,22 @@
           @size-change="changePageSize"
         />
       </div>
+          <!-- 推广二维码弹窗 -->
+      <el-dialog v-model="qrCodeDialogVisible" title="券礼包 H5 推广二维码" width="440px" align-center>
+        <div style="text-align: center; padding: 10px 0;">
+          <div v-if="qrCodeLoading" style="padding: 30px 0;">
+            <div style="color: #999;">正在生成推广二维码...</div>
+          </div>
+          <div v-else-if="qrCodeInfo.qrCodeBase64">
+            <img :src="qrCodeInfo.qrCodeBase64" alt="H5推广二维码" style="width: 220px; height: 220px; border: 1px solid #ebeef5; padding: 6px; border-radius: 8px;" />
+            <div style="margin-top: 15px; font-size: 13px; color: #555; word-break: break-all; text-align: left; background: #f8f9fa; padding: 10px; border-radius: 6px;">
+              <div style="font-weight: bold; margin-bottom: 4px;">H5 访问链接：</div>
+              <div style="color: #409eff;">{{ qrCodeInfo.h5Url }}</div>
+            </div>
+            <el-button type="primary" style="margin-top: 15px; width: 100%;" @click="copyH5Url">复制 H5 访问链接</el-button>
+          </div>
+        </div>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -77,7 +96,7 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getCouponActivityList, closeActivity } from "@/api/promotion";
+import { getCouponActivityList, closeActivity, getCouponPackageQrCode } from "@/api/promotion";
 import { Message, Modal } from "@/utils/message";
 
 defineOptions({ name: "coupon-activity" });
@@ -105,6 +124,7 @@ const selectDate = ref([]);
 function activityTypeText(type) {
   const map = {
     REGISTERED: "注册赠券",
+    COUPON_PACKAGE: "优惠券礼包",
     AUTO_COUPON: "自动发券",
   };
   return map[type] || "精准发券";
@@ -147,6 +167,56 @@ function promotionStatusTagType(status) {
 function init() {
   getDataList();
 }
+const qrCodeDialogVisible = ref(false);
+const qrCodeLoading = ref(false);
+const qrCodeInfo = reactive({
+  activityId: "",
+  h5Url: "",
+  qrCodeBase64: "",
+});
+
+function addCouponPackage() {
+  router.push({
+    name: "add-coupon-activity",
+    query: { couponActivityType: "COUPON_PACKAGE" },
+  });
+}
+
+function openQrCode(row) {
+  qrCodeDialogVisible.value = true;
+  qrCodeLoading.value = true;
+  qrCodeInfo.activityId = row.id;
+  qrCodeInfo.h5Url = "";
+  qrCodeInfo.qrCodeBase64 = "";
+
+  getCouponPackageQrCode(row.id)
+    .then((res) => {
+      if (res.success && res.result) {
+        qrCodeInfo.h5Url = res.result.h5Url;
+        qrCodeInfo.qrCodeBase64 = res.result.qrCodeBase64;
+      } else {
+        Message.error(res.message || "生成推广二维码失败");
+      }
+    })
+    .catch(() => {
+      Message.error("获取二维码异常");
+    })
+    .finally(() => {
+      qrCodeLoading.value = false;
+    });
+}
+
+function copyH5Url() {
+  if (!qrCodeInfo.h5Url) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(qrCodeInfo.h5Url).then(() => {
+      Message.success("H5 访问链接已复制到剪贴板！");
+    });
+  } else {
+    Message.success("链接：" + qrCodeInfo.h5Url);
+  }
+}
+
 function addRegistered() {
   router.push({
     name: "add-coupon-activity",
