@@ -73,7 +73,7 @@
                   </div>
                   <div class="goods-num">共{{ goods.num }}件</div>
                   <div class="goods-extra">
-                    <el-tag v-if="refundPriceList(goods.isRefund) && !isUnpaid(order)" type="warning" size="small">{{ refundPriceList(goods.isRefund) }}</el-tag>
+                    <el-tag v-if="canShowRefundTag(order, goods)" type="warning" size="small">{{ refundPriceList(goods.isRefund) }}</el-tag>
                   </div>
                 </div>
               </div>
@@ -160,7 +160,7 @@
                 </div>
                 <div class="goods-num">共{{ goods.num }}件</div>
                 <div class="goods-extra">
-                  <el-tag v-if="refundPriceList(goods.isRefund) && !isUnpaid(order)" type="warning" size="small">{{ refundPriceList(goods.isRefund) }}</el-tag>
+                  <el-tag v-if="canShowRefundTag(order, goods)" type="warning" size="small">{{ refundPriceList(goods.isRefund) }}</el-tag>
                 </div>
               </div>
             </div>
@@ -263,6 +263,11 @@ function refundPriceList(status) {
     default:
       return "";
   }
+}
+function canShowRefundTag (order, goods) {
+  // 未支付订单未发生资金交易，不展示退款标签
+  if (!order || order.payStatus !== 'PAID') return false;
+  return !!refundPriceList(goods?.isRefund);
 }
 function goodsDetail (skuId, goodsId) {
   // 跳转商品详情
@@ -445,13 +450,16 @@ function paymentLabel (order) {
   if (order.paymentMethod && map[order.paymentMethod]) {
     return map[order.paymentMethod]
   }
+  if (order.orderStatus === 'CANCELLED') {
+    return ''
+  }
   if (isUnpaid(order)) {
     return '待支付'
   }
   return ''
 }
 function isUnpaid (order) {
-  return order.payStatus === 'UNPAID' || order.orderStatus === 'UNPAID'
+  return (order.payStatus === 'UNPAID' || order.orderStatus === 'UNPAID') && order.orderStatus !== 'CANCELLED'
 }
 
 watch(() => route.query.tag, () => {
