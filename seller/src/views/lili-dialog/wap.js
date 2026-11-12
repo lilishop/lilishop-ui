@@ -11,11 +11,6 @@ export default [
     name: "category"
   },
   {
-    title: "店铺",
-    url: "2",
-    name: "shops"
-  },
-  {
     title: "活动",
     url: "3",
     name: "marketing"
