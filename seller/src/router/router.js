@@ -285,6 +285,13 @@ export const otherRouter = {
       component: () => import("@/views/procurement/damage-report/operation.vue")
     },
 
+    // 出库单新建、编辑和只读详情共用操作页，不在左侧菜单中单独展示。
+    {
+      path: "stock/outbound/operation",
+      title: "出库单",
+      name: "stock-outbound-operation",
+      component: () => import("@/views/stock/outbound/operation.vue")
+    },
     {
       path: "alertQuantityWarnList",
       title: "预警商品",

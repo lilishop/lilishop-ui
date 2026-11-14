@@ -4,11 +4,11 @@
   ~ @since 2026-11-12
   -->
 <template>
-  <div class="stock-outbound-operation">
+  <div class="search stock-outbound-operation">
     <el-card>
       <template #header>
-        <div class="card-header flex flex-justify-between flex-align-center">
-          <span class="font-bold text-lg">{{ pageTitle }}</span>
+        <div class="card-header">
+          <span>{{ pageTitle }}</span>
           <el-button @click="goBack">返回列表</el-button>
         </div>
       </template>
@@ -34,50 +34,40 @@
 
         <el-divider content-position="left">出库商品明细</el-divider>
 
-        <el-table :data="items" border class="mt-4" style="width: 100%">
+        <el-table :data="items" border class="mt_10 item-table" style="width: 100%">
           <el-table-column type="index" label="序号" width="60" align="center" />
           <el-table-column prop="goodsName" label="商品名称" min-width="200" show-overflow-tooltip />
-          <el-table-column prop="skuId" label="SKU ID" width="180" />
+          <el-table-column prop="skuId" label="SKU ID" class-name="sku-id-col" width="200" />
           <el-table-column prop="specs" label="规格" width="180" show-overflow-tooltip>
-            <template #default="{ row }">{{ row.specs || "-" }}</template>
+            <template #default="{ row }">{{ formatGoodsSpecs(row.specs) }}</template>
           </el-table-column>
           <el-table-column prop="quantity" label="出库数量" width="120" align="center" />
-          <el-table-column prop="unit" label="单位" width="100" align="center">
-            <template #default="{ row }">{{ row.unit || "-" }}</template>
-          </el-table-column>
-          <el-table-column prop="remark" label="明细备注" min-width="150" show-overflow-tooltip>
-            <template #default="{ row }">{{ row.remark || "-" }}</template>
-          </el-table-column>
         </el-table>
       </template>
 
       <!-- 新建/编辑表单 -->
       <template v-else>
         <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-form-item label="出库原因" prop="reasonId">
-                <el-select
-                  v-model="form.reasonId"
-                  placeholder="请选择出库原因"
-                  class="w-full"
-                  @change="handleReasonChange"
-                >
-                  <el-option
-                    v-for="item in reasonOptions"
-                    :key="item.id"
-                    :label="item.reason"
-                    :value="item.id"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <el-form-item label="出库原因" prop="reasonId">
+            <el-select
+              v-model="form.reasonId"
+              placeholder="请选择出库原因"
+              class="reason-select"
+              @change="handleReasonChange"
+            >
+              <el-option
+                v-for="item in reasonOptions"
+                :key="item.id"
+                :label="item.reason"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item label="备注" prop="remark">
             <el-input
               v-model="form.remark"
               type="textarea"
-              :rows="3"
+              :rows="2"
               maxlength="200"
               show-word-limit
               placeholder="请输入出库单备注"
@@ -86,17 +76,16 @@
           </el-form-item>
         </el-form>
 
-        <div class="flex flex-justify-between flex-align-center mb-4">
-          <el-divider content-position="left" class="flex-1 mr-4">出库商品明细</el-divider>
-          <el-button type="primary" @click="openSkuPicker">选择商品</el-button>
+        <div class="operation padding-row">
+          <el-button type="primary" @click="openSkuPicker">添加商品</el-button>
         </div>
 
-        <el-table :data="items" border style="width: 100%" empty-text="请点击上方按钮添加出库商品">
+        <el-table :data="items" border class="mt_10 item-table" style="width: 100%" empty-text="请点击上方按钮添加出库商品">
           <el-table-column type="index" label="序号" width="60" align="center" />
           <el-table-column prop="goodsName" label="商品名称" min-width="200" show-overflow-tooltip />
-          <el-table-column prop="skuId" label="SKU ID" width="180" />
+          <el-table-column prop="skuId" label="SKU ID" class-name="sku-id-col" width="170" />
           <el-table-column prop="specs" label="规格" width="160" show-overflow-tooltip>
-            <template #default="{ row }">{{ row.specs || "-" }}</template>
+            <template #default="{ row }">{{ formatGoodsSpecs(row.specs) }}</template>
           </el-table-column>
           <el-table-column label="出库数量" width="150" align="center">
             <template #default="{ row }">
@@ -106,19 +95,9 @@
                 :max="999999"
                 :step="1"
                 step-strictly
-                controls-position="right"
-                style="width: 120px"
+                :controls="false"
+                class="cell-input"
               />
-            </template>
-          </el-table-column>
-          <el-table-column label="单位" width="110" align="center">
-            <template #default="{ row }">
-              <el-input v-model="row.unit" maxlength="10" placeholder="件/个" />
-            </template>
-          </el-table-column>
-          <el-table-column label="明细备注" min-width="150">
-            <template #default="{ row }">
-              <el-input v-model="row.remark" maxlength="100" placeholder="备注" />
             </template>
           </el-table-column>
           <el-table-column label="操作" width="80" align="center" fixed="right">
@@ -128,15 +107,14 @@
           </el-table-column>
         </el-table>
 
-        <div class="summary mt-4 flex flex-justify-end font-14">
-          <span>出库品种数：<b class="text-primary">{{ items.length }}</b></span>
-          <span class="ml-6">合计出库数量：<b class="text-primary">{{ totalQuantity }}</b></span>
+        <div class="summary mt_10">
+          <span>出库品种数：<b>{{ items.length }}</b></span>
+          <span>合计出库数量：<b>{{ totalQuantity }}</b></span>
         </div>
 
-        <div class="footer-actions mt-6 flex flex-justify-center">
+        <div class="footer-actions mt_20">
+          <el-button type="primary" :loading="submitLoading" @click="handleSave">保存</el-button>
           <el-button @click="goBack">取消</el-button>
-          <el-button type="primary" :loading="submitLoading" @click="handleSave(false)">保存草稿</el-button>
-          <el-button type="success" :loading="submitLoading" @click="handleSave(true)">保存并提交</el-button>
         </div>
       </template>
     </el-card>
@@ -150,12 +128,12 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
+import { formatGoodsSpecs } from "@/utils/goodsSpecs";
 import liliDialog from "@/views/lili-dialog";
 import {
   createStockOutbound,
   getStockOutboundDetail,
   getStockReasonList,
-  submitStockOutbound,
   updateStockOutbound,
 } from "@/api/stock";
 
@@ -296,10 +274,14 @@ function removeItem(index) {
   items.value.splice(index, 1);
 }
 
-async function handleSave(submit = false) {
-  if (!formRef.value) return;
+/**
+ * 仅保存出库单，不触发提交或库存扣减；保存后须在列表手动提交，审核通过才生效。
+ * 保存失败时保留表单，避免用户误以为保存成功。
+ */
+async function handleSave() {
+  if (!formRef.value || submitLoading.value) return;
   await formRef.value.validate(async (valid) => {
-    if (!valid) return;
+    if (!valid || submitLoading.value) return;
     if (!items.value.length) {
       ElMessage.warning("请添加至少一种出库商品");
       return;
@@ -328,20 +310,11 @@ async function handleSave(submit = false) {
         })),
       };
 
-      let id = form.id;
-      if (id) {
-        await updateStockOutbound(id, payload);
-      } else {
-        const res = await createStockOutbound(payload);
-        id = res.result?.id || res.result?.outbound?.id || res.result;
-      }
-
-      if (submit && id) {
-        await submitStockOutbound(id);
-        ElMessage.success("出库单保存并提交成功");
-      } else {
-        ElMessage.success("出库单保存成功");
-      }
+      const res = form.id
+        ? await updateStockOutbound(form.id, payload)
+        : await createStockOutbound(payload);
+      if (!res.success) return;
+      ElMessage.success("出库单保存成功，请在列表中提交审核");
       goBack();
     } catch (e) {
       console.error(e);
@@ -357,19 +330,40 @@ function goBack() {
 </script>
 
 <style scoped>
-.stock-outbound-operation {
-  padding: 10px;
-}
 .card-header {
-  min-height: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.reason-select {
+  width: 300px;
+  max-width: 100%;
 }
 .summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 12px 0;
   font-size: 14px;
+}
+.footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.item-table :deep(.cell-input) {
+  width: 100%;
+}
+.item-table :deep(.cell-input .el-input__wrapper) {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.item-table :deep(.sku-id-col .cell) {
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.4;
 }
 .text-danger {
   color: #f56c6c;
-}
-.text-primary {
-  color: #409eff;
 }
 </style>
