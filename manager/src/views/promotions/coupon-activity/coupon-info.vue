@@ -1,19 +1,16 @@
 <template>
   <div class="coupon-activity-info-page">
-    <!-- 顶部标题与返回栏 -->
+    <!-- 顶部活动标题 -->
     <el-card shadow="never" class="header-card">
       <div class="page-header-row">
         <div class="header-left">
           <div class="header-title">
             <span>优惠券活动详情</span>
-            <el-tag :type="statusTagType(couponActivity.promotionStatus)" size="small" effect="plain" class="status-tag">
+            <span>
               {{ statusText(couponActivity.promotionStatus) }}
-            </el-tag>
-            <span v-if="id" class="activity-id font-mono">ID: {{ id }}</span>
+            </span>
+            <span v-if="id">ID: {{ id }}</span>
           </div>
-        </div>
-        <div class="header-right">
-          <el-button @click="back">返回活动列表</el-button>
         </div>
       </div>
     </el-card>
@@ -27,13 +24,13 @@
 
       <el-descriptions :column="2" border class="custom-descriptions">
         <el-descriptions-item label="活动名称">
-          <span class="font-semibold text-dark">{{ couponActivity.promotionName || "-" }}</span>
+          <span>{{ couponActivity.promotionName || "-" }}</span>
         </el-descriptions-item>
 
         <el-descriptions-item label="活动类型">
-          <el-tag size="small" effect="light" type="primary">
+          <span>
             {{ activityTypeText(couponActivity.couponActivityType) }}
-          </el-tag>
+          </span>
         </el-descriptions-item>
 
         <el-descriptions-item
@@ -47,21 +44,21 @@
           v-if="couponActivity.couponActivityType === 'SPECIFY' || couponActivity.couponActivityType === 'AUTO_COUPON'"
           label="活动范围"
         >
-          <el-tag size="small" effect="light" :type="couponActivity.activityScope === 'ALL' ? 'success' : 'warning'">
+          <span>
             {{ couponActivity.activityScope === "ALL" ? "全部会员" : "指定会员" }}
-          </el-tag>
+          </span>
         </el-descriptions-item>
 
         <el-descriptions-item label="活动时间" :span="2">
-          <span class="font-mono text-dark">
+          <span>
             {{ couponActivity.startTime || "-" }} 至 {{ couponActivity.endTime || "-" }}
           </span>
         </el-descriptions-item>
 
         <el-descriptions-item label="活动状态" :span="2">
-          <el-tag :type="statusTagType(couponActivity.promotionStatus)" size="small" effect="dark">
+          <span>
             {{ statusText(couponActivity.promotionStatus) }}
-          </el-tag>
+          </span>
         </el-descriptions-item>
       </el-descriptions>
     </el-card>
@@ -82,37 +79,37 @@
         empty-text="暂无关联优惠券"
         class="custom-table"
       >
-        <el-table-column prop="couponName" label="优惠券名称" min-width="200" show-overflow-tooltip>
+        <el-table-column prop="couponName" label="优惠券名称" min-width="320" show-overflow-tooltip>
           <template #default="{ row }">
-            <span class="font-semibold text-dark">{{ row.couponName || "-" }}</span>
+            <span>{{ row.couponName || "-" }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="优惠券类型" width="130" align="center">
+        <el-table-column label="优惠券类型" min-width="180" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row" size="small" effect="light" :type="row.couponType === 'DISCOUNT' ? 'warning' : 'danger'">
+            <span v-if="row">
               {{ couponTypeText(row) }}
-            </el-tag>
+            </span>
           </template>
         </el-table-column>
 
-        <el-table-column label="面额 / 折扣" width="140" align="right">
+        <el-table-column label="面额 / 折扣" min-width="180" align="right">
           <template #default="{ row }">
             <template v-if="row">
-              <span v-if="row.couponType === 'DISCOUNT'" class="price-val font-mono font-semibold">
+              <span v-if="row.couponType === 'DISCOUNT'">
                 {{ row.couponDiscount }} 折
               </span>
-              <span v-else-if="row.couponType === 'PRICE'" class="price-val font-mono font-semibold">
+              <span v-else-if="row.couponType === 'PRICE'">
                 ¥ {{ Number(row.price || 0).toFixed(2) }}
               </span>
-              <span v-else class="text-placeholder">-</span>
+              <span v-else>-</span>
             </template>
           </template>
         </el-table-column>
 
-        <el-table-column prop="num" label="赠送数量" width="120" align="right">
+        <el-table-column prop="num" label="赠送数量" min-width="140" align="right">
           <template #default="{ row }">
-            <span class="font-mono text-dark">{{ row.num ?? "-" }}</span>
+            <span>{{ row.num ?? "-" }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -139,13 +136,13 @@
       >
         <el-table-column prop="id" label="会员ID" min-width="220">
           <template #default="{ row }">
-            <span class="font-mono text-dark">{{ row.id || "-" }}</span>
+            <span>{{ row.id || "-" }}</span>
           </template>
         </el-table-column>
 
         <el-table-column prop="nickName" label="会员昵称" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <span class="font-semibold text-dark">{{ row.nickName || row.username || "-" }}</span>
+            <span>{{ row.nickName || row.username || "-" }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -187,10 +184,13 @@ function couponTypeText(row) {
   return "未知类型";
 }
 
+/** 将后端优惠券活动类型转换为中文，包含礼包和邀新活动。 */
 function activityTypeText(t) {
-  if (t === "REGISTERED") return "新人发券";
+  if (t === "REGISTERED") return "注册赠券";
+  if (t === "INVITE_NEW") return "邀新赠券";
   if (t === "AUTO_COUPON") return "自动发券";
-  if (t === "SPECIFY") return "精确发券";
+  if (t === "SPECIFY") return "精准发券";
+  if (t === "COUPON_PACKAGE") return "优惠券礼包";
   return t || "-";
 }
 
@@ -207,14 +207,6 @@ function statusText(s) {
   if (s === "END") return "已结束";
   if (s === "CLOSE") return "已关闭";
   return s || "-";
-}
-
-function statusTagType(s) {
-  if (s === "START") return "success";
-  if (s === "NEW") return "info";
-  if (s === "END") return "danger";
-  if (s === "CLOSE") return "warning";
-  return "info";
 }
 
 function getCouponActivity() {
@@ -261,22 +253,7 @@ function back() {
           display: flex;
           align-items: center;
           gap: 10px;
-          font-size: 16px;
-          font-weight: 600;
-          color: #303133;
 
-          .status-tag {
-            font-weight: normal;
-          }
-
-          .activity-id {
-            font-size: 13px;
-            font-weight: normal;
-            color: #909399;
-            background-color: #f4f4f5;
-            padding: 2px 8px;
-            border-radius: 4px;
-          }
         }
       }
     }
@@ -296,15 +273,7 @@ function back() {
         background-color: #409eff;
       }
 
-      .section-title {
-        font-size: 15px;
-        font-weight: 600;
-        color: #303133;
-      }
-
       .section-badge {
-        font-size: 12px;
-        color: #909399;
         margin-left: 6px;
       }
     }
@@ -313,20 +282,10 @@ function back() {
       :deep(.el-descriptions__label) {
         width: 140px;
         background-color: #fafafa;
-        color: #606266;
-        font-weight: 500;
       }
 
-      :deep(.el-descriptions__content) {
-        color: #303133;
-      }
     }
 
-    .custom-table {
-      .price-val {
-        color: #f56c6c;
-      }
-    }
   }
 
   .footer-card {
@@ -337,20 +296,5 @@ function back() {
     }
   }
 
-  .font-mono {
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  }
-
-  .font-semibold {
-    font-weight: 600;
-  }
-
-  .text-dark {
-    color: #303133;
-  }
-
-  .text-placeholder {
-    color: #c0c4cc;
-  }
 }
 </style>

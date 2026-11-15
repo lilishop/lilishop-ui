@@ -48,8 +48,10 @@
           <template #default="{ row }">
             <template v-if="row">
               <a class="link-text" @click="info(row)">查看</a>
-              <span class="op-split">|</span>
-              <a class="link-text" @click="openQrCode(row)">推广码</a>
+              <template v-if="row.couponActivityType === 'COUPON_PACKAGE'">
+                <span class="op-split">|</span>
+                <a class="link-text" @click="openQrCode(row)">推广码</a>
+              </template>
               <template
                 v-if="(!checked && row.promotionStatus === 'START') || row.promotionStatus === 'NEW'"
               >
@@ -74,13 +76,26 @@
         />
       </div>
           <!-- 推广二维码弹窗 -->
-      <el-dialog v-model="qrCodeDialogVisible" title="券礼包 H5 推广二维码" width="440px" align-center>
+      <el-dialog v-model="qrCodeDialogVisible" title="券礼包推广码" width="min(600px, 95vw)" align-center>
         <div style="text-align: center; padding: 10px 0;">
           <div v-if="qrCodeLoading" style="padding: 30px 0;">
             <div style="color: #999;">正在生成推广二维码...</div>
           </div>
           <div v-else-if="qrCodeInfo.qrCodeBase64">
-            <img :src="qrCodeInfo.qrCodeBase64" alt="H5推广二维码" style="width: 220px; height: 220px; border: 1px solid #ebeef5; padding: 6px; border-radius: 8px;" />
+            <div class="promotion-code-grid">
+              <div>
+                <div class="promotion-code-title">H5 二维码</div>
+                <img :src="qrCodeInfo.qrCodeBase64" alt="H5推广二维码" class="promotion-code-image" />
+              </div>
+              <div>
+                <div class="promotion-code-title">微信小程序葵花码</div>
+                <img v-if="qrCodeInfo.miniProgramCodeBase64" :src="qrCodeInfo.miniProgramCodeBase64" alt="微信小程序葵花码" class="promotion-code-image" />
+                <div v-else class="promotion-code-error">
+                  <p>{{ qrCodeInfo.miniProgramCodeError || '暂未生成葵花码，请更新后端服务后重试' }}</p>
+                  <el-button @click="openQrCode({ id: qrCodeInfo.activityId })">重新生成</el-button>
+                </div>
+              </div>
+            </div>
             <div style="margin-top: 15px; font-size: 13px; color: #555; word-break: break-all; text-align: left; background: #f8f9fa; padding: 10px; border-radius: 6px;">
               <div style="font-weight: bold; margin-bottom: 4px;">H5 访问链接：</div>
               <div style="color: #409eff;">{{ qrCodeInfo.h5Url }}</div>
@@ -169,10 +184,13 @@ function init() {
 }
 const qrCodeDialogVisible = ref(false);
 const qrCodeLoading = ref(false);
+let qrCodeRequestId = 0;
 const qrCodeInfo = reactive({
   activityId: "",
   h5Url: "",
   qrCodeBase64: "",
+  miniProgramCodeBase64: "",
+  miniProgramCodeError: "",
 });
 
 function addCouponPackage() {
@@ -182,26 +200,35 @@ function addCouponPackage() {
   });
 }
 
+/** 生成当前礼包的H5二维码及葵花码，忽略切换礼包前的旧请求结果。 */
 function openQrCode(row) {
   qrCodeDialogVisible.value = true;
   qrCodeLoading.value = true;
   qrCodeInfo.activityId = row.id;
   qrCodeInfo.h5Url = "";
   qrCodeInfo.qrCodeBase64 = "";
+  qrCodeInfo.miniProgramCodeBase64 = "";
+  qrCodeInfo.miniProgramCodeError = "";
 
+  const requestId = ++qrCodeRequestId;
   getCouponPackageQrCode(row.id)
     .then((res) => {
+      if (requestId !== qrCodeRequestId) return;
       if (res.success && res.result) {
         qrCodeInfo.h5Url = res.result.h5Url;
         qrCodeInfo.qrCodeBase64 = res.result.qrCodeBase64;
+        qrCodeInfo.miniProgramCodeBase64 = res.result.miniProgramCodeBase64 || "";
+        qrCodeInfo.miniProgramCodeError = res.result.miniProgramCodeError || "";
       } else {
         Message.error(res.message || "生成推广二维码失败");
       }
     })
     .catch(() => {
+      if (requestId !== qrCodeRequestId) return;
       Message.error("获取二维码异常");
     })
     .finally(() => {
+      if (requestId !== qrCodeRequestId) return;
       qrCodeLoading.value = false;
     });
 }
@@ -302,6 +329,23 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.promotion-code-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+.promotion-code-title {
+  margin-bottom: 12px;
+}
+.promotion-code-image {
+  width: 220px;
+  height: 220px;
+}
+.promotion-code-error {
+  max-width: 240px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
 .link-text {
   color: #409eff;
   cursor: pointer;

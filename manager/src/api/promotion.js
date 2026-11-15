@@ -147,7 +147,7 @@ export const getCouponActivityList = params => {
   return getRequest("/promotion/couponActivity", params);
 };
 // 关闭优惠券活动
-// 获取优惠券礼包H5推广二维码及链接
+// 获取优惠券礼包H5二维码、链接及微信小程序葵花码
 export const getCouponPackageQrCode = (id, params) => {
   return getRequest(`/promotion/couponActivity/package/qrcode/${id}`, params);
 };
