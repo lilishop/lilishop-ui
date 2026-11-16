@@ -366,13 +366,17 @@ function handleSubmit() {
     delete params.rangeTime;
     delete params.id;
     submitLoading.value = true;
-    saveActivityCoupon(params).then((res) => {
-      submitLoading.value = false;
-      if (res.success) {
-        Message.success("优惠券活动创建成功");
-        closeCurrentPage();
-      }
-    });
+    saveActivityCoupon(params)
+      .then((res) => {
+        if (res?.success) {
+          Message.success("优惠券活动创建成功");
+          closeCurrentPage();
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        submitLoading.value = false;
+      });
   });
 }
 
