@@ -259,6 +259,13 @@ export const otherRouter = {
       component: () => import("@/views/goods/goods-info/goodsDetail.vue")
     },
     {
+      path: "promotions/add-lottery-activity",
+      title: "新增抽奖活动",
+      name: "add-lottery-activity",
+      meta: { title: "新增抽奖活动" },
+      component: () => import("@/views/promotions/lottery/LotteryCreate.vue")
+    },
+    {
       path: "promotions/add-points-goods",
       title: "添加积分商品",
       name: "add-points-goods",
